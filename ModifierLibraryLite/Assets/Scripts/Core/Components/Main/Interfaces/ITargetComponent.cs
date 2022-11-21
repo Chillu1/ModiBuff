@@ -1,6 +1,6 @@
 namespace ModifierLibraryLite.Core
 {
-	public interface ITargetComponent
+	public interface ITargetComponent : IComponent
 	{
 		IUnit Target { get; }
 

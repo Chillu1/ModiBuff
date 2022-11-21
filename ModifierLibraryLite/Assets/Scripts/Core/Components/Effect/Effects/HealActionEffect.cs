@@ -4,9 +4,9 @@ namespace ModifierLibraryLite.Core
 	{
 		private IUnit _owner;
 
-		public void Effect(IUnit target)
+		public void Effect(IUnit target, IUnit owner)
 		{
-			_owner.Heal(target);
+			owner.Heal(target);
 		}
 	}
 }

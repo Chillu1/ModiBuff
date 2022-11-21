@@ -9,9 +9,9 @@ namespace ModifierLibraryLite.Core
 			_heal = heal;
 		}
 
-		public void Effect(IUnit target)
+		public void Effect(IUnit target, IUnit owner)
 		{
-			target.Heal(_heal);
+			target.Heal(_heal, owner);
 		}
 	}
 }

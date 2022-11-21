@@ -1,8 +1,8 @@
 namespace ModifierLibraryLite.Core
 {
-	public class RemoveEffect : IEffect
+	public class RemoveEffect : IRemoveEffect
 	{
-		public void Effect(IUnit target)
+		public void Effect(IUnit target, IUnit owner)
 		{
 			//TODO
 		}

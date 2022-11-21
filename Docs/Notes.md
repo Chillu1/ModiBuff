@@ -24,6 +24,10 @@ Goals of the libraries:
 
 ## Temp Notes
 
+Who should own the targetComp?
+Init/Time, or Effect?
+Effect shouldn't care about it?
+
 20_000 basic timers in one array: 5ms
 
 Effect on: GetHit, OnHit, Interval

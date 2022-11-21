@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace ModifierLibraryLite.Core
 {
 	public class DamageEffect : IEffect
@@ -9,9 +11,9 @@ namespace ModifierLibraryLite.Core
 			_damage = damage;
 		}
 
-		public void Effect(IUnit target)
+		public void Effect(IUnit target, IUnit owner)
 		{
-			target.TakeDamage(_damage);
+			target.TakeDamage(_damage, owner);
 		}
 	}
 }

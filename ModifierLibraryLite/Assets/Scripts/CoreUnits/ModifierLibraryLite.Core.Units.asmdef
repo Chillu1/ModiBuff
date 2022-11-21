@@ -1,7 +1,9 @@
 {
-    "name": "ModifierLibraryLite",
-    "rootNamespace": "ModifierLibraryLite",
-    "references": [],
+    "name": "ModifierLibraryLite.Core.Units",
+    "rootNamespace": "ModifierLibraryLite.Core.Units",
+    "references": [
+        "GUID:a0ba3884f00945fe92df4f878aea7c7e"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
