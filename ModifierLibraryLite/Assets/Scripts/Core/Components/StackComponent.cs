@@ -1,4 +1,4 @@
-namespace ModifierLibraryLite
+namespace ModifierLibraryLite.Core
 {
 	public class StackComponent : IStackComponent
 	{

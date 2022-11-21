@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ModifierLibraryLite
+namespace ModifierLibraryLite.Core
 {
 	public class TestModifiers
 	{

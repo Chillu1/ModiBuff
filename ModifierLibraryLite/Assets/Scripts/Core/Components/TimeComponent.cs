@@ -1,4 +1,4 @@
-namespace ModifierLibraryLite
+namespace ModifierLibraryLite.Core
 {
 	public class TimeComponent : ITimeComponent
 	{
@@ -35,6 +35,7 @@ namespace ModifierLibraryLite
 			_totalTime += _timer; //How to use these smart?
 			_timer = 0;
 
+			return;//TODOPRIO
 			foreach (var effect in _effects)
 				effect.Effect(_targetComponent.Target);
 		}

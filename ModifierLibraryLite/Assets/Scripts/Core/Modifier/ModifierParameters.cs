@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace ModifierLibraryLite
+namespace ModifierLibraryLite.Core
 {
 	public class ModifierParameters
 	{

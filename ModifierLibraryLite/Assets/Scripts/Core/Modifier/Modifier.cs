@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
 using ModifierLibraryLite.Utilities;
 
-namespace ModifierLibraryLite
+namespace ModifierLibraryLite.Core
 {
 	//Basic mods
 	//DoT
@@ -32,8 +32,13 @@ namespace ModifierLibraryLite
 		
 		public void Update(float deltaTime)
 		{
-			foreach (var timeComponent in _timeComponents.EmptyIfNull())
-				timeComponent.Update(deltaTime);
+			if (_timeComponents != null)
+			{
+				int length = _timeComponents.Length;
+			
+				for (int i = 0; i < length; i++)
+					_timeComponents[i].Update(deltaTime);
+			}
 		}
 
 		public void Refresh()
