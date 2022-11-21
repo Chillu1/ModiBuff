@@ -1,0 +1,16 @@
+{
+  "name": "ModifierLibraryLite",
+  "rootNamespace": "ModifierLibraryLite",
+  "references": [
+    "GUID:c100100d5d699bc52b3a6dc16b03725f"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
