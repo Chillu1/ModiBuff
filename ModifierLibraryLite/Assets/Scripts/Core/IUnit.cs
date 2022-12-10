@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace ModifierLibraryLite.Core
 {
 	public interface IUnit
@@ -11,6 +13,7 @@ namespace ModifierLibraryLite.Core
 		float Heal(float heal, IUnit acter);
 		float Heal(IUnit target);
 
-		bool TryAddModifier(Modifier modifier, IUnit target);
+		bool TryAddModifier(Modifier modifier, IUnit target, IUnit sender = null);
+		void TryApplyModifiers(IReadOnlyCollection<ModifierRecipe> getApplierModifiers, IUnit acter);
 	}
 }

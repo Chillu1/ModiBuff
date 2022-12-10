@@ -2,14 +2,16 @@ using System.Collections.Generic;
 
 namespace ModifierLibraryLite.Core
 {
-	public sealed class ModifierController : IModifierController
+	public sealed class ModifierController
 	{
 		//TODO Array mapping?
-		private readonly Dictionary<string, Modifier> _modifiers;
+		private readonly IDictionary<string, Modifier> _modifiers;
+		private readonly HashSet<ModifierRecipe> _modifierRecipeAppliers;
 
 		public ModifierController()
 		{
 			_modifiers = new Dictionary<string, Modifier>();
+			_modifierRecipeAppliers = new HashSet<ModifierRecipe>(5);
 		}
 
 		public void Update(in float delta)
@@ -20,11 +22,37 @@ namespace ModifierLibraryLite.Core
 				modifier.Update(delta);
 		}
 
+		public IReadOnlyCollection<ModifierRecipe> GetApplierModifiers()
+		{
+			return _modifierRecipeAppliers;
+		}
+
 		//TODO do appliers make sense? Should we just store the id, what kind of state do appliers have?
-		public (bool, Modifier) TryAdd(Modifier modifier)
+		public (bool Success, Modifier Modifier) TryAdd(Modifier modifier)
 		{
 			//TODO We should call the original modifier's check component here or before
 			return (true, Add(modifier));
+		}
+
+		public bool TryAddApplier(ModifierRecipe recipe)
+		{
+			if (_modifierRecipeAppliers.Contains(recipe))
+				return false;
+
+			_modifierRecipeAppliers.Add(recipe);
+			return true;
+		}
+
+		public bool TryAddAppliers(ModifierRecipe[] recipes)
+		{
+			bool success = true;
+			foreach (var recipe in recipes)
+			{
+				if (!TryAddApplier(recipe))
+					success = false;
+			}
+
+			return success;
 		}
 
 		private Modifier Add(Modifier modifier)

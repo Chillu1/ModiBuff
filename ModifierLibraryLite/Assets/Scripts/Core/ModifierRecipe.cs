@@ -12,6 +12,8 @@ namespace ModifierLibraryLite.Core
 	{
 		public string Id { get; }
 
+		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
+
 		private bool _init;
 		private float _interval;
 		private float _duration;
@@ -72,6 +74,13 @@ namespace ModifierLibraryLite.Core
 			}
 
 			_effectBinds[Utilities.Utilities.FastLog2((double)effectOn)].Add(effect);
+			return this;
+		}
+
+		//---Target---
+		public ModifierRecipe LegalTarget(LegalTargetType legalTargetType)
+		{
+			LegalTargetType = legalTargetType;
 			return this;
 		}
 

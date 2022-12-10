@@ -15,6 +15,8 @@ namespace ModifierLibraryLite.Core
 
 		public Modifier Get(string id) => _modifiers[id].Create();
 
+		public ModifierRecipe GetRecipe(string id) => _modifiers[id];
+
 		private ModifierRecipe Add(string id)
 		{
 			var recipe = new ModifierRecipe(id);
@@ -37,6 +39,20 @@ namespace ModifierLibraryLite.Core
 				.Effect(new DamageEffect(5), EffectOn.Interval)
 				.Remove(5)
 				;
+
+			Add("InitHeal")
+				.Effect(new HealEffect(5), EffectOn.Init);
+
+			Add("InitDamage")
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
+			Add("InitStrongHeal")
+				.Effect(new HealEffect(10), EffectOn.Init);
+
+			//Add("InitDamageSelf")
+			//	.Effect(new DamageEffect(5), EffectOn.Init);
+
+			//TODO TargetHeal
 
 			foreach (var modifier in _modifiers.Values)
 				modifier.Finish();

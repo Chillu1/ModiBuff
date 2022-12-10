@@ -1,7 +1,5 @@
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
-using ModifierLibraryLite.Utilities;
-using UnityEngine;
 
 [assembly: InternalsVisibleTo("ModifierLibraryLite.Tests")]
 
