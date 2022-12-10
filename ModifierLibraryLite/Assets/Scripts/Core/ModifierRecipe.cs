@@ -18,6 +18,8 @@ namespace ModifierLibraryLite.Core
 		private float _interval;
 		private float _duration;
 
+		private RemoveEffect _removeEffect;
+
 		private readonly ITargetComponent _target;
 
 		private List<IEffect>[] _effectBinds;
@@ -53,8 +55,9 @@ namespace ModifierLibraryLite.Core
 
 		public ModifierRecipe Remove(float duration)
 		{
-			_duration = duration;
-			Effect(new RemoveEffect(), EffectOn.Duration);
+			Duration(duration);
+			_removeEffect = new RemoveEffect();
+			Effect(_removeEffect, EffectOn.Duration);
 			return this;
 		}
 
@@ -91,11 +94,19 @@ namespace ModifierLibraryLite.Core
 			IRefreshComponent refreshComponent = null;
 			IStackComponent stackComponent = null;
 
+			var revertibleList = new List<IRevertEffect>(2);
+
 			for (int i = 0; i < _effectBinds.Length; i++)
 			{
 				var effects = _effectBinds[i];
 				if (effects.Count == 0)
 					continue;
+
+				for (int j = 0; j < effects.Count; j++)
+				{
+					if (effects[j] is IRevertEffect { IsRevertible: true } revertEffect)
+						revertibleList.Add(revertEffect);
+				}
 
 				var effectOn = (EffectOn)(1 << i);
 
@@ -117,8 +128,10 @@ namespace ModifierLibraryLite.Core
 				}
 			}
 
+			_removeEffect?.SetRevertibleEffects(revertibleList.ToArray());
+
 			_internalRecipe = new ModifierInternalRecipe(Id, (TargetComponent)_target, initComponent, timeComponents.ToArray(),
-				refreshComponent, stackComponent);
+				refreshComponent, stackComponent, _removeEffect);
 		}
 	}
 }

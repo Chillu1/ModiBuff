@@ -13,6 +13,8 @@ namespace ModifierLibraryLite.Core
 		float Heal(float heal, IUnit acter);
 		float Heal(IUnit target);
 
+		void AddDamage(float damage);
+
 		bool TryAddModifier(Modifier modifier, IUnit target, IUnit sender = null);
 		void TryApplyModifiers(IReadOnlyCollection<ModifierRecipe> getApplierModifiers, IUnit acter);
 	}

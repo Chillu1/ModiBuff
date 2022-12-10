@@ -24,6 +24,9 @@ Goals of the libraries:
 
 ## Temp Notes
 
+How to do remove logic in RemoveEffect.
+Reference to Modifier?
+
 Who should own the targetComp?
 Init/Time, or Effect?
 Effect shouldn't care about it?

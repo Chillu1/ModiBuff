@@ -52,6 +52,11 @@ namespace ModifierLibraryLite.Core.Units
 			return target.Heal(HealValue, this);
 		}
 
+		public void AddDamage(float damage)
+		{
+			Damage += damage;
+		}
+
 		//---Modifier based---
 
 		public bool AddApplierModifiers(params ModifierRecipe[] recipes)
@@ -73,6 +78,11 @@ namespace ModifierLibraryLite.Core.Units
 		{
 			foreach (var modifierRecipe in getApplierModifiers)
 				TryAddModifier(modifierRecipe.Create(), this, acter);
+		}
+
+		public bool ContainsModifier(Modifier modifier)
+		{
+			return _modifierController.Contains(modifier);
 		}
 	}
 }

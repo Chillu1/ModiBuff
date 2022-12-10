@@ -49,8 +49,19 @@ namespace ModifierLibraryLite.Core
 			Add("InitStrongHeal")
 				.Effect(new HealEffect(10), EffectOn.Init);
 
-			//Add("InitDamageSelf")
-			//	.Effect(new DamageEffect(5), EffectOn.Init);
+			Add("InitAddDamage")
+				.Effect(new AddDamageEffect(5), EffectOn.Init);
+
+			Add("DurationDamage")
+				.Effect(new DamageEffect(5), EffectOn.Duration)
+				.Duration(5);
+
+			Add("DurationRemove")
+				.Remove(5);
+
+			Add("InitAddDamageRevertible")
+				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				.Remove(5);
 
 			//TODO TargetHeal
 

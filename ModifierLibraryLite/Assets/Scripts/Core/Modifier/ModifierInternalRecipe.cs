@@ -13,7 +13,11 @@ namespace ModifierLibraryLite.Core
 		[CanBeNull] public IInitComponent InitComponent { get; private set; }
 		[CanBeNull] public ITimeComponent[] TimeComponents { get; private set; }
 		[CanBeNull] public IRefreshComponent RefreshComponent { get; private set; }
+
 		[CanBeNull] public IStackComponent StackComponent { get; private set; }
+
+		//[CanBeNull] public IRemoveComponent RemoveComponent { get; private set; }
+		public RemoveEffect RemoveEffect { get; private set; }
 
 		public ModifierInternalRecipe(string id)
 		{
@@ -21,7 +25,8 @@ namespace ModifierLibraryLite.Core
 		}
 
 		internal ModifierInternalRecipe(string id, TargetComponent targetComponent, IInitComponent initComponent,
-			ITimeComponent[] timeComponents, IRefreshComponent refreshComponent, IStackComponent stackComponent)
+			ITimeComponent[] timeComponents, IRefreshComponent refreshComponent, IStackComponent stackComponent,
+			RemoveEffect removeEffect = null)
 		{
 			Id = id;
 			TargetComponent = targetComponent;
@@ -29,6 +34,8 @@ namespace ModifierLibraryLite.Core
 			TimeComponents = timeComponents;
 			RefreshComponent = refreshComponent;
 			StackComponent = stackComponent;
+
+			RemoveEffect = removeEffect;
 		}
 
 		public void SetInitComponent(IInitComponent initComponent)

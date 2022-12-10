@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace ModifierLibraryLite.Core
 {
 	public class DamageEffect : IEffect

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 
@@ -5,13 +6,11 @@ using JetBrains.Annotations;
 
 namespace ModifierLibraryLite.Core
 {
-	//Basic mods
-	//DoT
-	//DoT refreshable duration
-
-	public class Modifier : IModifier
+	[SuppressMessage("ReSharper", "PossibleNullReferenceException")]
+	public sealed class Modifier : IModifier
 	{
 		public string Id { get; }
+		public bool ToRemove { get; private set; }
 
 		private readonly bool _init, _time, _refresh, _stack;
 
@@ -29,14 +28,13 @@ namespace ModifierLibraryLite.Core
 
 		public TargetComponent TargetComponent { get; }
 
-
-		public Modifier(ModifierInternalRecipe internalRecipe) : this(internalRecipe.Id, internalRecipe.TargetComponent,
-			internalRecipe.InitComponent, internalRecipe.TimeComponents, internalRecipe.RefreshComponent, internalRecipe.StackComponent)
+		public Modifier(ModifierInternalRecipe recipe) : this(recipe.Id, recipe.TargetComponent, recipe.InitComponent,
+			recipe.TimeComponents, recipe.RefreshComponent, recipe.StackComponent, recipe.RemoveEffect)
 		{
 		}
 
 		internal Modifier(string id, TargetComponent targetComponent, IInitComponent initComponent, ITimeComponent[] timeComponents,
-			IRefreshComponent refreshComponent, IStackComponent stackComponent)
+			IRefreshComponent refreshComponent, IStackComponent stackComponent, RemoveEffect removeEffect = null)
 		{
 			Id = id;
 
@@ -46,15 +44,12 @@ namespace ModifierLibraryLite.Core
 			_refreshComponent = refreshComponent;
 			_stackComponent = stackComponent;
 
+			removeEffect?.Setup(this);
+
 			_init = _initComponent != null;
 			_time = _timeComponents != null && _timeComponents.Length > 0;
 			_refresh = _refreshComponent != null;
 			_stack = _stackComponent != null;
-		}
-
-		//TODO Temporary for testing
-		public void SetupTarget(IUnit target)
-		{
 		}
 
 		public void Init()
@@ -89,6 +84,11 @@ namespace ModifierLibraryLite.Core
 				return;
 
 			_stackComponent.Stack();
+		}
+
+		public void SetForRemoval()
+		{
+			ToRemove = true;
 		}
 	}
 }

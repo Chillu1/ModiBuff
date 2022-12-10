@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace ModifierLibraryLite.Core
 {
@@ -8,10 +9,14 @@ namespace ModifierLibraryLite.Core
 		private readonly IDictionary<string, Modifier> _modifiers;
 		private readonly HashSet<ModifierRecipe> _modifierRecipeAppliers;
 
+		private readonly List<string> _modifiersToRemove;
+
 		public ModifierController()
 		{
 			_modifiers = new Dictionary<string, Modifier>();
 			_modifierRecipeAppliers = new HashSet<ModifierRecipe>(5);
+
+			_modifiersToRemove = new List<string>(5);
 		}
 
 		public void Update(in float delta)
@@ -19,7 +24,15 @@ namespace ModifierLibraryLite.Core
 			//int length = _modifiers.Count;
 			//TODO Array for loop mapping
 			foreach (var modifier in _modifiers.Values)
+			{
 				modifier.Update(delta);
+
+				if (modifier.ToRemove)
+					_modifiersToRemove.Add(modifier.Id);
+			}
+
+			for (int i = 0; i < _modifiersToRemove.Count; i++)
+				_modifiers.Remove(_modifiersToRemove[i]);
 		}
 
 		public IReadOnlyCollection<ModifierRecipe> GetApplierModifiers()
@@ -72,6 +85,11 @@ namespace ModifierLibraryLite.Core
 			modifier.Refresh();
 			modifier.Stack();
 			return modifier;
+		}
+
+		public bool Contains(Modifier modifier)
+		{
+			return _modifiers.ContainsKey(modifier.Id);
 		}
 	}
 }
