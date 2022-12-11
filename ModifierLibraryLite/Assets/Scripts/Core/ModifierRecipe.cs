@@ -20,8 +20,6 @@ namespace ModifierLibraryLite.Core
 
 		private RemoveEffect _removeEffect;
 
-		private readonly ITargetComponent _target;
-
 		private List<IEffect>[] _effectBinds;
 
 		private ModifierInternalRecipe _internalRecipe;
@@ -29,7 +27,6 @@ namespace ModifierLibraryLite.Core
 		public ModifierRecipe(string id)
 		{
 			Id = id;
-			_target = new TargetComponent();
 
 			var allEffectOns = Enum.GetValues(typeof(EffectOn)).Cast<EffectOn>().ToArray();
 			_effectBinds = new List<IEffect>[allEffectOns.Length];
@@ -112,26 +109,26 @@ namespace ModifierLibraryLite.Core
 
 				if (effectOn == EffectOn.Init)
 				{
-					initComponent = new InitComponent(_target, effects.ToArray());
+					initComponent = new InitComponent(effects.ToArray());
 				}
 
 				if (effectOn == EffectOn.Interval)
 				{
 					Debug.Assert(_interval > 0, "Interval must be greater than 0");
-					timeComponents.Add(new IntervalComponent(_interval, _target, effects.ToArray()));
+					timeComponents.Add(new IntervalComponent(_interval, effects.ToArray()));
 				}
 
 				if (effectOn == EffectOn.Duration)
 				{
 					Debug.Assert(_duration > 0, "Duration must be greater than 0");
-					timeComponents.Add(new DurationComponent(_duration, _target, effects.ToArray()));
+					timeComponents.Add(new DurationComponent(_duration, effects.ToArray()));
 				}
 			}
 
 			_removeEffect?.SetRevertibleEffects(revertibleList.ToArray());
 
-			_internalRecipe = new ModifierInternalRecipe(Id, (TargetComponent)_target, initComponent, timeComponents.ToArray(),
-				refreshComponent, stackComponent, _removeEffect);
+			_internalRecipe = new ModifierInternalRecipe(Id, initComponent, timeComponents.ToArray(), refreshComponent, stackComponent,
+				_removeEffect);
 		}
 	}
 }

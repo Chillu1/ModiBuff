@@ -9,7 +9,6 @@ namespace ModifierLibraryLite.Core
 	{
 		public string Id { get; }
 
-		public TargetComponent TargetComponent { get; }
 		[CanBeNull] public IInitComponent InitComponent { get; private set; }
 		[CanBeNull] public ITimeComponent[] TimeComponents { get; private set; }
 		[CanBeNull] public IRefreshComponent RefreshComponent { get; private set; }
@@ -24,12 +23,10 @@ namespace ModifierLibraryLite.Core
 			Id = id;
 		}
 
-		internal ModifierInternalRecipe(string id, TargetComponent targetComponent, IInitComponent initComponent,
-			ITimeComponent[] timeComponents, IRefreshComponent refreshComponent, IStackComponent stackComponent,
-			RemoveEffect removeEffect = null)
+		internal ModifierInternalRecipe(string id, IInitComponent initComponent, ITimeComponent[] timeComponents,
+			IRefreshComponent refreshComponent, IStackComponent stackComponent, RemoveEffect removeEffect = null)
 		{
 			Id = id;
-			TargetComponent = targetComponent;
 			InitComponent = initComponent;
 			TimeComponents = timeComponents;
 			RefreshComponent = refreshComponent;

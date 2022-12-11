@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
@@ -26,21 +27,21 @@ namespace ModifierLibraryLite.Core
 		[CanBeNull]
 		private readonly IStackComponent _stackComponent;
 
-		public TargetComponent TargetComponent { get; }
-
-		public Modifier(ModifierInternalRecipe recipe) : this(recipe.Id, recipe.TargetComponent, recipe.InitComponent,
-			recipe.TimeComponents, recipe.RefreshComponent, recipe.StackComponent, recipe.RemoveEffect)
+		public Modifier(ModifierInternalRecipe recipe) : this(recipe.Id, recipe.InitComponent, recipe.TimeComponents,
+			recipe.RefreshComponent, recipe.StackComponent, recipe.RemoveEffect)
 		{
 		}
 
-		internal Modifier(string id, TargetComponent targetComponent, IInitComponent initComponent, ITimeComponent[] timeComponents,
+		internal Modifier(string id, IInitComponent initComponent, ITimeComponent[] timeComponents,
 			IRefreshComponent refreshComponent, IStackComponent stackComponent, RemoveEffect removeEffect = null)
 		{
 			Id = id;
 
-			TargetComponent = targetComponent;
 			_initComponent = initComponent;
-			_timeComponents = timeComponents;
+			var timeComponentList = new List<ITimeComponent>();
+			for (int i = 0; i < timeComponents.Length; i++)
+				timeComponentList.Add(timeComponents[i].DeepClone());
+			_timeComponents = timeComponentList.ToArray();
 			_refreshComponent = refreshComponent;
 			_stackComponent = stackComponent;
 
@@ -50,6 +51,18 @@ namespace ModifierLibraryLite.Core
 			_time = _timeComponents != null && _timeComponents.Length > 0;
 			_refresh = _refreshComponent != null;
 			_stack = _stackComponent != null;
+		}
+
+		public void SetTargets(IUnit target, IUnit owner, IUnit sender)
+		{
+			var targetComponent = new TargetComponent(sender, owner, target);
+
+			if (_init)
+				_initComponent.SetupTarget(targetComponent);
+
+			if (_time)
+				for (int i = 0; i < _timeComponents.Length; i++)
+					_timeComponents[i].SetupTarget(targetComponent);
 		}
 
 		public void Init()

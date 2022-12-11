@@ -2,7 +2,7 @@ namespace ModifierLibraryLite.Core
 {
 	public class DamageEffect : IEffect
 	{
-		private float _damage;
+		private readonly float _damage;
 
 		public DamageEffect(float damage)
 		{

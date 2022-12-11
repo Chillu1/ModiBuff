@@ -2,18 +2,19 @@ namespace ModifierLibraryLite.Core
 {
 	public class InitComponent : IInitComponent
 	{
-		private readonly ITargetComponent _targetComponent;
+		private ITargetComponent _targetComponent;
 		private readonly IEffect[] _effects;
 
-		public InitComponent(ITargetComponent target, IEffect effect) : this(target, new[] { effect })
+		public InitComponent(IEffect effect) : this(new[] { effect })
 		{
 		}
 
-		public InitComponent(ITargetComponent target, IEffect[] effects)
+		public InitComponent(IEffect[] effects)
 		{
-			_targetComponent = target;
 			_effects = effects;
 		}
+
+		public void SetupTarget(ITargetComponent targetComponent) => _targetComponent = targetComponent;
 
 		public void Init()
 		{

@@ -1,6 +1,6 @@
 namespace ModifierLibraryLite.Core
 {
-	public interface IInitComponent : IComponent
+	public interface IInitComponent : ITarget, IComponent
 	{
 		void Init();
 	}

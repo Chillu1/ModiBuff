@@ -7,22 +7,25 @@ namespace ModifierLibraryLite.Core
 		private readonly float _interval;
 		private float _timer;
 
-		private readonly ITargetComponent _targetComponent;
+		private ITargetComponent _targetComponent;
 		private readonly IEffect[] _effects;
 
 		//private int _intervalCount;
 		//private float _totalTime;
 
-		public IntervalComponent(float interval, ITargetComponent targetComponent, IEffect[] effects)
+		public IntervalComponent(float interval, IEffect[] effects)
 		{
 			_interval = interval;
-			_targetComponent = targetComponent;
 			_effects = effects;
 		}
 
-		public IntervalComponent(float interval, ITargetComponent targetComponent, IEffect effect)
-			: this(interval, targetComponent, new[] { effect })
+		public IntervalComponent(float interval, IEffect effect) : this(interval, new[] { effect })
 		{
+		}
+
+		public void SetupTarget(ITargetComponent targetComponent)
+		{
+			_targetComponent = targetComponent;
 		}
 
 		public void Update(in float deltaTime)
@@ -43,5 +46,7 @@ namespace ModifierLibraryLite.Core
 				_effects[i].Effect(_targetComponent.Target, _targetComponent.Owner);
 			}
 		}
+
+		public ITimeComponent DeepClone() => new IntervalComponent(_interval, _effects);
 	}
 }

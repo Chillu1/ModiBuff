@@ -2,7 +2,7 @@ namespace ModifierLibraryLite.Core
 {
 	public sealed class AddDamageEffect : IRevertEffect
 	{
-		private float _damage;
+		private readonly float _damage;
 		public bool IsRevertible { get; }
 
 		public AddDamageEffect(float damage, bool revertible = false)

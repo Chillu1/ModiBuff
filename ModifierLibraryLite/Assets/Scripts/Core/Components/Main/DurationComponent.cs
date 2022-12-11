@@ -7,25 +7,24 @@ namespace ModifierLibraryLite.Core
 		private readonly float _duration;
 		private float _time;
 
-		private readonly ITargetComponent _targetComponent;
+		private ITargetComponent _targetComponent;
 		private readonly IEffect[] _effects;
 
-		public DurationComponent(float duration, ITargetComponent targetComponent, IEffect[] effects)
+		public DurationComponent(float duration, IEffect[] effects)
 		{
 			_duration = duration;
-			_targetComponent = targetComponent;
 			_effects = effects;
 		}
 
-		public DurationComponent(float duration, ITargetComponent targetComponent, IEffect effect)
-			: this(duration, targetComponent, new[] { effect })
+		public DurationComponent(float duration, IEffect effect) : this(duration, new[] { effect })
 		{
 		}
 
-		public DurationComponent(float duration, ITargetComponent targetComponent, IRemoveEffect effect)
-			: this(duration, targetComponent, new IEffect[] { effect })
+		public DurationComponent(float duration, IRemoveEffect effect) : this(duration, new IEffect[] { effect })
 		{
 		}
+
+		public void SetupTarget(ITargetComponent targetComponent) => _targetComponent = targetComponent;
 
 		public void Update(in float deltaTime)
 		{
@@ -40,5 +39,7 @@ namespace ModifierLibraryLite.Core
 					_effects[i].Effect(_targetComponent.Target, _targetComponent.Owner);
 			}
 		}
+
+		public ITimeComponent DeepClone() => new DurationComponent(_duration, _effects);
 	}
 }

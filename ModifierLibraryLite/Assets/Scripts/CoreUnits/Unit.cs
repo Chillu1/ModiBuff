@@ -67,9 +67,7 @@ namespace ModifierLibraryLite.Core.Units
 		public bool TryAddModifier(Modifier modifier, IUnit target, IUnit sender = null)
 		{
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
-			modifier.TargetComponent.SetSender(sender);
-			modifier.TargetComponent.SetOwner(this);
-			modifier.TargetComponent.SetTarget(target);
+			modifier.SetTargets(target, this, sender);
 
 			return _modifierController.TryAdd(modifier).Success;
 		}
