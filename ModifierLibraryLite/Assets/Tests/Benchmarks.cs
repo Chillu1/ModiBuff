@@ -1,4 +1,3 @@
-using ModifierLibraryLite.Core;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
 
@@ -6,7 +5,7 @@ namespace ModifierLibraryLite.Tests
 {
 	public sealed class Benchmarks : BaseModifierTests
 	{
-		private const int Iterations = 1000;
+		private const int Iterations = 5000;
 
 		[Test, Performance]
 		public void BenchNewBasicModifierFromRecipe()
@@ -19,7 +18,7 @@ namespace ModifierLibraryLite.Tests
 					var modifier = modifierRecipe.Create();
 				})
 				.WarmupCount(10)
-				.MeasurementCount(80)
+				.MeasurementCount(50)
 				.IterationsPerMeasurement(Iterations)
 				.GC()
 				.Run()
@@ -37,7 +36,43 @@ namespace ModifierLibraryLite.Tests
 					var modifier = modifierRecipe.Create();
 				})
 				.WarmupCount(10)
-				.MeasurementCount(80)
+				.MeasurementCount(50)
+				.IterationsPerMeasurement(Iterations)
+				.GC()
+				.Run()
+				;
+		}
+
+		[Test, Performance]
+		public void BenchPooledMediumModifierFromRecipe()
+		{
+			var recipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
+			Pool.Allocate(recipe.Id, 60 * Iterations);
+
+			Measure.Method(() =>
+				{
+					var modifier = Pool.Rent(recipe.Id);
+				})
+				.WarmupCount(10)
+				.MeasurementCount(50)
+				.IterationsPerMeasurement(Iterations)
+				.GC()
+				.Run()
+				;
+		}
+
+		[Test, Performance]
+		public void BenchPooledMediumModifierFromRecipeReturn()
+		{
+			var recipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
+
+			Measure.Method(() =>
+				{
+					var modifier = Pool.Rent(recipe.Id);
+					Pool.Return(modifier);
+				})
+				.WarmupCount(10)
+				.MeasurementCount(50)
 				.IterationsPerMeasurement(Iterations)
 				.GC()
 				.Run()

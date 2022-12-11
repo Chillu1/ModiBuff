@@ -56,6 +56,12 @@ namespace ModifierLibraryLite.Core
 				_timer = 0;
 		}
 
+		public void ResetState()
+		{
+			_timer = 0;
+			_targetComponent = null;
+		}
+
 		public ITimeComponent DeepClone() => new IntervalComponent(_interval, IsRefreshable, _effects);
 	}
 }

@@ -7,6 +7,7 @@ namespace ModifierLibraryLite.Tests
 	public abstract class BaseModifierTests
 	{
 		protected ModifierRecipes Recipes { get; private set; }
+		protected ModifierPool Pool { get; private set; }
 
 		protected Unit Unit { get; private set; }
 		protected float UnitHealth { get; private set; }
@@ -28,6 +29,7 @@ namespace ModifierLibraryLite.Tests
 		public void OneTimeSetup()
 		{
 			Recipes = new ModifierRecipes();
+			Pool = new ModifierPool(Recipes.GetRecipes());
 		}
 
 		[SetUp]

@@ -113,5 +113,14 @@ namespace ModifierLibraryLite.Core
 		{
 			ToRemove = true;
 		}
+
+		public void ResetState()
+		{
+			ToRemove = false;
+			if (_time)
+				for (int i = 0; i < _timeComponents.Length; i++)
+					_timeComponents[i].ResetState();
+			//No need to reset targetComponent references, because we overwrite them on SetTargets
+		}
 	}
 }

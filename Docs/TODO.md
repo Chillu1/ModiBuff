@@ -1,6 +1,8 @@
 # TODO
 
 * Basic pool bench
+  * Test arraypool/memorypool
+  * Array instead of stack bench
 
 * Stacking
 * Check components (chance, cooldown, mana use)

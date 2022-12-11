@@ -5,5 +5,6 @@ namespace ModifierLibraryLite.Core
 		bool IsRefreshable { get; }
 		void Update(in float deltaTime);
 		void Refresh();
+		void ResetState();
 	}
 }
