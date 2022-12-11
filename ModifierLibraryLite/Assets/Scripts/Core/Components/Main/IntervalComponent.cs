@@ -4,6 +4,8 @@ namespace ModifierLibraryLite.Core
 {
 	public sealed class IntervalComponent : ITimeComponent
 	{
+		public bool IsRefreshable { get; }
+
 		private readonly float _interval;
 		private float _timer;
 
@@ -13,13 +15,14 @@ namespace ModifierLibraryLite.Core
 		//private int _intervalCount;
 		//private float _totalTime;
 
-		public IntervalComponent(float interval, IEffect[] effects)
+		public IntervalComponent(float interval, bool refreshable, IEffect[] effects)
 		{
 			_interval = interval;
+			IsRefreshable = refreshable;
 			_effects = effects;
 		}
 
-		public IntervalComponent(float interval, IEffect effect) : this(interval, new[] { effect })
+		public IntervalComponent(float interval, bool refreshable, IEffect effect) : this(interval, refreshable, new[] { effect })
 		{
 		}
 
@@ -47,6 +50,12 @@ namespace ModifierLibraryLite.Core
 			}
 		}
 
-		public ITimeComponent DeepClone() => new IntervalComponent(_interval, _effects);
+		public void Refresh()
+		{
+			if (IsRefreshable)
+				_timer = 0;
+		}
+
+		public ITimeComponent DeepClone() => new IntervalComponent(_interval, IsRefreshable, _effects);
 	}
 }

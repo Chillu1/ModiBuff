@@ -9,7 +9,6 @@ namespace ModifierLibraryLite.Core
 		Init = 1,
 		Interval = 2,
 		Duration = 4,
-		Refresh = 8,
-		Stack = 16,
+		Stack = 8,
 	}
 }

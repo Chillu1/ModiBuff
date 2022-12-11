@@ -22,6 +22,9 @@ namespace ModifierLibraryLite.Core
 
 		private List<IEffect>[] _effectBinds;
 
+		private bool _refreshDuration, _refreshInterval;
+		//private List<bool> _refreshables;
+
 		private ModifierInternalRecipe _internalRecipe;
 
 		public ModifierRecipe(string id)
@@ -58,6 +61,24 @@ namespace ModifierLibraryLite.Core
 			return this;
 		}
 
+		public ModifierRecipe Refresh(RefreshType type = RefreshType.Duration)
+		{
+			switch (type)
+			{
+				case RefreshType.Duration:
+					_refreshDuration = true;
+					break;
+				case RefreshType.Interval:
+					_refreshInterval = true;
+					break;
+				default:
+					Debug.LogError($"Unknown refresh type: {type}");
+					return this;
+			}
+
+			return this;
+		}
+
 		//---Effects---
 
 		public ModifierRecipe Effect(IEffect effect, EffectOn effectOn)
@@ -86,9 +107,11 @@ namespace ModifierLibraryLite.Core
 
 		public void Finish()
 		{
+			if (_internalRecipe != null)
+				Debug.LogError("Modifier recipe already finished, finishing again. Not intended?");
+
 			IInitComponent initComponent = null;
 			IList<ITimeComponent> timeComponents = new List<ITimeComponent>(2);
-			IRefreshComponent refreshComponent = null;
 			IStackComponent stackComponent = null;
 
 			var revertibleList = new List<IRevertEffect>(2);
@@ -115,20 +138,19 @@ namespace ModifierLibraryLite.Core
 				if (effectOn == EffectOn.Interval)
 				{
 					Debug.Assert(_interval > 0, "Interval must be greater than 0");
-					timeComponents.Add(new IntervalComponent(_interval, effects.ToArray()));
+					timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, effects.ToArray()));
 				}
 
 				if (effectOn == EffectOn.Duration)
 				{
 					Debug.Assert(_duration > 0, "Duration must be greater than 0");
-					timeComponents.Add(new DurationComponent(_duration, effects.ToArray()));
+					timeComponents.Add(new DurationComponent(_duration, _refreshDuration, effects.ToArray()));
 				}
 			}
 
 			_removeEffect?.SetRevertibleEffects(revertibleList.ToArray());
 
-			_internalRecipe = new ModifierInternalRecipe(Id, initComponent, timeComponents.ToArray(), refreshComponent, stackComponent,
-				_removeEffect);
+			_internalRecipe = new ModifierInternalRecipe(Id, initComponent, timeComponents.ToArray(), stackComponent, _removeEffect);
 		}
 	}
 }

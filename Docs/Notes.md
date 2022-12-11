@@ -23,12 +23,27 @@ Goals of the libraries:
   * Basic effect manipulation (stack, refresh)
 
 ## Benches
-Creating a simple modifier is 13 times faster, and only allocated new memory for the modifier object (which can easily be pooled)
+
+From recipe/properties. 1_000 iters
+
+Medium InitDoTSeparateDamageRemove Modifier:
+
+ECS:
+?
+Lite:
+0.74ms, 4 GC (clones two timecomponents)
+Orig:
+?
+
+Simple InitDamage Modifier:
+
+Creating a simple modifier is 16 times faster, and only allocated new memory for the modifier object (which can easily be pooled)
 Also ecs is a bit on the slow side because we're creating the entities and their components, instead of reusing them, like in the case of lite.
+
 ECS:
 new modifier from recipe (InitDamage). 1_000 iters = 2.74ms, 1 GC
 Lite:
-new modifier from recipe (InitDamage). 1_000 iters = 0.26ms. 1 GC. bugged approch bench
+new modifier from recipe (InitDamage). 1_000 iters = 0.20ms. 1 GC (not cloning any components)
 Orig:
 new modifier from properties (InitDamageApplier). 1_000 iters = 3.35ms, 25 GC
 

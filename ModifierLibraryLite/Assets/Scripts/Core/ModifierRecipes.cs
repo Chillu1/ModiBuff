@@ -33,7 +33,7 @@ namespace ModifierLibraryLite.Core
 				.Remove(5)
 				;
 
-			Add("InitDoTSeparateDamage")
+			Add("InitDoTSeparateDamageRemove")
 				.Interval(1)
 				.Effect(new DamageEffect(10), EffectOn.Init)
 				.Effect(new DamageEffect(5), EffectOn.Interval)
@@ -62,6 +62,21 @@ namespace ModifierLibraryLite.Core
 			Add("InitAddDamageRevertible")
 				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
 				.Remove(5);
+
+			Add("DurationRefreshRemove")
+				.Remove(5)
+				.Refresh();
+
+			Add("IntervalRefreshRemove")
+				.Effect(new RemoveEffect(), EffectOn.Interval)
+				.Interval(5)
+				.Refresh(RefreshType.Interval);
+
+			Add("DurationRefreshRemove_IntervalDamage")
+				.Effect(new DamageEffect(5), EffectOn.Interval)
+				.Interval(5)
+				.Remove(5)
+				.Refresh();
 
 			//TODO TargetHeal
 

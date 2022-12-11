@@ -9,16 +9,35 @@ namespace ModifierLibraryLite.Tests
 		private const int Iterations = 1000;
 
 		[Test, Performance]
-		public void BenchNewModifierFromRecipe()
+		public void BenchNewBasicModifierFromRecipe()
 		{
+			//No cloning right now
 			var modifierRecipe = Recipes.GetRecipe("InitDamage");
 
 			Measure.Method(() =>
 				{
 					var modifier = modifierRecipe.Create();
 				})
-				.WarmupCount(5)
-				.MeasurementCount(50)
+				.WarmupCount(10)
+				.MeasurementCount(80)
+				.IterationsPerMeasurement(Iterations)
+				.GC()
+				.Run()
+				;
+		}
+
+		[Test, Performance]
+		public void BenchNewMediumModifierFromRecipe()
+		{
+			//We clone two TimeComponents here
+			var modifierRecipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
+
+			Measure.Method(() =>
+				{
+					var modifier = modifierRecipe.Create();
+				})
+				.WarmupCount(10)
+				.MeasurementCount(80)
 				.IterationsPerMeasurement(Iterations)
 				.GC()
 				.Run()

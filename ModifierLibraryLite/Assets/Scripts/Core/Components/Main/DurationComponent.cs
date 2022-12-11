@@ -4,23 +4,27 @@ namespace ModifierLibraryLite.Core
 {
 	public sealed class DurationComponent : ITimeComponent
 	{
+		public bool IsRefreshable { get; }
+
 		private readonly float _duration;
-		private float _time;
+		private float _timer;
 
 		private ITargetComponent _targetComponent;
 		private readonly IEffect[] _effects;
 
-		public DurationComponent(float duration, IEffect[] effects)
+		public DurationComponent(float duration, bool refreshable, IEffect[] effects)
 		{
 			_duration = duration;
+			IsRefreshable = refreshable;
 			_effects = effects;
 		}
 
-		public DurationComponent(float duration, IEffect effect) : this(duration, new[] { effect })
+		public DurationComponent(float duration, bool refreshable, IEffect effect) : this(duration, refreshable, new[] { effect })
 		{
 		}
 
-		public DurationComponent(float duration, IRemoveEffect effect) : this(duration, new IEffect[] { effect })
+		public DurationComponent(float duration, bool refreshable, IRemoveEffect effect) :
+			this(duration, refreshable, new IEffect[] { effect })
 		{
 		}
 
@@ -28,11 +32,11 @@ namespace ModifierLibraryLite.Core
 
 		public void Update(in float deltaTime)
 		{
-			if (_time >= _duration)
+			if (_timer >= _duration)
 				return;
 
-			_time += deltaTime;
-			if (_time >= _duration)
+			_timer += deltaTime;
+			if (_timer >= _duration)
 			{
 				int length = _effects.Length;
 				for (int i = 0; i < length; i++)
@@ -40,6 +44,12 @@ namespace ModifierLibraryLite.Core
 			}
 		}
 
-		public ITimeComponent DeepClone() => new DurationComponent(_duration, _effects);
+		public void Refresh()
+		{
+			if (IsRefreshable)
+				_timer = 0;
+		}
+
+		public ITimeComponent DeepClone() => new DurationComponent(_duration, IsRefreshable, _effects);
 	}
 }

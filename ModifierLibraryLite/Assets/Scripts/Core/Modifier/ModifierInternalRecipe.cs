@@ -5,17 +5,15 @@ namespace ModifierLibraryLite.Core
 	/// <summary>
 	///		Lower level recipe for a modifier.
 	/// </summary>
-	public class ModifierInternalRecipe : IDeepClone<ModifierInternalRecipe>
+	public class ModifierInternalRecipe
 	{
 		public string Id { get; }
 
 		[CanBeNull] public IInitComponent InitComponent { get; private set; }
 		[CanBeNull] public ITimeComponent[] TimeComponents { get; private set; }
-		[CanBeNull] public IRefreshComponent RefreshComponent { get; private set; }
 
 		[CanBeNull] public IStackComponent StackComponent { get; private set; }
 
-		//[CanBeNull] public IRemoveComponent RemoveComponent { get; private set; }
 		public RemoveEffect RemoveEffect { get; private set; }
 
 		public ModifierInternalRecipe(string id)
@@ -24,12 +22,11 @@ namespace ModifierLibraryLite.Core
 		}
 
 		internal ModifierInternalRecipe(string id, IInitComponent initComponent, ITimeComponent[] timeComponents,
-			IRefreshComponent refreshComponent, IStackComponent stackComponent, RemoveEffect removeEffect = null)
+			IStackComponent stackComponent, RemoveEffect removeEffect = null)
 		{
 			Id = id;
 			InitComponent = initComponent;
 			TimeComponents = timeComponents;
-			RefreshComponent = refreshComponent;
 			StackComponent = stackComponent;
 
 			RemoveEffect = removeEffect;
@@ -49,17 +46,6 @@ namespace ModifierLibraryLite.Core
 		public void SetStackComponent(IStackComponent stackComponent)
 		{
 			StackComponent = stackComponent;
-		}
-
-		public void SetRefreshable( /*IRefreshComponent refreshComponent*/)
-		{
-			//TODO
-			//RefreshComponent = refreshComponent;
-		}
-
-		public ModifierInternalRecipe DeepClone()
-		{
-			return null;
 		}
 	}
 }

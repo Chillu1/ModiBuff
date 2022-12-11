@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
@@ -22,35 +21,44 @@ namespace ModifierLibraryLite.Core
 		private readonly ITimeComponent[] _timeComponents;
 
 		[CanBeNull]
-		private readonly IRefreshComponent _refreshComponent;
-
-		[CanBeNull]
 		private readonly IStackComponent _stackComponent;
 
-		public Modifier(ModifierInternalRecipe recipe) : this(recipe.Id, recipe.InitComponent, recipe.TimeComponents,
-			recipe.RefreshComponent, recipe.StackComponent, recipe.RemoveEffect)
+		public Modifier(ModifierInternalRecipe recipe) : this(recipe.Id, recipe.InitComponent, recipe.TimeComponents, recipe.StackComponent,
+			recipe.RemoveEffect)
 		{
 		}
 
-		internal Modifier(string id, IInitComponent initComponent, ITimeComponent[] timeComponents,
-			IRefreshComponent refreshComponent, IStackComponent stackComponent, RemoveEffect removeEffect = null)
+		internal Modifier(string id, IInitComponent initComponent, ITimeComponent[] timeComponents, IStackComponent stackComponent,
+			RemoveEffect removeEffect = null)
 		{
 			Id = id;
 
-			_initComponent = initComponent;
-			var timeComponentList = new List<ITimeComponent>();
-			for (int i = 0; i < timeComponents.Length; i++)
-				timeComponentList.Add(timeComponents[i].DeepClone());
-			_timeComponents = timeComponentList.ToArray();
-			_refreshComponent = refreshComponent;
-			_stackComponent = stackComponent;
+			if (initComponent != null)
+			{
+				_initComponent = initComponent;
+				_init = true;
+			}
+
+			if (timeComponents != null && timeComponents.Length > 0)
+			{
+				_timeComponents = new ITimeComponent[timeComponents.Length];
+				for (int i = 0; i < timeComponents.Length; i++)
+				{
+					var timeComponent = timeComponents[i];
+					_timeComponents[i] = timeComponent.DeepClone();
+					_refresh = _refresh || timeComponent.IsRefreshable;
+				}
+
+				_time = true;
+			}
+
+			if (stackComponent != null)
+			{
+				_stackComponent = stackComponent;
+				_stack = true;
+			}
 
 			removeEffect?.Setup(this);
-
-			_init = _initComponent != null;
-			_time = _timeComponents != null && _timeComponents.Length > 0;
-			_refresh = _refreshComponent != null;
-			_stack = _stackComponent != null;
 		}
 
 		public void SetTargets(IUnit target, IUnit owner, IUnit sender)
@@ -85,10 +93,12 @@ namespace ModifierLibraryLite.Core
 
 		public void Refresh()
 		{
-			if (!_refresh)
+			if (!_refresh || !_time)
 				return;
 
-			_refreshComponent.Refresh();
+			int length = _timeComponents.Length;
+			for (int i = 0; i < length; i++)
+				_timeComponents[i].Refresh();
 		}
 
 		public void Stack()
