@@ -7,8 +7,8 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void Init_AddDamage_Remove_RevertDamage()
 		{
-			var modifier = Recipes.Get("InitAddDamageRevertible");
-			Unit.TryAddModifier(modifier, Unit);
+			var recipe = Recipes.GetRecipe("InitAddDamageRevertible");
+			Unit.TryAddModifier(recipe, Unit);
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 
 			Unit.Update(5);

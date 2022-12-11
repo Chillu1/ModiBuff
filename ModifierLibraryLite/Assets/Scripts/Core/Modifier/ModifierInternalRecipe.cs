@@ -5,7 +5,7 @@ namespace ModifierLibraryLite.Core
 	/// <summary>
 	///		Lower level recipe for a modifier.
 	/// </summary>
-	public class ModifierInternalRecipe
+	public class ModifierInternalRecipe : IDeepClone<ModifierInternalRecipe>
 	{
 		public string Id { get; }
 
@@ -55,6 +55,11 @@ namespace ModifierLibraryLite.Core
 		{
 			//TODO
 			//RefreshComponent = refreshComponent;
+		}
+
+		public ModifierInternalRecipe DeepClone()
+		{
+			return null;
 		}
 	}
 }

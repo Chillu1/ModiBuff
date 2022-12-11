@@ -11,7 +11,6 @@ namespace ModifierLibraryLite.Core.Units
 		public float Damage { get; private set; }
 		public float HealValue { get; private set; }
 
-
 		public Unit(float health = 500, float damage = 10, float healValue = 5)
 		{
 			Health = health;
@@ -64,23 +63,20 @@ namespace ModifierLibraryLite.Core.Units
 			return _modifierController.TryAddAppliers(recipes);
 		}
 
-		public bool TryAddModifier(Modifier modifier, IUnit target, IUnit sender = null)
+		public bool TryAddModifier(ModifierRecipe recipe, IUnit target, IUnit sender = null)
 		{
-			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
-			modifier.SetTargets(target, this, sender);
-
-			return _modifierController.TryAdd(modifier).Success;
+			return _modifierController.TryAdd(recipe, this, target, sender).Success;
 		}
 
 		public void TryApplyModifiers(IReadOnlyCollection<ModifierRecipe> getApplierModifiers, IUnit acter)
 		{
 			foreach (var modifierRecipe in getApplierModifiers)
-				TryAddModifier(modifierRecipe.Create(), this, acter);
+				TryAddModifier(modifierRecipe, this, acter);
 		}
 
-		public bool ContainsModifier(Modifier modifier)
+		public bool ContainsModifier(ModifierRecipe recipe)
 		{
-			return _modifierController.Contains(modifier);
+			return _modifierController.Contains(recipe);
 		}
 	}
 }

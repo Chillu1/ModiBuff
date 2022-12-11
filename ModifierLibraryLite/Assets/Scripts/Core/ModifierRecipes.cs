@@ -13,7 +13,7 @@ namespace ModifierLibraryLite.Core
 			SetupModifiers();
 		}
 
-		public Modifier Get(string id) => _modifiers[id].Create();
+		//public Modifier Get(string id) => _modifiers[id].Create();
 
 		public ModifierRecipe GetRecipe(string id) => _modifiers[id];
 
