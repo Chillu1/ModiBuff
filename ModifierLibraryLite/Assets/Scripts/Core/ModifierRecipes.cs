@@ -81,6 +81,10 @@ namespace ModifierLibraryLite.Core
 				.Remove(5)
 				.Refresh();
 
+			Add("StackDamage")
+				.Effect(new DamageEffect(5, DamageEffect.StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, 5, false);
+
 			//TODO TargetHeal
 
 			foreach (var modifier in _modifiers.Values)

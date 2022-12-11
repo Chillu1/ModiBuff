@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace ModifierLibraryLite.Tests
 {
-	public sealed class CloneTests : BaseModifierTests
+	public sealed class StateTests : BaseModifierTests
 	{
 		[Test]
 		public void TwoDurationModifiers_DifferentState()

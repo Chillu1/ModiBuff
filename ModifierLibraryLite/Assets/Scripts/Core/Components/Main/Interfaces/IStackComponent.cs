@@ -1,6 +1,6 @@
 namespace ModifierLibraryLite.Core
 {
-	public interface IStackComponent : IComponent
+	public interface IStackComponent : ITarget, IComponent
 	{
 		void Stack();
 	}

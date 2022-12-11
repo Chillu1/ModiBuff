@@ -5,11 +5,18 @@ namespace ModifierLibraryLite.Core
 {
 	public sealed class ModifierPool : IDisposable
 	{
+		public static ModifierPool Instance { get; private set; }
+
 		private readonly Dictionary<string, Stack<Modifier>> _pools;
 		private readonly Dictionary<string, ModifierRecipe> _recipes;
 
 		public ModifierPool(ModifierRecipe[] recipes, int initialSize = 64)
 		{
+			if (Instance != null)
+				return;
+
+			Instance = this;
+
 			_pools = new Dictionary<string, Stack<Modifier>>(recipes.Length);
 			_recipes = new Dictionary<string, ModifierRecipe>(recipes.Length);
 
@@ -64,6 +71,8 @@ namespace ModifierLibraryLite.Core
 		{
 			foreach (var pool in _pools.Values)
 				pool.Clear();
+
+			Instance = null;
 		}
 	}
 }

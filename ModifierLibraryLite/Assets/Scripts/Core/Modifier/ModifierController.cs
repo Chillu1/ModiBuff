@@ -11,6 +11,8 @@ namespace ModifierLibraryLite.Core
 
 		private readonly List<string> _modifiersToRemove;
 
+		private static ModifierPool _modifierPool;
+
 		public ModifierController()
 		{
 			_modifiers = new Dictionary<string, Modifier>();
@@ -81,7 +83,8 @@ namespace ModifierLibraryLite.Core
 				return existingModifier;
 			}
 
-			var modifier = recipe.Create();
+			var modifier = ModifierPool.Instance.Rent(recipe.Id);
+			//var modifier = recipe.Create();
 
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
 			modifier.SetTargets(target, owner, sender);

@@ -71,6 +71,9 @@ namespace ModifierLibraryLite.Core
 			if (_time)
 				for (int i = 0; i < _timeComponents.Length; i++)
 					_timeComponents[i].SetupTarget(targetComponent);
+
+			if (_stack)
+				_stackComponent.SetupTarget(targetComponent);
 		}
 
 		public void Init()

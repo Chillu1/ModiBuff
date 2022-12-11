@@ -29,7 +29,7 @@ namespace ModifierLibraryLite.Tests
 		public void OneTimeSetup()
 		{
 			Recipes = new ModifierRecipes();
-			Pool = new ModifierPool(Recipes.GetRecipes());
+			Pool = new ModifierPool(Recipes.GetRecipes(), 4);
 		}
 
 		[SetUp]
@@ -45,6 +45,14 @@ namespace ModifierLibraryLite.Tests
 			Unit = new Unit(UnitHealth, UnitDamage, UnitHeal);
 			Enemy = new Unit(EnemyHealth, EnemyDamage, EnemyHeal);
 			Ally = new Unit(AllyHealth, AllyDamage, AllyHeal);
+		}
+
+		[OneTimeTearDown]
+		public void OneTimeTearDown()
+		{
+			Recipes = null;
+			Pool.Dispose();
+			Pool = null;
 		}
 	}
 }
