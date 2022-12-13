@@ -47,11 +47,11 @@ namespace ModifierLibraryLite.Tests
 		public void BenchPooledMediumModifierFromRecipe()
 		{
 			var recipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
-			Pool.Allocate(recipe.Id, 60 * Iterations);
+			Pool.Allocate(recipe.IdInt, 60 * Iterations);
 
 			Measure.Method(() =>
 				{
-					var modifier = Pool.Rent(recipe.Id);
+					var modifier = Pool.Rent(recipe.IdInt);
 				})
 				.WarmupCount(10)
 				.MeasurementCount(50)
@@ -68,7 +68,7 @@ namespace ModifierLibraryLite.Tests
 
 			Measure.Method(() =>
 				{
-					var modifier = Pool.Rent(recipe.Id);
+					var modifier = Pool.Rent(recipe.IdInt);
 					Pool.Return(modifier);
 				})
 				.WarmupCount(10)

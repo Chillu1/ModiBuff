@@ -6,6 +6,8 @@ namespace ModifierLibraryLite.Tests
 {
 	public abstract class BaseModifierTests
 	{
+		private CoreSystem _coreSystem;
+
 		protected ModifierRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
 
@@ -28,8 +30,10 @@ namespace ModifierLibraryLite.Tests
 		[OneTimeSetUp]
 		public void OneTimeSetup()
 		{
-			Recipes = new ModifierRecipes();
-			Pool = new ModifierPool(Recipes.GetRecipes(), 4);
+			_coreSystem = new CoreSystem(4);
+
+			Recipes = _coreSystem.Recipes;
+			Pool = _coreSystem.Pool;
 		}
 
 		[SetUp]
@@ -50,8 +54,8 @@ namespace ModifierLibraryLite.Tests
 		[OneTimeTearDown]
 		public void OneTimeTearDown()
 		{
+			_coreSystem.Dispose();
 			Recipes = null;
-			Pool.Dispose();
 			Pool = null;
 		}
 	}

@@ -37,7 +37,5 @@ namespace ModifierLibraryLite.Tests
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
-		
-		//No checks applier
 	}
 }

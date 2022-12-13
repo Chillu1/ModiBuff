@@ -8,8 +8,9 @@ namespace ModifierLibraryLite.Core
 	/// <summary>
 	///		High level API for creating modifiers.
 	/// </summary>
-	public sealed class ModifierRecipe
+	public sealed class ModifierRecipe : IComparable<ModifierRecipe>
 	{
+		public int IdInt { get; }
 		public string Id { get; }
 		public bool HasChecks { get; private set; }
 
@@ -36,6 +37,7 @@ namespace ModifierLibraryLite.Core
 
 		public ModifierRecipe(string id)
 		{
+			IdInt = ModifierIdManager.GetFreeId();
 			Id = id;
 
 			var allEffectOns = Enum.GetValues(typeof(EffectOn)).Cast<EffectOn>().ToArray();
@@ -195,7 +197,15 @@ namespace ModifierLibraryLite.Core
 
 			_removeEffect?.SetRevertibleEffects(revertibleList.ToArray());
 
-			_internalRecipe = new ModifierInternalRecipe(Id, initComponent, timeComponents.ToArray(), stackComponent, _removeEffect);
+			_internalRecipe = new ModifierInternalRecipe(IdInt, Id, initComponent, timeComponents.ToArray(), stackComponent, _removeEffect);
+		}
+
+		public int CompareTo(ModifierRecipe other)
+		{
+			//Will we have troubles with not comparing references?
+			//if (ReferenceEquals(this, other)) return 0;
+			//if (ReferenceEquals(null, other)) return 1;
+			return IdInt.CompareTo(other.IdInt);
 		}
 	}
 }

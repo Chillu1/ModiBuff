@@ -8,6 +8,8 @@ namespace ModifierLibraryLite.Core
 
 		private void Start()
 		{
+			var _ = new CoreSystem();
+
 			_modifiers = new Modifier[20_000];
 			for (int i = 0; i < _modifiers.Length; i++)
 			{

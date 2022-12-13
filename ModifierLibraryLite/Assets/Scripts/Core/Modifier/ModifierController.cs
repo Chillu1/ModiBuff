@@ -61,7 +61,6 @@ namespace ModifierLibraryLite.Core
 				return true;
 			}
 
-			//TODO
 			if (_modifierChecksAppliers.ContainsKey(recipe.Id))
 				return false;
 
@@ -72,9 +71,9 @@ namespace ModifierLibraryLite.Core
 		public bool TryAddAppliers(ModifierRecipe[] recipes)
 		{
 			bool success = true;
-			foreach (var recipe in recipes)
+			for (int i = 0; i < recipes.Length; i++)
 			{
-				if (!TryAddApplier(recipe))
+				if (!TryAddApplier(recipes[i]))
 					success = false;
 			}
 
@@ -94,7 +93,7 @@ namespace ModifierLibraryLite.Core
 			}
 
 			//Debug.Log("Adding new modifier");
-			var modifier = ModifierPool.Instance.Rent(id);
+			var modifier = ModifierPool.Instance.Rent(ModifierIdManager.GetId(id));
 			//var modifier = recipe.Create();
 
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance

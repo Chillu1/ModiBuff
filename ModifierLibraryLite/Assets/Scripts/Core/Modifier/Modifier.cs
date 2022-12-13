@@ -9,6 +9,7 @@ namespace ModifierLibraryLite.Core
 	[SuppressMessage("ReSharper", "PossibleNullReferenceException")]
 	public sealed class Modifier : IModifier
 	{
+		public int IdInt { get; }
 		public string Id { get; }
 		public bool ToRemove { get; private set; }
 
@@ -23,14 +24,15 @@ namespace ModifierLibraryLite.Core
 		[CanBeNull]
 		private readonly IStackComponent _stackComponent;
 
-		public Modifier(ModifierInternalRecipe recipe) : this(recipe.Id, recipe.InitComponent, recipe.TimeComponents, recipe.StackComponent,
-			recipe.RemoveEffect)
+		public Modifier(ModifierInternalRecipe recipe) : this(recipe.IdInt, recipe.Id, recipe.InitComponent, recipe.TimeComponents,
+			recipe.StackComponent, recipe.RemoveEffect)
 		{
 		}
 
-		internal Modifier(string id, IInitComponent initComponent, ITimeComponent[] timeComponents, IStackComponent stackComponent,
-			RemoveEffect removeEffect = null)
+		internal Modifier(int idInt, string id, IInitComponent initComponent, ITimeComponent[] timeComponents,
+			IStackComponent stackComponent, RemoveEffect removeEffect = null)
 		{
+			IdInt = idInt;
 			Id = id;
 
 			if (initComponent != null)

@@ -7,8 +7,8 @@ namespace ModifierLibraryLite.Core
 	{
 		public static ModifierPool Instance { get; private set; }
 
-		private readonly Dictionary<string, Stack<Modifier>> _pools;
-		private readonly Dictionary<string, ModifierRecipe> _recipes;
+		private readonly Stack<Modifier>[] _poolsArray;
+		private readonly ModifierRecipe[] _recipesArray;
 
 		public ModifierPool(ModifierRecipe[] recipes, int initialSize = 64)
 		{
@@ -17,41 +17,43 @@ namespace ModifierLibraryLite.Core
 
 			Instance = this;
 
-			_pools = new Dictionary<string, Stack<Modifier>>(recipes.Length);
-			_recipes = new Dictionary<string, ModifierRecipe>(recipes.Length);
+			_poolsArray = new Stack<Modifier>[recipes.Length];
+			_recipesArray = new ModifierRecipe[recipes.Length];
 
 			foreach (var recipe in recipes)
 			{
-				_pools.Add(recipe.Id, new Stack<Modifier>(initialSize));
+				_poolsArray[recipe.IdInt] = new Stack<Modifier>(initialSize);
+				_recipesArray[recipe.IdInt] = recipe;
 
-				_recipes.Add(recipe.Id, recipe);
-
-				Allocate(recipe.Id, initialSize);
+				Allocate(recipe.IdInt, initialSize);
 			}
+
+			Array.Sort(_poolsArray, (x, y) => x.Peek().IdInt.CompareTo(y.Peek().IdInt));
+			Array.Sort(_recipesArray, (x, y) => x.IdInt.CompareTo(y.IdInt));
 		}
 
-		private void Allocate(string id)
+		private void Allocate(int id)
 		{
-			var recipe = _recipes[id];
-			var pool = _pools[id];
+			var recipe = _recipesArray[id];
+			var pool = _poolsArray[id];
 
 			//Double the size of the pool
 			for (int i = 0; i < pool.Count; i++)
 				pool.Push(recipe.Create());
 		}
 
-		internal void Allocate(string id, int count)
+		internal void Allocate(int id, int count)
 		{
-			var recipe = _recipes[id];
-			var pool = _pools[id];
+			var recipe = _recipesArray[id];
+			var pool = _poolsArray[id];
 
 			for (int i = 0; i < count; i++)
 				pool.Push(recipe.Create());
 		}
 
-		public Modifier Rent(string id)
+		public Modifier Rent(int id)
 		{
-			var pool = _pools[id];
+			var pool = _poolsArray[id];
 
 			if (pool.Count > 0)
 				return pool.Pop();
@@ -64,13 +66,13 @@ namespace ModifierLibraryLite.Core
 		{
 			modifier.ResetState();
 
-			_pools[modifier.Id].Push(modifier);
+			_poolsArray[modifier.IdInt].Push(modifier);
 		}
 
 		public void Dispose()
 		{
-			foreach (var pool in _pools.Values)
-				pool.Clear();
+			for (int i = 0; i < _poolsArray.Length; i++)
+				_poolsArray[i].Clear();
 
 			Instance = null;
 		}
