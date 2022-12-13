@@ -7,8 +7,8 @@ namespace ModifierLibraryLite.Core
 	{
 		public static ModifierPool Instance { get; private set; }
 
-		private readonly Stack<Modifier>[] _poolsArray;
-		private readonly ModifierRecipe[] _recipesArray;
+		private readonly Stack<Modifier>[] _pools;
+		private readonly ModifierRecipe[] _recipes;
 
 		public ModifierPool(ModifierRecipe[] recipes, int initialSize = 64)
 		{
@@ -17,25 +17,25 @@ namespace ModifierLibraryLite.Core
 
 			Instance = this;
 
-			_poolsArray = new Stack<Modifier>[recipes.Length];
-			_recipesArray = new ModifierRecipe[recipes.Length];
+			_pools = new Stack<Modifier>[recipes.Length];
+			_recipes = new ModifierRecipe[recipes.Length];
 
 			foreach (var recipe in recipes)
 			{
-				_poolsArray[recipe.Id] = new Stack<Modifier>(initialSize);
-				_recipesArray[recipe.Id] = recipe;
+				_pools[recipe.Id] = new Stack<Modifier>(initialSize);
+				_recipes[recipe.Id] = recipe;
 
 				Allocate(recipe.Id, initialSize);
 			}
 
-			Array.Sort(_poolsArray, (x, y) => x.Peek().Id.CompareTo(y.Peek().Id));
-			Array.Sort(_recipesArray, (x, y) => x.Id.CompareTo(y.Id));
+			Array.Sort(_pools, (x, y) => x.Peek().Id.CompareTo(y.Peek().Id));
+			Array.Sort(_recipes, (x, y) => x.Id.CompareTo(y.Id));
 		}
 
 		private void Allocate(int id)
 		{
-			var recipe = _recipesArray[id];
-			var pool = _poolsArray[id];
+			var recipe = _recipes[id];
+			var pool = _pools[id];
 
 			//Double the size of the pool
 			for (int i = 0; i < pool.Count; i++)
@@ -44,8 +44,8 @@ namespace ModifierLibraryLite.Core
 
 		internal void Allocate(int id, int count)
 		{
-			var recipe = _recipesArray[id];
-			var pool = _poolsArray[id];
+			var recipe = _recipes[id];
+			var pool = _pools[id];
 
 			for (int i = 0; i < count; i++)
 				pool.Push(recipe.Create());
@@ -53,7 +53,7 @@ namespace ModifierLibraryLite.Core
 
 		public Modifier Rent(int id)
 		{
-			var pool = _poolsArray[id];
+			var pool = _pools[id];
 
 			if (pool.Count > 0)
 				return pool.Pop();
@@ -66,13 +66,13 @@ namespace ModifierLibraryLite.Core
 		{
 			modifier.ResetState();
 
-			_poolsArray[modifier.Id].Push(modifier);
+			_pools[modifier.Id].Push(modifier);
 		}
 
 		public void Dispose()
 		{
-			for (int i = 0; i < _poolsArray.Length; i++)
-				_poolsArray[i].Clear();
+			for (int i = 0; i < _pools.Length; i++)
+				_pools[i].Clear();
 
 			Instance = null;
 		}
