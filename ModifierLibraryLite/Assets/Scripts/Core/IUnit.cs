@@ -16,6 +16,6 @@ namespace ModifierLibraryLite.Core
 		void AddDamage(float damage);
 
 		bool TryAddModifier(ModifierRecipe recipe, IUnit target, IUnit sender = null);
-		void TryApplyModifiers(IReadOnlyCollection<ModifierRecipe> getApplierModifiers, IUnit acter);
+		void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit acter);
 	}
 }

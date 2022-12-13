@@ -14,6 +14,8 @@ namespace ModifierLibraryLite.Core
 
 		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
 
+		private float _chance = -1f;
+
 		private bool _init;
 		private float _interval;
 		private float _duration;
@@ -41,7 +43,28 @@ namespace ModifierLibraryLite.Core
 				_effectBinds[i] = new List<IEffect>(2);
 		}
 
+		//---PostFinish---
+
+		public ModifierCheck CreateCheck()
+		{
+			if (_chance == -1f)
+				return new ModifierCheck(Id);
+
+			return new ModifierCheck(Id, new ChanceCheck(_chance));
+		}
+
 		public Modifier Create() => new Modifier(_internalRecipe);
+
+		//---Checks---
+
+		public ModifierRecipe Chance(float chance)
+		{
+			if (chance > 1)
+				chance /= 100;
+			Debug.Assert(chance >= 0 && chance <= 1, "Chance must be between 0 and 1");
+			_chance = chance;
+			return this;
+		}
 
 		//---Actions---
 

@@ -3,6 +3,18 @@ using UnityEngine;
 
 namespace ModifierLibraryLite.Core
 {
+	// public sealed class DamageData
+	// {
+	// 	public float Damage => _baseDamage + _extraDamage;
+	// 	private readonly float _baseDamage;
+	// 	private float _extraDamage;
+	//
+	// 	public DamageData(float damage) => _baseDamage = damage;
+	//
+	// 	public void Add(float damage) => _extraDamage += damage;
+	// 	public void Remove(float damage) => _extraDamage -= damage;
+	// }
+
 	public class DamageEffect : IStackEffect, IEffect
 	{
 		private readonly float _damage;
@@ -38,17 +50,17 @@ namespace ModifierLibraryLite.Core
 					break;
 			}
 		}
+	}
 
-		[Flags]
-		public enum StackEffectType
-		{
-			None = 0,
-			Effect = 1,
-			Add = 2, //Add to all damages?
-			AddStacksBased = 4,
-			//Multiply = 8, //Multiply all damages?
-			//MultiplyStacksBased = 16,
-			//SetMultiplierStacksBased = 32, //Multiply all damages?
-		}
+	[Flags]
+	public enum StackEffectType
+	{
+		None = 0,
+		Effect = 1,
+		Add = 2, //Add to all damages?
+		AddStacksBased = 4,
+		//Multiply = 8, //Multiply all damages?
+		//MultiplyStacksBased = 16,
+		//SetMultiplierStacksBased = 32, //Multiply all damages?
 	}
 }

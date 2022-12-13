@@ -39,6 +39,16 @@ Lite InitDmg (not cloning any components, no state)
 
 ## Temp Notes
 
+Check components:
+Cooldown has state (timer)
+Mana use doesn't have state
+Chance doesn't have state
+
+How to avoid having stack state in effects? Have it outside of the effect, and feed it each time?
+This won't work if we're calling it from Init/Time/Non-stack components
+We could store the stack information in the modifier, and feed it each time there.
+Or we could store the effect data outside? Then we only clone & reset that data, and not the whole effect.
+
 When cloning, all components should use the same instance of TargetComponent.
 Try to keep as mmuch logic stateless as possible.
 Only feed the target component after creating the modifier, making it so we don't have to clone it. And feed it to everyone automatically

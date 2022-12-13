@@ -82,8 +82,16 @@ namespace ModifierLibraryLite.Core
 				.Refresh();
 
 			Add("StackDamage")
-				.Effect(new DamageEffect(5, DamageEffect.StackEffectType.Effect), EffectOn.Stack)
+				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always, 5, false);
+
+			Add("StackAddDamage")
+				.Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, 5, false);
+
+			Add("ChanceInitDamage")
+				.Chance(0.5f)
+				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			//TODO TargetHeal
 

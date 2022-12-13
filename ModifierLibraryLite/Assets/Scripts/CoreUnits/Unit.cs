@@ -63,20 +63,35 @@ namespace ModifierLibraryLite.Core.Units
 			return _modifierController.TryAddAppliers(recipes);
 		}
 
-		public bool TryAddModifier(ModifierRecipe recipe, IUnit target, IUnit sender = null)
+		public bool TryAddModifier(string id, IUnit target, IUnit sender = null)
 		{
-			return _modifierController.TryAdd(recipe, this, target, sender).Success;
+			return _modifierController.TryAdd(id, this, target, sender).Success;
 		}
 
-		public void TryApplyModifiers(IReadOnlyCollection<ModifierRecipe> getApplierModifiers, IUnit acter)
+		public bool TryAddModifier(ModifierRecipe recipe, IUnit target, IUnit sender = null)
 		{
-			foreach (var modifierRecipe in getApplierModifiers)
-				TryAddModifier(modifierRecipe, this, acter);
+			return _modifierController.TryAdd(recipe.Id, this, target, sender).Success;
+		}
+
+		public void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit acter)
+		{
+			foreach (var check in modifierChecks)
+			{
+				if (!check.Check())
+					continue;
+
+				TryAddModifier(check.Id, this, acter);
+			}
 		}
 
 		public bool ContainsModifier(ModifierRecipe recipe)
 		{
 			return _modifierController.Contains(recipe);
+		}
+
+		public override string ToString()
+		{
+			return $"Health: {Health}, Damage: {Damage}, HealValue: {HealValue}";
 		}
 	}
 }
