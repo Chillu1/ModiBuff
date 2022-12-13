@@ -25,7 +25,7 @@ namespace ModifierLibraryLite.Core
 				return;
 
 			foreach (var recipe in modifierRecipes)
-				_idMap.Add(recipe.Id, recipe.IdInt);
+				_idMap.Add(recipe.Name, recipe.Id);
 		}
 
 		public static int GetFreeId() => _instance._nextId++;

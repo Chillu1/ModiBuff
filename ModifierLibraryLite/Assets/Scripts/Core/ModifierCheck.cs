@@ -2,14 +2,16 @@ namespace ModifierLibraryLite.Core
 {
 	public sealed class ModifierCheck
 	{
-		public string Id { get; }
+		public int IntId { get; }
+		public string Name { get; }
 
 		private readonly CooldownCheck _cooldown;
 		private readonly ChanceCheck _chance;
 
-		public ModifierCheck(string id, ChanceCheck chance = null)
+		public ModifierCheck(int intId, string name, ChanceCheck chance = null)
 		{
-			Id = id;
+			IntId = intId;
+			Name = name;
 			//_cooldown = cooldown;
 			_chance = chance;
 		}

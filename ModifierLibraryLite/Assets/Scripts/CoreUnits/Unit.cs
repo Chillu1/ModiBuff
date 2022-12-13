@@ -68,10 +68,15 @@ namespace ModifierLibraryLite.Core.Units
 
 		internal bool TryAddModifierSelf(string id) //No sender, TEMP?
 		{
-			return TryAddModifier(id, this);
+			return TryAddModifier(ModifierIdManager.GetId(id), this);
 		}
 
-		public bool TryAddModifier(string id, IUnit target, IUnit sender = null)
+		internal bool TryAddModifier(string id, IUnit target, IUnit sender = null)
+		{
+			return TryAddModifier(ModifierIdManager.GetId(id), target, sender);
+		}
+
+		public bool TryAddModifier(int id, IUnit target, IUnit sender = null)
 		{
 			return _modifierController.TryAdd(id, this, target, sender).Success;
 		}
@@ -88,7 +93,7 @@ namespace ModifierLibraryLite.Core.Units
 				if (!check.Check())
 					continue;
 
-				TryAddModifier(check.Id, this, acter);
+				TryAddModifier(check.IntId, this, acter);
 			}
 		}
 
@@ -98,9 +103,7 @@ namespace ModifierLibraryLite.Core.Units
 				TryAddModifier(recipes[i].Id, this, acter);
 		}
 
-		public bool ContainsModifier(ModifierRecipe recipe) => _modifierController.Contains(recipe);
-
-		public bool ContainsModifier(string id) => _modifierController.Contains(id);
+		public bool ContainsModifier(string id) => _modifierController.Contains(ModifierIdManager.GetId(id));
 
 		public override string ToString()
 		{

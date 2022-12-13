@@ -22,14 +22,14 @@ namespace ModifierLibraryLite.Core
 
 			foreach (var recipe in recipes)
 			{
-				_poolsArray[recipe.IdInt] = new Stack<Modifier>(initialSize);
-				_recipesArray[recipe.IdInt] = recipe;
+				_poolsArray[recipe.Id] = new Stack<Modifier>(initialSize);
+				_recipesArray[recipe.Id] = recipe;
 
-				Allocate(recipe.IdInt, initialSize);
+				Allocate(recipe.Id, initialSize);
 			}
 
-			Array.Sort(_poolsArray, (x, y) => x.Peek().IdInt.CompareTo(y.Peek().IdInt));
-			Array.Sort(_recipesArray, (x, y) => x.IdInt.CompareTo(y.IdInt));
+			Array.Sort(_poolsArray, (x, y) => x.Peek().Id.CompareTo(y.Peek().Id));
+			Array.Sort(_recipesArray, (x, y) => x.Id.CompareTo(y.Id));
 		}
 
 		private void Allocate(int id)
@@ -66,7 +66,7 @@ namespace ModifierLibraryLite.Core
 		{
 			modifier.ResetState();
 
-			_poolsArray[modifier.IdInt].Push(modifier);
+			_poolsArray[modifier.Id].Push(modifier);
 		}
 
 		public void Dispose()

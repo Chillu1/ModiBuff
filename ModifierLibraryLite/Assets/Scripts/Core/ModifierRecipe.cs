@@ -10,8 +10,8 @@ namespace ModifierLibraryLite.Core
 	/// </summary>
 	public sealed class ModifierRecipe : IComparable<ModifierRecipe>
 	{
-		public int IdInt { get; }
-		public string Id { get; }
+		public int Id { get; }
+		public string Name { get; }
 		public bool HasChecks { get; private set; }
 
 		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
@@ -35,10 +35,10 @@ namespace ModifierLibraryLite.Core
 
 		private ModifierInternalRecipe _internalRecipe;
 
-		public ModifierRecipe(string id)
+		public ModifierRecipe(string name)
 		{
-			IdInt = ModifierIdManager.GetFreeId();
-			Id = id;
+			Id = ModifierIdManager.GetFreeId();
+			Name = name;
 
 			var allEffectOns = Enum.GetValues(typeof(EffectOn)).Cast<EffectOn>().ToArray();
 			_effectBinds = new List<IEffect>[allEffectOns.Length];
@@ -51,9 +51,9 @@ namespace ModifierLibraryLite.Core
 		public ModifierCheck CreateCheck()
 		{
 			if (_chance == -1f)
-				return new ModifierCheck(Id);
+				return new ModifierCheck(Id, Name);
 
-			return new ModifierCheck(Id, new ChanceCheck(_chance));
+			return new ModifierCheck(Id, Name, new ChanceCheck(_chance));
 		}
 
 		public Modifier Create() => new Modifier(_internalRecipe);
@@ -197,7 +197,8 @@ namespace ModifierLibraryLite.Core
 
 			_removeEffect?.SetRevertibleEffects(revertibleList.ToArray());
 
-			_internalRecipe = new ModifierInternalRecipe(IdInt, Id, initComponent, timeComponents.ToArray(), stackComponent, _removeEffect);
+			_internalRecipe =
+				new ModifierInternalRecipe(Id, Name, initComponent, timeComponents.ToArray(), stackComponent, _removeEffect);
 		}
 
 		public int CompareTo(ModifierRecipe other)
@@ -205,7 +206,7 @@ namespace ModifierLibraryLite.Core
 			//Will we have troubles with not comparing references?
 			//if (ReferenceEquals(this, other)) return 0;
 			//if (ReferenceEquals(null, other)) return 1;
-			return IdInt.CompareTo(other.IdInt);
+			return Id.CompareTo(other.Id);
 		}
 	}
 }

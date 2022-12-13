@@ -7,8 +7,8 @@ namespace ModifierLibraryLite.Core
 	/// </summary>
 	public class ModifierInternalRecipe
 	{
-		public int IdInt { get; }
-		public string Id { get; }
+		public int Id { get; }
+		public string Name { get; }
 
 		[CanBeNull] public IInitComponent InitComponent { get; private set; }
 		[CanBeNull] public ITimeComponent[] TimeComponents { get; private set; }
@@ -17,16 +17,16 @@ namespace ModifierLibraryLite.Core
 
 		public RemoveEffect RemoveEffect { get; private set; }
 
-		public ModifierInternalRecipe(string id)
+		public ModifierInternalRecipe(string name)
 		{
-			Id = id;
+			Name = name;
 		}
 
-		internal ModifierInternalRecipe(int idInt, string id, IInitComponent initComponent, ITimeComponent[] timeComponents,
+		internal ModifierInternalRecipe(int id, string name, IInitComponent initComponent, ITimeComponent[] timeComponents,
 			IStackComponent stackComponent, RemoveEffect removeEffect = null)
 		{
-			IdInt = idInt;
 			Id = id;
+			Name = name;
 			InitComponent = initComponent;
 			TimeComponents = timeComponents;
 			StackComponent = stackComponent;

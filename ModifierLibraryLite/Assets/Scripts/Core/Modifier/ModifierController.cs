@@ -5,22 +5,20 @@ namespace ModifierLibraryLite.Core
 	public sealed class ModifierController
 	{
 		//TODO Array mapping?
-		private readonly IDictionary<string, Modifier> _modifiers;
+		private readonly Dictionary<int, Modifier> _modifiers;
 
 		private readonly List<ModifierRecipe> _modifierAppliers;
-		private readonly Dictionary<string, ModifierCheck> _modifierChecksAppliers;
+		private readonly Dictionary<int, ModifierCheck> _modifierChecksAppliers;
 
-		private readonly List<string> _modifiersToRemove;
-
-		private static ModifierPool _modifierPool;
+		private readonly List<int> _modifiersToRemove;
 
 		public ModifierController()
 		{
-			_modifiers = new Dictionary<string, Modifier>();
+			_modifiers = new Dictionary<int, Modifier>();
 			_modifierAppliers = new List<ModifierRecipe>(5);
-			_modifierChecksAppliers = new Dictionary<string, ModifierCheck>(5);
+			_modifierChecksAppliers = new Dictionary<int, ModifierCheck>(5);
 
-			_modifiersToRemove = new List<string>(5);
+			_modifiersToRemove = new List<int>(5);
 		}
 
 		public void Update(in float delta)
@@ -43,7 +41,7 @@ namespace ModifierLibraryLite.Core
 		public IReadOnlyList<ModifierRecipe> GetApplierModifiers() => _modifierAppliers;
 
 		//TODO do appliers make sense? Should we just store the id, what kind of state do appliers have?
-		public (bool Success, Modifier Modifier) TryAdd(string id, IUnit owner, IUnit target, IUnit sender = null)
+		public (bool Success, Modifier Modifier) TryAdd(int id, IUnit owner, IUnit target, IUnit sender = null)
 		{
 			//TODO We should call the original modifier's check component here or before
 
@@ -82,6 +80,11 @@ namespace ModifierLibraryLite.Core
 
 		private Modifier Add(string id, IUnit owner, IUnit target, IUnit sender = null)
 		{
+			return Add(ModifierIdManager.GetId(id), owner, target, sender);
+		}
+
+		private Modifier Add(int id, IUnit owner, IUnit target, IUnit sender = null)
+		{
 			if (_modifiers.TryGetValue(id, out var existingModifier))
 			{
 				//Debug.Log("Modifier already exists");
@@ -93,7 +96,7 @@ namespace ModifierLibraryLite.Core
 			}
 
 			//Debug.Log("Adding new modifier");
-			var modifier = ModifierPool.Instance.Rent(ModifierIdManager.GetId(id));
+			var modifier = ModifierPool.Instance.Rent(id);
 			//var modifier = recipe.Create();
 
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
@@ -106,8 +109,6 @@ namespace ModifierLibraryLite.Core
 			return modifier;
 		}
 
-		public bool Contains(ModifierRecipe recipe) => Contains(recipe.Id);
-		public bool Contains(Modifier modifier) => Contains(modifier.Id);
-		public bool Contains(string id) => _modifiers.ContainsKey(id);
+		public bool Contains(int id) => _modifiers.ContainsKey(id);
 	}
 }
