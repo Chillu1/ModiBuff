@@ -11,6 +11,7 @@ namespace ModifierLibraryLite.Core
 	public sealed class ModifierRecipe
 	{
 		public string Id { get; }
+		public bool HasChecks { get; private set; }
 
 		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
 
@@ -189,6 +190,8 @@ namespace ModifierLibraryLite.Core
 						effects.Cast<IStackEffect>().ToArray());
 				}
 			}
+
+			HasChecks = _chance != -1f;
 
 			_removeEffect?.SetRevertibleEffects(revertibleList.ToArray());
 

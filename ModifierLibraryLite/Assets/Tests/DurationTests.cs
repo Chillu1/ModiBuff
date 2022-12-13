@@ -7,8 +7,7 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void Duration_Damage()
 		{
-			var recipe = Recipes.GetRecipe("DurationDamage");
-			Unit.TryAddModifier(recipe, Unit);
+			Unit.TryAddModifierSelf("DurationDamage");
 
 			Unit.Update(5);
 
@@ -18,12 +17,11 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void Duration_Remove()
 		{
-			var recipe = Recipes.GetRecipe("DurationRemove");
-			Unit.TryAddModifier(recipe, Unit);
+			Unit.TryAddModifierSelf("DurationRemove");
 
 			Unit.Update(5);
 
-			Assert.False(Unit.ContainsModifier(recipe));
+			Assert.False(Unit.ContainsModifier("DurationRemove"));
 		}
 	}
 }

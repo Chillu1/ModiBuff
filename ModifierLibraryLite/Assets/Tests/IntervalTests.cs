@@ -7,8 +7,7 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void Init_DoT()
 		{
-			var recipe = Recipes.GetRecipe("InitDoT");
-			Unit.TryAddModifier(recipe, Unit); //Init
+			Unit.TryAddModifierSelf("InitDoT"); //Init
 
 			Assert.AreEqual(UnitHealth - 10, Unit.Health);
 

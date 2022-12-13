@@ -39,6 +39,8 @@ Lite InitDmg (not cloning any components, no state)
 
 ## Temp Notes
 
+Translating string IDs to int on init. Then only using the modifier ID's internally. And string names in init, testing. 
+
 Check components:
 Cooldown has state (timer)
 Mana use doesn't have state

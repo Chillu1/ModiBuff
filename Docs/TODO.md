@@ -6,6 +6,7 @@
   * Test arraypool/memorypool
   * Array instead of stack bench
 
+* Translating string IDs to int IDs on init (kind of how Default.Ecs does it, with Flags). This way we can also store the Modifiers sorted, and can search with binary tree. 
 * Stacking
   * State in effects, how?
 * Check components (chance, cooldown, mana use)

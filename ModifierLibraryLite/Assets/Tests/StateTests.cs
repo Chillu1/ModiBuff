@@ -7,10 +7,8 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void TwoDurationModifiers_DifferentState()
 		{
-			var recipe1 = Recipes.GetRecipe("DurationDamage");
-			var recipe2 = Recipes.GetRecipe("DurationDamage");
-			Unit.TryAddModifier(recipe1, Unit);
-			Enemy.TryAddModifier(recipe2, Enemy);
+			Unit.TryAddModifierSelf("DurationDamage");
+			Enemy.TryAddModifierSelf("DurationDamage");
 
 			Unit.Update(5);
 			Enemy.Update(2);
@@ -22,11 +20,8 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void TwoInitModifiers_DifferentState()
 		{
-			var recipe1 = Recipes.GetRecipe("InitDamage");
-			var recipe2 = Recipes.GetRecipe("InitDamage");
-
-			Unit.TryAddModifier(recipe1, Unit);
-			Enemy.TryAddModifier(recipe2, Enemy);
+			Unit.TryAddModifierSelf("InitDamage");
+			Enemy.TryAddModifierSelf("InitDamage");
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);

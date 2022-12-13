@@ -7,9 +7,7 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void Init_AddDamage()
 		{
-			var recipe = Recipes.GetRecipe("InitAddDamage");
-
-			Unit.TryAddModifier(recipe, Unit);
+			Unit.TryAddModifierSelf("InitAddDamage");
 
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 		}

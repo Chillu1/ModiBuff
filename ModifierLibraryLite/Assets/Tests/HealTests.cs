@@ -7,11 +7,10 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void SelfInit_Heal()
 		{
-			var recipe = Recipes.GetRecipe("InitHeal");
 			Unit.TakeDamage(5, Unit);
 			Assert.AreEqual(AllyHealth - 5, Unit.Health);
 
-			Unit.TryAddModifier(recipe, Unit); //Init
+			Unit.TryAddModifierSelf("InitHeal"); //Init
 
 			Assert.AreEqual(UnitHealth, Unit.Health);
 		}

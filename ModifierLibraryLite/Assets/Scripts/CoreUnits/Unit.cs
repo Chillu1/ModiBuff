@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ModifierLibraryLite.Tests")]
+
 namespace ModifierLibraryLite.Core.Units
 {
 	public class Unit : IUnit
@@ -25,8 +27,9 @@ namespace ModifierLibraryLite.Core.Units
 			_modifierController.Update(deltaTime);
 		}
 
-		public float Attack(IUnit target)
+		public float Attack(Unit target)
 		{
+			target.TryApplyModifiers(_modifierController.GetApplierCheckModifiers(), this);
 			target.TryApplyModifiers(_modifierController.GetApplierModifiers(), this);
 			float dealtDamage = target.TakeDamage(Damage, this);
 			return dealtDamage;
@@ -63,6 +66,11 @@ namespace ModifierLibraryLite.Core.Units
 			return _modifierController.TryAddAppliers(recipes);
 		}
 
+		internal bool TryAddModifierSelf(string id) //No sender, TEMP?
+		{
+			return TryAddModifier(id, this);
+		}
+
 		public bool TryAddModifier(string id, IUnit target, IUnit sender = null)
 		{
 			return _modifierController.TryAdd(id, this, target, sender).Success;
@@ -73,7 +81,7 @@ namespace ModifierLibraryLite.Core.Units
 			return _modifierController.TryAdd(recipe.Id, this, target, sender).Success;
 		}
 
-		public void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit acter)
+		private void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit acter)
 		{
 			foreach (var check in modifierChecks)
 			{
@@ -84,10 +92,15 @@ namespace ModifierLibraryLite.Core.Units
 			}
 		}
 
-		public bool ContainsModifier(ModifierRecipe recipe)
+		private void TryApplyModifiers(IReadOnlyList<ModifierRecipe> recipes, IUnit acter)
 		{
-			return _modifierController.Contains(recipe);
+			for (int i = 0; i < recipes.Count; i++)
+				TryAddModifier(recipes[i].Id, this, acter);
 		}
+
+		public bool ContainsModifier(ModifierRecipe recipe) => _modifierController.Contains(recipe);
+
+		public bool ContainsModifier(string id) => _modifierController.Contains(id);
 
 		public override string ToString()
 		{

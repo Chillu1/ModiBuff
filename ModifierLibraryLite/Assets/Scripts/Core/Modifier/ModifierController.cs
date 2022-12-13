@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace ModifierLibraryLite.Core
 {
@@ -8,8 +7,8 @@ namespace ModifierLibraryLite.Core
 		//TODO Array mapping?
 		private readonly IDictionary<string, Modifier> _modifiers;
 
-		//private readonly HashSet<ModifierRecipe> _modifierRecipeAppliers;
-		private readonly List<ModifierCheck> _modifierChecksAppliers;
+		private readonly List<ModifierRecipe> _modifierAppliers;
+		private readonly Dictionary<string, ModifierCheck> _modifierChecksAppliers;
 
 		private readonly List<string> _modifiersToRemove;
 
@@ -18,8 +17,8 @@ namespace ModifierLibraryLite.Core
 		public ModifierController()
 		{
 			_modifiers = new Dictionary<string, Modifier>();
-			//_modifierRecipeAppliers = new HashSet<ModifierRecipe>(5);
-			_modifierChecksAppliers = new List<ModifierCheck>(5);
+			_modifierAppliers = new List<ModifierRecipe>(5);
+			_modifierChecksAppliers = new Dictionary<string, ModifierCheck>(5);
 
 			_modifiersToRemove = new List<string>(5);
 		}
@@ -40,10 +39,8 @@ namespace ModifierLibraryLite.Core
 				_modifiers.Remove(_modifiersToRemove[i]);
 		}
 
-		public IReadOnlyCollection<ModifierCheck> GetApplierModifiers()
-		{
-			return _modifierChecksAppliers;
-		}
+		public IReadOnlyCollection<ModifierCheck> GetApplierCheckModifiers() => _modifierChecksAppliers.Values;
+		public IReadOnlyList<ModifierRecipe> GetApplierModifiers() => _modifierAppliers;
 
 		//TODO do appliers make sense? Should we just store the id, what kind of state do appliers have?
 		public (bool Success, Modifier Modifier) TryAdd(string id, IUnit owner, IUnit target, IUnit sender = null)
@@ -55,13 +52,20 @@ namespace ModifierLibraryLite.Core
 
 		public bool TryAddApplier(ModifierRecipe recipe)
 		{
-			//TODO If no checks. Only add an id?
+			if (!recipe.HasChecks)
+			{
+				if (_modifierAppliers.Contains(recipe))
+					return false;
+
+				_modifierAppliers.Add(recipe);
+				return true;
+			}
 
 			//TODO
-			if (_modifierChecksAppliers.Contains(recipe.CreateCheck()))
+			if (_modifierChecksAppliers.ContainsKey(recipe.Id))
 				return false;
 
-			_modifierChecksAppliers.Add(recipe.CreateCheck());
+			_modifierChecksAppliers.Add(recipe.Id, recipe.CreateCheck());
 			return true;
 		}
 

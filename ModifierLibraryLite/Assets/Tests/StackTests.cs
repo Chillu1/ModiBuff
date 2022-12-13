@@ -7,12 +7,10 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void Stack_Damage()
 		{
-			var recipe = Recipes.GetRecipe("StackDamage");
-
-			Unit.TryAddModifier(recipe, Unit);
+			Unit.TryAddModifierSelf("StackDamage");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
-			Unit.TryAddModifier(recipe, Unit);
+			Unit.TryAddModifierSelf("StackDamage");
 			Assert.AreEqual(UnitHealth - 10, Unit.Health);
 		}
 	}

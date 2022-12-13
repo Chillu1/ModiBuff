@@ -7,9 +7,7 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void InitDamage()
 		{
-			var modifier = Recipes.GetRecipe("InitDamage");
-
-			Unit.TryAddModifier(modifier, Unit);
+			Unit.TryAddModifierSelf("InitDamage");
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
@@ -19,10 +17,10 @@ namespace ModifierLibraryLite.Tests
 		{
 			var modifier = Recipes.GetRecipe("InitDamage");
 
-			Unit.TryAddModifier(modifier, Unit);
+			Unit.TryAddModifierSelf("InitDamage");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
-			Unit.TryAddModifier(modifier, Unit);
+			Unit.TryAddModifierSelf("InitDamage");
 			Assert.AreEqual(UnitHealth - 10, Unit.Health);
 		}
 	}

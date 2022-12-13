@@ -7,66 +7,66 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void NoRefresh()
 		{
-			var recipe = Recipes.GetRecipe("DurationRemove");
+			string recipeId = "DurationRemove";
 
-			Unit.TryAddModifier(recipe, Unit);
+			Unit.TryAddModifierSelf(recipeId);
 			Unit.Update(4);
 
-			Assert.True(Unit.ContainsModifier(recipe));
+			Assert.True(Unit.ContainsModifier(recipeId));
 
-			Unit.TryAddModifier(recipe, Unit);
+			Unit.TryAddModifierSelf(recipeId);
 			Unit.Update(4);
 
-			Assert.False(Unit.ContainsModifier(recipe));
+			Assert.False(Unit.ContainsModifier(recipeId));
 		}
 
 		[Test]
 		public void Refresh_Duration()
 		{
-			var recipe = Recipes.GetRecipe("DurationRefreshRemove");
+			string recipeId = "DurationRefreshRemove";
 
-			Unit.TryAddModifier(recipe, Unit);
+			Unit.TryAddModifierSelf(recipeId);
 			Unit.Update(4);
 
-			Assert.True(Unit.ContainsModifier(recipe));
+			Assert.True(Unit.ContainsModifier(recipeId));
 
-			Unit.TryAddModifier(recipe, Unit);
+			Unit.TryAddModifierSelf(recipeId);
 			Unit.Update(4);
 
-			Assert.True(Unit.ContainsModifier(recipe));
+			Assert.True(Unit.ContainsModifier(recipeId));
 		}
 
 		[Test]
 		public void Refresh_Interval()
 		{
-			var recipe = Recipes.GetRecipe("IntervalRefreshRemove");
+			string recipeId = "IntervalRefreshRemove";
 
-			Unit.TryAddModifier(recipe, Unit);
+			Unit.TryAddModifierSelf(recipeId);
 			Unit.Update(4);
 
-			Assert.True(Unit.ContainsModifier(recipe));
+			Assert.True(Unit.ContainsModifier(recipeId));
 
-			Unit.TryAddModifier(recipe, Unit);
+			Unit.TryAddModifierSelf(recipeId);
 			Unit.Update(4);
 
-			Assert.True(Unit.ContainsModifier(recipe));
+			Assert.True(Unit.ContainsModifier(recipeId));
 		}
 
 		[Test]
 		public void Refresh_DurationNotInterval()
 		{
-			var recipe = Recipes.GetRecipe("DurationRefreshRemove_IntervalDamage");
+			string recipeId = "DurationRefreshRemove_IntervalDamage";
 
-			Unit.TryAddModifier(recipe, Unit);
+			Unit.TryAddModifierSelf(recipeId);
 			Unit.Update(4);
 
-			Assert.True(Unit.ContainsModifier(recipe));
+			Assert.True(Unit.ContainsModifier(recipeId));
 
-			Unit.TryAddModifier(recipe, Unit);
+			Unit.TryAddModifierSelf(recipeId);
 			Unit.Update(4);
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-			Assert.True(Unit.ContainsModifier(recipe));
+			Assert.True(Unit.ContainsModifier(recipeId));
 		}
 	}
 }
