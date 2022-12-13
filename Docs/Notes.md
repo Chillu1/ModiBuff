@@ -28,7 +28,7 @@ Pools: preallocated
 
 |      | InitDmg, N:1k | InitDmg, N:5k | InitDoTSeparateDamageRemove, N:5k | InitDoTSeparateDamageRemove pool, N:5k | InitDoTSeparateDamageRemove pool reset return, N:5k |
 |------|---------------|---------------|-----------------------------------|----------------------------------------|-----------------------------------------------------|
-| Lite | 0.20ms,  1 GC | 0.93ms, 1 GC  | 3.48ms, 4 GC                      | 0.30ms, 0 GC                           | 0.70ms, 0 GC                                        |
+| Lite | 0.20ms,  1 GC | 0.93ms, 1 GC  | 3.48ms, 4 GC                      | 0.32ms, 0 GC                           | 0.75ms, 0 GC                                        |
 | Ecs  | 2.74ms,  1 GC |               |                                   |                                        |                                                     |
 | Orig | 3.35ms, 25 GC |               |                                   |                                        |                                                     |
 

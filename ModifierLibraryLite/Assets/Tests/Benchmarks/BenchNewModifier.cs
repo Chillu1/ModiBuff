@@ -3,7 +3,7 @@ using Unity.PerformanceTesting;
 
 namespace ModifierLibraryLite.Tests
 {
-	public sealed class Benchmarks : BaseModifierTests
+	public sealed class BenchNewModifier : BaseModifierTests
 	{
 		private const int Iterations = 5000;
 

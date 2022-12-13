@@ -17,6 +17,7 @@ namespace ModifierLibraryLite.Core
 		//public Modifier Get(string id) => _modifiers[id].Create();
 
 		public ModifierRecipe GetRecipe(string id) => _modifiers[id];
+		internal ModifierRecipe GetRecipe(int id) => _modifiers.Values.ElementAt(id);
 
 		internal ModifierRecipe[] GetRecipes() => _modifiers.Values.ToArray();
 

@@ -78,11 +78,6 @@ namespace ModifierLibraryLite.Core
 			return success;
 		}
 
-		private Modifier Add(string id, IUnit owner, IUnit target, IUnit sender = null)
-		{
-			return Add(ModifierIdManager.GetId(id), owner, target, sender);
-		}
-
 		private Modifier Add(int id, IUnit owner, IUnit target, IUnit sender = null)
 		{
 			if (_modifiers.TryGetValue(id, out var existingModifier))
