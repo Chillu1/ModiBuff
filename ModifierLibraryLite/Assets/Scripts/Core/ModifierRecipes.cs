@@ -109,6 +109,10 @@ namespace ModifierLibraryLite.Core
 			Add("InitHealAction")
 				.Effect(new HealActionEffect(), EffectOn.Init);
 
+			Add("InitDamage_CostHealth")
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Cost(CostType.Health, 5);
+
 			//TODO TargetHeal
 
 			foreach (var modifier in _modifiers.Values)

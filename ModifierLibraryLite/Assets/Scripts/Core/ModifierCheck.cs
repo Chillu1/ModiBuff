@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace ModifierLibraryLite.Core
 {
 	public sealed class ModifierCheck
@@ -6,24 +8,29 @@ namespace ModifierLibraryLite.Core
 		public string Name { get; }
 
 		private readonly CooldownCheck _cooldown;
+		private readonly CostCheck _cost;
 		private readonly ChanceCheck _chance;
 
-		public ModifierCheck(int intId, string name, ChanceCheck chance = null)
+		public ModifierCheck(int intId, string name, CostCheck cost = null, ChanceCheck chance = null)
 		{
 			IntId = intId;
 			Name = name;
 			//_cooldown = cooldown;
+			_cost = cost;
 			_chance = chance;
 		}
 
-		public bool Check()
+		public bool Check(IUnit unit)
 		{
-			bool result = true;
-
+			//Debug.Log($"Checking {Name}");
 			//result = _cooldown != null && _cooldown.IsReady;
-			result = _chance == null || _chance.Roll();
+			if (_chance != null && !_chance.Roll())
+				return false;
 
-			return result;
+			if (_cost != null && !_cost.Check(unit))
+				return false;
+
+			return true;
 		}
 	}
 }

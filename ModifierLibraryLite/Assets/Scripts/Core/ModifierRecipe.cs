@@ -17,6 +17,8 @@ namespace ModifierLibraryLite.Core
 		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
 
 		private float _chance = -1f;
+		private CostType _costType = CostType.None;
+		private float _cost = -1f;
 
 		private bool _init;
 		private float _interval;
@@ -50,15 +52,29 @@ namespace ModifierLibraryLite.Core
 
 		public ModifierCheck CreateCheck()
 		{
-			if (_chance == -1f)
-				return new ModifierCheck(Id, Name);
+			CostCheck cost = null;
+			ChanceCheck chance = null;
 
-			return new ModifierCheck(Id, Name, new ChanceCheck(_chance));
+			if (_costType != CostType.None && _cost > 0f)
+				cost = new CostCheck(_costType, _cost);
+
+			if (_chance >= 0f)
+				chance = new ChanceCheck(_chance);
+
+			return new ModifierCheck(Id, Name, cost, chance);
 		}
 
 		public Modifier Create() => new Modifier(_internalRecipe);
 
 		//---Checks---
+
+		public ModifierRecipe Cost(CostType costType, float cost)
+		{
+			_costType = costType;
+			_cost = cost;
+			HasChecks = true;
+			return this;
+		}
 
 		public ModifierRecipe Chance(float chance)
 		{
@@ -66,6 +82,7 @@ namespace ModifierLibraryLite.Core
 				chance /= 100;
 			Debug.Assert(chance >= 0 && chance <= 1, "Chance must be between 0 and 1");
 			_chance = chance;
+			HasChecks = true;
 			return this;
 		}
 
@@ -193,7 +210,7 @@ namespace ModifierLibraryLite.Core
 				}
 			}
 
-			HasChecks = _chance != -1f;
+			HasChecks = _costType != CostType.None || _chance >= 0f;
 
 			_removeEffect?.SetRevertibleEffects(revertibleList.ToArray());
 

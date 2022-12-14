@@ -15,10 +15,13 @@ namespace ModifierLibraryLite.Core
 		float Heal(IUnit target);
 
 		void AddDamage(float damage);
+		void UseHealth(float value);
 
 		bool TryAddModifier(ModifierRecipe recipe, IUnit target, IUnit sender = null);
 
+
 		//void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit acter);
+
 		//void TryApplyModifiers(IReadOnlyCollection<ModifierRecipe> recipes, IUnit acter);
 	}
 }

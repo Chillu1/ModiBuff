@@ -61,6 +61,11 @@ namespace ModifierLibraryLite.Core.Units
 			Damage += damage;
 		}
 
+		public void UseHealth(float value)
+		{
+			Health -= value;
+		}
+
 		//---Modifier based---
 
 		public bool AddApplierModifiers(params ModifierRecipe[] recipes)
@@ -92,7 +97,7 @@ namespace ModifierLibraryLite.Core.Units
 		{
 			foreach (var check in modifierChecks)
 			{
-				if (!check.Check())
+				if (!check.Check(acter))
 					continue;
 
 				TryAddModifier(check.IntId, this, acter);

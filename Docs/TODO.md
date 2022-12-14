@@ -26,7 +26,6 @@
 * Thorns on hit
 
 * Check
-  * Health cost
   * Health cost not lethal
   * Mana cost
   * Mana cost not enough
