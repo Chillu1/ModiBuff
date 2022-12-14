@@ -130,6 +130,10 @@ namespace ModifierLibraryLite.Core
 				.Effect(new ApplierEffect("InitDamage"), EffectOn.Interval)
 				.Interval(1);
 
+			Add("InitSelfHeal_DamageTarget")
+				.Effect(new SelfHealEffect(5), EffectOn.Init)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
 			//TODO TargetHeal
 
 			foreach (var modifier in _modifiers.Values)

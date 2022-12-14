@@ -3,15 +3,10 @@
 ## General
 
 * Stacking/modifier state (added damage, etc)
-* RemoveEffect reference is shared between modifiers. Probably refactor the remove approach
 
 * Basic pool bench
   * Test arraypool/memorypool
   * Array instead of stack bench
-
-* Stacking
-  * State in effects, how?
-* Targeting (deal damage to enemy, heal self)
 
 * Don't make a new modifier before we know we can apply it (improves performance). Because we might just stack/init/refresh the current one.
 
@@ -25,7 +20,6 @@
 * Check
   * Mana cost
   * Mana cost not enough
-  * Cooldown
 
 * Two effects
 * Aura

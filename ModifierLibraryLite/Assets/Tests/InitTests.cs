@@ -1,3 +1,4 @@
+using ModifierLibraryLite.Core;
 using NUnit.Framework;
 
 namespace ModifierLibraryLite.Tests

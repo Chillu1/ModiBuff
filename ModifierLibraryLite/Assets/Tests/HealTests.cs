@@ -1,3 +1,4 @@
+using ModifierLibraryLite.Core;
 using NUnit.Framework;
 
 namespace ModifierLibraryLite.Tests
@@ -18,11 +19,10 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void TargetInit_Heal()
 		{
-			var recipe = Recipes.GetRecipe("InitHeal");
 			Ally.TakeDamage(5, Ally);
 			Assert.AreEqual(AllyHealth - 5, Ally.Health);
 
-			Unit.TryAddModifier(recipe, Ally); //Init
+			Unit.TryAddModifier("InitHeal", Ally); //Init
 
 			Assert.AreEqual(AllyHealth, Ally.Health);
 		}

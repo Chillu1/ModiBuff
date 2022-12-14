@@ -120,16 +120,6 @@ namespace ModifierLibraryLite.Core.Units
 			return _modifierController.TryAddApplier(recipe, applierType);
 		}
 
-		internal bool TryAddModifierSelf(string id) //No sender, TEMP?
-		{
-			return TryAddModifier(ModifierIdManager.GetId(id), this, this);
-		}
-
-		internal bool TryAddModifier(string id, IUnit target)
-		{
-			return TryAddModifier(ModifierIdManager.GetId(id), target, this);
-		}
-
 		public bool TryAddModifier(int id, IUnit target, IUnit acter)
 		{
 			return _modifierController.TryAdd(id, acter, target, acter);
