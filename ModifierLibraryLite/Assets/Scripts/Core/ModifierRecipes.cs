@@ -103,6 +103,12 @@ namespace ModifierLibraryLite.Core
 				.Effect(new DamageEffect(5), EffectOn.Interval)
 				.Remove(5);
 
+			Add("InitAttackAction")
+				.Effect(new AttackActionEffect(), EffectOn.Init);
+
+			Add("InitHealAction")
+				.Effect(new HealActionEffect(), EffectOn.Init);
+
 			//TODO TargetHeal
 
 			foreach (var modifier in _modifiers.Values)

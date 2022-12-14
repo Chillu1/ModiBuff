@@ -6,7 +6,7 @@
   * Test arraypool/memorypool
   * Array instead of stack bench
 
-* RemoveEffect reference is shared between modifiers
+* RemoveEffect reference is shared between modifiers. Probably refactor the remove approach
 * Stacking
   * State in effects, how?
 * Check components (chance, cooldown, mana use)
@@ -24,9 +24,6 @@
 
 ### ModifierLibraryOld unit tests
 * Thorns on hit
-* Action modifiers
-  * Attack
-  * Heal
 
 * Check
   * Health cost

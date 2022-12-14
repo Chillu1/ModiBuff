@@ -9,6 +9,7 @@ namespace ModifierLibraryLite.Core
 		float HealValue { get; }
 
 		void Update(in float deltaTime);
+		float Attack(IUnit target);
 		float TakeDamage(float damage, IUnit acter);
 		float Heal(float heal, IUnit acter);
 		float Heal(IUnit target);

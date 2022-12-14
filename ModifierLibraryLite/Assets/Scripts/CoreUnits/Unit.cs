@@ -27,6 +27,8 @@ namespace ModifierLibraryLite.Core.Units
 			_modifierController.Update(deltaTime);
 		}
 
+		public float Attack(IUnit target) => Attack((Unit)target);
+
 		public float Attack(Unit target)
 		{
 			target.TryApplyModifiers(_modifierController.GetApplierCheckModifiers(), this);
