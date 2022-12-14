@@ -8,7 +8,7 @@ namespace ModifierLibraryLite.Core
 	{
 		public static ModifierPool Instance { get; private set; }
 
-		private const int MaxPoolSize = 100_000;
+		public static int MaxPoolSize = 100_000;
 
 		private readonly Stack<Modifier>[] _pools;
 		private readonly ModifierRecipe[] _recipes;
@@ -37,6 +37,17 @@ namespace ModifierLibraryLite.Core
 
 			Array.Sort(_pools, (x, y) => x.Peek().Id.CompareTo(y.Peek().Id));
 			Array.Sort(_recipes, (x, y) => x.Id.CompareTo(y.Id));
+		}
+
+		internal void SetMaxPoolSize(int size)
+		{
+			if (size < 0)
+				throw new ArgumentOutOfRangeException(nameof(size), "Max pool size cannot be negative.");
+
+			if (size < _stackCapacity)
+				throw new ArgumentOutOfRangeException(nameof(size), "Max pool size cannot be smaller than the current stack capacity.");
+
+			MaxPoolSize = size;
 		}
 
 		private void Allocate(int id)

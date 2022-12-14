@@ -8,18 +8,23 @@ namespace ModifierLibraryLite.Core.Units
 		private Unit _unit;
 		private ModifierRecipe _recipe;
 		private Unit[] _units;
+		private ModifierPool _pool;
+
+		private int _recipeId;
 
 		private void Start()
 		{
 			var coreSystem = new CoreSystem();
+			_pool = coreSystem.Pool;
+			_recipeId = ModifierIdManager.GetId("InitDoTSeparateDamageRemove");
 
 			_modifiers = new Modifier[20_000];
 			_unit = new Unit();
-			_units = new Unit[1_00];
+			_units = new Unit[10_000];
 			for (int i = 0; i < _units.Length; i++)
 			{
 				_units[i] = new Unit();
-				_units[i].TryAddModifier("InitDamage_RemoveFast", _units[i]);
+				_units[i].TryAddModifier("InitDoTSeparateDamageRemove", _units[i]);
 			}
 		}
 

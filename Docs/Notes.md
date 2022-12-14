@@ -39,6 +39,10 @@ Lite InitDmg (not cloning any components, no state)
 
 ## Temp Notes
 
+Array mapping of modifier's kinda hard. We could have a slot for each modifier type, then either iterate through all of these slots (skip nulls).
+Or have an array of modifier ids that we currently have, and iterate this way.
+Or double array mapping?
+
 Translating string IDs to int on init. Then only using the modifier ID's internally. And string names in init, testing. 
 
 Check components:

@@ -3,8 +3,10 @@ using System.Linq;
 
 namespace ModifierLibraryLite.Core
 {
-	public class ModifierRecipes
+	public sealed class ModifierRecipes
 	{
+		public static int RecipesCount { get; private set; }
+
 		private readonly IDictionary<string, ModifierRecipe> _modifiers;
 
 		public ModifierRecipes()
@@ -12,6 +14,7 @@ namespace ModifierLibraryLite.Core
 			_modifiers = new Dictionary<string, ModifierRecipe>();
 
 			SetupModifiers();
+			RecipesCount = _modifiers.Count;
 		}
 
 		//public Modifier Get(string id) => _modifiers[id].Create();
@@ -112,6 +115,9 @@ namespace ModifierLibraryLite.Core
 			Add("InitDamage_CostHealth")
 				.Effect(new DamageEffect(5), EffectOn.Init)
 				.Cost(CostType.Health, 5);
+
+			Add("Damage_OnHit") //Thorns
+				.Effect(new DamageEffect(5), EffectOn.Init); //Register on init?
 
 			//TODO TargetHeal
 

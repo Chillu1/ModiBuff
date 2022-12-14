@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEngine;
 
 [assembly: InternalsVisibleTo("ModifierLibraryLite.Tests")]
 
@@ -13,11 +15,14 @@ namespace ModifierLibraryLite.Core.Units
 		public float Damage { get; private set; }
 		public float HealValue { get; private set; }
 
+		private List<UnitEvent> _onDamageEvents;
+
 		public Unit(float health = 500, float damage = 10, float healValue = 5)
 		{
 			Health = health;
 			Damage = damage;
 			HealValue = healValue;
+			_onDamageEvents = new List<UnitEvent>();
 
 			_modifierController = new ModifierController();
 		}
@@ -37,11 +42,17 @@ namespace ModifierLibraryLite.Core.Units
 			return dealtDamage;
 		}
 
-		public float TakeDamage(float damage, IUnit acter)
+		public float TakeDamage(float damage, IUnit acter, bool triggersEvents = true)
 		{
 			float oldHealth = Health;
 			Health -= damage;
-			return oldHealth - Health;
+			float dealtDamage = oldHealth - Health;
+
+			if (triggersEvents)
+				for (int i = 0; i < _onDamageEvents.Count; i++)
+					_onDamageEvents[i](this, acter);
+
+			return dealtDamage;
 		}
 
 		public float Heal(float heal, IUnit acter)
@@ -67,6 +78,37 @@ namespace ModifierLibraryLite.Core.Units
 		}
 
 		//---Modifier based---
+
+		public void AddEffectEvent(IEffect effect, EffectOnEvent @event, TargetType targetType)
+		{
+			//Maybe don't have full modifier's for events, but instead only effects? This would take away stack, functionality, etc.
+			//Also would make the effects unrevertable.
+			//We could store the modifier directly, and call init/refresh/stack on it?
+			//TODO GetModifierId
+
+			switch (@event)
+			{
+				case EffectOnEvent.OnHit:
+					_onDamageEvents.Add((self, unit) => effect.Effect(unit, self));
+					break;
+				default:
+					Debug.LogError("Unknown event type: " + @event);
+					return;
+			}
+		}
+
+		public void RemoveEffectEvent(IEffect effect, EffectOnEvent @event, TargetType targetType)
+		{
+			switch (@event)
+			{
+				case EffectOnEvent.OnHit:
+					_onDamageEvents.Remove((self, unit) => effect.Effect(unit, self));
+					break;
+				default:
+					Debug.LogError("Unknown event type: " + @event);
+					return;
+			}
+		}
 
 		public bool AddApplierModifiers(params ModifierRecipe[] recipes)
 		{

@@ -47,6 +47,7 @@ namespace ModifierLibraryLite.Tests
 		public void BenchPooledMediumModifierFromRecipe()
 		{
 			var recipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
+			Pool.SetMaxPoolSize(1_000_000);
 			Pool.Allocate(recipe.Id, 60 * Iterations);
 
 			Measure.Method(() =>

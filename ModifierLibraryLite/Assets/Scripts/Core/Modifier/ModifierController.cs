@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,12 +28,14 @@ namespace ModifierLibraryLite.Core
 			//int length = _modifiers.Count;
 			//TODO Array for loop mapping
 			foreach (var modifier in _modifiers.Values)
-			{
 				modifier.Update(delta);
-			}
+
+			int removeCount = _modifiersToRemoveNew.Count;
+			if (removeCount == 0)
+				return;
 
 			//Debug.Log("ModifiersRemove: " + _modifiersToRemoveNew.Count);
-			for (int i = 0; i < _modifiersToRemoveNew.Count; i++)
+			for (int i = 0; i < removeCount; i++)
 				Remove(_modifiersToRemoveNew[i]);
 
 			_modifiersToRemoveNew.Clear();
@@ -120,7 +123,7 @@ namespace ModifierLibraryLite.Core
 
 		private void Remove(Modifier modifier)
 		{
-			Debug.Log("Removing modifier: " + modifier.Id);
+			//Debug.Log("Removing modifier: " + modifier.Id);
 			_modifiers.Remove(modifier.Id);
 			ModifierPool.Instance.Return(modifier);
 		}

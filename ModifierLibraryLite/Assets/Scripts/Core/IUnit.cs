@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-
 namespace ModifierLibraryLite.Core
 {
+	public delegate void UnitEvent(IUnit self, IUnit acter);
+
 	public interface IUnit
 	{
 		float Health { get; }
@@ -10,7 +10,7 @@ namespace ModifierLibraryLite.Core
 
 		void Update(in float deltaTime);
 		float Attack(IUnit target);
-		float TakeDamage(float damage, IUnit acter);
+		float TakeDamage(float damage, IUnit acter, bool triggersEvents = true);
 		float Heal(float heal, IUnit acter);
 		float Heal(IUnit target);
 
