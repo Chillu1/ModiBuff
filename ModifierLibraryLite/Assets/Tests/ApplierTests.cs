@@ -31,13 +31,11 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void DamageSelfApplier_Attack_DamageSelf()
 		{
-			//TODO
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamageSelf"), ApplierType.Attack);
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage"), ApplierType.Attack);
 
 			Unit.Attack(Enemy);
 
-			Debug.Log(Enemy.Health);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
@@ -50,6 +48,20 @@ namespace ModifierLibraryLite.Tests
 			Unit.Cast(Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+		}
+
+		[Test]
+		public void DamageApplier_Interval()
+		{
+			Unit.TryAddModifier("DamageApplier_Interval", Enemy);
+
+			Unit.Update(1f);
+
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+
+			Unit.Update(1f);
+
+			Assert.AreEqual(EnemyHealth - 10, Enemy.Health);
 		}
 	}
 }

@@ -40,7 +40,7 @@ namespace ModifierLibraryLite.Core
 
 		public ModifierRecipe(string name)
 		{
-			Id = ModifierIdManager.GetFreeId();
+			Id = ModifierIdManager.GetFreeId(name);
 			Name = name;
 
 			var allEffectOns = Enum.GetValues(typeof(EffectOn)).Cast<EffectOn>().ToArray();
@@ -224,8 +224,7 @@ namespace ModifierLibraryLite.Core
 
 			_removeEffect?.SetRevertibleEffects(revertibleList.ToArray());
 
-			_internalRecipe =
-				new ModifierInternalRecipe(Id, Name, initComponent, timeComponents.ToArray(), stackComponent, _removeEffect);
+			_internalRecipe = new ModifierInternalRecipe(Id, Name, initComponent, timeComponents.ToArray(), stackComponent);
 		}
 
 		public int CompareTo(ModifierRecipe other)

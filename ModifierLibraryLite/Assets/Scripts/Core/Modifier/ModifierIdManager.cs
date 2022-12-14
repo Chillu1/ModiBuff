@@ -4,6 +4,8 @@ namespace ModifierLibraryLite.Core
 {
 	public sealed class ModifierIdManager
 	{
+		public static int CurrentId { get; private set; }
+
 		private static ModifierIdManager _instance;
 		private int _nextId;
 
@@ -19,16 +21,14 @@ namespace ModifierLibraryLite.Core
 			_idMap = new Dictionary<string, int>();
 		}
 
-		public void SetupRecipeIds(ModifierRecipe[] modifierRecipes)
+		public static int GetFreeId(string name)
 		{
-			if (_idMap == null || _idMap.Count > 0)
-				return;
-
-			foreach (var recipe in modifierRecipes)
-				_idMap.Add(recipe.Name, recipe.Id);
+			CurrentId = _instance._nextId;
+			int id = _instance._nextId++;
+			if (!_instance._idMap.ContainsKey(name)) //TODO We keep making new recipes for every unit test file
+				_instance._idMap.Add(name, id);
+			return id;
 		}
-
-		public static int GetFreeId() => _instance._nextId++;
 
 		public static int GetId(string id) => _instance._idMap[id];
 

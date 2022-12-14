@@ -40,7 +40,7 @@ namespace ModifierLibraryLite.Tests
 			Assert.True(Enemy.ContainsModifier("DurationRemove"));
 		}
 
-		//[Test]
+		[Test]
 		public void TwoDurationRemoveModifiers_DifferentState_ReverseOrder()
 		{
 			Unit.TryAddModifierSelf("DurationRemove");

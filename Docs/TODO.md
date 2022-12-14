@@ -2,7 +2,6 @@
 
 ## General
 
-* Better appliers (attack, cast, non-act?)
 * Stacking/modifier state (added damage, etc)
 * RemoveEffect reference is shared between modifiers. Probably refactor the remove approach
 

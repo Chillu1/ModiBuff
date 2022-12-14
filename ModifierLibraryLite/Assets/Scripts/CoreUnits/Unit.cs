@@ -159,6 +159,11 @@ namespace ModifierLibraryLite.Core.Units
 
 		public bool ContainsModifier(string id) => _modifierController.Contains(ModifierIdManager.GetId(id));
 
+		public void PrepareRemoveModifier(int id)
+		{
+			_modifierController.PrepareRemove(id);
+		}
+
 		public void RemoveModifier(int id) => _modifierController.Remove(id);
 
 		public override string ToString()

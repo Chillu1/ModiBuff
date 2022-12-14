@@ -9,10 +9,7 @@ namespace ModifierLibraryLite.Core
 		{
 			var idManager = new ModifierIdManager();
 			Recipes = new ModifierRecipes();
-
-			var modifierRecipes = Recipes.GetRecipes();
-			idManager.SetupRecipeIds(modifierRecipes);
-			Pool = new ModifierPool(modifierRecipes, initialPoolSize);
+			Pool = new ModifierPool(Recipes.GetRecipes(), initialPoolSize);
 		}
 
 		public void Dispose()

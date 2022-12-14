@@ -118,6 +118,11 @@ namespace ModifierLibraryLite.Core
 			_modifiersToRemove.Add(modifier);
 		}
 
+		public void PrepareRemove(int id)
+		{
+			_modifiersToRemove.Add(_modifiers[id]);
+		}
+
 		public void Remove(int id)
 		{
 			Remove(_modifiers[id]);

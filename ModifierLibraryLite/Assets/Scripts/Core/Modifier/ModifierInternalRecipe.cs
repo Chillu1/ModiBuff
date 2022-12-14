@@ -15,23 +15,19 @@ namespace ModifierLibraryLite.Core
 
 		[CanBeNull] public IStackComponent StackComponent { get; private set; }
 
-		public RemoveEffect RemoveEffect { get; private set; }
-
 		public ModifierInternalRecipe(string name)
 		{
 			Name = name;
 		}
 
 		internal ModifierInternalRecipe(int id, string name, IInitComponent initComponent, ITimeComponent[] timeComponents,
-			IStackComponent stackComponent, RemoveEffect removeEffect = null)
+			IStackComponent stackComponent)
 		{
 			Id = id;
 			Name = name;
 			InitComponent = initComponent;
 			TimeComponents = timeComponents;
 			StackComponent = stackComponent;
-
-			RemoveEffect = removeEffect;
 		}
 
 		public void SetInitComponent(IInitComponent initComponent)

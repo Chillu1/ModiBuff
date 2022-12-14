@@ -39,6 +39,8 @@ Lite InitDmg (not cloning any components, no state)
 
 ## Temp Notes
 
+Problem: one remove effect for multiple modifiers.
+
 We can reverse the effect order with making reverse effects. Or we could have a wrapper instead. Trade-offs...
 
 Entire DurationComponent needs to be cloned because of _timer & _targetComponent. If we off-load them, we won't need to clone it.

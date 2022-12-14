@@ -26,12 +26,12 @@ namespace ModifierLibraryLite.Core
 		private IRemoveModifier _removeModifier;
 
 		public Modifier(ModifierInternalRecipe recipe) : this(recipe.Id, recipe.Name, recipe.InitComponent, recipe.TimeComponents,
-			recipe.StackComponent, recipe.RemoveEffect)
+			recipe.StackComponent)
 		{
 		}
 
 		internal Modifier(int id, string name, IInitComponent initComponent, ITimeComponent[] timeComponents,
-			IStackComponent stackComponent, RemoveEffect removeEffect = null)
+			IStackComponent stackComponent)
 		{
 			Id = id;
 			Name = name;
@@ -60,8 +60,6 @@ namespace ModifierLibraryLite.Core
 				_stackComponent = stackComponent;
 				_stack = true;
 			}
-
-			removeEffect?.Setup(this);
 		}
 
 		public void SetupModifierRemove(IRemoveModifier removeModifier)

@@ -23,5 +23,6 @@ namespace ModifierLibraryLite.Core
 		//void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit acter);
 
 		//void TryApplyModifiers(IReadOnlyCollection<ModifierRecipe> recipes, IUnit acter);
+		void PrepareRemoveModifier(int id);
 	}
 }
