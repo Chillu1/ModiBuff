@@ -6,6 +6,7 @@
   * Test arraypool/memorypool
   * Array instead of stack bench
 
+* RemoveEffect reference is shared between modifiers
 * Stacking
   * State in effects, how?
 * Check components (chance, cooldown, mana use)

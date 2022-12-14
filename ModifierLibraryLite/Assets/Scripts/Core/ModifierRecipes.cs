@@ -94,6 +94,15 @@ namespace ModifierLibraryLite.Core
 				.Chance(0.5f)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
+			Add("InitDamage_RemoveFast")
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Remove(1f);
+
+			Add("IntervalDamage_DurationRemove")
+				.Interval(4)
+				.Effect(new DamageEffect(5), EffectOn.Interval)
+				.Remove(5);
+
 			//TODO TargetHeal
 
 			foreach (var modifier in _modifiers.Values)

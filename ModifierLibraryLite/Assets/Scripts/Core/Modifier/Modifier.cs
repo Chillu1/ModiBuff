@@ -11,7 +11,6 @@ namespace ModifierLibraryLite.Core
 	{
 		public int Id { get; }
 		public string Name { get; }
-		public bool ToRemove { get; private set; }
 
 		private readonly bool _init, _time, _refresh, _stack;
 
@@ -23,6 +22,8 @@ namespace ModifierLibraryLite.Core
 
 		[CanBeNull]
 		private readonly IStackComponent _stackComponent;
+
+		private IRemoveModifier _removeModifier;
 
 		public Modifier(ModifierInternalRecipe recipe) : this(recipe.Id, recipe.Name, recipe.InitComponent, recipe.TimeComponents,
 			recipe.StackComponent, recipe.RemoveEffect)
@@ -61,6 +62,11 @@ namespace ModifierLibraryLite.Core
 			}
 
 			removeEffect?.Setup(this);
+		}
+
+		public void SetupModifierRemove(IRemoveModifier removeModifier)
+		{
+			_removeModifier = removeModifier;
 		}
 
 		public void SetTargets(IUnit target, IUnit owner, IUnit sender)
@@ -116,12 +122,12 @@ namespace ModifierLibraryLite.Core
 
 		public void SetForRemoval()
 		{
-			ToRemove = true;
+			_removeModifier?.PrepareRemove(this);
 		}
 
 		public void ResetState()
 		{
-			ToRemove = false;
+			//_removeModifier = null;
 			if (_time)
 				for (int i = 0; i < _timeComponents.Length; i++)
 					_timeComponents[i].ResetState();

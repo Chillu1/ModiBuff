@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using UnityEngine;
+using System.Runtime.CompilerServices;
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ModifierLibraryLite.Tests")]
+[assembly: InternalsVisibleTo("ModifierLibraryLite.Tests")]
 
 namespace ModifierLibraryLite.Core.Units
 {
@@ -78,12 +78,12 @@ namespace ModifierLibraryLite.Core.Units
 
 		public bool TryAddModifier(int id, IUnit target, IUnit sender = null)
 		{
-			return _modifierController.TryAdd(id, this, target, sender).Success;
+			return _modifierController.TryAdd(id, this, target, sender);
 		}
 
 		public bool TryAddModifier(ModifierRecipe recipe, IUnit target, IUnit sender = null)
 		{
-			return _modifierController.TryAdd(recipe.Id, this, target, sender).Success;
+			return _modifierController.TryAdd(recipe.Id, this, target, sender);
 		}
 
 		private void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit acter)
@@ -104,6 +104,8 @@ namespace ModifierLibraryLite.Core.Units
 		}
 
 		public bool ContainsModifier(string id) => _modifierController.Contains(ModifierIdManager.GetId(id));
+
+		public void RemoveModifier(int id) => _modifierController.Remove(id);
 
 		public override string ToString()
 		{

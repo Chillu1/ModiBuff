@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace ModifierLibraryLite.Core
 {
@@ -7,8 +8,12 @@ namespace ModifierLibraryLite.Core
 	{
 		public static ModifierPool Instance { get; private set; }
 
+		private const int MaxPoolSize = 100_000;
+
 		private readonly Stack<Modifier>[] _pools;
 		private readonly ModifierRecipe[] _recipes;
+
+		private int _stackCapacity = 64;
 
 		public ModifierPool(ModifierRecipe[] recipes, int initialSize = 64)
 		{
@@ -28,6 +33,8 @@ namespace ModifierLibraryLite.Core
 				Allocate(recipe.Id, initialSize);
 			}
 
+			_stackCapacity = initialSize;
+
 			Array.Sort(_pools, (x, y) => x.Peek().Id.CompareTo(y.Peek().Id));
 			Array.Sort(_recipes, (x, y) => x.Id.CompareTo(y.Id));
 		}
@@ -38,8 +45,8 @@ namespace ModifierLibraryLite.Core
 			var pool = _pools[id];
 
 			//Double the size of the pool
-			for (int i = 0; i < pool.Count; i++)
-				pool.Push(recipe.Create());
+			//TODO
+			throw new NotImplementedException();
 		}
 
 		internal void Allocate(int id, int count)
@@ -49,6 +56,10 @@ namespace ModifierLibraryLite.Core
 
 			for (int i = 0; i < count; i++)
 				pool.Push(recipe.Create());
+
+			_stackCapacity += count;
+			if (_stackCapacity > MaxPoolSize)
+				Debug.LogError("ModifierPool exceeded max size of " + MaxPoolSize);
 		}
 
 		public Modifier Rent(int id)
@@ -58,7 +69,7 @@ namespace ModifierLibraryLite.Core
 			if (pool.Count > 0)
 				return pool.Pop();
 
-			Allocate(id);
+			Allocate(id, _stackCapacity);
 			return pool.Pop();
 		}
 
@@ -74,6 +85,7 @@ namespace ModifierLibraryLite.Core
 			for (int i = 0; i < _pools.Length; i++)
 				_pools[i].Clear();
 
+			_stackCapacity = 0;
 			Instance = null;
 		}
 	}

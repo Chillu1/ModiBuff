@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace ModifierLibraryLite.Core
 {
-	public sealed class ModifierController
+	public sealed class ModifierController : IRemoveModifier
 	{
 		//TODO Array mapping?
 		private readonly Dictionary<int, Modifier> _modifiers;
@@ -10,7 +11,7 @@ namespace ModifierLibraryLite.Core
 		private readonly List<ModifierRecipe> _modifierAppliers;
 		private readonly Dictionary<int, ModifierCheck> _modifierChecksAppliers;
 
-		private readonly List<int> _modifiersToRemove;
+		private readonly List<Modifier> _modifiersToRemoveNew;
 
 		public ModifierController()
 		{
@@ -18,7 +19,7 @@ namespace ModifierLibraryLite.Core
 			_modifierAppliers = new List<ModifierRecipe>(5);
 			_modifierChecksAppliers = new Dictionary<int, ModifierCheck>(5);
 
-			_modifiersToRemove = new List<int>(5);
+			_modifiersToRemoveNew = new List<Modifier>(5);
 		}
 
 		public void Update(in float delta)
@@ -28,24 +29,25 @@ namespace ModifierLibraryLite.Core
 			foreach (var modifier in _modifiers.Values)
 			{
 				modifier.Update(delta);
-
-				if (modifier.ToRemove)
-					_modifiersToRemove.Add(modifier.Id);
 			}
 
-			for (int i = 0; i < _modifiersToRemove.Count; i++)
-				_modifiers.Remove(_modifiersToRemove[i]);
+			//Debug.Log("ModifiersRemove: " + _modifiersToRemoveNew.Count);
+			for (int i = 0; i < _modifiersToRemoveNew.Count; i++)
+				Remove(_modifiersToRemoveNew[i]);
+
+			_modifiersToRemoveNew.Clear();
 		}
 
 		public IReadOnlyCollection<ModifierCheck> GetApplierCheckModifiers() => _modifierChecksAppliers.Values;
 		public IReadOnlyList<ModifierRecipe> GetApplierModifiers() => _modifierAppliers;
 
 		//TODO do appliers make sense? Should we just store the id, what kind of state do appliers have?
-		public (bool Success, Modifier Modifier) TryAdd(int id, IUnit owner, IUnit target, IUnit sender = null)
+		public bool TryAdd(int id, IUnit owner, IUnit target, IUnit sender = null)
 		{
-			//TODO We should call the original modifier's check component here or before
+			//TODO We should check if the target is legal here?
+			Add(id, owner, target, sender);
 
-			return (true, Add(id, owner, target, sender));
+			return true;
 		}
 
 		public bool TryAddApplier(ModifierRecipe recipe)
@@ -92,8 +94,8 @@ namespace ModifierLibraryLite.Core
 
 			//Debug.Log("Adding new modifier");
 			var modifier = ModifierPool.Instance.Rent(id);
-			//var modifier = recipe.Create();
 
+			modifier.SetupModifierRemove(this);
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
 			modifier.SetTargets(target, owner, sender);
 
@@ -105,5 +107,22 @@ namespace ModifierLibraryLite.Core
 		}
 
 		public bool Contains(int id) => _modifiers.ContainsKey(id);
+
+		public void PrepareRemove(Modifier modifier)
+		{
+			_modifiersToRemoveNew.Add(modifier);
+		}
+
+		public void Remove(int id)
+		{
+			Remove(_modifiers[id]);
+		}
+
+		private void Remove(Modifier modifier)
+		{
+			Debug.Log("Removing modifier: " + modifier.Id);
+			_modifiers.Remove(modifier.Id);
+			ModifierPool.Instance.Return(modifier);
+		}
 	}
 }
