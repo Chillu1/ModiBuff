@@ -2,8 +2,6 @@
 
 ## General
 
-* Sort into directories
-
 * Basic pool bench
   * Test arraypool/memorypool
   * Array instead of stack bench
