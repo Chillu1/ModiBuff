@@ -119,6 +119,10 @@ namespace ModifierLibraryLite.Core
 			Add("Damage_OnHit") //Thorns
 				.Effect(new DamageEffect(5), EffectOn.Init); //Register on init?
 
+			Add("InitDamage_Cooldown")
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Cooldown(1);
+
 			//TODO TargetHeal
 
 			foreach (var modifier in _modifiers.Values)

@@ -16,6 +16,7 @@ namespace ModifierLibraryLite.Core
 
 		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
 
+		private float _cooldown = -1f;
 		private float _chance = -1f;
 		private CostType _costType = CostType.None;
 		private float _cost = -1f;
@@ -52,8 +53,12 @@ namespace ModifierLibraryLite.Core
 
 		public ModifierCheck CreateCheck()
 		{
+			CooldownCheck cooldown = null;
 			CostCheck cost = null;
 			ChanceCheck chance = null;
+
+			if (_cooldown > 0f)
+				cooldown = new CooldownCheck(_cooldown);
 
 			if (_costType != CostType.None && _cost > 0f)
 				cost = new CostCheck(_costType, _cost);
@@ -61,12 +66,19 @@ namespace ModifierLibraryLite.Core
 			if (_chance >= 0f)
 				chance = new ChanceCheck(_chance);
 
-			return new ModifierCheck(Id, Name, cost, chance);
+			return new ModifierCheck(Id, Name, cooldown, cost, chance);
 		}
 
 		public Modifier Create() => new Modifier(_internalRecipe);
 
 		//---Checks---
+
+		public ModifierRecipe Cooldown(float cooldown)
+		{
+			_cooldown = cooldown;
+			HasChecks = true;
+			return this;
+		}
 
 		public ModifierRecipe Cost(CostType costType, float cost)
 		{
@@ -209,8 +221,6 @@ namespace ModifierLibraryLite.Core
 						effects.Cast<IStackEffect>().ToArray());
 				}
 			}
-
-			HasChecks = _costType != CostType.None || _chance >= 0f;
 
 			_removeEffect?.SetRevertibleEffects(revertibleList.ToArray());
 

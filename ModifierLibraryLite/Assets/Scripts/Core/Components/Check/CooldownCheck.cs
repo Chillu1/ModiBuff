@@ -10,6 +10,9 @@ namespace ModifierLibraryLite.Core
 		public CooldownCheck(float cooldown)
 		{
 			_cooldown = cooldown;
+
+			//Start with cooldown ready
+			_timer = cooldown;
 		}
 
 		public void Update(in float deltaTime)

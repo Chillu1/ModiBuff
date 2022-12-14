@@ -19,15 +19,27 @@ namespace ModifierLibraryLite.Core
 			switch (_costType)
 			{
 				case CostType.Health:
-					bool result = unit.Health >= _cost;
-					if (result)
-						unit.UseHealth(_cost);
-					return result;
+					return unit.Health >= _cost;
 				case CostType.Mana:
 					throw new System.NotImplementedException();
 				default:
 					Debug.LogError($"Unknown cost type: {_costType}");
 					return false;
+			}
+		}
+
+		public void Use(IUnit unit)
+		{
+			switch (_costType)
+			{
+				case CostType.Health:
+					unit.UseHealth(_cost);
+					return;
+				case CostType.Mana:
+					throw new System.NotImplementedException();
+				default:
+					Debug.LogError($"Unknown cost type: {_costType}");
+					return;
 			}
 		}
 	}

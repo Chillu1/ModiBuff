@@ -30,6 +30,9 @@ namespace ModifierLibraryLite.Core
 			foreach (var modifier in _modifiers.Values)
 				modifier.Update(delta);
 
+			foreach (var check in _modifierChecksAppliers.Values)
+				check.Update(delta);
+
 			int removeCount = _modifiersToRemoveNew.Count;
 			if (removeCount == 0)
 				return;
