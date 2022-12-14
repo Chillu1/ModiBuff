@@ -2,16 +2,16 @@
 
 ## General
 
-* Better appliers (attack, cast)
+* Better appliers (attack, cast, non-act?)
+* Stacking/modifier state (added damage, etc)
+* RemoveEffect reference is shared between modifiers. Probably refactor the remove approach
 
 * Basic pool bench
   * Test arraypool/memorypool
   * Array instead of stack bench
 
-* RemoveEffect reference is shared between modifiers. Probably refactor the remove approach
 * Stacking
   * State in effects, how?
-* Check components (cooldown)
 * Targeting (deal damage to enemy, heal self)
 
 * Don't make a new modifier before we know we can apply it (improves performance). Because we might just stack/init/refresh the current one.
@@ -55,5 +55,4 @@
 
 ## Misc/low prio
 * Standarized modifier unit tests, fitting both ModifierLibraryNew and ModifierLibraryEcs
-* Better appliers (non-attack only)
 * Appliers with state

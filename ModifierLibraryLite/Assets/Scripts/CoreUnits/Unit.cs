@@ -32,12 +32,17 @@ namespace ModifierLibraryLite.Core.Units
 			_modifierController.Update(deltaTime);
 		}
 
+		public void Cast(Unit target)
+		{
+			target.TryApplyModifiers(_modifierController.GetApplierCastModifiers(), this);
+		}
+
 		public float Attack(IUnit target) => Attack((Unit)target);
 
 		public float Attack(Unit target)
 		{
 			target.TryApplyModifiers(_modifierController.GetApplierCheckModifiers(), this);
-			target.TryApplyModifiers(_modifierController.GetApplierModifiers(), this);
+			target.TryApplyModifiers(_modifierController.GetApplierAttackModifiers(), this);
 			float dealtDamage = target.TakeDamage(Damage, this);
 			return dealtDamage;
 		}
@@ -110,29 +115,29 @@ namespace ModifierLibraryLite.Core.Units
 			}
 		}
 
-		public bool AddApplierModifiers(params ModifierRecipe[] recipes)
+		public bool AddApplierModifier(ModifierRecipe recipe, ApplierType applierType = ApplierType.None)
 		{
-			return _modifierController.TryAddAppliers(recipes);
+			return _modifierController.TryAddApplier(recipe, applierType);
 		}
 
 		internal bool TryAddModifierSelf(string id) //No sender, TEMP?
 		{
-			return TryAddModifier(ModifierIdManager.GetId(id), this);
+			return TryAddModifier(ModifierIdManager.GetId(id), this, this);
 		}
 
-		internal bool TryAddModifier(string id, IUnit target, IUnit sender = null)
+		internal bool TryAddModifier(string id, IUnit target)
 		{
-			return TryAddModifier(ModifierIdManager.GetId(id), target, sender);
+			return TryAddModifier(ModifierIdManager.GetId(id), target, this);
 		}
 
-		public bool TryAddModifier(int id, IUnit target, IUnit sender = null)
+		public bool TryAddModifier(int id, IUnit target, IUnit acter)
 		{
-			return _modifierController.TryAdd(id, this, target, sender);
+			return _modifierController.TryAdd(id, acter, target, acter);
 		}
 
-		public bool TryAddModifier(ModifierRecipe recipe, IUnit target, IUnit sender = null)
+		public bool TryAddModifier(ModifierRecipe recipe, IUnit target)
 		{
-			return _modifierController.TryAdd(recipe.Id, this, target, sender);
+			return _modifierController.TryAdd(recipe.Id, this, target, this);
 		}
 
 		private void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit acter)
@@ -142,14 +147,14 @@ namespace ModifierLibraryLite.Core.Units
 				if (!check.Check(acter))
 					continue;
 
-				TryAddModifier(check.IntId, this, acter);
+				TryAddModifier(check.Id, this, acter);
 			}
 		}
 
-		private void TryApplyModifiers(IReadOnlyList<ModifierRecipe> recipes, IUnit acter)
+		private void TryApplyModifiers(IReadOnlyList<int> recipes, IUnit acter)
 		{
 			for (int i = 0; i < recipes.Count; i++)
-				TryAddModifier(recipes[i].Id, this, acter);
+				TryAddModifier(recipes[i], this, acter);
 		}
 
 		public bool ContainsModifier(string id) => _modifierController.Contains(ModifierIdManager.GetId(id));

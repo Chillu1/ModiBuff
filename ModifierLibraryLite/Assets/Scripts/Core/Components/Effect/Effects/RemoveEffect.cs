@@ -18,11 +18,11 @@ namespace ModifierLibraryLite.Core
 			_modifier = modifier;
 		}
 
-		public void Effect(IUnit target, IUnit owner)
+		public void Effect(IUnit target, IUnit acter)
 		{
 			//Debug.Log("RemoveEffect Effect, modifier id: " + _modifier.Id);
 			for (int i = 0; i < _revertibleEffects.Length; i++)
-				_revertibleEffects[i].RevertEffect(target, owner);
+				_revertibleEffects[i].RevertEffect(target, acter);
 			_modifier.SetForRemoval();
 		}
 	}

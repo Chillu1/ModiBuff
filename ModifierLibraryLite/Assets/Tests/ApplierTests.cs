@@ -1,4 +1,6 @@
+using ModifierLibraryLite.Core;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace ModifierLibraryLite.Tests
 {
@@ -8,7 +10,7 @@ namespace ModifierLibraryLite.Tests
 		public void DamageApplier_Attack_Damage()
 		{
 			var applier = Recipes.GetRecipe("InitDamage");
-			Unit.AddApplierModifiers(applier);
+			Unit.AddApplierModifier(applier, ApplierType.Attack);
 
 			Unit.Attack(Enemy);
 
@@ -19,23 +21,35 @@ namespace ModifierLibraryLite.Tests
 		public void HealApplier_Attack_Heal()
 		{
 			var applier = Recipes.GetRecipe("InitStrongHeal");
-			Unit.AddApplierModifiers(applier);
+			Unit.AddApplierModifier(applier, ApplierType.Attack);
 
 			Unit.Attack(Enemy);
 
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
 		}
 
-		//[Test]
+		[Test]
 		public void DamageSelfApplier_Attack_DamageSelf()
 		{
 			//TODO
-			var applier = Recipes.GetRecipe("InitDamageSelf");
-			Unit.AddApplierModifiers(applier);
+			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamageSelf"), ApplierType.Attack);
+			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage"), ApplierType.Attack);
 
 			Unit.Attack(Enemy);
 
+			Debug.Log(Enemy.Health);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void DamageApplier_Cast_Damage()
+		{
+			var applier = Recipes.GetRecipe("InitDamage");
+			Unit.AddApplierModifier(applier, ApplierType.Cast);
+
+			Unit.Cast(Enemy);
+
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
 	}
 }

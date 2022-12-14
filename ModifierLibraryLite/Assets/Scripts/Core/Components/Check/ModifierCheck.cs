@@ -4,7 +4,7 @@ namespace ModifierLibraryLite.Core
 {
 	public sealed class ModifierCheck
 	{
-		public int IntId { get; }
+		public int Id { get; }
 		public string Name { get; }
 
 		private readonly bool _hasCooldown, _hasCost, _hasChance;
@@ -13,9 +13,9 @@ namespace ModifierLibraryLite.Core
 		private readonly CostCheck _cost;
 		private readonly ChanceCheck _chance;
 
-		public ModifierCheck(int intId, string name, CooldownCheck cooldown = null, CostCheck cost = null, ChanceCheck chance = null)
+		public ModifierCheck(int id, string name, CooldownCheck cooldown = null, CostCheck cost = null, ChanceCheck chance = null)
 		{
-			IntId = intId;
+			Id = id;
 			Name = name;
 			_cooldown = cooldown;
 			_cost = cost;

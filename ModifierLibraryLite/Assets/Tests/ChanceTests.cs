@@ -7,7 +7,7 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void Random_InitDamage()
 		{
-			Unit.AddApplierModifiers(Recipes.GetRecipe("ChanceInitDamage"));
+			Unit.AddApplierModifier(Recipes.GetRecipe("ChanceInitDamage"));
 
 			for (int i = 0; i < 50; i++)
 				Unit.Attack(Enemy);

@@ -7,7 +7,7 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void InitDamage_CostHealth()
 		{
-			Unit.AddApplierModifiers(Recipes.GetRecipe("InitDamage_CostHealth"));
+			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostHealth"));
 
 			Unit.Attack(Unit);
 
@@ -17,7 +17,7 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void InitDamage_CostHealth_NotLethal()
 		{
-			Unit.AddApplierModifiers(Recipes.GetRecipe("InitDamage_CostHealth"));
+			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostHealth"));
 
 			Unit.TakeDamage(UnitHealth - 1, Unit);
 			Unit.Attack(Enemy); //Shouldn't activate, because the Unit would die

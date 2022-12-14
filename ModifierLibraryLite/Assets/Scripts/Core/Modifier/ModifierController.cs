@@ -1,6 +1,4 @@
-using System.Buffers;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace ModifierLibraryLite.Core
 {
@@ -9,18 +7,20 @@ namespace ModifierLibraryLite.Core
 		//TODO Array mapping?
 		private readonly Dictionary<int, Modifier> _modifiers;
 
-		private readonly List<ModifierRecipe> _modifierAppliers;
+		private readonly List<int> _modifierAttackAppliers;
+		private readonly List<int> _modifierCastAppliers;
 		private readonly Dictionary<int, ModifierCheck> _modifierChecksAppliers;
 
-		private readonly List<Modifier> _modifiersToRemoveNew;
+		private readonly List<Modifier> _modifiersToRemove;
 
 		public ModifierController()
 		{
 			_modifiers = new Dictionary<int, Modifier>();
-			_modifierAppliers = new List<ModifierRecipe>(5);
+			_modifierAttackAppliers = new List<int>(5);
+			_modifierCastAppliers = new List<int>(5);
 			_modifierChecksAppliers = new Dictionary<int, ModifierCheck>(5);
 
-			_modifiersToRemoveNew = new List<Modifier>(5);
+			_modifiersToRemove = new List<Modifier>(5);
 		}
 
 		public void Update(in float delta)
@@ -33,19 +33,20 @@ namespace ModifierLibraryLite.Core
 			foreach (var check in _modifierChecksAppliers.Values)
 				check.Update(delta);
 
-			int removeCount = _modifiersToRemoveNew.Count;
+			int removeCount = _modifiersToRemove.Count;
 			if (removeCount == 0)
 				return;
 
 			//Debug.Log("ModifiersRemove: " + _modifiersToRemoveNew.Count);
 			for (int i = 0; i < removeCount; i++)
-				Remove(_modifiersToRemoveNew[i]);
+				Remove(_modifiersToRemove[i]);
 
-			_modifiersToRemoveNew.Clear();
+			_modifiersToRemove.Clear();
 		}
 
 		public IReadOnlyCollection<ModifierCheck> GetApplierCheckModifiers() => _modifierChecksAppliers.Values;
-		public IReadOnlyList<ModifierRecipe> GetApplierModifiers() => _modifierAppliers;
+		public IReadOnlyList<int> GetApplierAttackModifiers() => _modifierAttackAppliers;
+		public IReadOnlyList<int> GetApplierCastModifiers() => _modifierCastAppliers;
 
 		//TODO do appliers make sense? Should we just store the id, what kind of state do appliers have?
 		public bool TryAdd(int id, IUnit owner, IUnit target, IUnit sender = null)
@@ -56,15 +57,25 @@ namespace ModifierLibraryLite.Core
 			return true;
 		}
 
-		public bool TryAddApplier(ModifierRecipe recipe)
+		public bool TryAddApplier(ModifierRecipe recipe, ApplierType applierType = ApplierType.None)
 		{
 			if (!recipe.HasChecks)
 			{
-				if (_modifierAppliers.Contains(recipe))
-					return false;
+				switch (applierType)
+				{
+					case ApplierType.Cast:
+						if (_modifierCastAppliers.Contains(recipe.Id))
+							return false;
+						_modifierCastAppliers.Add(recipe.Id);
+						return true;
+					case ApplierType.Attack:
+						if (_modifierAttackAppliers.Contains(recipe.Id))
+							return false;
+						_modifierAttackAppliers.Add(recipe.Id);
+						return true;
+				}
 
-				_modifierAppliers.Add(recipe);
-				return true;
+				return false;
 			}
 
 			if (_modifierChecksAppliers.ContainsKey(recipe.Id))
@@ -72,18 +83,6 @@ namespace ModifierLibraryLite.Core
 
 			_modifierChecksAppliers.Add(recipe.Id, recipe.CreateCheck());
 			return true;
-		}
-
-		public bool TryAddAppliers(ModifierRecipe[] recipes)
-		{
-			bool success = true;
-			for (int i = 0; i < recipes.Length; i++)
-			{
-				if (!TryAddApplier(recipes[i]))
-					success = false;
-			}
-
-			return success;
 		}
 
 		private Modifier Add(int id, IUnit owner, IUnit target, IUnit sender = null)
@@ -116,7 +115,7 @@ namespace ModifierLibraryLite.Core
 
 		public void PrepareRemove(Modifier modifier)
 		{
-			_modifiersToRemoveNew.Add(modifier);
+			_modifiersToRemove.Add(modifier);
 		}
 
 		public void Remove(int id)

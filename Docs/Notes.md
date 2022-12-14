@@ -39,6 +39,18 @@ Lite InitDmg (not cloning any components, no state)
 
 ## Temp Notes
 
+We can reverse the effect order with making reverse effects. Or we could have a wrapper instead. Trade-offs...
+
+Entire DurationComponent needs to be cloned because of _timer & _targetComponent. If we off-load them, we won't need to clone it.
+Same with IntervalComponent.
+
+How to design appliers?
+Apply can happen on attack, cast. Or "normal" functions? Do we want to apply modifiers ex. on interval? Probably?
+Should appliers be set on init in recipe? Or chosen to be appliers on add?
+
+Should appliers be stored as effects? Or in ModifierController?
+As effects gives more flexibility?
+
 Array mapping of modifier's kinda hard. We could have a slot for each modifier type, then either iterate through all of these slots (skip nulls).
 Or have an array of modifier ids that we currently have, and iterate this way.
 Or double array mapping?

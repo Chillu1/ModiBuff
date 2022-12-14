@@ -2,6 +2,7 @@ namespace ModifierLibraryLite.Core
 {
 	public interface IEffect
 	{
-		void Effect(IUnit target, IUnit owner);
+		/// <param name="acter">owner</param>
+		void Effect(IUnit target, IUnit acter);
 	}
 }

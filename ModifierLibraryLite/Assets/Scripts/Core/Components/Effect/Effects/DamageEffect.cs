@@ -26,9 +26,9 @@ namespace ModifierLibraryLite.Core
 			_stackEffect = stackEffect;
 		}
 
-		public void Effect(IUnit target, IUnit owner)
+		public void Effect(IUnit target, IUnit acter)
 		{
-			target.TakeDamage(_damage, owner);
+			target.TakeDamage(_damage, acter);
 		}
 
 		public void StackEffect(int stacks, float value, ITargetComponent targetComponent)

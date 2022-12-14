@@ -2,9 +2,9 @@ namespace ModifierLibraryLite.Core
 {
 	public sealed class AttackActionEffect : IEffect
 	{
-		public void Effect(IUnit target, IUnit owner)
+		public void Effect(IUnit target, IUnit acter)
 		{
-			owner.Attack(target);
+			acter.Attack(target);
 		}
 	}
 }

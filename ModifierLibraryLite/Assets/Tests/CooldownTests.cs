@@ -7,7 +7,7 @@ namespace ModifierLibraryLite.Tests
 		[Test]
 		public void InitDamage_Cooldown()
 		{
-			Unit.AddApplierModifiers(Recipes.GetRecipe("InitDamage_Cooldown"));
+			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_Cooldown"));
 
 			Unit.Attack(Enemy);
 

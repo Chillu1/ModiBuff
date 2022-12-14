@@ -11,7 +11,7 @@ namespace ModifierLibraryLite.Core
 			IsRevertible = revertible;
 		}
 
-		public void Effect(IUnit target, IUnit owner)
+		public void Effect(IUnit target, IUnit acter)
 		{
 			target.AddDamage(_damage);
 		}

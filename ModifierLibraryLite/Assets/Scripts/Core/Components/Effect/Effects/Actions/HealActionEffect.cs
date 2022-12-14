@@ -2,9 +2,9 @@ namespace ModifierLibraryLite.Core
 {
 	public class HealActionEffect : IEffect
 	{
-		public void Effect(IUnit target, IUnit owner)
+		public void Effect(IUnit target, IUnit acter)
 		{
-			owner.Heal(target);
+			acter.Heal(target);
 		}
 	}
 }

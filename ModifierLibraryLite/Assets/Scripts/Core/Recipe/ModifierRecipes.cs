@@ -123,6 +123,9 @@ namespace ModifierLibraryLite.Core
 				.Effect(new DamageEffect(5), EffectOn.Init)
 				.Cooldown(1);
 
+			Add("InitDamageSelf")
+				.Effect(new SelfDamageEffect(5), EffectOn.Init);
+
 			//TODO TargetHeal
 
 			foreach (var modifier in _modifiers.Values)
