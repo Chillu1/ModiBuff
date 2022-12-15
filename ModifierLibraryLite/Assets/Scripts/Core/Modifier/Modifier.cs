@@ -23,15 +23,19 @@ namespace ModifierLibraryLite.Core
 		[CanBeNull]
 		private readonly IStackComponent _stackComponent;
 
+		[CanBeNull]
+		private readonly StackEffects _stackEffects;
+
+		private TargetComponent _targetComponent;
 		private IRemoveModifier _removeModifier;
 
 		public Modifier(ModifierInternalRecipe recipe) : this(recipe.Id, recipe.Name, recipe.InitComponent, recipe.TimeComponents,
-			recipe.StackComponent)
+			recipe.StackComponent, recipe.StackEffects)
 		{
 		}
 
-		internal Modifier(int id, string name, IInitComponent initComponent, ITimeComponent[] timeComponents,
-			IStackComponent stackComponent)
+		internal Modifier(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents,
+			IStackComponent stackComponent, StackEffects stackEffects)
 		{
 			Id = id;
 			Name = name;
@@ -57,7 +61,8 @@ namespace ModifierLibraryLite.Core
 
 			if (stackComponent != null)
 			{
-				_stackComponent = stackComponent;
+				_stackComponent = stackComponent.ShallowClone();
+				_stackEffects = stackEffects;
 				_stack = true;
 			}
 		}
@@ -76,10 +81,7 @@ namespace ModifierLibraryLite.Core
 
 			if (_time)
 				for (int i = 0; i < _timeComponents.Length; i++)
-					_timeComponents[i].SetupTarget(targetComponent);
-
-			if (_stack)
-				_stackComponent.SetupTarget(targetComponent);
+					_timeComponents[i].SetupTarget(_targetComponent);
 		}
 
 		public void Init()
@@ -115,7 +117,8 @@ namespace ModifierLibraryLite.Core
 			if (!_stack)
 				return;
 
-			_stackComponent.Stack();
+			if (_stackComponent.Stack())
+				_stackEffects.StackEffect(_stackComponent.Stacks, _targetComponent.Target, _targetComponent.Owner);
 		}
 
 		public void SetForRemoval()

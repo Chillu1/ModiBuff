@@ -14,20 +14,22 @@ namespace ModifierLibraryLite.Core
 		[CanBeNull] public ITimeComponent[] TimeComponents { get; private set; }
 
 		[CanBeNull] public IStackComponent StackComponent { get; private set; }
+		[CanBeNull] public StackEffects StackEffects { get; private set; }
 
 		public ModifierInternalRecipe(string name)
 		{
 			Name = name;
 		}
 
-		internal ModifierInternalRecipe(int id, string name, IInitComponent initComponent, ITimeComponent[] timeComponents,
-			IStackComponent stackComponent)
+		internal ModifierInternalRecipe(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents,
+			IStackComponent stackComponent, StackEffects stackEffects)
 		{
 			Id = id;
 			Name = name;
 			InitComponent = initComponent;
 			TimeComponents = timeComponents;
 			StackComponent = stackComponent;
+			StackEffects = stackEffects;
 		}
 
 		public void SetInitComponent(IInitComponent initComponent)

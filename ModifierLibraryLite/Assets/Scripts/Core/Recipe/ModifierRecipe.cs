@@ -180,6 +180,7 @@ namespace ModifierLibraryLite.Core
 			IInitComponent initComponent = null;
 			IList<ITimeComponent> timeComponents = new List<ITimeComponent>(2);
 			IStackComponent stackComponent = null;
+			StackEffects stackEffects = null;
 
 			var revertibleList = new List<IRevertEffect>(2);
 
@@ -217,14 +218,14 @@ namespace ModifierLibraryLite.Core
 				if (effectOn == EffectOn.Stack)
 				{
 					Debug.Assert(_maxStacks > 0, "Max stacks must be greater than 0");
-					stackComponent = new StackComponent(_whenStackEffect, _maxStacks, _stacksRepeatable,
-						effects.Cast<IStackEffect>().ToArray());
+					stackComponent = new StackComponent(_whenStackEffect, _maxStacks, _stacksRepeatable);
+					stackEffects = new StackEffects(effects.Cast<IStackEffect>().ToArray());
 				}
 			}
 
 			_removeEffect?.SetRevertibleEffects(revertibleList.ToArray());
 
-			_internalRecipe = new ModifierInternalRecipe(Id, Name, initComponent, timeComponents.ToArray(), stackComponent);
+			_internalRecipe = new ModifierInternalRecipe(Id, Name, initComponent, timeComponents.ToArray(), stackComponent, stackEffects);
 		}
 
 		public int CompareTo(ModifierRecipe other)

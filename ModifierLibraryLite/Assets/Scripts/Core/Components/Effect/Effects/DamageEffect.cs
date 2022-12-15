@@ -31,12 +31,12 @@ namespace ModifierLibraryLite.Core
 			target.TakeDamage(_damage, acter);
 		}
 
-		public void StackEffect(int stacks, float value, ITargetComponent targetComponent)
+		public void StackEffect(int stacks, float value, IUnit target, IUnit owner)
 		{
 			switch (_stackEffect)
 			{
 				case StackEffectType.Effect:
-					Effect(targetComponent.Target, targetComponent.Owner);
+					Effect(target, owner);
 					break;
 				case StackEffectType.Add:
 					//TODO This is a problem, having state in effects is bad for us. Because then we need to clone it.
