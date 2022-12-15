@@ -177,7 +177,7 @@ namespace ModifierLibraryLite.Core
 			if (_internalRecipe != null)
 				Debug.LogError("Modifier recipe already finished, finishing again. Not intended?");
 
-			IInitComponent initComponent = null;
+			InitComponent initComponent = null;
 			IList<ITimeComponent> timeComponents = new List<ITimeComponent>(2);
 			IStackComponent stackComponent = null;
 

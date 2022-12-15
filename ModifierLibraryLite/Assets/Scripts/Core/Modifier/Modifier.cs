@@ -15,7 +15,7 @@ namespace ModifierLibraryLite.Core
 		private readonly bool _init, _time, _refresh, _stack;
 
 		[CanBeNull]
-		private readonly IInitComponent _initComponent;
+		private readonly InitComponent _initComponent;
 
 		[CanBeNull]
 		private readonly ITimeComponent[] _timeComponents;
@@ -24,13 +24,14 @@ namespace ModifierLibraryLite.Core
 		private readonly IStackComponent _stackComponent;
 
 		private IRemoveModifier _removeModifier;
+		private TargetComponent _targetComponent;
 
 		public Modifier(ModifierInternalRecipe recipe) : this(recipe.Id, recipe.Name, recipe.InitComponent, recipe.TimeComponents,
 			recipe.StackComponent)
 		{
 		}
 
-		internal Modifier(int id, string name, IInitComponent initComponent, ITimeComponent[] timeComponents,
+		internal Modifier(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents,
 			IStackComponent stackComponent)
 		{
 			Id = id;
@@ -69,17 +70,14 @@ namespace ModifierLibraryLite.Core
 
 		public void SetTargets(IUnit target, IUnit owner, IUnit sender)
 		{
-			var targetComponent = new TargetComponent(sender, owner, target);
-
-			if (_init)
-				_initComponent.SetupTarget(targetComponent);
+			_targetComponent = new TargetComponent(sender, owner, target);
 
 			if (_time)
 				for (int i = 0; i < _timeComponents.Length; i++)
-					_timeComponents[i].SetupTarget(targetComponent);
+					_timeComponents[i].SetupTarget(_targetComponent);
 
 			if (_stack)
-				_stackComponent.SetupTarget(targetComponent);
+				_stackComponent.SetupTarget(_targetComponent);
 		}
 
 		public void Init()
@@ -87,7 +85,7 @@ namespace ModifierLibraryLite.Core
 			if (!_init)
 				return;
 
-			_initComponent.Init();
+			_initComponent.Init(_targetComponent.Target, _targetComponent.Owner);
 		}
 
 		public void Update(float deltaTime)

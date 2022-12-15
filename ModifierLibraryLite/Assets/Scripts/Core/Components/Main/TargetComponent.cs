@@ -18,23 +18,5 @@ namespace ModifierLibraryLite.Core
 			Owner = owner;
 			Target = target;
 		}
-
-		//TODO Temporary?
-		public void SetSender(IUnit sender)
-		{
-			Sender = sender;
-		}
-
-		//TODO Temporary?
-		public void SetOwner(IUnit owner)
-		{
-			Owner = owner;
-		}
-
-		//TODO Temporary?
-		public void SetTarget(IUnit target)
-		{
-			Target = target;
-		}
 	}
 }

@@ -10,7 +10,7 @@ namespace ModifierLibraryLite.Core
 		public int Id { get; }
 		public string Name { get; }
 
-		[CanBeNull] public IInitComponent InitComponent { get; private set; }
+		[CanBeNull] public InitComponent InitComponent { get; private set; }
 		[CanBeNull] public ITimeComponent[] TimeComponents { get; private set; }
 
 		[CanBeNull] public IStackComponent StackComponent { get; private set; }
@@ -20,7 +20,7 @@ namespace ModifierLibraryLite.Core
 			Name = name;
 		}
 
-		internal ModifierInternalRecipe(int id, string name, IInitComponent initComponent, ITimeComponent[] timeComponents,
+		internal ModifierInternalRecipe(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents,
 			IStackComponent stackComponent)
 		{
 			Id = id;
@@ -30,7 +30,7 @@ namespace ModifierLibraryLite.Core
 			StackComponent = stackComponent;
 		}
 
-		public void SetInitComponent(IInitComponent initComponent)
+		public void SetInitComponent(InitComponent initComponent)
 		{
 			InitComponent = initComponent;
 			//If init != null, log warning

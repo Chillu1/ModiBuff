@@ -1,8 +1,7 @@
 namespace ModifierLibraryLite.Core
 {
-	public class InitComponent : IInitComponent
+	public class InitComponent
 	{
-		private ITargetComponent _targetComponent;
 		private readonly IEffect[] _effects;
 
 		public InitComponent(IEffect effect) : this(new[] { effect })
@@ -14,13 +13,11 @@ namespace ModifierLibraryLite.Core
 			_effects = effects;
 		}
 
-		public void SetupTarget(ITargetComponent targetComponent) => _targetComponent = targetComponent;
-
-		public void Init()
+		public void Init(IUnit target, IUnit owner)
 		{
 			int length = _effects.Length;
 			for (int i = 0; i < length; i++)
-				_effects[i].Effect(_targetComponent.Target, _targetComponent.Owner);
+				_effects[i].Effect(target, owner);
 		}
 	}
 }

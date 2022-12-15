@@ -26,6 +26,10 @@ namespace ModifierLibraryLite.Tests
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+
+			Unit.TryAddModifierSelf("InitDamage");
+			Assert.AreEqual(UnitHealth - 10, Unit.Health);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
 
 		[Test]

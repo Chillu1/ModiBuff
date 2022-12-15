@@ -3,6 +3,7 @@
 ## General
 
 * Stacking/modifier state (added damage, etc)
+* Bench feeding target component vs cloning & caching it
 
 * Basic pool bench
   * Test arraypool/memorypool

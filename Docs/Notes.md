@@ -28,7 +28,7 @@ Pools: preallocated
 
 |      | InitDmg, N:1k | InitDmg, N:5k | InitDoTSeparateDamageRemove, N:5k | InitDoTSeparateDamageRemove pool, N:5k | InitDoTSeparateDamageRemove pool reset return, N:5k |
 |------|---------------|---------------|-----------------------------------|----------------------------------------|-----------------------------------------------------|
-| Lite | 0.20ms,  1 GC | 0.93ms, 1 GC  | 3.48ms, 4 GC                      | 0.32ms, 0 GC                           | 0.75ms, 0 GC                                        |
+| Lite | 0.20ms,  1 GC | 0.74ms, 1 GC  | 2.90ms, 4 GC                      | 0.12ms, 0 GC                           | 0.23ms, 0 GC                                        |
 | Ecs  | 2.74ms,  1 GC |               |                                   |                                        |                                                     |
 | Orig | 3.35ms, 25 GC |               |                                   |                                        |                                                     |
 
@@ -37,7 +37,21 @@ Also ecs is a bit on the slow side because we're creating the entities and their
 
 Lite InitDmg (not cloning any components, no state)
 
+### Findings
+
+* Caching and feeding one level (ex. targets to a component) is the same speed as cloning and caching the whole component (iteration-wise)
+* Having state in components and effects is fine. Because we only clone on allocate (pool), and having 2x memory usage for 10k modifiers is not a big deal.
+* Interface IEffects are as fast as delegates
+
 ## Temp Notes
+
+We could merge interval & duration to one component, by having a separate duration timer (that updates every interval amount?)
+But then we're kind of forcing interval to be a multiple of duration.
+
+Having state is actually fine in effects/components? Because we allocate modifiers on init and then every so often.
+So it will slightly slow down allocations (but we can allocate a lot on init to counteract that). And increase memory usage. By a fair amount (which doesn't really matter)
+
+What's better, cloning init component, or feeding the target through the function?
 
 Problem: one remove effect for multiple modifiers.
 
