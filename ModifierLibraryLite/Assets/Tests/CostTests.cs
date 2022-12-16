@@ -1,3 +1,4 @@
+using ModifierLibraryLite.Core;
 using NUnit.Framework;
 
 namespace ModifierLibraryLite.Tests
@@ -5,7 +6,7 @@ namespace ModifierLibraryLite.Tests
 	public sealed class CostTests : BaseModifierTests
 	{
 		[Test]
-		public void InitDamage_CostHealth()
+		public void CostHealth()
 		{
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostHealth"));
 
@@ -15,7 +16,7 @@ namespace ModifierLibraryLite.Tests
 		}
 
 		[Test]
-		public void InitDamage_CostHealth_NotLethal()
+		public void CostHealth_NotLethal()
 		{
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostHealth"));
 
@@ -23,6 +24,28 @@ namespace ModifierLibraryLite.Tests
 			Unit.Attack(Enemy); //Shouldn't activate, because the Unit would die
 
 			Assert.AreEqual(1, Unit.Health);
+		}
+
+		[Test]
+		public void CostMana()
+		{
+			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostMana"), ApplierType.Attack);
+
+			Unit.Attack(Unit);
+
+			Assert.AreEqual(UnitMana - 5, Unit.Mana);
+		}
+
+		[Test]
+		public void CostMana_NotEnough()
+		{
+			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostMana"), ApplierType.Attack);
+
+			Unit.UseMana(UnitMana - 1);
+			Unit.TakeDamage(UnitHealth - 1, Unit);
+			Unit.Attack(Enemy); //Shouldn't activate, because the Unit doesn't have enough mana
+
+			Assert.AreEqual(1, Unit.Mana);
 		}
 	}
 }

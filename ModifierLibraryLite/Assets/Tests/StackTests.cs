@@ -46,7 +46,7 @@ namespace ModifierLibraryLite.Tests
 			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health); //2 stacks = +4 damage == 6
 		}
 
-		[Test]
+		//[Test]
 		public void StackAddDamageRevertible()
 		{
 			Unit.TryAddModifierSelf("StackAddDamageRevertible"); //5 base, + 2 on stack

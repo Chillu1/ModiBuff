@@ -7,6 +7,7 @@ namespace ModifierLibraryLite.Core
 		float Health { get; }
 		float Damage { get; }
 		float HealValue { get; }
+		float Mana { get; }
 
 		void Update(in float deltaTime);
 		float Attack(IUnit target);
@@ -16,6 +17,7 @@ namespace ModifierLibraryLite.Core
 
 		void AddDamage(float damage);
 		void UseHealth(float value);
+		void UseMana(float value);
 
 		bool TryAddModifier(int id, IUnit target, IUnit acter);
 

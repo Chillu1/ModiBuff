@@ -151,6 +151,10 @@ namespace ModifierLibraryLite.Core
 				.Stack(WhenStackEffect.Always, value: 2)
 				.Remove(5);
 
+			Add("InitDamage_CostMana")
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Cost(CostType.Mana, 5);
+
 			//TODO TargetHeal
 
 			foreach (var modifier in _modifiers.Values)

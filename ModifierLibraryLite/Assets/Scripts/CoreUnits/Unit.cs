@@ -14,14 +14,16 @@ namespace ModifierLibraryLite.Core.Units
 		public float Health { get; private set; }
 		public float Damage { get; private set; }
 		public float HealValue { get; private set; }
+		public float Mana { get; private set; }
 
 		private List<UnitEvent> _onDamageEvents;
 
-		public Unit(float health = 500, float damage = 10, float healValue = 5)
+		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000)
 		{
 			Health = health;
 			Damage = damage;
 			HealValue = healValue;
+			Mana = mana;
 			_onDamageEvents = new List<UnitEvent>();
 
 			_modifierController = new ModifierController();
@@ -80,6 +82,11 @@ namespace ModifierLibraryLite.Core.Units
 		public void UseHealth(float value)
 		{
 			Health -= value;
+		}
+
+		public void UseMana(float value)
+		{
+			Mana -= value;
 		}
 
 		//---Modifier based---

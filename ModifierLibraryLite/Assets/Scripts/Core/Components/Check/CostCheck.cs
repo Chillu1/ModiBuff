@@ -21,7 +21,7 @@ namespace ModifierLibraryLite.Core
 				case CostType.Health:
 					return unit.Health >= _cost;
 				case CostType.Mana:
-					throw new System.NotImplementedException();
+					return unit.Mana >= _cost;
 				default:
 					Debug.LogError($"Unknown cost type: {_costType}");
 					return false;
@@ -36,7 +36,8 @@ namespace ModifierLibraryLite.Core
 					unit.UseHealth(_cost);
 					return;
 				case CostType.Mana:
-					throw new System.NotImplementedException();
+					unit.UseMana(_cost);
+					return;
 				default:
 					Debug.LogError($"Unknown cost type: {_costType}");
 					return;
