@@ -39,6 +39,7 @@ namespace ModifierLibraryLite.Core
 
 			_stacks++;
 
+			//Redundancy because of performance
 			switch (_whenStackEffect)
 			{
 				case WhenStackEffect.Always:
@@ -69,6 +70,15 @@ namespace ModifierLibraryLite.Core
 					Debug.LogError($"Invalid stack effect: {_whenStackEffect}");
 					break;
 			}
+		}
+
+		public IStackComponent ShallowClone()
+		{
+			var effects = new IStackEffect[_effects.Length];
+			for (int i = 0; i < _effects.Length; i++)
+				effects[i] = _effects[i].ShallowClone();
+
+			return new StackComponent(_whenStackEffect, _value, _maxStacks, _isRepeatable, _everyXStacks, effects);
 		}
 	}
 

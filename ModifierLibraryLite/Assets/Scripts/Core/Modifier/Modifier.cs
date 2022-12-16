@@ -31,8 +31,7 @@ namespace ModifierLibraryLite.Core
 		{
 		}
 
-		internal Modifier(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents,
-			IStackComponent stackComponent)
+		internal Modifier(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents, IStackComponent stackComponent)
 		{
 			Id = id;
 			Name = name;
@@ -58,7 +57,7 @@ namespace ModifierLibraryLite.Core
 
 			if (stackComponent != null)
 			{
-				_stackComponent = stackComponent;
+				_stackComponent = stackComponent.ShallowClone();
 				_stack = true;
 			}
 		}

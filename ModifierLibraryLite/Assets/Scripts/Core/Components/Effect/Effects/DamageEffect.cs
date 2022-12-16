@@ -46,6 +46,8 @@ namespace ModifierLibraryLite.Core
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(targetComponent.Target, targetComponent.Owner);
 		}
+
+		public IStackEffect ShallowClone() => new DamageEffect(_baseDamage, _stackEffect);
 	}
 
 	[Flags]
