@@ -3,6 +3,8 @@
 ## General
 
 * Stacking/modifier state (added damage, etc)
+* Reset stacks state
+* Stack timer? Resets stacks after x seconds, can be refreshed
 
 * Basic pool bench
   * Test arraypool/memorypool

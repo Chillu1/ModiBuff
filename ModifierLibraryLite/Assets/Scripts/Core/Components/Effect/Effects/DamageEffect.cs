@@ -37,7 +37,6 @@ namespace ModifierLibraryLite.Core
 		public void StackEffect(int stacks, float value, ITargetComponent targetComponent)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				//TODO Clone effect, if it's a stackeffect?
 				_extraDamage += value;
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)

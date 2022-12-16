@@ -146,6 +146,10 @@ namespace ModifierLibraryLite.Core
 				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always, value: 2);
 
+			Add("StackAddDamageRevertible")
+				.Effect(new AddDamageEffect(5, true, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, value: 2)
+				.Remove(5);
 
 			//TODO TargetHeal
 

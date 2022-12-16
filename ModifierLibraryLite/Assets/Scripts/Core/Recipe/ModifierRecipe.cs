@@ -227,6 +227,7 @@ namespace ModifierLibraryLite.Core
 				}
 			}
 
+			//TODO, the stack effects are getting cloned after this
 			_removeEffect?.SetRevertibleEffects(revertibleList.ToArray());
 
 			_internalRecipe = new ModifierInternalRecipe(Id, Name, initComponent, timeComponents.ToArray(), stackComponent);
