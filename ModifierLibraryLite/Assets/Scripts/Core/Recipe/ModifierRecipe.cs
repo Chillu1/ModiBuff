@@ -33,8 +33,10 @@ namespace ModifierLibraryLite.Core
 		//private List<bool> _refreshables;
 
 		private WhenStackEffect _whenStackEffect;
+		private float _stackValue;
 		private int _maxStacks;
-		private bool _stacksRepeatable;
+		private bool _isRepeatable;
+		private int _everyXStacks;
 
 		private ModifierInternalRecipe _internalRecipe;
 
@@ -138,11 +140,14 @@ namespace ModifierLibraryLite.Core
 			return this;
 		}
 
-		public ModifierRecipe Stack(WhenStackEffect whenStackEffect, int maxStacks, bool repeatable)
+		public ModifierRecipe Stack(WhenStackEffect whenStackEffect, float value = -1, int maxStacks = -1, bool repeatable = false,
+			int everyXStacks = -1)
 		{
 			_whenStackEffect = whenStackEffect;
+			_stackValue = value;
 			_maxStacks = maxStacks;
-			_stacksRepeatable = repeatable;
+			_isRepeatable = repeatable;
+			_everyXStacks = everyXStacks;
 			return this;
 		}
 
@@ -216,8 +221,8 @@ namespace ModifierLibraryLite.Core
 
 				if (effectOn == EffectOn.Stack)
 				{
-					Debug.Assert(_maxStacks > 0, "Max stacks must be greater than 0");
-					stackComponent = new StackComponent(_whenStackEffect, _maxStacks, _stacksRepeatable,
+					Debug.Assert(_maxStacks == -1 || _maxStacks > 0, "Max stacks must be greater than 0");
+					stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _isRepeatable, _everyXStacks,
 						effects.Cast<IStackEffect>().ToArray());
 				}
 			}

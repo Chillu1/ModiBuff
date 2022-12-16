@@ -9,7 +9,7 @@ Goals of the libraries:
 * Original: Small solo/party vs solo/party games, very feature rich, not optimized
   * Ex. games: binding of isaac, tiny rogues, gungeon, dota, witcher 3
   * Ex. genres: moba, arena, duel
-* Lite: Solo vs hunreds, or hundreds vs hundreds. Much faster, less features
+* Lite: Solo vs hunreds, or hundreds vs hundreds. Much faster, less features. No allocations (pooled).
   * Ex. games: Rimworld,
   * Ex. genres: small arpg, small rts, pve, colony sim
 * Ecs: Solo vs thousands, or thousands vs thousands. Very fast, much less features, optimized, needs ecs

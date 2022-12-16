@@ -7,6 +7,7 @@ namespace ModifierLibraryLite.Core
 		private readonly WhenStackEffect _whenStackEffect;
 		private readonly int _maxStacks;
 		private readonly bool _isRepeatable;
+		private readonly int _everyXStacks;
 		private readonly IStackEffect[] _effects;
 
 		private ITargetComponent _targetComponent;
@@ -14,11 +15,14 @@ namespace ModifierLibraryLite.Core
 		private int _stacks;
 		private float _value;
 
-		public StackComponent(WhenStackEffect whenStackEffect, int maxStacks, bool isRepeatable, IStackEffect[] effects)
+		public StackComponent(WhenStackEffect whenStackEffect, float value, int maxStacks, bool repeatable, int everyXStacks,
+			IStackEffect[] effects)
 		{
 			_whenStackEffect = whenStackEffect;
+			_value = value;
 			_maxStacks = maxStacks;
-			_isRepeatable = isRepeatable;
+			_isRepeatable = repeatable;
+			_everyXStacks = everyXStacks;
 
 			_effects = effects;
 		}
@@ -30,7 +34,7 @@ namespace ModifierLibraryLite.Core
 
 		public void Stack()
 		{
-			if (_stacks >= _maxStacks)
+			if (_maxStacks != -1 && _stacks >= _maxStacks)
 				return;
 
 			_stacks++;
@@ -41,11 +45,25 @@ namespace ModifierLibraryLite.Core
 					for (int i = 0; i < _effects.Length; i++)
 						_effects[i].StackEffect(_stacks, _value, _targetComponent);
 					break;
-				case WhenStackEffect.MaxStacks:
+				case WhenStackEffect.OnMaxStacks:
+					if (_stacks == _maxStacks)
+					{
+						for (int i = 0; i < _effects.Length; i++)
+							_effects[i].StackEffect(_stacks, _value, _targetComponent);
+						if (_isRepeatable)
+							_stacks = 0;
+					}
+
 					break;
 				case WhenStackEffect.OnXStacks:
-					break;
-				case WhenStackEffect.EveryXStacks:
+					if (_everyXStacks > 0 && _stacks % _everyXStacks == 0)
+					{
+						for (int i = 0; i < _effects.Length; i++)
+							_effects[i].StackEffect(_stacks, _value, _targetComponent);
+						if (_isRepeatable)
+							_stacks = 0;
+					}
+
 					break;
 				default:
 					Debug.LogError($"Invalid stack effect: {_whenStackEffect}");
@@ -59,9 +77,8 @@ namespace ModifierLibraryLite.Core
 	{
 		None,
 		Always,
-		MaxStacks,
+		OnMaxStacks,
 		OnXStacks,
-		EveryXStacks,
-		ZeroStacks,
+		//OnZeroStacks,
 	}
 }

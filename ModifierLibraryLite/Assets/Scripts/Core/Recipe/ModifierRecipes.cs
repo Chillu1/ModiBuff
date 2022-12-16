@@ -87,11 +87,11 @@ namespace ModifierLibraryLite.Core
 
 			Add("StackDamage")
 				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
-				.Stack(WhenStackEffect.Always, 5, false);
+				.Stack(WhenStackEffect.Always);
 
 			Add("StackAddDamage")
 				.Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Stack)
-				.Stack(WhenStackEffect.Always, 5, false);
+				.Stack(WhenStackEffect.Always);
 
 			Add("ChanceInitDamage")
 				.Chance(0.5f)
@@ -133,6 +133,19 @@ namespace ModifierLibraryLite.Core
 			Add("InitSelfHeal_DamageTarget")
 				.Effect(new SelfHealEffect(5), EffectOn.Init)
 				.Effect(new DamageEffect(5), EffectOn.Init);
+
+			Add("DamageOnMaxStacks")
+				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.OnMaxStacks, value: -1, maxStacks: 2);
+
+			Add("DamageEveryTwoStacks")
+				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.OnXStacks, value: -1, maxStacks: -1, true, everyXStacks: 2);
+
+			Add("StackBasedDamage")
+				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, value: 2);
+
 
 			//TODO TargetHeal
 
