@@ -155,6 +155,15 @@ namespace ModifierLibraryLite.Core
 				.Effect(new DamageEffect(5), EffectOn.Init)
 				.Cost(CostType.Mana, 5);
 
+			Add("InitStun")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2), EffectOn.Init);
+
+			Add("InitDisarm")
+				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 2), EffectOn.Init);
+
+			Add("InitSilence")
+				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2), EffectOn.Init);
+
 			//TODO TargetHeal
 
 			foreach (var modifier in _modifiers.Values)

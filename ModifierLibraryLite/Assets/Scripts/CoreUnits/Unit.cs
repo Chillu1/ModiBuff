@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -18,6 +17,8 @@ namespace ModifierLibraryLite.Core.Units
 
 		private List<UnitEvent> _onDamageEvents;
 
+		private readonly StatusEffectController _statusEffectController;
+
 		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000)
 		{
 			Health = health;
@@ -27,15 +28,20 @@ namespace ModifierLibraryLite.Core.Units
 			_onDamageEvents = new List<UnitEvent>();
 
 			_modifierController = new ModifierController();
+			_statusEffectController = new StatusEffectController();
 		}
 
 		public void Update(in float deltaTime)
 		{
+			_statusEffectController.Update(deltaTime);
 			_modifierController.Update(deltaTime);
 		}
 
 		public void Cast(Unit target)
 		{
+			if ((_statusEffectController.LegalActions & LegalAction.Cast) == 0)
+				return;
+
 			target.TryApplyModifiers(_modifierController.GetApplierCastModifiers(), this);
 		}
 
@@ -43,6 +49,9 @@ namespace ModifierLibraryLite.Core.Units
 
 		public float Attack(Unit target)
 		{
+			if ((_statusEffectController.LegalActions & LegalAction.Act) == 0)
+				return 0;
+
 			target.TryApplyModifiers(_modifierController.GetApplierCheckModifiers(), this);
 			target.TryApplyModifiers(_modifierController.GetApplierAttackModifiers(), this);
 			float dealtDamage = target.TakeDamage(Damage, this);
@@ -71,6 +80,9 @@ namespace ModifierLibraryLite.Core.Units
 
 		public float Heal(IUnit target)
 		{
+			if ((_statusEffectController.LegalActions & LegalAction.Act) == 0)
+				return 0;
+
 			return target.Heal(HealValue, this);
 		}
 
@@ -87,6 +99,16 @@ namespace ModifierLibraryLite.Core.Units
 		public void UseMana(float value)
 		{
 			Mana -= value;
+		}
+
+		public bool HasStatusEffect(StatusEffectType statusEffect)
+		{
+			return _statusEffectController.HasStatusEffect(statusEffect);
+		}
+
+		public void ChangeStatusEffect(StatusEffectType statusEffectType, float duration)
+		{
+			_statusEffectController.ChangeStatusEffect(statusEffectType, duration);
 		}
 
 		//---Modifier based---

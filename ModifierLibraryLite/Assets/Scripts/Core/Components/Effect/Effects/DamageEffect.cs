@@ -3,18 +3,6 @@ using UnityEngine;
 
 namespace ModifierLibraryLite.Core
 {
-	// public sealed class DamageData
-	// {
-	// 	public float Damage => _baseDamage + _extraDamage;
-	// 	private readonly float _baseDamage;
-	// 	private float _extraDamage;
-	//
-	// 	public DamageData(float damage) => _baseDamage = damage;
-	//
-	// 	public void Add(float damage) => _extraDamage += damage;
-	// 	public void Remove(float damage) => _extraDamage -= damage;
-	// }
-
 	public class DamageEffect : IStackEffect, IEffect
 	{
 		private readonly float _baseDamage;
