@@ -32,7 +32,7 @@ namespace ModifierLibraryLite.Core.Units
 		{
 			for (int i = 0; i < _legalActionTimers.Length; i++)
 			{
-				Debug.Log($"LegalAction: {((LegalAction)(1 << i)).ToString()} Timer: {_legalActionTimers[i]}");
+				//Debug.Log($"LegalAction: {((LegalAction)(1 << i)).ToString()} Timer: {_legalActionTimers[i]}");
 				if (_legalActionTimers[i] <= 0)
 					continue;
 
@@ -40,7 +40,7 @@ namespace ModifierLibraryLite.Core.Units
 				if (_legalActionTimers[i] <= 0)
 				{
 					_legalActionTimers[i] = 0;
-					Debug.Log($"StatusEffectController: {((LegalAction)(1 << i)).ToString()} has expired");
+					//Debug.Log($"StatusEffectController: {((LegalAction)(1 << i)).ToString()} has expired");
 					TryRestoreLegalAction(i);
 				}
 			}
@@ -82,7 +82,7 @@ namespace ModifierLibraryLite.Core.Units
 			if (_referenceCounts[index] <= 0)
 			{
 				_referenceCounts[index] = 0;
-				Debug.Log("Restoring legal action: " + (LegalAction)(1 << index) + ". Current legal actions: " + LegalActions);
+				//Debug.Log("Restoring legal action: " + (LegalAction)(1 << index) + ". Current legal actions: " + LegalActions);
 				LegalActions |= (LegalAction)(1 << index);
 			}
 		}

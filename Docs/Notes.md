@@ -29,7 +29,7 @@ Pools: preallocated
 |      | InitDmg, N:1k | InitDmg, N:5k | InitDoTSeparateDamageRemove, N:5k | InitDoTSeparateDamageRemove pool, N:5k | InitDoTSeparateDamageRemove pool reset return, N:5k |
 |------|---------------|---------------|-----------------------------------|----------------------------------------|-----------------------------------------------------|
 | Lite | 0.20ms,  1 GC | 0.74ms, 1 GC  | 2.90ms, 4 GC                      | 0.12ms, 0 GC                           | 0.23ms, 0 GC                                        |
-| Ecs  | 2.74ms,  1 GC |               |                                   |                                        |                                                     |
+| Ecs  | 2.74ms,  1 GC | 4.00ms, 1 GC  | 5.80ms, 1 GC                      |                                        |                                                     |
 | Orig | 3.35ms, 25 GC |               |                                   |                                        |                                                     |
 
 Creating a simple modifier is 16 times faster, and only allocated new memory for the modifier object (which can easily be pooled)

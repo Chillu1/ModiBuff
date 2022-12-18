@@ -10,8 +10,6 @@
   * Test arraypool/memorypool
   * Array instead of stack bench
 
-* Don't make a new modifier before we know we can apply it (improves performance). Because we might just stack/init/refresh the current one.
-
 ## Tests
 
 ### Benchmarks
@@ -19,11 +17,6 @@
 
 ### ModifierLibraryOld unit tests
 
-* Check
-  * Mana cost
-  * Mana cost not enough
-
-* Two effects
 * Aura
 
 * Effects on events
