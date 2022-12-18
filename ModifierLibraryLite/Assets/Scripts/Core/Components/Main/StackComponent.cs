@@ -72,6 +72,12 @@ namespace ModifierLibraryLite.Core
 			}
 		}
 
+		public void ResetState()
+		{
+			_stacks = 0;
+			_targetComponent = null;
+		}
+
 		public IStackComponent ShallowClone()
 		{
 			var effects = new IStackEffect[_effects.Length];

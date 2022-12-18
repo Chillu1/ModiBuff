@@ -4,6 +4,9 @@ using Unity.PerformanceTesting;
 
 namespace ModifierLibraryLite.Tests
 {
+	/// <summary>
+	///		Only tests for subsequent inits, not new modifier each time
+	/// </summary>
 	public sealed class BenchAddModifier : BaseModifierTests
 	{
 		private const int Iterations = 5000;

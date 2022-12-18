@@ -183,6 +183,10 @@ namespace ModifierLibraryLite.Core.Units
 			_modifierController.PrepareRemove(id);
 		}
 
+		/// <summary>
+		///		Only to be used for testing, use <see cref="PrepareRemoveModifier(int)"/> instead.
+		/// </summary>
+		/// <param name="id"></param>
 		public void RemoveModifier(int id) => _modifierController.Remove(id);
 
 		public override string ToString()

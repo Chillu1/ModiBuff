@@ -6,34 +6,76 @@ ModifierLibraryLite : 10_000 (goal)
 ModifierLibraryEcs : 100_000 (400_000 time modifiers)
 
 Goals of the libraries:
-* Original: Small solo/party vs solo/party games, very feature rich, not optimized
+* Original: Small solo/party vs solo/party games, very feature rich, not optimized (GC/allocations)
   * Ex. games: binding of isaac, tiny rogues, gungeon, dota, witcher 3
   * Ex. genres: moba, arena, duel
-* Lite: Solo vs hunreds, or hundreds vs hundreds. Much faster, less features. No allocations (pooled).
+* Lite: Solo vs hunreds, or hundreds vs hundreds. Much faster, less features. No GC/allocations (pooled).
   * Ex. games: Rimworld,
   * Ex. genres: small arpg, small rts, pve, colony sim
-* Ecs: Solo vs thousands, or thousands vs thousands. Very fast, much less features, optimized, needs ecs
+* Ecs: Solo vs thousands, or thousands vs thousands. Very fast iteration, much less features, optimized, needs ecs
   * Ex. games: PoE, Diablo
   * Ex. genres: arpg, rpg, rts, pve
 
-## Goals
+## Differences to original
 
+* Much better backend and design decisions
 * Lightweight
-* Basic++ effects
-  * Basic effect manipulation (stack, refresh)
+* Smaller Core
+* No GC/allocations
+* Improved API
+* Only cloning statefull objects (less memory, 20 MB for 100_000 modifiers, 7 MB for 100_000 simple modifiers)
+
+* Less features, missing:
+  * Unit event (on attacked, on hit, on killed, when attacking...)
+  * Aura
+  * Condition effects (when low health)
+  * Status effects (stun, silence, disarm)
+  * Fully functioning revertible modifiers
+  * Stateful applier modifiers
+
+### When to chose which library
+
+#### Benchmarks:
+TODO bench Iteration 5000 InitDoTDamageRemove
+TODO Put benches from ##Benches here
+
+#### Lite
+Smmary: Very optimized, no GC, good featureset.  
+Ex. games: Rimworld    
+Ex. genres: small arpg, small rts, pve, colony sim
+
+Lite is the best choice 80% of the time. It's fast, lightweight, deeply redesigned core, has no GC/allocations, and is very easy to use.
+It's also very well tested for most scenarios.
+
+#### Ecs
+Summary: Fastest iteration, small featureset, needs ecs framework. Entities: Solo vs Thousands, or Thousands vs Thousands.  
+Ex. games: PoE, Diablo  
+Ex. genres: arpg, rpg, rts, pve
+
+Ecs is a good choice if you don't care about about having a lot of features, and if your game will have hundreds of thousands of units.
+Or just if you want to use it with an ecs framework.
+
+#### Original
+Summary: Not optimized, amazing featureset, entities: Solo vs Solo, Solo vs Party, Party vs Party  
+Ex. games: binding of isaac, tiny rogues, gungeon, dota, witcher 3  
+Ex. genres: moba, arena, duel
+
+Only choose original if you need the deep featureset, AND you don't expect to have more than 100 units in the game at the same time, all using/applying 10 modifiers each frame.
+If you're making a moba or a small PvP arena game, you can use the original library. That being said, Lite is a better choice for the vast majority of games.
 
 ## Benches
 
 Pools: preallocated
 
-|      | InitDmg, N:1k | InitDmg, N:5k | InitDoTSeparateDamageRemove, N:5k | InitDoTSeparateDamageRemove pool, N:5k | InitDoTSeparateDamageRemove pool reset return, N:5k |
-|------|---------------|---------------|-----------------------------------|----------------------------------------|-----------------------------------------------------|
-| Lite | 0.20ms,  1 GC | 0.74ms, 1 GC  | 2.90ms, 4 GC                      | 0.12ms, 0 GC                           | 0.23ms, 0 GC                                        |
-| Ecs  | 2.74ms,  1 GC | 4.00ms, 1 GC  | 5.80ms, 1 GC                      |                                        |                                                     |
-| Orig | 3.35ms, 25 GC |               |                                   |                                        |                                                     |
+|      | InitDmg, N:5k | InitDoTSeparateDamageRemove, N:5k | InitDoTSeparateDamageRemove pool, N:5k | InitDoTSeparateDamageRemove pool reset return, N:5k |
+|------|---------------|-----------------------------------|----------------------------------------|-----------------------------------------------------|
+| Lite | 0.74ms, 1 GC  | 2.84ms, 4 GC                      | 0.12ms, 0 GC                           | 0.25ms, 0 GC                                        |
+| Ecs  | 4.00ms, 1 GC  | 5.80ms, 1 GC                      | NaN                                    | NaN                                                 |
+| Orig | 46 ms, 45 GC  | 70 ms, 63 GC                      | NaN                                    | NaN                                                 |
 
-Creating a simple modifier is 16 times faster, and only allocated new memory for the modifier object (which can easily be pooled)
-Also ecs is a bit on the slow side because we're creating the entities and their components, instead of reusing them, like in the case of lite.
+Pooling in lite is 280X faster than original (because of pooling & reset)
+But it's also faster in case of doing init/stack/refresh on an existing modifier (we don't create a new modifier)
+Ecs is a bit on the slow side because we're creating the entities and their components, instead of reusing them, like in the case of lite.
 
 Lite InitDmg (not cloning any components, no state)
 

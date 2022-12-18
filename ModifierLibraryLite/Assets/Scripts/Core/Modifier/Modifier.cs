@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 
 [assembly: InternalsVisibleTo("ModifierLibraryLite.Tests")]
+[assembly: InternalsVisibleTo("ModifierLibraryLite.Core.Units")]
 
 namespace ModifierLibraryLite.Core
 {
@@ -126,6 +127,8 @@ namespace ModifierLibraryLite.Core
 			if (_time)
 				for (int i = 0; i < _timeComponents.Length; i++)
 					_timeComponents[i].ResetState();
+			if (_stack)
+				_stackComponent.ResetState();
 			//No need to reset targetComponent references, because we overwrite them on SetTargets
 		}
 	}

@@ -91,6 +91,12 @@ namespace ModifierLibraryLite.Core
 			_pools[modifier.Id].Push(modifier);
 		}
 
+		internal void Clear()
+		{
+			foreach (var pool in _pools)
+				pool.Clear();
+		}
+
 		public void Dispose()
 		{
 			for (int i = 0; i < _pools.Length; i++)
