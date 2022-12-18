@@ -87,6 +87,12 @@ Lite InitDmg (not cloning any components, no state)
 
 ## Temp Notes
 
+EffectOnEvents setup works differently than ModifierRecipe. Should probably have a ModifierEventRecipe setup instead.
+Ex. always on init, always revert effect when modifier is remvoed?
+
+EffectOn Event in ModifierRecipe?
+Or modifiers don't know about events, and we do the add/remove manually?
+
 We could merge interval & duration to one component, by having a separate duration timer (that updates every interval amount?)
 But then we're kind of forcing interval to be a multiple of duration.
 

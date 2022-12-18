@@ -16,6 +16,7 @@ namespace ModifierLibraryLite.Core.Units
 		public float Mana { get; private set; }
 
 		private List<UnitEvent> _onDamageEvents;
+		private List<Modifier> _onDamageModifiers;
 
 		private readonly StatusEffectController _statusEffectController;
 
@@ -26,6 +27,7 @@ namespace ModifierLibraryLite.Core.Units
 			HealValue = healValue;
 			Mana = mana;
 			_onDamageEvents = new List<UnitEvent>();
+			_onDamageModifiers = new List<Modifier>();
 
 			_modifierController = new ModifierController();
 			_statusEffectController = new StatusEffectController();
@@ -65,8 +67,15 @@ namespace ModifierLibraryLite.Core.Units
 			float dealtDamage = oldHealth - Health;
 
 			if (triggersEvents)
+			{
 				for (int i = 0; i < _onDamageEvents.Count; i++)
 					_onDamageEvents[i](this, acter);
+				for (int i = 0; i < _onDamageModifiers.Count; i++)
+				{
+					//TODO Feed target? & do stack
+					_onDamageModifiers[i].Init();
+				}
+			}
 
 			return dealtDamage;
 		}
@@ -113,7 +122,35 @@ namespace ModifierLibraryLite.Core.Units
 
 		//---Modifier based---
 
-		public void AddEffectEvent(IEffect effect, EffectOnEvent @event, TargetType targetType)
+		public void AddEffectEvent(Modifier modifier, EffectOnEvent @event)
+		{
+			switch (@event)
+			{
+				case EffectOnEvent.OnHit:
+					_onDamageModifiers.Add(modifier);
+					break;
+				default:
+					Debug.LogError("Unknown event type: " + @event);
+					return;
+			}
+		}
+
+		public void RemoveEffectEvent(Modifier modifier, EffectOnEvent @event)
+		{
+			switch (@event)
+			{
+				case EffectOnEvent.OnHit:
+					bool remove = _onDamageModifiers.Remove(modifier);
+					if (!remove)
+						Debug.LogError("Could not remove event modifier: " + modifier.Name);
+					break;
+				default:
+					Debug.LogError("Unknown event type: " + @event);
+					return;
+			}
+		}
+
+		public void AddEffectEvent(IEffect effect, EffectOnEvent @event)
 		{
 			//Maybe don't have full modifier's for events, but instead only effects? This would take away stack, functionality, etc.
 			//Also would make the effects unrevertable.
@@ -123,7 +160,7 @@ namespace ModifierLibraryLite.Core.Units
 			switch (@event)
 			{
 				case EffectOnEvent.OnHit:
-					_onDamageEvents.Add((self, unit) => effect.Effect(unit, self));
+					_onDamageEvents.Add(effect.Effect);
 					break;
 				default:
 					Debug.LogError("Unknown event type: " + @event);
@@ -131,12 +168,14 @@ namespace ModifierLibraryLite.Core.Units
 			}
 		}
 
-		public void RemoveEffectEvent(IEffect effect, EffectOnEvent @event, TargetType targetType)
+		public void RemoveEffectEvent(IEffect effect, EffectOnEvent @event)
 		{
 			switch (@event)
 			{
 				case EffectOnEvent.OnHit:
-					_onDamageEvents.Remove((self, unit) => effect.Effect(unit, self));
+					bool remove = _onDamageEvents.Remove(effect.Effect);
+					if (!remove)
+						Debug.LogError("Could not remove event: " + effect.GetType());
 					break;
 				default:
 					Debug.LogError("Unknown event type: " + @event);

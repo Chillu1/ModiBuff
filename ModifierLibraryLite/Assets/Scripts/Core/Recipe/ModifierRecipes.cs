@@ -164,6 +164,15 @@ namespace ModifierLibraryLite.Core
 			Add("InitSilence")
 				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2), EffectOn.Init);
 
+			Add("InitDamageSelfRemove")
+				.Effect(new SelfDamageEffect(5), EffectOn.Init)
+				.Remove(5);
+
+			//Add("InitDamageSelfRemoveEvent")
+			//	.Effect(new SelfDamageEffect(5), EffectOn.Init)
+			//	.Event(EffectOnEvent.OnHit)
+			//	.Remove(5);
+
 			//TODO TargetHeal
 
 			foreach (var modifier in _modifiers.Values)

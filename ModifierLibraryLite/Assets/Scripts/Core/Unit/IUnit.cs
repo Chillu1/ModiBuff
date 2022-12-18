@@ -19,6 +19,9 @@ namespace ModifierLibraryLite.Core
 		void UseHealth(float value);
 		void UseMana(float value);
 
+		void AddEffectEvent(IEffect effect, EffectOnEvent @event);
+		void RemoveEffectEvent(IEffect effect, EffectOnEvent @event);
+
 		bool HasStatusEffect(StatusEffectType statusEffect);
 		void ChangeStatusEffect(StatusEffectType statusEffectType, float duration);
 
