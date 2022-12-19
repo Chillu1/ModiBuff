@@ -11,6 +11,7 @@
   * Array instead of stack bench
 
 ## Tests
+* StatusEffectEffect.Revert
 
 ### Benchmarks
 *
@@ -39,7 +40,7 @@
 * Status resistance
 
 * Status effects
-  * Act, Silence, Stun, Confuse, Disarm, Taunt
+  * Confuse, Taunt
 
 ## Misc/low prio
 * Standarized modifier unit tests, fitting both ModifierLibraryNew and ModifierLibraryEcs

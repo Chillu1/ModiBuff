@@ -126,6 +126,11 @@ namespace ModifierLibraryLite.Core.Units
 			_statusEffectController.ChangeStatusEffect(statusEffectType, duration);
 		}
 
+		public void DecreaseStatusEffect(StatusEffectType statusEffectType, float duration)
+		{
+			_statusEffectController.DecreaseStatusEffect(statusEffectType, duration);
+		}
+
 		//---Modifier based---
 
 		public void AddEffectEvent(Modifier modifier, EffectOnEvent @event)

@@ -58,5 +58,23 @@ namespace ModifierLibraryLite.Tests
 			Unit.Update(5); //Modifier removed
 			Assert.AreEqual(UnitDamage, Unit.Damage);
 		}
+
+		[Test]
+		public void StunEveryTwoStacks()
+		{
+			Unit.TryAddModifierSelf("StunEveryTwoStacks");
+
+			Assert.False(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Unit.TryAddModifierSelf("StunEveryTwoStacks");
+			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
+
+			Unit.Update(2);
+
+			Assert.False(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Unit.TryAddModifierSelf("StunEveryTwoStacks");
+			Assert.False(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Unit.TryAddModifierSelf("StunEveryTwoStacks");
+			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
+		}
 	}
 }

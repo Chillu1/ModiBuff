@@ -28,7 +28,7 @@ namespace ModifierLibraryLite.Core.Units
 				if (_legalActionTimers[i] <= 0)
 				{
 					_legalActionTimers[i] = 0;
-					TryRestoreLegalAction(i);
+					LegalActions |= (LegalAction)(1 << i);
 				}
 			}
 		}
@@ -63,19 +63,31 @@ namespace ModifierLibraryLite.Core.Units
 				if (_legalActionTimers[legalActionIndex] >= duration)
 					continue;
 
-				//Debug.Log("Overwriting timer for " + legalActions[i] + " with " + duration + ". Was " + _legalActionTimers[legalActionIndex]);
 				_legalActionTimers[legalActionIndex] = duration;
 				LegalActions &= ~legalActions[i];
 			}
 		}
 
-		private void TryRestoreLegalAction(int index)
+		public void DecreaseStatusEffect(StatusEffectType statusEffectType, float duration)
 		{
-			//_referenceCounts[index]--;
-			//if (_referenceCounts[index] <= 0)
+			var legalActions = StatusEffectTypeHelper.LegalActions[(int)statusEffectType];
+			for (int i = 0; i < legalActions.Length; i++)
 			{
-				//_referenceCounts[index] = 0;
-				LegalActions |= (LegalAction)(1 << index);
+				long legalActionIndex = Utilities.Utilities.FastLog2((double)legalActions[i]);
+				float currentDuration = _legalActionTimers[legalActionIndex];
+				if (currentDuration <= 0)
+					continue;
+
+				currentDuration -= duration;
+				if (currentDuration <= 0)
+				{
+					_legalActionTimers[legalActionIndex] = 0;
+					LegalActions |= legalActions[i];
+				}
+				else
+				{
+					_legalActionTimers[legalActionIndex] = currentDuration;
+				}
 			}
 		}
 	}

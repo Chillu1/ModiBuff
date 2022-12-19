@@ -24,6 +24,7 @@ namespace ModifierLibraryLite.Core
 
 		bool HasStatusEffect(StatusEffectType statusEffect);
 		void ChangeStatusEffect(StatusEffectType statusEffectType, float duration);
+		void DecreaseStatusEffect(StatusEffectType statusEffectType, float duration);
 
 		bool TryAddModifier(int id, IUnit target, IUnit acter);
 

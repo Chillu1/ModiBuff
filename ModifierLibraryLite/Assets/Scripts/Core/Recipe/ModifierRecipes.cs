@@ -190,6 +190,10 @@ namespace ModifierLibraryLite.Core
 				.Interval(1)
 				.Stack(WhenStackEffect.Always, value: 2);
 
+			Add("StunEveryTwoStacks")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.OnXStacks, value: -1, maxStacks: -1, true, everyXStacks: 2);
+
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
 			//	.Effect(new StackEffectNew(StackEffectType.Add, new DamageEffect(5)), EffectOn.Interval)
