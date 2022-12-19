@@ -185,6 +185,17 @@ namespace ModifierLibraryLite.Core
 			Add("InitShortFreeze")
 				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 1), EffectOn.Init);
 
+			Add("IntervalDamage_StackAddDamage")
+				.Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Interval)
+				.Interval(1)
+				.Stack(WhenStackEffect.Always, value: 2);
+
+			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
+			//Add("IntervalDamage_StackAddDamage")
+			//	.Effect(new StackEffectNew(StackEffectType.Add, new DamageEffect(5)), EffectOn.Interval)
+			//	.Interval(1)
+			//	.Stack(WhenStackEffect.Always, value: 2);
+
 			//Add("InitDamageSelfRemoveEvent")
 			//	.Effect(new SelfDamageEffect(5), EffectOn.Init)
 			//	.Event(EffectOnEvent.OnHit)

@@ -87,6 +87,18 @@ Lite InitDmg (not cloning any components, no state)
 
 ## Temp Notes
 
+Initinterval stackable dmg. Same damage effect, adds dmg on stack
+Stackeffect being a parent of ieffects (try to make IEffects stateless)
+
+RemoveEffect problem:
+We need to add revertible effect clones after making them to remove effect.
+Also we need a clone of remove effect for every new modifier instance, since itself will hold references to clones effects.
+Problem is, that the remove effect is fed on Finish, and it will be the non-cloned version, with references to the non-cloned effects.
+
+Not using Components in ModifierRecipe, but arrays of effects, and component data.
+Then when cloning we have an easier time? Because we could clone the revertable effects once, and feed them?
+The responsibility from cloning would go away from Modifier ctr.
+
 How to know when to add a modifier as an act (attack/cast) applier, and when as a normal modifier?
 
 Applier: ApplyExtraDamageToTarget on cast, with 5 mana cost

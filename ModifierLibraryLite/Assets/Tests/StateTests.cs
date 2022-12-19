@@ -117,5 +117,21 @@ namespace ModifierLibraryLite.Tests
 			Unit.TryAddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health); //2 stacks = +4 damage == 6
 		}
+
+		//[Test] //TODO Right now we're cloning the effect in StackComponent, because of state. This bugs out stack consistency (because of two separate instances).
+		public void IntervalDamage_AddDamageOnStack()
+		{
+			Unit.TryAddModifierSelf("IntervalDamage_StackAddDamage");
+
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
+
+			Unit.TryAddModifierSelf("IntervalDamage_StackAddDamage");
+
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health);
+		}
 	}
 }
