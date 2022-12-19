@@ -87,6 +87,13 @@ Lite InitDmg (not cloning any components, no state)
 
 ## Temp Notes
 
+How to know when to add a modifier as an act (attack/cast) applier, and when as a normal modifier?
+
+Applier: ApplyExtraDamageToTarget on cast, with 5 mana cost
+
+Stateful appliers. how and why?
+Ex. ApplyOnHit. But we can do this without extra Applier logic?
+
 EffectOnEvents setup works differently than ModifierRecipe. Should probably have a ModifierEventRecipe setup instead.
 Ex. always on init, always revert effect when modifier is remvoed?
 

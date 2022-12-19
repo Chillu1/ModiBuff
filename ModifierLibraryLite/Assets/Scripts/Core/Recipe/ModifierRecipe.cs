@@ -8,7 +8,7 @@ namespace ModifierLibraryLite.Core
 	/// <summary>
 	///		High level API for creating modifiers.
 	/// </summary>
-	public sealed class ModifierRecipe : IComparable<ModifierRecipe>
+	public sealed class ModifierRecipe : IModifierRecipe, IComparable<ModifierRecipe>
 	{
 		public int Id { get; }
 		public string Name { get; }
@@ -53,7 +53,7 @@ namespace ModifierLibraryLite.Core
 
 		//---PostFinish---
 
-		public ModifierCheck CreateCheck()
+		internal ModifierCheck CreateCheck()
 		{
 			CooldownCheck cooldown = null;
 			CostCheck cost = null;
@@ -62,6 +62,7 @@ namespace ModifierLibraryLite.Core
 			if (_cooldown > 0f)
 				cooldown = new CooldownCheck(_cooldown);
 
+			//TODO If cost and chance don't have state, we can use the same instance for all IDx modifiers
 			if (_costType != CostType.None && _cost > 0f)
 				cost = new CostCheck(_costType, _cost);
 
@@ -71,7 +72,7 @@ namespace ModifierLibraryLite.Core
 			return new ModifierCheck(Id, Name, cooldown, cost, chance);
 		}
 
-		public Modifier Create() => new Modifier(_internalRecipe);
+		internal Modifier Create() => new Modifier(_internalRecipe);
 
 		//---Checks---
 
@@ -177,7 +178,7 @@ namespace ModifierLibraryLite.Core
 			return this;
 		}
 
-		public void Finish()
+		internal void Finish()
 		{
 			if (_internalRecipe != null)
 				Debug.LogError("Modifier recipe already finished, finishing again. Not intended?");

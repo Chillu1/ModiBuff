@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace ModifierLibraryLite.Core
 {
@@ -27,6 +28,12 @@ namespace ModifierLibraryLite.Core
 		private ModifierRecipe Add(string id)
 		{
 			var recipe = new ModifierRecipe(id);
+			if (_modifiers.ContainsKey(id))
+			{
+				Debug.LogError($"Modifier with id {id} already exists");
+				return _modifiers[id];
+			}
+
 			_modifiers.Add(id, recipe);
 			return recipe;
 		}
@@ -167,6 +174,16 @@ namespace ModifierLibraryLite.Core
 			Add("InitDamageSelfRemove")
 				.Effect(new SelfDamageEffect(5), EffectOn.Init)
 				.Remove(5);
+
+			Add("InitDamageCostMana")
+				.Cost(CostType.Mana, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
+			Add("InitShortStun")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 1), EffectOn.Init);
+
+			Add("InitShortFreeze")
+				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 1), EffectOn.Init);
 
 			//Add("InitDamageSelfRemoveEvent")
 			//	.Effect(new SelfDamageEffect(5), EffectOn.Init)

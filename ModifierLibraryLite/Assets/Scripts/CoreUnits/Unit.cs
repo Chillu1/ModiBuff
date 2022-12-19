@@ -44,6 +44,7 @@ namespace ModifierLibraryLite.Core.Units
 			if ((_statusEffectController.LegalActions & LegalAction.Cast) == 0)
 				return;
 
+			target.TryApplyModifiers(_modifierController.GetApplierCheckModifiers(), this);
 			target.TryApplyModifiers(_modifierController.GetApplierCastModifiers(), this);
 		}
 
@@ -108,6 +109,11 @@ namespace ModifierLibraryLite.Core.Units
 		public void UseMana(float value)
 		{
 			Mana -= value;
+		}
+
+		public bool HasLegalAction(LegalAction legalAction)
+		{
+			return _statusEffectController.HasLegalAction(legalAction);
 		}
 
 		public bool HasStatusEffect(StatusEffectType statusEffect)

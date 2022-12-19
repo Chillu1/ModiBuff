@@ -1,19 +1,11 @@
-using System;
-using UnityEngine;
-
 namespace ModifierLibraryLite.Core.Units
 {
 	public sealed class StatusEffectController
 	{
-		//"Reference count" of the number of times this effect has been applied, and storing status effect timers
-		//VS
-		//LegalAction array, with legal action timers
 		private readonly float[] _legalActionTimers;
 
-		//If this is slow, change to a bunch of bools
+		//If this is slow, change to a bunch of bools: CanAct, CanMove, etc...
 		public LegalAction LegalActions { get; private set; }
-
-		private int[] _referenceCounts;
 
 		public StatusEffectController()
 		{
@@ -21,9 +13,6 @@ namespace ModifierLibraryLite.Core.Units
 			_legalActionTimers = new float[legalActionsLength];
 			for (int i = 0; i < _legalActionTimers.Length; i++)
 				_legalActionTimers[i] = 0;
-			_referenceCounts = new int[legalActionsLength];
-			for (int i = 0; i < _referenceCounts.Length; i++)
-				_referenceCounts[i] = 0;
 
 			LegalActions = LegalAction.All;
 		}
@@ -32,7 +21,6 @@ namespace ModifierLibraryLite.Core.Units
 		{
 			for (int i = 0; i < _legalActionTimers.Length; i++)
 			{
-				//Debug.Log($"LegalAction: {((LegalAction)(1 << i)).ToString()} Timer: {_legalActionTimers[i]}");
 				if (_legalActionTimers[i] <= 0)
 					continue;
 
@@ -40,10 +28,14 @@ namespace ModifierLibraryLite.Core.Units
 				if (_legalActionTimers[i] <= 0)
 				{
 					_legalActionTimers[i] = 0;
-					//Debug.Log($"StatusEffectController: {((LegalAction)(1 << i)).ToString()} has expired");
 					TryRestoreLegalAction(i);
 				}
 			}
+		}
+
+		public bool HasLegalAction(LegalAction legalAction)
+		{
+			return (LegalActions & legalAction) != 0;
 		}
 
 		public bool HasStatusEffect(StatusEffectType statusEffectType)
@@ -53,9 +45,10 @@ namespace ModifierLibraryLite.Core.Units
 			//Check if all of them are bigger than 0
 			for (int i = 0; i < legalActions.Length; i++)
 			{
-				long legalActionIndex = Utilities.Utilities.FastLog2((double)legalActions[i]);
-				if (_referenceCounts[legalActionIndex] <= 0)
-					return false;
+				if ((LegalActions & legalActions[i]) == 0)
+					continue;
+
+				return false;
 			}
 
 			return true;
@@ -70,19 +63,18 @@ namespace ModifierLibraryLite.Core.Units
 				if (_legalActionTimers[legalActionIndex] >= duration)
 					continue;
 
+				//Debug.Log("Overwriting timer for " + legalActions[i] + " with " + duration + ". Was " + _legalActionTimers[legalActionIndex]);
 				_legalActionTimers[legalActionIndex] = duration;
-				_referenceCounts[legalActionIndex]++;
 				LegalActions &= ~legalActions[i];
 			}
 		}
 
 		private void TryRestoreLegalAction(int index)
 		{
-			_referenceCounts[index]--;
-			if (_referenceCounts[index] <= 0)
+			//_referenceCounts[index]--;
+			//if (_referenceCounts[index] <= 0)
 			{
-				_referenceCounts[index] = 0;
-				//Debug.Log("Restoring legal action: " + (LegalAction)(1 << index) + ". Current legal actions: " + LegalActions);
+				//_referenceCounts[index] = 0;
 				LegalActions |= (LegalAction)(1 << index);
 			}
 		}

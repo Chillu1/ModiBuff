@@ -63,5 +63,16 @@ namespace ModifierLibraryLite.Tests
 
 			Assert.AreEqual(EnemyHealth - 10, Enemy.Health);
 		}
+
+		[Test]
+		public void InitDamageCostMana()
+		{
+			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamageCostMana"), ApplierType.Cast);
+
+			Unit.Cast(Enemy);
+
+			Assert.AreEqual(UnitMana - 5, Unit.Mana);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+		}
 	}
 }
