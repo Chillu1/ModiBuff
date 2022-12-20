@@ -1,6 +1,7 @@
 [//]: # (TODO Library Logo)
-[![Library Logo](Docs/LogoTest.png)](Docs/LogoTest.png)
-[![Library Text](Docs/ModiBuff.png)](Docs/ModiBuff.png)
+![Library Logo](Docs/LogoTest.png)
+![Library Text](Docs/ModiBuff.png)
+![Coverage](Docs/badge_linecoverage.svg)
 
 - [What is this?](#what-is-this)
 - [Features](#features)
