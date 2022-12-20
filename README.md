@@ -42,17 +42,18 @@ This library was made to make a standarized powerful system that allows for manp
 
 Preallocated Pools
 
-|      | InitDmg, N:5k | InitDoTSeparateDamageRemove, N:5k | InitDoTSeparateDamageRemove pool, N:5k | InitDoTSeparateDamageRemove pool reset return, N:5k |
-|------|---------------|-----------------------------------|----------------------------------------|-----------------------------------------------------|
-| Lite | 0.74ms, 1 GC  | 2.84ms, 4 GC                      | 0.12ms, 0 GC                           | 0.25ms, 0 GC                                        |
-| Ecs  | 4.00ms, 1 GC  | 5.80ms, 1 GC                      | NaN                                    | NaN                                                 |
-| Old  | 46 ms, 45 GC  | 70 ms, 63 GC                      | NaN                                    | NaN                                                 |
+|      | InitDmg, N:5k | DoT, N:5k    | DoT pool, N:5k | DoT pool reset return, N:5k |
+|------|---------------|--------------|----------------|-----------------------------|
+| Lite | 0.74ms, 1 GC  | 2.84ms, 4 GC | 0.12ms, 0 GC   | 0.25ms, 0 GC                |
+| Ecs  | 4.00ms, 1 GC  | 5.80ms, 1 GC | NaN            | NaN                         |
+| Old  | 46.0ms, 45 GC | 70 ms, 63 GC | NaN            | NaN                         |
 
 Pooling in lite is 280X faster than original (because of pooling & reset)
 But it's also faster in case of doing init/stack/refresh on an existing modifier (we don't create a new modifier)
 Ecs is a bit on the slow side because we're creating the entities and their components, instead of reusing them, like in the case of lite.
 
 Lite InitDmg (not cloning any components, no state)
+DoT = InitDoTSeparateDamageRemove
 
 # Installation
 Currently the library is not on NuGet or any other package manager. You can download the source code and add it to your project directly.
