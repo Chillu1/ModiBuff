@@ -433,7 +433,7 @@ InitTestScene*.unity
 *.vscode
 
 /.idea/
-/ModifierLibraryLite/Library/
-/ModifierLibraryLite/Temp/
-/ModifierLibraryLite/UserSettings/
-/ModifierLibraryLite/.idea/
+/ModiBuff/Library/
+/ModiBuff/Temp/
+/ModiBuff/UserSettings/
+/ModiBuff/.idea/
