@@ -10,7 +10,7 @@ namespace ModifierLibraryLite.Core
 
 		public static int MaxPoolSize = 100_000;
 
-		private readonly Stack<Modifier>[] _pools;
+		private Stack<Modifier>[] _pools;
 		private readonly ModifierRecipe[] _recipes;
 
 		private int _stackCapacity = 64;
@@ -95,6 +95,13 @@ namespace ModifierLibraryLite.Core
 		{
 			foreach (var pool in _pools)
 				pool.Clear();
+		}
+
+		internal void Add(Modifier modifier)
+		{
+			Array.Resize(ref _pools, _pools.Length + 1);
+			_pools[modifier.Id] = new Stack<Modifier>(_stackCapacity);
+			_pools[modifier.Id].Push(modifier);
 		}
 
 		public void Dispose()

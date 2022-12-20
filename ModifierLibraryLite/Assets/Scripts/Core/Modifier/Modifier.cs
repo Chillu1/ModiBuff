@@ -58,7 +58,7 @@ namespace ModifierLibraryLite.Core
 
 			if (stackComponent != null)
 			{
-				_stackComponent = stackComponent.ShallowClone();
+				_stackComponent = stackComponent; //.ShallowClone();
 				_stack = true;
 			}
 		}

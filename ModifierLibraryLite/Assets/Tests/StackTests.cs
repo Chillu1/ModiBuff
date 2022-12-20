@@ -46,13 +46,27 @@ namespace ModifierLibraryLite.Tests
 			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health); //2 stacks = +4 damage == 6
 		}
 
-		//[Test]
+		[Test]
 		public void StackAddDamageRevertible()
 		{
-			Unit.TryAddModifierSelf("StackAddDamageRevertible"); //5 base, + 2 on stack
+			Pool.Clear();
+
+			int id = ModifierIdManager.GetFreeId("StackAddDamageRevertibleCustom");
+			var damageEffect = new AddDamageEffect(5, true, StackEffectType.Effect | StackEffectType.Add);
+			var removeEffect = new RemoveEffect();
+			removeEffect.SetRevertibleEffects(new IRevertEffect[] { damageEffect });
+			var stackComponent = new StackComponent(WhenStackEffect.Always, 2, -1, false, -1, new IStackEffect[] { damageEffect });
+			var durationComponent = new DurationComponent(5, false, removeEffect);
+
+			var modifierRecipe = new ModifierInternalRecipe(id, "StackAddDamageRevertibleCustom", null,
+				new ITimeComponent[] { durationComponent }, stackComponent);
+
+			Pool.Add(new Modifier(modifierRecipe));
+
+			Unit.TryAddModifierSelf("StackAddDamageRevertibleCustom"); //5 base, + 2 on stack
 			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
 
-			Unit.TryAddModifierSelf("StackAddDamageRevertible"); //5 base, + 4 on stack
+			Unit.TryAddModifierSelf("StackAddDamageRevertibleCustom"); //5 base, + 4 on stack
 			Assert.AreEqual(UnitDamage + 10 + 6, Unit.Damage);
 
 			Unit.Update(5); //Modifier removed
