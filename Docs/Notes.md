@@ -29,9 +29,8 @@ Goals of the libraries:
   * Unit event (on attacked, on hit, on killed, when attacking...)
   * Aura
   * Condition effects (when low health)
-  * Status effects (stun, silence, disarm)
+  * Some status effects (taunt, confuse)
   * Fully functioning revertible modifiers
-  * Stateful applier modifiers
 
 ### When to chose which library
 
@@ -86,6 +85,22 @@ Lite InitDmg (not cloning any components, no state)
 * Interface IEffects are as fast as delegates
 
 ## Temp Notes
+
+Logo creation.
+Keywords: modifier, buff, debuff.
+
+Half a gear icon left-right to top, inside a muscle icon. Poison drop (green drop)?
+
+Name:
+modifier library ecs buff debuff mod lib gear tech modify
+Ideas:
+* Modify (common)
+* Modifyable (ify)
+* DeBuffs (common)
+* DeMod (used)
+* ModiBuff/MoDeBuFf/ModeBuff
+* ModBuff (used)
+* Buffodify
 
 Initinterval stackable dmg. Same damage effect, adds dmg on stack
 Stackeffect being a parent of ieffects (try to make IEffects stateless)

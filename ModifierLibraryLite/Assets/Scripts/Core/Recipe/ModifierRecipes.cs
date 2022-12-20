@@ -44,15 +44,13 @@ namespace ModifierLibraryLite.Core
 			Add("InitDoT")
 				.Interval(1)
 				.Effect(new DamageEffect(10), EffectOn.Init | EffectOn.Interval)
-				.Remove(5)
-				;
+				.Remove(5);
 
 			Add("InitDoTSeparateDamageRemove")
 				.Interval(1)
 				.Effect(new DamageEffect(10), EffectOn.Init)
 				.Effect(new DamageEffect(5), EffectOn.Interval)
-				.Remove(5)
-				;
+				.Remove(5);
 
 			Add("InitHeal")
 				.Effect(new HealEffect(5), EffectOn.Init);

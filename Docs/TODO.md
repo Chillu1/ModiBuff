@@ -2,6 +2,9 @@
 
 ## General
 
+* Rethink the whole recipe effects process, being able to use the same effect clone instance for multiple components & remove.
+  * Create modifiers that pass the unit tests for states, and remove effect, and same effect multiple places uses stacks.
+
 * Stacking/modifier state (added damage, etc)
 * Reset stacks state
 * Stack timer? Resets stacks after x seconds, can be refreshed
