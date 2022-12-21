@@ -1,7 +1,12 @@
 namespace ModiBuff.Core
 {
-	public interface IShallowClone<out T>
+	public interface IShallowClone<out T> : IShallowClone
 	{
-		T ShallowClone();
+		new T ShallowClone();
+	}
+
+	public interface IShallowClone
+	{
+		object ShallowClone();
 	}
 }

@@ -61,8 +61,6 @@ namespace ModiBuff.Core
 					{
 						for (int i = 0; i < _effects.Length; i++)
 							_effects[i].StackEffect(_stacks, _value, _targetComponent);
-						if (_isRepeatable)
-							_stacks = 0;
 					}
 
 					break;
@@ -89,6 +87,8 @@ namespace ModiBuff.Core
 
 			return new StackComponent(_whenStackEffect, _value, _maxStacks, _isRepeatable, _everyXStacks, effects);
 		}
+
+		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 
 

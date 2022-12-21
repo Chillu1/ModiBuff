@@ -40,5 +40,6 @@ namespace ModiBuff.Core
 		}
 
 		public IStackEffect ShallowClone() => new StatusEffectEffect(_statusEffectType, _duration, _stackEffect);
+		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

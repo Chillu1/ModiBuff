@@ -29,5 +29,6 @@ namespace ModiBuff.Core
 		}
 
 		public RemoveEffect ShallowClone() => new RemoveEffect(_id);
+		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

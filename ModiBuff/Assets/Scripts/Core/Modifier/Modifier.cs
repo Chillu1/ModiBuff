@@ -27,12 +27,7 @@ namespace ModiBuff.Core
 		private IRemoveModifier _removeModifier;
 		private TargetComponent _targetComponent;
 
-		public Modifier(ModifierInternalRecipe recipe) : this(recipe.Id, recipe.Name, recipe.InitComponent, recipe.TimeComponents,
-			recipe.StackComponent)
-		{
-		}
-
-		internal Modifier(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents, IStackComponent stackComponent)
+		public Modifier(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents, IStackComponent stackComponent)
 		{
 			Id = id;
 			Name = name;

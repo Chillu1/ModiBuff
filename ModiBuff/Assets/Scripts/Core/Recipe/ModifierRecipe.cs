@@ -31,7 +31,6 @@ namespace ModiBuff.Core
 		private List<IEffect>[] _effectBinds;
 
 		private bool _refreshDuration, _refreshInterval;
-		//private List<bool> _refreshables;
 
 		private WhenStackEffect _whenStackEffect;
 		private float _stackValue;
@@ -39,7 +38,6 @@ namespace ModiBuff.Core
 		private bool _isRepeatable;
 		private int _everyXStacks;
 
-		private ModifierInternalRecipe _internalRecipe;
 		private List<ITimeComponent> _timeComponents;
 		private ModifierCreator _modifierCreator;
 
@@ -81,8 +79,6 @@ namespace ModiBuff.Core
 			InitComponent initComponent = null;
 			IStackComponent stackComponent = null;
 
-			if (_modifierCreator == null)
-				_modifierCreator = new ModifierCreator(_effectBinds);
 			var creation = _modifierCreator.Create(_removeEffectWrapper);
 
 			if (creation.initEffects.Count > 0)
@@ -206,10 +202,11 @@ namespace ModiBuff.Core
 
 		internal void Finish()
 		{
-			if (_internalRecipe != null)
+			if (_modifierCreator != null)
 				Debug.LogError("Modifier recipe already finished, finishing again. Not intended?");
 
 			_timeComponents = new List<ITimeComponent>(2);
+			_modifierCreator = new ModifierCreator(_effectBinds);
 		}
 
 		public int CompareTo(ModifierRecipe other)

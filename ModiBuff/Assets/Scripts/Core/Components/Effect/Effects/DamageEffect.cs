@@ -38,6 +38,7 @@ namespace ModiBuff.Core
 		public void ResetState() => _extraDamage = 0;
 
 		public IStackEffect ShallowClone() => new DamageEffect(_baseDamage, _stackEffect);
+		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 
 	[Flags]

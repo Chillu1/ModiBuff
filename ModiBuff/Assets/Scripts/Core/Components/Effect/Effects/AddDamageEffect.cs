@@ -47,5 +47,6 @@ namespace ModiBuff.Core
 		}
 
 		public IStackEffect ShallowClone() => new AddDamageEffect(_damage, IsRevertible, _stackEffect);
+		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }
