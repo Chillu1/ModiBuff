@@ -31,7 +31,7 @@ namespace ModiBuff.Tests
 		[OneTimeSetUp]
 		public void OneTimeSetup()
 		{
-			_coreSystem = new CoreSystem(2);
+			_coreSystem = new CoreSystem(1);
 
 			Recipes = _coreSystem.Recipes;
 			Pool = _coreSystem.Pool;

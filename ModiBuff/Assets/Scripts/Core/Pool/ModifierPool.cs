@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace ModiBuff.Core
@@ -10,7 +9,8 @@ namespace ModiBuff.Core
 
 		public static int MaxPoolSize = 100_000;
 
-		private readonly Stack<Modifier>[] _pools;
+		private readonly Modifier[][] _pools;
+		private readonly int[] _poolTops;
 		private readonly ModifierRecipe[] _recipes;
 
 		private int _stackCapacity = 64;
@@ -22,12 +22,15 @@ namespace ModiBuff.Core
 
 			Instance = this;
 
-			_pools = new Stack<Modifier>[recipes.Length];
+			initialSize = Mathf.Max(initialSize, 1);
+
+			_pools = new Modifier[recipes.Length][];
+			_poolTops = new int[recipes.Length];
 			_recipes = new ModifierRecipe[recipes.Length];
 
 			foreach (var recipe in recipes)
 			{
-				_pools[recipe.Id] = new Stack<Modifier>(initialSize);
+				_pools[recipe.Id] = new Modifier[initialSize];
 				_recipes[recipe.Id] = recipe;
 
 				Allocate(recipe.Id, initialSize);
@@ -35,7 +38,7 @@ namespace ModiBuff.Core
 
 			_stackCapacity = initialSize;
 
-			Array.Sort(_pools, (x, y) => x.Peek().Id.CompareTo(y.Peek().Id));
+			Array.Sort(_pools, (x, y) => x[0].Id.CompareTo(y[0].Id));
 			Array.Sort(_recipes, (x, y) => x.Id.CompareTo(y.Id));
 		}
 
@@ -50,57 +53,64 @@ namespace ModiBuff.Core
 			MaxPoolSize = size;
 		}
 
-		private void Allocate(int id)
+		internal void Resize(int id, int size)
 		{
-			var recipe = _recipes[id];
 			var pool = _pools[id];
 
-			//Double the size of the pool
-			//TODO
-			throw new NotImplementedException();
+			Array.Resize(ref pool, size);
+			_pools[id] = pool;
 		}
 
 		internal void Allocate(int id, int count)
 		{
 			var recipe = _recipes[id];
-			var pool = _pools[id];
+			int poolLength = _pools[id].Length; //Don't cache pool array, it can be resized.
+
+			if (count > poolLength)
+			{
+				int newSize = poolLength << 1;
+				while (newSize < poolLength + count)
+					newSize <<= 1;
+				Resize(id, newSize);
+			}
 
 			for (int i = 0; i < count; i++)
-				pool.Push(recipe.Create());
-
-			_stackCapacity += count;
-			if (_stackCapacity > MaxPoolSize)
-				Debug.LogError("ModifierPool exceeded max size of " + MaxPoolSize);
+				_pools[id][_poolTops[id]++] = recipe.Create();
 		}
 
 		public Modifier Rent(int id)
 		{
 			var pool = _pools[id];
 
-			if (pool.Count > 0)
-				return pool.Pop();
+			if (_poolTops[id] == 0)
+				Allocate(id, _stackCapacity);
 
-			Allocate(id, _stackCapacity);
-			return pool.Pop();
+			return pool[--_poolTops[id]];
 		}
 
 		public void Return(Modifier modifier)
 		{
 			modifier.ResetState();
 
-			_pools[modifier.Id].Push(modifier);
+			if (_poolTops[modifier.Id] == _pools[modifier.Id].Length)
+				Resize(modifier.Id, _pools[modifier.Id].Length << 1);
+
+			_pools[modifier.Id][_poolTops[modifier.Id]++] = modifier;
 		}
 
 		internal void Clear()
 		{
-			foreach (var pool in _pools)
-				pool.Clear();
+			for (int i = 0; i < _pools.Length; i++)
+			{
+				Modifier[] pool = _pools[i];
+				Array.Clear(pool, 0, pool.Length);
+				_poolTops[i] = 0;
+			}
 		}
 
 		public void Dispose()
 		{
-			for (int i = 0; i < _pools.Length; i++)
-				_pools[i].Clear();
+			Clear();
 
 			_stackCapacity = 0;
 			Instance = null;

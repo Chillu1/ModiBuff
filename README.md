@@ -48,7 +48,7 @@ Preallocated Pools
 
 |                                                       | InitDmg, N:5k | DoT, N:5k    | DoT pool, N:5k | DoT pool reset return, N:5k |
 |-------------------------------------------------------|---------------|--------------|----------------|-----------------------------|
-| ModiBuff (this)                                       | 0.74ms, 1 GC  | 2.84ms, 4 GC | 0.12ms, 0 GC   | 0.25ms, 0 GC                |
+| ModiBuff (this)                                       | 0.74ms, 1 GC  | 2.84ms, 4 GC | 0.03ms, 0 GC   | 0.16ms, 0 GC                |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.00ms, 1 GC  | 5.80ms, 1 GC | NaN            | NaN                         |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC | 70 ms, 63 GC | NaN            | NaN                         |
 

@@ -46,6 +46,18 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - 5 - 2, Enemy.Health);
 		}
 
+		[Test]
+		public void AllocateModifiers_RentAll()
+		{
+			var recipe = Recipes.GetRecipe("InitDamage");
+			Pool.Allocate(recipe.Id, 5000);
+
+			for (int i = 0; i < 5000; i++)
+			{
+				var modifier = Pool.Rent(recipe.Id);
+			}
+		}
+
 		//TODO Pool AddedDamage revertible state reset
 	}
 }
