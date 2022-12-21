@@ -112,7 +112,6 @@ namespace ModiBuff.Tests
 			Assert.False(Unit.HasStatusEffect(StatusEffectType.Stun));
 		}
 
-		//TODO X, duration over, tried adding a new shorter one, didn't overwrite. But added a seperate status effect type
 		[Test]
 		public void Disarm_DontOverwriteDuration_SeparateStatusEffect()
 		{
