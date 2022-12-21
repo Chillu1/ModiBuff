@@ -1,12 +1,13 @@
-![Library Logo](Docs/LogoTest.png)
-![Library Text](Docs/ModiBuff.png)
+<img src="Docs/LogoTest.png" width="500"/>
+<img src="Docs/ModiBuff.png" width="500"/>
+
 ![Coverage](Docs/badge_linecoverage.svg)
 
 - [What is this?](#what-is-this)
 - [Features](#features)
 - [Benchmarks](#benchmarks)
 - [Installation](#installation)
-- [Differences to Ecs and Old](#differences-to-ecs-and-old)
+- [Differences to ModiBuffEcs and Old](#differences-to-modibuffecs-and-old)
 - [Usage](#usage)
   - [Recipe](#recipe)
   - [Modifier](#modifier)
@@ -42,33 +43,34 @@ This library was made to make a standarized powerful system that allows for mani
 
 Preallocated Pools
 
-|      | InitDmg, N:5k | DoT, N:5k    | DoT pool, N:5k | DoT pool reset return, N:5k |
-|------|---------------|--------------|----------------|-----------------------------|
-| Lite | 0.74ms, 1 GC  | 2.84ms, 4 GC | 0.12ms, 0 GC   | 0.25ms, 0 GC                |
-| Ecs  | 4.00ms, 1 GC  | 5.80ms, 1 GC | NaN            | NaN                         |
-| Old  | 46.0ms, 45 GC | 70 ms, 63 GC | NaN            | NaN                         |
+|                                                       | InitDmg, N:5k | DoT, N:5k    | DoT pool, N:5k | DoT pool reset return, N:5k |
+|-------------------------------------------------------|---------------|--------------|----------------|-----------------------------|
+| ModiBuff (this)                                       | 0.74ms, 1 GC  | 2.84ms, 4 GC | 0.12ms, 0 GC   | 0.25ms, 0 GC                |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.00ms, 1 GC  | 5.80ms, 1 GC | NaN            | NaN                         |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC | 70 ms, 63 GC | NaN            | NaN                         |
 
-Pooling in lite is 280X faster than original (because of pooling & reset)
+Pooling in ModiBuff is 280X faster than original (because of pooling & reset)
 But it's also faster in case of doing init/stack/refresh on an existing modifier (we don't create a new modifier)
-Ecs is a bit on the slow side because we're creating the entities and their components, instead of reusing them, like in the case of lite.
+ModiBuffEcs is a bit on the slow side because we're creating the entities and their components, instead of reusing them, like in the case of ModiBuff.
 
-Lite InitDmg (not cloning any components, no state)
+ModiBuff InitDmg (not cloning any components, no state)
 DoT = InitDoTSeparateDamageRemove
 
 # Installation
 Currently the library is not on NuGet or any other package manager. You can download the source code and add it to your project directly.
 
-# Differences to Ecs and Old
-## Ecs
-Lite has:
+# Differences to ModiBuffEcs and Old
+## [ModiBuffEcs]((https://github.com/Chillu1/ModiBuffEcs))
+ModiBuff has:
 * No GC/allocations
 * No ECS framework needed
 * Worse iteration speed, 10 000 modifiers compared to 100 000 modifiers, 5ms update, average complexity modifiers
 
+
 * More features
   * ... 
-## Old
-Lite has:
+## [Old Modifier Library]((https://github.com/Chillu1/ModifierLibrary))
+ModiBuff has:
 * **Much** better backend and design decisions
 * Lightweight
 * Smaller Codebase
@@ -76,6 +78,7 @@ Lite has:
 * Improved API
 * Better iteration speed, 10 000 modifiers (from 500), 5ms update, average complexity modifiers
 * Only cloning statefull objects (less memory, 20 MB for 100_000 modifiers, 7 MB for 100_000 simple modifiers)
+
 
 * Less features, missing:
   * Unit event (on attacked, on hit, on killed, when attacking...)
@@ -132,20 +135,20 @@ Recipe system fixes a lot of internal complexity of setting up modifiers for you
 It's possible to use the Modifier class directly in cases where you'd want multiple interval/duration components.
 
 # When to use which library
-## Lite
+## ModiBuff
 Smmary: Very optimized, no GC, good featureset.  
 Ex. games: Rimworld    
 Ex. genres: small arpg, small rts, pve, colony sim
 
-Lite is the best choice 80% of the time. It's fast, lightweight, deeply redesigned core, has no GC/allocations, and is very easy to use.
+ModiBuff is the best choice 80% of the time. It's fast, lightweight, deeply redesigned core, has no GC/allocations, and is very easy to use.
 It's also very well tested for most scenarios.
 
-## Ecs
+## ModiBuffEcs
 Summary: Fastest iteration, small featureset, needs ecs framework. Entities: Solo vs Thousands, or Thousands vs Thousands.  
 Ex. games: PoE, Diablo  
 Ex. genres: arpg, rpg, rts, pve
 
-Ecs is a good choice if you don't care about about having a lot of features, and if your game will have hundreds of thousands of units.
+ModiBuffEcs is a good choice if you don't care about about having a lot of features, and if your game will have hundreds of thousands of units.
 Or just if you want to use it with an ecs framework.
 
 ## Original
@@ -154,7 +157,7 @@ Ex. games: binding of isaac, tiny rogues, gungeon, dota, witcher 3
 Ex. genres: moba, arena, duel
 
 Only choose original if you need the deep featureset, AND you don't expect to have more than 100 units in the game at the same time, all using/applying 10 modifiers each frame.
-If you're making a moba or a small PvP arena game, you can use the original library. That being said, Lite is a better choice for the vast majority of games.
+If you're making a moba or a small PvP arena game, you can use the original library. That being said, ModiBuff is a better choice for the vast majority of games.
 
 
 # FAQ
