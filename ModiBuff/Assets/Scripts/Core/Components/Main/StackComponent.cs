@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace ModiBuff.Core
 {
-	public class StackComponent : IStackComponent
+	public class StackComponent : IStackComponent, IStateReset
 	{
 		private readonly WhenStackEffect _whenStackEffect;
 		private readonly int _maxStacks;
@@ -76,6 +76,9 @@ namespace ModiBuff.Core
 		{
 			_stacks = 0;
 			_targetComponent = null;
+			for (int i = 0; i < _effects.Length; i++)
+				if (_effects[i] is IStateReset effect)
+					effect.ResetState();
 		}
 
 		public IStackComponent ShallowClone()

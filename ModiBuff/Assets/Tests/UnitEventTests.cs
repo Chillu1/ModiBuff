@@ -50,6 +50,7 @@ namespace ModiBuff.Tests
 		{
 			var recipe = Recipes.GetRecipe("InitDamageSelfRemove");
 			var modifier = recipe.Create();
+			modifier.SetTargets(Unit, Enemy, Enemy);
 			Unit.AddEffectEvent(modifier, EffectOnEvent.OnHit);
 
 			Enemy.Attack(Unit);

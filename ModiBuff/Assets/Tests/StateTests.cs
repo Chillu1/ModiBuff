@@ -118,7 +118,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health); //2 stacks = +4 damage == 6
 		}
 
-		//[Test] //TODO Right now we're cloning the effect in StackComponent, because of state. This bugs out stack consistency (because of two separate instances).
+		[Test]
 		public void IntervalDamage_AddDamageOnStack()
 		{
 			Unit.TryAddModifierSelf("IntervalDamage_StackAddDamage");

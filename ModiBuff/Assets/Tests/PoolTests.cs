@@ -5,7 +5,6 @@ namespace ModiBuff.Tests
 {
 	public sealed class PoolTests : BaseModifierTests
 	{
-		//TODO Pool time reset
 		[Test]
 		public void TimeStateReset()
 		{
@@ -29,7 +28,7 @@ namespace ModiBuff.Tests
 			Assert.False(Enemy.ContainsModifier("DurationRemove"));
 		}
 
-		//[Test] //State not reset because of remove component
+		[Test]
 		public void StackStateReset()
 		{
 			Pool.Clear();

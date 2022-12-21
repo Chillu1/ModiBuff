@@ -45,12 +45,15 @@ namespace ModiBuff.Core
 
 			if (timeComponents != null && timeComponents.Length > 0)
 			{
-				_timeComponents = new ITimeComponent[timeComponents.Length];
+				_timeComponents = timeComponents;
+
 				for (int i = 0; i < timeComponents.Length; i++)
 				{
-					var timeComponent = timeComponents[i];
-					_timeComponents[i] = timeComponent.DeepClone();
-					_refresh = _refresh || timeComponent.IsRefreshable;
+					if (timeComponents[i].IsRefreshable)
+					{
+						_refresh = true;
+						break;
+					}
 				}
 
 				_time = true;
@@ -58,7 +61,7 @@ namespace ModiBuff.Core
 
 			if (stackComponent != null)
 			{
-				_stackComponent = stackComponent.ShallowClone();
+				_stackComponent = stackComponent;
 				_stack = true;
 			}
 		}

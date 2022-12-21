@@ -39,6 +39,8 @@ namespace ModiBuff.Core
 		private int _everyXStacks;
 
 		private ModifierInternalRecipe _internalRecipe;
+		private List<ITimeComponent> _timeComponents;
+		private ModifierCreator _modifierCreator;
 
 		public ModifierRecipe(string name)
 		{
@@ -72,7 +74,33 @@ namespace ModiBuff.Core
 			return new ModifierCheck(Id, Name, cooldown, cost, chance);
 		}
 
-		internal Modifier Create() => new Modifier(_internalRecipe);
+		internal Modifier Create()
+		{
+			_timeComponents.Clear();
+			InitComponent initComponent = null;
+			IStackComponent stackComponent = null;
+
+			if (_modifierCreator == null)
+				_modifierCreator = new ModifierCreator(_effectBinds);
+			var creation = _modifierCreator.Create();
+
+			if (creation.initEffects.Count > 0)
+				initComponent = new InitComponent(creation.initEffects.ToArray());
+			if (creation.intervalEffects.Count > 0)
+				_timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, creation.intervalEffects.ToArray()));
+			if (creation.durationEffects.Count > 0)
+				_timeComponents.Add(new DurationComponent(_duration, _refreshDuration, creation.durationEffects.ToArray()));
+			if (creation.stackEffects.Count > 0)
+				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _isRepeatable, _everyXStacks,
+					creation.stackEffects.Cast<IStackEffect>().ToArray());
+
+			//TODO, we should make a new remove effect each modifier
+			_removeEffect?.SetRevertibleEffects(creation.revertList.ToArray());
+
+			_modifierCreator.Clear();
+
+			return new Modifier(Id, Name, initComponent, _timeComponents.ToArray(), stackComponent);
+		}
 
 		//---Checks---
 
@@ -183,55 +211,7 @@ namespace ModiBuff.Core
 			if (_internalRecipe != null)
 				Debug.LogError("Modifier recipe already finished, finishing again. Not intended?");
 
-			InitComponent initComponent = null;
-			IList<ITimeComponent> timeComponents = new List<ITimeComponent>(2);
-			IStackComponent stackComponent = null;
-
-			var revertibleList = new List<IRevertEffect>(2);
-
-			for (int i = 0; i < _effectBinds.Length; i++)
-			{
-				var effects = _effectBinds[i];
-				if (effects.Count == 0)
-					continue;
-
-				for (int j = 0; j < effects.Count; j++)
-				{
-					if (effects[j] is IRevertEffect { IsRevertible: true } revertEffect)
-						revertibleList.Add(revertEffect);
-				}
-
-				var effectOn = (EffectOn)(1 << i);
-
-				if (effectOn == EffectOn.Init)
-				{
-					initComponent = new InitComponent(effects.ToArray());
-				}
-
-				if (effectOn == EffectOn.Interval)
-				{
-					Debug.Assert(_interval > 0, "Interval must be greater than 0");
-					timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, effects.ToArray()));
-				}
-
-				if (effectOn == EffectOn.Duration)
-				{
-					Debug.Assert(_duration > 0, "Duration must be greater than 0");
-					timeComponents.Add(new DurationComponent(_duration, _refreshDuration, effects.ToArray()));
-				}
-
-				if (effectOn == EffectOn.Stack)
-				{
-					Debug.Assert(_maxStacks == -1 || _maxStacks > 0, "Max stacks must be greater than 0");
-					stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _isRepeatable, _everyXStacks,
-						effects.Cast<IStackEffect>().ToArray());
-				}
-			}
-
-			//TODO, the stack effects are getting cloned after this
-			_removeEffect?.SetRevertibleEffects(revertibleList.ToArray());
-
-			_internalRecipe = new ModifierInternalRecipe(Id, Name, initComponent, timeComponents.ToArray(), stackComponent);
+			_timeComponents = new List<ITimeComponent>(2);
 		}
 
 		public int CompareTo(ModifierRecipe other)

@@ -184,7 +184,7 @@ namespace ModiBuff.Core
 				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 1), EffectOn.Init);
 
 			Add("IntervalDamage_StackAddDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Interval)
+				.Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Interval | EffectOn.Stack)
 				.Interval(1)
 				.Stack(WhenStackEffect.Always, value: 2);
 
