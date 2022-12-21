@@ -24,5 +24,19 @@ namespace ModiBuff.Tests
 
 			Assert.False(Unit.ContainsModifier("DurationRemove"));
 		}
+
+		[Test]
+		public void Duration_Damage_Once()
+		{
+			Unit.TryAddModifierSelf("DurationDamage");
+
+			Unit.Update(5);
+
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.Update(5);
+
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
 	}
 }

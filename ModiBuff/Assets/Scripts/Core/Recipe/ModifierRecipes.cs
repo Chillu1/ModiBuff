@@ -189,8 +189,12 @@ namespace ModiBuff.Core
 				.Stack(WhenStackEffect.Always, value: 2);
 
 			Add("StunEveryTwoStacks")
-				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, StackEffectType.Effect), EffectOn.Stack)
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, false, StackEffectType.Effect), EffectOn.Stack)
 				.Stack(WhenStackEffect.OnXStacks, value: -1, maxStacks: -1, true, everyXStacks: 2);
+
+			Add("InitStun_Revertible")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, true), EffectOn.Init)
+				.Remove(1);
 
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")

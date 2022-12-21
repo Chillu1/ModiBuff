@@ -76,5 +76,18 @@ namespace ModiBuff.Tests
 			Unit.TryAddModifierSelf("StunEveryTwoStacks");
 			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
 		}
+
+		[Test]
+		public void DamageOnMaxStacks_Limit()
+		{
+			Unit.TryAddModifierSelf("DamageOnMaxStacks");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+			Unit.TryAddModifierSelf("DamageOnMaxStacks");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.TryAddModifierSelf("DamageOnMaxStacks");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.TryAddModifierSelf("DamageOnMaxStacks");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
 	}
 }

@@ -147,5 +147,20 @@ namespace ModiBuff.Tests
 			Assert.False(Unit.HasLegalAction(LegalAction.Act));
 			Assert.True(Unit.HasLegalAction(LegalAction.Move));
 		}
+
+		[Test]
+		public void Stun_Revert()
+		{
+			int modifierId = ModifierIdManager.GetId("InitStun_Revertible");
+			Unit.TryAddModifierSelf("InitStun_Revertible");
+
+			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.False(Unit.HasLegalAction(LegalAction.Act));
+
+			Unit.Update(1f); //Should trigger remove => revert
+
+			Assert.False(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.HasLegalAction(LegalAction.Act));
+		}
 	}
 }
