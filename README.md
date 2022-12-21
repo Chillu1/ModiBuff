@@ -1,4 +1,3 @@
-[//]: # (TODO Library Logo)
 ![Library Logo](Docs/LogoTest.png)
 ![Library Text](Docs/ModiBuff.png)
 ![Coverage](Docs/badge_linecoverage.svg)
@@ -17,7 +16,7 @@
 - [Examples](#examples)
 
 # What is this?
-This library was made to make a standarized powerful system that allows for manpulation of both effects and entities.
+This library was made to make a standarized powerful system that allows for manipulation of both effects and entities.
 
 > Note: The library is currently in development, and it will most likely encounter breaking API changes.
  
@@ -37,7 +36,7 @@ This library was made to make a standarized powerful system that allows for manp
   * Damage (& self damage)
   * Heal
   * Status effects (stun, silence, disarm, etc.)
-  * And many more, see [the rest](ModifierLibraryLite/Assets/Scripts/Core/Components/Effect/Effects)
+  * And many more, see [the rest](ModiBuff/Assets/Scripts/Core/Components/Effect/Effects)
 
 # Benchmarks
 
