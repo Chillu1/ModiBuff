@@ -133,5 +133,30 @@ namespace ModiBuff.Tests
 			Unit.Update(1);
 			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health);
 		}
+
+		[Test]
+		public void AddDamageOnStack_RevertibleRemove()
+		{
+			Unit.TryAddModifierSelf("StackAddDamageRevertible");
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+
+			Unit.TryAddModifierSelf("StackAddDamageRevertible");
+			Assert.AreEqual(UnitDamage + 5 + 5 + 2 + 4, Unit.Damage);
+
+			Unit.TryAddModifierSelf("StackAddDamageRevertible");
+			Assert.AreEqual(UnitDamage + 5 + 5 + 5 + 2 + 4 + 6, Unit.Damage);
+
+			Enemy.TryAddModifierSelf("StackAddDamageRevertible");
+			Assert.AreEqual(EnemyDamage + 5 + 2, Enemy.Damage);
+
+			Enemy.TryAddModifierSelf("StackAddDamageRevertible");
+			Assert.AreEqual(EnemyDamage + 5 + 5 + 2 + 4, Enemy.Damage);
+
+			Enemy.Update(5); //Removed
+			Assert.AreEqual(EnemyDamage, Enemy.Damage);
+
+			Unit.Update(5); //Removed
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+		}
 	}
 }

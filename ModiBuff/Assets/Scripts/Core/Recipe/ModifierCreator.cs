@@ -35,8 +35,18 @@ namespace ModiBuff.Core
 			_stackEffects = new List<IStackEffect>();
 		}
 
-		public ModifierCreation Create()
+		public ModifierCreation Create(EffectWrapper removeEffectWrapper)
 		{
+			if (removeEffectWrapper != null)
+			{
+				if ((removeEffectWrapper.EffectOn & EffectOn.Init) != 0) //Probably never a thing, but added just in case
+					_initEffects.Add(removeEffectWrapper.GetEffect());
+				if ((removeEffectWrapper.EffectOn & EffectOn.Interval) != 0)
+					_intervalEffects.Add(removeEffectWrapper.GetEffect());
+				if ((removeEffectWrapper.EffectOn & EffectOn.Duration) != 0)
+					_durationEffects.Add(removeEffectWrapper.GetEffect());
+			}
+
 			for (int i = 0; i < _effectWrappers.Count; i++)
 			{
 				var effectWrapper = _effectWrappers[i];
@@ -52,6 +62,12 @@ namespace ModiBuff.Core
 					_durationEffects.Add(effectWrapper.GetEffect());
 				if ((effectWrapper.EffectOn & EffectOn.Stack) != 0)
 					_stackEffects.Add((IStackEffect)effectWrapper.GetEffect());
+			}
+
+			if (removeEffectWrapper != null)
+			{
+				((RemoveEffect)removeEffectWrapper.GetEffect()).SetRevertibleEffects(_revertList.ToArray());
+				removeEffectWrapper.Reset();
 			}
 
 			for (int i = 0; i < _effectWrappers.Count; i++)
@@ -128,6 +144,13 @@ namespace ModiBuff.Core
 			//		_effectClone = (IEffect)revertEffect.ShallowClone();
 			//	return _effectClone;
 			//}
+
+			if (_effect is RemoveEffect removeEffect)
+			{
+				if (_effectClone == null)
+					_effectClone = removeEffect.ShallowClone();
+				return _effectClone;
+			}
 
 			return _effect;
 		}

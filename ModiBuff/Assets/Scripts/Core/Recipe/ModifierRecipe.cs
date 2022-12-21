@@ -26,6 +26,7 @@ namespace ModiBuff.Core
 		private float _duration;
 
 		private RemoveEffect _removeEffect;
+		private EffectWrapper _removeEffectWrapper;
 
 		private List<IEffect>[] _effectBinds;
 
@@ -82,7 +83,7 @@ namespace ModiBuff.Core
 
 			if (_modifierCreator == null)
 				_modifierCreator = new ModifierCreator(_effectBinds);
-			var creation = _modifierCreator.Create();
+			var creation = _modifierCreator.Create(_removeEffectWrapper);
 
 			if (creation.initEffects.Count > 0)
 				initComponent = new InitComponent(creation.initEffects.ToArray());
@@ -94,12 +95,10 @@ namespace ModiBuff.Core
 				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _isRepeatable, _everyXStacks,
 					creation.stackEffects.Cast<IStackEffect>().ToArray());
 
-			//TODO, we should make a new remove effect each modifier
-			_removeEffect?.SetRevertibleEffects(creation.revertList.ToArray());
-
 			_modifierCreator.Clear();
 
-			return new Modifier(Id, Name, initComponent, _timeComponents.ToArray(), stackComponent);
+			return new Modifier(Id, Name, initComponent,
+				_timeComponents.Count == 0 ? Array.Empty<ITimeComponent>() : _timeComponents.ToArray(), stackComponent);
 		}
 
 		//---Checks---
@@ -146,8 +145,7 @@ namespace ModiBuff.Core
 		public ModifierRecipe Remove(float duration)
 		{
 			Duration(duration);
-			_removeEffect = new RemoveEffect();
-			Effect(_removeEffect, EffectOn.Duration);
+			_removeEffectWrapper = new EffectWrapper(new RemoveEffect(), EffectOn.Duration);
 			return this;
 		}
 

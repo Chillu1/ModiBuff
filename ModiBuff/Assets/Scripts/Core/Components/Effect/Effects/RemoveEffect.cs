@@ -2,15 +2,16 @@ using UnityEngine;
 
 namespace ModiBuff.Core
 {
-	public class RemoveEffect : IRemoveEffect
+	public class RemoveEffect : IRemoveEffect, IShallowClone<RemoveEffect>
 	{
 		private IRevertEffect[] _revertibleEffects;
 		private readonly int _id;
 
-		public RemoveEffect()
+		public RemoveEffect() : this(ModifierIdManager.CurrentId)
 		{
-			_id = ModifierIdManager.CurrentId;
 		}
+
+		private RemoveEffect(int id) => _id = id;
 
 		public void SetRevertibleEffects(IRevertEffect[] revertibleEffects)
 		{
@@ -26,5 +27,7 @@ namespace ModiBuff.Core
 			//Still not fully ideal, but fixed the state issue 
 			target.PrepareRemoveModifier(_id); //TODO From which collection? Applier support?
 		}
+
+		public RemoveEffect ShallowClone() => new RemoveEffect(_id);
 	}
 }
