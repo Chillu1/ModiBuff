@@ -28,8 +28,8 @@ This library was made to make a standarized powerful system that allows for mani
 # Features
 
 * No GC/allocations (fully pooled)
-* Low memory usage (20 MB for 100 000 modifiers)
-* Fast iteration [2 000 interval modifiers in 5ms](#benchmarks)
+* Low memory usage (2 MB for 10_000 modifiers)
+* Fast iteration [5_000 interval modifiers in 5ms](#benchmarks)
 * Easy high level API [recipes](#recipe)
 * Effects on actions
 	* Init
@@ -45,12 +45,13 @@ This library was made to make a standarized powerful system that allows for mani
 # Benchmarks
 
 Preallocated Pools
+Initializing a new clone of the modifier:
 
-|                                                       | InitDmg, N:5k | DoT, N:5k    | DoT pool, N:5k | DoT pool reset return, N:5k |
-|-------------------------------------------------------|---------------|--------------|----------------|-----------------------------|
-| ModiBuff (this)                                       | 0.74ms, 1 GC  | 2.84ms, 4 GC | 0.03ms, 0 GC   | 0.16ms, 0 GC                |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.00ms, 1 GC  | 5.80ms, 1 GC | NaN            | NaN                         |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC | 70 ms, 63 GC | NaN            | NaN                         |
+|                                                       | InitDmg, N:5k | DoT, N:5k     | DoT pool, N:5k | DoT pool reset return, N:5k |
+|-------------------------------------------------------|---------------|---------------|----------------|-----------------------------|
+| ModiBuff (this)                                       | 3.87ms, 4 GC  | 12.5ms, 11 GC | 0.03ms, 0 GC   | 0.16ms, 0 GC                |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.00ms, 1 GC  | 5.80ms,  1 GC | NaN            | NaN                         |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC | 70 ms,  63 GC | NaN            | NaN                         |
 
 Non-pool benchmarks don't really matter for ModiBuff, since it will only slow down when allocating the new modifiers in the pools.
 
@@ -59,10 +60,10 @@ But it's also much faster in cases of doing init/stack/refresh on an existing mo
 ModiBuffEcs is a bit on the slow side for now, because we're creating the entities and their components, instead of reusing them, like in
 the case of ModiBuff.
 
-Mixed modifier = N of each. Ex. 2560 instances * 40 recipes = 102_400 modifiers  
-100_000 mixed modifiers = 21MB  
+Mixed modifier = N of each. Ex. 256 instances * 40 recipes = 10_240 modifiers  
+10_000 mixed modifiers = 2MB  
 Modifier Recipes setup = 7ms  
-Preallocating 100 000 mixed modifiers = 1 second
+Preallocating 10_000 mixed modifiers = 100ms
 
 ModiBuff InitDmg (not cloning any components, no state)
 DoT = InitDoTSeparateDamageRemove
@@ -70,6 +71,10 @@ DoT = InitDoTSeparateDamageRemove
 # Installation
 
 Currently the library is not on NuGet or any other package manager. You can download the source code and add it to your project directly.
+
+Specifically, you should get [Core](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Scripts/Core).
+[Download Link](https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2FChillu1%2FModiBuff%2Ftree%2Fmaster%2FModiBuff%2FAssets%2FScripts%2FCore)  
+And [Core Units](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Scripts/CoreUnits), if you want an implementation example.
 
 # Differences to ModiBuffEcs and Old
 
@@ -79,7 +84,7 @@ ModiBuff has:
 
 * No GC/allocations
 * No ECS framework needed
-* Worse iteration speed, 2_000 interval modifiers compared to 100_000 modifiers, 5ms update, average complexity modifiers
+* Worse iteration speed, 5_000 interval modifiers compared to 100_000 modifiers, 5ms update, average complexity modifiers
 
 
 * More features
@@ -94,7 +99,7 @@ ModiBuff has:
 * Smaller Codebase
 * No GC/allocations
 * Improved API
-* Better iteration speed, 2_000 interval modifiers (from 500), 5ms update, average complexity modifiers
+* Better iteration speed, 5_000 interval modifiers (from 500), 5ms update, average complexity modifiers
 * Only cloning statefull objects (less memory, 20 MB for 100_000 modifiers, 7 MB for 100_000 simple modifiers)
 
 

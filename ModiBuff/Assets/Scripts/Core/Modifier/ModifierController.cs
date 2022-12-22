@@ -4,8 +4,10 @@ namespace ModiBuff.Core
 {
 	public sealed class ModifierController : IRemoveModifier
 	{
-		//TODO Array mapping?
-		private readonly Dictionary<int, Modifier> _modifiers;
+		private readonly Modifier[] _modifiers;
+
+		//Saving indexes is faster if we have more than 170 recipes
+		//private readonly List<int> _modifierIndexes;
 
 		private readonly List<int> _modifierAttackAppliers;
 		private readonly List<int> _modifierCastAppliers;
@@ -15,7 +17,7 @@ namespace ModiBuff.Core
 
 		public ModifierController()
 		{
-			_modifiers = new Dictionary<int, Modifier>();
+			_modifiers = new Modifier[ModifierRecipes.RecipesCount];
 			_modifierAttackAppliers = new List<int>(5);
 			_modifierCastAppliers = new List<int>(5);
 			_modifierChecksAppliers = new Dictionary<int, ModifierCheck>(5);
@@ -25,11 +27,17 @@ namespace ModiBuff.Core
 
 		public void Update(in float delta)
 		{
-			//int length = _modifiers.Count;
-			//TODO Array for loop mapping
-			if (_modifiers.Count > 0)
-				foreach (var modifier in _modifiers.Values)
-					modifier.Update(delta);
+			int length = _modifiers.Length;
+			//for (int i = 0; i < length; i++)
+			//	_modifiers[_modifierIndexes[i]].Update(delta);
+			for (int i = 0; i < length; i++)
+			{
+				var modifier = _modifiers[i];
+				if (modifier == null)
+					continue;
+
+				modifier.Update(delta);
+			}
 
 			if (_modifierChecksAppliers.Count > 0)
 				foreach (var check in _modifierChecksAppliers.Values)
@@ -89,7 +97,8 @@ namespace ModiBuff.Core
 
 		private Modifier Add(int id, IUnit owner, IUnit target, IUnit sender = null)
 		{
-			if (_modifiers.TryGetValue(id, out var existingModifier))
+			var existingModifier = _modifiers[id];
+			if (existingModifier != null)
 			{
 				//Debug.Log("Modifier already exists");
 				//TODO should we update the modifier targets when init/refreshing/stacking?
@@ -106,14 +115,14 @@ namespace ModiBuff.Core
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
 			modifier.SetTargets(target, owner, sender);
 
-			_modifiers.Add(modifier.Id, modifier);
+			_modifiers[id] = modifier;
 			modifier.Init();
 			modifier.Refresh();
 			modifier.Stack();
 			return modifier;
 		}
 
-		public bool Contains(int id) => _modifiers.ContainsKey(id);
+		public bool Contains(int id) => _modifiers[id] != null;
 
 		public void PrepareRemove(Modifier modifier)
 		{
@@ -133,7 +142,7 @@ namespace ModiBuff.Core
 		private void Remove(Modifier modifier)
 		{
 			//Debug.Log("Removing modifier: " + modifier.Id);
-			_modifiers.Remove(modifier.Id);
+			_modifiers[modifier.Id] = null;
 			ModifierPool.Instance.Return(modifier);
 		}
 	}

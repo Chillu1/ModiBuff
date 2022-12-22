@@ -16,24 +16,24 @@ namespace ModiBuff.Tests
 			Measure.Method(() =>
 			{
 				var modifier = modifierRecipe.Create();
-			}).BenchGC();
+			}).BenchGC(Iterations);
 		}
 
 		[Test, Performance]
 		public void BenchNewMediumModifierFromRecipe()
 		{
-			//We clone two TimeComponents here
 			var modifierRecipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
 
 			Measure.Method(() =>
 			{
 				var modifier = modifierRecipe.Create();
-			}).BenchGC();
+			}).BenchGC(Iterations);
 		}
 
 		[Test, Performance]
 		public void BenchPooledMediumModifierFromRecipe()
 		{
+			Pool.Clear();
 			var recipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
 			Pool.SetMaxPoolSize(1_000_000);
 			Pool.Allocate(recipe.Id, 60 * Iterations);
@@ -41,31 +41,35 @@ namespace ModiBuff.Tests
 			Measure.Method(() =>
 			{
 				var modifier = Pool.Rent(recipe.Id);
-			}).BenchGC();
+			}).BenchGC(Iterations);
 		}
 
 		[Test, Performance]
 		public void BenchPooledMediumModifierFromRecipeReturn()
 		{
+			Pool.Clear();
 			var recipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
+			Pool.Allocate(recipe.Id, Iterations);
 
 			Measure.Method(() =>
 			{
 				var modifier = Pool.Rent(recipe.Id);
 				Pool.Return(modifier);
-			}).BenchGC();
+			}).BenchGC(Iterations);
 		}
 
 		[Test, Performance]
 		public void BenchPooledFullStateModifierFromRecipeReturn()
 		{
+			Pool.Clear();
 			var recipe = Recipes.GetRecipe("IntervalDamage_StackAddDamage");
+			Pool.Allocate(recipe.Id, Iterations);
 
 			Measure.Method(() =>
 			{
 				var modifier = Pool.Rent(recipe.Id);
 				Pool.Return(modifier);
-			}).BenchGC();
+			}).BenchGC(Iterations);
 		}
 	}
 }

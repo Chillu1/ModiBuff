@@ -16,6 +16,7 @@ namespace ModiBuff.Core
 
 			SetupModifiers();
 			RecipesCount = _modifiers.Count;
+			Debug.Log($"[ModiBuff] Loaded {RecipesCount} recipes.");
 		}
 
 		//public Modifier Get(string id) => _modifiers[id].Create();

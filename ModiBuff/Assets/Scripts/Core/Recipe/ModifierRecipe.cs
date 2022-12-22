@@ -28,7 +28,7 @@ namespace ModiBuff.Core
 		private RemoveEffect _removeEffect;
 		private EffectWrapper _removeEffectWrapper;
 
-		private List<IEffect>[] _effectBinds;
+		private List<EffectWrapper> _effectWrappers;
 
 		private bool _refreshDuration, _refreshInterval;
 
@@ -46,10 +46,7 @@ namespace ModiBuff.Core
 			Id = ModifierIdManager.GetFreeId(name);
 			Name = name;
 
-			var allEffectOns = Enum.GetValues(typeof(EffectOn)).Cast<EffectOn>().ToArray();
-			_effectBinds = new List<IEffect>[allEffectOns.Length];
-			for (int i = 0; i < allEffectOns.Length; i++)
-				_effectBinds[i] = new List<IEffect>(2);
+			_effectWrappers = new List<EffectWrapper>(3);
 		}
 
 		//---PostFinish---
@@ -178,18 +175,7 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe Effect(IEffect effect, EffectOn effectOn)
 		{
-			if (!Utilities.Utilities.IsPowerOfTwo((int)effectOn))
-			{
-				foreach (var baseEffectOn in Enum.GetValues(typeof(EffectOn)).Cast<EffectOn>())
-				{
-					if ((effectOn & baseEffectOn) != 0)
-						Effect(effect, baseEffectOn);
-				}
-
-				return this;
-			}
-
-			_effectBinds[Utilities.Utilities.FastLog2((double)effectOn)].Add(effect);
+			_effectWrappers.Add(new EffectWrapper(effect, effectOn));
 			return this;
 		}
 
@@ -206,14 +192,11 @@ namespace ModiBuff.Core
 				Debug.LogError("Modifier recipe already finished, finishing again. Not intended?");
 
 			_timeComponents = new List<ITimeComponent>(2);
-			_modifierCreator = new ModifierCreator(_effectBinds);
+			_modifierCreator = new ModifierCreator(_effectWrappers);
 		}
 
 		public int CompareTo(ModifierRecipe other)
 		{
-			//Will we have troubles with not comparing references?
-			//if (ReferenceEquals(this, other)) return 0;
-			//if (ReferenceEquals(null, other)) return 1;
 			return Id.CompareTo(other.Id);
 		}
 	}

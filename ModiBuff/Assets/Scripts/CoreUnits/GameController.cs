@@ -4,8 +4,6 @@ namespace ModiBuff.Core.Units
 {
 	public class GameController : MonoBehaviour
 	{
-		private Modifier[] _modifiers;
-		private Unit _unit;
 		private ModifierRecipe _recipe;
 		private IUnit[] _units;
 		private ModifierPool _pool;
@@ -17,23 +15,24 @@ namespace ModiBuff.Core.Units
 			var coreSystem = new CoreSystem();
 			_pool = coreSystem.Pool;
 			_recipeId = ModifierIdManager.GetId("DoT");
-			var _recipeId2 = ModifierIdManager.GetId("InitDoTSeparateDamageRemove");
+			//var _recipeId2 = ModifierIdManager.GetId("InitDoTSeparateDamageRemove");
 
 			//_modifiers = new Modifier[20_000];
 			//_unit = new Unit();
-			_units = new IUnit[1_000];
+			_units = new IUnit[5_000];
 			for (int i = 0; i < _units.Length; i++)
 			{
 				_units[i] = new Unit();
 				_units[i].TryAddModifier(_recipeId, _units[i], _units[i]);
-				_units[i].TryAddModifier(_recipeId2, _units[i], _units[i]);
+				//_units[i].TryAddModifier(_recipeId2, _units[i], _units[i]);
 			}
 		}
 
 		private void Update()
 		{
 			float delta = Time.deltaTime;
-			for (int i = 0; i < _units.Length; i++)
+			int length = _units.Length;
+			for (int i = 0; i < length; i++)
 			{
 				//if (Time.frameCount % 10 == 0)
 				//	_unit.TryAddModifier(_recipe.Id, _unit);

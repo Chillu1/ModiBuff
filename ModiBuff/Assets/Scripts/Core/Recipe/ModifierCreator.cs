@@ -11,21 +11,9 @@ namespace ModiBuff.Core
 		private List<IEffect> _durationEffects;
 		private List<IStackEffect> _stackEffects;
 
-		public ModifierCreator(List<IEffect>[] effectBinds)
+		public ModifierCreator(List<EffectWrapper> effectWrappers)
 		{
-			_effectWrappers = new List<EffectWrapper>(effectBinds.Length);
-			for (int i = 0; i < effectBinds.Length; i++)
-			{
-				var effectOn = (EffectOn)(1 << i);
-				//Debug.Log(effectOn);//TODO Sometimes we get 16? How?
-				for (int j = 0; j < effectBinds[i].Count; j++)
-				{
-					if (_effectWrappers.Exists(w => w.IsSameEffect(effectBinds[i][j], effectOn)))
-						continue;
-
-					_effectWrappers.Add(new EffectWrapper(effectBinds[i][j], effectOn));
-				}
-			}
+			_effectWrappers = effectWrappers;
 
 			_revertList = new List<IRevertEffect>();
 
