@@ -16,13 +16,9 @@ namespace ModiBuff.Tests
 		{
 			int modifierId = ModifierIdManager.GetId("InitDamage");
 
-			Measure.Method(() => Unit.TryAddModifier(modifierId, Unit, Unit))
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.GC()
-				.Run()
-				;
+			Measure.Method(
+					() => Unit.TryAddModifier(modifierId, Unit, Unit))
+				.BenchGC(Iterations);
 		}
 
 		[Test, Performance]
@@ -30,13 +26,9 @@ namespace ModiBuff.Tests
 		{
 			int modifierId = ModifierIdManager.GetId("InitDoTSeparateDamageRemove");
 
-			Measure.Method(() => Unit.TryAddModifier(modifierId, Unit, Unit))
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.GC()
-				.Run()
-				;
+			Measure.Method(
+					() => Unit.TryAddModifier(modifierId, Unit, Unit))
+				.BenchGC(Iterations);
 		}
 	}
 }

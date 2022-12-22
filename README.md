@@ -29,7 +29,7 @@ This library was made to make a standarized powerful system that allows for mani
 
 * No GC/allocations (fully pooled)
 * Low memory usage (20 MB for 100 000 modifiers)
-* Fast iteration [10 000 modifiers in 5ms](#benchmarks)
+* Fast iteration [2 000 interval modifiers in 5ms](#benchmarks)
 * Easy high level API [recipes](#recipe)
 * Effects on actions
 	* Init
@@ -54,10 +54,10 @@ Preallocated Pools
 
 Non-pool benchmarks don't really matter for ModiBuff, since it will only slow down when allocating the new modifiers in the pools.
 
-Pooling in ModiBuff is 280X faster than original (because of pooling & reset)  
-But it's also faster in case of doing init/stack/refresh on an existing modifier (we don't create a new modifier)  
-ModiBuffEcs is a bit on the slow side because we're creating the entities and their components, instead of reusing them, like in the case of
-ModiBuff.
+Pooling in ModiBuff is 430X faster than original old version (because of pooling & reset)  
+But it's also much faster in cases of doing init/stack/refresh on an existing modifier (we don't create a new modifier anymore)  
+ModiBuffEcs is a bit on the slow side for now, because we're creating the entities and their components, instead of reusing them, like in
+the case of ModiBuff.
 
 Mixed modifier = N of each. Ex. 2560 instances * 40 recipes = 102_400 modifiers  
 100_000 mixed modifiers = 21MB  
@@ -79,7 +79,7 @@ ModiBuff has:
 
 * No GC/allocations
 * No ECS framework needed
-* Worse iteration speed, 10 000 modifiers compared to 100 000 modifiers, 5ms update, average complexity modifiers
+* Worse iteration speed, 2_000 interval modifiers compared to 100_000 modifiers, 5ms update, average complexity modifiers
 
 
 * More features
@@ -94,7 +94,7 @@ ModiBuff has:
 * Smaller Codebase
 * No GC/allocations
 * Improved API
-* Better iteration speed, 10 000 modifiers (from 500), 5ms update, average complexity modifiers
+* Better iteration speed, 2_000 interval modifiers (from 500), 5ms update, average complexity modifiers
 * Only cloning statefull objects (less memory, 20 MB for 100_000 modifiers, 7 MB for 100_000 simple modifiers)
 
 
@@ -103,7 +103,6 @@ ModiBuff has:
 	* Aura
 	* Condition effects (when low health)
 	* Some status effects (taunt, confuse)
-	* Fully functioning revertible modifiers
 
 # Usage
 
@@ -188,7 +187,7 @@ Ex. games: binding of isaac, tiny rogues, gungeon, dota, witcher 3
 Ex. genres: moba, arena, duel
 
 Only choose original if you need the deep featureset, AND you don't expect to have more than 100 units in the game at the same time, all
-using/applying 10 modifiers each frame.
+using/applying 5 modifiers each frame.
 If you're making a moba or a small PvP arena game, you can use the original library. That being said, ModiBuff is a better choice for the
 vast majority of games.
 
@@ -201,6 +200,8 @@ vast majority of games.
 [//]: # (TODO Recipe examples for usual game mechanics)
 
 [//]: # (DoT, InitDoTSeparateDmg, OnXStacks, StackableDamage, StunEverySecondFor0.2Seconds)
+
+[//]: # ("Absoultely crazy modifiers": applying appliers on events, X stacks, etc)
 
 Delayed damage
 

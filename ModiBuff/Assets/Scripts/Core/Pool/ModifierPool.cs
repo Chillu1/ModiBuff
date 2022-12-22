@@ -112,7 +112,7 @@ namespace ModiBuff.Core
 		{
 			Clear();
 
-			_stackCapacity = 0;
+			_stackCapacity = 1;
 			Instance = null;
 		}
 	}

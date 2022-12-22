@@ -27,12 +27,7 @@ namespace ModiBuff.Tests
 					for (int i = 0; i < effects.Length; i++)
 						effects[i].Effect(unit, unit);
 				})
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.GC()
-				.Run()
-				;
+				.BenchGC(Iterations);
 		}
 
 		[Test, Performance]
@@ -52,12 +47,7 @@ namespace ModiBuff.Tests
 					for (int i = 0; i < actions.Length; i++)
 						actions[i](unit, unit);
 				})
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.GC()
-				.Run()
-				;
+				.BenchGC(Iterations);
 		}
 
 		[Test, Performance]
@@ -77,12 +67,7 @@ namespace ModiBuff.Tests
 					for (int i = 0; i < effects.Length; i++)
 						effects[i].Effect(unit, unit);
 				})
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.GC()
-				.Run()
-				;
+				.BenchGC(Iterations);
 		}
 	}
 }

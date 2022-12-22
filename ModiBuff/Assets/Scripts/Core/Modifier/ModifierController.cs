@@ -27,11 +27,13 @@ namespace ModiBuff.Core
 		{
 			//int length = _modifiers.Count;
 			//TODO Array for loop mapping
-			foreach (var modifier in _modifiers.Values)
-				modifier.Update(delta);
+			if (_modifiers.Count > 0)
+				foreach (var modifier in _modifiers.Values)
+					modifier.Update(delta);
 
-			foreach (var check in _modifierChecksAppliers.Values)
-				check.Update(delta);
+			if (_modifierChecksAppliers.Count > 0)
+				foreach (var check in _modifierChecksAppliers.Values)
+					check.Update(delta);
 
 			int removeCount = _modifiersToRemove.Count;
 			if (removeCount == 0)

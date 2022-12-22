@@ -196,6 +196,21 @@ namespace ModiBuff.Core
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, true), EffectOn.Init)
 				.Remove(1);
 
+			{
+				Add("InitAddDamageBuff")
+					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+					.Refresh()
+					.Remove(1.05f); //TODO standardized aura time & aura effects should always be refreshable
+
+				Add("InitAddDamageBuff_Interval")
+					.Interval(1)
+					.Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval);
+			}
+
+			Add("DoT")
+				.Interval(1)
+				.Effect(new DamageEffect(5), EffectOn.Interval);
+
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
 			//	.Effect(new StackEffectNew(StackEffectType.Add, new DamageEffect(5)), EffectOn.Interval)

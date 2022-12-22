@@ -18,6 +18,9 @@ namespace ModiBuff.Core.Units
 		private List<UnitEvent> _onDamageEvents;
 		private List<Modifier> _onDamageModifiers;
 
+		private List<Unit> _targetsInRange;
+		private List<Modifier> _auraModifiers;
+
 		private readonly StatusEffectController _statusEffectController;
 
 		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000)
@@ -29,6 +32,10 @@ namespace ModiBuff.Core.Units
 			_onDamageEvents = new List<UnitEvent>();
 			_onDamageModifiers = new List<Modifier>();
 
+			_targetsInRange = new List<Unit>();
+			_targetsInRange.Add(this);
+			_auraModifiers = new List<Modifier>();
+
 			_modifierController = new ModifierController();
 			_statusEffectController = new StatusEffectController();
 		}
@@ -37,6 +44,8 @@ namespace ModiBuff.Core.Units
 		{
 			_statusEffectController.Update(deltaTime);
 			_modifierController.Update(deltaTime);
+			for (int i = 0; i < _auraModifiers.Count; i++)
+				_auraModifiers[i].Update(deltaTime);
 		}
 
 		public void Cast(Unit target)
@@ -110,6 +119,8 @@ namespace ModiBuff.Core.Units
 		{
 			Mana -= value;
 		}
+
+		//---StatusEffects---
 
 		public bool HasLegalAction(LegalAction legalAction)
 		{
@@ -238,6 +249,20 @@ namespace ModiBuff.Core.Units
 		/// </summary>
 		/// <param name="id"></param>
 		public void RemoveModifier(int id) => _modifierController.Remove(id);
+
+		//---Aura---
+
+		public void AddCloseTargets(params Unit[] targets)
+		{
+			_targetsInRange.AddRange(targets);
+		}
+
+		public void AddAuraModifier(ModifierRecipe recipe)
+		{
+			var modifier = recipe.Create();
+			//modifier.SetTargets();
+			_auraModifiers.Add(modifier);
+		}
 
 		public override string ToString()
 		{

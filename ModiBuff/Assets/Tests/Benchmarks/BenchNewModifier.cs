@@ -14,15 +14,9 @@ namespace ModiBuff.Tests
 			var modifierRecipe = Recipes.GetRecipe("InitDamage");
 
 			Measure.Method(() =>
-				{
-					var modifier = modifierRecipe.Create();
-				})
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.GC()
-				.Run()
-				;
+			{
+				var modifier = modifierRecipe.Create();
+			}).BenchGC();
 		}
 
 		[Test, Performance]
@@ -32,15 +26,9 @@ namespace ModiBuff.Tests
 			var modifierRecipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
 
 			Measure.Method(() =>
-				{
-					var modifier = modifierRecipe.Create();
-				})
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.GC()
-				.Run()
-				;
+			{
+				var modifier = modifierRecipe.Create();
+			}).BenchGC();
 		}
 
 		[Test, Performance]
@@ -51,15 +39,9 @@ namespace ModiBuff.Tests
 			Pool.Allocate(recipe.Id, 60 * Iterations);
 
 			Measure.Method(() =>
-				{
-					var modifier = Pool.Rent(recipe.Id);
-				})
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.GC()
-				.Run()
-				;
+			{
+				var modifier = Pool.Rent(recipe.Id);
+			}).BenchGC();
 		}
 
 		[Test, Performance]
@@ -68,16 +50,22 @@ namespace ModiBuff.Tests
 			var recipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
 
 			Measure.Method(() =>
-				{
-					var modifier = Pool.Rent(recipe.Id);
-					Pool.Return(modifier);
-				})
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.GC()
-				.Run()
-				;
+			{
+				var modifier = Pool.Rent(recipe.Id);
+				Pool.Return(modifier);
+			}).BenchGC();
+		}
+
+		[Test, Performance]
+		public void BenchPooledFullStateModifierFromRecipeReturn()
+		{
+			var recipe = Recipes.GetRecipe("IntervalDamage_StackAddDamage");
+
+			Measure.Method(() =>
+			{
+				var modifier = Pool.Rent(recipe.Id);
+				Pool.Return(modifier);
+			}).BenchGC();
 		}
 	}
 }

@@ -16,15 +16,17 @@ namespace ModiBuff.Core.Units
 		{
 			var coreSystem = new CoreSystem();
 			_pool = coreSystem.Pool;
-			_recipeId = ModifierIdManager.GetId("InitDoTSeparateDamageRemove");
+			_recipeId = ModifierIdManager.GetId("DoT");
+			var _recipeId2 = ModifierIdManager.GetId("InitDoTSeparateDamageRemove");
 
-			_modifiers = new Modifier[20_000];
-			_unit = new Unit();
-			_units = new IUnit[10_000];
+			//_modifiers = new Modifier[20_000];
+			//_unit = new Unit();
+			_units = new IUnit[1_000];
 			for (int i = 0; i < _units.Length; i++)
 			{
 				_units[i] = new Unit();
 				_units[i].TryAddModifier(_recipeId, _units[i], _units[i]);
+				_units[i].TryAddModifier(_recipeId2, _units[i], _units[i]);
 			}
 		}
 

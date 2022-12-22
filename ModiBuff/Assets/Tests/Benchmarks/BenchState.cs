@@ -19,13 +19,8 @@ namespace ModiBuff.Tests
 			IEffect[] effects = { new DamageEffect(5), new DamageEffect(5) };
 			var init = new InitComponentFeedFake(effects);
 
-			Measure.Method(() => { init.Init(targetComponent.Target, targetComponent.Owner); })
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.GC()
-				.Run()
-				;
+			Measure.Method(() => init.Init(targetComponent.Target, targetComponent.Owner))
+				.BenchGC(Iterations);
 		}
 
 		private sealed class InitComponentFeedFake
@@ -52,13 +47,8 @@ namespace ModiBuff.Tests
 			var init = new InitComponentCacheFake(effects);
 			init.SetupTarget(new TargetComponent(source, source, target));
 
-			Measure.Method(() => { init.Init(); })
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.GC()
-				.Run()
-				;
+			Measure.Method(() => init.Init())
+				.BenchGC(Iterations);
 		}
 
 		private sealed class InitComponentCacheFake

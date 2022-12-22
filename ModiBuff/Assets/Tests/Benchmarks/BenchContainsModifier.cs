@@ -42,11 +42,7 @@ namespace ModiBuff.Tests
 						var m = modifier;
 					}
 				})
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.Run()
-				;
+				.Bench(Iterations);
 		}
 
 		[Test, Performance]
@@ -73,11 +69,7 @@ namespace ModiBuff.Tests
 						var m = list[index];
 					}
 				})
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.Run()
-				;
+				.Bench(Iterations);
 		}
 
 		[Test, Performance]
@@ -98,11 +90,7 @@ namespace ModiBuff.Tests
 				{
 					var m = modifiers[recipe.Id];
 				})
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.Run()
-				;
+				.Bench(Iterations);
 		}
 
 		//[Test, Performance]
@@ -129,11 +117,7 @@ namespace ModiBuff.Tests
 						}
 					}
 				})
-				.WarmupCount(10)
-				.MeasurementCount(50)
-				.IterationsPerMeasurement(Iterations)
-				.Run()
-				;
+				.Bench(Iterations);
 		}
 	}
 }
