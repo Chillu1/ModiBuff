@@ -8,7 +8,7 @@ namespace ModiBuff.Core
 		public CoreSystem(int initialPoolSize = 64)
 		{
 			var idManager = new ModifierIdManager();
-			Recipes = new ModifierRecipes();
+			Recipes = new TestModifierRecipes();
 			Pool = new ModifierPool(Recipes.GetRecipes(), initialPoolSize);
 		}
 

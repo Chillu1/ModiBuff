@@ -40,7 +40,7 @@ namespace ModiBuff.Core.Units
 			_statusEffectController = new StatusEffectController();
 		}
 
-		public void Update(in float deltaTime)
+		public virtual void Update(in float deltaTime) //TODO Remove virtual
 		{
 			_statusEffectController.Update(deltaTime);
 			_modifierController.Update(deltaTime);

@@ -3,7 +3,7 @@ namespace ModiBuff.Core
 	public sealed class EffectWrapper
 	{
 		private readonly IEffect _effect;
-		public EffectOn EffectOn { get; private set; }
+		public EffectOn EffectOn { get; }
 
 		private IEffect _effectClone;
 
@@ -11,14 +11,6 @@ namespace ModiBuff.Core
 		{
 			_effect = effect;
 			EffectOn = effectOn;
-		}
-
-		public bool IsSameEffect(IEffect effect, EffectOn effectOn)
-		{
-			bool isSameEffect = _effect == effect;
-			if (isSameEffect)
-				EffectOn |= effectOn;
-			return isSameEffect;
 		}
 
 		public IEffect GetEffect()

@@ -1,0 +1,17 @@
+{
+    "name": "ModiBuff.Examples.SimpleSolo",
+    "rootNamespace": "ModiBuff.Examples.SimpleSolo",
+    "references": [
+        "GUID:a0ba3884f00945fe92df4f878aea7c7e",
+        "GUID:3c1bdbd47ad9134a4941d9e8d412f1ae"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
