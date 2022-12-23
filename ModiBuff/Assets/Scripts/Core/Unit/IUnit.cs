@@ -9,7 +9,7 @@ namespace ModiBuff.Core
 		float HealValue { get; }
 		float Mana { get; }
 
-		void Update(in float deltaTime);
+		void Update(float deltaTime);
 		float Attack(IUnit target);
 		float TakeDamage(float damage, IUnit acter, bool triggersEvents = true);
 		float Heal(float heal, IUnit acter);

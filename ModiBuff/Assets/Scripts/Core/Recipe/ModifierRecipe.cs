@@ -21,7 +21,8 @@ namespace ModiBuff.Core
 		private CostType _costType = CostType.None;
 		private float _cost = -1f;
 
-		private bool _init;
+		private bool _oneTimeInit;
+
 		private float _interval;
 		private float _duration;
 
@@ -79,7 +80,7 @@ namespace ModiBuff.Core
 			var creation = _modifierCreator.Create(_removeEffectWrapper);
 
 			if (creation.initEffects.Count > 0)
-				initComponent = new InitComponent(creation.initEffects.ToArray());
+				initComponent = new InitComponent(_oneTimeInit, creation.initEffects.ToArray());
 			if (creation.intervalEffects.Count > 0)
 				_timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, creation.intervalEffects.ToArray()));
 			if (creation.durationEffects.Count > 0)
@@ -122,6 +123,16 @@ namespace ModiBuff.Core
 		}
 
 		//---Actions---
+
+		/// <summary>
+		///		Only trigger Init effects once. When adding modifier.
+		/// </summary>
+		/// <remarks>Works well for auras</remarks>
+		public ModifierRecipe OneTimeInit()
+		{
+			_oneTimeInit = true;
+			return this;
+		}
 
 		public ModifierRecipe Interval(float interval)
 		{

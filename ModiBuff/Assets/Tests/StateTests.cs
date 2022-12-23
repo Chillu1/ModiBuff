@@ -158,5 +158,22 @@ namespace ModiBuff.Tests
 			Unit.Update(5); //Removed
 			Assert.AreEqual(UnitDamage, Unit.Damage);
 		}
+
+		[Test]
+		public void OneTimeInit_ResetState()
+		{
+			Pool.Clear();
+			int recipeId = ModifierIdManager.GetId("OneTimeInitDamage");
+			Pool.Allocate(recipeId, 1);
+
+			Unit.TryAddModifierSelf("OneTimeInitDamage"); //Init
+			Unit.TryAddModifierSelf("OneTimeInitDamage"); //No init
+
+			Unit.RemoveModifier(recipeId); //Remove, back to pool, reset state
+
+			Unit.TryAddModifierSelf("OneTimeInitDamage"); //Use again, init
+
+			Assert.AreEqual(UnitHealth - 10, Unit.Health);
+		}
 	}
 }

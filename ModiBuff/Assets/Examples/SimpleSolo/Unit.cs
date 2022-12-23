@@ -14,7 +14,7 @@ namespace ModiBuff.Examples.SimpleSolo
 			_targetSystem = new TargetSystem();
 		}
 
-		public override void Update(in float delta)
+		public override void Update(float delta)
 		{
 			_attackTimer += delta;
 			if (_attackTimer >= _attackCooldown)

@@ -175,6 +175,10 @@ namespace ModiBuff.Core
 				.Interval(1)
 				.Effect(new DamageEffect(5), EffectOn.Interval);
 
+			Add("OneTimeInitDamage")
+				.OneTimeInit()
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
 			//	.Effect(new StackEffectNew(StackEffectType.Add, new DamageEffect(5)), EffectOn.Interval)

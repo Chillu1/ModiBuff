@@ -273,3 +273,8 @@ Add("StackBasedDamage")
 ```
 
 ## Full
+
+[All examples](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Examples)
+
+[Simple solo](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Examples/SimpleSolo)
+example, of player unit fighting a single enemy unit

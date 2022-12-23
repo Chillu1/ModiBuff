@@ -121,7 +121,8 @@ namespace ModiBuff.Core
 
 		public void ResetState()
 		{
-			//_removeModifier = null;
+			if (_init)
+				_initComponent.ResetState();
 			if (_time)
 				for (int i = 0; i < _timeComponents.Length; i++)
 					_timeComponents[i].ResetState();
