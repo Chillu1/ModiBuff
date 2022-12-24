@@ -16,10 +16,16 @@ namespace ModiBuff.Core
 
 		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
 
-		private float _cooldown = -1f;
-		private float _chance = -1f;
-		private CostType _costType = CostType.None;
+		private float _applyCooldown = -1f;
+		private float _applyChance = -1f;
+		private CostType _applyCostType = CostType.None;
 		private float _cost = -1f;
+
+		private bool _hasEffectChecks;
+		private float _effectCooldown = -1f;
+		private float _effectChance = -1f;
+		private CostType _effectCostType = CostType.None;
+		private float _effectCost = -1f;
 
 		private bool _oneTimeInit;
 
@@ -42,6 +48,9 @@ namespace ModiBuff.Core
 		private List<ITimeComponent> _timeComponents;
 		private ModifierCreator _modifierCreator;
 
+		private CostCheck _effectCostInstance;
+		private ChanceCheck _effectChanceInstance;
+
 		public ModifierRecipe(string name)
 		{
 			Id = ModifierIdManager.GetFreeId(name);
@@ -58,15 +67,15 @@ namespace ModiBuff.Core
 			CostCheck cost = null;
 			ChanceCheck chance = null;
 
-			if (_cooldown > 0f)
-				cooldown = new CooldownCheck(_cooldown);
+			if (_applyCooldown > 0f)
+				cooldown = new CooldownCheck(_applyCooldown);
 
 			//TODO If cost and chance don't have state, we can use the same instance for all IDx modifiers
-			if (_costType != CostType.None && _cost > 0f)
-				cost = new CostCheck(_costType, _cost);
+			if (_applyCostType != CostType.None && _cost > 0f)
+				cost = new CostCheck(_applyCostType, _cost);
 
-			if (_chance >= 0f)
-				chance = new ChanceCheck(_chance);
+			if (_applyChance >= 0f)
+				chance = new ChanceCheck(_applyChance);
 
 			return new ModifierCheck(Id, Name, cooldown, cost, chance);
 		}
@@ -79,46 +88,89 @@ namespace ModiBuff.Core
 
 			var creation = _modifierCreator.Create(_removeEffectWrapper);
 
+			CooldownCheck cooldown = null;
+			if (_effectCooldown > 0f)
+				cooldown = new CooldownCheck(_effectCooldown);
+			ModifierCheck effectCheck = null;
+			if (_hasEffectChecks)
+				effectCheck = new ModifierCheck(Id, Name, cooldown, _effectCostInstance, _effectChanceInstance);
+
 			if (creation.initEffects.Count > 0)
-				initComponent = new InitComponent(_oneTimeInit, creation.initEffects.ToArray());
+				initComponent = new InitComponent(_oneTimeInit, creation.initEffects.ToArray(), effectCheck);
 			if (creation.intervalEffects.Count > 0)
-				_timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, creation.intervalEffects.ToArray()));
+				_timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, creation.intervalEffects.ToArray(), effectCheck));
 			if (creation.durationEffects.Count > 0)
 				_timeComponents.Add(new DurationComponent(_duration, _refreshDuration, creation.durationEffects.ToArray()));
 			if (creation.stackEffects.Count > 0)
 				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _isRepeatable, _everyXStacks,
-					creation.stackEffects.Cast<IStackEffect>().ToArray());
+					creation.stackEffects.Cast<IStackEffect>().ToArray(), effectCheck);
 
 			_modifierCreator.Clear();
 
 			return new Modifier(Id, Name, initComponent,
-				_timeComponents.Count == 0 ? Array.Empty<ITimeComponent>() : _timeComponents.ToArray(), stackComponent);
+				_timeComponents.Count == 0 ? Array.Empty<ITimeComponent>() : _timeComponents.ToArray(), stackComponent, effectCheck);
 		}
 
-		//---Checks---
+		//---ApplyChecks---
 
-		public ModifierRecipe Cooldown(float cooldown)
+		/// <summary>
+		///		Cooldown set for when we can try to apply the modifier to a target.
+		/// </summary>
+		public ModifierRecipe ApplyCooldown(float cooldown)
 		{
-			_cooldown = cooldown;
+			_applyCooldown = cooldown;
 			HasChecks = true;
 			return this;
 		}
 
-		public ModifierRecipe Cost(CostType costType, float cost)
+		/// <summary>
+		///		Cost for when we can try to apply the modifier to a target.
+		/// </summary>
+		public ModifierRecipe ApplyCost(CostType costType, float cost)
 		{
-			_costType = costType;
+			_applyCostType = costType;
 			_cost = cost;
 			HasChecks = true;
 			return this;
 		}
 
-		public ModifierRecipe Chance(float chance)
+		/// <summary>
+		///		Chance for when trying to apply the modifier to a target.
+		/// </summary>
+		public ModifierRecipe ApplyChance(float chance)
 		{
 			if (chance > 1)
 				chance /= 100;
 			Debug.Assert(chance >= 0 && chance <= 1, "Chance must be between 0 and 1");
-			_chance = chance;
+			_applyChance = chance;
 			HasChecks = true;
+			return this;
+		}
+
+		//---EffectChecks---
+
+		public ModifierRecipe EffectCooldown(float cooldown)
+		{
+			_effectCooldown = cooldown;
+			_hasEffectChecks = true;
+			return this;
+		}
+
+		public ModifierRecipe EffectCost(CostType costType, float cost)
+		{
+			_effectCostType = costType;
+			_effectCost = cost;
+			_hasEffectChecks = true;
+			return this;
+		}
+
+		public ModifierRecipe EffectChance(float chance)
+		{
+			if (chance > 1)
+				chance /= 100;
+			Debug.Assert(chance >= 0 && chance <= 1, "Chance must be between 0 and 1");
+			_effectChance = chance;
+			_hasEffectChecks = true;
 			return this;
 		}
 
@@ -204,6 +256,15 @@ namespace ModiBuff.Core
 
 			_timeComponents = new List<ITimeComponent>(2);
 			_modifierCreator = new ModifierCreator(_effectWrappers);
+
+			if (_hasEffectChecks)
+			{
+				if (_effectCostType != CostType.None && _effectCost > 0f)
+					_effectCostInstance = new CostCheck(_effectCostType, _effectCost);
+
+				if (_effectChance >= 0f)
+					_effectChanceInstance = new ChanceCheck(_effectChance);
+			}
 		}
 
 		public int CompareTo(ModifierRecipe other)

@@ -1,13 +1,10 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using JetBrains.Annotations;
 
 [assembly: InternalsVisibleTo("ModiBuff.Tests")]
 [assembly: InternalsVisibleTo("ModiBuff.Core.Units")]
 
 namespace ModiBuff.Core
 {
-	[SuppressMessage("ReSharper", "PossibleNullReferenceException")]
 	public sealed class Modifier : IModifier
 	{
 		public int Id { get; }
@@ -15,19 +12,19 @@ namespace ModiBuff.Core
 
 		private readonly bool _init, _time, _refresh, _stack;
 
-		[CanBeNull]
 		private readonly InitComponent _initComponent;
 
-		[CanBeNull]
 		private readonly ITimeComponent[] _timeComponents;
 
-		[CanBeNull]
 		private readonly IStackComponent _stackComponent;
 
-		private IRemoveModifier _removeModifier;
+		private readonly ModifierCheck _effectCheck;
+		private readonly bool _check;
+
 		private TargetComponent _targetComponent;
 
-		public Modifier(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents, IStackComponent stackComponent)
+		public Modifier(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents, IStackComponent stackComponent,
+			ModifierCheck effectCheck)
 		{
 			Id = id;
 			Name = name;
@@ -59,11 +56,12 @@ namespace ModiBuff.Core
 				_stackComponent = stackComponent;
 				_stack = true;
 			}
-		}
 
-		public void SetupModifierRemove(IRemoveModifier removeModifier)
-		{
-			_removeModifier = removeModifier;
+			if (effectCheck != null)
+			{
+				_effectCheck = effectCheck;
+				_check = true;
+			}
 		}
 
 		public void SetTargets(IUnit target, IUnit owner, IUnit sender)
@@ -88,6 +86,9 @@ namespace ModiBuff.Core
 
 		public void Update(float deltaTime)
 		{
+			if (_check)
+				_effectCheck.Update(deltaTime);
+
 			if (!_time)
 				return;
 
@@ -112,11 +113,6 @@ namespace ModiBuff.Core
 				return;
 
 			_stackComponent.Stack();
-		}
-
-		public void SetForRemoval()
-		{
-			_removeModifier?.PrepareRemove(this);
 		}
 
 		public void ResetState()

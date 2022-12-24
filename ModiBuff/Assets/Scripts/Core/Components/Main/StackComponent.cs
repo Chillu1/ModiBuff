@@ -2,13 +2,15 @@ using UnityEngine;
 
 namespace ModiBuff.Core
 {
-	public class StackComponent : IStackComponent, IStateReset
+	public sealed class StackComponent : IStackComponent, IStateReset
 	{
 		private readonly WhenStackEffect _whenStackEffect;
 		private readonly int _maxStacks;
 		private readonly bool _isRepeatable;
 		private readonly int _everyXStacks;
 		private readonly IStackEffect[] _effects;
+		private readonly ModifierCheck _modifierCheck;
+		private readonly bool _check;
 
 		private ITargetComponent _targetComponent;
 
@@ -16,7 +18,7 @@ namespace ModiBuff.Core
 		private float _value;
 
 		public StackComponent(WhenStackEffect whenStackEffect, float value, int maxStacks, bool repeatable, int everyXStacks,
-			IStackEffect[] effects)
+			IStackEffect[] effects, ModifierCheck check)
 		{
 			_whenStackEffect = whenStackEffect;
 			_value = value;
@@ -25,6 +27,9 @@ namespace ModiBuff.Core
 			_everyXStacks = everyXStacks;
 
 			_effects = effects;
+			_modifierCheck = check;
+
+			_check = check != null;
 		}
 
 		public void SetupTarget(ITargetComponent targetComponent)
@@ -38,6 +43,9 @@ namespace ModiBuff.Core
 				return;
 
 			_stacks++;
+
+			if (_check && !_modifierCheck.Check(_targetComponent.Owner))
+				return;
 
 			//Redundancy because of performance
 			switch (_whenStackEffect)
@@ -85,7 +93,7 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _effects.Length; i++)
 				effects[i] = _effects[i].ShallowClone();
 
-			return new StackComponent(_whenStackEffect, _value, _maxStacks, _isRepeatable, _everyXStacks, effects);
+			return new StackComponent(_whenStackEffect, _value, _maxStacks, _isRepeatable, _everyXStacks, effects, _modifierCheck);
 		}
 
 		object IShallowClone.ShallowClone() => ShallowClone();

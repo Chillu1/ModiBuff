@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public class TargetComponent : ITargetComponent
+	public sealed class TargetComponent : ITargetComponent
 	{
 		public IUnit Sender { get; private set; }
 

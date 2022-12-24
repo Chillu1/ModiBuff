@@ -11,18 +11,25 @@ namespace ModiBuff.Core
 
 		private ITargetComponent _targetComponent;
 		private readonly IEffect[] _effects;
+		private readonly bool _check;
+
+		private readonly ModifierCheck _modifierCheck;
 
 		//private int _intervalCount;
 		//private float _totalTime;
 
-		public IntervalComponent(float interval, bool refreshable, IEffect[] effects)
+		public IntervalComponent(float interval, bool refreshable, IEffect[] effects, ModifierCheck check)
 		{
 			_interval = interval;
 			IsRefreshable = refreshable;
 			_effects = effects;
+			_modifierCheck = check;
+
+			_check = check != null;
 		}
 
-		public IntervalComponent(float interval, bool refreshable, IEffect effect) : this(interval, refreshable, new[] { effect })
+		public IntervalComponent(float interval, bool refreshable, IEffect effect, ModifierCheck check) :
+			this(interval, refreshable, new[] { effect }, check)
 		{
 		}
 
@@ -37,10 +44,13 @@ namespace ModiBuff.Core
 			if (_timer < _interval)
 				return;
 
-			//_intervalCount++; //TODO Add this as an idea to ModifierLibraryOrg. Any way to use these smart?
+			//_intervalCount++;
 			//_totalTime += _timer;
 
 			_timer -= _interval;
+
+			if (_check && !_modifierCheck.Check(_targetComponent.Owner))
+				return;
 
 			int length = _effects.Length;
 			for (int i = 0; i < length; i++)
@@ -62,6 +72,6 @@ namespace ModiBuff.Core
 			_targetComponent = null;
 		}
 
-		public ITimeComponent DeepClone() => new IntervalComponent(_interval, IsRefreshable, _effects);
+		public ITimeComponent DeepClone() => new IntervalComponent(_interval, IsRefreshable, _effects, _modifierCheck);
 	}
 }

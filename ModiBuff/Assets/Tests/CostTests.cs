@@ -47,5 +47,14 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(1, Unit.Mana);
 		}
+
+		[Test]
+		public void CostMana_Effect()
+		{
+			Unit.TryAddModifierSelf("InitDamage_CostManaEffect");
+
+			Assert.AreEqual(UnitMana - 5, Unit.Mana);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
 	}
 }

@@ -111,7 +111,6 @@ namespace ModiBuff.Core
 			//Debug.Log("Adding new modifier");
 			var modifier = ModifierPool.Instance.Rent(id);
 
-			modifier.SetupModifierRemove(this);
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
 			modifier.SetTargets(target, owner, sender);
 

@@ -40,7 +40,13 @@ This library was made to make a standarized powerful system that allows for mani
 	* Damage (& self damage)
 	* Heal
 	* Status effects (stun, silence, disarm, etc.)
+	* Add stat (Damage, Heal)
 	* And many more, see [the rest](ModiBuff/Assets/Scripts/Core/Components/Effect/Effects)
+* Conditions (checks)
+	* Chance 0-100%
+	* Cooldown
+	* Health/Mana cost
+* Fully revertable effects
 
 # Benchmarks
 
@@ -65,7 +71,6 @@ Mixed modifier = N of each. Ex. 256 instances * 40 recipes = 10_240 modifiers
 Modifier Recipes setup = 7ms  
 Preallocating 10_000 mixed modifiers = 100ms
 
-ModiBuff InitDmg (not cloning any components, no state)
 DoT = InitDoTSeparateDamageRemove
 
 # Installation
@@ -154,6 +159,13 @@ Add("InitStun")
     .Remove(2);
 ```
 
+### Recipe Limitations
+
+* One Interval Component
+* One Duration Component
+* One Modifier Check for all effects
+* Same Checks (cost, chance, cooldown) for all effects
+
 ## Effect
 
 ## Modifier
@@ -197,6 +209,16 @@ If you're making a moba or a small PvP arena game, you can use the original libr
 vast majority of games.
 
 # FAQ
+
+Q: My stack effect is not working, what's wrong?  
+A: StackEffectType needs to be set in all: `IEffect` (ex. DamageEffect), `Recipe.Effect.EffectOn.Stack` and `Recipe.Stack()`  
+Ex:
+
+```csharp
+Add("StackDamage")
+	.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
+	.Stack(WhenStackEffect.Always);
+```
 
 # Examples
 

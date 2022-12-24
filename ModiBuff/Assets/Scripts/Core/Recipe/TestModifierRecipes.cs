@@ -63,7 +63,7 @@ namespace ModiBuff.Core
 				.Stack(WhenStackEffect.Always);
 
 			Add("ChanceInitDamage")
-				.Chance(0.5f)
+				.ApplyChance(0.5f)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("InitDamage_RemoveFast")
@@ -83,14 +83,14 @@ namespace ModiBuff.Core
 
 			Add("InitDamage_CostHealth")
 				.Effect(new DamageEffect(5), EffectOn.Init)
-				.Cost(CostType.Health, 5);
+				.ApplyCost(CostType.Health, 5);
 
 			Add("Damage_OnHit") //Thorns
 				.Effect(new DamageEffect(5), EffectOn.Init); //Register on init?
 
 			Add("InitDamage_Cooldown")
 				.Effect(new DamageEffect(5), EffectOn.Init)
-				.Cooldown(1);
+				.ApplyCooldown(1);
 
 			Add("InitDamageSelf")
 				.Effect(new SelfDamageEffect(5), EffectOn.Init);
@@ -122,7 +122,7 @@ namespace ModiBuff.Core
 
 			Add("InitDamage_CostMana")
 				.Effect(new DamageEffect(5), EffectOn.Init)
-				.Cost(CostType.Mana, 5);
+				.ApplyCost(CostType.Mana, 5);
 
 			Add("InitStun")
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2), EffectOn.Init);
@@ -138,7 +138,7 @@ namespace ModiBuff.Core
 				.Remove(5);
 
 			Add("InitDamageCostMana")
-				.Cost(CostType.Mana, 5)
+				.ApplyCost(CostType.Mana, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("InitShortStun")
@@ -162,6 +162,7 @@ namespace ModiBuff.Core
 
 			{
 				Add("InitAddDamageBuff")
+					.OneTimeInit()
 					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
 					.Refresh()
 					.Remove(1.05f); //TODO standardized aura time & aura effects should always be refreshable
@@ -179,6 +180,33 @@ namespace ModiBuff.Core
 				.OneTimeInit()
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
+			Add("ChanceEffectInitDamage")
+				.EffectChance(0.5f)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
+			Add("ChanceEffectIntervalDamage")
+				.EffectChance(0.5f)
+				.Interval(1)
+				.Effect(new DamageEffect(5), EffectOn.Interval);
+
+			Add("ChanceEffectDurationDamage")
+				.EffectChance(0.5f)
+				.Effect(new DamageEffect(5), EffectOn.Duration)
+				.Remove(1);
+
+			Add("ChanceEffectStackDamage")
+				.EffectChance(0.5f)
+				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always);
+
+			Add("InitDamage_CostManaEffect")
+				.EffectCost(CostType.Mana, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
+			Add("InitDamage_Cooldown_Effect")
+				.EffectCooldown(1)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
 			//	.Effect(new StackEffectNew(StackEffectType.Add, new DamageEffect(5)), EffectOn.Interval)
@@ -191,6 +219,40 @@ namespace ModiBuff.Core
 			//	.Remove(5);
 
 			//TODO TargetHeal
+
+			NonTestRecipes();
+		}
+
+		private void NonTestRecipes()
+		{
+			//Stun every second
+			Add("StunEverySecond")
+				.Interval(1)
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 0.2f), EffectOn.Init | EffectOn.Interval)
+				.Remove(5)
+				.Refresh();
+
+			//Delayed Silence
+			Add("DelayedSilence")
+				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 1), EffectOn.Duration)
+				.Remove(5);
+
+			//Stacking damage, more damage for every stack, removed after 5 seconds, refreshable duration
+			{
+				Add("StackingDamage")
+					.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
+					.Stack(WhenStackEffect.Always, value: 2, maxStacks: -1)
+					.Remove(5)
+					.Refresh();
+
+				Add("StackingDamageApplier")
+					.Effect(new ApplierEffect("StackingDamage"), EffectOn.Init);
+			}
+
+			//Self Damage, Damage Target
+			Add("SelfDamage")
+				.Effect(new SelfDamageEffect(5), EffectOn.Init)
+				.Effect(new DamageEffect(10), EffectOn.Init);
 		}
 	}
 }

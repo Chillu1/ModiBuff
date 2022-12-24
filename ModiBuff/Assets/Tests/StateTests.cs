@@ -175,5 +175,15 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(UnitHealth - 10, Unit.Health);
 		}
+
+		[Test]
+		public void InitDamage_Cooldown_Effect()
+		{
+			Unit.TryAddModifierSelf("InitDamage_Cooldown_Effect");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Enemy.TryAddModifierSelf("InitDamage_Cooldown_Effect");
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+		}
 	}
 }
