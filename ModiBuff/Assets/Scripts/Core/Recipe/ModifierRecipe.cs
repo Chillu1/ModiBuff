@@ -42,7 +42,6 @@ namespace ModiBuff.Core
 		private WhenStackEffect _whenStackEffect;
 		private float _stackValue;
 		private int _maxStacks;
-		private bool _isRepeatable;
 		private int _everyXStacks;
 
 		private List<ITimeComponent> _timeComponents;
@@ -102,7 +101,7 @@ namespace ModiBuff.Core
 			if (creation.durationEffects.Count > 0)
 				_timeComponents.Add(new DurationComponent(_duration, _refreshDuration, creation.durationEffects.ToArray()));
 			if (creation.stackEffects.Count > 0)
-				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _isRepeatable, _everyXStacks,
+				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _everyXStacks,
 					creation.stackEffects.Cast<IStackEffect>().ToArray(), effectCheck);
 
 			_modifierCreator.Clear();
@@ -223,13 +222,11 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		public ModifierRecipe Stack(WhenStackEffect whenStackEffect, float value = -1, int maxStacks = -1, bool repeatable = false,
-			int everyXStacks = -1)
+		public ModifierRecipe Stack(WhenStackEffect whenStackEffect, float value = -1, int maxStacks = -1, int everyXStacks = -1)
 		{
 			_whenStackEffect = whenStackEffect;
 			_stackValue = value;
 			_maxStacks = maxStacks;
-			_isRepeatable = repeatable;
 			_everyXStacks = everyXStacks;
 			return this;
 		}

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace ModiBuff.Core
@@ -6,7 +7,6 @@ namespace ModiBuff.Core
 	{
 		private readonly WhenStackEffect _whenStackEffect;
 		private readonly int _maxStacks;
-		private readonly bool _isRepeatable;
 		private readonly int _everyXStacks;
 		private readonly IStackEffect[] _effects;
 		private readonly ModifierCheck _modifierCheck;
@@ -17,13 +17,12 @@ namespace ModiBuff.Core
 		private int _stacks;
 		private float _value;
 
-		public StackComponent(WhenStackEffect whenStackEffect, float value, int maxStacks, bool repeatable, int everyXStacks,
-			IStackEffect[] effects, ModifierCheck check)
+		public StackComponent(WhenStackEffect whenStackEffect, float value, int maxStacks, int everyXStacks, IStackEffect[] effects,
+			ModifierCheck check)
 		{
 			_whenStackEffect = whenStackEffect;
 			_value = value;
 			_maxStacks = maxStacks;
-			_isRepeatable = repeatable;
 			_everyXStacks = everyXStacks;
 
 			_effects = effects;
@@ -47,34 +46,29 @@ namespace ModiBuff.Core
 			if (_check && !_modifierCheck.Check(_targetComponent.Owner))
 				return;
 
-			//Redundancy because of performance
 			switch (_whenStackEffect)
 			{
 				case WhenStackEffect.Always:
-					for (int i = 0; i < _effects.Length; i++)
-						_effects[i].StackEffect(_stacks, _value, _targetComponent);
-					break;
+					StackEffect();
+					return;
 				case WhenStackEffect.OnMaxStacks:
 					if (_stacks == _maxStacks)
-					{
-						for (int i = 0; i < _effects.Length; i++)
-							_effects[i].StackEffect(_stacks, _value, _targetComponent);
-						if (_isRepeatable)
-							_stacks = 0;
-					}
-
-					break;
-				case WhenStackEffect.OnXStacks:
+						StackEffect();
+					return;
+				case WhenStackEffect.EveryXStacks:
 					if (_everyXStacks > 0 && _stacks % _everyXStacks == 0)
-					{
-						for (int i = 0; i < _effects.Length; i++)
-							_effects[i].StackEffect(_stacks, _value, _targetComponent);
-					}
-
-					break;
+						StackEffect();
+					return;
 				default:
 					Debug.LogError($"Invalid stack effect: {_whenStackEffect}");
-					break;
+					return;
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			void StackEffect()
+			{
+				for (int i = 0; i < _effects.Length; i++)
+					_effects[i].StackEffect(_stacks, _value, _targetComponent);
 			}
 		}
 
@@ -93,7 +87,7 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _effects.Length; i++)
 				effects[i] = _effects[i].ShallowClone();
 
-			return new StackComponent(_whenStackEffect, _value, _maxStacks, _isRepeatable, _everyXStacks, effects, _modifierCheck);
+			return new StackComponent(_whenStackEffect, _value, _maxStacks, _everyXStacks, effects, _modifierCheck);
 		}
 
 		object IShallowClone.ShallowClone() => ShallowClone();
@@ -105,7 +99,7 @@ namespace ModiBuff.Core
 		None,
 		Always,
 		OnMaxStacks,
-		OnXStacks,
+		EveryXStacks,
 		//OnZeroStacks,
 	}
 }

@@ -109,7 +109,7 @@ namespace ModiBuff.Core
 
 			Add("DamageEveryTwoStacks")
 				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
-				.Stack(WhenStackEffect.OnXStacks, value: -1, maxStacks: -1, true, everyXStacks: 2);
+				.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2);
 
 			Add("StackBasedDamage")
 				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
@@ -154,7 +154,7 @@ namespace ModiBuff.Core
 
 			Add("StunEveryTwoStacks")
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, false, StackEffectType.Effect), EffectOn.Stack)
-				.Stack(WhenStackEffect.OnXStacks, value: -1, maxStacks: -1, true, everyXStacks: 2);
+				.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2);
 
 			Add("InitStun_Revertible")
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, true), EffectOn.Init)
