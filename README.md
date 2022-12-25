@@ -27,8 +27,8 @@ This library was made to make a standarized powerful system that allows for mani
 
 # Features
 
-* No GC/allocations (fully pooled)
-* Low memory usage (2 MB for 10_000 modifiers)
+* No GC/allocations (fully pooled with state reset)
+* Low memory usage (1 MB for 5_000 modifiers)
 * Fast iteration [5_000 interval modifiers in 5ms](#benchmarks)
 * Easy high level API [recipes](#recipe)
 * Effects on actions
@@ -46,18 +46,23 @@ This library was made to make a standarized powerful system that allows for mani
 	* Chance 0-100%
 	* Cooldown
 	* Health/Mana cost
-* Fully revertable effects
+* Applier Modifiers
+	* OnAttack
+	* Cast
+* Fully revertible effects
 
 # Benchmarks
 
 Preallocated Pools
-Initializing a new clone of the modifier:
+WarmupCount: 10
+MeasurementCount: 50
+N: 5_000
 
-|                                                       | InitDmg, N:5k | DoT, N:5k     | DoT pool, N:5k | DoT pool reset return, N:5k |
-|-------------------------------------------------------|---------------|---------------|----------------|-----------------------------|
-| ModiBuff (this)                                       | 3.87ms, 4 GC  | 12.5ms, 11 GC | 0.03ms, 0 GC   | 0.16ms, 0 GC                |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.00ms, 1 GC  | 5.80ms,  1 GC | NaN            | NaN                         |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC | 70 ms,  63 GC | NaN            | NaN                         |
+|                                                       | New InitDmg   | New DoT*      | DoT pool     | DoT pool reset return | Apply InitDmg | Apply InitStackDmg |
+|-------------------------------------------------------|---------------|---------------|--------------|-----------------------|---------------|--------------------|
+| ModiBuff (this)                                       | 3.87ms,  4 GC | 12.5ms, 11 GC | 0.03ms, 0 GC | 0.16ms, 0 GC          | 0.71ms, 0 GC  | 1.21ms, 0 GC       |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.00ms,  1 GC | 5.80ms,  1 GC | X            | X                     | ?             |                    |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC | 70.0ms, 63 GC | X            | X                     | ?             |                    |
 
 Non-pool benchmarks don't really matter for ModiBuff, since it will only slow down when allocating the new modifiers in the pools.
 
@@ -66,12 +71,12 @@ But it's also much faster in cases of doing init/stack/refresh on an existing mo
 ModiBuffEcs is a bit on the slow side for now, because we're creating the entities and their components, instead of reusing them, like in
 the case of ModiBuff.
 
-Mixed modifier = N of each. Ex. 256 instances * 40 recipes = 10_240 modifiers  
-10_000 mixed modifiers = 2MB  
+Mixed modifier = N of each. Ex. 128 instances * 40 recipes = 5_120 modifiers  
+5_000 mixed modifiers = 1MB  
 Modifier Recipes setup = 7ms  
-Preallocating 10_000 mixed modifiers = 100ms
+Preallocating 5_000 mixed modifiers = 50ms
 
-DoT = InitDoTSeparateDamageRemove
+*DoT = InitDoTSeparateDamageRemove
 
 # Installation
 
@@ -105,7 +110,7 @@ ModiBuff has:
 * No GC/allocations
 * Improved API
 * Better iteration speed, 5_000 interval modifiers (from 500), 5ms update, average complexity modifiers
-* Only cloning statefull objects (less memory, 20 MB for 100_000 modifiers, 7 MB for 100_000 simple modifiers)
+* Better memory managment (1MB for 5_000 modifiers)
 
 
 * Less features, missing:

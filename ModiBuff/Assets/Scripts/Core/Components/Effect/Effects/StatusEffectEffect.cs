@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public sealed class StatusEffectEffect : IStackEffect, IRevertEffect, IEffect
+	public sealed class StatusEffectEffect : IStateReset, IStackEffect, IRevertEffect, IEffect
 	{
 		public bool IsRevertible { get; }
 
@@ -27,7 +27,7 @@ namespace ModiBuff.Core
 			target.ChangeStatusEffect(_statusEffectType, _duration + _extraDuration);
 		}
 
-		public void RevertEffect(IUnit target, IUnit owner)
+		public void RevertEffect(IUnit target, IUnit acter)
 		{
 			target.DecreaseStatusEffect(_statusEffectType, _totalDuration);
 		}
@@ -42,6 +42,12 @@ namespace ModiBuff.Core
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(targetComponent.Target, targetComponent.Acter);
+		}
+
+		public void ResetState()
+		{
+			_extraDuration = 0;
+			_totalDuration = 0;
 		}
 
 		public IStackEffect ShallowClone() => new StatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect);

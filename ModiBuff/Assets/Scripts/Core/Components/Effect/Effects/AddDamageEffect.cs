@@ -1,12 +1,13 @@
 namespace ModiBuff.Core
 {
-	public sealed class AddDamageEffect : IStackEffect, IStateReset, IRevertEffect
+	public sealed class AddDamageEffect : IStackEffect, IStateReset, IRevertEffect, IEffect
 	{
+		public bool IsRevertible { get; }
+
 		private readonly float _damage;
-		private float _extraDamage;
 		private readonly StackEffectType _stackEffect;
 
-		public bool IsRevertible { get; }
+		private float _extraDamage;
 		private float _totalAddedDamage;
 
 		public AddDamageEffect(float damage, bool revertible = false, StackEffectType stackEffect = StackEffectType.None)
@@ -23,7 +24,7 @@ namespace ModiBuff.Core
 			target.AddDamage(_damage + _extraDamage);
 		}
 
-		public void RevertEffect(IUnit target, IUnit owner)
+		public void RevertEffect(IUnit target, IUnit acter)
 		{
 			target.AddDamage(-_totalAddedDamage);
 		}

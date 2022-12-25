@@ -12,23 +12,23 @@ namespace ModiBuff.Tests
 		private const int Iterations = 5000;
 
 		[Test, Performance]
-		public void BenchAddSimpleModifier()
+		public void BenchAddInitDamage()
 		{
 			int modifierId = ModifierIdManager.GetId("InitDamage");
 
 			Measure.Method(
 					() => Unit.TryAddModifier(modifierId, Unit, Unit))
-				.BenchGC(Iterations);
+				.Bench(Iterations);
 		}
 
 		[Test, Performance]
-		public void BenchAddMediumModifier()
+		public void BenchAddInitStackDamage()
 		{
-			int modifierId = ModifierIdManager.GetId("InitDoTSeparateDamageRemove");
+			int modifierId = ModifierIdManager.GetId("InitStackDamage");
 
 			Measure.Method(
 					() => Unit.TryAddModifier(modifierId, Unit, Unit))
-				.BenchGC(Iterations);
+				.Bench(Iterations);
 		}
 	}
 }

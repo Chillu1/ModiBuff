@@ -207,6 +207,10 @@ namespace ModiBuff.Core
 				.EffectCooldown(1)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
+			Add("InitStackDamage")
+				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Init | EffectOn.Stack)
+				.Stack(WhenStackEffect.Always);
+
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
 			//	.Effect(new StackEffectNew(StackEffectType.Add, new DamageEffect(5)), EffectOn.Interval)

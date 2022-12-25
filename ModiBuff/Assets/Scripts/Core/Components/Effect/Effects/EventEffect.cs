@@ -14,7 +14,7 @@ namespace ModiBuff.Core
 			target.AddEffectEvent(_effect, EffectOnEvent.OnHit);
 		}
 
-		public void RevertEffect(IUnit target, IUnit owner)
+		public void RevertEffect(IUnit target, IUnit acter)
 		{
 			target.RemoveEffectEvent(_effect, EffectOnEvent.OnHit);
 		}
