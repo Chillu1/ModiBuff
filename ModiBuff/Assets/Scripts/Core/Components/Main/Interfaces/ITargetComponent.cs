@@ -4,7 +4,7 @@ namespace ModiBuff.Core
 	{
 		IUnit Target { get; }
 
-		IUnit Owner { get; }
+		IUnit Acter { get; }
 		//IUnit OriginalOwner { get; }
 	}
 }

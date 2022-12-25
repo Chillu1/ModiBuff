@@ -2,21 +2,17 @@ namespace ModiBuff.Core
 {
 	public sealed class TargetComponent : ITargetComponent
 	{
-		public IUnit Sender { get; private set; }
-
-		public IUnit Owner { get; private set; }
+		/// <summary>
+		///		Unit that applied the modifier.
+		/// </summary>
+		public IUnit Acter { get; private set; }
 
 		public IUnit Target { get; private set; }
 
-		public TargetComponent()
+		public TargetComponent(IUnit target, IUnit acter)
 		{
-		}
-
-		public TargetComponent(IUnit sender, IUnit owner, IUnit target)
-		{
-			Sender = sender;
-			Owner = owner;
 			Target = target;
+			Acter = acter;
 		}
 	}
 }

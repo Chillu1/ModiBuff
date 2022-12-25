@@ -37,7 +37,7 @@ namespace ModiBuff.Core
 				_extraDamage += value * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
-				Effect(targetComponent.Target, targetComponent.Owner);
+				Effect(targetComponent.Target, targetComponent.Acter);
 		}
 
 		public void ResetState()

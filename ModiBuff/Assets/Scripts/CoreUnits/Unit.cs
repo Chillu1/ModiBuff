@@ -205,6 +205,11 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
+		public bool TryAddModifier(ModifierAddReference addReference, IUnit sender)
+		{
+			return _modifierController.TryAdd(addReference, this, sender);
+		}
+
 		public bool AddApplierModifier(ModifierRecipe recipe, ApplierType applierType = ApplierType.None)
 		{
 			return _modifierController.TryAddApplier(recipe, applierType);
@@ -212,12 +217,12 @@ namespace ModiBuff.Core.Units
 
 		public bool TryAddModifier(int id, IUnit target, IUnit acter)
 		{
-			return _modifierController.TryAdd(id, acter, target, acter);
+			return _modifierController.TryAdd(id, target, acter);
 		}
 
 		public bool TryAddModifier(ModifierRecipe recipe, IUnit target)
 		{
-			return _modifierController.TryAdd(recipe.Id, this, target, this);
+			return _modifierController.TryAdd(recipe.Id, target, this);
 		}
 
 		private void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit acter)

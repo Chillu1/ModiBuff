@@ -6,7 +6,7 @@ namespace ModiBuff.Core
 		string Name { get; }
 
 		//TODO Temp
-		void SetTargets(IUnit target, IUnit owner, IUnit sender);
+		void SetTargets(IUnit target, IUnit acter);
 
 		void Init();
 		void Update(float deltaTime);

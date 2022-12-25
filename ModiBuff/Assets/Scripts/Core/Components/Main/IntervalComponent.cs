@@ -49,14 +49,14 @@ namespace ModiBuff.Core
 
 			_timer -= _interval;
 
-			if (_check && !_modifierCheck.Check(_targetComponent.Owner))
+			if (_check && !_modifierCheck.Check(_targetComponent.Acter))
 				return;
 
 			int length = _effects.Length;
 			for (int i = 0; i < length; i++)
 			{
 				//Debug.Log("Type: " + _effects[i].GetType().Name);
-				_effects[i].Effect(_targetComponent.Target, _targetComponent.Owner);
+				_effects[i].Effect(_targetComponent.Target, _targetComponent.Acter);
 			}
 		}
 

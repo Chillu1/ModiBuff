@@ -43,7 +43,7 @@ namespace ModiBuff.Core
 
 			_stacks++;
 
-			if (_check && !_modifierCheck.Check(_targetComponent.Owner))
+			if (_check && !_modifierCheck.Check(_targetComponent.Acter))
 				return;
 
 			switch (_whenStackEffect)

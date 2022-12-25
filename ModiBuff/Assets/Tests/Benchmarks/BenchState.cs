@@ -14,12 +14,12 @@ namespace ModiBuff.Tests
 		{
 			IUnit target = new Unit();
 			IUnit source = new Unit();
-			TargetComponent targetComponent = new TargetComponent(source, source, target);
+			TargetComponent targetComponent = new TargetComponent(source, target);
 
 			IEffect[] effects = { new DamageEffect(5), new DamageEffect(5) };
 			var init = new InitComponentFeedFake(effects);
 
-			Measure.Method(() => init.Init(targetComponent.Target, targetComponent.Owner))
+			Measure.Method(() => init.Init(targetComponent.Target, targetComponent.Acter))
 				.BenchGC(Iterations);
 		}
 
@@ -45,7 +45,7 @@ namespace ModiBuff.Tests
 
 			IEffect[] effects = { new DamageEffect(5), new DamageEffect(5) };
 			var init = new InitComponentCacheFake(effects);
-			init.SetupTarget(new TargetComponent(source, source, target));
+			init.SetupTarget(new TargetComponent(source, target));
 
 			Measure.Method(() => init.Init())
 				.BenchGC(Iterations);
@@ -64,7 +64,7 @@ namespace ModiBuff.Tests
 			{
 				int length = _effects.Length;
 				for (int i = 0; i < length; i++)
-					_effects[i].Effect(_targetComponent.Target, _targetComponent.Owner);
+					_effects[i].Effect(_targetComponent.Target, _targetComponent.Acter);
 			}
 		}
 	}

@@ -41,7 +41,7 @@ namespace ModiBuff.Core
 				_extraDuration += value * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
-				Effect(targetComponent.Target, targetComponent.Owner);
+				Effect(targetComponent.Target, targetComponent.Acter);
 		}
 
 		public IStackEffect ShallowClone() => new StatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect);

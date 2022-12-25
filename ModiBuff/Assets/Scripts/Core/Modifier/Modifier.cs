@@ -64,9 +64,9 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public void SetTargets(IUnit target, IUnit owner, IUnit sender)
+		public void SetTargets(IUnit target, IUnit acter)
 		{
-			_targetComponent = new TargetComponent(sender, owner, target);
+			_targetComponent = new TargetComponent(target, acter);
 
 			if (_time)
 				for (int i = 0; i < _timeComponents.Length; i++)
@@ -81,7 +81,7 @@ namespace ModiBuff.Core
 			if (!_init)
 				return;
 
-			_initComponent.Init(_targetComponent.Target, _targetComponent.Owner);
+			_initComponent.Init(_targetComponent.Target, _targetComponent.Acter);
 		}
 
 		public void Update(float deltaTime)

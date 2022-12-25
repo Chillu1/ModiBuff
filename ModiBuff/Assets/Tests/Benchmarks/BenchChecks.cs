@@ -12,7 +12,7 @@ namespace ModiBuff.Tests
 		public void BenchInitDamage()
 		{
 			var modifier = Recipes.GetRecipe("InitDamage").Create();
-			modifier.SetTargets(Unit, Unit, Unit);
+			modifier.SetTargets(Unit, Unit);
 
 			Measure.Method(() => { modifier.Init(); })
 				.Bench(Iterations);
@@ -24,7 +24,7 @@ namespace ModiBuff.Tests
 			var checks = new ModifierCheck[ModifierRecipes.RecipesCount];
 			var check = new ModifierCheck(0, "Test");
 			var modifier = Recipes.GetRecipe("InitDamage").Create();
-			modifier.SetTargets(Unit, Unit, Unit);
+			modifier.SetTargets(Unit, Unit);
 			checks[modifier.Id] = check;
 
 			Measure.Method(() =>
@@ -47,7 +47,7 @@ namespace ModiBuff.Tests
 			public TestCheckModifier(InitComponent initComponent, IUnit target)
 			{
 				_check = new ModifierCheck(0, "Test");
-				_targetComponent = new TargetComponent(target, target, target);
+				_targetComponent = new TargetComponent(target, target);
 
 				if (initComponent != null)
 				{
@@ -59,7 +59,7 @@ namespace ModiBuff.Tests
 			public int Id { get; }
 			public string Name { get; }
 
-			public void SetTargets(IUnit target, IUnit owner, IUnit sender)
+			public void SetTargets(IUnit target, IUnit acter)
 			{
 			}
 
@@ -71,7 +71,7 @@ namespace ModiBuff.Tests
 				if (!_check.Check(_targetComponent.Target))
 					return;
 
-				_initComponent.Init(_targetComponent.Target, _targetComponent.Owner);
+				_initComponent.Init(_targetComponent.Target, _targetComponent.Acter);
 			}
 
 			public void Update(float deltaTime)
@@ -110,7 +110,7 @@ namespace ModiBuff.Tests
 
 			public TestModifier(InitComponent initComponent, IUnit target)
 			{
-				_targetComponent = new TargetComponent(target, target, target);
+				_targetComponent = new TargetComponent(target, target);
 
 				if (initComponent != null)
 				{
@@ -122,7 +122,7 @@ namespace ModiBuff.Tests
 			public int Id { get; }
 			public string Name { get; }
 
-			public void SetTargets(IUnit target, IUnit owner, IUnit sender)
+			public void SetTargets(IUnit target, IUnit acter)
 			{
 			}
 
@@ -131,7 +131,7 @@ namespace ModiBuff.Tests
 				if (!_init)
 					return;
 
-				_initComponent.Init(_targetComponent.Target, _targetComponent.Owner);
+				_initComponent.Init(_targetComponent.Target, _targetComponent.Acter);
 			}
 
 			public void Update(float deltaTime)
@@ -170,7 +170,7 @@ namespace ModiBuff.Tests
 
 			public BaseModifier(InitComponent initComponent, IUnit target)
 			{
-				TargetComponent = new TargetComponent(target, target, target);
+				TargetComponent = new TargetComponent(target, target);
 
 				if (initComponent != null)
 				{
@@ -182,7 +182,7 @@ namespace ModiBuff.Tests
 			public int Id { get; }
 			public string Name { get; }
 
-			public void SetTargets(IUnit target, IUnit owner, IUnit sender)
+			public void SetTargets(IUnit target, IUnit acter)
 			{
 			}
 
@@ -191,7 +191,7 @@ namespace ModiBuff.Tests
 				if (!_init)
 					return;
 
-				_initComponent.Init(TargetComponent.Target, TargetComponent.Owner);
+				_initComponent.Init(TargetComponent.Target, TargetComponent.Acter);
 			}
 
 			public void Update(float deltaTime)

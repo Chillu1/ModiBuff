@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace ModiBuff.Core
@@ -58,11 +59,28 @@ namespace ModiBuff.Core
 		public IReadOnlyList<int> GetApplierAttackModifiers() => _modifierAttackAppliers;
 		public IReadOnlyList<int> GetApplierCastModifiers() => _modifierCastAppliers;
 
+		public bool TryAdd(ModifierAddReference addReference, IUnit self, IUnit acter)
+		{
+			switch (addReference.ApplierType)
+			{
+				case ApplierType.None:
+					return TryAdd(addReference.Id, self, acter);
+				case ApplierType.Cast:
+					return TryAddApplier(addReference.Recipe, addReference.ApplierType);
+				case ApplierType.Attack:
+					return TryAddApplier(addReference.Recipe, addReference.ApplierType);
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+
+			return true;
+		}
+
 		//TODO do appliers make sense? Should we just store the id, what kind of state do appliers have?
-		public bool TryAdd(int id, IUnit owner, IUnit target, IUnit sender = null)
+		public bool TryAdd(int id, IUnit target, IUnit acter)
 		{
 			//TODO We should check if the target is legal here?
-			Add(id, owner, target, sender);
+			Add(id, target, acter);
 
 			return true;
 		}
@@ -95,7 +113,7 @@ namespace ModiBuff.Core
 			return true;
 		}
 
-		private Modifier Add(int id, IUnit owner, IUnit target, IUnit sender = null)
+		private Modifier Add(int id, IUnit target, IUnit acter)
 		{
 			var existingModifier = _modifiers[id];
 			if (existingModifier != null)
@@ -112,7 +130,7 @@ namespace ModiBuff.Core
 			var modifier = ModifierPool.Instance.Rent(id);
 
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
-			modifier.SetTargets(target, owner, sender);
+			modifier.SetTargets(target, acter);
 
 			_modifiers[id] = modifier;
 			modifier.Init();
