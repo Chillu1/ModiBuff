@@ -17,9 +17,11 @@ namespace ModiBuff.Core
 		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
 
 		private float _applyCooldown = -1f;
+		private float _applyCost = -1f;
+		private CostCheck _applyCostCheck = null;
 		private float _applyChance = -1f;
 		private CostType _applyCostType = CostType.None;
-		private float _cost = -1f;
+		private ChanceCheck _applyChanceCheck = null;
 
 		private bool _hasEffectChecks;
 		private float _effectCooldown = -1f;
@@ -60,26 +62,17 @@ namespace ModiBuff.Core
 
 		//---PostFinish---
 
-		internal ModifierCheck CreateCheck()
+		ModifierCheck IModifierRecipe.CreateApplyCheck()
 		{
 			CooldownCheck cooldown = null;
-			CostCheck cost = null;
-			ChanceCheck chance = null;
 
 			if (_applyCooldown > 0f)
 				cooldown = new CooldownCheck(_applyCooldown);
 
-			//TODO If cost and chance don't have state, we can use the same instance for all IDx modifiers
-			if (_applyCostType != CostType.None && _cost > 0f)
-				cost = new CostCheck(_applyCostType, _cost);
-
-			if (_applyChance >= 0f)
-				chance = new ChanceCheck(_applyChance);
-
-			return new ModifierCheck(Id, Name, cooldown, cost, chance);
+			return new ModifierCheck(Id, Name, cooldown, _applyCostCheck, _applyChanceCheck);
 		}
 
-		internal Modifier Create()
+		Modifier IModifierRecipe.Create()
 		{
 			_timeComponents.Clear();
 			InitComponent initComponent = null;
@@ -128,7 +121,7 @@ namespace ModiBuff.Core
 		public ModifierRecipe ApplyCost(CostType costType, float cost)
 		{
 			_applyCostType = costType;
-			_cost = cost;
+			_applyCost = cost;
 			HasChecks = true;
 			return this;
 		}
@@ -246,13 +239,18 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		void IModifierRecipe.Finish()
+		public void Finish()
 		{
 			if (_modifierCreator != null)
 				Debug.LogError("Modifier recipe already finished, finishing again. Not intended?");
 
 			_timeComponents = new List<ITimeComponent>(2);
 			_modifierCreator = new ModifierCreator(_effectWrappers);
+
+			if (_applyCostType != CostType.None && _applyCost > 0)
+				_applyCostCheck = new CostCheck(_applyCostType, _applyCost);
+			if (_applyChance >= 0f)
+				_applyChanceCheck = new ChanceCheck(_applyChance);
 
 			if (_hasEffectChecks)
 			{

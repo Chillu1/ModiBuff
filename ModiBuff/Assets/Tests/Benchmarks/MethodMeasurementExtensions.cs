@@ -22,5 +22,15 @@ namespace ModiBuff.Tests
 				.Run();
 			return measurement;
 		}
+
+		public static MethodMeasurement BenchGCLow(this MethodMeasurement measurement, int iterations = 5000)
+		{
+			measurement.WarmupCount(5)
+				.MeasurementCount(20)
+				.IterationsPerMeasurement(iterations)
+				.GC()
+				.Run();
+			return measurement;
+		}
 	}
 }

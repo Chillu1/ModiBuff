@@ -53,28 +53,40 @@ This library was made to make a standarized powerful system that allows for mani
 
 # Benchmarks
 
-Preallocated Pools
-WarmupCount: 10
-MeasurementCount: 50
+Intel Core i7-4790 CPU @ 3.60GHz  
+Preallocated Pools  
+WarmupCount: 10  
+MeasurementCount: 50  
 N: 5_000
 
-|                                                       | New InitDmg   | New DoT*      | DoT pool     | DoT pool reset return | Apply InitDmg | Apply InitStackDmg |
-|-------------------------------------------------------|---------------|---------------|--------------|-----------------------|---------------|--------------------|
-| ModiBuff (this)                                       | 3.87ms,  4 GC | 12.5ms, 11 GC | 0.03ms, 0 GC | 0.16ms, 0 GC          | 0.71ms, 0 GC  | 1.21ms, 0 GC       |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.00ms,  1 GC | 5.80ms,  1 GC | X            | X                     | ?             | ?                  |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC | 70.0ms, 63 GC | X            | X                     | ?             | ?                  |
+#### Add/Apply/Update Modifier table
+
+| Library                                               | Apply InitDmg | Apply InitStackDmg | Update DoT* |
+|-------------------------------------------------------|---------------|--------------------|-------------|
+| ModiBuff (this)                                       | 0.14ms, 0 GC  | 0.27ms, 0 GC       | 1.4ms, 0 GC |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | ?             | ?                  | ?           |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | ?             | ?                  | ?           |
+
+#### New Modifier/Pool table
+
+| Library                                               | New InitDmg   | New DoT*      | DoT pool     | DoT pool reset return |
+|-------------------------------------------------------|---------------|---------------|--------------|-----------------------|
+| ModiBuff (this)                                       | 3.87ms,  4 GC | 12.5ms, 11 GC | 0.03ms, 0 GC | 0.16ms, 0 GC          |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.00ms,  1 GC | 5.80ms,  1 GC | X            | X                     |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC | 70.0ms, 63 GC | X            | X                     |
 
 Non-pool benchmarks don't really matter for ModiBuff, since it will only slow down when allocating the new modifiers in the pools.
 
-Pooling in ModiBuff is 430X faster than original old version (because of pooling & reset)  
+Pooling in ModiBuff is 430X faster than original old version (because of pool & reset)  
 But it's also much faster in cases of doing init/stack/refresh on an existing modifier (we don't create a new modifier anymore)  
 ModiBuffEcs is a bit on the slow side for now, because we're creating the entities and their components, instead of reusing them, like in
 the case of ModiBuff.
 
-Mixed modifier = N of each. Ex. 128 instances * 40 recipes = 5_120 modifiers  
+Mixed modifier = N of each. Ex. 100 instances * 58 recipes = 5_800 modifiers  
 5_000 mixed modifiers = 1MB  
-Modifier Recipes setup = 7ms  
-Preallocating 5_000 mixed modifiers = 50ms
+Modifier Recipes setup = 0.2ms  
+Preallocating 5_800 mixed modifiers = 7ms  
+So with 5_800 preallocated modifiers, the library will add 8ms to the game startup time.
 
 *DoT = InitDoTSeparateDamageRemove
 

@@ -1,6 +1,5 @@
 namespace ModiBuff.Core
 {
-	//TODO Might be a bad approach for events, instead of setting up events in a different way, maybe with a timer and effect only?
 	public sealed class EventEffect : IRevertEffect, IEffect
 	{
 		//Always revert event effect?

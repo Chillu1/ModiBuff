@@ -143,15 +143,9 @@ namespace ModiBuff.Core.Units
 
 		public void AddEffectEvent(IEffect effect, EffectOnEvent @event)
 		{
-			//Maybe don't have full modifier's for events, but instead only effects? This would take away stack, functionality, etc.
-			//Also would make the effects unrevertable.
-			//We could store the modifier directly, and call init/refresh/stack on it?
-			//TODO GetModifierId
-
 			switch (@event)
 			{
 				case EffectOnEvent.OnHit:
-					//_onDamageEvents.Add(effect.Effect);
 					_onDamageEffects.Add(effect);
 					break;
 				default:
@@ -180,7 +174,7 @@ namespace ModiBuff.Core.Units
 			return _modifierController.TryAdd(addReference, this, sender);
 		}
 
-		public bool AddApplierModifier(ModifierRecipe recipe, ApplierType applierType = ApplierType.None)
+		public bool AddApplierModifier(IModifierRecipe recipe, ApplierType applierType = ApplierType.None)
 		{
 			return _modifierController.TryAddApplier(recipe, applierType);
 		}
@@ -232,7 +226,7 @@ namespace ModiBuff.Core.Units
 			_targetsInRange.AddRange(targets);
 		}
 
-		public void AddAuraModifier(ModifierRecipe recipe)
+		public void AddAuraModifier(IModifierRecipe recipe)
 		{
 			var modifier = recipe.Create();
 			//modifier.SetTargets();

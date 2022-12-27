@@ -11,11 +11,11 @@ namespace ModiBuff.Core
 
 		private readonly Modifier[][] _pools;
 		private readonly int[] _poolTops;
-		private readonly ModifierRecipe[] _recipes;
+		private readonly IModifierRecipe[] _recipes;
 
 		private int _stackCapacity = 64;
 
-		public ModifierPool(ModifierRecipe[] recipes, int initialSize = 64)
+		public ModifierPool(IModifierRecipe[] recipes, int initialSize = 64)
 		{
 			if (Instance != null)
 				return;
@@ -26,7 +26,7 @@ namespace ModiBuff.Core
 
 			_pools = new Modifier[recipes.Length][];
 			_poolTops = new int[recipes.Length];
-			_recipes = new ModifierRecipe[recipes.Length];
+			_recipes = new IModifierRecipe[recipes.Length];
 
 			foreach (var recipe in recipes)
 			{

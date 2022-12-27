@@ -12,9 +12,9 @@ namespace ModiBuff.Tests
 		[TestCase(1f)]
 		public void BenchDoTIteration(float delta)
 		{
-			Pool.Allocate(ModifierIdManager.GetId("DoT"), 10_000);
+			Pool.Allocate(ModifierIdManager.GetId("DoT"), 5_000);
 
-			var units = new Unit[10_000];
+			var units = new Unit[5_000];
 			for (int i = 0; i < units.Length; i++)
 			{
 				units[i] = new Unit();
@@ -38,7 +38,7 @@ namespace ModiBuff.Tests
 			unit.TryAddModifierSelf("DoT");
 
 			Measure.Method(() => { unit.Update(delta); })
-				.BenchGC(10_000);
+				.BenchGC(5_000);
 		}
 	}
 }

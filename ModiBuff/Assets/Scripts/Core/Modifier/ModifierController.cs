@@ -85,7 +85,7 @@ namespace ModiBuff.Core
 			return true;
 		}
 
-		public bool TryAddApplier(ModifierRecipe recipe, ApplierType applierType = ApplierType.None)
+		public bool TryAddApplier(IModifierRecipe recipe, ApplierType applierType = ApplierType.None)
 		{
 			if (!recipe.HasChecks)
 			{
@@ -109,7 +109,7 @@ namespace ModiBuff.Core
 			if (_modifierChecksAppliers.ContainsKey(recipe.Id))
 				return false;
 
-			_modifierChecksAppliers.Add(recipe.Id, recipe.CreateCheck());
+			_modifierChecksAppliers.Add(recipe.Id, recipe.CreateApplyCheck());
 			return true;
 		}
 

@@ -2,6 +2,14 @@ namespace ModiBuff.Core
 {
 	public interface IModifierRecipe
 	{
-		internal void Finish();
+		int Id { get; }
+		string Name { get; }
+
+		bool HasChecks { get; }
+
+		internal ModifierCheck CreateApplyCheck();
+		internal Modifier Create();
+
+		void Finish();
 	}
 }

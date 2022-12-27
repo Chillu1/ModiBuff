@@ -93,14 +93,14 @@ namespace ModiBuff.Core
 				.ApplyCooldown(1);
 
 			Add("InitDamageSelf")
-				.Effect(new SelfDamageEffect(5), EffectOn.Init);
+				.Effect(new ActerDamageEffect(5), EffectOn.Init);
 
 			Add("DamageApplier_Interval")
 				.Effect(new ApplierEffect("InitDamage"), EffectOn.Interval)
 				.Interval(1);
 
 			Add("InitSelfHeal_DamageTarget")
-				.Effect(new SelfHealEffect(5), EffectOn.Init)
+				.Effect(new ActerHealEffect(5), EffectOn.Init)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("DamageOnMaxStacks")
@@ -134,7 +134,7 @@ namespace ModiBuff.Core
 				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2), EffectOn.Init);
 
 			Add("InitDamageSelfRemove")
-				.Effect(new SelfDamageEffect(5), EffectOn.Init)
+				.Effect(new ActerDamageEffect(5), EffectOn.Init)
 				.Remove(5);
 
 			Add("InitDamageCostMana")
@@ -216,15 +216,15 @@ namespace ModiBuff.Core
 			//	.Remove(5);
 
 			Add("ThornsOnHitEvent")
-				.Effect(new EventEffect(new SelfDamageEffect(5), EffectOnEvent.OnHit), EffectOn.Init);
+				.Effect(new EventEffect(new ActerDamageEffect(5), EffectOnEvent.OnHit), EffectOn.Init);
 
 			Add("ThornsOnHitEvent_Remove")
-				.Effect(new EventEffect(new SelfDamageEffect(5), EffectOnEvent.OnHit), EffectOn.Init)
+				.Effect(new EventEffect(new ActerDamageEffect(5), EffectOnEvent.OnHit), EffectOn.Init)
 				.Remove(5);
 
 			//EventRecipes
 			//AddEvent("ThornsOnHitEvent", EffectOnEvent.OnHit)
-			//	.Effect(new SelfDamageEffect(5));
+			//	.Effect(new ActerDamageEffect(5));
 
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
@@ -270,7 +270,7 @@ namespace ModiBuff.Core
 
 			//Self Damage, Damage Target
 			Add("SelfDamage")
-				.Effect(new SelfDamageEffect(5), EffectOn.Init)
+				.Effect(new ActerDamageEffect(5), EffectOn.Init)
 				.Effect(new DamageEffect(10), EffectOn.Init);
 		}
 	}

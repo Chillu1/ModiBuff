@@ -10,6 +10,7 @@ namespace ModiBuff.Core
 	{
 		public int Id { get; }
 		public string Name { get; }
+		public bool HasChecks { get; }
 
 		private readonly EffectOnEvent _effectOnEvent;
 
@@ -24,7 +25,7 @@ namespace ModiBuff.Core
 			_effects = new List<IEffect>(2);
 		}
 
-		internal Modifier Create()
+		Modifier IModifierRecipe.Create()
 		{
 			var eventEffect = new EventEffect((IEffect)((IShallowClone)_effects[0]).ShallowClone(), _effectOnEvent);
 			var initComponent = new InitComponent(true, eventEffect, null);
@@ -47,7 +48,12 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		void IModifierRecipe.Finish()
+		ModifierCheck IModifierRecipe.CreateApplyCheck()
+		{
+			return null;
+		}
+
+		public void Finish()
 		{
 		}
 	}

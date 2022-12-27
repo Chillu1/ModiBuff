@@ -22,18 +22,17 @@ namespace ModiBuff.Core
 			foreach (var modifier in _eventRecipes.Values)
 				((IModifierRecipe)modifier).Finish();
 
-			RecipesCount = _recipes.Count + _eventRecipes.Count + 1;
-			Debug.Log($"[ModiBuff] Loaded {RecipesCount} recipes.");
+			RecipesCount = _recipes.Count + _eventRecipes.Count;
+			//Debug.Log($"[ModiBuff] Loaded {RecipesCount} recipes.");
 		}
 
 		protected abstract void SetupRecipes();
 
-		//TODO Will be invalid casts with EventRecipe
-		public ModifierRecipe GetRecipe(string id) => (ModifierRecipe)_recipes[id];
+		public IModifierRecipe GetRecipe(string id) => _recipes[id];
 		public ModifierEventRecipe GetEventRecipe(string id) => _eventRecipes[id];
-		internal ModifierRecipe GetRecipe(int id) => (ModifierRecipe)_recipes.Values.ElementAt(id);
+		internal IModifierRecipe GetRecipe(int id) => (ModifierRecipe)_recipes.Values.ElementAt(id);
 
-		internal ModifierRecipe[] GetRecipes() => _recipes.Values.Cast<ModifierRecipe>().ToArray();
+		internal IModifierRecipe[] GetRecipes() => _recipes.Values.ToArray();
 
 		protected ModifierRecipe Add(string id)
 		{

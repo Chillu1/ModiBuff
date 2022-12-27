@@ -1,10 +1,10 @@
 namespace ModiBuff.Core
 {
-	public sealed class SelfHealEffect : IEffect
+	public sealed class ActerHealEffect : IEffect
 	{
 		private readonly float _heal;
 
-		public SelfHealEffect(float heal)
+		public ActerHealEffect(float heal)
 		{
 			_heal = heal;
 		}
