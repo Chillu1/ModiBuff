@@ -61,8 +61,8 @@ N: 5_000
 |                                                       | New InitDmg   | New DoT*      | DoT pool     | DoT pool reset return | Apply InitDmg | Apply InitStackDmg |
 |-------------------------------------------------------|---------------|---------------|--------------|-----------------------|---------------|--------------------|
 | ModiBuff (this)                                       | 3.87ms,  4 GC | 12.5ms, 11 GC | 0.03ms, 0 GC | 0.16ms, 0 GC          | 0.71ms, 0 GC  | 1.21ms, 0 GC       |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.00ms,  1 GC | 5.80ms,  1 GC | X            | X                     | ?             |                    |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC | 70.0ms, 63 GC | X            | X                     | ?             |                    |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.00ms,  1 GC | 5.80ms,  1 GC | X            | X                     | ?             | ?                  |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC | 70.0ms, 63 GC | X            | X                     | ?             | ?                  |
 
 Non-pool benchmarks don't really matter for ModiBuff, since it will only slow down when allocating the new modifiers in the pools.
 
@@ -108,9 +108,12 @@ ModiBuff has:
 * Lightweight
 * Smaller Codebase
 * No GC/allocations
-* Improved API
+* Redesigned Improved API
+	* [Recipes](#recipe)
+	  vs [Properties](https://github.com/Chillu1/ModifierLibrary/blob/master/ModifierLibrary/Assets/Scripts/ModifierLibrary/ModifierPrototypes.cs#L126)
 * Better iteration speed, 5_000 interval modifiers (from 500), 5ms update, average complexity modifiers
 * Better memory managment (1MB for 5_000 modifiers)
+* No arbitrary name constraints
 
 
 * Less features, missing:
@@ -118,6 +121,7 @@ ModiBuff has:
 	* Aura
 	* Condition effects (when low health)
 	* Some status effects (taunt, confuse)
+	* Tags
 
 # Usage
 
@@ -147,7 +151,7 @@ Add("Init_DoT_Remove_Refreshable")
 
 You're also able to create modifiers with same effect instance on multiple actions.  
 Ex. Same damage on Init and Interval.
-> Note: init will be triggered each time we try to add the modifier to the entity.
+> Note: init will be triggered each time we try to add the modifier to the entity (unless we set `.OneTimeInit()`).
 
 ```csharp
 Add("InitDoT")
@@ -165,6 +169,8 @@ Add("InitStun")
 ```
 
 ### Recipe Limitations
+
+> Note that these limitations don't matter for 95% of the use cases.
 
 * One Interval Component
 * One Duration Component

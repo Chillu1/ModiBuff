@@ -246,7 +246,7 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		internal void Finish()
+		void IModifierRecipe.Finish()
 		{
 			if (_modifierCreator != null)
 				Debug.LogError("Modifier recipe already finished, finishing again. Not intended?");

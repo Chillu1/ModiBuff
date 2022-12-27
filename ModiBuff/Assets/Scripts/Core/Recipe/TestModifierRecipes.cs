@@ -211,6 +211,21 @@ namespace ModiBuff.Core
 				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Init | EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 
+			//Add("InitDamageSelfEvent")
+			//	.Effect(new EventEffect(new SelfDamageEffect(5)), EffectOn.Init)
+			//	.Remove(5);
+
+			Add("ThornsOnHitEvent")
+				.Effect(new EventEffect(new SelfDamageEffect(5), EffectOnEvent.OnHit), EffectOn.Init);
+
+			Add("ThornsOnHitEvent_Remove")
+				.Effect(new EventEffect(new SelfDamageEffect(5), EffectOnEvent.OnHit), EffectOn.Init)
+				.Remove(5);
+
+			//EventRecipes
+			//AddEvent("ThornsOnHitEvent", EffectOnEvent.OnHit)
+			//	.Effect(new SelfDamageEffect(5));
+
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
 			//	.Effect(new StackEffectNew(StackEffectType.Add, new DamageEffect(5)), EffectOn.Interval)

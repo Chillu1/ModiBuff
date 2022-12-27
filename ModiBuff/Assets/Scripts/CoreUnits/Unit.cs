@@ -16,7 +16,7 @@ namespace ModiBuff.Core.Units
 		public float Mana { get; private set; }
 
 		private List<UnitEvent> _onDamageEvents;
-		private List<Modifier> _onDamageModifiers;
+		private List<IEffect> _onDamageEffects;
 
 		private List<Unit> _targetsInRange;
 		private List<Modifier> _auraModifiers;
@@ -30,7 +30,7 @@ namespace ModiBuff.Core.Units
 			HealValue = healValue;
 			Mana = mana;
 			_onDamageEvents = new List<UnitEvent>();
-			_onDamageModifiers = new List<Modifier>();
+			_onDamageEffects = new List<IEffect>();
 
 			_targetsInRange = new List<Unit>();
 			_targetsInRange.Add(this);
@@ -78,13 +78,10 @@ namespace ModiBuff.Core.Units
 
 			if (triggersEvents)
 			{
-				for (int i = 0; i < _onDamageEvents.Count; i++)
-					_onDamageEvents[i](this, acter);
-				for (int i = 0; i < _onDamageModifiers.Count; i++)
-				{
-					//TODO Feed target? & do stack
-					_onDamageModifiers[i].Init();
-				}
+				//for (int i = 0; i < _onDamageEvents.Count; i++)
+				//	_onDamageEvents[i](this, acter);
+				for (int i = 0; i < _onDamageEffects.Count; i++)
+					_onDamageEffects[i].Effect(this, acter);
 			}
 
 			return dealtDamage;
@@ -144,34 +141,6 @@ namespace ModiBuff.Core.Units
 
 		//---Modifier based---
 
-		public void AddEffectEvent(Modifier modifier, EffectOnEvent @event)
-		{
-			switch (@event)
-			{
-				case EffectOnEvent.OnHit:
-					_onDamageModifiers.Add(modifier);
-					break;
-				default:
-					Debug.LogError("Unknown event type: " + @event);
-					return;
-			}
-		}
-
-		public void RemoveEffectEvent(Modifier modifier, EffectOnEvent @event)
-		{
-			switch (@event)
-			{
-				case EffectOnEvent.OnHit:
-					bool remove = _onDamageModifiers.Remove(modifier);
-					if (!remove)
-						Debug.LogError("Could not remove event modifier: " + modifier.Name);
-					break;
-				default:
-					Debug.LogError("Unknown event type: " + @event);
-					return;
-			}
-		}
-
 		public void AddEffectEvent(IEffect effect, EffectOnEvent @event)
 		{
 			//Maybe don't have full modifier's for events, but instead only effects? This would take away stack, functionality, etc.
@@ -182,7 +151,8 @@ namespace ModiBuff.Core.Units
 			switch (@event)
 			{
 				case EffectOnEvent.OnHit:
-					_onDamageEvents.Add(effect.Effect);
+					//_onDamageEvents.Add(effect.Effect);
+					_onDamageEffects.Add(effect);
 					break;
 				default:
 					Debug.LogError("Unknown event type: " + @event);
@@ -195,7 +165,7 @@ namespace ModiBuff.Core.Units
 			switch (@event)
 			{
 				case EffectOnEvent.OnHit:
-					bool remove = _onDamageEvents.Remove(effect.Effect);
+					bool remove = _onDamageEffects.Remove(effect);
 					if (!remove)
 						Debug.LogError("Could not remove event: " + effect.GetType());
 					break;
@@ -215,14 +185,14 @@ namespace ModiBuff.Core.Units
 			return _modifierController.TryAddApplier(recipe, applierType);
 		}
 
-		public bool TryAddModifier(int id, IUnit target, IUnit acter)
+		public bool TryAddModifier(int id, IUnit acter)
 		{
-			return _modifierController.TryAdd(id, target, acter);
+			return _modifierController.TryAdd(id, this, acter);
 		}
 
-		public bool TryAddModifier(ModifierRecipe recipe, IUnit target)
+		public bool TryAddModifierTarget(int id, IUnit target, IUnit acter)
 		{
-			return _modifierController.TryAdd(recipe.Id, target, this);
+			return _modifierController.TryAdd(id, target, acter);
 		}
 
 		private void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit acter)
@@ -232,14 +202,14 @@ namespace ModiBuff.Core.Units
 				if (!check.Check(acter))
 					continue;
 
-				TryAddModifier(check.Id, this, acter);
+				TryAddModifier(check.Id, acter);
 			}
 		}
 
 		private void TryApplyModifiers(IReadOnlyList<int> recipes, IUnit acter)
 		{
 			for (int i = 0; i < recipes.Count; i++)
-				TryAddModifier(recipes[i], this, acter);
+				TryAddModifier(recipes[i], acter);
 		}
 
 		public bool ContainsModifier(string id) => _modifierController.Contains(ModifierIdManager.GetId(id));

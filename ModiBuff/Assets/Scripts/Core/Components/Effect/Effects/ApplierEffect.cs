@@ -26,7 +26,7 @@ namespace ModiBuff.Core
 
 		public void Effect(IUnit target, IUnit acter)
 		{
-			target.TryAddModifier(_modifierId, target, acter);
+			target.TryAddModifier(_modifierId, acter);
 		}
 	}
 }

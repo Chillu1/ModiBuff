@@ -1,6 +1,7 @@
 namespace ModiBuff.Core
 {
-	internal interface IModifierRecipe
+	public interface IModifierRecipe
 	{
+		internal void Finish();
 	}
 }

@@ -53,7 +53,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageApplier_Interval()
 		{
-			Unit.TryAddModifier("DamageApplier_Interval", Enemy);
+			Unit.TryAddModifierTarget("DamageApplier_Interval", Enemy);
 
 			Unit.Update(1f);
 

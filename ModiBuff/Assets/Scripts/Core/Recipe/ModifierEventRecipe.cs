@@ -11,11 +11,26 @@ namespace ModiBuff.Core
 		public int Id { get; }
 		public string Name { get; }
 
+		private readonly EffectOnEvent _effectOnEvent;
+
 		private readonly List<IEffect> _effects;
 
-		public ModifierEventRecipe()
+		public ModifierEventRecipe(string name, EffectOnEvent effectOnEvent)
 		{
-			_effects = new List<IEffect>();
+			Id = ModifierIdManager.GetFreeId(name);
+			Name = name;
+			_effectOnEvent = effectOnEvent;
+
+			_effects = new List<IEffect>(2);
+		}
+
+		internal Modifier Create()
+		{
+			var eventEffect = new EventEffect((IEffect)((IShallowClone)_effects[0]).ShallowClone(), _effectOnEvent);
+			var initComponent = new InitComponent(true, eventEffect, null);
+			//If has remove duration, durationComp
+
+			return new Modifier(Id, Name, initComponent, null, null, null);
 		}
 
 		public ModifierEventRecipe Remove(float duration)
@@ -30,6 +45,10 @@ namespace ModiBuff.Core
 		{
 			_effects.Add(effect);
 			return this;
+		}
+
+		void IModifierRecipe.Finish()
+		{
 		}
 	}
 }

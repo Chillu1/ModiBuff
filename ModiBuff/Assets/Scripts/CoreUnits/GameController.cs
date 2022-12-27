@@ -23,7 +23,7 @@ namespace ModiBuff.Core.Units
 			for (int i = 0; i < _units.Length; i++)
 			{
 				_units[i] = new Unit();
-				_units[i].TryAddModifier(_recipeId, _units[i], _units[i]);
+				_units[i].TryAddModifier(_recipeId, _units[i]);
 				//_units[i].TryAddModifier(_recipeId2, _units[i], _units[i]);
 			}
 		}

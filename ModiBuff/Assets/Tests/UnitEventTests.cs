@@ -6,7 +6,7 @@ namespace ModiBuff.Tests
 	public sealed class UnitEventTests : BaseModifierTests
 	{
 		[Test]
-		public void Thorns_OnHit()
+		public void ThornsEffect_OnHit()
 		{
 			Unit.AddEffectEvent(new SelfDamageEffect(5), EffectOnEvent.OnHit);
 
@@ -16,7 +16,7 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-		public void Thorns_OnHit_Remove()
+		public void ThornsEffect_OnHit_Remove()
 		{
 			var effect = new SelfDamageEffect(5);
 			Unit.AddEffectEvent(effect, EffectOnEvent.OnHit);
@@ -31,27 +31,19 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-		public void ThornsModifier_OnHit_Duration()
+		public void Thorns_OnHit()
 		{
-			var recipe = Recipes.GetRecipe("InitDamageSelf");
-			var modifier = recipe.Create();
-			modifier.SetTargets(Unit, Enemy);
-			Unit.AddEffectEvent(modifier, EffectOnEvent.OnHit);
+			Unit.TryAddModifierSelf("ThornsOnHitEvent");
 
 			Enemy.Attack(Unit);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
-
-			Unit.RemoveEffectEvent(modifier, EffectOnEvent.OnHit);
 		}
 
-		//[Test]
-		public void ThornsModifier_OnHit_DurationRemove()
+		[Test]
+		public void Thorns_OnHit_DurationRemove()
 		{
-			var recipe = Recipes.GetRecipe("InitDamageSelfRemove");
-			var modifier = recipe.Create();
-			modifier.SetTargets(Unit, Enemy);
-			Unit.AddEffectEvent(modifier, EffectOnEvent.OnHit);
+			Unit.TryAddModifierSelf("ThornsOnHitEvent_Remove");
 
 			Enemy.Attack(Unit);
 

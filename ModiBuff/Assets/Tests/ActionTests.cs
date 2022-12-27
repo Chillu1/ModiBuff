@@ -16,7 +16,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackEnemy_Action()
 		{
-			Unit.TryAddModifier("InitAttackAction", Enemy);
+			Unit.TryAddModifierTarget("InitAttackAction", Enemy);
 
 			Assert.AreEqual(EnemyHealth - UnitDamage, Enemy.Health);
 		}

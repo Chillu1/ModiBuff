@@ -26,7 +26,8 @@ namespace ModiBuff.Core
 		void ChangeStatusEffect(StatusEffectType statusEffectType, float duration);
 		void DecreaseStatusEffect(StatusEffectType statusEffectType, float duration);
 
-		bool TryAddModifier(int id, IUnit target, IUnit acter);
+		bool TryAddModifier(int id, IUnit acter);
+		bool TryAddModifierTarget(int id, IUnit target, IUnit acter);
 
 
 		//void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit acter);

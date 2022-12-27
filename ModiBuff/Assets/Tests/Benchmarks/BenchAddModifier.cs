@@ -17,7 +17,7 @@ namespace ModiBuff.Tests
 			int modifierId = ModifierIdManager.GetId("InitDamage");
 
 			Measure.Method(
-					() => Unit.TryAddModifier(modifierId, Unit, Unit))
+					() => Unit.TryAddModifier(modifierId, Unit))
 				.Bench(Iterations);
 		}
 
@@ -27,7 +27,7 @@ namespace ModiBuff.Tests
 			int modifierId = ModifierIdManager.GetId("InitStackDamage");
 
 			Measure.Method(
-					() => Unit.TryAddModifier(modifierId, Unit, Unit))
+					() => Unit.TryAddModifier(modifierId, Unit))
 				.Bench(Iterations);
 		}
 	}
