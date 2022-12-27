@@ -3,6 +3,24 @@ namespace ModiBuff.Core
 	public enum EffectOnEvent
 	{
 		None,
-		OnHit,
+
+		//When you're the target of X
+		WhenAttacked, //When being attacked (doesn't matter if it gets blocked, evaded or deals no damage)
+
+		//WhenEvaded,
+		//WhenHit, //When attack connects
+		//WhenDamaged, //When attack deals damage
+		WhenCast,
+		WhenKilled,
+		WhenHealed,
+
+		//When you're the source/acter of X
+		OnAttack,
+
+		//OnEvade,
+		//OnHit,
+		OnCast,
+		OnKill,
+		OnHeal,
 	}
 }

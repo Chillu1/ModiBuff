@@ -15,8 +15,16 @@ namespace ModiBuff.Core.Units
 		public float HealValue { get; private set; }
 		public float Mana { get; private set; }
 
-		private List<UnitEvent> _onDamageEvents;
-		private List<IEffect> _onDamageEffects;
+		//This can be done with an array of list, but it's better performance wise.
+		private List<IEffect> _whenAttackedEffects;
+		private List<IEffect> _whenCastEffects;
+		private List<IEffect> _whenDeathEffects;
+		private List<IEffect> _whenHealedEffects;
+
+		private List<IEffect> _onAttackEffects;
+		private List<IEffect> _onCastEffects;
+		private List<IEffect> _onKillEffects;
+		private List<IEffect> _onHealEffects;
 
 		private List<Unit> _targetsInRange;
 		private List<Modifier> _auraModifiers;
@@ -29,8 +37,15 @@ namespace ModiBuff.Core.Units
 			Damage = damage;
 			HealValue = healValue;
 			Mana = mana;
-			_onDamageEvents = new List<UnitEvent>();
-			_onDamageEffects = new List<IEffect>();
+
+			_whenAttackedEffects = new List<IEffect>();
+			_whenCastEffects = new List<IEffect>();
+			_whenDeathEffects = new List<IEffect>();
+			_whenHealedEffects = new List<IEffect>();
+			_onAttackEffects = new List<IEffect>();
+			_onCastEffects = new List<IEffect>();
+			_onKillEffects = new List<IEffect>();
+			_onHealEffects = new List<IEffect>();
 
 			_targetsInRange = new List<Unit>();
 			_targetsInRange.Add(this);
@@ -57,16 +72,24 @@ namespace ModiBuff.Core.Units
 			target.TryApplyModifiers(_modifierController.GetApplierCastModifiers(), this);
 		}
 
-		public float Attack(IUnit target) => Attack((Unit)target);
+		public float Attack(IUnit target, bool triggersEvents = true) => Attack((Unit)target, triggersEvents);
 
-		public float Attack(Unit target)
+		public float Attack(Unit target, bool triggersEvents = true)
 		{
 			if ((_statusEffectController.LegalActions & LegalAction.Act) == 0)
 				return 0;
 
 			target.TryApplyModifiers(_modifierController.GetApplierCheckModifiers(), this);
 			target.TryApplyModifiers(_modifierController.GetApplierAttackModifiers(), this);
-			float dealtDamage = target.TakeDamage(Damage, this);
+			for (int i = 0; i < _onAttackEffects.Count; i++)
+				_onAttackEffects[i].Effect(target, this);
+
+			float dealtDamage = target.TakeDamage(Damage, this, triggersEvents);
+
+			if (target.Health <= 0)
+				for (int i = 0; i < _onKillEffects.Count; i++)
+					_onKillEffects[i].Effect(target, this);
+
 			return dealtDamage;
 		}
 
@@ -78,10 +101,12 @@ namespace ModiBuff.Core.Units
 
 			if (triggersEvents)
 			{
-				//for (int i = 0; i < _onDamageEvents.Count; i++)
-				//	_onDamageEvents[i](this, acter);
-				for (int i = 0; i < _onDamageEffects.Count; i++)
-					_onDamageEffects[i].Effect(this, acter);
+				for (int i = 0; i < _whenAttackedEffects.Count; i++)
+					_whenAttackedEffects[i].Effect(this, acter);
+
+				if (Health <= 0)
+					for (int i = 0; i < _whenDeathEffects.Count; i++)
+						_whenDeathEffects[i].Effect(this, acter);
 			}
 
 			return dealtDamage;
@@ -90,6 +115,8 @@ namespace ModiBuff.Core.Units
 		public float Heal(float heal, IUnit acter)
 		{
 			float oldHealth = Health;
+			for (int i = 0; i < _whenHealedEffects.Count; i++)
+				_whenHealedEffects[i].Effect(this, acter);
 			Health += heal;
 			return Health - oldHealth;
 		}
@@ -98,6 +125,9 @@ namespace ModiBuff.Core.Units
 		{
 			if ((_statusEffectController.LegalActions & LegalAction.Act) == 0)
 				return 0;
+
+			for (int i = 0; i < _onHealEffects.Count; i++)
+				_onHealEffects[i].Effect(target, this);
 
 			return target.Heal(HealValue, this);
 		}
@@ -145,8 +175,29 @@ namespace ModiBuff.Core.Units
 		{
 			switch (@event)
 			{
-				case EffectOnEvent.OnHit:
-					_onDamageEffects.Add(effect);
+				case EffectOnEvent.WhenAttacked:
+					_whenAttackedEffects.Add(effect);
+					break;
+				case EffectOnEvent.WhenCast:
+					_whenCastEffects.Add(effect);
+					break;
+				case EffectOnEvent.WhenKilled:
+					_whenDeathEffects.Add(effect);
+					break;
+				case EffectOnEvent.WhenHealed:
+					_whenHealedEffects.Add(effect);
+					break;
+				case EffectOnEvent.OnAttack:
+					_onAttackEffects.Add(effect);
+					break;
+				case EffectOnEvent.OnCast:
+					_onCastEffects.Add(effect);
+					break;
+				case EffectOnEvent.OnKill:
+					_onKillEffects.Add(effect);
+					break;
+				case EffectOnEvent.OnHeal:
+					_onHealEffects.Add(effect);
 					break;
 				default:
 					Debug.LogError("Unknown event type: " + @event);
@@ -158,14 +209,40 @@ namespace ModiBuff.Core.Units
 		{
 			switch (@event)
 			{
-				case EffectOnEvent.OnHit:
-					bool remove = _onDamageEffects.Remove(effect);
-					if (!remove)
-						Debug.LogError("Could not remove event: " + effect.GetType());
+				case EffectOnEvent.WhenAttacked:
+					Remove(_whenAttackedEffects, effect);
+					break;
+				case EffectOnEvent.WhenCast:
+					Remove(_whenCastEffects, effect);
+					break;
+				case EffectOnEvent.WhenKilled:
+					Remove(_whenDeathEffects, effect);
+					break;
+				case EffectOnEvent.WhenHealed:
+					Remove(_whenHealedEffects, effect);
+					break;
+				case EffectOnEvent.OnAttack:
+					Remove(_onAttackEffects, effect);
+					break;
+				case EffectOnEvent.OnCast:
+					Remove(_onCastEffects, effect);
+					break;
+				case EffectOnEvent.OnKill:
+					Remove(_onKillEffects, effect);
+					break;
+				case EffectOnEvent.OnHeal:
+					Remove(_onHealEffects, effect);
 					break;
 				default:
 					Debug.LogError("Unknown event type: " + @event);
 					return;
+			}
+
+			void Remove(List<IEffect> effects, IEffect effectToRemove)
+			{
+				bool remove = effects.Remove(effectToRemove);
+				if (!remove)
+					Debug.LogError("Could not remove event: " + effectToRemove.GetType());
 			}
 		}
 

@@ -1,10 +1,10 @@
 namespace ModiBuff.Core
 {
-	public sealed class AttackActionEffect : IEffect
+	public sealed class SelfAttackActionEffect : IEffect
 	{
 		public void Effect(IUnit target, IUnit acter)
 		{
-			acter.Attack(target, false);
+			target.Attack(target, false);
 		}
 	}
 }

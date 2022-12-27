@@ -7,7 +7,7 @@ namespace ModiBuff.Core
 
 		bool HasChecks { get; }
 
-		internal ModifierCheck CreateApplyCheck();
+		internal ModifierCheck CreateApplyCheck(); //TODO Split this into two interfaces?
 		internal Modifier Create();
 
 		void Finish();

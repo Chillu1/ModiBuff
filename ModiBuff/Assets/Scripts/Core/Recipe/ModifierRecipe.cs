@@ -18,10 +18,10 @@ namespace ModiBuff.Core
 
 		private float _applyCooldown = -1f;
 		private float _applyCost = -1f;
-		private CostCheck _applyCostCheck = null;
+		private CostCheck _applyCostCheck;
 		private float _applyChance = -1f;
 		private CostType _applyCostType = CostType.None;
-		private ChanceCheck _applyChanceCheck = null;
+		private ChanceCheck _applyChanceCheck;
 
 		private bool _hasEffectChecks;
 		private float _effectCooldown = -1f;

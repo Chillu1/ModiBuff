@@ -16,6 +16,11 @@ namespace ModiBuff.Core
 
 		private readonly List<IEffect> _effects;
 
+		private float _removeDuration;
+		private EffectWrapper _removeEffectWrapper;
+
+		private bool _refreshDuration;
+
 		public ModifierEventRecipe(string name, EffectOnEvent effectOnEvent)
 		{
 			Id = ModifierIdManager.GetFreeId(name);
@@ -25,22 +30,52 @@ namespace ModiBuff.Core
 			_effects = new List<IEffect>(2);
 		}
 
+		//---PostFinish---
+
 		Modifier IModifierRecipe.Create()
 		{
-			var eventEffect = new EventEffect((IEffect)((IShallowClone)_effects[0]).ShallowClone(), _effectOnEvent);
+			//TODO Clone stateful
+			var revertList = new List<IRevertEffect>();
+			var eventEffect = new EventEffect(_effects[0], _effectOnEvent);
 			var initComponent = new InitComponent(true, eventEffect, null);
-			//If has remove duration, durationComp
 
-			return new Modifier(Id, Name, initComponent, null, null, null);
+			ITimeComponent[] timeComponents = null;
+			if (_removeDuration > 0)
+			{
+				timeComponents = new ITimeComponent[]
+				{
+					new DurationComponent(_removeDuration, _refreshDuration, _removeEffectWrapper.GetEffect())
+				};
+			}
+
+			if (eventEffect is IRevertEffect revertEffect && revertEffect.IsRevertible)
+				revertList.Add(revertEffect);
+
+			if (_removeEffectWrapper != null)
+			{
+				((RemoveEffect)_removeEffectWrapper.GetEffect()).SetRevertibleEffects(revertList.ToArray());
+				_removeEffectWrapper.Reset();
+			}
+
+			return new Modifier(Id, Name, initComponent, timeComponents, null, null);
 		}
+
+		//---Actions---
 
 		public ModifierEventRecipe Remove(float duration)
 		{
-			//Duration(duration);
-			//_removeEffect = new RemoveEffect();
-			//Effect(_removeEffect, EffectOn.Duration);
+			_removeDuration = duration;
+			_removeEffectWrapper = new EffectWrapper(new RemoveEffect(), EffectOn.Duration);
 			return this;
 		}
+
+		public ModifierEventRecipe Refresh()
+		{
+			_refreshDuration = true;
+			return this;
+		}
+
+		//---Effects---
 
 		public ModifierEventRecipe Effect(IEffect effect)
 		{
@@ -48,10 +83,7 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		ModifierCheck IModifierRecipe.CreateApplyCheck()
-		{
-			return null;
-		}
+		ModifierCheck IModifierRecipe.CreateApplyCheck() => throw new System.NotImplementedException();
 
 		public void Finish()
 		{

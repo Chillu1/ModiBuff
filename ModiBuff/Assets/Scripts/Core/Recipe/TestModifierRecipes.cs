@@ -211,20 +211,25 @@ namespace ModiBuff.Core
 				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Init | EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 
-			//Add("InitDamageSelfEvent")
-			//	.Effect(new EventEffect(new SelfDamageEffect(5)), EffectOn.Init)
-			//	.Remove(5);
+			//EventRecipes
+			AddEvent("ThornsOnHitEvent", EffectOnEvent.WhenAttacked)
+				.Effect(new ActerDamageEffect(5));
 
-			Add("ThornsOnHitEvent")
-				.Effect(new EventEffect(new ActerDamageEffect(5), EffectOnEvent.OnHit), EffectOn.Init);
-
-			Add("ThornsOnHitEvent_Remove")
-				.Effect(new EventEffect(new ActerDamageEffect(5), EffectOnEvent.OnHit), EffectOn.Init)
+			AddEvent("ThornsOnHitEvent_Remove", EffectOnEvent.WhenAttacked)
+				.Effect(new ActerDamageEffect(5))
 				.Remove(5);
 
-			//EventRecipes
-			//AddEvent("ThornsOnHitEvent", EffectOnEvent.OnHit)
-			//	.Effect(new ActerDamageEffect(5));
+			AddEvent("AddDamage_OnKill_Event", EffectOnEvent.OnKill)
+				.Effect(new ActerAddDamageEffect(5));
+
+			AddEvent("Damage_OnDeath_Event", EffectOnEvent.WhenKilled)
+				.Effect(new ActerDamageEffect(5));
+
+			AddEvent("Heal_OnHeal_Event", EffectOnEvent.OnHeal)
+				.Effect(new ActerHealEffect(5));
+
+			AddEvent("AttackSelf_OnHit_Event", EffectOnEvent.WhenAttacked)
+				.Effect(new SelfAttackActionEffect());
 
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
@@ -236,8 +241,6 @@ namespace ModiBuff.Core
 			//	.Effect(new SelfDamageEffect(5), EffectOn.Init)
 			//	.Event(EffectOnEvent.OnHit)
 			//	.Remove(5);
-
-			//TODO TargetHeal
 
 			NonTestRecipes();
 		}
