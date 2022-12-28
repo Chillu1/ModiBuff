@@ -16,6 +16,9 @@ namespace ModiBuff.Core
 
 		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
 
+		private StatType _applyConditionStatType;
+		private float _applyConditionValue;
+		private ConditionCheck _applyCondition;
 		private float _applyCooldown = -1f;
 		private float _applyCost = -1f;
 		private CostCheck _applyCostCheck;
@@ -49,6 +52,7 @@ namespace ModiBuff.Core
 		private List<ITimeComponent> _timeComponents;
 		private ModifierCreator _modifierCreator;
 
+		private ConditionCheck _effectConditionInstance;
 		private CostCheck _effectCostInstance;
 		private ChanceCheck _effectChanceInstance;
 
@@ -69,7 +73,7 @@ namespace ModiBuff.Core
 			if (_applyCooldown > 0f)
 				cooldown = new CooldownCheck(_applyCooldown);
 
-			return new ModifierCheck(Id, Name, cooldown, _applyCostCheck, _applyChanceCheck);
+			return new ModifierCheck(Id, Name, _applyCondition, cooldown, _applyCostCheck, _applyChanceCheck);
 		}
 
 		Modifier IModifierRecipe.Create()
@@ -85,7 +89,7 @@ namespace ModiBuff.Core
 				cooldown = new CooldownCheck(_effectCooldown);
 			ModifierCheck effectCheck = null;
 			if (_hasEffectChecks)
-				effectCheck = new ModifierCheck(Id, Name, cooldown, _effectCostInstance, _effectChanceInstance);
+				effectCheck = new ModifierCheck(Id, Name, _effectConditionInstance, cooldown, _effectCostInstance, _effectChanceInstance);
 
 			if (creation.initEffects.Count > 0)
 				initComponent = new InitComponent(_oneTimeInit, creation.initEffects.ToArray(), effectCheck);
@@ -104,6 +108,15 @@ namespace ModiBuff.Core
 		}
 
 		//---ApplyChecks---
+
+		//TODO ApplyCondition bool Enum. Ex. HealthIsFull
+		public ModifierRecipe ApplyCondition(StatType statType, float value) //, ComparisonType comparisonType)
+		{
+			_applyConditionStatType = statType;
+			_applyConditionValue = value;
+			HasChecks = true;
+			return this;
+		}
 
 		/// <summary>
 		///		Cooldown set for when we can try to apply the modifier to a target.
@@ -140,6 +153,13 @@ namespace ModiBuff.Core
 		}
 
 		//---EffectChecks---
+
+		public ModifierRecipe EffectCondition(StatType statType, float value) //, ComparisonType comparisonType)
+		{
+			_effectConditionInstance = new ConditionCheck(statType, value);
+			_hasEffectChecks = true;
+			return this;
+		}
 
 		public ModifierRecipe EffectCooldown(float cooldown)
 		{
@@ -247,6 +267,8 @@ namespace ModiBuff.Core
 			_timeComponents = new List<ITimeComponent>(2);
 			_modifierCreator = new ModifierCreator(_effectWrappers);
 
+			if (_applyConditionStatType != StatType.None && _applyConditionValue > 0)
+				_applyCondition = new ConditionCheck(_applyConditionStatType, _applyConditionValue);
 			if (_applyCostType != CostType.None && _applyCost > 0)
 				_applyCostCheck = new CostCheck(_applyCostType, _applyCost);
 			if (_applyChance >= 0f)

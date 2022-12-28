@@ -16,15 +16,8 @@ namespace ModiBuff.Core.Units
 		public float Mana { get; private set; }
 
 		//This can be done with an array of list, but it's better performance wise.
-		private List<IEffect> _whenAttackedEffects;
-		private List<IEffect> _whenCastEffects;
-		private List<IEffect> _whenDeathEffects;
-		private List<IEffect> _whenHealedEffects;
-
-		private List<IEffect> _onAttackEffects;
-		private List<IEffect> _onCastEffects;
-		private List<IEffect> _onKillEffects;
-		private List<IEffect> _onHealEffects;
+		private List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
+		private List<IEffect> _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
 
 		private List<Unit> _targetsInRange;
 		private List<Modifier> _auraModifiers;
