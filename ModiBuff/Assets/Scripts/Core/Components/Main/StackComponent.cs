@@ -85,7 +85,12 @@ namespace ModiBuff.Core
 		{
 			var effects = new IStackEffect[_effects.Length];
 			for (int i = 0; i < _effects.Length; i++)
-				effects[i] = _effects[i].ShallowClone();
+			{
+				if (_effects[i] is IStateEffect effect)
+					effects[i] = (IStackEffect)effect.ShallowClone();
+				else
+					effects[i] = _effects[i];
+			}
 
 			return new StackComponent(_whenStackEffect, _value, _maxStacks, _everyXStacks, effects, _modifierCheck);
 		}

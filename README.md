@@ -129,7 +129,6 @@ ModiBuff has:
 
 
 * Less features, missing:
-	* Unit event (on attacked, on hit, on killed, when attacking...)
 	* Aura
 	* Condition effects (when low health)
 	* Some status effects (taunt, confuse)
@@ -190,6 +189,29 @@ Add("InitStun")
 * Same Checks (cost, chance, cooldown) for all effects
 
 ## Effect
+
+### Applier Effect
+
+Hands down, the most important effect is the ApplierEffect.  
+It's used to apply other modifiers to units. While being able to use modifier logic, like stacks.  
+This can create some very sophisticated modifiers:
+
+```csharp
+//Disarm the target for 5 seconds. On 2 stacks, removable in 10 seconds, refreshable.
+Add("ComplexApplier_Disarm")
+	.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect), EffectOn.Stack)
+	.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2)
+	.Remove(10)
+	.Refresh();
+//rupture modifier, that does DoT. When this gets to 5 stacks, apply the disarm effect.
+Add("ComplexApplier_Rupture")
+	.Effect(new DamageEffect(5), EffectOn.Interval)
+	.Effect(new ApplierEffect("ComplexApplier_Disarm"), EffectOn.Stack)
+	.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 5);
+//WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^
+AddEvent("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
+	.Effect(new ActerApplierEffect("ComplexApplier_Rupture"));
+```
 
 ## Modifier
 
@@ -323,3 +345,9 @@ Add("StackBasedDamage")
 
 [Simple solo](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Examples/SimpleSolo)
 example, of player unit fighting a single enemy unit
+
+# Limitations
+
+Currently the system is designed to max have **one** modifier type per Unit.  
+This can be configured by using special containing logic in ModifierController, but then you'll need to keep track of all the instances, and
+init/stack/refresh them.

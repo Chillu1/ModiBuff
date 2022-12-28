@@ -108,6 +108,20 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - EnemyDamage - UnitDamage, Unit.Health);
 		}
 
+		[Test]
+		public void PoisonDoT_OnHit()
+		{
+			Unit.TryAddModifierSelf("PoisonDoT_OnHit_Event");
+
+			Enemy.Attack(Unit);
+
+			Enemy.Update(1);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+
+			Enemy.Update(1);
+			Assert.AreEqual(EnemyHealth - 10, Enemy.Health);
+		}
+
 		//TODO EventRecursion
 	}
 }

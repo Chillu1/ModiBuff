@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public sealed class StatusEffectEffect : IStateReset, IStackEffect, IRevertEffect, IEffect
+	public sealed class StatusEffectEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect
 	{
 		public bool IsRevertible { get; }
 
@@ -50,7 +50,7 @@ namespace ModiBuff.Core
 			_totalDuration = 0;
 		}
 
-		public IStackEffect ShallowClone() => new StatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect);
+		public IStateEffect ShallowClone() => new StatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

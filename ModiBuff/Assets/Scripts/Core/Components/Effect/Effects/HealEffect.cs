@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public class HealEffect : IStateReset, IStackEffect, IRevertEffect, IEffect
+	public class HealEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect
 	{
 		public bool IsRevertible { get; }
 
@@ -46,7 +46,7 @@ namespace ModiBuff.Core
 			_totalHeal = 0;
 		}
 
-		public IStackEffect ShallowClone() => new HealEffect(_heal);
+		public IStateEffect ShallowClone() => new HealEffect(_heal);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

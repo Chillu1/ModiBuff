@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public sealed class ActerAddDamageEffect : IStackEffect, IStateReset, IRevertEffect, IEffect
+	public sealed class ActerAddDamageEffect : IStackEffect, IStateEffect, IRevertEffect, IEffect
 	{
 		public bool IsRevertible { get; }
 
@@ -47,7 +47,7 @@ namespace ModiBuff.Core
 			_totalAddedDamage = 0;
 		}
 
-		public IStackEffect ShallowClone() => new AddDamageEffect(_damage, IsRevertible, _stackEffect);
+		public IStateEffect ShallowClone() => new ActerAddDamageEffect(_damage, IsRevertible, _stackEffect);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

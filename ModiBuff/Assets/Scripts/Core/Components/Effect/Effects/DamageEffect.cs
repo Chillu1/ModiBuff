@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ModiBuff.Core
 {
-	public sealed class DamageEffect : IStackEffect, IStateReset, IEffect
+	public sealed class DamageEffect : IStackEffect, IStateEffect, IEffect
 	{
 		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;
@@ -37,7 +37,7 @@ namespace ModiBuff.Core
 
 		public void ResetState() => _extraDamage = 0;
 
-		public IStackEffect ShallowClone() => new DamageEffect(_baseDamage, _stackEffect);
+		public IStateEffect ShallowClone() => new DamageEffect(_baseDamage, _stackEffect);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 

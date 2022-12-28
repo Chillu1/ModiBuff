@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public interface IStackEffect : IShallowClone<IStackEffect>
+	public interface IStackEffect
 	{
 		void StackEffect(int stacks, float value, ITargetComponent targetComponent);
 	}

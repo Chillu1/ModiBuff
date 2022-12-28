@@ -74,5 +74,45 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitMana - 5, Unit.Mana);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
+
+		[Test]
+		public void NestedStackApplier()
+		{
+			Unit.TryAddModifierSelf("ComplexApplier_OnHit_Event");
+
+			Enemy.Attack(Unit); //Gets rupture modifier
+
+			Enemy.Update(1f); //Rupture modifier interval ticks
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+
+			Enemy.AttackN(Unit, 9); //Gets 9 more stacks
+
+			Assert.True(Enemy.HasStatusEffect(StatusEffectType.Disarm));
+
+			Enemy.Update(1f); //Rupture modifier interval ticks
+			Assert.AreEqual(EnemyHealth - 5 - 5, Enemy.Health);
+
+			Enemy.Update(4f);
+			Assert.False(Enemy.HasStatusEffect(StatusEffectType.Disarm));
+
+			Enemy.Update(5f);
+			Enemy.AttackN(Unit, 5);
+
+			//Only 1 stack of Disarm
+			Assert.False(Enemy.HasStatusEffect(StatusEffectType.Disarm));
+		}
+
+		[Test]
+		public void AddDamageStacksEventsAppliers()
+		{
+			//Add damage on 4 stacks buff, that you give someone when they heal you 5 times, for 60 seconds.
+			Ally.TryAddModifierSelf("ComplexApplier2_WhenHealed_Event");
+
+			Unit.HealN(Ally, 5);
+
+			Unit.AttackN(Enemy, 4);
+
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+		}
 	}
 }
