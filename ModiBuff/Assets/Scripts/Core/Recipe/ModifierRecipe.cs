@@ -12,25 +12,17 @@ namespace ModiBuff.Core
 	{
 		public int Id { get; }
 		public string Name { get; }
-		public bool HasChecks { get; private set; }
+		public bool HasApplyChecks { get; private set; }
 
 		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
 
-		private StatType _applyConditionStatType;
-		private float _applyConditionValue;
 		private ConditionCheck _applyCondition;
 		private float _applyCooldown = -1f;
-		private float _applyCost = -1f;
 		private CostCheck _applyCostCheck;
-		private float _applyChance = -1f;
-		private CostType _applyCostType = CostType.None;
 		private ChanceCheck _applyChanceCheck;
 
 		private bool _hasEffectChecks;
 		private float _effectCooldown = -1f;
-		private float _effectChance = -1f;
-		private CostType _effectCostType = CostType.None;
-		private float _effectCost = -1f;
 
 		private bool _oneTimeInit;
 
@@ -112,9 +104,8 @@ namespace ModiBuff.Core
 		//TODO ApplyCondition bool Enum. Ex. HealthIsFull
 		public ModifierRecipe ApplyCondition(StatType statType, float value) //, ComparisonType comparisonType)
 		{
-			_applyConditionStatType = statType;
-			_applyConditionValue = value;
-			HasChecks = true;
+			_applyCondition = new ConditionCheck(statType, value);
+			HasApplyChecks = true;
 			return this;
 		}
 
@@ -124,7 +115,7 @@ namespace ModiBuff.Core
 		public ModifierRecipe ApplyCooldown(float cooldown)
 		{
 			_applyCooldown = cooldown;
-			HasChecks = true;
+			HasApplyChecks = true;
 			return this;
 		}
 
@@ -133,9 +124,8 @@ namespace ModiBuff.Core
 		/// </summary>
 		public ModifierRecipe ApplyCost(CostType costType, float cost)
 		{
-			_applyCostType = costType;
-			_applyCost = cost;
-			HasChecks = true;
+			_applyCostCheck = new CostCheck(costType, cost);
+			HasApplyChecks = true;
 			return this;
 		}
 
@@ -147,8 +137,8 @@ namespace ModiBuff.Core
 			if (chance > 1)
 				chance /= 100;
 			Debug.Assert(chance >= 0 && chance <= 1, "Chance must be between 0 and 1");
-			_applyChance = chance;
-			HasChecks = true;
+			_applyChanceCheck = new ChanceCheck(chance);
+			HasApplyChecks = true;
 			return this;
 		}
 
@@ -170,8 +160,7 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe EffectCost(CostType costType, float cost)
 		{
-			_effectCostType = costType;
-			_effectCost = cost;
+			_effectCostInstance = new CostCheck(costType, cost);
 			_hasEffectChecks = true;
 			return this;
 		}
@@ -181,7 +170,7 @@ namespace ModiBuff.Core
 			if (chance > 1)
 				chance /= 100;
 			Debug.Assert(chance >= 0 && chance <= 1, "Chance must be between 0 and 1");
-			_effectChance = chance;
+			_effectChanceInstance = new ChanceCheck(chance);
 			_hasEffectChecks = true;
 			return this;
 		}
@@ -266,22 +255,6 @@ namespace ModiBuff.Core
 
 			_timeComponents = new List<ITimeComponent>(2);
 			_modifierCreator = new ModifierCreator(_effectWrappers);
-
-			if (_applyConditionStatType != StatType.None && _applyConditionValue > 0)
-				_applyCondition = new ConditionCheck(_applyConditionStatType, _applyConditionValue);
-			if (_applyCostType != CostType.None && _applyCost > 0)
-				_applyCostCheck = new CostCheck(_applyCostType, _applyCost);
-			if (_applyChance >= 0f)
-				_applyChanceCheck = new ChanceCheck(_applyChance);
-
-			if (_hasEffectChecks)
-			{
-				if (_effectCostType != CostType.None && _effectCost > 0f)
-					_effectCostInstance = new CostCheck(_effectCostType, _effectCost);
-
-				if (_effectChance >= 0f)
-					_effectChanceInstance = new ChanceCheck(_effectChance);
-			}
 		}
 
 		public int CompareTo(ModifierRecipe other)

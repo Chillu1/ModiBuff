@@ -10,7 +10,7 @@ namespace ModiBuff.Core
 	{
 		public int Id { get; }
 		public string Name { get; }
-		public bool HasChecks { get; }
+		public bool HasApplyChecks { get; }
 
 		private readonly EffectOnEvent _effectOnEvent;
 

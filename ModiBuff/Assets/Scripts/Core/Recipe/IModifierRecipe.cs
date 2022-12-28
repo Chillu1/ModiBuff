@@ -5,7 +5,7 @@ namespace ModiBuff.Core
 		int Id { get; }
 		string Name { get; }
 
-		bool HasChecks { get; }
+		bool HasApplyChecks { get; }
 
 		internal ModifierCheck CreateApplyCheck(); //TODO Split this into two interfaces?
 		internal Modifier Create();

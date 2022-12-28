@@ -78,7 +78,7 @@ namespace ModiBuff.Core
 
 		public bool TryAddApplier(IModifierRecipe recipe, ApplierType applierType = ApplierType.None)
 		{
-			if (!recipe.HasChecks)
+			if (!recipe.HasApplyChecks)
 			{
 				switch (applierType)
 				{
