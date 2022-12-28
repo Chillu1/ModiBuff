@@ -5,11 +5,11 @@ namespace ModiBuff.Core
 	public sealed class ModifierCreator
 	{
 		private readonly List<EffectWrapper> _effectWrappers;
-		private List<IRevertEffect> _revertList;
-		private List<IEffect> _initEffects;
-		private List<IEffect> _intervalEffects;
-		private List<IEffect> _durationEffects;
-		private List<IStackEffect> _stackEffects;
+		private readonly List<IRevertEffect> _revertList;
+		private readonly List<IEffect> _initEffects;
+		private readonly List<IEffect> _intervalEffects;
+		private readonly List<IEffect> _durationEffects;
+		private readonly List<IStackEffect> _stackEffects;
 
 		public ModifierCreator(List<EffectWrapper> effectWrappers)
 		{

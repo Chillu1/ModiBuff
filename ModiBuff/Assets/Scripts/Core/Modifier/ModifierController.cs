@@ -6,9 +6,7 @@ namespace ModiBuff.Core
 	public sealed class ModifierController : IRemoveModifier
 	{
 		private readonly Modifier[] _modifiers;
-
-		//Saving indexes is faster if we have more than 170 recipes
-		//private readonly List<int> _modifierIndexes;
+		private readonly List<int> _modifierIndexes;
 
 		private readonly List<int> _modifierAttackAppliers;
 		private readonly List<int> _modifierCastAppliers;
@@ -18,6 +16,7 @@ namespace ModiBuff.Core
 
 		public ModifierController()
 		{
+			_modifierIndexes = new List<int>(5);
 			_modifiers = new Modifier[ModifierRecipes.RecipesCount];
 			_modifierAttackAppliers = new List<int>(5);
 			_modifierCastAppliers = new List<int>(5);
@@ -28,17 +27,9 @@ namespace ModiBuff.Core
 
 		public void Update(in float delta)
 		{
-			int length = _modifiers.Length;
-			//for (int i = 0; i < length; i++)
-			//	_modifiers[_modifierIndexes[i]].Update(delta);
+			int length = _modifierIndexes.Count;
 			for (int i = 0; i < length; i++)
-			{
-				var modifier = _modifiers[i];
-				if (modifier == null)
-					continue;
-
-				modifier.Update(delta);
-			}
+				_modifiers[_modifierIndexes[i]].Update(delta);
 
 			if (_modifierChecksAppliers.Count > 0)
 				foreach (var check in _modifierChecksAppliers.Values)
@@ -133,6 +124,7 @@ namespace ModiBuff.Core
 			modifier.SetTargets(target, acter);
 
 			_modifiers[id] = modifier;
+			_modifierIndexes.Add(id);
 			modifier.Init();
 			modifier.Refresh();
 			modifier.Stack();
@@ -160,6 +152,7 @@ namespace ModiBuff.Core
 		{
 			//Debug.Log("Removing modifier: " + modifier.Id);
 			_modifiers[modifier.Id] = null;
+			_modifierIndexes.Remove(modifier.Id);
 			ModifierPool.Instance.Return(modifier);
 		}
 	}

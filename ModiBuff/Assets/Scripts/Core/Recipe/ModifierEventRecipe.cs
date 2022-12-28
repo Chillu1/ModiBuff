@@ -14,12 +14,14 @@ namespace ModiBuff.Core
 
 		private readonly EffectOnEvent _effectOnEvent;
 
-		private readonly List<IEffect> _effects;
+		private readonly List<EffectWrapper> _effects;
 
 		private float _removeDuration;
 		private EffectWrapper _removeEffectWrapper;
 
 		private bool _refreshDuration;
+
+		private readonly List<IRevertEffect> _revertEffects;
 
 		public ModifierEventRecipe(string name, EffectOnEvent effectOnEvent)
 		{
@@ -27,16 +29,19 @@ namespace ModiBuff.Core
 			Name = name;
 			_effectOnEvent = effectOnEvent;
 
-			_effects = new List<IEffect>(2);
+			_effects = new List<EffectWrapper>(2);
+			_revertEffects = new List<IRevertEffect>(2);
 		}
 
 		//---PostFinish---
 
 		Modifier IModifierRecipe.Create()
 		{
-			//TODO Clone stateful
-			var revertList = new List<IRevertEffect>();
-			var eventEffect = new EventEffect(_effects[0], _effectOnEvent);
+			var effects = new IEffect[_effects.Count];
+			for (int i = 0; i < _effects.Count; i++)
+				effects[i] = _effects[i].GetEffect();
+
+			var eventEffect = new EventEffect(effects, _effectOnEvent);
 			var initComponent = new InitComponent(true, eventEffect, null);
 
 			ITimeComponent[] timeComponents = null;
@@ -48,14 +53,19 @@ namespace ModiBuff.Core
 				};
 			}
 
+			//TODO Do we want to be able to revert the effects inside the event as well?
 			if (eventEffect is IRevertEffect revertEffect && revertEffect.IsRevertible)
-				revertList.Add(revertEffect);
+				_revertEffects.Add(revertEffect);
 
 			if (_removeEffectWrapper != null)
 			{
-				((RemoveEffect)_removeEffectWrapper.GetEffect()).SetRevertibleEffects(revertList.ToArray());
+				((RemoveEffect)_removeEffectWrapper.GetEffect()).SetRevertibleEffects(_revertEffects.ToArray());
 				_removeEffectWrapper.Reset();
 			}
+
+			for (int i = 0; i < _effects.Count; i++)
+				_effects[i].Reset();
+			_revertEffects.Clear();
 
 			return new Modifier(Id, Name, initComponent, timeComponents, null, null);
 		}
@@ -79,7 +89,10 @@ namespace ModiBuff.Core
 
 		public ModifierEventRecipe Effect(IEffect effect)
 		{
-			_effects.Add(effect);
+			if (effect is IEventTrigger eventTrigger)
+				eventTrigger.SetEventBased();
+
+			_effects.Add(new EffectWrapper(effect, EffectOn.Init));
 			return this;
 		}
 

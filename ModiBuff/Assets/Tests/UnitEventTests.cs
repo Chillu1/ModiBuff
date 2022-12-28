@@ -122,6 +122,17 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - 10, Enemy.Health);
 		}
 
-		//TODO EventRecursion
+		[Test]
+		public void Thorns_OnHit_Recursion()
+		{
+			Unit.TryAddModifierSelf("ThornsOnHitEvent");
+			Enemy.TryAddModifierSelf("ThornsOnHitEvent");
+
+			Enemy.Attack(Unit);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+
+			Unit.Attack(Enemy);
+			Assert.AreEqual(UnitHealth - EnemyDamage - 5, Unit.Health);
+		}
 	}
 }

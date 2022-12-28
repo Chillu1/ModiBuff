@@ -95,15 +95,18 @@ namespace ModiBuff.Core.Units
 
 		public float TakeDamage(float damage, IUnit acter, bool triggersEvents = true)
 		{
+			if (triggersEvents)
+			{
+				for (int i = 0; i < _whenAttackedEffects.Count; i++)
+					_whenAttackedEffects[i].Effect(this, acter);
+			}
+
 			float oldHealth = Health;
 			Health -= damage;
 			float dealtDamage = oldHealth - Health;
 
 			if (triggersEvents)
 			{
-				for (int i = 0; i < _whenAttackedEffects.Count; i++)
-					_whenAttackedEffects[i].Effect(this, acter);
-
 				if (Health <= 0)
 					for (int i = 0; i < _whenDeathEffects.Count; i++)
 						_whenDeathEffects[i].Effect(this, acter);
@@ -112,24 +115,26 @@ namespace ModiBuff.Core.Units
 			return dealtDamage;
 		}
 
-		public float Heal(float heal, IUnit acter)
+		public float Heal(float heal, IUnit acter, bool triggersEvents = true)
 		{
 			float oldHealth = Health;
-			for (int i = 0; i < _whenHealedEffects.Count; i++)
-				_whenHealedEffects[i].Effect(this, acter);
+			if (triggersEvents)
+				for (int i = 0; i < _whenHealedEffects.Count; i++)
+					_whenHealedEffects[i].Effect(this, acter);
 			Health += heal;
 			return Health - oldHealth;
 		}
 
-		public float Heal(IUnit target)
+		public float Heal(IUnit target, bool triggersEvents = true)
 		{
 			if ((_statusEffectController.LegalActions & LegalAction.Act) == 0)
 				return 0;
 
-			for (int i = 0; i < _onHealEffects.Count; i++)
-				_onHealEffects[i].Effect(target, this);
+			if (triggersEvents)
+				for (int i = 0; i < _onHealEffects.Count; i++)
+					_onHealEffects[i].Effect(target, this);
 
-			return target.Heal(HealValue, this);
+			return target.Heal(HealValue, this, triggersEvents);
 		}
 
 		public void AddDamage(float damage)

@@ -1,11 +1,12 @@
 namespace ModiBuff.Core
 {
-	public class HealEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect
+	public class HealEffect : IEventTrigger, IStateEffect, IStackEffect, IRevertEffect, IEffect
 	{
 		public bool IsRevertible { get; }
 
 		private readonly float _heal;
 		private readonly StackEffectType _stackEffect;
+		private bool _isEventBased;
 
 		private float _extraHeal;
 		private float _totalHeal;
@@ -15,17 +16,19 @@ namespace ModiBuff.Core
 			_heal = heal;
 		}
 
+		public void SetEventBased() => _isEventBased = true;
+
 		public void Effect(IUnit target, IUnit acter)
 		{
 			if (IsRevertible)
 				_totalHeal = _heal + _extraHeal;
 
-			target.Heal(_heal + _extraHeal, acter);
+			target.Heal(_heal + _extraHeal, acter, !_isEventBased);
 		}
 
 		public void RevertEffect(IUnit target, IUnit acter)
 		{
-			target.Heal(-_totalHeal, acter);
+			target.Heal(-_totalHeal, acter, !_isEventBased);
 		}
 
 		public void StackEffect(int stacks, float value, ITargetComponent targetComponent)

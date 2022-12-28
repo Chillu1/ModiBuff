@@ -3,10 +3,11 @@ using UnityEngine;
 
 namespace ModiBuff.Core
 {
-	public sealed class DamageEffect : IStackEffect, IStateEffect, IEffect
+	public sealed class DamageEffect : IEventTrigger, IStackEffect, IStateEffect, IEffect
 	{
 		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;
+		private bool _isEventBased;
 
 		private float _extraDamage;
 
@@ -16,10 +17,12 @@ namespace ModiBuff.Core
 			_stackEffect = stackEffect;
 		}
 
+		public void SetEventBased() => _isEventBased = true;
+
 		public void Effect(IUnit target, IUnit acter)
 		{
 			//Debug.Log($"Base damage: {_baseDamage}. Extra damage: {_extraDamage}");
-			target.TakeDamage(_baseDamage + _extraDamage, acter);
+			target.TakeDamage(_baseDamage + _extraDamage, acter, !_isEventBased);
 		}
 
 		public void StackEffect(int stacks, float value, ITargetComponent targetComponent)
