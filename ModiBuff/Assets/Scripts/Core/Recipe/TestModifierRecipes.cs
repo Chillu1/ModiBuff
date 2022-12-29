@@ -212,11 +212,11 @@ namespace ModiBuff.Core
 				.Stack(WhenStackEffect.Always);
 
 			Add("InitDamage_ApplyCondition_HealthAbove100")
-				.ApplyCondition(StatType.Health, 100)
+				.ApplyCondition(StatType.Health, 100, ComparisonType.GreaterOrEqual)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("InitDamage_EffectCondition_HealthAbove100")
-				.EffectCondition(StatType.Health, 100)
+				.EffectCondition(StatType.Health, 100, ComparisonType.GreaterOrEqual)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("InitDamage_EffectCondition_HealthFull")

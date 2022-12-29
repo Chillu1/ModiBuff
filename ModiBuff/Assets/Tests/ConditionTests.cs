@@ -84,6 +84,6 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
-		//TODO HealthIsBelow 50%-10%
+		//TODO Stat is lower/higher/equal than X%
 	}
 }

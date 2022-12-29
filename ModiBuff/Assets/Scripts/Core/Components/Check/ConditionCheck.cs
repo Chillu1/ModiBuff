@@ -8,9 +8,10 @@ namespace ModiBuff.Core
 		private readonly ConditionType _conditionType;
 		private readonly StatType _statType;
 		private readonly float _statValue;
+		private readonly ComparisonType _comparisonType;
 		private readonly LegalAction _legalAction;
 		private readonly StatusEffectType _statusEffect;
-		private readonly string _modifierName;
+		private readonly string _modifierName; //For possible save/load feature
 		private readonly int _modifierId = -1;
 		private readonly Func<IUnit, bool> _checks;
 
@@ -25,16 +26,17 @@ namespace ModiBuff.Core
 		}
 
 		public ConditionCheck(ConditionType conditionType, StatType statType, float statValue) :
-			this(conditionType, statType, statValue, LegalAction.None, StatusEffectType.None, null)
+			this(conditionType, statType, statValue, ComparisonType.GreaterOrEqual, LegalAction.None, StatusEffectType.None, null)
 		{
 		}
 
-		public ConditionCheck(ConditionType conditionType, StatType statType, float statValue, LegalAction legalAction,
-			StatusEffectType statusEffectType, string modifierName)
+		public ConditionCheck(ConditionType conditionType, StatType statType, float statValue, ComparisonType comparisonType,
+			LegalAction legalAction, StatusEffectType statusEffectType, string modifierName)
 		{
 			_conditionType = conditionType;
 			_statType = statType;
 			_statValue = statValue;
+			_comparisonType = comparisonType;
 			_legalAction = legalAction;
 			_statusEffect = statusEffectType;
 			_modifierName = modifierName;
@@ -87,7 +89,11 @@ namespace ModiBuff.Core
 				case ConditionType.None:
 					break;
 				case ConditionType.HealthIsFull:
-					if (Math.Abs(unit.Health - unit.MaxHealth) > DeltaTolerance)
+					if (!CheckValue(unit.Health, unit.MaxHealth, ComparisonType.Equal))
+						return false;
+					break;
+				case ConditionType.ManaIsFull:
+					if (!CheckValue(unit.Mana, unit.MaxMana, ComparisonType.Equal))
 						return false;
 					break;
 				default:
@@ -99,11 +105,11 @@ namespace ModiBuff.Core
 				case StatType.None:
 					break;
 				case StatType.Health:
-					if (unit.Health < _statValue)
+					if (!CheckValue(unit.Health, _statValue, _comparisonType))
 						return false;
 					break;
 				case StatType.Mana:
-					if (unit.Mana < _statValue)
+					if (!CheckValue(unit.Mana, _statValue, _comparisonType))
 						return false;
 					break;
 				default:
@@ -120,6 +126,20 @@ namespace ModiBuff.Core
 				return false;
 
 			return true;
+
+			bool CheckValue(float unitValue, float value, ComparisonType comparisonType)
+			{
+				return comparisonType switch
+				{
+					ComparisonType.None => true,
+					ComparisonType.Greater => unitValue > value,
+					ComparisonType.Equal => Math.Abs(unitValue - value) < DeltaTolerance,
+					ComparisonType.Less => unitValue < value,
+					ComparisonType.GreaterOrEqual => unitValue >= value,
+					ComparisonType.LessOrEqual => unitValue <= value,
+					_ => throw new ArgumentOutOfRangeException()
+				};
+			}
 		}
 	}
 }

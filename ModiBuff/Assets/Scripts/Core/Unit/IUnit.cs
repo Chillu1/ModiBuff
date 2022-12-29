@@ -9,6 +9,7 @@ namespace ModiBuff.Core
 		float Damage { get; }
 		float HealValue { get; }
 		float Mana { get; }
+		float MaxMana { get; }
 
 		void Update(float deltaTime);
 		float Attack(IUnit target, bool triggersEvents = true);

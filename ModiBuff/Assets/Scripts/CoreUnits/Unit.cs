@@ -15,6 +15,7 @@ namespace ModiBuff.Core.Units
 		public float Damage { get; private set; }
 		public float HealValue { get; private set; }
 		public float Mana { get; private set; }
+		public float MaxMana { get; private set; }
 
 		//This can be done with an array of list, but it's better performance wise.
 		private List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
@@ -32,6 +33,7 @@ namespace ModiBuff.Core.Units
 			Damage = damage;
 			HealValue = healValue;
 			Mana = mana;
+			MaxMana = mana;
 
 			_whenAttackedEffects = new List<IEffect>();
 			_whenCastEffects = new List<IEffect>();

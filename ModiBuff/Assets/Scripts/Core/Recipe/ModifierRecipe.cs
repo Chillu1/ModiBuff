@@ -19,12 +19,17 @@ namespace ModiBuff.Core
 		private ConditionType _applyConditionType;
 		private StatType _applyConditionStatType;
 		private float _applyConditionValue = -1;
+		private ComparisonType _applyConditionComparisonType;
+		private LegalAction _applyConditionLegalAction;
+		private StatusEffectType _applyConditionStatusEffect;
+		private string _applyConditionModifierName;
 		private float _applyCooldown = -1f;
 
 		private bool _hasEffectChecks;
 		private ConditionType _effectConditionType;
 		private StatType _effectConditionStatType;
 		private float _effectConditionValue = -1;
+		private ComparisonType _effectConditionComparisonType;
 		private LegalAction _effectConditionLegalAction;
 		private StatusEffectType _effectConditionStatusEffect;
 		private string _effectConditionModifierName;
@@ -118,10 +123,32 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		public ModifierRecipe ApplyCondition(StatType statType, float value) //, ComparisonType comparisonType)
+		public ModifierRecipe ApplyCondition(StatType statType, float value, ComparisonType comparisonType = ComparisonType.GreaterOrEqual)
 		{
 			_applyConditionStatType = statType;
 			_applyConditionValue = value;
+			_applyConditionComparisonType = comparisonType;
+			HasApplyChecks = true;
+			return this;
+		}
+
+		public ModifierRecipe ApplyCondition(LegalAction legalAction)
+		{
+			_applyConditionLegalAction = legalAction;
+			HasApplyChecks = true;
+			return this;
+		}
+
+		public ModifierRecipe ApplyCondition(StatusEffectType statusEffectType)
+		{
+			_applyConditionStatusEffect = statusEffectType;
+			HasApplyChecks = true;
+			return this;
+		}
+
+		public ModifierRecipe ApplyCondition(string modifierName)
+		{
+			_applyConditionModifierName = modifierName;
 			HasApplyChecks = true;
 			return this;
 		}
@@ -168,10 +195,11 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		public ModifierRecipe EffectCondition(StatType statType, float value) //, ComparisonType comparisonType)
+		public ModifierRecipe EffectCondition(StatType statType, float value, ComparisonType comparisonType = ComparisonType.GreaterOrEqual)
 		{
 			_effectConditionStatType = statType;
 			_effectConditionValue = value;
+			_effectConditionComparisonType = comparisonType;
 			_hasEffectChecks = true;
 			return this;
 		}
@@ -304,20 +332,31 @@ namespace ModiBuff.Core
 
 			if (HasApplyChecks)
 			{
-				if (_applyConditionType != ConditionType.None || (_applyConditionStatType != StatType.None && _applyConditionValue != -1f))
-					_applyCondition = new ConditionCheck(_applyConditionType, _applyConditionStatType, _applyConditionValue);
+				if (_applyConditionType != ConditionType.None
+				    || (_applyConditionStatType != StatType.None && _applyConditionValue != -1f)
+				    || _applyConditionLegalAction != LegalAction.None
+				    || _applyConditionStatusEffect != StatusEffectType.None
+				    || _applyConditionModifierName != null)
+				{
+					_applyCondition = new ConditionCheck(_applyConditionType, _applyConditionStatType, _applyConditionValue,
+						_applyConditionComparisonType, _applyConditionLegalAction, _applyConditionStatusEffect,
+						_applyConditionModifierName);
+				}
 			}
 
 			if (_hasEffectChecks)
 			{
+				//Checking if condition is legal
 				if (_effectConditionType != ConditionType.None
-				    || (_effectConditionStatType != StatType.None && _effectConditionValue != -1)
+				    || (_effectConditionStatType != StatType.None && _effectConditionValue != -1 &&
+				        _effectConditionComparisonType != ComparisonType.None)
 				    || _effectConditionLegalAction != LegalAction.None
 				    || _effectConditionStatusEffect != StatusEffectType.None
 				    || _effectConditionModifierName != null)
 				{
 					_effectCondition = new ConditionCheck(_effectConditionType, _effectConditionStatType, _effectConditionValue,
-						_effectConditionLegalAction, _effectConditionStatusEffect, _effectConditionModifierName);
+						_effectConditionComparisonType, _effectConditionLegalAction, _effectConditionStatusEffect,
+						_effectConditionModifierName);
 				}
 			}
 		}
