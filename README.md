@@ -65,11 +65,11 @@ N: 5_000
 
 #### Add/Apply/Update Modifier table
 
-| Library                                               | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Update DoT*<br/>(5_000 units) |
-|-------------------------------------------------------|--------------------------------|-------------------------------------|-------------------------------|
-| ModiBuff (this)                                       | 0.14ms, 0 GC                   | 0.27ms, 0 GC                        | 0.95ms, 0 GC                  |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | ?                              | ?                                   | ?                             |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                              | ?                                   | ?                             |
+| Library                                               | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Update DoT*<br/>(5_000 units, N:1) |
+|-------------------------------------------------------|--------------------------------|-------------------------------------|------------------------------------|
+| ModiBuff (this)                                       | 0.14ms, 0 GC                   | 0.27ms, 0 GC                        | 0.95ms, 0 GC                       |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | ?                              | ?                                   | ?                                  |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                              | ?                                   | ?                                  |
 
 #### New Modifier/Pool table
 
@@ -101,41 +101,6 @@ Currently the library is not on NuGet or any other package manager. You can down
 Specifically, you should get [Core](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Scripts/Core).
 [Download Link](https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2FChillu1%2FModiBuff%2Ftree%2Fmaster%2FModiBuff%2FAssets%2FScripts%2FCore)  
 And [Core Units](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Scripts/CoreUnits), if you want an implementation example.
-
-# Differences to ModiBuffEcs and Old
-
-## [ModiBuffEcs]((https://github.com/Chillu1/ModiBuffEcs))
-
-ModiBuff has:
-
-* No GC/allocations
-* No ECS framework needed
-* Worse iteration speed, 5_000 interval modifiers compared to 100_000 modifiers, 5ms update, average complexity modifiers
-
-
-* More features
-	* ...
-
-## [Old Modifier Library]((https://github.com/Chillu1/ModifierLibrary))
-
-ModiBuff has:
-
-* **Much** better backend and design decisions
-* Lightweight
-* Smaller Codebase
-* No GC/allocations
-* Redesigned Improved API
-	* [Recipes](#recipe)
-	  vs [Properties](https://github.com/Chillu1/ModifierLibrary/blob/master/ModifierLibrary/Assets/Scripts/ModifierLibrary/ModifierPrototypes.cs#L126)
-* Better iteration speed, 5_000 interval modifiers (from 500), 5ms update, average complexity modifiers
-* Better memory managment (1MB for 5_000 modifiers)
-* No arbitrary name constraints
-
-
-* Less features, missing:
-	* Aura
-	* Some status effects (taunt, confuse)
-	* Tags
 
 # Usage
 
@@ -197,7 +162,7 @@ Add("InitStun")
 
 ### Applier Effect
 
-Hands down, the most important effect is the ApplierEffect.  
+Hands down, the most powerful effect is the ApplierEffect.  
 It's used to apply other modifiers to units. While being able to use modifier logic, like stacks.  
 This can create some very sophisticated modifiers:
 
@@ -226,21 +191,60 @@ You should **NOT** use the Modifier class directly, but instead use the recipe s
 Recipe system fixes a lot of internal complexity of setting up modifiers for you.  
 It's possible to use the Modifier class directly in cases where you'd want multiple interval/duration components.
 
+# Differences to ModiBuffEcs and Old
+
+## [ModiBuffEcs]((https://github.com/Chillu1/ModiBuffEcs))
+
+ModiBuff has:
+
+* No GC/allocations
+* No ECS framework needed
+* Worse iteration speed, 25_000 interval modifiers compared to 100_000 modifiers, 5ms update, average complexity modifiers
+
+---
+
+* More features
+	* ...
+
+## [Old Modifier Library]((https://github.com/Chillu1/ModifierLibrary))
+
+ModiBuff has:
+
+* **Much** better backend and design decisions
+* Lightweight
+* Smaller Codebase
+* No GC/allocations
+* Redesigned Improved API
+	* [Recipes](#recipe)
+	  vs [Properties](https://github.com/Chillu1/ModifierLibrary/blob/master/ModifierLibrary/Assets/Scripts/ModifierLibrary/ModifierPrototypes.cs#L126)
+* Better iteration speed, 25_000 interval modifiers (from 500), 5ms update, average complexity modifiers
+* Better memory managment (1MB for 5_000 modifiers)
+* No arbitrary name constraints
+
+---
+
+* Less features, missing:
+	* Aura
+	* Two status effects: taunt, confuse
+	* Tags
+
 # When to use which library
 
 ## ModiBuff
 
-Smmary: Very optimized, no GC, good featureset.  
-Ex. games: Rimworld    
+Smmary: Very optimized, no GC, great featureset.  
+Ex. games: Rimworld, Hades, Binding of Isaac, Tiny Rogues, Enter the Gungeon  
 Ex. genres: small arpg, small rts, pve, colony sim
 
-ModiBuff is the best choice 80% of the time. It's fast, lightweight, deeply redesigned core, has no GC/allocations, and is very easy to use.
+ModiBuff is the best choice 95% of the time. It's fast, lightweight, deeply redesigned core, has no GC/allocations, and is very easy to
+use.  
 It's also very well tested for most scenarios.
 
 ## ModiBuffEcs
 
-Summary: Fastest iteration, small featureset, needs ecs framework. Entities: Solo vs Thousands, or Thousands vs Thousands.  
-Ex. games: PoE, Diablo  
+Summary: Fastest iteration, small featureset, needs ecs framework.  
+Entities: Solo vs Thousands, or Thousands vs Thousands.  
+Ex. games: Path of Exile, Diablo, StarCraft, Warcraft  
 Ex. genres: arpg, rpg, rts, pve
 
 ModiBuffEcs is a good choice if you don't care about about having a lot of features, and if your game will have hundreds of thousands of
@@ -249,14 +253,15 @@ Or just if you want to use it with an ecs framework.
 
 ## Original
 
-Summary: Not optimized, amazing featureset, entities: Solo vs Solo, Solo vs Party, Party vs Party  
-Ex. games: binding of isaac, tiny rogues, gungeon, dota, witcher 3  
+Summary: Not optimized, amazing featureset.  
+Entities: Solo vs Solo, Solo vs Party, Party vs Party  
+Ex. games: dota, witcher 3  
 Ex. genres: moba, arena, duel
 
 Only choose original if you need the deep featureset, AND you don't expect to have more than 100 units in the game at the same time, all
 using/applying 5 modifiers each frame.
-If you're making a moba or a small PvP arena game, you can use the original library. That being said, ModiBuff is a better choice for the
-vast majority of games.
+If you're making a moba or a small PvP arena game, you can use the original library. That being said, **ModiBuff is a better choice for the
+vast majority of games.**
 
 # FAQ
 
@@ -266,7 +271,7 @@ Ex:
 
 ```csharp
 Add("StackDamage")
-	.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
+	.Effect(new DamageEffect(5, StackEffectType.Effect/*<<THIS*/), EffectOn.Stack)
 	.Stack(WhenStackEffect.Always);
 ```
 
