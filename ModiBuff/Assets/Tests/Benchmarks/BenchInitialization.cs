@@ -22,8 +22,8 @@ namespace ModiBuff.Tests
 
 		[Test, Performance]
 		[TestCase(100)]
+		[TestCase(500)]
 		[TestCase(1000)]
-		[TestCase(5000)]
 		public void BenchAllocatePool(int n)
 		{
 			var _ = new ModifierIdManager();

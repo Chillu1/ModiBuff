@@ -5,5 +5,6 @@ namespace ModiBuff.Core
 		None,
 		Health,
 		Mana,
+		Damage,
 	}
 }

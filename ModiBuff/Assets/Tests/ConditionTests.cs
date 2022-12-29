@@ -6,7 +6,7 @@ namespace ModiBuff.Tests
 	public sealed class ConditionTests : BaseModifierTests
 	{
 		[Test]
-		public void HealthConditionOnApply_InitDamage()
+		public void HealthCondition_OnApply_InitDamage()
 		{
 			Unit.TakeDamage(UnitHealth - 6, Unit); //6hp left
 
@@ -16,7 +16,7 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-		public void HealthConditionOnEffect_InitDamage()
+		public void HealthCondition_OnEffect_InitDamage()
 		{
 			Unit.TryAddModifierSelf("InitDamage_EffectCondition_HealthAbove100");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health); //995
@@ -25,5 +25,19 @@ namespace ModiBuff.Tests
 			Unit.TryAddModifierSelf("InitDamage_EffectCondition_HealthAbove100");
 			Assert.AreEqual(1, Unit.Health); //Still 1hp left
 		}
+
+		[Test]
+		public void HealthIsFullCondition_OnEffect_InitDamage()
+		{
+			Unit.TryAddModifierSelf("InitDamage_EffectCondition_HealthFull");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.TryAddModifierSelf("InitDamage_EffectCondition_HealthFull");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+		//TODO HealthIsBelow 50%-10%
+		//TODO Has StatusEffect
+		//TODO Has LegalAction
+		//TODO Has Modifier
 	}
 }

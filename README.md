@@ -29,7 +29,8 @@ This library was made to make a standarized powerful system that allows for mani
 
 * No GC/allocations (fully pooled with state reset)
 * Low memory usage (1 MB for 5_000 modifiers)
-* Fast iteration [5_000 interval modifiers in 5ms](#benchmarks)
+* Fast effects [5_000 damage modifiers in 0.14ms](#benchmarks)
+* Fast iteration [5_000 interval modifiers & 5_000 units in 5ms](#benchmarks)
 * Easy high level API [recipes](#recipe)
 * Effects on actions
 	* Init
@@ -49,6 +50,9 @@ This library was made to make a standarized powerful system that allows for mani
 * Applier Modifiers
 	* OnAttack
 	* Cast
+* Conditions
+	* Stat (health/mana/damage) >/=/< than X
+	* Stat is full/half/empty
 * Fully revertible effects
 
 # Benchmarks
@@ -61,21 +65,21 @@ N: 5_000
 
 #### Add/Apply/Update Modifier table
 
-| Library                                               | Apply InitDmg | Apply InitStackDmg | Update DoT* |
-|-------------------------------------------------------|---------------|--------------------|-------------|
-| ModiBuff (this)                                       | 0.14ms, 0 GC  | 0.27ms, 0 GC       | 1.4ms, 0 GC |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | ?             | ?                  | ?           |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | ?             | ?                  | ?           |
+| Library                                               | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Update DoT*<br/>(5_000 units) |
+|-------------------------------------------------------|--------------------------------|-------------------------------------|-------------------------------|
+| ModiBuff (this)                                       | 0.14ms, 0 GC                   | 0.27ms, 0 GC                        | 0.95ms, 0 GC                  |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | ?                              | ?                                   | ?                             |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                              | ?                                   | ?                             |
 
 #### New Modifier/Pool table
 
-| Library                                               | New InitDmg   | New DoT*      | DoT pool     | DoT pool reset return |
-|-------------------------------------------------------|---------------|---------------|--------------|-----------------------|
-| ModiBuff (this)                                       | 3.87ms,  4 GC | 12.5ms, 11 GC | 0.03ms, 0 GC | 0.16ms, 0 GC          |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.00ms,  1 GC | 5.80ms,  1 GC | X            | X                     |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC | 70.0ms, 63 GC | X            | X                     |
+| Library                                               | New<br/>InitDmg | New<br/>DoT*  | DoT pool     | DoT pool<br/>reset return |
+|-------------------------------------------------------|-----------------|---------------|--------------|---------------------------|
+| ModiBuff (this)                                       | 4.07ms,  4 GC   | 10.3ms, 11 GC | 0.03ms, 0 GC | 0.16ms, 0 GC              |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.00ms,  1 GC   | 5.80ms,  1 GC | X            | X                         |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC   | 70.0ms, 63 GC | X            | X                         |
 
-Non-pool benchmarks don't really matter for ModiBuff, since it will only slow down when allocating the new modifiers in the pools.
+> Important: Non-pool benchmarks don't matter for ModiBuff, since it will only be slower when allocating the new modifiers in the pools.
 
 Pooling in ModiBuff is 430X faster than original old version (because of pool & reset)  
 But it's also much faster in cases of doing init/stack/refresh on an existing modifier (we don't create a new modifier anymore)  
@@ -130,7 +134,6 @@ ModiBuff has:
 
 * Less features, missing:
 	* Aura
-	* Condition effects (when low health)
 	* Some status effects (taunt, confuse)
 	* Tags
 

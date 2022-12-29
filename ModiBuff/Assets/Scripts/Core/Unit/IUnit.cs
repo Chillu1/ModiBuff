@@ -5,6 +5,7 @@ namespace ModiBuff.Core
 	public interface IUnit
 	{
 		float Health { get; }
+		float MaxHealth { get; }
 		float Damage { get; }
 		float HealValue { get; }
 		float Mana { get; }

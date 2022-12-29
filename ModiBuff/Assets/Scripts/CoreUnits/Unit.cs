@@ -11,6 +11,7 @@ namespace ModiBuff.Core.Units
 		private readonly ModifierController _modifierController;
 
 		public float Health { get; private set; }
+		public float MaxHealth { get; private set; }
 		public float Damage { get; private set; }
 		public float HealValue { get; private set; }
 		public float Mana { get; private set; }
@@ -27,6 +28,7 @@ namespace ModiBuff.Core.Units
 		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000)
 		{
 			Health = health;
+			MaxHealth = health;
 			Damage = damage;
 			HealValue = healValue;
 			Mana = mana;

@@ -30,7 +30,7 @@ namespace ModiBuff.Core
 			return id;
 		}
 
-		public static int GetId(string id) => _instance._idMap[id];
+		public static int GetId(string name) => _instance._idMap[name];
 
 		public static void Reset() => _instance._nextId = 0;
 	}

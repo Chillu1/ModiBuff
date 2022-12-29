@@ -16,12 +16,15 @@ namespace ModiBuff.Core
 
 		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
 
-		private ConditionCheck _applyCondition;
+		private ConditionType _applyConditionType;
+		private StatType _applyConditionStatType;
+		private float _applyConditionValue = -1;
 		private float _applyCooldown = -1f;
-		private CostCheck _applyCostCheck;
-		private ChanceCheck _applyChanceCheck;
 
 		private bool _hasEffectChecks;
+		private ConditionType _effectConditionType;
+		private StatType _effectConditionStatType;
+		private float _effectConditionValue = -1;
 		private float _effectCooldown = -1f;
 
 		private bool _oneTimeInit;
@@ -44,9 +47,13 @@ namespace ModiBuff.Core
 		private List<ITimeComponent> _timeComponents;
 		private ModifierCreator _modifierCreator;
 
-		private ConditionCheck _effectConditionInstance;
-		private CostCheck _effectCostInstance;
-		private ChanceCheck _effectChanceInstance;
+		private ConditionCheck _applyCondition;
+		private CostCheck _applyCostCheck;
+		private ChanceCheck _applyChanceCheck;
+
+		private ConditionCheck _effectCondition;
+		private CostCheck _effectCost;
+		private ChanceCheck _effectChance;
 
 		public ModifierRecipe(string name)
 		{
@@ -81,7 +88,7 @@ namespace ModiBuff.Core
 				cooldown = new CooldownCheck(_effectCooldown);
 			ModifierCheck effectCheck = null;
 			if (_hasEffectChecks)
-				effectCheck = new ModifierCheck(Id, Name, _effectConditionInstance, cooldown, _effectCostInstance, _effectChanceInstance);
+				effectCheck = new ModifierCheck(Id, Name, _effectCondition, cooldown, _effectCost, _effectChance);
 
 			if (creation.initEffects.Count > 0)
 				initComponent = new InitComponent(_oneTimeInit, creation.initEffects.ToArray(), effectCheck);
@@ -101,10 +108,17 @@ namespace ModiBuff.Core
 
 		//---ApplyChecks---
 
-		//TODO ApplyCondition bool Enum. Ex. HealthIsFull
+		public ModifierRecipe ApplyCondition(ConditionType conditionType)
+		{
+			_applyConditionType = conditionType;
+			HasApplyChecks = true;
+			return this;
+		}
+
 		public ModifierRecipe ApplyCondition(StatType statType, float value) //, ComparisonType comparisonType)
 		{
-			_applyCondition = new ConditionCheck(statType, value);
+			_applyConditionStatType = statType;
+			_applyConditionValue = value;
 			HasApplyChecks = true;
 			return this;
 		}
@@ -144,9 +158,17 @@ namespace ModiBuff.Core
 
 		//---EffectChecks---
 
+		public ModifierRecipe EffectCondition(ConditionType conditionType)
+		{
+			_effectConditionType = conditionType;
+			_hasEffectChecks = true;
+			return this;
+		}
+
 		public ModifierRecipe EffectCondition(StatType statType, float value) //, ComparisonType comparisonType)
 		{
-			_effectConditionInstance = new ConditionCheck(statType, value);
+			_effectConditionStatType = statType;
+			_effectConditionValue = value;
 			_hasEffectChecks = true;
 			return this;
 		}
@@ -160,7 +182,7 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe EffectCost(CostType costType, float cost)
 		{
-			_effectCostInstance = new CostCheck(costType, cost);
+			_effectCost = new CostCheck(costType, cost);
 			_hasEffectChecks = true;
 			return this;
 		}
@@ -170,7 +192,7 @@ namespace ModiBuff.Core
 			if (chance > 1)
 				chance /= 100;
 			Debug.Assert(chance >= 0 && chance <= 1, "Chance must be between 0 and 1");
-			_effectChanceInstance = new ChanceCheck(chance);
+			_effectChance = new ChanceCheck(chance);
 			_hasEffectChecks = true;
 			return this;
 		}
@@ -255,6 +277,19 @@ namespace ModiBuff.Core
 
 			_timeComponents = new List<ITimeComponent>(2);
 			_modifierCreator = new ModifierCreator(_effectWrappers);
+
+			if (HasApplyChecks)
+			{
+				if (_applyConditionType != ConditionType.None || (_applyConditionStatType != StatType.None && _applyConditionValue != -1f))
+					_applyCondition = new ConditionCheck(_applyConditionType, _applyConditionStatType, _applyConditionValue);
+			}
+
+			if (_hasEffectChecks)
+			{
+				if (_effectConditionType != ConditionType.None ||
+				    (_effectConditionStatType != StatType.None && _effectConditionValue != -1))
+					_effectCondition = new ConditionCheck(_effectConditionType, _effectConditionStatType, _effectConditionValue);
+			}
 		}
 
 		public int CompareTo(ModifierRecipe other)

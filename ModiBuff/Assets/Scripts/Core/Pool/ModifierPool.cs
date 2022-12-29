@@ -102,8 +102,7 @@ namespace ModiBuff.Core
 		{
 			for (int i = 0; i < _pools.Length; i++)
 			{
-				Modifier[] pool = _pools[i];
-				Array.Clear(pool, 0, pool.Length);
+				Array.Clear(_pools[i], 0, _pools[i].Length);
 				_poolTops[i] = 0;
 			}
 		}

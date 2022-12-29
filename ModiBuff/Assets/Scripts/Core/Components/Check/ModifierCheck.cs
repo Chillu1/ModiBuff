@@ -26,9 +26,9 @@ namespace ModiBuff.Core
 			_chance = chance;
 
 			_hasCondition = condition != null;
-			_hasCooldown = _cooldown != null;
-			_hasCost = _cost != null;
-			_hasChance = _chance != null;
+			_hasCooldown = cooldown != null;
+			_hasCost = cost != null;
+			_hasChance = chance != null;
 		}
 
 		public void Update(in float delta)
