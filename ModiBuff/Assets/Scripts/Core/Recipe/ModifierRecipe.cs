@@ -25,6 +25,9 @@ namespace ModiBuff.Core
 		private ConditionType _effectConditionType;
 		private StatType _effectConditionStatType;
 		private float _effectConditionValue = -1;
+		private LegalAction _effectConditionLegalAction;
+		private StatusEffectType _effectConditionStatusEffect;
+		private string _effectConditionModifierName;
 		private float _effectCooldown = -1f;
 
 		private bool _oneTimeInit;
@@ -173,6 +176,27 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		public ModifierRecipe EffectCondition(LegalAction legalAction)
+		{
+			_effectConditionLegalAction = legalAction;
+			_hasEffectChecks = true;
+			return this;
+		}
+
+		public ModifierRecipe EffectCondition(StatusEffectType statusEffectType)
+		{
+			_effectConditionStatusEffect = statusEffectType;
+			_hasEffectChecks = true;
+			return this;
+		}
+
+		public ModifierRecipe EffectCondition(string modifierName)
+		{
+			_effectConditionModifierName = modifierName;
+			_hasEffectChecks = true;
+			return this;
+		}
+
 		public ModifierRecipe EffectCooldown(float cooldown)
 		{
 			_effectCooldown = cooldown;
@@ -286,9 +310,15 @@ namespace ModiBuff.Core
 
 			if (_hasEffectChecks)
 			{
-				if (_effectConditionType != ConditionType.None ||
-				    (_effectConditionStatType != StatType.None && _effectConditionValue != -1))
-					_effectCondition = new ConditionCheck(_effectConditionType, _effectConditionStatType, _effectConditionValue);
+				if (_effectConditionType != ConditionType.None
+				    || (_effectConditionStatType != StatType.None && _effectConditionValue != -1)
+				    || _effectConditionLegalAction != LegalAction.None
+				    || _effectConditionStatusEffect != StatusEffectType.None
+				    || _effectConditionModifierName != null)
+				{
+					_effectCondition = new ConditionCheck(_effectConditionType, _effectConditionStatType, _effectConditionValue,
+						_effectConditionLegalAction, _effectConditionStatusEffect, _effectConditionModifierName);
+				}
 			}
 		}
 

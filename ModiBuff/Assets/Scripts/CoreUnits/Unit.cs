@@ -246,6 +246,11 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
+		public bool ContainsModifier(int id)
+		{
+			return _modifierController.Contains(id);
+		}
+
 		public bool TryAddModifier(ModifierAddReference addReference, IUnit sender)
 		{
 			return _modifierController.TryAdd(addReference, this, sender);

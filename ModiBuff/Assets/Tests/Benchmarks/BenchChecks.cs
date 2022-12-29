@@ -246,5 +246,15 @@ namespace ModiBuff.Tests
 			Measure.Method(() => { modifier.Init(); })
 				.Bench(Iterations);
 		}
+
+		[Test, Performance]
+		public void BenchMultipleCombination()
+		{
+			Unit.TryAddModifierSelf("InitFreeze");
+			Unit.TryAddModifierSelf("Flag");
+
+			Measure.Method(() => { Unit.TryAddModifierSelf("InitDamage_EffectCondition_Combination"); })
+				.Bench();
+		}
 	}
 }

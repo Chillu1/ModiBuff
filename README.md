@@ -7,11 +7,11 @@
 - [Features](#features)
 - [Benchmarks](#benchmarks)
 - [Installation](#installation)
-- [Differences to ModiBuffEcs and Old](#differences-to-modibuffecs-and-old)
 - [Usage](#usage)
 	- [Recipe](#recipe)
 	- [Modifier](#modifier)
 	- [Effect](#effect)
+- [Differences to ModiBuffEcs and Old](#differences-to-modibuffecs-and-old)
 - [When to use which library](#when-to-use-which-library)
 - [FAQ](#faq)
 - [Examples](#examples)
@@ -30,7 +30,7 @@ This library was made to make a standarized powerful system that allows for mani
 * No GC/allocations (fully pooled with state reset)
 * Low memory usage (1 MB for 5_000 modifiers)
 * Fast effects [5_000 damage modifiers in 0.14ms](#benchmarks)
-* Fast iteration [5_000 interval modifiers & 5_000 units in 5ms](#benchmarks)
+* Fast iteration [5_000 interval modifiers & 5_000 units in 0.95ms](#benchmarks)
 * Easy high level API [recipes](#recipe)
 * Effects on actions
 	* Init
@@ -47,12 +47,15 @@ This library was made to make a standarized powerful system that allows for mani
 	* Chance 0-100%
 	* Cooldown
 	* Health/Mana cost
+	* General:
+		* Stat (health/mana/damage) >/=/< than X
+		* Stat is full/half/empty
 * Applier Modifiers
 	* OnAttack
 	* Cast
-* Conditions
-	* Stat (health/mana/damage) >/=/< than X
-	* Stat is full/half/empty
+* [Event based Effects](#event-recipe)
+	* WhenAttacked/Cast/Killed/Healed
+	* OnAttack/Cast/Kill/Heal
 * Fully revertible effects
 
 # Benchmarks
@@ -147,7 +150,9 @@ Add("InitStun")
     .Remove(2);
 ```
 
-[//]: # (TODO ## ModifierEventRecipe)
+[//]: # (TODO ## EventRecipe)
+
+## Event Recipe
 
 ### Recipe Limitations
 

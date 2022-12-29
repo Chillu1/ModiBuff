@@ -35,9 +35,55 @@ namespace ModiBuff.Tests
 			Unit.TryAddModifierSelf("InitDamage_EffectCondition_HealthFull");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
+
+		[Test]
+		public void HasModifier_OnEffect_InitDamage()
+		{
+			Unit.TryAddModifierSelf("InitDamage_EffectCondition_ContainsModifier");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.TryAddModifierSelf("Flag");
+			Unit.TryAddModifierSelf("InitDamage_EffectCondition_ContainsModifier");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void HasStatusEffect_OnEffect_InitDamage()
+		{
+			Unit.TryAddModifierSelf("InitDamage_EffectCondition_FreezeStatusEffect");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.TryAddModifierSelf("InitFreeze");
+			Unit.TryAddModifierSelf("InitDamage_EffectCondition_FreezeStatusEffect");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void HasLegalAction_OnEffect_InitDamage()
+		{
+			Unit.TryAddModifierSelf("InitDamage_EffectCondition_ActLegalAction");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.TryAddModifierSelf("InitFreeze");
+			Unit.TryAddModifierSelf("InitDamage_EffectCondition_ActLegalAction");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void Combination_OnEffect_InitDamage()
+		{
+			Unit.TryAddModifierSelf("InitDamage_EffectCondition_Combination");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.TryAddModifierSelf("InitFreeze");
+			Unit.TryAddModifierSelf("InitDamage_EffectCondition_Combination");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.TryAddModifierSelf("Flag");
+			Unit.TryAddModifierSelf("InitDamage_EffectCondition_Combination");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
 		//TODO HealthIsBelow 50%-10%
-		//TODO Has StatusEffect
-		//TODO Has LegalAction
-		//TODO Has Modifier
 	}
 }

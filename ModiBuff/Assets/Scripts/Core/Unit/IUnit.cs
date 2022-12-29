@@ -23,10 +23,12 @@ namespace ModiBuff.Core
 		void AddEffectEvent(IEffect effect, EffectOnEvent @event);
 		void RemoveEffectEvent(IEffect effect, EffectOnEvent @event);
 
+		bool HasLegalAction(LegalAction legalAction);
 		bool HasStatusEffect(StatusEffectType statusEffect);
 		void ChangeStatusEffect(StatusEffectType statusEffectType, float duration);
 		void DecreaseStatusEffect(StatusEffectType statusEffectType, float duration);
 
+		bool ContainsModifier(int id);
 		bool TryAddModifier(int id, IUnit acter);
 		bool TryAddModifierTarget(int id, IUnit target, IUnit acter);
 
