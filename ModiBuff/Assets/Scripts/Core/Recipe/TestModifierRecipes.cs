@@ -40,19 +40,16 @@ namespace ModiBuff.Core
 				.Remove(5);
 
 			Add("DurationRefreshRemove")
-				.Remove(5)
-				.Refresh();
+				.Remove(5).Refresh();
 
 			Add("IntervalRefreshRemove")
 				.Effect(new RemoveEffect(), EffectOn.Interval)
-				.Interval(5)
-				.Refresh(RefreshType.Interval);
+				.Interval(5).Refresh();
 
 			Add("DurationRefreshRemove_IntervalDamage")
 				.Effect(new DamageEffect(5), EffectOn.Interval)
 				.Interval(5)
-				.Remove(5)
-				.Refresh();
+				.Remove(5).Refresh();
 
 			Add("StackDamage")
 				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
@@ -164,8 +161,7 @@ namespace ModiBuff.Core
 				Add("InitAddDamageBuff")
 					.OneTimeInit()
 					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
-					.Refresh()
-					.Remove(1.05f); //TODO standardized aura time & aura effects should always be refreshable
+					.Remove(1.05f).Refresh(); //TODO standardized aura time & aura effects should always be refreshable
 
 				Add("InitAddDamageBuff_Interval")
 					.Interval(1)
@@ -247,6 +243,14 @@ namespace ModiBuff.Core
 				.EffectCondition("Flag")
 				.EffectCondition(StatusEffectType.Freeze)
 				.Effect(new DamageEffect(5), EffectOn.Init);
+
+			Add("InitDamage_CostHealth_HealSelf")
+				.ApplyCost(CostType.Health, 5)
+				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Init)
+				.Effect(new HealEffect(5), EffectOn.Init, Targeting.ActerActer);
+
+			Add("InitAttackAction_Self")
+				.Effect(new AttackActionEffect(), EffectOn.Init, Targeting.TargetTarget);
 
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
@@ -346,8 +350,7 @@ namespace ModiBuff.Core
 			Add("StunEverySecond")
 				.Interval(1)
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 0.2f), EffectOn.Init | EffectOn.Interval)
-				.Remove(5)
-				.Refresh();
+				.Remove(5).Refresh();
 
 			//Delayed Silence
 			Add("DelayedSilence")
@@ -359,8 +362,7 @@ namespace ModiBuff.Core
 				Add("StackingDamage")
 					.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
 					.Stack(WhenStackEffect.Always, value: 2, maxStacks: -1)
-					.Remove(5)
-					.Refresh();
+					.Remove(5).Refresh();
 
 				Add("StackingDamageApplier")
 					.Effect(new ApplierEffect("StackingDamage"), EffectOn.Init);

@@ -43,7 +43,9 @@ This library was made to make a standarized powerful system that allows for mani
 	* Heal
 	* Status effects (stun, silence, disarm, etc.)
 	* Add stat (Damage, Heal)
-	* And many more, see [the rest](ModiBuff/Assets/Scripts/Core/Components/Effect/Effects)
+	* Actions (Attack, Heal, etc.)
+	* [Special Applier (another Modifier)](#applier-effect)
+	* And more, see [the rest](ModiBuff/Assets/Scripts/Core/Components/Effect/Effects)
 * Conditions (checks)
 	* Chance 0-100%
 	* Cooldown
@@ -51,12 +53,15 @@ This library was made to make a standarized powerful system that allows for mani
 	* General:
 		* Stat (health/mana/damage) >/=/< than X
 		* Stat is full/empty
+		* Has LegalAction (can attack, cast spell, move, etc.)
+		* Has StatusEffect (stunned, silenced, disarmed, etc.)
+		* Has Modifier
 * Applier Modifiers
 	* OnAttack
 	* Cast
 * [Event based Effects](#event-recipe)
-	* WhenAttacked/Cast/Killed/Healed
-	* OnAttack/Cast/Kill/Heal
+	* When Attacked/Cast/Killed/Healed
+	* On Attack/Cast/Kill/Heal
 * Fully revertible effects
 
 # Benchmarks
@@ -175,18 +180,18 @@ This can create some very sophisticated modifiers:
 ```csharp
 //Disarm the target for 5 seconds. On 2 stacks, removable in 10 seconds, refreshable.
 Add("ComplexApplier_Disarm")
-	.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect), EffectOn.Stack)
-	.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2)
-	.Remove(10)
-	.Refresh();
+    .Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect), EffectOn.Stack)
+    .Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2)
+    .Remove(10)
+    .Refresh();
 //rupture modifier, that does DoT. When this gets to 5 stacks, apply the disarm effect.
 Add("ComplexApplier_Rupture")
-	.Effect(new DamageEffect(5), EffectOn.Interval)
-	.Effect(new ApplierEffect("ComplexApplier_Disarm"), EffectOn.Stack)
-	.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 5);
+    .Effect(new DamageEffect(5), EffectOn.Interval)
+    .Effect(new ApplierEffect("ComplexApplier_Disarm"), EffectOn.Stack)
+    .Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 5);
 //WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^
 AddEvent("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
-	.Effect(new ActerApplierEffect("ComplexApplier_Rupture"));
+    .Effect(new ActerApplierEffect("ComplexApplier_Rupture"));
 ```
 
 ## Modifier
@@ -277,8 +282,8 @@ Ex:
 
 ```csharp
 Add("StackDamage")
-	.Effect(new DamageEffect(5, StackEffectType.Effect/*<<THIS*/), EffectOn.Stack)
-	.Stack(WhenStackEffect.Always);
+    .Effect(new DamageEffect(5, StackEffectType.Effect/*<<THIS*/), EffectOn.Stack)
+    .Stack(WhenStackEffect.Always);
 ```
 
 # Examples

@@ -37,6 +37,7 @@ namespace ModiBuff.Core
 
 		private bool _oneTimeInit;
 
+		private bool _currentIsInterval;
 		private float _interval;
 		private float _duration;
 
@@ -264,12 +265,14 @@ namespace ModiBuff.Core
 		public ModifierRecipe Interval(float interval)
 		{
 			_interval = interval;
+			_currentIsInterval = true;
 			return this;
 		}
 
 		public ModifierRecipe Duration(float duration)
 		{
 			_duration = duration;
+			_currentIsInterval = false;
 			return this;
 		}
 
@@ -280,7 +283,26 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		public ModifierRecipe Refresh(RefreshType type = RefreshType.Duration)
+		public ModifierRecipe Refresh()
+		{
+			if (_interval <= 0 && _duration <= 0)
+			{
+				Debug.LogWarning("Refresh() called without a duration or interval set, defaulting to duration");
+				Refresh(RefreshType.Duration);
+				return this;
+			}
+
+			if (_currentIsInterval)
+			{
+				Refresh(RefreshType.Interval);
+				return this;
+			}
+
+			Refresh(RefreshType.Duration);
+			return this;
+		}
+
+		public ModifierRecipe Refresh(RefreshType type)
 		{
 			switch (type)
 			{

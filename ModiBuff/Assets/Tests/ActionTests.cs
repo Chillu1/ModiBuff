@@ -30,5 +30,13 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
+
+		[Test]
+		public void AttackSelfTarget_Action()
+		{
+			Unit.TryAddModifierSelf("InitAttackAction_Self");
+
+			Assert.AreEqual(UnitHealth - UnitDamage, Unit.Health);
+		}
 	}
 }

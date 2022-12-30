@@ -56,5 +56,16 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitMana - 5, Unit.Mana);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
+
+		[Test]
+		public void CostHealth_HealSelf()
+		{
+			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostHealth_HealSelf"), ApplierType.Cast);
+
+			Unit.Cast(Enemy);
+
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
 	}
 }
