@@ -15,6 +15,7 @@
 - [When to use which library](#when-to-use-which-library)
 - [FAQ](#faq)
 - [Examples](#examples)
+- [Limitations](#limitations)
 
 # What is this?
 

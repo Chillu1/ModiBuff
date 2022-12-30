@@ -12,7 +12,7 @@ namespace ModiBuff.Core
 
 		private float _extraDamage;
 
-		public DamageEffect(float damage, StackEffectType stackEffect = StackEffectType.None) :
+		public DamageEffect(float damage, StackEffectType stackEffect = StackEffectType.Effect) :
 			this(damage, stackEffect, Targeting.TargetActer, false)
 		{
 		}

@@ -7,7 +7,7 @@ namespace ModiBuff.Core
 	{
 		public static ModifierPool Instance { get; private set; }
 
-		public static int MaxPoolSize = 100_000;
+		public static int MaxPoolSize = 10_000;
 
 		private readonly Modifier[][] _pools;
 		private readonly int[] _poolTops;
@@ -76,6 +76,9 @@ namespace ModiBuff.Core
 
 			for (int i = 0; i < count; i++)
 				_pools[id][_poolTops[id]++] = recipe.Create();
+
+			if (_poolTops[id] > MaxPoolSize)
+				Debug.LogError($"Modifier pool for {recipe.Name} is over the max pool size of {MaxPoolSize}.");
 		}
 
 		public Modifier Rent(int id)

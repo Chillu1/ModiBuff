@@ -14,7 +14,7 @@ namespace ModiBuff.Core
 		private float _extraDamage;
 		private float _totalAddedDamage;
 
-		public AddDamageEffect(float damage, bool revertible = false, StackEffectType stackEffect = StackEffectType.None) :
+		public AddDamageEffect(float damage, bool revertible = false, StackEffectType stackEffect = StackEffectType.Effect) :
 			this(damage, revertible, stackEffect, Targeting.TargetActer)
 		{
 		}

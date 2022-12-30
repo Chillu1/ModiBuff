@@ -12,7 +12,7 @@ namespace ModiBuff.Core
 		private float _totalDuration;
 
 		public StatusEffectEffect(StatusEffectType statusEffectType, float duration, bool revertible = false,
-			StackEffectType stackEffect = StackEffectType.None)
+			StackEffectType stackEffect = StackEffectType.Effect)
 		{
 			_statusEffectType = statusEffectType;
 			_duration = duration;

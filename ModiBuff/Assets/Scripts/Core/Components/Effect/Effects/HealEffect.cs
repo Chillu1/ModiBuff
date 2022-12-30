@@ -15,7 +15,7 @@ namespace ModiBuff.Core
 		private float _extraHeal;
 		private float _totalHeal;
 
-		public HealEffect(float heal, bool revertible = false, StackEffectType stack = StackEffectType.None) :
+		public HealEffect(float heal, bool revertible = false, StackEffectType stack = StackEffectType.Effect) :
 			this(heal, revertible, stack, Targeting.TargetActer)
 		{
 		}
