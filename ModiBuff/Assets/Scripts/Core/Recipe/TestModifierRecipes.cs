@@ -100,7 +100,7 @@ namespace ModiBuff.Core
 				.Interval(1);
 
 			Add("InitSelfHeal_DamageTarget")
-				.Effect(new ActerHealEffect(5), EffectOn.Init)
+				.Effect(new HealEffect(5, targeting: Targeting.ActerActer), EffectOn.Init)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("DamageOnMaxStacks")
@@ -275,7 +275,7 @@ namespace ModiBuff.Core
 				.Effect(new ActerDamageEffect(5));
 
 			AddEvent("Heal_OnHeal_Event", EffectOnEvent.OnHeal)
-				.Effect(new ActerHealEffect(5));
+				.Effect(new HealEffect(5, targeting: Targeting.ActerTarget));
 
 			AddEvent("AttackSelf_OnHit_Event", EffectOnEvent.WhenAttacked)
 				.Effect(new SelfAttackActionEffect());

@@ -30,5 +30,15 @@ namespace ModiBuff.Tests
 					() => Unit.TryAddModifier(modifierId, Unit))
 				.Bench(Iterations);
 		}
+
+		[Test, Performance]
+		public void BenchAddInitHeal()
+		{
+			int modifierId = ModifierIdManager.GetId("InitHeal");
+
+			Measure.Method(
+					() => Unit.TryAddModifier(modifierId, Unit))
+				.Bench(Iterations);
+		}
 	}
 }

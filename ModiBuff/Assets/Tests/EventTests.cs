@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class UnitEventTests : BaseModifierTests
+	public sealed class EventTests : BaseModifierTests
 	{
 		[Test]
 		public void ThornsEffect_OnHit()

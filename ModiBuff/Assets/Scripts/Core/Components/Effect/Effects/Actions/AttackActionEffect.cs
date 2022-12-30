@@ -1,10 +1,14 @@
 namespace ModiBuff.Core
 {
-	public sealed class AttackActionEffect : IEffect
+	public sealed class AttackActionEffect : IEventTrigger, IEffect
 	{
+		private bool _isEventBased;
+
+		public void SetEventBased() => _isEventBased = true;
+
 		public void Effect(IUnit target, IUnit acter)
 		{
-			acter.Attack(target, false);
+			acter.Attack(target, !_isEventBased);
 		}
 	}
 }

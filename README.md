@@ -49,7 +49,7 @@ This library was made to make a standarized powerful system that allows for mani
 	* Health/Mana cost
 	* General:
 		* Stat (health/mana/damage) >/=/< than X
-		* Stat is full/half/empty
+		* Stat is full/empty
 * Applier Modifiers
 	* OnAttack
 	* Cast
