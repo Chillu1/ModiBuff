@@ -9,7 +9,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ThornsEffect_OnHit()
 		{
-			Unit.AddEffectEvent(new ActerDamageEffect(5), EffectOnEvent.WhenAttacked);
+			var effect = new DamageEffect(5);
+			effect.SetTargeting(Targeting.ActerTarget);
+			Unit.AddEffectEvent(effect, EffectOnEvent.WhenAttacked);
 
 			Enemy.Attack(Unit);
 
@@ -19,7 +21,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ThornsEffect_OnHit_Remove()
 		{
-			var effect = new ActerDamageEffect(5);
+			var effect = new DamageEffect(5);
+			effect.SetTargeting(Targeting.ActerTarget);
 			Unit.AddEffectEvent(effect, EffectOnEvent.WhenAttacked);
 
 			Enemy.Attack(Unit);

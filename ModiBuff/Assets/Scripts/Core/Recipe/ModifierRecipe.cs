@@ -309,8 +309,10 @@ namespace ModiBuff.Core
 
 		//---Effects---
 
-		public ModifierRecipe Effect(IEffect effect, EffectOn effectOn)
+		public ModifierRecipe Effect(IEffect effect, EffectOn effectOn, Targeting targeting = Targeting.TargetActer)
 		{
+			if (effect is ITargetEffect effectTarget)
+				effectTarget.SetTargeting(targeting);
 			_effectWrappers.Add(new EffectWrapper(effect, effectOn));
 			return this;
 		}

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
-	public sealed class HealEffect : IEventTrigger, IStateEffect, IStackEffect, IRevertEffect, IEffect
+	public sealed class HealEffect : ITargetEffect, IEventTrigger, IStateEffect, IStackEffect, IRevertEffect, IEffect
 	{
 		public bool IsRevertible { get; }
 
@@ -15,16 +15,20 @@ namespace ModiBuff.Core
 		private float _extraHeal;
 		private float _totalHeal;
 
-		public HealEffect(float heal, bool revertible = false, Targeting targeting = Targeting.TargetActer,
-			StackEffectType stack = StackEffectType.None)
+		public HealEffect(float heal, bool revertible = false, StackEffectType stack = StackEffectType.None) :
+			this(heal, revertible, stack, Targeting.TargetActer)
+		{
+		}
+
+		private HealEffect(float heal, bool revertible, StackEffectType stack, Targeting targeting)
 		{
 			_heal = heal;
 			IsRevertible = revertible;
-			_targeting = targeting;
 			_stackEffect = stack;
+			_targeting = targeting;
 		}
 
-		//public void SetTargeting(Targeting targeting) => _targeting = targeting;
+		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 		public void SetEventBased() => _isEventBased = true;
 
 		public void Effect(IUnit target, IUnit acter)
@@ -80,7 +84,7 @@ namespace ModiBuff.Core
 			_totalHeal = 0;
 		}
 
-		public IStateEffect ShallowClone() => new HealEffect(_heal, IsRevertible, _targeting, _stackEffect);
+		public IStateEffect ShallowClone() => new HealEffect(_heal, IsRevertible, _stackEffect, _targeting);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

@@ -1,11 +1,13 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace ModiBuff.Core
 {
-	public sealed class ApplierEffect : IEffect, IStackEffect
+	public sealed class ApplierEffect : ITargetEffect, IEffect, IStackEffect
 	{
 		private readonly int _modifierId;
+		private Targeting _targeting;
 
 		public ApplierEffect(string modifierName)
 		{
@@ -21,9 +23,27 @@ namespace ModiBuff.Core
 			}
 		}
 
+		public void SetTargeting(Targeting targeting) => _targeting = targeting;
+
 		public void Effect(IUnit target, IUnit acter)
 		{
-			target.TryAddModifier(_modifierId, acter);
+			switch (_targeting)
+			{
+				case Targeting.TargetActer:
+					target.TryAddModifier(_modifierId, acter);
+					break;
+				case Targeting.ActerTarget:
+					acter.TryAddModifier(_modifierId, target);
+					break;
+				case Targeting.TargetTarget:
+					target.TryAddModifier(_modifierId, target);
+					break;
+				case Targeting.ActerActer:
+					acter.TryAddModifier(_modifierId, acter);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		}
 
 		public void StackEffect(int stacks, float value, ITargetComponent targetComponent)

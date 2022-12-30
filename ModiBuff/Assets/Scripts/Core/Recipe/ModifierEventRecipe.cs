@@ -87,8 +87,10 @@ namespace ModiBuff.Core
 
 		//---Effects---
 
-		public ModifierEventRecipe Effect(IEffect effect)
+		public ModifierEventRecipe Effect(IEffect effect, Targeting targeting = Targeting.TargetActer)
 		{
+			if (effect is ITargetEffect effectTarget)
+				effectTarget.SetTargeting(targeting);
 			if (effect is IEventTrigger eventTrigger)
 				eventTrigger.SetEventBased();
 
