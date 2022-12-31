@@ -18,14 +18,14 @@ namespace ModiBuff.Core
 			_revertibleEffects = revertibleEffects;
 		}
 
-		public void Effect(IUnit target, IUnit acter)
+		public void Effect(IUnit target, IUnit source)
 		{
 			//Debug.Log("RemoveEffect Effect, modifier id: " + _modifier.Id);
 			for (int i = 0; i < _revertibleEffects.Length; i++)
-				_revertibleEffects[i].RevertEffect(target, acter);
+				_revertibleEffects[i].RevertEffect(target, source);
 
 			//Still not fully ideal, but fixed the state issue 
-			target.PrepareRemoveModifier(_id); //TODO From which collection? Applier support?
+			target.ModifierController.PrepareRemove(_id); //TODO From which collection? Applier support?
 		}
 
 		public RemoveEffect ShallowClone() => new RemoveEffect(_id);

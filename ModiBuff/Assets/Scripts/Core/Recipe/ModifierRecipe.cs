@@ -331,7 +331,7 @@ namespace ModiBuff.Core
 
 		//---Effects---
 
-		public ModifierRecipe Effect(IEffect effect, EffectOn effectOn, Targeting targeting = Targeting.TargetActer)
+		public ModifierRecipe Effect(IEffect effect, EffectOn effectOn, Targeting targeting = Targeting.TargetSource)
 		{
 			if (effect is ITargetEffect effectTarget)
 				effectTarget.SetTargeting(targeting);

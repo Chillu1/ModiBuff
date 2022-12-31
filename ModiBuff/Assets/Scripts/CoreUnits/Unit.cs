@@ -8,8 +8,6 @@ namespace ModiBuff.Core.Units
 {
 	public class Unit : IUnit
 	{
-		private readonly ModifierController _modifierController;
-
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
 		public float Damage { get; private set; }
@@ -17,11 +15,13 @@ namespace ModiBuff.Core.Units
 		public float Mana { get; private set; }
 		public float MaxMana { get; private set; }
 
+		public ModifierController ModifierController { get; }
+
 		//This can be done with an array of list, but it's better performance wise.
 		private List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
 		private List<IEffect> _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
 
-		private List<Unit> _targetsInRange;
+		private List<IUnit> _targetsInRange;
 		private List<Modifier> _auraModifiers;
 
 		private readonly StatusEffectController _statusEffectController;
@@ -44,18 +44,18 @@ namespace ModiBuff.Core.Units
 			_onKillEffects = new List<IEffect>();
 			_onHealEffects = new List<IEffect>();
 
-			_targetsInRange = new List<Unit>();
+			_targetsInRange = new List<IUnit>();
 			_targetsInRange.Add(this);
 			_auraModifiers = new List<Modifier>();
 
-			_modifierController = new ModifierController();
+			ModifierController = new ModifierController();
 			_statusEffectController = new StatusEffectController();
 		}
 
 		public virtual void Update(float deltaTime) //TODO Remove virtual
 		{
 			_statusEffectController.Update(deltaTime);
-			_modifierController.Update(deltaTime);
+			ModifierController.Update(deltaTime);
 			for (int i = 0; i < _auraModifiers.Count; i++)
 				_auraModifiers[i].Update(deltaTime);
 		}
@@ -65,8 +65,8 @@ namespace ModiBuff.Core.Units
 			if ((_statusEffectController.LegalActions & LegalAction.Cast) == 0)
 				return;
 
-			target.TryApplyModifiers(_modifierController.GetApplierCheckModifiers(), this);
-			target.TryApplyModifiers(_modifierController.GetApplierCastModifiers(), this);
+			target.TryApplyModifiers(ModifierController.GetApplierCheckModifiers(), this);
+			target.TryApplyModifiers(ModifierController.GetApplierCastModifiers(), this);
 		}
 
 		public float Attack(IUnit target, bool triggersEvents = true) => Attack((Unit)target, triggersEvents);
@@ -76,8 +76,8 @@ namespace ModiBuff.Core.Units
 			if ((_statusEffectController.LegalActions & LegalAction.Act) == 0)
 				return 0;
 
-			target.TryApplyModifiers(_modifierController.GetApplierCheckModifiers(), this);
-			target.TryApplyModifiers(_modifierController.GetApplierAttackModifiers(), this);
+			target.TryApplyModifiers(ModifierController.GetApplierCheckModifiers(), this);
+			target.TryApplyModifiers(ModifierController.GetApplierAttackModifiers(), this);
 			for (int i = 0; i < _onAttackEffects.Count; i++)
 				_onAttackEffects[i].Effect(target, this);
 
@@ -90,12 +90,12 @@ namespace ModiBuff.Core.Units
 			return dealtDamage;
 		}
 
-		public float TakeDamage(float damage, IUnit acter, bool triggersEvents = true)
+		public float TakeDamage(float damage, IUnit source, bool triggersEvents = true)
 		{
 			if (triggersEvents)
 			{
 				for (int i = 0; i < _whenAttackedEffects.Count; i++)
-					_whenAttackedEffects[i].Effect(this, acter);
+					_whenAttackedEffects[i].Effect(this, source);
 			}
 
 			float oldHealth = Health;
@@ -106,18 +106,18 @@ namespace ModiBuff.Core.Units
 			{
 				if (Health <= 0)
 					for (int i = 0; i < _whenDeathEffects.Count; i++)
-						_whenDeathEffects[i].Effect(this, acter);
+						_whenDeathEffects[i].Effect(this, source);
 			}
 
 			return dealtDamage;
 		}
 
-		public float Heal(float heal, IUnit acter, bool triggersEvents = true)
+		public float Heal(float heal, IUnit source, bool triggersEvents = true)
 		{
 			float oldHealth = Health;
 			if (triggersEvents)
 				for (int i = 0; i < _whenHealedEffects.Count; i++)
-					_whenHealedEffects[i].Effect(this, acter);
+					_whenHealedEffects[i].Effect(this, source);
 			Health += heal;
 			return Health - oldHealth;
 		}
@@ -248,61 +248,45 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public bool ContainsModifier(int id)
-		{
-			return _modifierController.Contains(id);
-		}
-
 		public bool TryAddModifier(ModifierAddReference addReference, IUnit sender)
 		{
-			return _modifierController.TryAdd(addReference, this, sender);
+			return ModifierController.TryAdd(addReference, this, sender);
 		}
 
 		//TODO Don't use. For testing
 		public bool AddApplierModifier(IModifierRecipe recipe, ApplierType applierType = ApplierType.None)
 		{
-			return _modifierController.TryAddApplier(recipe.Id, recipe.HasApplyChecks, applierType);
+			return ModifierController.TryAddApplier(recipe.Id, recipe.HasApplyChecks, applierType);
 		}
 
-		public bool TryAddModifier(int id, IUnit acter)
+		public bool TryAddModifier(int id, IUnit source)
 		{
-			return _modifierController.TryAdd(id, this, acter);
+			return ModifierController.TryAdd(id, this, source);
 		}
 
-		public bool TryAddModifierTarget(int id, IUnit target, IUnit acter)
+		public bool TryAddModifierTarget(int id, IUnit target, IUnit source)
 		{
-			return _modifierController.TryAdd(id, target, acter);
+			return ModifierController.TryAdd(id, target, source);
 		}
 
-		private void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit acter)
+		private void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit source)
 		{
 			foreach (var check in modifierChecks)
 			{
-				if (!check.Check(acter))
+				if (!check.Check(source))
 					continue;
 
-				TryAddModifier(check.Id, acter);
+				TryAddModifier(check.Id, source);
 			}
 		}
 
-		private void TryApplyModifiers(IReadOnlyList<int> recipes, IUnit acter)
+		private void TryApplyModifiers(IReadOnlyList<int> recipes, IUnit source)
 		{
 			for (int i = 0; i < recipes.Count; i++)
-				TryAddModifier(recipes[i], acter);
+				TryAddModifier(recipes[i], source);
 		}
 
-		public bool ContainsModifier(string id) => _modifierController.Contains(ModifierIdManager.GetId(id));
-
-		public void PrepareRemoveModifier(int id)
-		{
-			_modifierController.PrepareRemove(id);
-		}
-
-		/// <summary>
-		///		Only to be used for testing, use <see cref="PrepareRemoveModifier(int)"/> instead.
-		/// </summary>
-		/// <param name="id"></param>
-		public void RemoveModifier(int id) => _modifierController.Remove(id);
+		public bool ContainsModifier(string id) => ModifierController.Contains(ModifierIdManager.GetId(id));
 
 		//---Aura---
 
@@ -311,10 +295,11 @@ namespace ModiBuff.Core.Units
 			_targetsInRange.AddRange(targets);
 		}
 
-		public void AddAuraModifier(IModifierRecipe recipe)
+		public void AddAuraModifier(string name)
 		{
-			var modifier = recipe.Create();
 			//modifier.SetTargets();
+			var modifier = ModifierPool.Instance.Rent(ModifierIdManager.GetId(name));
+			//modifier.SetAuraTargets(_targetsInRange, this);
 			_auraModifiers.Add(modifier);
 		}
 

@@ -25,31 +25,31 @@ namespace ModiBuff.Core
 
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 
-		public void Effect(IUnit target, IUnit acter)
+		public void Effect(IUnit target, IUnit source)
 		{
 			switch (_targeting)
 			{
-				case Targeting.TargetActer:
-					target.TryAddModifier(_modifierId, acter);
+				case Targeting.TargetSource:
+					target.TryAddModifier(_modifierId, source);
 					break;
-				case Targeting.ActerTarget:
-					acter.TryAddModifier(_modifierId, target);
+				case Targeting.SourceTarget:
+					source.TryAddModifier(_modifierId, target);
 					break;
 				case Targeting.TargetTarget:
 					target.TryAddModifier(_modifierId, target);
 					break;
-				case Targeting.ActerActer:
-					acter.TryAddModifier(_modifierId, acter);
+				case Targeting.SourceSource:
+					source.TryAddModifier(_modifierId, source);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
 		}
 
-		public void StackEffect(int stacks, float value, ITargetComponent targetComponent)
+		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
 		{
 			//Applier effect can't have different ways of using stacks/value
-			Effect(targetComponent.Target, targetComponent.Acter);
+			Effect(target, source);
 		}
 	}
 }

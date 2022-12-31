@@ -8,9 +8,8 @@ namespace ModiBuff.Tests
 		//[Test]//TODO
 		public void AuraInterval()
 		{
-			var recipe = Recipes.GetRecipe("InitAddDamageBuff_Interval");
 			Unit.AddCloseTargets(Ally);
-			Unit.AddAuraModifier(recipe);
+			Unit.AddAuraModifier("InitAddDamageBuff_Interval");
 
 			Unit.Update(1f);
 
@@ -21,9 +20,8 @@ namespace ModiBuff.Tests
 		//[Test]//TODO
 		public void Aura_AddDamage_Timeout()
 		{
-			var recipe = Recipes.GetRecipe("InitAddDamageBuff_Interval");
 			Unit.AddCloseTargets(Ally);
-			Unit.AddAuraModifier(recipe);
+			Unit.AddAuraModifier("InitAddDamageBuff_Interval");
 
 			Unit.Update(1f);
 

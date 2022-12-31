@@ -6,9 +6,9 @@ namespace ModiBuff.Core
 
 		public void SetEventBased() => _isEventBased = true;
 
-		public void Effect(IUnit target, IUnit acter)
+		public void Effect(IUnit target, IUnit source)
 		{
-			acter.Heal(target, !_isEventBased);
+			source.Heal(target, !_isEventBased);
 		}
 	}
 }

@@ -16,7 +16,7 @@ namespace ModiBuff.Core
 		private float _totalHeal;
 
 		public HealEffect(float heal, bool revertible = false, StackEffectType stack = StackEffectType.Effect) :
-			this(heal, revertible, stack, Targeting.TargetActer)
+			this(heal, revertible, stack, Targeting.TargetSource)
 		{
 		}
 
@@ -31,42 +31,42 @@ namespace ModiBuff.Core
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 		public void SetEventBased() => _isEventBased = true;
 
-		public void Effect(IUnit target, IUnit acter)
+		public void Effect(IUnit target, IUnit source)
 		{
 			if (IsRevertible)
 				_totalHeal = _heal + _extraHeal;
 
-			Effect(_heal + _extraHeal, target, acter);
+			Effect(_heal + _extraHeal, target, source);
 		}
 
-		public void RevertEffect(IUnit target, IUnit acter)
+		public void RevertEffect(IUnit target, IUnit source)
 		{
-			Effect(-_totalHeal, target, acter);
+			Effect(-_totalHeal, target, source);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void Effect(float value, IUnit target, IUnit acter)
+		private void Effect(float value, IUnit target, IUnit source)
 		{
 			switch (_targeting)
 			{
-				case Targeting.TargetActer:
-					target.Heal(value, acter, !_isEventBased);
+				case Targeting.TargetSource:
+					target.Heal(value, source, !_isEventBased);
 					break;
-				case Targeting.ActerTarget:
-					acter.Heal(value, target, !_isEventBased);
+				case Targeting.SourceTarget:
+					source.Heal(value, target, !_isEventBased);
 					break;
 				case Targeting.TargetTarget:
 					target.Heal(value, target, !_isEventBased);
 					break;
-				case Targeting.ActerActer:
-					acter.Heal(value, acter, !_isEventBased);
+				case Targeting.SourceSource:
+					source.Heal(value, source, !_isEventBased);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
 		}
 
-		public void StackEffect(int stacks, float value, ITargetComponent targetComponent)
+		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
 				_totalHeal += value;
@@ -75,7 +75,7 @@ namespace ModiBuff.Core
 				_totalHeal += value * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
-				Effect(targetComponent.Target, targetComponent.Acter);
+				Effect(target, source);
 		}
 
 		public void ResetState()

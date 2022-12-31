@@ -13,7 +13,7 @@ namespace ModiBuff.Core
 		private float _extraDamage;
 
 		public DamageEffect(float damage, StackEffectType stackEffect = StackEffectType.Effect) :
-			this(damage, stackEffect, Targeting.TargetActer, false)
+			this(damage, stackEffect, Targeting.TargetSource, false)
 		{
 		}
 
@@ -28,34 +28,34 @@ namespace ModiBuff.Core
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 		public void SetEventBased() => _isEventBased = true;
 
-		public void Effect(IUnit target, IUnit acter)
+		public void Effect(IUnit target, IUnit source)
 		{
 			//Debug.Log($"Base damage: {_baseDamage}. Extra damage: {_extraDamage}");
-			Effect(target, acter, _baseDamage + _extraDamage);
+			Effect(target, source, _baseDamage + _extraDamage);
 		}
 
-		private void Effect(IUnit target, IUnit acter, float damage)
+		private void Effect(IUnit target, IUnit source, float damage)
 		{
 			switch (_targeting)
 			{
-				case Targeting.TargetActer:
-					target.TakeDamage(damage, acter, !_isEventBased);
+				case Targeting.TargetSource:
+					target.TakeDamage(damage, source, !_isEventBased);
 					break;
-				case Targeting.ActerTarget:
-					acter.TakeDamage(damage, target, !_isEventBased);
+				case Targeting.SourceTarget:
+					source.TakeDamage(damage, target, !_isEventBased);
 					break;
 				case Targeting.TargetTarget:
 					target.TakeDamage(damage, target, !_isEventBased);
 					break;
-				case Targeting.ActerActer:
-					acter.TakeDamage(damage, acter, !_isEventBased);
+				case Targeting.SourceSource:
+					source.TakeDamage(damage, source, !_isEventBased);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
 		}
 
-		public void StackEffect(int stacks, float value, ITargetComponent targetComponent)
+		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
 				_extraDamage += value;
@@ -64,7 +64,7 @@ namespace ModiBuff.Core
 				_extraDamage += value * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
-				Effect(targetComponent.Target, targetComponent.Acter);
+				Effect(target, source);
 			//Debug.Log($"Base damage: {_baseDamage}. Extra damage: {_extraDamage}. StackEffect: {_stackEffect}");
 		}
 

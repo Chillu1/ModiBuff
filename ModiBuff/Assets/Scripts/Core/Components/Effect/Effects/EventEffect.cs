@@ -22,13 +22,13 @@ namespace ModiBuff.Core
 			_effectOnEvent = effectOnEvent;
 		}
 
-		public void Effect(IUnit target, IUnit acter)
+		public void Effect(IUnit target, IUnit source)
 		{
 			for (int i = 0; i < _effects.Length; i++)
 				target.AddEffectEvent(_effects[i], _effectOnEvent);
 		}
 
-		public void RevertEffect(IUnit target, IUnit acter)
+		public void RevertEffect(IUnit target, IUnit source)
 		{
 			for (int i = 0; i < _effects.Length; i++)
 				target.RemoveEffectEvent(_effects[i], _effectOnEvent);

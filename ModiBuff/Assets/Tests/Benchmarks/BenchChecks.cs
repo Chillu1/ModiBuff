@@ -59,7 +59,7 @@ namespace ModiBuff.Tests
 			public int Id { get; }
 			public string Name { get; }
 
-			public void SetTargets(IUnit target, IUnit acter)
+			public void SetTargets(IUnit target, IUnit source)
 			{
 			}
 
@@ -71,7 +71,7 @@ namespace ModiBuff.Tests
 				if (!_check.Check(_targetComponent.Target))
 					return;
 
-				_initComponent.Init(_targetComponent.Target, _targetComponent.Acter);
+				_initComponent.Init(_targetComponent.Target, _targetComponent.Source);
 			}
 
 			public void Update(float deltaTime)
@@ -122,7 +122,7 @@ namespace ModiBuff.Tests
 			public int Id { get; }
 			public string Name { get; }
 
-			public void SetTargets(IUnit target, IUnit acter)
+			public void SetTargets(IUnit target, IUnit source)
 			{
 			}
 
@@ -131,7 +131,7 @@ namespace ModiBuff.Tests
 				if (!_init)
 					return;
 
-				_initComponent.Init(_targetComponent.Target, _targetComponent.Acter);
+				_initComponent.Init(_targetComponent.Target, _targetComponent.Source);
 			}
 
 			public void Update(float deltaTime)
@@ -182,7 +182,7 @@ namespace ModiBuff.Tests
 			public int Id { get; }
 			public string Name { get; }
 
-			public void SetTargets(IUnit target, IUnit acter)
+			public void SetTargets(IUnit target, IUnit source)
 			{
 			}
 
@@ -191,7 +191,7 @@ namespace ModiBuff.Tests
 				if (!_init)
 					return;
 
-				_initComponent.Init(TargetComponent.Target, TargetComponent.Acter);
+				_initComponent.Init(TargetComponent.Target, TargetComponent.Source);
 			}
 
 			public void Update(float deltaTime)

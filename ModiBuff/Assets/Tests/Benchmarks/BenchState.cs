@@ -19,7 +19,7 @@ namespace ModiBuff.Tests
 			IEffect[] effects = { new DamageEffect(5), new DamageEffect(5) };
 			var init = new InitComponentFeedFake(effects);
 
-			Measure.Method(() => init.Init(targetComponent.Target, targetComponent.Acter))
+			Measure.Method(() => init.Init(targetComponent.Target, targetComponent.Source))
 				.BenchGC(Iterations);
 		}
 
@@ -64,7 +64,7 @@ namespace ModiBuff.Tests
 			{
 				int length = _effects.Length;
 				for (int i = 0; i < length; i++)
-					_effects[i].Effect(_targetComponent.Target, _targetComponent.Acter);
+					_effects[i].Effect(_targetComponent.Target, _targetComponent.Source);
 			}
 		}
 	}

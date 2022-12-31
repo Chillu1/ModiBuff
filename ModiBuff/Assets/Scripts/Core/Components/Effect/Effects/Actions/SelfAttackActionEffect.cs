@@ -6,7 +6,7 @@ namespace ModiBuff.Core
 
 		public void SetEventBased() => _isEventBased = true;
 
-		public void Effect(IUnit target, IUnit acter)
+		public void Effect(IUnit target, IUnit source)
 		{
 			target.Attack(target, !_isEventBased);
 		}

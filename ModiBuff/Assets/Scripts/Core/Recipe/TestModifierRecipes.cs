@@ -90,14 +90,14 @@ namespace ModiBuff.Core
 				.ApplyCooldown(1);
 
 			Add("InitDamageSelf")
-				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.ActerTarget);
+				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.SourceTarget);
 
 			Add("DamageApplier_Interval")
 				.Effect(new ApplierEffect("InitDamage"), EffectOn.Interval)
 				.Interval(1);
 
 			Add("InitSelfHeal_DamageTarget")
-				.Effect(new HealEffect(5), EffectOn.Init, Targeting.ActerTarget)
+				.Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceTarget)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("DamageOnMaxStacks")
@@ -131,7 +131,7 @@ namespace ModiBuff.Core
 				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2), EffectOn.Init);
 
 			Add("InitDamageSelfRemove")
-				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.ActerTarget)
+				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.SourceTarget)
 				.Remove(5);
 
 			Add("InitDamageCostMana")
@@ -247,7 +247,7 @@ namespace ModiBuff.Core
 			Add("InitDamage_CostHealth_HealSelf")
 				.ApplyCost(CostType.Health, 5)
 				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Init)
-				.Effect(new HealEffect(5), EffectOn.Init, Targeting.ActerActer);
+				.Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceSource);
 
 			Add("InitAttackAction_Self")
 				.Effect(new AttackActionEffect(), EffectOn.Init, Targeting.TargetTarget);
@@ -266,20 +266,20 @@ namespace ModiBuff.Core
 		private void EventRecipes()
 		{
 			AddEvent("ThornsOnHitEvent", EffectOnEvent.WhenAttacked)
-				.Effect(new DamageEffect(5), Targeting.ActerTarget);
+				.Effect(new DamageEffect(5), Targeting.SourceTarget);
 
 			AddEvent("ThornsOnHitEvent_Remove", EffectOnEvent.WhenAttacked)
-				.Effect(new DamageEffect(5), Targeting.ActerTarget)
+				.Effect(new DamageEffect(5), Targeting.SourceTarget)
 				.Remove(5);
 
 			AddEvent("AddDamage_OnKill_Event", EffectOnEvent.OnKill)
-				.Effect(new AddDamageEffect(5), Targeting.ActerTarget);
+				.Effect(new AddDamageEffect(5), Targeting.SourceTarget);
 
 			AddEvent("Damage_OnDeath_Event", EffectOnEvent.WhenKilled)
-				.Effect(new DamageEffect(5), Targeting.ActerTarget);
+				.Effect(new DamageEffect(5), Targeting.SourceTarget);
 
 			AddEvent("Heal_OnHeal_Event", EffectOnEvent.OnHeal)
-				.Effect(new HealEffect(5), Targeting.ActerTarget);
+				.Effect(new HealEffect(5), Targeting.SourceTarget);
 
 			AddEvent("AttackSelf_OnHit_Event", EffectOnEvent.WhenAttacked)
 				.Effect(new SelfAttackActionEffect());
@@ -290,7 +290,7 @@ namespace ModiBuff.Core
 					.Effect(new DamageEffect(5), EffectOn.Interval);
 
 				AddEvent("PoisonDoT_OnHit_Event", EffectOnEvent.WhenAttacked)
-					.Effect(new ApplierEffect("PoisonDoT"), Targeting.ActerTarget);
+					.Effect(new ApplierEffect("PoisonDoT"), Targeting.SourceTarget);
 			}
 			{
 				//Disarm the target for 5 seconds. On 2 stacks, removable in 10 seconds, refreshable.
@@ -305,7 +305,7 @@ namespace ModiBuff.Core
 					.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 5);
 				//WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^
 				AddEvent("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
-					.Effect(new ApplierEffect("ComplexApplier_Rupture"), Targeting.ActerTarget);
+					.Effect(new ApplierEffect("ComplexApplier_Rupture"), Targeting.SourceTarget);
 			}
 			{
 				//Add damage on 4 stacks buff, that you give someone when they heal you 5 times, for 60 seconds.
@@ -316,7 +316,7 @@ namespace ModiBuff.Core
 					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
 					.Remove(10).Refresh();
 
-				//On 4 stacks, Add Damage to Unit acter (attacker). TODO Maybe remove the modifier from you/reset stacks?
+				//On 4 stacks, Add Damage to Unit source (attacker). TODO Maybe remove the modifier from you/reset stacks?
 				Add("ComplexApplier2_AddDamageAdd")
 					.Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)
 					//.Effect(new RemoveEffect(), EffectOn.Stack)
@@ -324,7 +324,7 @@ namespace ModiBuff.Core
 					.Remove(5).Refresh();
 
 				AddEvent("ComplexApplier2_WhenAttacked_Event", EffectOnEvent.WhenAttacked)
-					.Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), Targeting.ActerTarget)
+					.Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), Targeting.SourceTarget)
 					.Remove(5).Refresh();
 
 				//Long main buff. Apply the modifier OnAttack.
@@ -338,9 +338,9 @@ namespace ModiBuff.Core
 					.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 5)
 					.Remove(5).Refresh();
 
-				//Apply the modifier to acter (healer) WhenHealed
+				//Apply the modifier to source (healer) WhenHealed
 				AddEvent("ComplexApplier2_WhenHealed_Event", EffectOnEvent.WhenHealed)
-					.Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), Targeting.ActerTarget);
+					.Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), Targeting.SourceTarget);
 			}
 		}
 
@@ -370,7 +370,7 @@ namespace ModiBuff.Core
 
 			//Self Damage, Damage Target
 			Add("SelfDamage")
-				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.ActerTarget)
+				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.SourceTarget)
 				.Effect(new DamageEffect(10), EffectOn.Init);
 		}
 	}

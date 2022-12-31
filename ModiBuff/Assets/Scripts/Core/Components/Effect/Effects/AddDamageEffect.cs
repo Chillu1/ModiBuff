@@ -15,7 +15,7 @@ namespace ModiBuff.Core
 		private float _totalAddedDamage;
 
 		public AddDamageEffect(float damage, bool revertible = false, StackEffectType stackEffect = StackEffectType.Effect) :
-			this(damage, revertible, stackEffect, Targeting.TargetActer)
+			this(damage, revertible, stackEffect, Targeting.TargetSource)
 		{
 		}
 
@@ -29,42 +29,42 @@ namespace ModiBuff.Core
 
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 
-		public void Effect(IUnit target, IUnit acter)
+		public void Effect(IUnit target, IUnit source)
 		{
 			if (IsRevertible)
 				_totalAddedDamage += _damage + _extraDamage;
 
-			Effect(target, acter, _damage + _extraDamage);
+			Effect(target, source, _damage + _extraDamage);
 		}
 
-		public void RevertEffect(IUnit target, IUnit acter)
+		public void RevertEffect(IUnit target, IUnit source)
 		{
-			Effect(target, acter, -_totalAddedDamage);
+			Effect(target, source, -_totalAddedDamage);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void Effect(IUnit target, IUnit acter, float damage)
+		private void Effect(IUnit target, IUnit source, float damage)
 		{
 			switch (_targeting)
 			{
-				case Targeting.TargetActer:
+				case Targeting.TargetSource:
 					target.AddDamage(damage);
 					break;
-				case Targeting.ActerTarget:
-					acter.AddDamage(damage);
+				case Targeting.SourceTarget:
+					source.AddDamage(damage);
 					break;
 				case Targeting.TargetTarget:
 					target.AddDamage(damage);
 					break;
-				case Targeting.ActerActer:
-					acter.AddDamage(damage);
+				case Targeting.SourceSource:
+					source.AddDamage(damage);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
 		}
 
-		public void StackEffect(int stacks, float value, ITargetComponent targetComponent)
+		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
 				_extraDamage += value;
@@ -73,7 +73,7 @@ namespace ModiBuff.Core
 				_extraDamage += value * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
-				Effect(targetComponent.Target, targetComponent.Acter);
+				Effect(target, source);
 		}
 
 		public void ResetState()

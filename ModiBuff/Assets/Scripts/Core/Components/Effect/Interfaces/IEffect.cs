@@ -2,7 +2,7 @@ namespace ModiBuff.Core
 {
 	public interface IEffect
 	{
-		/// <param name="acter">owner</param>
-		void Effect(IUnit target, IUnit acter);
+		/// <param name="source">owner/acter</param>
+		void Effect(IUnit target, IUnit source);
 	}
 }

@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("ModiBuff.Tests")]
@@ -64,9 +66,9 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public void SetTargets(IUnit target, IUnit acter)
+		public void SetTargets(IUnit target, IUnit source)
 		{
-			_targetComponent = new TargetComponent(target, acter);
+			_targetComponent = new TargetComponent(target, source);
 
 			if (_time)
 				for (int i = 0; i < _timeComponents.Length; i++)
@@ -76,12 +78,17 @@ namespace ModiBuff.Core
 				_stackComponent.SetupTarget(_targetComponent);
 		}
 
+		public void UpdateTargets(IUnit source)
+		{
+			_targetComponent.UpdateTargets(source);
+		}
+
 		public void Init()
 		{
 			if (!_init)
 				return;
 
-			_initComponent.Init(_targetComponent.Target, _targetComponent.Acter);
+			_initComponent.Init(_targetComponent.Target, _targetComponent.Source);
 		}
 
 		public void Update(float deltaTime)

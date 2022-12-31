@@ -5,14 +5,19 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Unit that applied the modifier.
 		/// </summary>
-		public IUnit Acter { get; private set; }
+		public IUnit Source { get; private set; }
 
-		public IUnit Target { get; private set; }
+		public IUnit Target { get; }
 
-		public TargetComponent(IUnit target, IUnit acter)
+		public TargetComponent(IUnit target, IUnit source)
 		{
 			Target = target;
-			Acter = acter;
+			Source = source;
+		}
+
+		public void UpdateTargets(IUnit source)
+		{
+			Source = source;
 		}
 	}
 }

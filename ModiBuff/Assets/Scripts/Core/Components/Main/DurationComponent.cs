@@ -40,7 +40,7 @@ namespace ModiBuff.Core
 			{
 				int length = _effects.Length;
 				for (int i = 0; i < length; i++)
-					_effects[i].Effect(_targetComponent.Target, _targetComponent.Acter);
+					_effects[i].Effect(_targetComponent.Target, _targetComponent.Source);
 			}
 		}
 

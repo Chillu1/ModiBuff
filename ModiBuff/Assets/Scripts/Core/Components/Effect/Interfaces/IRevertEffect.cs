@@ -4,6 +4,6 @@ namespace ModiBuff.Core
 	{
 		bool IsRevertible { get; }
 
-		void RevertEffect(IUnit target, IUnit acter);
+		void RevertEffect(IUnit target, IUnit source);
 	}
 }

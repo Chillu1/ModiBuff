@@ -122,7 +122,7 @@ namespace ModiBuff.Core
 			if (_statusEffect != StatusEffectType.None && !unit.HasStatusEffect(_statusEffect))
 				return false;
 
-			if (_modifierId != -1 && !unit.ContainsModifier(_modifierId))
+			if (_modifierId != -1 && !unit.ModifierController.Contains(_modifierId))
 				return false;
 
 			return true;

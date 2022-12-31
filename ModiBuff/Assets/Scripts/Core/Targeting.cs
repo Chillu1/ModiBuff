@@ -3,14 +3,14 @@ namespace ModiBuff.Core
 	public enum Targeting
 	{
 		/// <summary>
-		///		Target gets attacked by Acter
+		///		Target gets attacked by Source
 		/// </summary>
-		TargetActer,
+		TargetSource,
 
 		/// <summary>
-		///		Acter gets attacked by Target
+		///		Source gets attacked by Target
 		/// </summary>
-		ActerTarget,
+		SourceTarget,
 
 		/// <summary>
 		///		Target gets attacked by Target
@@ -18,8 +18,8 @@ namespace ModiBuff.Core
 		TargetTarget,
 
 		/// <summary>
-		///		Acter gets attacked by Acter
+		///		Source gets attacked by Source
 		/// </summary>
-		ActerActer,
+		SourceSource,
 	}
 }

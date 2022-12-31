@@ -43,7 +43,7 @@ namespace ModiBuff.Core
 
 			_stacks++;
 
-			if (_check && !_modifierCheck.Check(_targetComponent.Acter))
+			if (_check && !_modifierCheck.Check(_targetComponent.Source))
 				return;
 
 			switch (_whenStackEffect)
@@ -68,7 +68,7 @@ namespace ModiBuff.Core
 			void StackEffect()
 			{
 				for (int i = 0; i < _effects.Length; i++)
-					_effects[i].StackEffect(_stacks, _value, _targetComponent);
+					_effects[i].StackEffect(_stacks, _value, _targetComponent.Target, _targetComponent.Source);
 			}
 		}
 

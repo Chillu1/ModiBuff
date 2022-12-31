@@ -50,17 +50,17 @@ namespace ModiBuff.Core
 		public IReadOnlyList<int> GetApplierAttackModifiers() => _modifierAttackAppliers;
 		public IReadOnlyList<int> GetApplierCastModifiers() => _modifierCastAppliers;
 
-		public bool TryAdd(ModifierAddReference addReference, IUnit self, IUnit acter)
+		public bool TryAdd(ModifierAddReference addReference, IUnit self, IUnit source)
 		{
-			return TryAdd(addReference.Id, addReference.HasApplyChecks, addReference.ApplierType, self, acter);
+			return TryAdd(addReference.Id, addReference.HasApplyChecks, addReference.ApplierType, self, source);
 		}
 
-		public bool TryAdd(int id, bool hasApplyChecks, ApplierType applierType, IUnit self, IUnit acter)
+		public bool TryAdd(int id, bool hasApplyChecks, ApplierType applierType, IUnit self, IUnit source)
 		{
 			switch (applierType)
 			{
 				case ApplierType.None:
-					return TryAdd(id, self, acter);
+					return TryAdd(id, self, source);
 				case ApplierType.Cast:
 				case ApplierType.Attack:
 					return TryAddApplier(id, hasApplyChecks, applierType);
@@ -70,10 +70,10 @@ namespace ModiBuff.Core
 		}
 
 		//TODO do appliers make sense? Should we just store the id, what kind of state do appliers have?
-		public bool TryAdd(int id, IUnit target, IUnit acter)
+		public bool TryAdd(int id, IUnit target, IUnit source)
 		{
 			//TODO We should check if the target is legal here?
-			Add(id, target, acter);
+			Add(id, target, source);
 
 			return true;
 		}
@@ -106,13 +106,14 @@ namespace ModiBuff.Core
 			return true;
 		}
 
-		private Modifier Add(int id, IUnit target, IUnit acter)
+		private Modifier Add(int id, IUnit target, IUnit source)
 		{
 			var existingModifier = _modifiers[id];
 			if (existingModifier != null)
 			{
 				//Debug.Log("Modifier already exists");
 				//TODO should we update the modifier targets when init/refreshing/stacking?
+				existingModifier.UpdateTargets(source);
 				existingModifier.Init();
 				existingModifier.Refresh();
 				existingModifier.Stack();
@@ -123,7 +124,7 @@ namespace ModiBuff.Core
 			var modifier = ModifierPool.Instance.Rent(id);
 
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
-			modifier.SetTargets(target, acter);
+			modifier.SetTargets(target, source);
 
 			_modifiers[id] = modifier;
 			_modifierIndexes.Add(id);
@@ -133,6 +134,7 @@ namespace ModiBuff.Core
 			return modifier;
 		}
 
+		internal bool Contains(string name) => _modifiers[ModifierIdManager.GetId(name)] != null;
 		public bool Contains(int id) => _modifiers[id] != null;
 
 		public void PrepareRemove(Modifier modifier)
@@ -145,7 +147,10 @@ namespace ModiBuff.Core
 			_modifiersToRemove.Add(_modifiers[id]);
 		}
 
-		public void Remove(int id)
+		/// <summary>
+		///		Only to be used for testing, use <see cref="PrepareRemoveModifier(int)"/> instead.
+		/// </summary>
+		internal void Remove(int id)
 		{
 			Remove(_modifiers[id]);
 		}

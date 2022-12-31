@@ -35,9 +35,9 @@ namespace ModiBuff.Tests
 		{
 			var actions = new Action<IUnit, IUnit>[]
 			{
-				(target, acter) => { target.TakeDamage(5, acter); },
-				(target, acter) => { target.TakeDamage(5, acter); },
-				(target, acter) => { target.TakeDamage(5, acter); },
+				(target, source) => { target.TakeDamage(5, source); },
+				(target, source) => { target.TakeDamage(5, source); },
+				(target, source) => { target.TakeDamage(5, source); },
 			};
 
 			IUnit unit = new Unit();

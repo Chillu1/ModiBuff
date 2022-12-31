@@ -20,19 +20,19 @@ namespace ModiBuff.Core
 			_stackEffect = stackEffect;
 		}
 
-		public void Effect(IUnit target, IUnit acter)
+		public void Effect(IUnit target, IUnit source)
 		{
 			if (IsRevertible)
 				_totalDuration = _duration + _extraDuration;
 			target.ChangeStatusEffect(_statusEffectType, _duration + _extraDuration);
 		}
 
-		public void RevertEffect(IUnit target, IUnit acter)
+		public void RevertEffect(IUnit target, IUnit source)
 		{
 			target.DecreaseStatusEffect(_statusEffectType, _totalDuration);
 		}
 
-		public void StackEffect(int stacks, float value, ITargetComponent targetComponent)
+		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
 				_extraDuration += value;
@@ -41,7 +41,7 @@ namespace ModiBuff.Core
 				_extraDuration += value * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
-				Effect(targetComponent.Target, targetComponent.Acter);
+				Effect(target, source);
 		}
 
 		public void ResetState()

@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public delegate void UnitEvent(IUnit self, IUnit acter);
+	public delegate void UnitEvent(IUnit self, IUnit source);
 
 	public interface IUnit
 	{
@@ -11,10 +11,12 @@ namespace ModiBuff.Core
 		float Mana { get; }
 		float MaxMana { get; }
 
+		ModifierController ModifierController { get; }
+
 		void Update(float deltaTime);
 		float Attack(IUnit target, bool triggersEvents = true);
-		float TakeDamage(float damage, IUnit acter, bool triggersEvents = true);
-		float Heal(float heal, IUnit acter, bool triggersEvents = true);
+		float TakeDamage(float damage, IUnit source, bool triggersEvents = true);
+		float Heal(float heal, IUnit source, bool triggersEvents = true);
 		float Heal(IUnit target, bool triggersEvents = true);
 
 		void AddDamage(float damage);
@@ -29,14 +31,7 @@ namespace ModiBuff.Core
 		void ChangeStatusEffect(StatusEffectType statusEffectType, float duration);
 		void DecreaseStatusEffect(StatusEffectType statusEffectType, float duration);
 
-		bool ContainsModifier(int id);
-		bool TryAddModifier(int id, IUnit acter);
-		bool TryAddModifierTarget(int id, IUnit target, IUnit acter);
-
-
-		//void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit acter);
-
-		//void TryApplyModifiers(IReadOnlyCollection<ModifierRecipe> recipes, IUnit acter);
-		void PrepareRemoveModifier(int id);
+		bool TryAddModifier(int id, IUnit source);
+		bool TryAddModifierTarget(int id, IUnit target, IUnit source);
 	}
 }
