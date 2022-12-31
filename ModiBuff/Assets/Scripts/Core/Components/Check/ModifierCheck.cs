@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace ModiBuff.Core
 {
-	public sealed class ModifierCheck
+	public sealed class ModifierCheck : IStateReset
 	{
 		public int Id { get; }
 		public string Name { get; }
@@ -57,6 +57,12 @@ namespace ModiBuff.Core
 				_cost.Use(unit);
 
 			return true;
+		}
+
+		public void ResetState()
+		{
+			if (_hasCooldown)
+				_cooldown.ResetCooldown();
 		}
 	}
 }

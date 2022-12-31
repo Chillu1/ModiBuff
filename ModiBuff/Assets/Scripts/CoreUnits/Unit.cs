@@ -258,9 +258,10 @@ namespace ModiBuff.Core.Units
 			return _modifierController.TryAdd(addReference, this, sender);
 		}
 
+		//TODO Don't use. For testing
 		public bool AddApplierModifier(IModifierRecipe recipe, ApplierType applierType = ApplierType.None)
 		{
-			return _modifierController.TryAddApplier(recipe, applierType);
+			return _modifierController.TryAddApplier(recipe.Id, recipe.HasApplyChecks, applierType);
 		}
 
 		public bool TryAddModifier(int id, IUnit acter)

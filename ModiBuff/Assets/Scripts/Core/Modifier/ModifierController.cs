@@ -52,19 +52,21 @@ namespace ModiBuff.Core
 
 		public bool TryAdd(ModifierAddReference addReference, IUnit self, IUnit acter)
 		{
-			switch (addReference.ApplierType)
+			return TryAdd(addReference.Id, addReference.HasApplyChecks, addReference.ApplierType, self, acter);
+		}
+
+		public bool TryAdd(int id, bool hasApplyChecks, ApplierType applierType, IUnit self, IUnit acter)
+		{
+			switch (applierType)
 			{
 				case ApplierType.None:
-					return TryAdd(addReference.Id, self, acter);
+					return TryAdd(id, self, acter);
 				case ApplierType.Cast:
-					return TryAddApplier(addReference.Recipe, addReference.ApplierType);
 				case ApplierType.Attack:
-					return TryAddApplier(addReference.Recipe, addReference.ApplierType);
+					return TryAddApplier(id, hasApplyChecks, applierType);
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
-
-			return true;
 		}
 
 		//TODO do appliers make sense? Should we just store the id, what kind of state do appliers have?
@@ -76,31 +78,31 @@ namespace ModiBuff.Core
 			return true;
 		}
 
-		public bool TryAddApplier(IModifierRecipe recipe, ApplierType applierType = ApplierType.None)
+		public bool TryAddApplier(int id, bool hasApplyChecks, ApplierType applierType = ApplierType.None)
 		{
-			if (!recipe.HasApplyChecks)
+			if (!hasApplyChecks)
 			{
 				switch (applierType)
 				{
 					case ApplierType.Cast:
-						if (_modifierCastAppliers.Contains(recipe.Id))
+						if (_modifierCastAppliers.Contains(id))
 							return false;
-						_modifierCastAppliers.Add(recipe.Id);
+						_modifierCastAppliers.Add(id);
 						return true;
 					case ApplierType.Attack:
-						if (_modifierAttackAppliers.Contains(recipe.Id))
+						if (_modifierAttackAppliers.Contains(id))
 							return false;
-						_modifierAttackAppliers.Add(recipe.Id);
+						_modifierAttackAppliers.Add(id);
 						return true;
 				}
 
 				return false;
 			}
 
-			if (_modifierChecksAppliers.ContainsKey(recipe.Id))
+			if (_modifierChecksAppliers.ContainsKey(id))
 				return false;
 
-			_modifierChecksAppliers.Add(recipe.Id, recipe.CreateApplyCheck());
+			_modifierChecksAppliers.Add(id, ModifierPool.Instance.RentCheck(id));
 			return true;
 		}
 

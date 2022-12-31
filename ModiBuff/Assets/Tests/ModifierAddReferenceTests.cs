@@ -9,7 +9,7 @@ namespace ModiBuff.Tests
 		public void AddSelfModifier()
 		{
 			var recipe = Recipes.GetRecipe("InitDamage");
-			var modifierReference = new ModifierAddReference(recipe.Id, recipe);
+			var modifierReference = new ModifierAddReference(recipe);
 
 			Unit.TryAddModifier(modifierReference, Enemy);
 
@@ -20,7 +20,7 @@ namespace ModiBuff.Tests
 		public void AddTargetModifier()
 		{
 			var recipe = Recipes.GetRecipe("InitDamageSelf");
-			var modifierReference = new ModifierAddReference(recipe.Id, recipe);
+			var modifierReference = new ModifierAddReference(recipe);
 
 			Unit.TryAddModifier(modifierReference, Enemy);
 
@@ -31,7 +31,7 @@ namespace ModiBuff.Tests
 		public void AddTargetApplyAttackModifier()
 		{
 			var recipe = Recipes.GetRecipe("InitDamage");
-			var modifierReference = new ModifierAddReference(recipe.Id, recipe, ApplierType.Attack);
+			var modifierReference = new ModifierAddReference(recipe, ApplierType.Attack);
 
 			Unit.TryAddModifier(modifierReference, Unit);
 
@@ -44,7 +44,7 @@ namespace ModiBuff.Tests
 		public void AddSelfApplyAttackModifier()
 		{
 			var recipe = Recipes.GetRecipe("InitDamageSelf");
-			var modifierReference = new ModifierAddReference(recipe.Id, recipe, ApplierType.Attack);
+			var modifierReference = new ModifierAddReference(recipe, ApplierType.Attack);
 
 			Unit.TryAddModifier(modifierReference, Enemy);
 
@@ -57,7 +57,7 @@ namespace ModiBuff.Tests
 		public void AddTargetApplyCastModifier()
 		{
 			var recipe = Recipes.GetRecipe("InitDamage");
-			var modifierReference = new ModifierAddReference(recipe.Id, recipe, ApplierType.Cast);
+			var modifierReference = new ModifierAddReference(recipe, ApplierType.Cast);
 
 			Unit.TryAddModifier(modifierReference, Unit);
 

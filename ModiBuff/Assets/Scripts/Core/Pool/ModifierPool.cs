@@ -11,6 +11,8 @@ namespace ModiBuff.Core
 
 		private readonly Modifier[][] _pools;
 		private readonly int[] _poolTops;
+		private readonly ModifierCheck[][] _checkPools;
+		private readonly int[] _checkPoolTops;
 		private readonly IModifierRecipe[] _recipes;
 
 		private int _stackCapacity = 64;
@@ -26,6 +28,8 @@ namespace ModiBuff.Core
 
 			_pools = new Modifier[recipes.Length][];
 			_poolTops = new int[recipes.Length];
+			_checkPools = new ModifierCheck[recipes.Length][];
+			_checkPoolTops = new int[recipes.Length];
 			_recipes = new IModifierRecipe[recipes.Length];
 
 			foreach (var recipe in recipes)
@@ -33,13 +37,22 @@ namespace ModiBuff.Core
 				_pools[recipe.Id] = new Modifier[initialSize];
 				_recipes[recipe.Id] = recipe;
 
+				//if (recipe.HasApplyChecks)
+				{
+					_checkPools[recipe.Id] = new ModifierCheck[initialSize];
+					AllocateChecks(recipe.Id, initialSize);
+				}
+
 				Allocate(recipe.Id, initialSize);
 			}
 
 			_stackCapacity = initialSize;
 
 			Array.Sort(_pools, (x, y) => x[0].Id.CompareTo(y[0].Id));
+			Array.Sort(_poolTops, (x, y) => x.CompareTo(y));
 			Array.Sort(_recipes, (x, y) => x.Id.CompareTo(y.Id));
+			//Array.Sort(_checkPools, (x, y) => x[0].Id.CompareTo(y[0].Id));
+			//Array.Sort(_checkPoolTops, (x, y) => x.CompareTo(y));
 		}
 
 		internal void SetMaxPoolSize(int size)
@@ -59,6 +72,14 @@ namespace ModiBuff.Core
 
 			Array.Resize(ref pool, size);
 			_pools[id] = pool;
+		}
+
+		internal void ResizeChecks(int id, int size)
+		{
+			var pool = _checkPools[id];
+
+			Array.Resize(ref pool, size);
+			_checkPools[id] = pool;
 		}
 
 		internal void Allocate(int id, int count)
@@ -81,6 +102,28 @@ namespace ModiBuff.Core
 				Debug.LogError($"Modifier pool for {recipe.Name} is over the max pool size of {MaxPoolSize}.");
 		}
 
+		internal void AllocateChecks(int id, int count)
+		{
+			var recipe = _recipes[id];
+			int poolLength = _checkPools[id].Length; //Don't cache pool array, it can be resized.
+
+			if (count > poolLength)
+			{
+				int newSize = poolLength << 1;
+				while (newSize < poolLength + count)
+					newSize <<= 1;
+
+				ResizeChecks(id, newSize);
+			}
+
+			if (recipe.HasApplyChecks)
+				for (int i = 0; i < count; i++)
+					_checkPools[id][_checkPoolTops[id]++] = recipe.CreateApplyCheck();
+
+			if (_checkPoolTops[id] > MaxPoolSize)
+				Debug.LogError($"Modifier check pool for {recipe.Name} is over the max pool size of {MaxPoolSize}.");
+		}
+
 		public Modifier Rent(int id)
 		{
 			var pool = _pools[id];
@@ -89,6 +132,16 @@ namespace ModiBuff.Core
 				Allocate(id, _stackCapacity);
 
 			return pool[--_poolTops[id]];
+		}
+
+		public ModifierCheck RentCheck(int id)
+		{
+			var pool = _checkPools[id];
+
+			if (_checkPoolTops[id] == 0)
+				AllocateChecks(id, _stackCapacity);
+
+			return pool[--_checkPoolTops[id]];
 		}
 
 		public void Return(Modifier modifier)
@@ -101,12 +154,24 @@ namespace ModiBuff.Core
 			_pools[modifier.Id][_poolTops[modifier.Id]++] = modifier;
 		}
 
+		public void ReturnCheck(ModifierCheck check)
+		{
+			check.ResetState();
+
+			if (_checkPoolTops[check.Id] == _checkPools[check.Id].Length)
+				ResizeChecks(check.Id, _checkPools[check.Id].Length << 1);
+
+			_checkPools[check.Id][_checkPoolTops[check.Id]++] = check;
+		}
+
 		internal void Clear()
 		{
 			for (int i = 0; i < _pools.Length; i++)
 			{
 				Array.Clear(_pools[i], 0, _pools[i].Length);
 				_poolTops[i] = 0;
+				Array.Clear(_checkPools[i], 0, _checkPools[i].Length);
+				_checkPoolTops[i] = 0;
 			}
 		}
 

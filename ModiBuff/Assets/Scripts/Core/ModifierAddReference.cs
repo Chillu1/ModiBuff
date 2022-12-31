@@ -6,13 +6,13 @@ namespace ModiBuff.Core
 	public sealed class ModifierAddReference //TODO Rename
 	{
 		public int Id { get; }
-		public IModifierRecipe Recipe { get; } //TODO Temporary
+		public bool HasApplyChecks { get; }
 		public ApplierType ApplierType { get; }
 
-		public ModifierAddReference(int id, IModifierRecipe recipe, ApplierType applierType = ApplierType.None)
+		public ModifierAddReference(IModifierRecipe recipe, ApplierType applierType = ApplierType.None)
 		{
-			Id = id;
-			Recipe = recipe;
+			Id = recipe.Id;
+			HasApplyChecks = recipe.HasApplyChecks;
 			ApplierType = applierType;
 		}
 	}
