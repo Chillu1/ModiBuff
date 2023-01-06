@@ -26,9 +26,9 @@ namespace ModiBuff.Examples.SimpleSolo
 			}
 		}
 
-		public void Cast(string spellName)
+		public void Cast(int spellId)
 		{
-			Cast((Core.Units.Unit)_targetSystem.CastTarget);
+			Cast(spellId, (Core.Units.Unit)_targetSystem.CastTarget);
 		}
 
 		public void SetAttackTarget(IUnit target) => _targetSystem.SetAttackTarget(target);

@@ -194,6 +194,49 @@ AddEvent("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
     .Effect(new ActerApplierEffect("ComplexApplier_Rupture"));
 ```
 
+This one is very complex, but it shows the power of the ApplierEffect.  
+Obviously the effects can be whatever we want. Damage, Stun, etc.
+
+Add damage on 4 stacks buff, that you give someone when they heal you 5 times, for 60 seconds.  
+To clarify:
+
+* Player heals ally 5 times, gets buff
+* Player attacks an enemy 4 times, gets damage buff
+* Player buff gets removed after 60 seconds
+
+```csharp            
+//AddDamage 5, one time init, remove in 10 seconds, refreshable.                     
+Add("ComplexApplier2_AddDamage")                                                     
+    .OneTimeInit()                                                                   
+    .Effect(new AddDamageEffect(5, true), EffectOn.Init)                             
+    .Remove(10).Refresh();                                                           
+                                                                                     
+//On 4 stacks, Add Damage to Unit source (attacker).
+Add("ComplexApplier2_AddDamageAdd")                                                  
+    .Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)                                 
+    .Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 4)  
+    .Remove(5).Refresh();                                                            
+                                                                                     
+AddEvent("ComplexApplier2_WhenAttacked_Event", EffectOnEvent.WhenAttacked)           
+    .Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), Targeting.SourceTarget
+    .Remove(5).Refresh();                                                            
+                                                                                     
+//Long main buff. Apply the modifier OnAttack.                                       
+AddEvent("ComplexApplier2_OnAttack_Event", EffectOnEvent.OnAttack)                   
+    .Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"))                 
+    .Remove(60).Refresh();                                                           
+                                                                                     
+//On 5 stacks, apply the modifier to self.                                           
+Add("ComplexApplier2_WhenHealed")                                                    
+    .Effect(new ApplierEffect("ComplexApplier2_OnAttack_Event"), EffectOn.Stack)     
+    .Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 5)  
+    .Remove(5).Refresh();                                                            
+                                                                                     
+//Apply the modifier to source (healer) WhenHealed                                   
+AddEvent("ComplexApplier2_WhenHealed_Event", EffectOnEvent.WhenHealed)               
+    .Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), Targeting.SourceTarget);
+```
+
 ## Modifier
 
 Modifiers are the core backend part of the library, they are the things that are applied to entities with effects on certain actions.    
@@ -296,6 +339,8 @@ Add("StackDamage")
 
 [//]: # ("Absoultely crazy modifiers": applying appliers on events, X stacks, etc)
 
+> Important: Damage being the default effect is just an example, it makes it easier to understand and test.
+
 Delayed damage
 
 ```csharp
@@ -316,7 +361,7 @@ Add("InitAddDamageRevertible")
 
 ```csharp
 Add("ChanceInitDamage")
-    .Chance(0.5f)
+    .ApplyChance(0.5f)
     .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
@@ -332,7 +377,7 @@ Self heal for 5, deal damage to target for 5
 
 ```csharp
 Add("InitSelfHeal_DamageTarget")
-    .Effect(new SelfHealEffect(5), EffectOn.Init)
+	.Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceTarget)
     .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
@@ -358,6 +403,129 @@ Every stack, add 2 damage to the effect, then deal 5 base damage + 2 added damag
 Add("StackBasedDamage")
     .Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
     .Stack(WhenStackEffect.Always, value: 2);
+```
+
+Costs 5 mana, deal 5 damage on init
+
+```csharp
+Add("InitDamage_CostMana")
+    .ApplyCost(CostType.Mana, 5)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+Every two stacks, stun.
+
+```csharp
+Add("StunEveryTwoStacks")
+    .Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, false, StackEffectType.Effect), EffectOn.Stack)
+    .Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2);
+```
+
+Init Damage. With 1 second linger. Won't work again if applied within 1 second, aka "global cooldown".
+
+```csharp
+Add("OneTimeInitDamage_LingerDuration")
+    .OneTimeInit()
+    .Effect(new DamageEffect(5), EffectOn.Init)
+    .Remove(1);
+```
+
+50% chance to trigger effect (init dammage)
+
+```csharp
+Add("ChanceEffectInitDamage")
+    .EffectChance(0.5f)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+1 second cooldown, on effect. Bsaically the effect can only be triggered once every 1 second (not apply).
+
+```csharp
+Add("InitDamage_Cooldown_Effect")
+    .EffectCooldown(1)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+Deal 5 damage only when health is above 100
+
+```csharp
+Add("InitDamage_EffectCondition_HealthAbove100")
+    .EffectCondition(StatType.Health, 100, ComparisonType.GreaterOrEqual)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+Deal 5 damage only when unit has a modifier "Flag"
+
+```csharp
+Add("Flag");
+
+Add("InitDamage_EffectCondition_ContainsModifier")
+    .EffectCondition("Flag")
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+Deal 5 damage only when unit is frozen
+
+```csharp
+Add("InitDamage_EffectCondition_FreezeStatusEffect")
+    .EffectCondition(StatusEffectType.Freeze)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+Deal 5 damage only when unit can act
+
+```csharp
+Add("InitDamage_EffectCondition_ActLegalAction")
+    .EffectCondition(LegalAction.Act)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+Combination of unit frozen and has a modifier "Flag"
+
+```csharp
+Add("InitDamage_EffectCondition_Combination")
+    .EffectCondition("Flag")
+    .EffectCondition(StatusEffectType.Freeze)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+``` 
+
+Costs 5 health, deal 5 damage, heals 5 back. Basically a "barrier" for activating.
+
+```csharp
+Add("InitDamage_CostHealth_HealSelf")
+    .ApplyCost(CostType.Health, 5)
+    .Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Init)
+    .Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceSource);
+```
+
+### Event Recipes
+
+Thorns on hit (deal 5 damage to attacker)
+
+```csharp
+AddEvent("ThornsOnHitEvent", EffectOnEvent.WhenAttacked)
+    .Effect(new DamageEffect(5), Targeting.SourceTarget);
+```
+
+Add damage on kill
+
+```csharp
+AddEvent("AddDamage_OnKill_Event", EffectOnEvent.OnKill)
+    .Effect(new AddDamageEffect(5), Targeting.SourceTarget);
+```
+
+Damage attacker on death
+
+```csharp
+AddEvent("Damage_OnDeath_Event", EffectOnEvent.WhenKilled)
+    .Effect(new DamageEffect(5), Targeting.SourceTarget);
+```
+
+Attack self when attacked
+
+```csharp
+AddEvent("AttackSelf_OnHit_Event", EffectOnEvent.WhenAttacked)
+    .Effect(new SelfAttackActionEffect());
 ```
 
 ## Full

@@ -118,8 +118,8 @@ namespace ModiBuff.Core
 				.Remove(5);
 
 			Add("InitDamage_CostMana")
-				.Effect(new DamageEffect(5), EffectOn.Init)
-				.ApplyCost(CostType.Mana, 5);
+				.ApplyCost(CostType.Mana, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("InitStun")
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2), EffectOn.Init);
@@ -133,10 +133,6 @@ namespace ModiBuff.Core
 			Add("InitDamageSelfRemove")
 				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.SourceTarget)
 				.Remove(5);
-
-			Add("InitDamageCostMana")
-				.ApplyCost(CostType.Mana, 5)
-				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("InitShortStun")
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 1), EffectOn.Init);
@@ -251,6 +247,12 @@ namespace ModiBuff.Core
 
 			Add("InitAttackAction_Self")
 				.Effect(new AttackActionEffect(), EffectOn.Init, Targeting.TargetTarget);
+
+			//InitDamageOneTime With1Seconds linger, to not work again (global effect cooldown)
+			Add("OneTimeInitDamage_LingerDuration")
+				.OneTimeInit()
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Remove(1);
 
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")

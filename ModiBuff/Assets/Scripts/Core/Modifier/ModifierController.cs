@@ -49,6 +49,7 @@ namespace ModiBuff.Core
 		public IReadOnlyCollection<ModifierCheck> GetApplierCheckModifiers() => _modifierChecksAppliers.Values;
 		public IReadOnlyList<int> GetApplierAttackModifiers() => _modifierAttackAppliers;
 		public IReadOnlyList<int> GetApplierCastModifiers() => _modifierCastAppliers;
+		public int GetApplierCastModifier(int id) => _modifierCastAppliers.Contains(id) ? id : -1;
 
 		public bool TryAdd(ModifierAddReference addReference, IUnit self, IUnit source)
 		{

@@ -60,6 +60,16 @@ namespace ModiBuff.Core.Units
 				_auraModifiers[i].Update(deltaTime);
 		}
 
+		public void Cast(int id, Unit target)
+		{
+			if ((_statusEffectController.LegalActions & LegalAction.Cast) == 0)
+				return;
+
+			int applierId = ModifierController.GetApplierCastModifier(id);
+			if (applierId != -1)
+				target.TryAddModifier(applierId, this);
+		}
+
 		public void Cast(Unit target)
 		{
 			if ((_statusEffectController.LegalActions & LegalAction.Cast) == 0)

@@ -67,7 +67,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamageCostMana()
 		{
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamageCostMana"), ApplierType.Cast);
+			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostMana"), ApplierType.Cast);
 
 			Unit.Cast(Enemy);
 
