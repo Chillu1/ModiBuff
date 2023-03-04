@@ -77,7 +77,7 @@ N: 5_000
 | Library                                               | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Update DoT*<br/>(5_000 units, N:1) |
 |-------------------------------------------------------|--------------------------------|-------------------------------------|------------------------------------|
 | ModiBuff (this)                                       | 0.14ms, 0 GC                   | 0.27ms, 0 GC                        | 0.95ms, 0 GC                       |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | ?                              | ?                                   | ?                                  |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 0.43ms, 0 GC                   | ?                                   | 0.06ms, 3 GC                       |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                              | ?                                   | ?                                  |
 
 #### New Modifier/Pool table
@@ -85,7 +85,7 @@ N: 5_000
 | Library                                               | New<br/>InitDmg | New<br/>DoT*  | DoT pool     | DoT pool<br/>reset return |
 |-------------------------------------------------------|-----------------|---------------|--------------|---------------------------|
 | ModiBuff (this)                                       | 4.07ms,  4 GC   | 10.3ms, 11 GC | 0.03ms, 0 GC | 0.16ms, 0 GC              |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.00ms,  1 GC   | 5.80ms,  1 GC | X            | X                         |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 4.46ms,  1 GC   | 6.07ms,  1 GC | 0.83ms, 0 GC | 1.90ms, 0 GC              |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC   | 70.0ms, 63 GC | X            | X                         |
 
 > Important: Non-pool benchmarks don't matter for ModiBuff, since it will only be slower when allocating the new modifiers in the pools.
@@ -537,6 +537,7 @@ example, of player unit fighting a single enemy unit
 
 # Limitations
 
-Currently the system is designed to max have **one** modifier type per Unit.  
+Currently the system is designed to max have **one** modifier instance type per Unit. In other words, an Unit can only store one InitDamage
+modifier instance.  
 This can be configured by using special containing logic in ModifierController, but then you'll need to keep track of all the instances, and
 init/stack/refresh them.
