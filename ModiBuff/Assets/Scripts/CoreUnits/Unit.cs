@@ -6,7 +6,8 @@ using UnityEngine;
 
 namespace ModiBuff.Core.Units
 {
-	public class Unit : IUnit, IDamagable, IHealable, IHealer
+	public class Unit : IUnit, IUpdatable, IModifierOwner, IAttacker, IDamagable, IHealable, IHealer, IManaOwner, IHealthCost, IAddDamage,
+		IEventOwner, IStatusEffectOwner
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -274,7 +275,7 @@ namespace ModiBuff.Core.Units
 			return ModifierController.TryAdd(id, this, source);
 		}
 
-		public bool TryAddModifierTarget(int id, IUnit target, IUnit source)
+		bool IModifierOwner.TryAddModifierTarget(int id, IUnit target, IUnit source)
 		{
 			return ModifierController.TryAdd(id, target, source);
 		}

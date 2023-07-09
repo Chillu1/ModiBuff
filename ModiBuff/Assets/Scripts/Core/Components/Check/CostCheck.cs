@@ -19,9 +19,13 @@ namespace ModiBuff.Core
 			switch (_costType)
 			{
 				case CostType.Health:
-					return unit is IDamagable damagable && damagable.Health >= _cost;
+					if (unit is not IDamagable damagable || unit is not IHealthCost)
+						return false;
+					return damagable.Health >= _cost;
 				case CostType.Mana:
-					return unit.Mana >= _cost;
+					if (unit is not IManaOwner manaOwner)
+						return false;
+					return manaOwner.Mana >= _cost;
 				default:
 					Debug.LogError($"Unknown cost type: {_costType}");
 					return false;
@@ -33,10 +37,10 @@ namespace ModiBuff.Core
 			switch (_costType)
 			{
 				case CostType.Health:
-					unit.UseHealth(_cost);
+					((IHealthCost)unit).UseHealth(_cost);
 					return;
 				case CostType.Mana:
-					unit.UseMana(_cost);
+					((IManaOwner)unit).UseMana(_cost);
 					return;
 				default:
 					Debug.LogError($"Unknown cost type: {_costType}");

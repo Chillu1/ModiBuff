@@ -8,7 +8,7 @@ namespace ModiBuff.Core
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			target.Attack(target, !_isEventBased);
+			((IAttacker)target).Attack(target, !_isEventBased);
 		}
 	}
 }
