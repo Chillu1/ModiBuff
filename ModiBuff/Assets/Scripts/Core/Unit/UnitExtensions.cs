@@ -5,17 +5,17 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		For unit tests only.
 		/// </summary>
-		internal static bool TryAddModifierSelf(this IUnit unit, string id)
+		internal static bool TryAddModifierSelf(this IModifierOwner unit, string id)
 		{
-			return unit.TryAddModifier(ModifierIdManager.GetId(id), unit);
+			return unit.TryAddModifier(ModifierIdManager.GetId(id), (IUnit)unit);
 		}
 
-		internal static bool TryAddModifierTarget(this IUnit unit, string id, IUnit target)
+		internal static bool TryAddModifierTarget(this IModifierOwner unit, string id, IUnit target)
 		{
-			return unit.TryAddModifierTarget(ModifierIdManager.GetId(id), target, unit);
+			return unit.TryAddModifierTarget(ModifierIdManager.GetId(id), target, (IUnit)unit);
 		}
 
-		internal static float AttackN(this IUnit unit, IUnit target, int n)
+		internal static float AttackN(this IAttacker unit, IUnit target, int n)
 		{
 			float totalDamage = 0;
 			for (int i = 0; i < n; i++)
@@ -23,7 +23,7 @@ namespace ModiBuff.Core
 			return totalDamage;
 		}
 
-		internal static float HealN(this IUnit unit, IUnit target, int n)
+		internal static float HealN(this IHealer unit, IHealable target, int n)
 		{
 			float totalHeal = 0;
 			for (int i = 0; i < n; i++)

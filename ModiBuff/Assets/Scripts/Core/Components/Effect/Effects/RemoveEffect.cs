@@ -25,7 +25,7 @@ namespace ModiBuff.Core
 				_revertibleEffects[i].RevertEffect(target, source);
 
 			//Still not fully ideal, but fixed the state issue 
-			target.ModifierController.PrepareRemove(_id); //TODO From which collection? Applier support?
+			((IModifierOwner)target).ModifierController.PrepareRemove(_id); //TODO From which collection? Applier support?
 		}
 
 		public RemoveEffect ShallowClone() => new RemoveEffect(_id);

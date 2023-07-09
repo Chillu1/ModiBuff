@@ -5,7 +5,7 @@ namespace ModiBuff.Core.Units
 	public class GameController : MonoBehaviour
 	{
 		private ModifierRecipe _recipe;
-		private IUnit[] _units;
+		private Unit[] _units;
 		private ModifierPool _pool;
 
 		private int _recipeId;
@@ -19,7 +19,7 @@ namespace ModiBuff.Core.Units
 
 			//_modifiers = new Modifier[20_000];
 			//_unit = new Unit();
-			_units = new IUnit[5_000];
+			_units = new Unit[5_000];
 			for (int i = 0; i < _units.Length; i++)
 			{
 				_units[i] = new Unit();

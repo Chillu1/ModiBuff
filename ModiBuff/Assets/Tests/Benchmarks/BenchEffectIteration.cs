@@ -33,7 +33,7 @@ namespace ModiBuff.Tests
 		[Test, Performance]
 		public void BenchDelegateEffectsArray()
 		{
-			var actions = new Action<IUnit, IUnit>[]
+			var actions = new Action<IDamagable, IUnit>[]
 			{
 				(target, source) => { target.TakeDamage(5, source); },
 				(target, source) => { target.TakeDamage(5, source); },
@@ -41,11 +41,12 @@ namespace ModiBuff.Tests
 			};
 
 			IUnit unit = new Unit();
+			var damageable = unit as IDamagable;
 
 			Measure.Method(() =>
 				{
 					for (int i = 0; i < actions.Length; i++)
-						actions[i](unit, unit);
+						actions[i](damageable, unit);
 				})
 				.BenchGC(Iterations);
 		}

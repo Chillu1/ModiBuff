@@ -24,12 +24,12 @@ namespace ModiBuff.Core
 		{
 			if (IsRevertible)
 				_totalDuration = _duration + _extraDuration;
-			target.ChangeStatusEffect(_statusEffectType, _duration + _extraDuration);
+			((IStatusEffectOwner)target).ChangeStatusEffect(_statusEffectType, _duration + _extraDuration);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			target.DecreaseStatusEffect(_statusEffectType, _totalDuration);
+			((IStatusEffectOwner)target).DecreaseStatusEffect(_statusEffectType, _totalDuration);
 		}
 
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)

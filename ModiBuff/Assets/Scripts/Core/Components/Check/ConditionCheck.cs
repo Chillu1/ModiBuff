@@ -83,63 +83,129 @@ namespace ModiBuff.Core
 
 		public bool Check(IUnit unit)
 		{
-			//return _checks == null || _checks(unit);
+			if (!CheckConditionType(unit))
+				return false;
+
+			if (!CheckStatType(unit))
+				return false;
+
+			if (_legalAction != LegalAction.None)
+			{
+				if (unit is IStatusEffectOwner statusEffectOwner)
+				{
+					if (!statusEffectOwner.HasLegalAction(_legalAction))
+						return false;
+				}
+#if DEBUG && !MODIBUFF_PROFILE
+				else
+					throw new ArgumentException("Unit is not IStatusEffectOwner");
+#endif
+			}
+
+			if (_statusEffect != StatusEffectType.None)
+			{
+				if (unit is IStatusEffectOwner statusEffectOwner)
+				{
+					if (!statusEffectOwner.HasStatusEffect(_statusEffect))
+						return false;
+				}
+#if DEBUG && !MODIBUFF_PROFILE
+				else
+					throw new ArgumentException("Unit is not IStatusEffectOwner");
+#endif
+			}
+
+			if (_modifierId != -1 && !((IModifierOwner)unit).ModifierController.Contains(_modifierId))
+				return false;
+
+			return true;
+		}
+
+		private bool CheckConditionType(IUnit unit)
+		{
 			switch (_conditionType)
 			{
 				case ConditionType.None:
 					break;
 				case ConditionType.HealthIsFull:
-					if (!CheckValue(unit.Health, unit.MaxHealth, ComparisonType.Equal))
-						return false;
+					if (unit is IDamagable damagable)
+					{
+						if (!CheckValue(damagable.Health, damagable.MaxHealth, ComparisonType.Equal))
+							return false;
+					}
+#if DEBUG && !MODIBUFF_PROFILE
+					else
+						throw new ArgumentException("Unit is not IDamagable");
+#endif
+
 					break;
 				case ConditionType.ManaIsFull:
-					if (!CheckValue(unit.Mana, unit.MaxMana, ComparisonType.Equal))
-						return false;
+					if (unit is IManaOwner manaUser)
+					{
+						if (!CheckValue(manaUser.Mana, manaUser.MaxMana, ComparisonType.Equal))
+							return false;
+					}
+#if DEBUG && !MODIBUFF_PROFILE
+					else
+						throw new ArgumentException("Unit is not IManaUser");
+#endif
+
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
 
+			return true;
+		}
+
+		private bool CheckStatType(IUnit unit)
+		{
 			switch (_statType)
 			{
 				case StatType.None:
 					break;
 				case StatType.Health:
-					if (!CheckValue(unit.Health, _statValue, _comparisonType))
-						return false;
+					if (unit is IDamagable damagable)
+					{
+						if (!CheckValue(damagable.Health, _statValue, _comparisonType))
+							return false;
+					}
+#if DEBUG && !MODIBUFF_PROFILE
+					else
+						throw new ArgumentException("Unit is not IDamagable");
+#endif
+
 					break;
 				case StatType.Mana:
-					if (!CheckValue(unit.Mana, _statValue, _comparisonType))
-						return false;
+					if (unit is IManaOwner manaUser)
+					{
+						if (!CheckValue(manaUser.Mana, _statValue, _comparisonType))
+							return false;
+					}
+#if DEBUG && !MODIBUFF_PROFILE
+					else
+						throw new ArgumentException("Unit is not IManaUser");
+#endif
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
 
-			if (_legalAction != LegalAction.None && !unit.HasLegalAction(_legalAction))
-				return false;
-
-			if (_statusEffect != StatusEffectType.None && !unit.HasStatusEffect(_statusEffect))
-				return false;
-
-			if (_modifierId != -1 && !unit.ModifierController.Contains(_modifierId))
-				return false;
-
 			return true;
+		}
 
-			bool CheckValue(float unitValue, float value, ComparisonType comparisonType)
+		private static bool CheckValue(float unitValue, float value, ComparisonType comparisonType)
+		{
+			return comparisonType switch
 			{
-				return comparisonType switch
-				{
-					ComparisonType.None => true,
-					ComparisonType.Greater => unitValue > value,
-					ComparisonType.Equal => Math.Abs(unitValue - value) < DeltaTolerance,
-					ComparisonType.Less => unitValue < value,
-					ComparisonType.GreaterOrEqual => unitValue >= value,
-					ComparisonType.LessOrEqual => unitValue <= value,
-					_ => throw new ArgumentOutOfRangeException()
-				};
-			}
+				ComparisonType.None => true,
+				ComparisonType.Greater => unitValue > value,
+				ComparisonType.Equal => Math.Abs(unitValue - value) < DeltaTolerance,
+				ComparisonType.Less => unitValue < value,
+				ComparisonType.GreaterOrEqual => unitValue >= value,
+				ComparisonType.LessOrEqual => unitValue <= value,
+				_ => throw new ArgumentOutOfRangeException()
+			};
 		}
 	}
 }

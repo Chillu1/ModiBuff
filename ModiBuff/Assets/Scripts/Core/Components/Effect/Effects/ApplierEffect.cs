@@ -30,16 +30,16 @@ namespace ModiBuff.Core
 			switch (_targeting)
 			{
 				case Targeting.TargetSource:
-					target.TryAddModifier(_modifierId, source);
+					((IModifierOwner)target).TryAddModifier(_modifierId, source);
 					break;
 				case Targeting.SourceTarget:
-					source.TryAddModifier(_modifierId, target);
+					((IModifierOwner)source).TryAddModifier(_modifierId, target);
 					break;
 				case Targeting.TargetTarget:
-					target.TryAddModifier(_modifierId, target);
+					((IModifierOwner)target).TryAddModifier(_modifierId, target);
 					break;
 				case Targeting.SourceSource:
-					source.TryAddModifier(_modifierId, source);
+					((IModifierOwner)source).TryAddModifier(_modifierId, source);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
