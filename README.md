@@ -77,7 +77,7 @@ N: 5_000
 | Library                                               | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Update DoT*<br/>(5_000 units, N:1) |
 |-------------------------------------------------------|--------------------------------|-------------------------------------|------------------------------------|
 | ModiBuff (this)                                       | 0.14ms, 0 GC                   | 0.27ms, 0 GC                        | 0.95ms, 0 GC                       |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 0.51ms, 0 GC                   | ?                                   | 0.10ms, 0 GC                       |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 0.51ms, 0 GC                   | ?                                   | 0.22ms, 0 GC                       |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                              | ?                                   | ?                                  |
 
 #### New Modifier/Pool table
@@ -85,7 +85,7 @@ N: 5_000
 | Library                                               | New<br/>InitDmg | New<br/>DoT*  | DoT pool     | DoT pool<br/>reset return |
 |-------------------------------------------------------|-----------------|---------------|--------------|---------------------------|
 | ModiBuff (this)                                       | 4.07ms,  4 GC   | 10.3ms, 11 GC | 0.03ms, 0 GC | 0.16ms, 0 GC              |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 5.38ms,  1 GC   | 7.54ms,  1 GC | 0.80ms, 0 GC | 2.08ms, 0 GC              |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 5.22ms,  1 GC   | 8.33ms,  1 GC | 0.82ms, 0 GC | 2.13ms, 0 GC              |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC   | 70.0ms, 63 GC | X            | X                         |
 
 > Important: Non-pool benchmarks don't matter for ModiBuff and ModiBuffEcs, since it will only be slower when allocating the new modifiers
