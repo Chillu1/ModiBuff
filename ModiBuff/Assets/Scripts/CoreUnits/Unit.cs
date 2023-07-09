@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ModiBuff.Core.Units
 {
-	public class Unit : IUnit
+	public class Unit : IUnit, IDamagable, IHealable, IHealer
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -91,7 +91,7 @@ namespace ModiBuff.Core.Units
 			for (int i = 0; i < _onAttackEffects.Count; i++)
 				_onAttackEffects[i].Effect(target, this);
 
-			float dealtDamage = target.TakeDamage(Damage, this, triggersEvents);
+			float dealtDamage = target.TakeDamage(Damage, (IUnit)this, triggersEvents);
 
 			if (target.Health <= 0)
 				for (int i = 0; i < _onKillEffects.Count; i++)
@@ -132,14 +132,14 @@ namespace ModiBuff.Core.Units
 			return Health - oldHealth;
 		}
 
-		public float Heal(IUnit target, bool triggersEvents = true)
+		public float Heal(IHealable target, bool triggersEvents = true)
 		{
 			if ((_statusEffectController.LegalActions & LegalAction.Act) == 0)
 				return 0;
 
 			if (triggersEvents)
 				for (int i = 0; i < _onHealEffects.Count; i++)
-					_onHealEffects[i].Effect(target, this);
+					_onHealEffects[i].Effect((IUnit)target, this);
 
 			return target.Heal(HealValue, this, triggersEvents);
 		}

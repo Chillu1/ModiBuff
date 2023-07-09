@@ -4,20 +4,14 @@ namespace ModiBuff.Core
 
 	public interface IUnit
 	{
-		float Health { get; }
-		float MaxHealth { get; }
-		float Damage { get; }
-		float HealValue { get; }
 		float Mana { get; }
 		float MaxMana { get; }
 
 		ModifierController ModifierController { get; }
 
 		void Update(float deltaTime);
+
 		float Attack(IUnit target, bool triggersEvents = true);
-		float TakeDamage(float damage, IUnit source, bool triggersEvents = true);
-		float Heal(float heal, IUnit source, bool triggersEvents = true);
-		float Heal(IUnit target, bool triggersEvents = true);
 
 		void AddDamage(float damage);
 		void UseHealth(float value);

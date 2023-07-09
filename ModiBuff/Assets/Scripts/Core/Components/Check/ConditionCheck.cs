@@ -83,14 +83,21 @@ namespace ModiBuff.Core
 
 		public bool Check(IUnit unit)
 		{
-			//return _checks == null || _checks(unit);
 			switch (_conditionType)
 			{
 				case ConditionType.None:
 					break;
 				case ConditionType.HealthIsFull:
-					if (!CheckValue(unit.Health, unit.MaxHealth, ComparisonType.Equal))
-						return false;
+					if (unit is IDamagable damagable)
+					{
+						if (!CheckValue(damagable.Health, damagable.MaxHealth, ComparisonType.Equal))
+							return false;
+					}
+#if DEBUG && !MODIBUFF_PROFILE
+					else
+						throw new ArgumentException("Unit is not IDamagable");
+#endif
+
 					break;
 				case ConditionType.ManaIsFull:
 					if (!CheckValue(unit.Mana, unit.MaxMana, ComparisonType.Equal))
@@ -105,8 +112,16 @@ namespace ModiBuff.Core
 				case StatType.None:
 					break;
 				case StatType.Health:
-					if (!CheckValue(unit.Health, _statValue, _comparisonType))
-						return false;
+					if (unit is IDamagable damagable)
+					{
+						if (!CheckValue(damagable.Health, _statValue, _comparisonType))
+							return false;
+					}
+#if DEBUG && !MODIBUFF_PROFILE
+					else
+						throw new ArgumentException("Unit is not IDamagable");
+#endif
+
 					break;
 				case StatType.Mana:
 					if (!CheckValue(unit.Mana, _statValue, _comparisonType))

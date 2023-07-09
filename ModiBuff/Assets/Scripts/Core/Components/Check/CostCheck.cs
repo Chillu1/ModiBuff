@@ -19,7 +19,7 @@ namespace ModiBuff.Core
 			switch (_costType)
 			{
 				case CostType.Health:
-					return unit.Health >= _cost;
+					return unit is IDamagable damagable && damagable.Health >= _cost;
 				case CostType.Mana:
 					return unit.Mana >= _cost;
 				default:

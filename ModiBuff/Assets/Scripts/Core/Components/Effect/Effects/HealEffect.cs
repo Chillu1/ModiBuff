@@ -36,16 +36,16 @@ namespace ModiBuff.Core
 			if (IsRevertible)
 				_totalHeal = _heal + _extraHeal;
 
-			Effect(_heal + _extraHeal, target, source);
+			Effect(_heal + _extraHeal, (IHealable)target, source);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			Effect(-_totalHeal, target, source);
+			Effect(-_totalHeal, (IHealable)target, source);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void Effect(float value, IUnit target, IUnit source)
+		private void Effect(float value, IHealable target, IUnit source)
 		{
 			switch (_targeting)
 			{
@@ -53,13 +53,13 @@ namespace ModiBuff.Core
 					target.Heal(value, source, !_isEventBased);
 					break;
 				case Targeting.SourceTarget:
-					source.Heal(value, target, !_isEventBased);
+					((IHealable)source).Heal(value, (IUnit)target, !_isEventBased);
 					break;
 				case Targeting.TargetTarget:
-					target.Heal(value, target, !_isEventBased);
+					target.Heal(value, (IUnit)target, !_isEventBased);
 					break;
 				case Targeting.SourceSource:
-					source.Heal(value, source, !_isEventBased);
+					((IHealable)source).Heal(value, source, !_isEventBased);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
