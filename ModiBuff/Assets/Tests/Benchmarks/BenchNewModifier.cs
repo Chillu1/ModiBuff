@@ -69,7 +69,7 @@ namespace ModiBuff.Tests
 			{
 				var modifier = Pool.Rent(recipe.Id);
 				Pool.Return(modifier);
-			}).BenchGC(Iterations);
+			}).Bench(Iterations);
 		}
 	}
 }

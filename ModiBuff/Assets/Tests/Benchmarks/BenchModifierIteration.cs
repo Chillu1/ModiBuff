@@ -8,14 +8,17 @@ namespace ModiBuff.Tests
 {
 	public sealed class BenchModifierIteration : BaseModifierTests
 	{
+		private const int Iterations = 5000;
+		private const int UnitCount = 5000;
+
 		[Test, Performance]
 		[TestCase(0.0167f)]
 		[TestCase(1f)]
 		public void BenchDoTIteration(float delta)
 		{
-			Pool.Allocate(IdManager.GetId("DoT"), 5_000);
+			Pool.Allocate(IdManager.GetId("DoT"), UnitCount);
 
-			var units = new Unit[5_000];
+			var units = new Unit[UnitCount];
 			for (int i = 0; i < units.Length; i++)
 			{
 				units[i] = new Unit();
@@ -39,7 +42,7 @@ namespace ModiBuff.Tests
 			unit.TryAddModifierSelf("DoT");
 
 			Measure.Method(() => { unit.Update(delta); })
-				.BenchGC(5_000);
+				.BenchGC(Iterations);
 		}
 
 		[Test, Performance]

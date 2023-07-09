@@ -88,7 +88,7 @@ namespace ModiBuff.Core
 			var recipe = _recipes[id];
 			int poolLength = _pools[id].Length; //Don't cache pool array, it can be resized.
 
-			if (count > poolLength)
+			if (count + _poolTops[id] > poolLength)
 			{
 				int newSize = poolLength << 1;
 				while (newSize < poolLength + count)

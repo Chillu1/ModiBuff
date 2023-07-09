@@ -17,6 +17,8 @@ namespace ModiBuff.Core.Units
 		public float MaxMana { get; private set; }
 		public float StatusResistance { get; private set; } = 1f;
 
+		public bool IsDead { get; private set; }
+
 		public ModifierController ModifierController { get; }
 
 		//Note: These event lists should only be used for classic effects.
@@ -126,12 +128,14 @@ namespace ModiBuff.Core.Units
 
 			if (triggersEvents)
 			{
-				if (Health <= 0)
+				if (Health <= 0 && !IsDead)
 				{
 					for (int i = 0; i < _whenDeathEffects.Count; i++)
 						_whenDeathEffects[i].Effect(this, source);
 					//Unit Death TODO Destroy/pool unit
 					ModifierController.Clear();
+
+					IsDead = true;
 				}
 			}
 
