@@ -3,14 +3,14 @@ using ModiBuff.Core;
 
 namespace ModiBuff.Examples.SimpleSolo
 {
-	public sealed class TargetSystem
+	public sealed class TargetingSystem
 	{
 		public IUnit AttackTarget { get; private set; }
 		public IUnit CastTarget { get; private set; } //TODO Enemy and friendly
 
 		private readonly List<IUnit> _closeTargets;
 
-		public TargetSystem()
+		public TargetingSystem()
 		{
 			_closeTargets = new List<IUnit>();
 		}

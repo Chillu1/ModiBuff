@@ -5,6 +5,5 @@ namespace ModiBuff.Core
 		ModifierController ModifierController { get; } //TODO Refactor/remove?
 
 		bool TryAddModifier(int id, IUnit source);
-		internal bool TryAddModifierTarget(int id, IUnit target, IUnit source);
 	}
 }

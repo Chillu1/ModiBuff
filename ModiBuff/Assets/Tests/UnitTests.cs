@@ -30,11 +30,6 @@ namespace ModiBuff.Tests
 			{
 				return ModifierController.TryAdd(id, this, source);
 			}
-
-			bool IModifierOwner.TryAddModifierTarget(int id, IUnit target, IUnit source)
-			{
-				return false;
-			}
 		}
 
 		[Test]

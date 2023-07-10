@@ -56,7 +56,8 @@ namespace ModiBuff.Core
 			return TryAdd(addReference.Id, addReference.HasApplyChecks, addReference.ApplierType, self, source);
 		}
 
-		public bool TryAdd(int id, bool hasApplyChecks, ApplierType applierType, IUnit self, IUnit source)
+		//TODO Refactor, make it easier to add appliers through API
+		private bool TryAdd(int id, bool hasApplyChecks, ApplierType applierType, IUnit self, IUnit source)
 		{
 			switch (applierType)
 			{
@@ -103,7 +104,7 @@ namespace ModiBuff.Core
 			if (_modifierChecksAppliers.ContainsKey(id))
 				return false;
 
-			_modifierChecksAppliers.Add(id, ModifierPool.Instance.RentCheck(id));
+			_modifierChecksAppliers.Add(id, ModifierPool.Instance.RentModifierCheck(id));
 			return true;
 		}
 

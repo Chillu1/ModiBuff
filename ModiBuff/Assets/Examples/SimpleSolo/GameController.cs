@@ -14,11 +14,11 @@ namespace ModiBuff.Examples.SimpleSolo
 		{
 			var recipes = new ModifierRecipes();
 
-			_unit = new Unit();
-			_enemy = new Unit();
+			_unit = new Unit(100, 5);
+			_enemy = new Unit(20, 1);
 
-			_unit.AddApplierModifier(recipes.GetRecipe("DoT"), ApplierType.Attack);
-			_enemy.AddApplierModifier(recipes.GetRecipe("InitDamage"), ApplierType.Attack);
+			_unit.ModifierController.TryAddApplier(ModifierIdManager.GetId("DoT"), false, ApplierType.Attack);
+			_enemy.ModifierController.TryAddApplier(ModifierIdManager.GetId("DoT"), false, ApplierType.Attack);
 
 			_unit.SetAttackTarget(_enemy);
 			_unit.SetCastTarget(_enemy);

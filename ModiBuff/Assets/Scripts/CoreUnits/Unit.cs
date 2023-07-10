@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-[assembly: InternalsVisibleTo("ModifierLibraryLite.Tests")]
+[assembly: InternalsVisibleTo("ModiBuff.Tests")]
 
 namespace ModiBuff.Core.Units
 {
@@ -53,7 +53,7 @@ namespace ModiBuff.Core.Units
 			_statusEffectController = new StatusEffectController();
 		}
 
-		public virtual void Update(float deltaTime) //TODO Remove virtual
+		public void Update(float deltaTime)
 		{
 			_statusEffectController.Update(deltaTime);
 			ModifierController.Update(deltaTime);
@@ -92,7 +92,7 @@ namespace ModiBuff.Core.Units
 			for (int i = 0; i < _onAttackEffects.Count; i++)
 				_onAttackEffects[i].Effect(target, this);
 
-			float dealtDamage = target.TakeDamage(Damage, (IUnit)this, triggersEvents);
+			float dealtDamage = target.TakeDamage(Damage, this, triggersEvents);
 
 			if (target.Health <= 0)
 				for (int i = 0; i < _onKillEffects.Count; i++)
@@ -264,8 +264,7 @@ namespace ModiBuff.Core.Units
 			return ModifierController.TryAdd(addReference, this, sender);
 		}
 
-		//TODO Don't use. For testing
-		public bool AddApplierModifier(IModifierRecipe recipe, ApplierType applierType = ApplierType.None)
+		internal bool AddApplierModifier(IModifierRecipe recipe, ApplierType applierType = ApplierType.None)
 		{
 			return ModifierController.TryAddApplier(recipe.Id, recipe.HasApplyChecks, applierType);
 		}
@@ -273,11 +272,6 @@ namespace ModiBuff.Core.Units
 		public bool TryAddModifier(int id, IUnit source)
 		{
 			return ModifierController.TryAdd(id, this, source);
-		}
-
-		bool IModifierOwner.TryAddModifierTarget(int id, IUnit target, IUnit source)
-		{
-			return ModifierController.TryAdd(id, target, source);
 		}
 
 		private void TryApplyModifiers(IReadOnlyCollection<ModifierCheck> modifierChecks, IUnit source)

@@ -134,7 +134,7 @@ namespace ModiBuff.Core
 			return pool[--_poolTops[id]];
 		}
 
-		public ModifierCheck RentCheck(int id)
+		public ModifierCheck RentModifierCheck(int id)
 		{
 			var pool = _checkPools[id];
 

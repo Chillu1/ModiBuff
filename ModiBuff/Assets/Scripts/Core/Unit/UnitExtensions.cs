@@ -12,7 +12,7 @@ namespace ModiBuff.Core
 
 		internal static bool TryAddModifierTarget(this IModifierOwner unit, string id, IUnit target)
 		{
-			return unit.TryAddModifierTarget(ModifierIdManager.GetId(id), target, (IUnit)unit);
+			return unit.ModifierController.TryAdd(ModifierIdManager.GetId(id), target, (IUnit)unit);
 		}
 
 		internal static float AttackN(this IAttacker unit, IUnit target, int n)
