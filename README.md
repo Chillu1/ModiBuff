@@ -1,5 +1,9 @@
+<p align="center">
 <img src="Docs/LogoTest.png" width="500"/>
 <img src="Docs/ModiBuff.png" width="500"/>
+</p>
+
+<h1></h1>
 
 ![Coverage](Docs/badge_linecoverage.svg)
 
@@ -93,8 +97,7 @@ N: 5_000
 
 Pooling in ModiBuff is 430X faster than original old version (because of pool & reset)  
 But it's also much faster in cases of doing init/stack/refresh on an existing modifier (we don't create a new modifier anymore)  
-ModiBuffEcs is a bit on the slow side for now, because we're creating the entities and their components, instead of reusing them, like in
-the case of ModiBuff.
+ModiBuffEcs is a bit on the slow side for now, because of how pooling works, with enabling and disabling entities.
 
 Mixed modifier = N of each. Ex. 100 instances * 58 recipes = 5_800 modifiers  
 5_000 mixed modifiers = 1MB  
