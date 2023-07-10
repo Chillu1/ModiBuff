@@ -16,6 +16,18 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+		public void Stack_Heal()
+		{
+			Unit.TakeDamage(UnitHealth - 5, Unit);
+
+			Unit.TryAddModifierSelf("StackHeal");
+			Assert.AreEqual(10, Unit.Health);
+
+			Unit.TryAddModifierSelf("StackHeal");
+			Assert.AreEqual(15, Unit.Health);
+		}
+
+		[Test]
 		public void DamageOnMaxStacks()
 		{
 			Unit.TryAddModifierSelf("DamageOnMaxStacks");

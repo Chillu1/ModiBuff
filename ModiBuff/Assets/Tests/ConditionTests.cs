@@ -16,6 +16,20 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+		public void ManaCondition_OnApply_InitDamage()
+		{
+			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_ApplyCondition_ManaBelow100"), ApplierType.Cast);
+			Unit.Cast(Unit);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.UseMana(UnitMana - 100); //100 mana left
+
+			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_ApplyCondition_ManaBelow100"), ApplierType.Cast);
+			Unit.Cast(Unit);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
 		public void HealthCondition_OnEffect_InitDamage()
 		{
 			Unit.TryAddModifierSelf("InitDamage_EffectCondition_HealthAbove100");
@@ -33,6 +47,17 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
 			Unit.TryAddModifierSelf("InitDamage_EffectCondition_HealthFull");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void ManaIsFullCondition_OnEffect_InitDamage()
+		{
+			Unit.TryAddModifierSelf("InitDamage_EffectCondition_ManaFull");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.UseMana(5);
+			Unit.TryAddModifierSelf("InitDamage_EffectCondition_ManaFull"); //Not full
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 

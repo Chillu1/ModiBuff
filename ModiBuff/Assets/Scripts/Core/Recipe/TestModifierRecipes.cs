@@ -254,6 +254,18 @@ namespace ModiBuff.Core
 				.Effect(new DamageEffect(5), EffectOn.Init)
 				.Remove(1);
 
+			Add("InitDamage_ApplyCondition_ManaBelow100")
+				.ApplyCondition(StatType.Mana, 100, ComparisonType.LessOrEqual)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
+			Add("InitDamage_EffectCondition_ManaFull")
+				.EffectCondition(ConditionType.ManaIsFull)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
+			Add("StackHeal")
+				.Effect(new HealEffect(5, false, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always);
+
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
 			//	.Effect(new StackEffectNew(StackEffectType.Add, new DamageEffect(5)), EffectOn.Interval)

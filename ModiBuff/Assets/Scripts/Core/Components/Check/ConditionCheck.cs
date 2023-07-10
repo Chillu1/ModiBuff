@@ -140,9 +140,10 @@ namespace ModiBuff.Core
 
 					break;
 				case ConditionType.ManaIsFull:
-					if (unit is IManaOwner manaUser)
+				{
+					if (unit is IManaOwner manaOwner)
 					{
-						if (!CheckValue(manaUser.Mana, manaUser.MaxMana, ComparisonType.Equal))
+						if (!CheckValue(manaOwner.Mana, manaOwner.MaxMana, ComparisonType.Equal))
 							return false;
 					}
 #if DEBUG && !MODIBUFF_PROFILE
@@ -151,6 +152,20 @@ namespace ModiBuff.Core
 #endif
 
 					break;
+				}
+				case ConditionType.ManaIsEmpty:
+				{
+					if (unit is IManaOwner manaOwner)
+					{
+						if (!CheckValue(manaOwner.Mana, 0f, ComparisonType.Equal))
+							return false;
+					}
+#if DEBUG && !MODIBUFF_PROFILE
+					else
+						throw new ArgumentException("Unit is not IManaUser");
+#endif
+					break;
+				}
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
