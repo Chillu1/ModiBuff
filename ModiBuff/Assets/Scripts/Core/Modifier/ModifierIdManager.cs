@@ -4,8 +4,6 @@ namespace ModiBuff.Core
 {
 	public sealed class ModifierIdManager
 	{
-		public static int NextId => _instance._nextId;
-
 		private static ModifierIdManager _instance;
 		private int _nextId;
 

@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
+	/// <summary>
+	///		Class responsible for handling the correct cloning and sync of modifiers
+	/// </summary>
 	public sealed class ModifierCreator
 	{
 		private readonly List<EffectWrapper> _effectWrappers;

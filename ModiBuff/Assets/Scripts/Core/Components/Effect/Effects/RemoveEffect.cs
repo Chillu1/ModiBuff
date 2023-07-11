@@ -1,15 +1,17 @@
 namespace ModiBuff.Core
 {
-	public class RemoveEffect : IRemoveEffect, IShallowClone<RemoveEffect>
+	public class RemoveEffect : IRemoveEffect, IModifierIdOwner, IShallowClone<RemoveEffect>
 	{
 		private IRevertEffect[] _revertibleEffects;
-		private readonly int _id;
+		private int _id;
 
-		public RemoveEffect() : this(ModifierIdManager.NextId - 1)
+		public RemoveEffect()
 		{
 		}
 
-		public RemoveEffect(int id) => _id = id;
+		internal RemoveEffect(int id) => _id = id;
+
+		public void SetModifierId(int id) => _id = id;
 
 		public void SetRevertibleEffects(IRevertEffect[] revertibleEffects)
 		{

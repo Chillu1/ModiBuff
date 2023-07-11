@@ -338,6 +338,8 @@ namespace ModiBuff.Core
 		{
 			if (effect is ITargetEffect effectTarget)
 				effectTarget.SetTargeting(targeting);
+			if (effect is IModifierIdOwner modifierIdOwner)
+				modifierIdOwner.SetModifierId(Id);
 			_effectWrappers.Add(new EffectWrapper(effect, effectOn));
 			return this;
 		}
