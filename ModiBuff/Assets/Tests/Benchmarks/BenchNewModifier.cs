@@ -41,7 +41,7 @@ namespace ModiBuff.Tests
 			Measure.Method(() =>
 			{
 				var modifier = Pool.Rent(recipe.Id);
-			}).BenchGC(Iterations);
+			}).Bench(Iterations);
 		}
 
 		[Test, Performance]
@@ -55,7 +55,7 @@ namespace ModiBuff.Tests
 			{
 				var modifier = Pool.Rent(recipe.Id);
 				Pool.Return(modifier);
-			}).BenchGC(Iterations);
+			}).Bench(Iterations);
 		}
 
 		[Test, Performance]

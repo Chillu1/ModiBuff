@@ -53,6 +53,12 @@ namespace ModiBuff.Core.Units
 			_statusEffectController = new StatusEffectController();
 		}
 
+		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences) : this(health, damage)
+		{
+			foreach (var modifierAddReference in modifierAddReferences)
+				TryAddModifier(modifierAddReference, this);
+		}
+
 		public void Update(float deltaTime)
 		{
 			_statusEffectController.Update(deltaTime);

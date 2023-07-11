@@ -42,6 +42,29 @@ namespace ModiBuff.Tests
 				.BenchGC(5_000);
 		}
 
+		[Test, Performance]
+		public void BenchInitIteration()
+		{
+			const float delta = 0.0167f;
+
+			Pool.Allocate(ModifierIdManager.GetId("InitDamage"), 5_000);
+			int id = ModifierIdManager.GetId("InitDamage");
+
+			var units = new Unit[5_000];
+			for (int i = 0; i < units.Length; i++)
+				units[i] = new Unit();
+
+			Measure.Method(() =>
+				{
+					for (int i = 0; i < units.Length; i++)
+					{
+						var unit = units[i];
+						unit.TryAddModifier(id, unit);
+					}
+				})
+				.BenchGC(1);
+		}
+
 		private const int CollectionIterations = 500;
 		private const int CollectionSize = 100;
 		private readonly int[] _indexes = { 25, 50, 75 };

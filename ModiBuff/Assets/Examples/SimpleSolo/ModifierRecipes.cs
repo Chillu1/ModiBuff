@@ -12,7 +12,16 @@ namespace ModiBuff.Examples.SimpleSolo
 			Add("DoT")
 				.Interval(1)
 				.Effect(new DamageEffect(2), EffectOn.Interval)
-				.Duration(5);
+				.Remove(5).Refresh();
+
+			Add("FireSlimeSelfDoT")
+				.Interval(1)
+				.Effect(new DamageEffect(1), EffectOn.Interval);
+
+			Add("DisarmChance")
+				.ApplyChance(0.2f)
+				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 1f), EffectOn.Init)
+				.Remove(1f).Refresh();
 		}
 	}
 }

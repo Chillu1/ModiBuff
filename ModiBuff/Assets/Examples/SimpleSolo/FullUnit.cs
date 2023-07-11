@@ -5,6 +5,7 @@ namespace ModiBuff.Examples.SimpleSolo
 	/// <summary>
 	///		Lazy implementation using the default Unit example, allows for all library features to be used
 	/// </summary>
+	/// <remarks>  Note that <see cref="Core.Units.Unit"/> is not meant to be inherited from</remarks>
 	public sealed class FullUnit : Core.Units.Unit
 	{
 		private readonly TargetingSystem _targetingSystem;
