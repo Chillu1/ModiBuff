@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace ModiBuff.Core
 {
 	public class RemoveEffect : IRemoveEffect, IShallowClone<RemoveEffect>
@@ -7,11 +5,11 @@ namespace ModiBuff.Core
 		private IRevertEffect[] _revertibleEffects;
 		private readonly int _id;
 
-		public RemoveEffect() : this(ModifierIdManager.CurrentId)
+		public RemoveEffect() : this(ModifierIdManager.NextId - 1)
 		{
 		}
 
-		private RemoveEffect(int id) => _id = id;
+		public RemoveEffect(int id) => _id = id;
 
 		public void SetRevertibleEffects(IRevertEffect[] revertibleEffects)
 		{

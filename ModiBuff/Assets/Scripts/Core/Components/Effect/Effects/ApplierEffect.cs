@@ -13,8 +13,8 @@ namespace ModiBuff.Core
 		{
 			try
 			{
-				//TODO Last registered effect instead of name? Won't lead to any problems?
-				_modifierId = ModifierIdManager.GetId(modifierName);
+				//Could ask the user to instead supply the id, but that isn't ideal
+				_modifierId = ModifierIdManager.GetIdOld(modifierName);
 			}
 			catch (KeyNotFoundException)
 			{

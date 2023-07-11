@@ -4,7 +4,7 @@ namespace ModiBuff.Core
 {
 	public sealed class ModifierIdManager
 	{
-		public static int CurrentId { get; private set; }
+		public static int NextId => _instance._nextId;
 
 		private static ModifierIdManager _instance;
 		private int _nextId;
@@ -21,17 +21,21 @@ namespace ModiBuff.Core
 			_idMap = new Dictionary<string, int>();
 		}
 
-		public static int GetFreeId(string name)
+		public int GetFreeId(string name)
 		{
-			CurrentId = _instance._nextId;
-			int id = _instance._nextId++;
-			if (!_instance._idMap.ContainsKey(name)) //TODO We keep making new recipes for every unit test file
-				_instance._idMap.Add(name, id);
+			int id = _nextId;
+			_idMap.TryAdd(name, id);
+			_nextId++;
 			return id;
 		}
 
-		public static int GetId(string name) => _instance._idMap[name];
+		/// <summary>
+		///		Lazy implementation for ease of use.
+		/// </summary>
+		internal static int GetIdOld(string name) => _instance._idMap[name];
 
-		public static void Reset() => _instance._nextId = 0;
+		public int GetId(string name) => _idMap[name];
+
+		public void Reset() => _instance = null;
 	}
 }

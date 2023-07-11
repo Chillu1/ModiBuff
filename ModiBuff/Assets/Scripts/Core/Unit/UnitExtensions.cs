@@ -1,18 +1,20 @@
 namespace ModiBuff.Core
 {
-	public static class UnitExtensions
+	internal static class UnitExtensions
 	{
-		/// <summary>
-		///		For unit tests only.
-		/// </summary>
-		internal static bool TryAddModifierSelf(this IModifierOwner unit, string id)
+		internal static bool TryAddModifierSelf(this IModifierOwner unit, string name)
 		{
-			return unit.TryAddModifier(ModifierIdManager.GetId(id), (IUnit)unit);
+			return unit.TryAddModifier(ModifierIdManager.GetIdOld(name), (IUnit)unit);
 		}
 
-		internal static bool TryAddModifierTarget(this IModifierOwner unit, string id, IUnit target)
+		internal static bool TryAddModifierTarget(this IModifierOwner unit, string name, IUnit target)
 		{
-			return unit.ModifierController.TryAdd(ModifierIdManager.GetId(id), target, (IUnit)unit);
+			return unit.ModifierController.TryAdd(ModifierIdManager.GetIdOld(name), target, (IUnit)unit);
+		}
+
+		internal static bool ContainsModifier(this IModifierOwner unit, string name)
+		{
+			return unit.ModifierController.Contains(ModifierIdManager.GetIdOld(name));
 		}
 
 		internal static float AttackN(this IAttacker unit, IUnit target, int n)

@@ -14,6 +14,8 @@ namespace ModiBuff.Core
 		public string Name { get; }
 		public bool HasApplyChecks { get; private set; }
 
+		private readonly ModifierIdManager _idManager;
+
 		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
 
 		private ConditionType _applyConditionType;
@@ -22,7 +24,7 @@ namespace ModiBuff.Core
 		private ComparisonType _applyConditionComparisonType;
 		private LegalAction _applyConditionLegalAction;
 		private StatusEffectType _applyConditionStatusEffect;
-		private string _applyConditionModifierName;
+		private int _applyConditionModifierId = -1;
 		private float _applyCooldown = -1f;
 
 		private bool _hasEffectChecks;
@@ -32,7 +34,7 @@ namespace ModiBuff.Core
 		private ComparisonType _effectConditionComparisonType;
 		private LegalAction _effectConditionLegalAction;
 		private StatusEffectType _effectConditionStatusEffect;
-		private string _effectConditionModifierName;
+		private int _effectConditionModifierId = -1;
 		private float _effectCooldown = -1f;
 
 		private bool _oneTimeInit;
@@ -64,10 +66,11 @@ namespace ModiBuff.Core
 		private CostCheck _effectCost;
 		private ChanceCheck _effectChance;
 
-		public ModifierRecipe(string name)
+		public ModifierRecipe(string name, ModifierIdManager idManager)
 		{
-			Id = ModifierIdManager.GetFreeId(name);
+			Id = idManager.GetFreeId(name);
 			Name = name;
+			_idManager = idManager;
 
 			_effectWrappers = new List<EffectWrapper>(3);
 		}
@@ -149,7 +152,7 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe ApplyCondition(string modifierName)
 		{
-			_applyConditionModifierName = modifierName;
+			_applyConditionModifierId = _idManager.GetId(modifierName);
 			HasApplyChecks = true;
 			return this;
 		}
@@ -221,7 +224,7 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe EffectCondition(string modifierName)
 		{
-			_effectConditionModifierName = modifierName;
+			_effectConditionModifierId = _idManager.GetId(modifierName);
 			_hasEffectChecks = true;
 			return this;
 		}
@@ -279,7 +282,7 @@ namespace ModiBuff.Core
 		public ModifierRecipe Remove(float duration)
 		{
 			Duration(duration);
-			_removeEffectWrapper = new EffectWrapper(new RemoveEffect(), EffectOn.Duration);
+			_removeEffectWrapper = new EffectWrapper(new RemoveEffect(Id), EffectOn.Duration);
 			return this;
 		}
 
@@ -360,11 +363,11 @@ namespace ModiBuff.Core
 				    || (_applyConditionStatType != StatType.None && _applyConditionValue != -1f)
 				    || _applyConditionLegalAction != LegalAction.None
 				    || _applyConditionStatusEffect != StatusEffectType.None
-				    || _applyConditionModifierName != null)
+				    || _applyConditionModifierId != -1)
 				{
 					_applyCondition = new ConditionCheck(_applyConditionType, _applyConditionStatType, _applyConditionValue,
 						_applyConditionComparisonType, _applyConditionLegalAction, _applyConditionStatusEffect,
-						_applyConditionModifierName);
+						_applyConditionModifierId);
 				}
 			}
 
@@ -376,11 +379,11 @@ namespace ModiBuff.Core
 				        _effectConditionComparisonType != ComparisonType.None)
 				    || _effectConditionLegalAction != LegalAction.None
 				    || _effectConditionStatusEffect != StatusEffectType.None
-				    || _effectConditionModifierName != null)
+				    || _effectConditionModifierId != -1)
 				{
 					_effectCondition = new ConditionCheck(_effectConditionType, _effectConditionStatType, _effectConditionValue,
 						_effectConditionComparisonType, _effectConditionLegalAction, _effectConditionStatusEffect,
-						_effectConditionModifierName);
+						_effectConditionModifierId);
 				}
 			}
 		}

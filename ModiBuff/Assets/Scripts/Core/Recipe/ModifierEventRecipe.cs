@@ -23,9 +23,9 @@ namespace ModiBuff.Core
 
 		private readonly List<IRevertEffect> _revertEffects;
 
-		public ModifierEventRecipe(string name, EffectOnEvent effectOnEvent)
+		public ModifierEventRecipe(int id, string name, EffectOnEvent effectOnEvent)
 		{
-			Id = ModifierIdManager.GetFreeId(name);
+			Id = id;
 			Name = name;
 			_effectOnEvent = effectOnEvent;
 
@@ -75,7 +75,7 @@ namespace ModiBuff.Core
 		public ModifierEventRecipe Remove(float duration)
 		{
 			_removeDuration = duration;
-			_removeEffectWrapper = new EffectWrapper(new RemoveEffect(), EffectOn.Duration);
+			_removeEffectWrapper = new EffectWrapper(new RemoveEffect(Id), EffectOn.Duration);
 			return this;
 		}
 

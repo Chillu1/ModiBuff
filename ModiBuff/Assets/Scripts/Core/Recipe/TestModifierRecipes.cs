@@ -2,6 +2,10 @@ namespace ModiBuff.Core
 {
 	public sealed class TestModifierRecipes : ModifierRecipesBase
 	{
+		public TestModifierRecipes(ModifierIdManager idManager) : base(idManager)
+		{
+		}
+
 		protected override void SetupRecipes()
 		{
 			//For now recipes only supports one interval, one duration.

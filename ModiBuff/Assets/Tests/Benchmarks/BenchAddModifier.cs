@@ -14,7 +14,7 @@ namespace ModiBuff.Tests
 		[Test, Performance]
 		public void BenchAddInitDamage()
 		{
-			int modifierId = ModifierIdManager.GetId("InitDamage");
+			int modifierId = IdManager.GetId("InitDamage");
 
 			Measure.Method(
 					() => Unit.TryAddModifier(modifierId, Unit))
@@ -24,7 +24,7 @@ namespace ModiBuff.Tests
 		[Test, Performance]
 		public void BenchAddInitStackDamage()
 		{
-			int modifierId = ModifierIdManager.GetId("InitStackDamage");
+			int modifierId = IdManager.GetId("InitStackDamage");
 
 			Measure.Method(
 					() => Unit.TryAddModifier(modifierId, Unit))
@@ -34,7 +34,7 @@ namespace ModiBuff.Tests
 		[Test, Performance]
 		public void BenchAddInitHeal()
 		{
-			int modifierId = ModifierIdManager.GetId("InitHeal");
+			int modifierId = IdManager.GetId("InitHeal");
 
 			Measure.Method(
 					() => Unit.TryAddModifier(modifierId, Unit))

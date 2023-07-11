@@ -151,7 +151,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun_Revert()
 		{
-			int modifierId = ModifierIdManager.GetId("InitStun_Revertible");
+			int modifierId = IdManager.GetId("InitStun_Revertible");
 			Unit.TryAddModifierSelf("InitStun_Revertible");
 
 			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));

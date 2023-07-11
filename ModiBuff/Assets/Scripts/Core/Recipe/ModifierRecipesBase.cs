@@ -8,10 +8,12 @@ namespace ModiBuff.Core
 	{
 		public static int RecipesCount { get; private set; }
 
+		private readonly ModifierIdManager _idManager;
 		private readonly IDictionary<string, IModifierRecipe> _recipes;
 
-		public ModifierRecipesBase()
+		public ModifierRecipesBase(ModifierIdManager idManager)
 		{
+			_idManager = idManager;
 			_recipes = new Dictionary<string, IModifierRecipe>();
 
 			SetupRecipes();
@@ -37,7 +39,7 @@ namespace ModiBuff.Core
 				return (ModifierRecipe)localRecipe;
 			}
 
-			var recipe = new ModifierRecipe(name);
+			var recipe = new ModifierRecipe(name, _idManager);
 			_recipes.Add(name, recipe);
 			return recipe;
 		}
@@ -50,7 +52,7 @@ namespace ModiBuff.Core
 				return (ModifierEventRecipe)localRecipe;
 			}
 
-			var recipe = new ModifierEventRecipe(name, effectOnEvent);
+			var recipe = new ModifierEventRecipe(_idManager.GetFreeId(name), name, effectOnEvent);
 			_recipes.Add(name, recipe);
 			return recipe;
 		}

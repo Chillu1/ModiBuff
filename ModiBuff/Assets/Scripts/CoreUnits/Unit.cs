@@ -297,8 +297,6 @@ namespace ModiBuff.Core.Units
 				TryAddModifier(recipes[i], source);
 		}
 
-		public bool ContainsModifier(string id) => ModifierController.Contains(ModifierIdManager.GetId(id));
-
 		//---Aura---
 
 		public void AddCloseTargets(params Unit[] targets)
@@ -309,9 +307,9 @@ namespace ModiBuff.Core.Units
 		public void AddAuraModifier(string name)
 		{
 			//modifier.SetTargets();
-			var modifier = ModifierPool.Instance.Rent(ModifierIdManager.GetId(name));
+			//var modifier = ModifierPool.Instance.Rent(ModifierIdManager.GetId(name));
 			//modifier.SetAuraTargets(_targetsInRange, this);
-			_auraModifiers.Add(modifier);
+			//_auraModifiers.Add(modifier);
 		}
 
 		public override string ToString()

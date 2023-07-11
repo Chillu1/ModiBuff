@@ -13,7 +13,7 @@ namespace ModiBuff.Tests
 		[TestCase(1f)]
 		public void BenchDoTIteration(float delta)
 		{
-			Pool.Allocate(ModifierIdManager.GetId("DoT"), 5_000);
+			Pool.Allocate(IdManager.GetId("DoT"), 5_000);
 
 			var units = new Unit[5_000];
 			for (int i = 0; i < units.Length; i++)
@@ -47,8 +47,8 @@ namespace ModiBuff.Tests
 		{
 			const float delta = 0.0167f;
 
-			Pool.Allocate(ModifierIdManager.GetId("InitDamage"), 5_000);
-			int id = ModifierIdManager.GetId("InitDamage");
+			Pool.Allocate(IdManager.GetId("InitDamage"), 5_000);
+			int id = IdManager.GetId("InitDamage");
 
 			var units = new Unit[5_000];
 			for (int i = 0; i < units.Length; i++)

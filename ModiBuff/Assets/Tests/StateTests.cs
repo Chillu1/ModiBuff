@@ -163,7 +163,7 @@ namespace ModiBuff.Tests
 		public void OneTimeInit_ResetState()
 		{
 			Pool.Clear();
-			int recipeId = ModifierIdManager.GetId("OneTimeInitDamage");
+			int recipeId = IdManager.GetId("OneTimeInitDamage");
 			Pool.Allocate(recipeId, 1);
 
 			Unit.TryAddModifierSelf("OneTimeInitDamage"); //Init

@@ -10,13 +10,13 @@ namespace ModiBuff.Tests
 		[Test, Performance]
 		public void BenchSetupRecipes()
 		{
-			var _ = new ModifierIdManager();
+			var modifierIdManager = new ModifierIdManager();
 
 			Measure.Method(() =>
 				{
-					var recipes = new TestModifierRecipes();
+					var recipes = new TestModifierRecipes(modifierIdManager);
 				})
-				.CleanUp(() => ModifierIdManager.Reset())
+				.CleanUp(() => modifierIdManager.Reset())
 				.BenchGC(1);
 		}
 
@@ -26,14 +26,14 @@ namespace ModiBuff.Tests
 		[TestCase(1000)]
 		public void BenchAllocatePool(int n)
 		{
-			var _ = new ModifierIdManager();
-			var recipes = new TestModifierRecipes();
+			var modifierIdManager = new ModifierIdManager();
+			var recipes = new TestModifierRecipes(modifierIdManager);
 			ModifierPool pool = null;
 
 			Measure.Method(() => { pool = new ModifierPool(recipes.GetRecipes(), n); })
 				.CleanUp(() =>
 				{
-					ModifierIdManager.Reset();
+					modifierIdManager.Reset();
 					pool.Dispose();
 				})
 				.BenchGCLow(1);

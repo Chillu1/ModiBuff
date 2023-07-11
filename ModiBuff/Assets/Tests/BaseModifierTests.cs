@@ -8,6 +8,7 @@ namespace ModiBuff.Tests
 	{
 		private CoreSystem _coreSystem;
 
+		protected ModifierIdManager IdManager { get; private set; }
 		protected ModifierRecipesBase Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
 
@@ -33,6 +34,7 @@ namespace ModiBuff.Tests
 		{
 			_coreSystem = new CoreSystem(1);
 
+			IdManager = _coreSystem.IdManager;
 			Recipes = _coreSystem.Recipes;
 			Pool = _coreSystem.Pool;
 		}
@@ -57,6 +59,7 @@ namespace ModiBuff.Tests
 		public void OneTimeTearDown()
 		{
 			_coreSystem.Dispose();
+			IdManager = null;
 			Recipes = null;
 			Pool = null;
 		}

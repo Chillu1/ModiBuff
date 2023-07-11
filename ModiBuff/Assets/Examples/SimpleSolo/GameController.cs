@@ -12,13 +12,14 @@ namespace ModiBuff.Examples.SimpleSolo
 
 		public GameController()
 		{
-			var recipes = new ModifierRecipes();
+			var idManager = new ModifierIdManager();
+			var recipes = new ModifierRecipes(idManager);
 
 			_unit = new Unit(100, 5);
 			_enemy = new Unit(20, 1);
 
-			_unit.ModifierController.TryAddApplier(ModifierIdManager.GetId("DoT"), false, ApplierType.Attack);
-			_enemy.ModifierController.TryAddApplier(ModifierIdManager.GetId("DoT"), false, ApplierType.Attack);
+			_unit.ModifierController.TryAddApplier(idManager.GetId("DoT"), false, ApplierType.Attack);
+			_enemy.ModifierController.TryAddApplier(idManager.GetId("DoT"), false, ApplierType.Attack);
 
 			_unit.SetAttackTarget(_enemy);
 			_unit.SetCastTarget(_enemy);

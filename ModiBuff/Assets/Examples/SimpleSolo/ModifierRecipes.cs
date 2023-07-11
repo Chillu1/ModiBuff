@@ -4,6 +4,10 @@ namespace ModiBuff.Examples.SimpleSolo
 {
 	public sealed class ModifierRecipes : ModifierRecipesBase
 	{
+		public ModifierRecipes(ModifierIdManager idManager) : base(idManager)
+		{
+		}
+
 		protected override void SetupRecipes()
 		{
 			Add("InitDamage")

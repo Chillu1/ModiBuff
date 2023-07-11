@@ -14,7 +14,7 @@ namespace ModiBuff.Core.Units
 		{
 			var coreSystem = new CoreSystem();
 			_pool = coreSystem.Pool;
-			_recipeId = ModifierIdManager.GetId("DoT");
+			_recipeId = coreSystem.IdManager.GetId("DoT");
 			//var _recipeId2 = ModifierIdManager.GetId("InitDoTSeparateDamageRemove");
 
 			//_modifiers = new Modifier[20_000];

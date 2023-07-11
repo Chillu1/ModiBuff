@@ -136,7 +136,6 @@ namespace ModiBuff.Core
 			return modifier;
 		}
 
-		internal bool Contains(string name) => _modifiers[ModifierIdManager.GetId(name)] != null;
 		public bool Contains(int id) => _modifiers[id] != null;
 
 		public void PrepareRemove(Modifier modifier)

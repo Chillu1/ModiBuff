@@ -9,7 +9,7 @@ namespace ModiBuff.Tests
 		public void TimeStateReset()
 		{
 			Pool.Clear();
-			Pool.Allocate(ModifierIdManager.GetId("DurationRemove"), 1);
+			Pool.Allocate(IdManager.GetId("DurationRemove"), 1);
 
 			Unit.TryAddModifierSelf("DurationRemove");
 
@@ -32,7 +32,7 @@ namespace ModiBuff.Tests
 		public void StackStateReset()
 		{
 			Pool.Clear();
-			Pool.Allocate(ModifierIdManager.GetId("StackBasedDamage"), 1);
+			Pool.Allocate(IdManager.GetId("StackBasedDamage"), 1);
 
 			Unit.TryAddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health); //1 stack = +2 damage == 2
@@ -40,7 +40,7 @@ namespace ModiBuff.Tests
 			Unit.TryAddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health); //2 stacks = +4 damage == 4
 
-			Unit.ModifierController.Remove(ModifierIdManager.GetId("StackBasedDamage")); //Return to pool
+			Unit.ModifierController.Remove(IdManager.GetId("StackBasedDamage")); //Return to pool
 
 			Enemy.TryAddModifierSelf("StackBasedDamage"); //State should be reset
 			Assert.AreEqual(EnemyHealth - 5 - 2, Enemy.Health);

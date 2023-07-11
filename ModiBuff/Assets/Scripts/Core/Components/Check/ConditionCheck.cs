@@ -10,8 +10,10 @@ namespace ModiBuff.Core
 		private readonly float _statValue;
 		private readonly ComparisonType _comparisonType;
 		private readonly LegalAction _legalAction;
+
 		private readonly StatusEffectType _statusEffect;
-		private readonly string _modifierName; //For possible save/load feature
+
+		//private readonly string _modifierName; //For possible save/load feature
 		private readonly int _modifierId = -1;
 		private readonly Func<IUnit, bool> _checks;
 
@@ -26,12 +28,12 @@ namespace ModiBuff.Core
 		}
 
 		public ConditionCheck(ConditionType conditionType, StatType statType, float statValue) :
-			this(conditionType, statType, statValue, ComparisonType.GreaterOrEqual, LegalAction.None, StatusEffectType.None, null)
+			this(conditionType, statType, statValue, ComparisonType.GreaterOrEqual, LegalAction.None, StatusEffectType.None, -1)
 		{
 		}
 
 		public ConditionCheck(ConditionType conditionType, StatType statType, float statValue, ComparisonType comparisonType,
-			LegalAction legalAction, StatusEffectType statusEffectType, string modifierName)
+			LegalAction legalAction, StatusEffectType statusEffectType, int modifierId)
 		{
 			_conditionType = conditionType;
 			_statType = statType;
@@ -39,9 +41,7 @@ namespace ModiBuff.Core
 			_comparisonType = comparisonType;
 			_legalAction = legalAction;
 			_statusEffect = statusEffectType;
-			_modifierName = modifierName;
-			if (!string.IsNullOrEmpty(modifierName))
-				_modifierId = ModifierIdManager.GetId(modifierName);
+			_modifierId = modifierId;
 
 			/*var conditionList = new List<Func<IUnit, bool>>();
 
