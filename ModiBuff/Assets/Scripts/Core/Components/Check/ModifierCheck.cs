@@ -31,7 +31,7 @@ namespace ModiBuff.Core
 			_hasChance = chance != null;
 		}
 
-		public void Update(in float delta)
+		public void Update(float delta)
 		{
 			if (!_hasCooldown)
 				return;

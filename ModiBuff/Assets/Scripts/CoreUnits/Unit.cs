@@ -18,7 +18,8 @@ namespace ModiBuff.Core.Units
 
 		public ModifierController ModifierController { get; }
 
-		//This can be done with an array of list, but it's better performance wise.
+		//Note: These event lists should only be used for classic effects.
+		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
 		private List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
 		private List<IEffect> _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
 
@@ -122,8 +123,12 @@ namespace ModiBuff.Core.Units
 			if (triggersEvents)
 			{
 				if (Health <= 0)
+				{
 					for (int i = 0; i < _whenDeathEffects.Count; i++)
 						_whenDeathEffects[i].Effect(this, source);
+					//Unit Death TODO Destroy/pool unit
+					ModifierController.Clear();
+				}
 			}
 
 			return dealtDamage;

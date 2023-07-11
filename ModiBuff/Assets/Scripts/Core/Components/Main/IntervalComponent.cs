@@ -38,7 +38,7 @@ namespace ModiBuff.Core
 			_targetComponent = targetComponent;
 		}
 
-		public void Update(in float deltaTime)
+		public void Update(float deltaTime)
 		{
 			_timer += deltaTime;
 			if (_timer < _interval)

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
-	public sealed class ModifierController : IRemoveModifier
+	public sealed class ModifierController
 	{
 		private readonly Modifier[] _modifiers;
 		private readonly List<int> _modifierIndexes;
@@ -12,7 +12,7 @@ namespace ModiBuff.Core
 		private readonly List<int> _modifierCastAppliers;
 		private readonly Dictionary<int, ModifierCheck> _modifierChecksAppliers;
 
-		private readonly List<Modifier> _modifiersToRemove;
+		private readonly List<int> _modifiersToRemove;
 
 		public ModifierController()
 		{
@@ -22,10 +22,10 @@ namespace ModiBuff.Core
 			_modifierCastAppliers = new List<int>(5);
 			_modifierChecksAppliers = new Dictionary<int, ModifierCheck>(5);
 
-			_modifiersToRemove = new List<Modifier>(5);
+			_modifiersToRemove = new List<int>(5);
 		}
 
-		public void Update(in float delta)
+		public void Update(float delta)
 		{
 			int length = _modifierIndexes.Count;
 			for (int i = 0; i < length; i++)
@@ -39,7 +39,6 @@ namespace ModiBuff.Core
 			if (removeCount == 0)
 				return;
 
-			//Debug.Log("ModifiersRemove: " + _modifiersToRemoveNew.Count);
 			for (int i = 0; i < removeCount; i++)
 				Remove(_modifiersToRemove[i]);
 
@@ -115,7 +114,7 @@ namespace ModiBuff.Core
 			{
 				//Debug.Log("Modifier already exists");
 				//TODO should we update the modifier targets when init/refreshing/stacking?
-				existingModifier.UpdateTargets(source);
+				existingModifier.UpdateSource(source);
 				existingModifier.Init();
 				existingModifier.Refresh();
 				existingModifier.Stack();
@@ -138,30 +137,35 @@ namespace ModiBuff.Core
 
 		public bool Contains(int id) => _modifiers[id] != null;
 
-		public void PrepareRemove(Modifier modifier)
-		{
-			_modifiersToRemove.Add(modifier);
-		}
+		public void PrepareRemove(int id) => _modifiersToRemove.Add(id);
 
-		public void PrepareRemove(int id)
+		internal void Remove(int id)
 		{
-			_modifiersToRemove.Add(_modifiers[id]);
+			var modifier = _modifiers[id];
+			//Debug.Log("Removing modifier: " + modifier.Id);
+			_modifiers[id] = null;
+			_modifierIndexes.Remove(id);
+			ModifierPool.Instance.Return(modifier);
 		}
 
 		/// <summary>
-		///		Only to be used for testing, use <see cref="PrepareRemoveModifier(int)"/> instead.
+		///		Returns all modifiers back to the pool
 		/// </summary>
-		internal void Remove(int id)
+		public void Clear()
 		{
-			Remove(_modifiers[id]);
-		}
+			int length = _modifierIndexes.Count;
+			for (int i = 0; i < length; i++)
+				Remove(_modifierIndexes[i]);
 
-		private void Remove(Modifier modifier)
-		{
-			//Debug.Log("Removing modifier: " + modifier.Id);
-			_modifiers[modifier.Id] = null;
-			_modifierIndexes.Remove(modifier.Id);
-			ModifierPool.Instance.Return(modifier);
+			foreach (var check in _modifierChecksAppliers.Values)
+				ModifierPool.Instance.ReturnCheck(check);
+
+			//Clear the rest, if the unit will be reused/pooled. Otherwise this is not needed
+			_modifierIndexes.Clear();
+			_modifierAttackAppliers.Clear();
+			_modifierCastAppliers.Clear();
+			_modifierChecksAppliers.Clear();
+			_modifiersToRemove.Clear();
 		}
 	}
 }

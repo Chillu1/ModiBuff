@@ -78,9 +78,9 @@ namespace ModiBuff.Core
 				_stackComponent.SetupTarget(_targetComponent);
 		}
 
-		public void UpdateTargets(IUnit source)
+		public void UpdateSource(IUnit source)
 		{
-			_targetComponent.UpdateTargets(source);
+			_targetComponent.UpdateSource(source);
 		}
 
 		public void Init()

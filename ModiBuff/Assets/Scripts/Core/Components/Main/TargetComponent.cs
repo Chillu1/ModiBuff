@@ -15,7 +15,7 @@ namespace ModiBuff.Core
 			Source = source;
 		}
 
-		public void UpdateTargets(IUnit source)
+		public void UpdateSource(IUnit source)
 		{
 			Source = source;
 		}

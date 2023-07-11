@@ -45,8 +45,6 @@ namespace ModiBuff.Tests
 		[Test, Performance]
 		public void BenchInitIteration()
 		{
-			const float delta = 0.0167f;
-
 			Pool.Allocate(IdManager.GetId("InitDamage"), 5_000);
 			int id = IdManager.GetId("InitDamage");
 

@@ -15,7 +15,7 @@ namespace ModiBuff.Core
 			_timer = cooldown;
 		}
 
-		public void Update(in float deltaTime)
+		public void Update(float deltaTime)
 		{
 			if (_timer > _cooldown)
 				return;

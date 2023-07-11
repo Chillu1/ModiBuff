@@ -30,7 +30,7 @@ namespace ModiBuff.Core
 
 		public void SetupTarget(ITargetComponent targetComponent) => _targetComponent = targetComponent;
 
-		public void Update(in float deltaTime)
+		public void Update(float deltaTime)
 		{
 			if (_timer >= _duration)
 				return;
