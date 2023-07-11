@@ -38,7 +38,7 @@ namespace ModiBuff.Tests
 				})
 				.BenchGCLow(1);
 
-			Debug.Log("Allocated: " + ModifierRecipes.RecipesCount * n + " modifiers");
+			Debug.Log("Allocated: " + ModifierRecipesBase.RecipesCount * n + " modifiers");
 		}
 	}
 }

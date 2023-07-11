@@ -4,13 +4,13 @@ using UnityEngine;
 
 namespace ModiBuff.Core
 {
-	public abstract class ModifierRecipes
+	public abstract class ModifierRecipesBase
 	{
 		public static int RecipesCount { get; private set; }
 
 		private readonly IDictionary<string, IModifierRecipe> _recipes;
 
-		public ModifierRecipes()
+		public ModifierRecipesBase()
 		{
 			_recipes = new Dictionary<string, IModifierRecipe>();
 

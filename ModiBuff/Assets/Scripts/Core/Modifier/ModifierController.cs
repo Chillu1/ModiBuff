@@ -17,7 +17,7 @@ namespace ModiBuff.Core
 		public ModifierController()
 		{
 			_modifierIndexes = new List<int>(5);
-			_modifiers = new Modifier[ModifierRecipes.RecipesCount];
+			_modifiers = new Modifier[ModifierRecipesBase.RecipesCount];
 			_modifierAttackAppliers = new List<int>(5);
 			_modifierCastAppliers = new List<int>(5);
 			_modifierChecksAppliers = new Dictionary<int, ModifierCheck>(5);

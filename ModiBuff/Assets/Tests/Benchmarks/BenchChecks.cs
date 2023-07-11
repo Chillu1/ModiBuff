@@ -21,7 +21,7 @@ namespace ModiBuff.Tests
 		[Test, Performance]
 		public void BenchCheckInitDamage()
 		{
-			var checks = new ModifierCheck[ModifierRecipes.RecipesCount];
+			var checks = new ModifierCheck[ModifierRecipesBase.RecipesCount];
 			var check = new ModifierCheck(0, "Test");
 			var modifier = Recipes.GetRecipe("InitDamage").Create();
 			modifier.SetTargets(Unit, Unit);

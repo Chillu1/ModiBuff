@@ -2,7 +2,7 @@ using ModiBuff.Core;
 
 namespace ModiBuff.Examples.SimpleSolo
 {
-	public sealed class ModifierRecipes : ModiBuff.Core.ModifierRecipes
+	public sealed class ModifierRecipes : ModifierRecipesBase
 	{
 		protected override void SetupRecipes()
 		{

@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public sealed class TestModifierRecipes : ModifierRecipes
+	public sealed class TestModifierRecipes : ModifierRecipesBase
 	{
 		protected override void SetupRecipes()
 		{
@@ -310,13 +310,13 @@ namespace ModiBuff.Core
 				//Disarm the target for 5 seconds. On 2 stacks, removable in 10 seconds, refreshable.
 				Add("ComplexApplier_Disarm")
 					.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect), EffectOn.Stack)
-					.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2)
+					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2)
 					.Remove(10).Refresh();
 				//rupture modifier, that does DoT. When this gets to 5 stacks, apply the disarm effect.
 				Add("ComplexApplier_Rupture")
 					.Effect(new DamageEffect(5), EffectOn.Interval)
 					.Effect(new ApplierEffect("ComplexApplier_Disarm"), EffectOn.Stack)
-					.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 5);
+					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5);
 				//WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^
 				AddEvent("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
 					.Effect(new ApplierEffect("ComplexApplier_Rupture"), Targeting.SourceTarget);

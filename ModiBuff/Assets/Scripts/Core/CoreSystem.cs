@@ -2,7 +2,7 @@ namespace ModiBuff.Core
 {
 	public sealed class CoreSystem
 	{
-		public ModifierRecipes Recipes { get; }
+		public ModifierRecipesBase Recipes { get; }
 		public ModifierPool Pool { get; }
 
 		public CoreSystem(int initialPoolSize = 64)

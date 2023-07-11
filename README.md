@@ -82,7 +82,7 @@ N: 5_000
 |-------------------------------------------------------|--------------------------------|-------------------------------------|------------------------------------|
 | ModiBuff (this)                                       | 0.14ms, 0 GC                   | 0.27ms, 0 GC                        | 0.95ms, 0 GC                       |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 0.51ms, 0 GC                   | ?                                   | 0.22ms, 0 GC                       |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                              | ?                                   | ?                                  |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | 10.7ms, 12 GC                  | ?                                   | ?                                  |
 
 #### New Modifier/Pool table
 
@@ -92,8 +92,8 @@ N: 5_000
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 5.22ms,  1 GC   | 8.33ms,  1 GC | 0.82ms, 0 GC | 2.13ms, 0 GC              |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC   | 70.0ms, 63 GC | X            | X                         |
 
-> Important: Non-pool benchmarks don't matter for ModiBuff and ModiBuffEcs, since it will only be slower when allocating the new modifiers
-> in the pools.
+> Important: Non-pool ("New") benchmarks don't matter for ModiBuff and ModiBuffEcs, since it will only be slower when allocating the new
+> modifiers in the pools.
 
 Pooling in ModiBuff is 430X faster than original old version (because of pool & reset)  
 But it's also much faster in cases of doing init/stack/refresh on an existing modifier (we don't create a new modifier anymore)  
@@ -111,9 +111,19 @@ So with 5_800 preallocated modifiers, the library will add 8ms to the game start
 
 Currently the library is not on NuGet or any other package manager. You can download the source code and add it to your project directly.
 
-Specifically, you should get [Core](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Scripts/Core).
-[Download Link](https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2FChillu1%2FModiBuff%2Ftree%2Fmaster%2FModiBuff%2FAssets%2FScripts%2FCore)  
-And [Core Units](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Scripts/CoreUnits), if you want an implementation example.
+Specifically, you should get [Core](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Scripts/Core),
+[Download Link](https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2FChillu1%2FModiBuff%2Ftree%2Fmaster%2FModiBuff%2FAssets%2FScripts%2FCore)
+.
+
+For a full implementation of all library features with Units, you should get
+[Core Units](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Scripts/CoreUnits),
+[Download Link](https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2FChillu1%2FModiBuff%2Ftree%2Fmaster%2FModiBuff%2FAssets%2FScripts%2FCoreUnits)
+.
+
+## Setup
+
+1. Make your own "ModifierRecipes" class that inherits from "ModifierRecipesBase" and fill it with your modifier recipes.
+2. Create your own "Unit" class or use the "Unit" class from CoreUnits.
 
 # Usage
 
@@ -122,7 +132,7 @@ And [Core Units](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets
 ModifierRecipes are the high level API for creating modifiers, they use the builder pattern/method chaining/fluent interface to create
 modifiers (without the need for calling a Finish/Complete method).
 
-Easiest modifier, that does 5 damage when added, is created like this:
+Easiest modifier, that does 5 damage when added, can be created like this:
 
 ```csharp
 Add("InitDamage")
@@ -143,7 +153,7 @@ Add("Init_DoT_Remove_Refreshable")
 
 You're also able to create modifiers with same effect instance on multiple actions.  
 Ex. Same damage on Init and Interval.
-> Note: init will be triggered each time we try to add the modifier to the entity (unless we set `.OneTimeInit()`).
+> Note: init will be triggered each time we try to add the modifier to the unit (unless we set `.OneTimeInit()`).
 
 ```csharp
 Add("InitDoT")
@@ -162,9 +172,9 @@ Add("InitStun")
 
 [//]: # (TODO ## EventRecipe)
 
-## Event Recipe
+[comment]: # (## Event Recipe)
 
-### Recipe Limitations
+## Recipe Limitations
 
 > Note that these limitations don't matter for 95% of the use cases.
 
@@ -182,23 +192,25 @@ It's used to apply other modifiers to units. While being able to use modifier lo
 This can create some very sophisticated modifiers:
 
 ```csharp
-//Disarm the target for 5 seconds. On 2 stacks, removable in 10 seconds, refreshable.
-Add("ComplexApplier_Disarm")
-    .Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect), EffectOn.Stack)
-    .Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2)
-    .Remove(10)
-    .Refresh();
+//WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^ rupture modifier
+AddEvent("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
+    .Effect(new ActerApplierEffect("ComplexApplier_Rupture"));
+
 //rupture modifier, that does DoT. When this gets to 5 stacks, apply the disarm effect.
 Add("ComplexApplier_Rupture")
     .Effect(new DamageEffect(5), EffectOn.Interval)
     .Effect(new ApplierEffect("ComplexApplier_Disarm"), EffectOn.Stack)
-    .Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 5);
-//WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^
-AddEvent("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
-    .Effect(new ActerApplierEffect("ComplexApplier_Rupture"));
+    .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5);
+
+//Disarm the target for 5 seconds. On 2 stacks, removable in 10 seconds, refreshable.
+Add("ComplexApplier_Disarm")
+    .Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect), EffectOn.Stack)
+    .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2)
+    .Remove(10)
+    .Refresh();
 ```
 
-This one is very complex, but it shows the power of the ApplierEffect.  
+The next one is very complex, but it shows the power of the ApplierEffect.  
 Obviously the effects can be whatever we want. Damage, Stun, etc.
 
 Add damage on 4 stacks buff, that you give someone when they heal you 5 times, for 60 seconds.  
@@ -209,36 +221,36 @@ To clarify:
 * Player buff gets removed after 60 seconds
 
 ```csharp            
+//Apply the modifier to source (healer) WhenHealed                                   
+AddEvent("ComplexApplier2_WhenHealed_Event", EffectOnEvent.WhenHealed)               
+    .Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), Targeting.SourceTarget);
+
+//On 5 stacks, apply the modifier to self.                                           
+Add("ComplexApplier2_WhenHealed")                                                    
+    .Effect(new ApplierEffect("ComplexApplier2_OnAttack_Event"), EffectOn.Stack)     
+    .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5)  
+    .Remove(5).Refresh();   
+
+//Long main buff. Apply the modifier OnAttack.                                       
+AddEvent("ComplexApplier2_OnAttack_Event", EffectOnEvent.OnAttack)                   
+    .Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"))                 
+    .Remove(60).Refresh();  
+
+AddEvent("ComplexApplier2_WhenAttacked_Event", EffectOnEvent.WhenAttacked)           
+    .Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), Targeting.SourceTarget
+    .Remove(5).Refresh();   
+
+//On 4 stacks, Add Damage to Unit source (attacker).
+Add("ComplexApplier2_AddDamageAdd")                                                  
+    .Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)                                 
+    .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)  
+    .Remove(5).Refresh();      
+
 //AddDamage 5, one time init, remove in 10 seconds, refreshable.                     
 Add("ComplexApplier2_AddDamage")                                                     
     .OneTimeInit()                                                                   
     .Effect(new AddDamageEffect(5, true), EffectOn.Init)                             
-    .Remove(10).Refresh();                                                           
-                                                                                     
-//On 4 stacks, Add Damage to Unit source (attacker).
-Add("ComplexApplier2_AddDamageAdd")                                                  
-    .Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)                                 
-    .Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 4)  
-    .Remove(5).Refresh();                                                            
-                                                                                     
-AddEvent("ComplexApplier2_WhenAttacked_Event", EffectOnEvent.WhenAttacked)           
-    .Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), Targeting.SourceTarget
-    .Remove(5).Refresh();                                                            
-                                                                                     
-//Long main buff. Apply the modifier OnAttack.                                       
-AddEvent("ComplexApplier2_OnAttack_Event", EffectOnEvent.OnAttack)                   
-    .Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"))                 
-    .Remove(60).Refresh();                                                           
-                                                                                     
-//On 5 stacks, apply the modifier to self.                                           
-Add("ComplexApplier2_WhenHealed")                                                    
-    .Effect(new ApplierEffect("ComplexApplier2_OnAttack_Event"), EffectOn.Stack)     
-    .Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 5)  
-    .Remove(5).Refresh();                                                            
-                                                                                     
-//Apply the modifier to source (healer) WhenHealed                                   
-AddEvent("ComplexApplier2_WhenHealed_Event", EffectOnEvent.WhenHealed)               
-    .Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), Targeting.SourceTarget);
+    .Remove(10).Refresh();
 ```
 
 ## Modifier
@@ -248,6 +260,9 @@ Ex. Init, Interval, Duration, Stack.
 You should **NOT** use the Modifier class directly, but instead use the recipe system.
 Recipe system fixes a lot of internal complexity of setting up modifiers for you.  
 It's possible to use the Modifier class directly in cases where you'd want multiple interval/duration components.
+
+> Note: Currently it's impossible to use internal modifiers directly with the library, since the systems rely on the recipe system
+> (pooling). This will be changed in the near future.
 
 # Differences to ModiBuffEcs and Old
 
@@ -337,6 +352,8 @@ Add("StackDamage")
 
 ## Modifier/Effect/Recipe
 
+A list of a lot basic recipe examples.
+
 [//]: # (TODO Recipe examples for usual game mechanics)
 
 [//]: # (DoT, InitDoTSeparateDmg, OnXStacks, StackableDamage, StunEverySecondFor0.2Seconds)
@@ -381,7 +398,7 @@ Self heal for 5, deal damage to target for 5
 
 ```csharp
 Add("InitSelfHeal_DamageTarget")
-	.Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceTarget)
+    .Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceTarget)
     .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
@@ -425,7 +442,8 @@ Add("StunEveryTwoStacks")
     .Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2);
 ```
 
-Init Damage. With 1 second linger. Won't work again if applied within 1 second, aka "global cooldown".
+Init Damage. With 1 second linger. Won't work again if applied within 1 second, aka "global cooldown", shared between all X modifier
+instaces.
 
 ```csharp
 Add("OneTimeInitDamage_LingerDuration")
@@ -442,7 +460,7 @@ Add("ChanceEffectInitDamage")
     .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
-1 second cooldown, on effect. Bsaically the effect can only be triggered once every 1 second (not apply).
+1 second cooldown, on effect. Basically the effect can only be triggered once every 1 second (not apply).
 
 ```csharp
 Add("InitDamage_Cooldown_Effect")
@@ -476,7 +494,7 @@ Add("InitDamage_EffectCondition_FreezeStatusEffect")
     .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
-Deal 5 damage only when unit can act
+Deal 5 damage only when unit can act (move, attack, cast, etc)
 
 ```csharp
 Add("InitDamage_EffectCondition_ActLegalAction")
