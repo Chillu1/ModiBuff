@@ -12,7 +12,7 @@ namespace ModiBuff.Tests
 		public void BenchInitDamage()
 		{
 			var modifier = Recipes.GetRecipe("InitDamage").Create();
-			modifier.SetTargets(Unit, Unit);
+			modifier.SetTarget(new SingleTargetComponent(Unit, Unit));
 
 			Measure.Method(() => { modifier.Init(); })
 				.Bench(Iterations);
@@ -24,7 +24,7 @@ namespace ModiBuff.Tests
 			var checks = new ModifierCheck[ModifierRecipesBase.RecipesCount];
 			var check = new ModifierCheck(0, "Test");
 			var modifier = Recipes.GetRecipe("InitDamage").Create();
-			modifier.SetTargets(Unit, Unit);
+			modifier.SetTarget(new SingleTargetComponent(Unit, Unit));
 			checks[modifier.Id] = check;
 
 			Measure.Method(() =>
@@ -42,12 +42,12 @@ namespace ModiBuff.Tests
 			private readonly ModifierCheck _check;
 			private readonly InitComponent _initComponent;
 
-			private TargetComponent _targetComponent;
+			private SingleTargetComponent _targetComponent;
 
 			public TestCheckModifier(InitComponent initComponent, IUnit target)
 			{
 				_check = new ModifierCheck(0, "Test");
-				_targetComponent = new TargetComponent(target, target);
+				_targetComponent = new SingleTargetComponent(target, target);
 
 				if (initComponent != null)
 				{
@@ -58,10 +58,6 @@ namespace ModiBuff.Tests
 
 			public int Id { get; }
 			public string Name { get; }
-
-			public void SetTargets(IUnit target, IUnit source)
-			{
-			}
 
 			public void Init()
 			{
@@ -106,11 +102,11 @@ namespace ModiBuff.Tests
 
 			private readonly InitComponent _initComponent;
 
-			private TargetComponent _targetComponent;
+			private SingleTargetComponent _targetComponent;
 
 			public TestModifier(InitComponent initComponent, IUnit target)
 			{
-				_targetComponent = new TargetComponent(target, target);
+				_targetComponent = new SingleTargetComponent(target, target);
 
 				if (initComponent != null)
 				{
@@ -121,10 +117,6 @@ namespace ModiBuff.Tests
 
 			public int Id { get; }
 			public string Name { get; }
-
-			public void SetTargets(IUnit target, IUnit source)
-			{
-			}
 
 			public void Init()
 			{
@@ -166,11 +158,11 @@ namespace ModiBuff.Tests
 
 			private readonly InitComponent _initComponent;
 
-			protected TargetComponent TargetComponent;
+			protected SingleTargetComponent TargetComponent;
 
 			public BaseModifier(InitComponent initComponent, IUnit target)
 			{
-				TargetComponent = new TargetComponent(target, target);
+				TargetComponent = new SingleTargetComponent(target, target);
 
 				if (initComponent != null)
 				{
@@ -181,10 +173,6 @@ namespace ModiBuff.Tests
 
 			public int Id { get; }
 			public string Name { get; }
-
-			public void SetTargets(IUnit target, IUnit source)
-			{
-			}
 
 			public void Init()
 			{

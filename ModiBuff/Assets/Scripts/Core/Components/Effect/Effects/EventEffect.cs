@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public sealed class EventEffect : IRevertEffect, IEffect
+	public sealed class EventEffect : BaseEffect, IRevertEffect, IEffect
 	{
 		//Always revert event effect?
 		public bool IsRevertible => true;
@@ -22,7 +22,7 @@ namespace ModiBuff.Core
 			_effectOnEvent = effectOnEvent;
 		}
 
-		public void Effect(IUnit target, IUnit source)
+		public override void Effect(IUnit target, IUnit source)
 		{
 			var eventOwner = (IEventOwner)target;
 			for (int i = 0; i < _effects.Length; i++)

@@ -14,7 +14,7 @@ namespace ModiBuff.Tests
 		{
 			IUnit target = new Unit();
 			IUnit source = new Unit();
-			TargetComponent targetComponent = new TargetComponent(source, target);
+			SingleTargetComponent targetComponent = new SingleTargetComponent(source, target);
 
 			IEffect[] effects = { new DamageEffect(5), new DamageEffect(5) };
 			var init = new InitComponentFeedFake(effects);
@@ -45,7 +45,7 @@ namespace ModiBuff.Tests
 
 			IEffect[] effects = { new DamageEffect(5), new DamageEffect(5) };
 			var init = new InitComponentCacheFake(effects);
-			init.SetupTarget(new TargetComponent(source, target));
+			init.SetupTarget(new SingleTargetComponent(source, target));
 
 			Measure.Method(() => init.Init())
 				.BenchGC(Iterations);
@@ -54,11 +54,11 @@ namespace ModiBuff.Tests
 		private sealed class InitComponentCacheFake
 		{
 			private readonly IEffect[] _effects;
-			private TargetComponent _targetComponent;
+			private SingleTargetComponent _targetComponent;
 
 			public InitComponentCacheFake(IEffect[] effects) => _effects = effects;
 
-			public void SetupTarget(TargetComponent targetComponent) => _targetComponent = targetComponent;
+			public void SetupTarget(SingleTargetComponent targetComponent) => _targetComponent = targetComponent;
 
 			public void Init()
 			{

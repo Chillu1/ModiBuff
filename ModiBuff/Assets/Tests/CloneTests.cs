@@ -10,9 +10,9 @@ namespace ModiBuff.Tests
 		{
 			var stackComponent = new StackComponent(WhenStackEffect.EveryXStacks, 2, 10, 2,
 				new IStackEffect[] { new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add) }, null);
-			stackComponent.SetupTarget(new TargetComponent(Unit, Unit));
+			stackComponent.SetupTarget(new SingleTargetComponent(Unit, Unit));
 			var clone = stackComponent.ShallowClone();
-			clone.SetupTarget(new TargetComponent(Enemy, Enemy));
+			clone.SetupTarget(new SingleTargetComponent(Enemy, Enemy));
 
 			stackComponent.Stack();
 			stackComponent.Stack();

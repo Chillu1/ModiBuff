@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace ModiBuff.Core
 {
 	public sealed class InitComponent : IStateReset
@@ -33,6 +35,21 @@ namespace ModiBuff.Core
 			int length = _effects.Length;
 			for (int i = 0; i < length; i++)
 				_effects[i].Effect(target, owner);
+
+			_isInitialized = true;
+		}
+
+		public void Init(IList<IUnit> targets, IUnit owner)
+		{
+			if (_oneTime && _isInitialized)
+				return;
+
+			if (_check && !_modifierCheck.Check(owner))
+				return;
+
+			int length = _effects.Length;
+			for (int i = 0; i < length; i++)
+				_effects[i].Effect(targets, owner);
 
 			_isInitialized = true;
 		}

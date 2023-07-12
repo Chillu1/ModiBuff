@@ -73,11 +73,11 @@ namespace ModiBuff.Tests
 		{
 			var modifiers = new Modifier[CollectionSize];
 			modifiers[_indexes[0]] = Recipes.GetRecipe("DoT").Create();
-			modifiers[_indexes[0]].SetTargets(Unit, Unit);
+			modifiers[_indexes[0]].SetTarget(new SingleTargetComponent(Unit, Unit));
 			modifiers[_indexes[1]] = Recipes.GetRecipe("DoT").Create();
-			modifiers[_indexes[1]].SetTargets(Unit, Unit);
+			modifiers[_indexes[1]].SetTarget(new SingleTargetComponent(Unit, Unit));
 			modifiers[_indexes[2]] = Recipes.GetRecipe("DoT").Create();
-			modifiers[_indexes[2]].SetTargets(Unit, Unit);
+			modifiers[_indexes[2]].SetTarget(new SingleTargetComponent(Unit, Unit));
 			int[] indexes = { _indexes[0], _indexes[1], _indexes[2] };
 
 			Measure.Method(() =>
@@ -98,11 +98,11 @@ namespace ModiBuff.Tests
 		{
 			var modifiers = new Modifier[CollectionSize];
 			modifiers[_indexes[0]] = Recipes.GetRecipe("DoT").Create();
-			modifiers[_indexes[0]].SetTargets(Unit, Unit);
+			modifiers[_indexes[0]].SetTarget(new SingleTargetComponent(Unit, Unit));
 			modifiers[_indexes[1]] = Recipes.GetRecipe("DoT").Create();
-			modifiers[_indexes[1]].SetTargets(Unit, Unit);
+			modifiers[_indexes[1]].SetTarget(new SingleTargetComponent(Unit, Unit));
 			modifiers[_indexes[2]] = Recipes.GetRecipe("DoT").Create();
-			modifiers[_indexes[2]].SetTargets(Unit, Unit);
+			modifiers[_indexes[2]].SetTarget(new SingleTargetComponent(Unit, Unit));
 
 			Measure.Method(() =>
 				{
@@ -128,11 +128,11 @@ namespace ModiBuff.Tests
 		{
 			var modifiers = new Dictionary<int, Modifier>(CollectionSize);
 			modifiers[_indexes[0]] = Recipes.GetRecipe("DoT").Create();
-			modifiers[_indexes[0]].SetTargets(Unit, Unit);
+			modifiers[_indexes[0]].SetTarget(new SingleTargetComponent(Unit, Unit));
 			modifiers[_indexes[1]] = Recipes.GetRecipe("DoT").Create();
-			modifiers[_indexes[1]].SetTargets(Unit, Unit);
+			modifiers[_indexes[1]].SetTarget(new SingleTargetComponent(Unit, Unit));
 			modifiers[_indexes[2]] = Recipes.GetRecipe("DoT").Create();
-			modifiers[_indexes[2]].SetTargets(Unit, Unit);
+			modifiers[_indexes[2]].SetTarget(new SingleTargetComponent(Unit, Unit));
 
 			Measure.Method(() =>
 				{
@@ -149,11 +149,11 @@ namespace ModiBuff.Tests
 		{
 			var modifiers = new List<Modifier>(CollectionSize);
 			modifiers.Add(Recipes.GetRecipe("DoT").Create());
-			modifiers[0].SetTargets(Unit, Unit);
+			modifiers[0].SetTarget(new SingleTargetComponent(Unit, Unit));
 			modifiers.Add(Recipes.GetRecipe("DoT").Create());
-			modifiers[1].SetTargets(Unit, Unit);
+			modifiers[1].SetTarget(new SingleTargetComponent(Unit, Unit));
 			modifiers.Add(Recipes.GetRecipe("DoT").Create());
-			modifiers[2].SetTargets(Unit, Unit);
+			modifiers[2].SetTarget(new SingleTargetComponent(Unit, Unit));
 
 			Measure.Method(() =>
 				{
@@ -174,13 +174,13 @@ namespace ModiBuff.Tests
 			var modifiers = new Modifier[CollectionSize];
 			var indexes = new List<int>();
 			modifiers[_indexes[0]] = Recipes.GetRecipe("DoT").Create();
-			modifiers[_indexes[0]].SetTargets(Unit, Unit);
+			modifiers[_indexes[0]].SetTarget(new SingleTargetComponent(Unit, Unit));
 			indexes.Add(_indexes[0]);
 			modifiers[_indexes[1]] = Recipes.GetRecipe("DoT").Create();
-			modifiers[_indexes[1]].SetTargets(Unit, Unit);
+			modifiers[_indexes[1]].SetTarget(new SingleTargetComponent(Unit, Unit));
 			indexes.Add(_indexes[1]);
 			modifiers[_indexes[2]] = Recipes.GetRecipe("DoT").Create();
-			modifiers[_indexes[2]].SetTargets(Unit, Unit);
+			modifiers[_indexes[2]].SetTarget(new SingleTargetComponent(Unit, Unit));
 			indexes.Add(_indexes[2]);
 
 			Measure.Method(() =>

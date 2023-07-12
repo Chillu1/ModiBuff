@@ -31,10 +31,7 @@ namespace ModiBuff.Core
 			_check = check != null;
 		}
 
-		public void SetupTarget(ITargetComponent targetComponent)
-		{
-			_targetComponent = targetComponent;
-		}
+		public void SetupTarget(ITargetComponent targetComponent) => _targetComponent = targetComponent;
 
 		public void Stack()
 		{
@@ -67,8 +64,19 @@ namespace ModiBuff.Core
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			void StackEffect()
 			{
-				for (int i = 0; i < _effects.Length; i++)
-					_effects[i].StackEffect(_stacks, _value, _targetComponent.Target, _targetComponent.Source);
+				int length = _effects.Length;
+				switch (_targetComponent)
+				{
+					case IMultiTargetComponent targetComponent:
+						for (int i = 0; i < length; i++)
+						for (int j = 0; j < targetComponent.Targets.Count; j++)
+							_effects[i].StackEffect(_stacks, _value, targetComponent.Targets[j], targetComponent.Source);
+						break;
+					case ISingleTargetComponent targetComponent:
+						for (int i = 0; i < length; i++)
+							_effects[i].StackEffect(_stacks, _value, targetComponent.Target, targetComponent.Source);
+						break;
+				}
 			}
 		}
 

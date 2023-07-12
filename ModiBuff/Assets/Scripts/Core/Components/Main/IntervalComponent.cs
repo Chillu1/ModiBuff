@@ -33,10 +33,7 @@ namespace ModiBuff.Core
 		{
 		}
 
-		public void SetupTarget(ITargetComponent targetComponent)
-		{
-			_targetComponent = targetComponent;
-		}
+		public void SetupTarget(ITargetComponent targetComponent) => _targetComponent = targetComponent;
 
 		public void Update(float deltaTime)
 		{
@@ -53,10 +50,16 @@ namespace ModiBuff.Core
 				return;
 
 			int length = _effects.Length;
-			for (int i = 0; i < length; i++)
+			switch (_targetComponent)
 			{
-				//Debug.Log("Type: " + _effects[i].GetType().Name);
-				_effects[i].Effect(_targetComponent.Target, _targetComponent.Source);
+				case IMultiTargetComponent targetComponent:
+					for (int i = 0; i < length; i++)
+						_effects[i].Effect(targetComponent.Targets, targetComponent.Source);
+					break;
+				case ISingleTargetComponent targetComponent:
+					for (int i = 0; i < length; i++)
+						_effects[i].Effect(targetComponent.Target, targetComponent.Source);
+					break;
 			}
 		}
 

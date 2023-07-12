@@ -23,7 +23,8 @@ namespace ModiBuff.Core
 		private readonly ModifierCheck _effectCheck;
 		private readonly bool _check;
 
-		private TargetComponent _targetComponent;
+		private ITargetComponent _targetComponent;
+		private bool _multiTarget;
 
 		public Modifier(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents, IStackComponent stackComponent,
 			ModifierCheck effectCheck)
@@ -66,9 +67,10 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public void SetTargets(IUnit target, IUnit source)
+		public void SetTarget(ITargetComponent targetComponent)
 		{
-			_targetComponent = new TargetComponent(target, source);
+			_targetComponent = targetComponent;
+			_multiTarget = targetComponent is MultiTargetComponent;
 
 			if (_time)
 				for (int i = 0; i < _timeComponents.Length; i++)
@@ -78,17 +80,17 @@ namespace ModiBuff.Core
 				_stackComponent.SetupTarget(_targetComponent);
 		}
 
-		public void UpdateSource(IUnit source)
-		{
-			_targetComponent.UpdateSource(source);
-		}
+		public void UpdateSource(IUnit source) => _targetComponent.UpdateSource(source);
 
 		public void Init()
 		{
 			if (!_init)
 				return;
 
-			_initComponent.Init(_targetComponent.Target, _targetComponent.Source);
+			if (_multiTarget)
+				_initComponent.Init(((MultiTargetComponent)_targetComponent).Targets, _targetComponent.Source);
+			else
+				_initComponent.Init(((SingleTargetComponent)_targetComponent).Target, _targetComponent.Source);
 		}
 
 		public void Update(float deltaTime)

@@ -125,7 +125,7 @@ namespace ModiBuff.Core
 			var modifier = ModifierPool.Instance.Rent(id);
 
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
-			modifier.SetTargets(target, source);
+			modifier.SetTarget(new SingleTargetComponent(target, source));
 
 			_modifiers[id] = modifier;
 			_modifierIndexes.Add(id);
@@ -153,8 +153,7 @@ namespace ModiBuff.Core
 		/// </summary>
 		public void Clear()
 		{
-			int length = _modifierIndexes.Count;
-			for (int i = 0; i < length; i++)
+			for (int i = 0; i < _modifierIndexes.Count; i++)
 				Remove(_modifierIndexes[i]);
 
 			foreach (var check in _modifierChecksAppliers.Values)

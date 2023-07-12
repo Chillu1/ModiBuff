@@ -309,12 +309,11 @@ namespace ModiBuff.Core.Units
 			_targetsInRange.AddRange(targets);
 		}
 
-		public void AddAuraModifier(string name)
+		public void AddAuraModifier(int id)
 		{
-			//modifier.SetTargets();
-			//var modifier = ModifierPool.Instance.Rent(ModifierIdManager.GetId(name));
-			//modifier.SetAuraTargets(_targetsInRange, this);
-			//_auraModifiers.Add(modifier);
+			var modifier = ModifierPool.Instance.Rent(id);
+			modifier.SetTarget(new MultiTargetComponent(_targetsInRange, this));
+			_auraModifiers.Add(modifier);
 		}
 
 		public override string ToString()

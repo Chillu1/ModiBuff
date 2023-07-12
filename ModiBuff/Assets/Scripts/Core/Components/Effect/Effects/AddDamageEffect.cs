@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
-	public sealed class AddDamageEffect : ITargetEffect, IStackEffect, IStateEffect, IRevertEffect, IEffect
+	public sealed class AddDamageEffect : BaseEffect, ITargetEffect, IStackEffect, IStateEffect, IRevertEffect, IEffect
 	{
 		public bool IsRevertible { get; }
 
@@ -29,7 +29,7 @@ namespace ModiBuff.Core
 
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 
-		public void Effect(IUnit target, IUnit source)
+		public override void Effect(IUnit target, IUnit source)
 		{
 			if (IsRevertible)
 				_totalAddedDamage += _damage + _extraDamage;
