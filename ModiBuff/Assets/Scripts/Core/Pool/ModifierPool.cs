@@ -7,7 +7,8 @@ namespace ModiBuff.Core
 	{
 		public static ModifierPool Instance { get; private set; }
 
-		public static int MaxPoolSize = 10_000;
+		public const int DefaultMaxPoolSize = 10_000;
+		public static int MaxPoolSize = DefaultMaxPoolSize;
 
 		private readonly Modifier[][] _pools;
 		private readonly int[] _poolTops;

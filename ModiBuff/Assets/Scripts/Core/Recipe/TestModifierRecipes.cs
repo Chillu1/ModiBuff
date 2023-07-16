@@ -83,15 +83,15 @@ namespace ModiBuff.Core
 				.Effect(new HealActionEffect(), EffectOn.Init);
 
 			Add("InitDamage_CostHealth")
-				.Effect(new DamageEffect(5), EffectOn.Init)
-				.ApplyCost(CostType.Health, 5);
+				.ApplyCost(CostType.Health, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("Damage_OnHit") //Thorns
 				.Effect(new DamageEffect(5), EffectOn.Init); //Register on init?
 
 			Add("InitDamage_Cooldown")
-				.Effect(new DamageEffect(5), EffectOn.Init)
-				.ApplyCooldown(1);
+				.ApplyCooldown(1)
+				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("InitDamageSelf")
 				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.SourceTarget);
@@ -151,7 +151,7 @@ namespace ModiBuff.Core
 
 			Add("StunEveryTwoStacks")
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, false, StackEffectType.Effect), EffectOn.Stack)
-				.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2);
+				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2);
 
 			Add("InitStun_Revertible")
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, true), EffectOn.Init)
@@ -297,6 +297,11 @@ namespace ModiBuff.Core
 				.ApplyCondition(StatusEffectType.Freeze)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
+			Add("DoTRemove")
+				.Interval(1)
+				.Effect(new DamageEffect(5), EffectOn.Interval)
+				.Remove(5);
+
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
 			//	.Effect(new StackEffectNew(StackEffectType.Add, new DamageEffect(5)), EffectOn.Interval)
@@ -417,6 +422,25 @@ namespace ModiBuff.Core
 			Add("SelfDamage")
 				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.SourceTarget)
 				.Effect(new DamageEffect(10), EffectOn.Init);
+
+			//Full recipe
+			Add("Full")
+				.OneTimeInit()
+				.ApplyCondition(ConditionType.HealthIsFull)
+				.ApplyCooldown(1)
+				.ApplyCost(CostType.Mana, 5)
+				.ApplyChance(0.5f)
+				.EffectCondition(ConditionType.HealthIsFull)
+				.EffectCooldown(1)
+				.EffectCost(CostType.Mana, 5)
+				.EffectChance(0.5f)
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Effect(new DamageEffect(5), EffectOn.Stack)
+				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2)
+				.Interval(1)
+				.Effect(new DamageEffect(2), EffectOn.Interval)
+				.Remove(5).Refresh()
+				.Effect(new DamageEffect(8), EffectOn.Duration);
 		}
 	}
 }

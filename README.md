@@ -174,6 +174,41 @@ Add("InitStun")
 
 [comment]: # (## Event Recipe)
 
+## In-depth Recipe Creation
+
+Every modifier needs a unique name.
+It will be registered under this name in the backend,
+and assigned an unique ID.
+
+```csharp
+Add("ModifierName")
+```
+
+Functions should be used in the operation order.
+This is optional, except for refresh functions, which should be called right after interval/duration.
+
+```csharp
+Add("Full")
+    .OneTimeInit()
+    .ApplyCondition(ConditionType.HealthIsFull)
+    .ApplyCooldown(1)
+    .ApplyCost(CostType.Mana, 5)
+    .ApplyChance(0.5f)
+    .EffectCondition(ConditionType.HealthIsFull)
+    .EffectCooldown(1)
+    .EffectCost(CostType.Mana, 5)
+    .EffectChance(0.5f)
+    .Effect(new DamageEffect(5), EffectOn.Init)
+    .Effect(new DamageEffect(5), EffectOn.Stack)
+    .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2)
+    .Interval(1)
+    .Effect(new DamageEffect(2), EffectOn.Interval)
+    .Remove(5).Refresh()
+    .Effect(new DamageEffect(8), EffectOn.Duration);
+```
+
+Each modifier should have at least one effect, unless it's used as a flag.
+
 ## Recipe Limitations
 
 > Note that these limitations don't matter for 95% of the use cases.
