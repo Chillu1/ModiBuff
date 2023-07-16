@@ -1,6 +1,8 @@
+using System.Text.RegularExpressions;
 using ModiBuff.Core;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace ModiBuff.Tests
 {
@@ -113,6 +115,13 @@ namespace ModiBuff.Tests
 			Unit.AttackN(Enemy, 4);
 
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+		}
+
+		[Test]
+		public void ApplierDoesntExist()
+		{
+			LogAssert.Expect(LogType.Error, new Regex("Can't find modifier with name*"));
+			var applier = new ApplierEffect("NonExistentApplier");
 		}
 	}
 }

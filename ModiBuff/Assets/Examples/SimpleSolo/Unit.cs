@@ -40,11 +40,10 @@ namespace ModiBuff.Examples.SimpleSolo
 			ModifierController.Update(deltaTime);
 		}
 
-		public void Cast(int spellId, IUnit target)
+		public void Cast(int id, IUnit target)
 		{
-			int applierId = ModifierController.GetApplierCastModifier(spellId);
-			if (applierId != -1)
-				((IModifierOwner)target).TryAddModifier(applierId, this);
+			if (ModifierController.GetApplierCastModifier(id))
+				((IModifierOwner)target).TryAddModifier(id, this);
 		}
 
 		public void SetAttackTarget(IUnit target) => _targetingSystem.SetAttackTarget(target);

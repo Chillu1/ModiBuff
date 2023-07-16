@@ -62,6 +62,8 @@ namespace ModiBuff.Tests
 
 			LogAssert.Expect(LogType.Error, new Regex("Modifier pool for*")); //Assert that they were returned to pool
 			Pool.Allocate(IdManager.GetId("InitDamage"), 1);
+
+			Pool.SetMaxPoolSize(ModifierPool.MaxPoolSize);
 		}
 	}
 }

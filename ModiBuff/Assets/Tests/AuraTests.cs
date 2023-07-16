@@ -35,7 +35,40 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(AllyDamage, Ally.Damage);
 		}
 
-		//TODO Ally Same AddedDamage Refresh
-		//TODO Ally Same AddedDamage Aura Timeout then Add again
+		[Test]
+		public void AuraAddedDamageRefresh()
+		{
+			Unit.AddCloseTargets(Ally);
+			Unit.AddAuraModifier(IdManager.GetId("InitAddDamageBuff_Interval"));
+
+			Unit.Update(1f);
+
+			Assert.AreEqual(AllyDamage + 5, Ally.Damage);
+
+			Ally.Update(0.8f);
+			Unit.Update(1f);
+			Ally.Update(0.8f);
+
+			Assert.AreEqual(AllyDamage + 5, Ally.Damage);
+		}
+
+		[Test]
+		public void Aura_AddDamage_Timeout_AddAgain()
+		{
+			Unit.AddCloseTargets(Ally);
+			Unit.AddAuraModifier(IdManager.GetId("InitAddDamageBuff_Interval"));
+
+			Unit.Update(1f);
+
+			Assert.AreEqual(AllyDamage + 5, Ally.Damage);
+
+			Ally.Update(1.1f);
+
+			Assert.AreEqual(AllyDamage, Ally.Damage);
+
+			Unit.Update(1f);
+
+			Assert.AreEqual(AllyDamage + 5, Ally.Damage);
+		}
 	}
 }

@@ -73,9 +73,12 @@ namespace ModiBuff.Core.Units
 			if ((_statusEffectController.LegalActions & LegalAction.Cast) == 0)
 				return;
 
-			int applierId = ModifierController.GetApplierCastModifier(id);
-			if (applierId != -1)
-				target.TryAddModifier(applierId, this);
+			if (ModifierController.GetApplierCastModifier(id))
+				target.TryAddModifier(id, this);
+#if DEBUG && !MODIBUFF_PROFILE
+			else
+				Debug.LogError($"Modifier {id} not found in applier list.");
+#endif
 		}
 
 		public void Cast(Unit target)

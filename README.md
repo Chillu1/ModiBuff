@@ -297,7 +297,6 @@ ModiBuff has:
 ---
 
 * Less features, missing:
-	* Aura
 	* Two status effects: taunt, confuse
 	* Tags
 
