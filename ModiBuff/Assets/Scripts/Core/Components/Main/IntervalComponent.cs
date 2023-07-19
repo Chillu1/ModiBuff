@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace ModiBuff.Core
 {
 	public sealed class IntervalComponent : ITimeComponent
@@ -10,6 +8,10 @@ namespace ModiBuff.Core
 		private float _timer;
 
 		private ITargetComponent _targetComponent;
+
+		private bool _statusResistance;
+		private IStatusResistance _statusResistanceTarget;
+
 		private readonly IEffect[] _effects;
 		private readonly bool _check;
 
@@ -33,11 +35,22 @@ namespace ModiBuff.Core
 		{
 		}
 
-		public void SetupTarget(ITargetComponent targetComponent) => _targetComponent = targetComponent;
+		public void SetupTarget(ITargetComponent targetComponent)
+		{
+			_targetComponent = targetComponent;
+			if (targetComponent is ISingleTargetComponent singleTargetComponent &&
+			    singleTargetComponent.Target is IStatusResistance statusResistance)
+			{
+				_statusResistance = true;
+				_statusResistanceTarget = statusResistance;
+			}
+		}
 
 		public void Update(float deltaTime)
 		{
-			_timer += deltaTime;
+			//Special calculation if target has status resistance functionality
+			_timer += _statusResistance ? deltaTime / _statusResistanceTarget.StatusResistance : deltaTime;
+
 			if (_timer < _interval)
 				return;
 
@@ -73,6 +86,8 @@ namespace ModiBuff.Core
 		{
 			_timer = 0;
 			_targetComponent = null;
+			_statusResistance = false;
+			_statusResistanceTarget = null;
 		}
 
 		public ITimeComponent DeepClone() => new IntervalComponent(_interval, IsRefreshable, _effects, _modifierCheck);

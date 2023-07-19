@@ -7,7 +7,7 @@ using UnityEngine;
 namespace ModiBuff.Core.Units
 {
 	public class Unit : IUnit, IUpdatable, IModifierOwner, IAttacker, IDamagable, IHealable, IHealer, IManaOwner, IHealthCost, IAddDamage,
-		IEventOwner, IStatusEffectOwner
+		IEventOwner, IStatusEffectOwner, IStatusResistance
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -15,6 +15,7 @@ namespace ModiBuff.Core.Units
 		public float HealValue { get; private set; }
 		public float Mana { get; private set; }
 		public float MaxMana { get; private set; }
+		public float StatusResistance { get; private set; } = 1f;
 
 		public ModifierController ModifierController { get; }
 
@@ -194,6 +195,20 @@ namespace ModiBuff.Core.Units
 		public void DecreaseStatusEffect(StatusEffectType statusEffectType, float duration)
 		{
 			_statusEffectController.DecreaseStatusEffect(statusEffectType, duration);
+		}
+
+		//---StatusResistances---
+
+		public void ChangeStatusResistance(float value)
+		{
+#if DEBUG && !MODIBUFF_PROFILE
+			if (value <= 0)
+			{
+				Debug.LogError("StatusResistance can't be negative or zero.");
+				return;
+			}
+#endif
+			StatusResistance = value;
 		}
 
 		//---Modifier based---

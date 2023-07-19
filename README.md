@@ -88,7 +88,7 @@ N: 5_000
 
 | Library                                               | New<br/>InitDmg | New<br/>DoT*  | DoT pool     | DoT pool<br/>reset return |
 |-------------------------------------------------------|-----------------|---------------|--------------|---------------------------|
-| ModiBuff (this)                                       | 4.93ms,  4 GC   | 11.6ms, 11 GC | 0.04ms, 0 GC | 0.18ms, 0 GC              |
+| ModiBuff (this)                                       | 4.80ms,  4 GC   | 12.3ms, 11 GC | 0.04ms, 0 GC | 0.16ms, 0 GC              |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 5.22ms,  1 GC   | 8.33ms,  1 GC | 0.82ms, 0 GC | 2.13ms, 0 GC              |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC   | 70.0ms, 63 GC | X            | X                         |
 
@@ -123,7 +123,7 @@ For a full implementation of all library features with Units, you should get
 ## Setup
 
 1. Make your own "ModifierRecipes" class that inherits from "ModifierRecipesBase" and fill it with your modifier recipes.
-2. Create your own "Unit" class or use the "Unit" class from CoreUnits.
+2. Create your own "Unit" class/implement "IUnit" interfaces or use the "Unit" class from CoreUnits.
 
 # Usage
 
@@ -217,6 +217,21 @@ Each modifier should have at least one effect, unless it's used as a flag.
 * One Duration Component
 * One Modifier Check for all effects
 * Same Checks (cost, chance, cooldown) for all effects
+
+## Adding Modifiers To Units
+
+There's multiple ways to add modifiers to a unit.
+
+For normal modifiers, the best approach is to use `IModifierOwner.TryAddModifier(int, IUnit)`.
+By feeding the modifier ID, and the source unit.
+
+For applier (attack, cast, etc) modifiers, `IModifierOwner.ModifierController.TryAddApplier(int, bool, ApplierType)` should be used.
+
+Currently for aura modifiers it has to be implemented directly into the unit. An example of this can be found
+in `CoreUnits.Unit.AddAuraModifier(int)`.
+
+This is also the case for unit events, like `OnKill`, `OnAttack`, `WhenDeath`, etc.
+Through `IEventOwner.AddEffectEvent(IEffect, EffectOnEvent)`.
 
 ## Effect
 
