@@ -9,7 +9,8 @@ namespace ModiBuff.Core
 
 		private ITargetComponent _targetComponent;
 
-		private bool _statusResistance;
+		private bool _usesStatusResistance;
+		private bool _statusResistanceImplemented;
 		private IStatusResistance _statusResistanceTarget;
 
 		private readonly IEffect[] _effects;
@@ -20,18 +21,19 @@ namespace ModiBuff.Core
 		//private int _intervalCount;
 		//private float _totalTime;
 
-		public IntervalComponent(float interval, bool refreshable, IEffect[] effects, ModifierCheck check)
+		public IntervalComponent(float interval, bool refreshable, IEffect[] effects, ModifierCheck check, bool affectedByStatusResistance)
 		{
 			_interval = interval;
 			IsRefreshable = refreshable;
 			_effects = effects;
 			_modifierCheck = check;
+			_usesStatusResistance = affectedByStatusResistance;
 
 			_check = check != null;
 		}
 
-		public IntervalComponent(float interval, bool refreshable, IEffect effect, ModifierCheck check) :
-			this(interval, refreshable, new[] { effect }, check)
+		public IntervalComponent(float interval, bool refreshable, IEffect effect, ModifierCheck check, bool usesStatusResistance) :
+			this(interval, refreshable, new[] { effect }, check, usesStatusResistance)
 		{
 		}
 
@@ -41,7 +43,7 @@ namespace ModiBuff.Core
 			if (targetComponent is ISingleTargetComponent singleTargetComponent &&
 			    singleTargetComponent.Target is IStatusResistance statusResistance)
 			{
-				_statusResistance = true;
+				_statusResistanceImplemented = true;
 				_statusResistanceTarget = statusResistance;
 			}
 		}
@@ -49,7 +51,9 @@ namespace ModiBuff.Core
 		public void Update(float deltaTime)
 		{
 			//Special calculation if target has status resistance functionality
-			_timer += _statusResistance ? deltaTime / _statusResistanceTarget.StatusResistance : deltaTime;
+			_timer += _usesStatusResistance && _statusResistanceImplemented
+				? deltaTime / _statusResistanceTarget.StatusResistance
+				: deltaTime;
 
 			if (_timer < _interval)
 				return;
@@ -86,10 +90,11 @@ namespace ModiBuff.Core
 		{
 			_timer = 0;
 			_targetComponent = null;
-			_statusResistance = false;
+			_statusResistanceImplemented = false;
 			_statusResistanceTarget = null;
 		}
 
-		public ITimeComponent DeepClone() => new IntervalComponent(_interval, IsRefreshable, _effects, _modifierCheck);
+		public ITimeComponent DeepClone() =>
+			new IntervalComponent(_interval, IsRefreshable, _effects, _modifierCheck, _usesStatusResistance);
 	}
 }

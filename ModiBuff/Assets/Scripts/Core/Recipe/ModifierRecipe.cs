@@ -41,6 +41,7 @@ namespace ModiBuff.Core
 
 		private bool _currentIsInterval;
 		private float _interval;
+		private bool _intervalAffectedByStatusResistance;
 		private float _duration;
 
 		private RemoveEffect _removeEffect;
@@ -105,7 +106,8 @@ namespace ModiBuff.Core
 			if (creation.initEffects.Count > 0)
 				initComponent = new InitComponent(_oneTimeInit, creation.initEffects.ToArray(), effectCheck);
 			if (creation.intervalEffects.Count > 0)
-				_timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, creation.intervalEffects.ToArray(), effectCheck));
+				_timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, creation.intervalEffects.ToArray(), effectCheck,
+					_intervalAffectedByStatusResistance));
 			if (creation.durationEffects.Count > 0)
 				_timeComponents.Add(new DurationComponent(_duration, _refreshDuration, creation.durationEffects.ToArray()));
 			if (creation.stackEffects.Count > 0)
@@ -265,9 +267,10 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		public ModifierRecipe Interval(float interval)
+		public ModifierRecipe Interval(float interval, bool affectedByStatusResistance = false)
 		{
 			_interval = interval;
+			_intervalAffectedByStatusResistance = affectedByStatusResistance;
 			_currentIsInterval = true;
 			return this;
 		}

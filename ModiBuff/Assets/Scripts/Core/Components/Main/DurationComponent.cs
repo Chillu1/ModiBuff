@@ -9,7 +9,7 @@ namespace ModiBuff.Core
 
 		private ITargetComponent _targetComponent;
 
-		private bool _statusResistance;
+		private bool _statusResistanceImplemented;
 		private IStatusResistance _statusResistanceTarget;
 
 		private readonly IEffect[] _effects;
@@ -36,7 +36,7 @@ namespace ModiBuff.Core
 			if (targetComponent is ISingleTargetComponent singleTargetComponent &&
 			    singleTargetComponent.Target is IStatusResistance statusResistance)
 			{
-				_statusResistance = true;
+				_statusResistanceImplemented = true;
 				_statusResistanceTarget = statusResistance;
 			}
 		}
@@ -47,7 +47,7 @@ namespace ModiBuff.Core
 				return;
 
 			//Special calculation if target has status resistance functionality
-			_timer += _statusResistance ? deltaTime / _statusResistanceTarget.StatusResistance : deltaTime;
+			_timer += _statusResistanceImplemented ? deltaTime / _statusResistanceTarget.StatusResistance : deltaTime;
 
 			if (_timer < _duration)
 				return;
@@ -76,7 +76,7 @@ namespace ModiBuff.Core
 		{
 			_timer = 0;
 			_targetComponent = null;
-			_statusResistance = false;
+			_statusResistanceImplemented = false;
 			_statusResistanceTarget = null;
 		}
 
