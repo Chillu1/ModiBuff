@@ -235,6 +235,18 @@ Through `IEventOwner.AddEffectEvent(IEffect, EffectOnEvent)`.
 
 ## Effect
 
+### Making New Effects
+
+The library allows for easy creation of new effects.
+Which are needed for using custom game-based logic.
+
+Effects should implement `BaseEffect` or `IEffect`.
+They can also implement `ITargetEffect` for event targeting owner/source, `IEventTrigger` to avoid event recursion, `IStackEffect` for
+stacking functionality, `IStateEffect` for reseting runtime state.
+
+For fully featured effect implementation, look at
+[DamageEffect](https://github.com/Chillu1/ModiBuff/blob/a3131a122e4aacc54a05c2e0e657d053ffa27d42/ModiBuff/Assets/Scripts/Core/Components/Effect/Effects/DamageEffect.cs)
+
 ### Applier Effect
 
 Hands down, the most powerful effect is the ApplierEffect.  

@@ -5,13 +5,15 @@ namespace ModiBuff.Examples.SimpleSolo
 	/// <summary>
 	///		Custom basic unit implementation
 	/// </summary>
-	public sealed class Unit : IUnit, IUpdatable, IModifierOwner, IAttacker, IDamagable
+	public sealed class Unit : IUnit, IUpdatable, IModifierOwner, IAttacker, IDamagable, IBlockOwner
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
 		public float Damage { get; private set; }
 
 		public ModifierController ModifierController { get; }
+
+		public int BlockInstance { get; private set; }
 
 		private readonly TargetingSystem _targetingSystem;
 
@@ -51,6 +53,12 @@ namespace ModiBuff.Examples.SimpleSolo
 
 		public float TakeDamage(float damage, IUnit source, bool triggersEvents = true)
 		{
+			if (BlockInstance > 0) //Example custom game logic implementation
+			{
+				RemoveBlock(1);
+				return 0;
+			}
+
 			return Health -= damage;
 		}
 
@@ -65,5 +73,8 @@ namespace ModiBuff.Examples.SimpleSolo
 
 			return dealtDamage;
 		}
+
+		public void AddBlock(int amount) => BlockInstance += amount;
+		public void RemoveBlock(int amount) => BlockInstance -= amount;
 	}
 }

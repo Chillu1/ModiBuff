@@ -26,6 +26,12 @@ namespace ModiBuff.Examples.SimpleSolo
 				.ApplyChance(0.2f)
 				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 1f), EffectOn.Init)
 				.Remove(1f).Refresh();
+
+			Add("SmallBlock")
+				.Effect(new BlockEffect(2), EffectOn.Init);
+
+			Add("BossBlock")
+				.Effect(new BlockEffect(5), EffectOn.Init);
 		}
 	}
 }
