@@ -6,13 +6,13 @@ namespace ModiBuff.Examples.SimpleSolo
 	/// <summary>
 	///		Example simple custom effect implementation
 	/// </summary>
-	public sealed class BlockEffect : BaseEffect
+	public sealed class BlockEffect : IEffect
 	{
 		private readonly int _blockAmount;
 
 		public BlockEffect(int blockAmount) => _blockAmount = blockAmount;
 
-		public override void Effect(IUnit target, IUnit source)
+		public void Effect(IUnit target, IUnit source)
 		{
 #if DEBUG
 			if (target is not IBlockOwner)

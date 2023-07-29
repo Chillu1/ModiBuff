@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public sealed class StatusEffectEffect : BaseEffect, IStateEffect, IStackEffect, IRevertEffect, IEffect
+	public sealed class StatusEffectEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect
 	{
 		public bool IsRevertible { get; }
 
@@ -20,7 +20,7 @@ namespace ModiBuff.Core
 			_stackEffect = stackEffect;
 		}
 
-		public override void Effect(IUnit target, IUnit source)
+		public void Effect(IUnit target, IUnit source)
 		{
 			if (IsRevertible)
 				_totalDuration = _duration + _extraDuration;

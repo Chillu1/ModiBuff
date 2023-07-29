@@ -2,7 +2,7 @@ using System;
 
 namespace ModiBuff.Core
 {
-	public sealed class DamageEffect : BaseEffect, ITargetEffect, IEventTrigger, IStackEffect, IStateEffect, IEffect
+	public sealed class DamageEffect : ITargetEffect, IEventTrigger, IStackEffect, IStateEffect, IEffect
 	{
 		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;
@@ -27,7 +27,7 @@ namespace ModiBuff.Core
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 		public void SetEventBased() => _isEventBased = true;
 
-		public override void Effect(IUnit target, IUnit source)
+		public void Effect(IUnit target, IUnit source)
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (target is not IDamagable)

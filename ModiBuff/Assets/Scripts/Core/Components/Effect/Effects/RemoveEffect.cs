@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public class RemoveEffect : BaseEffect, IRemoveEffect, IModifierIdOwner, IShallowClone<RemoveEffect>
+	public sealed class RemoveEffect : IRemoveEffect, IModifierIdOwner, IShallowClone<RemoveEffect>
 	{
 		private IRevertEffect[] _revertibleEffects;
 		private int _id;
@@ -18,7 +18,7 @@ namespace ModiBuff.Core
 			_revertibleEffects = revertibleEffects;
 		}
 
-		public override void Effect(IUnit target, IUnit source)
+		public void Effect(IUnit target, IUnit source)
 		{
 			//Debug.Log("RemoveEffect Effect, modifier id: " + _modifier.Id);
 			for (int i = 0; i < _revertibleEffects.Length; i++)

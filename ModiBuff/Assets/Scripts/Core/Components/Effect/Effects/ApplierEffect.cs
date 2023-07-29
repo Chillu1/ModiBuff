@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ModiBuff.Core
 {
-	public sealed class ApplierEffect : BaseEffect, ITargetEffect, IEffect, IStackEffect
+	public sealed class ApplierEffect : ITargetEffect, IStackEffect, IEffect
 	{
 		private readonly int _modifierId;
 		private Targeting _targeting;
@@ -25,7 +25,7 @@ namespace ModiBuff.Core
 
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 
-		public override void Effect(IUnit target, IUnit source)
+		public void Effect(IUnit target, IUnit source)
 		{
 			switch (_targeting)
 			{

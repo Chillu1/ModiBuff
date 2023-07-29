@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
-	public sealed class HealEffect : BaseEffect, ITargetEffect, IEventTrigger, IStateEffect, IStackEffect, IRevertEffect, IEffect
+	public sealed class HealEffect : ITargetEffect, IEventTrigger, IStateEffect, IStackEffect, IRevertEffect, IEffect
 	{
 		public bool IsRevertible { get; }
 
@@ -31,7 +31,7 @@ namespace ModiBuff.Core
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 		public void SetEventBased() => _isEventBased = true;
 
-		public override void Effect(IUnit target, IUnit source)
+		public void Effect(IUnit target, IUnit source)
 		{
 			if (IsRevertible)
 				_totalHeal = _heal + _extraHeal;

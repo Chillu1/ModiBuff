@@ -6,7 +6,7 @@ namespace ModiBuff.Examples.SimpleSolo
 	/// <summary>
 	///		Full example of a custom effect implementation
 	/// </summary>
-	public sealed class FullBlockEffect : BaseEffect, ITargetEffect, IEventTrigger, IStackEffect, IStateEffect
+	public sealed class FullBlockEffect : IEffect, ITargetEffect, IEventTrigger, IStackEffect, IStateEffect
 	{
 		private readonly int _baseBlock;
 		private readonly StackBlockEffectType _stackEffect;
@@ -31,7 +31,7 @@ namespace ModiBuff.Examples.SimpleSolo
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 		public void SetEventBased() => _isEventBased = true;
 
-		public override void Effect(IUnit target, IUnit source)
+		public void Effect(IUnit target, IUnit source)
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (target is not IBlockOwner)
