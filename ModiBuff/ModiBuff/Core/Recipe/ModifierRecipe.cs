@@ -43,7 +43,6 @@ namespace ModiBuff.Core
 		private bool _intervalAffectedByStatusResistance;
 		private float _duration;
 
-		private RemoveEffect _removeEffect;
 		private EffectWrapper _removeEffectWrapper;
 
 		private List<EffectWrapper> _effectWrappers;

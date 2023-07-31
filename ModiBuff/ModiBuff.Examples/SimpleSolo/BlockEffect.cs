@@ -15,7 +15,7 @@ namespace ModiBuff.Examples.SimpleSolo
 		public void Effect(IUnit target, IUnit source)
 		{
 #if DEBUG
-			if (target is not IBlockOwner)
+			if (!(target is IBlockOwner))
 				throw new ArgumentException("Target must implement IBlockOwner");
 #endif
 

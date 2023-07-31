@@ -34,9 +34,9 @@ namespace ModiBuff.Examples.SimpleSolo
 		public void Effect(IUnit target, IUnit source)
 		{
 #if DEBUG && !MODIBUFF_PROFILE
-			if (target is not IBlockOwner)
+			if (!(target is IBlockOwner))
 				throw new ArgumentException("Target must implement IBlockOwner");
-			if (source is not IBlockOwner && _targeting == Targeting.SourceTarget || _targeting == Targeting.SourceSource)
+			if (!(source is IBlockOwner) && _targeting == Targeting.SourceTarget || _targeting == Targeting.SourceSource)
 				throw new ArgumentException("Source must implement IBlockOwner when targeting source");
 #endif
 			Effect((IBlockOwner)target, source, _baseBlock + _extraBlock);

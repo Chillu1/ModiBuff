@@ -22,6 +22,8 @@ namespace ModiBuff.Examples.SimpleSolo
 
 		public Unit(float health, float damage)
 		{
+			_targetingSystem = new TargetingSystem();
+
 			ModifierController = new ModifierController();
 
 			Health = MaxHealth = health;
