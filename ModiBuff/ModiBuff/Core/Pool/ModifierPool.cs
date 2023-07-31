@@ -177,6 +177,9 @@ namespace ModiBuff.Core
 
 		public void Dispose()
 		{
+			if (_pools == null) //Somehow this is true in bench?
+				return;
+
 			Clear();
 
 			_stackCapacity = 1;

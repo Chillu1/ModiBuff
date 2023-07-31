@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("ModiBuff.Tests")]
 [assembly: InternalsVisibleTo("ModiBuff.Core.Units")]
+[assembly: InternalsVisibleTo("ModiBuff.Benchmarks")]
 
 namespace ModiBuff.Core
 {
