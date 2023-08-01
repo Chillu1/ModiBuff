@@ -70,27 +70,29 @@ This library was made to make a standarized powerful system that allows for mani
 
 # Benchmarks
 
-Intel Core i7-4790 CPU @ 3.60GHz  
+BenchmarkDotNet v0.13.6, EndeavourOS
+Intel Core i7-4790 CPU 3.60GHz (Haswell), 1 CPU, 8 logical and 4 physical cores
+.NET SDK 6.0.120
+.NET 6.0.20 (6.0.2023.36801), X64 RyuJIT AVX2
+ 
 Preallocated Pools  
-WarmupCount: 10  
-MeasurementCount: 50  
-N: 5_000
+N: 10_000
 
 #### Add/Apply/Update Modifier table
 
-| Library                                               | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Update DoT*<br/>(5_000 units, N:1) |
-|-------------------------------------------------------|--------------------------------|-------------------------------------|------------------------------------|
-| ModiBuff (this)                                       | 0.26ms, 0 GC                   | 0.40ms, 0 GC                        | 1.14ms, 0 GC                       |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 0.51ms, 0 GC                   | ?                                   | 0.22ms, 0 GC                       |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | 10.7ms, 12 GC                  | ?                                   | ?                                  |
+| Library                                               | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Update DoT*<br/>(10_000 units, N:1) |
+|-------------------------------------------------------|--------------------------------|-------------------------------------|-------------------------------------|
+| ModiBuff (this)                                       | 0.30ms, 0 B                    | 0.66ms, 0 B                         | 0.82ms, 0 B                         |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 1.02ms, 0 GC                   | ?                                   | 0.44ms, 0 GC                        |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | 21.4ms, 24 GC                  | ?                                   | ?                                   |
 
 #### New Modifier/Pool table
 
 | Library                                               | New<br/>InitDmg | New<br/>DoT*  | DoT pool     | DoT pool<br/>reset return |
 |-------------------------------------------------------|-----------------|---------------|--------------|---------------------------|
-| ModiBuff (this)                                       | 4.80ms,  4 GC   | 12.3ms, 11 GC | 0.04ms, 0 GC | 0.16ms, 0 GC              |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 5.22ms,  1 GC   | 8.33ms,  1 GC | 0.82ms, 0 GC | 2.13ms, 0 GC              |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | 46.0ms, 45 GC   | 70.0ms, 63 GC | X            | X                         |
+| ModiBuff (this)                                       | 1.25ms,  2 MB   | 3.3ms, 4.7 MB | 0.04ms, 0 GC | 0.20ms, 0 B               |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 10.4ms,  2 GC   | 16.7ms,  2 GC | 1.64ms, 0 GC | 4.26ms, 0 GC              |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | 92.0ms, 90 GC   | 140ms, 126 GC | X            | X                         |
 
 > Important: Non-pool ("New") benchmarks don't matter for ModiBuff and ModiBuffEcs, since it will only be slower when allocating the new
 > modifiers in the pools.
@@ -240,7 +242,7 @@ Through `IEventOwner.AddEffectEvent(IEffect, EffectOnEvent)`.
 The library allows for easy creation of new effects.
 Which are needed for using custom game-based logic.
 
-Effects should implement `BaseEffect` or `IEffect`.
+Effects have to implement `IEffect`.
 They can also implement `ITargetEffect` for event targeting owner/source, `IEventTrigger` to avoid event recursion, `IStackEffect` for
 stacking functionality, `IStateEffect` for reseting runtime state.
 
