@@ -3,7 +3,8 @@ using ModiBuff.Core;
 
 namespace ModiBuff.Tests
 {
-	public sealed class BenchNewModifier : BaseModifierBenches
+	[MemoryDiagnoser]
+	public class BenchNewModifier : BaseModifierBenches
 	{
 		private IModifierRecipe _initDamageRecipe;
 		private IModifierRecipe _initDoTSeparateDamageRemoveRecipe;
@@ -17,18 +18,13 @@ namespace ModiBuff.Tests
 			_initDoTSeparateDamageRemoveRecipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
 			_intervalDamageStackAddDamageRecipe = Recipes.GetRecipe("IntervalDamage_StackAddDamage");
 
-			//Pool.Clear();
-			//var recipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
-			//Pool.SetMaxPoolSize(1_000_000);
-			//Pool.Allocate(recipe.Id, 60 * Iterations);
+			Pool.Clear();
+			Pool.SetMaxPoolSize(1_000_000);
+			//Pool.Allocate(Recipes.GetRecipe("InitDoTSeparateDamageRemove").Id, 60 * Iterations);
 
-			//Pool.Clear();
-			//var recipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
-			//Pool.Allocate(recipe.Id, Iterations);
+			Pool.Allocate(Recipes.GetRecipe("InitDoTSeparateDamageRemove").Id, Iterations);
 
-			//Pool.Clear();
-			//var recipe = Recipes.GetRecipe("IntervalDamage_StackAddDamage");
-			//Pool.Allocate(recipe.Id, Iterations);
+			Pool.Allocate(Recipes.GetRecipe("IntervalDamage_StackAddDamage").Id, Iterations);
 		}
 
 		[Benchmark]
@@ -49,14 +45,14 @@ namespace ModiBuff.Tests
 			var modifier = Pool.Rent(_initDoTSeparateDamageRemoveRecipe.Id);
 		}
 
-		//[Benchmark]//TODO This one needs work manipulation, because we can overflow the limit
+		[Benchmark]
 		public void BenchPooledMediumModifierFromRecipeReturn()
 		{
 			var modifier = Pool.Rent(_initDoTSeparateDamageRemoveRecipe.Id);
 			Pool.Return(modifier);
 		}
 
-		//[Benchmark]//TODO This one needs work manipulation, because we can overflow the limit
+		[Benchmark]
 		public void BenchPooledFullStateModifierFromRecipeReturn()
 		{
 			var modifier = Pool.Rent(_intervalDamageStackAddDamageRecipe.Id);

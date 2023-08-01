@@ -7,7 +7,7 @@ namespace ModiBuff.Tests
 	[MemoryDiagnoser]
 	public class BenchModifierIteration : BaseModifierBenches
 	{
-		private const int UnitCount = 5_000;
+		private const int UnitCount = 10_000;
 
 		[Params(0.0167f /*, 1f*/)]
 		public float Delta;
@@ -22,6 +22,7 @@ namespace ModiBuff.Tests
 		public override void GlobalSetup()
 		{
 			base.GlobalSetup();
+			Pool.SetMaxPoolSize(20_000);
 
 			_dotUnits = new Unit[UnitCount];
 			for (int i = 0; i < _dotUnits.Length; i++)
