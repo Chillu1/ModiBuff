@@ -291,8 +291,7 @@ namespace ModiBuff.Core
 		{
 			if (_interval <= 0 && _duration <= 0)
 			{
-				//TODO Warning
-				//Debug.LogWarning("Refresh() called without a duration or interval set, defaulting to duration");
+				Logger.LogWarning("Refresh() called without a duration or interval set, defaulting to duration");
 				Refresh(RefreshType.Duration);
 				return this;
 			}
@@ -318,8 +317,7 @@ namespace ModiBuff.Core
 					_refreshInterval = true;
 					break;
 				default:
-					//TODO Error
-					//Debug.LogError($"Unknown refresh type: {type}");
+					Logger.LogError($"Unknown refresh type: {type}");
 					return this;
 			}
 
@@ -357,7 +355,7 @@ namespace ModiBuff.Core
 		public void Finish()
 		{
 			if (_modifierCreator != null)
-				throw new Exception("Modifier recipe already finished, finishing again. Not intended?"); //TODO To error
+				Logger.LogError("Modifier recipe already finished, finishing again. Not intended?");
 
 			_timeComponents = new List<ITimeComponent>(2);
 			_modifierCreator = new ModifierCreator(_effectWrappers);

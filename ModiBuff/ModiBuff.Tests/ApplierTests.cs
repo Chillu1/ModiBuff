@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+using System.Collections.Generic;
 using ModiBuff.Core;
 using NUnit.Framework;
 
@@ -115,11 +115,40 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 		}
 
-		//[Test]//TODO
-		//public void ApplierDoesntExist()
-		//{
-		//	LogAssert.Expect(LogType.Error, new Regex("Can't find modifier with name*"));
-		//	var applier = new ApplierEffect("NonExistentApplier");
-		//}
+		[Test]
+		public void ModifierDoesntExist()
+		{
+			Assert.Catch<KeyNotFoundException>(() => Recipes.GetRecipe("NonExistentApplier"));
+		}
+
+		private sealed class TestLogger : ILogger
+		{
+			public bool ErrorLogged;
+
+			public void Log(string message)
+			{
+			}
+
+			public void LogWarning(string message)
+			{
+			}
+
+			public void LogError(string message)
+			{
+				ErrorLogged = true;
+			}
+		}
+
+		[Test]
+		public void ApplierDoesntExist()
+		{
+			var testLogger = new TestLogger();
+			Logger.SetLogger(testLogger);
+
+			var applier = new ApplierEffect("NonExistentApplier");
+			Assert.True(testLogger.ErrorLogged);
+
+			Logger.SetLogger<NUnitLogger>();
+		}
 	}
 }

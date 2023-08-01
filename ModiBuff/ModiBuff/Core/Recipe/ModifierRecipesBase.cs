@@ -20,8 +20,7 @@ namespace ModiBuff.Core
 				modifier.Finish();
 
 			RecipesCount = _recipes.Count;
-			//TODO Log
-			//Debug.Log($"[ModiBuff] Loaded {RecipesCount} recipes.");
+			Logger.Log($"[ModiBuff] Loaded {RecipesCount} recipes.");
 		}
 
 		protected abstract void SetupRecipes();
@@ -35,8 +34,7 @@ namespace ModiBuff.Core
 		{
 			if (_recipes.TryGetValue(name, out var localRecipe))
 			{
-				//TODO Log
-				//Debug.LogError($"Modifier with id {name} already exists");
+				Logger.LogError($"Modifier with id {name} already exists");
 				return (ModifierRecipe)localRecipe;
 			}
 
@@ -49,8 +47,7 @@ namespace ModiBuff.Core
 		{
 			if (_recipes.TryGetValue(name, out var localRecipe))
 			{
-				//TODO Log
-				//Debug.LogError($"Modifier with id {name} already exists");
+				Logger.LogError($"Modifier with id {name} already exists");
 				return (ModifierEventRecipe)localRecipe;
 			}
 

@@ -32,6 +32,7 @@ namespace ModiBuff.Tests
 		[OneTimeSetUp]
 		public void OneTimeSetup()
 		{
+			Logger.SetLogger<NUnitLogger>();
 			_coreSystem = new CoreSystem(1);
 
 			IdManager = _coreSystem.IdManager;

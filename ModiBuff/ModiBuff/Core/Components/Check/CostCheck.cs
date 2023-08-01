@@ -25,8 +25,8 @@ namespace ModiBuff.Core
 						return false;
 					return manaOwner.Mana >= _cost;
 				default:
-					//TODO Log error instead of throwing exception
-					throw new System.ArgumentOutOfRangeException("Unknown cost type: " + _costType);
+					Logger.LogError("Unknown cost type: " + _costType);
+					return false;
 			}
 		}
 
@@ -41,8 +41,8 @@ namespace ModiBuff.Core
 					((IManaOwner)unit).UseMana(_cost);
 					return;
 				default:
-					//TODO Log error instead of throwing exception
-					throw new System.ArgumentOutOfRangeException("Unknown cost type: " + _costType);
+					Logger.LogError("Unknown cost type: " + _costType);
+					return;
 			}
 		}
 	}

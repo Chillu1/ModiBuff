@@ -12,6 +12,8 @@ namespace ModiBuff.Examples.SimpleSolo
 
 		public GameController()
 		{
+			Logger.SetLogger<ConsoleLogger>();
+
 			var idManager = new ModifierIdManager();
 			var recipes = new ModifierRecipes(idManager);
 

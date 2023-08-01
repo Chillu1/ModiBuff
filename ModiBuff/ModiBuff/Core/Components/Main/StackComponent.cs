@@ -58,8 +58,8 @@ namespace ModiBuff.Core
 						StackEffect();
 					return;
 				default:
-					//TODO Log error
-					throw new ArgumentOutOfRangeException("Invalid stack effect: " + _whenStackEffect);
+					Logger.LogError("Invalid stack effect: " + _whenStackEffect);
+					return;
 			}
 		}
 
@@ -87,7 +87,7 @@ namespace ModiBuff.Core
 		}
 
 		object IShallowClone.ShallowClone() => ShallowClone();
-		
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void StackEffect()
 		{
