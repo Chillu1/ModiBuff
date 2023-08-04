@@ -1,9 +1,15 @@
 namespace ModiBuff.Core
 {
-	public interface IModifierOwner
+	public interface IModifierOwner : IUnit
 	{
 		ModifierController ModifierController { get; } //TODO Refactor/remove?
+	}
 
-		bool TryAddModifier(int id, IUnit source);
+	public static class ModifierOwnerExtensions
+	{
+		public static bool TryAddModifier(this IModifierOwner owner, int id, IUnit source)
+		{
+			return owner.ModifierController.TryAdd(id, owner, source);
+		}
 	}
 }

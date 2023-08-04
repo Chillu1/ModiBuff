@@ -18,8 +18,8 @@ namespace ModiBuff.Core.Units
 			SetupRecipes();
 
 			RecipesCount = _recipes.Count;
-			//TODO LOG
-			//Debug.Log($"Loaded {RecipesCount} unit recipes.");
+
+			Logger.Log($"Loaded {RecipesCount} unit recipes.");
 		}
 
 		protected abstract void SetupRecipes();
@@ -33,8 +33,7 @@ namespace ModiBuff.Core.Units
 		{
 			if (_recipes.TryGetValue(name, out var localRecipe))
 			{
-				//TODO LOG
-				//Debug.LogError($"Unit with id {name} already exists");
+				Logger.LogError($"Unit with id {name} already exists");
 				return localRecipe;
 			}
 

@@ -114,8 +114,8 @@ namespace ModiBuff.Core
 
 			_modifierCreator.Clear();
 
-			return new Modifier(Id, Name, initComponent,
-				_timeComponents.Count == 0 ? new ITimeComponent[0] : _timeComponents.ToArray(), stackComponent, effectCheck);
+			return new Modifier(Id, Name, initComponent, _timeComponents.Count == 0 ? null : _timeComponents.ToArray(), stackComponent,
+				effectCheck);
 		}
 
 		//---ApplyChecks---

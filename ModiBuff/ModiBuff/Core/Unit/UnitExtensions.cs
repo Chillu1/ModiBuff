@@ -4,12 +4,12 @@ namespace ModiBuff.Core
 	{
 		internal static bool TryAddModifierSelf(this IModifierOwner unit, string name)
 		{
-			return unit.TryAddModifier(ModifierIdManager.GetIdOld(name), (IUnit)unit);
+			return unit.TryAddModifier(ModifierIdManager.GetIdOld(name), unit);
 		}
 
 		internal static bool TryAddModifierTarget(this IModifierOwner unit, string name, IUnit target)
 		{
-			return unit.ModifierController.TryAdd(ModifierIdManager.GetIdOld(name), target, (IUnit)unit);
+			return unit.ModifierController.TryAdd(ModifierIdManager.GetIdOld(name), target, unit);
 		}
 
 		internal static bool ContainsModifier(this IModifierOwner unit, string name)

@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public interface IDamagable
+	public interface IDamagable : IUnit
 	{
 		float Health { get; }
 		float MaxHealth { get; }

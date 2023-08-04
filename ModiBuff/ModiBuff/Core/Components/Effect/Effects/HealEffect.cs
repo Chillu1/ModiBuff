@@ -53,10 +53,10 @@ namespace ModiBuff.Core
 					target.Heal(value, source, !_isEventBased);
 					break;
 				case Targeting.SourceTarget:
-					((IHealable)source).Heal(value, (IUnit)target, !_isEventBased);
+					((IHealable)source).Heal(value, target, !_isEventBased);
 					break;
 				case Targeting.TargetTarget:
-					target.Heal(value, (IUnit)target, !_isEventBased);
+					target.Heal(value, target, !_isEventBased);
 					break;
 				case Targeting.SourceSource:
 					((IHealable)source).Heal(value, source, !_isEventBased);

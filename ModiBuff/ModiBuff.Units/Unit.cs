@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
-	public class Unit : IUnit, IUpdatable, IModifierOwner, IAttacker, IDamagable, IHealable, IHealer, IManaOwner, IHealthCost, IAddDamage,
+	public class Unit : IUpdatable, IModifierOwner, IAttacker, IDamagable, IHealable, IHealer, IManaOwner, IHealthCost, IAddDamage,
 		IEventOwner, IStatusEffectOwner, IStatusResistance
 	{
 		public float Health { get; private set; }
@@ -76,11 +76,10 @@ namespace ModiBuff.Core.Units
 				return;
 
 			if (ModifierController.GetApplierCastModifier(id))
-				target.TryAddModifier(id, this);
+				target.ModifierController.TryAdd(id, target, this);
 #if DEBUG && !MODIBUFF_PROFILE
-			//TODO LOG
-			//else
-			//	Debug.LogError($"Modifier {id} not found in applier list.");
+			else
+				Logger.LogError($"Modifier {id} not found in applier list.");
 #endif
 		}
 
@@ -127,16 +126,15 @@ namespace ModiBuff.Core.Units
 			Health -= damage;
 			float dealtDamage = oldHealth - Health;
 
-			if (triggersEvents)
-				if (Health <= 0 && !IsDead)
-				{
-					for (int i = 0; i < _whenDeathEffects.Count; i++)
-						_whenDeathEffects[i].Effect(this, source);
-					//Unit Death TODO Destroy/pool unit
-					ModifierController.Clear();
+			if (triggersEvents && Health <= 0 && !IsDead)
+			{
+				for (int i = 0; i < _whenDeathEffects.Count; i++)
+					_whenDeathEffects[i].Effect(this, source);
+				//Unit Death TODO Destroy/pool unit
+				ModifierController.Clear();
 
-					IsDead = true;
-				}
+				IsDead = true;
+			}
 
 			return dealtDamage;
 		}
@@ -158,7 +156,7 @@ namespace ModiBuff.Core.Units
 
 			if (triggersEvents)
 				for (int i = 0; i < _onHealEffects.Count; i++)
-					_onHealEffects[i].Effect((IUnit)target, this);
+					_onHealEffects[i].Effect(target, this);
 
 			return target.Heal(HealValue, this, triggersEvents);
 		}
@@ -206,9 +204,10 @@ namespace ModiBuff.Core.Units
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (value <= 0)
-				//TODO LOG
-				//Debug.LogError("StatusResistance can't be negative or zero.");
+			{
+				Logger.LogError("StatusResistance can't be negative or zero.");
 				return;
+			}
 #endif
 			StatusResistance = value;
 		}
@@ -244,8 +243,7 @@ namespace ModiBuff.Core.Units
 					_onHealEffects.Add(effect);
 					break;
 				default:
-					//TODO LOG
-					//Debug.LogError("Unknown event type: " + @event);
+					Logger.LogError("Unknown event type: " + @event);
 					return;
 			}
 		}
@@ -279,17 +277,16 @@ namespace ModiBuff.Core.Units
 					Remove(_onHealEffects, effect);
 					break;
 				default:
-					//TODO LOG
-					//Debug.LogError("Unknown event type: " + @event);
+					Logger.LogError("Unknown event type: " + @event);
 					return;
 			}
 
 			void Remove(List<IEffect> effects, IEffect effectToRemove)
 			{
 				bool remove = effects.Remove(effectToRemove);
-				//TODO LOG
-				//if (!remove)
-				//Debug.LogError("Could not remove event: " + effectToRemove.GetType());
+
+				if (!remove)
+					Logger.LogError("Could not remove event: " + effectToRemove.GetType());
 			}
 		}
 
@@ -303,11 +300,6 @@ namespace ModiBuff.Core.Units
 			return ModifierController.TryAddApplier(recipe.Id, recipe.HasApplyChecks, applierType);
 		}
 
-		public bool TryAddModifier(int id, IUnit source)
-		{
-			return ModifierController.TryAdd(id, this, source);
-		}
-
 		private void TryApplyModifiers(ICollection<ModifierCheck> modifierChecks, IUnit source)
 		{
 			foreach (var check in modifierChecks)
@@ -315,14 +307,14 @@ namespace ModiBuff.Core.Units
 				if (!check.Check(source))
 					continue;
 
-				TryAddModifier(check.Id, source);
+				ModifierController.TryAdd(check.Id, this, source);
 			}
 		}
 
 		private void TryApplyModifiers(IReadOnlyList<int> recipes, IUnit source)
 		{
 			for (int i = 0; i < recipes.Count; i++)
-				TryAddModifier(recipes[i], source);
+				ModifierController.TryAdd(recipes[i], this, source);
 		}
 
 		//---Aura---

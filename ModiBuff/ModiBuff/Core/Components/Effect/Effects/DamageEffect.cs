@@ -46,10 +46,10 @@ namespace ModiBuff.Core
 					target.TakeDamage(damage, source, !_isEventBased);
 					break;
 				case Targeting.SourceTarget:
-					((IDamagable)source).TakeDamage(damage, (IUnit)target, !_isEventBased);
+					((IDamagable)source).TakeDamage(damage, target, !_isEventBased);
 					break;
 				case Targeting.TargetTarget:
-					target.TakeDamage(damage, (IUnit)target, !_isEventBased);
+					target.TakeDamage(damage, target, !_isEventBased);
 					break;
 				case Targeting.SourceSource:
 					((IDamagable)source).TakeDamage(damage, source, !_isEventBased);
