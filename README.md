@@ -23,19 +23,16 @@
 
 # What is this?
 
-This library was made to make a standarized powerful system that allows for manipulation of both effects and entities.
+This zero dependency library was made to make a standarized powerful system that allows for manipulation of both effects and entities.
 
 > Note: The library is currently in development, and it will most likely encounter breaking API changes.
-
-> Note: The library currently depends on Unity Engine for logging and unit testing, but this is temporary, the 0.1 release will be
-> completely engine agnostic.
 
 # Features
 
 * No GC/allocations (fully pooled with state reset)
-* Low memory usage (1 MB for 5_000 modifiers)
-* Fast effects [5_000 damage modifiers in 0.14ms](#benchmarks)
-* Fast iteration [5_000 interval modifiers & 5_000 units in 0.95ms](#benchmarks)
+* Low memory usage (2 MB for 10_000 modifiers)
+* Fast effects [10_000 damage modifiers in 0.30ms](#benchmarks)
+* Fast iteration [10_000 interval modifiers & 10_000 units in 0.82ms](#benchmarks)
 * Easy high level API [recipes](#recipe)
 * Effects on actions
 	* Init
@@ -70,9 +67,9 @@ This library was made to make a standarized powerful system that allows for mani
 
 # Benchmarks
 
-BenchmarkDotNet v0.13.6, EndeavourOS
-Intel Core i7-4790 CPU 3.60GHz (Haswell), 1 CPU, 8 logical and 4 physical cores
-.NET SDK 6.0.120
+BenchmarkDotNet v0.13.6, EndeavourOS  
+Intel Core i7-4790 CPU 3.60GHz (Haswell), 1 CPU, 8 logical and 4 physical cores  
+.NET SDK 6.0.120  
 .NET 6.0.20 (6.0.2023.36801), X64 RyuJIT AVX2
  
 Preallocated Pools  
@@ -108,6 +105,12 @@ Preallocating 5_800 mixed modifiers = 7ms
 So with 5_800 preallocated modifiers, the library will add 8ms to the game startup time.
 
 *DoT = InitDoTSeparateDamageRemove
+
+# Requirements
+
+ModiBuff is compatible with .NETStandard 1.1, C# 7.0
+
+For development net 6.0 is required to build and run all tests. The tests depend on NUnit, and benchmarks depend on BenchmarkDotNet.
 
 # Installation
 
