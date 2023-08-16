@@ -46,8 +46,7 @@ namespace ModiBuff.Examples.SimpleSolo
 
 		public void Cast(int id, IUnit target)
 		{
-			if (ModifierController.GetApplierCastModifier(id))
-				((IModifierOwner)target).TryAddModifier(id, this);
+			((IModifierOwner)target).ModifierController.TryCastModifier(id, target, this);
 		}
 
 		public void SetAttackTarget(IUnit target) => _targetingSystem.SetAttackTarget(target);

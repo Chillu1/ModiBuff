@@ -9,8 +9,9 @@ namespace ModiBuff.Core
 		private readonly List<int> _modifierIndexes;
 
 		private readonly List<int> _modifierAttackAppliers;
-		private readonly List<int> _modifierCastAppliers;
-		private readonly Dictionary<int, ModifierCheck> _modifierChecksAppliers;
+		private readonly List<int> _modifierCastAppliers; //TODO Will there be cast modifier without any appliers?
+		private readonly Dictionary<int, ModifierCheck> _modifierCastChecksAppliers;
+		private readonly Dictionary<int, ModifierCheck> _modifierAttackChecksAppliers;
 
 		private readonly List<int> _modifiersToRemove;
 
@@ -20,7 +21,8 @@ namespace ModiBuff.Core
 			_modifiers = new Modifier[ModifierRecipesBase.RecipesCount];
 			_modifierAttackAppliers = new List<int>(5);
 			_modifierCastAppliers = new List<int>(5);
-			_modifierChecksAppliers = new Dictionary<int, ModifierCheck>(5);
+			_modifierCastChecksAppliers = new Dictionary<int, ModifierCheck>(5);
+			_modifierAttackChecksAppliers = new Dictionary<int, ModifierCheck>(5);
 
 			_modifiersToRemove = new List<int>(5);
 		}
@@ -31,8 +33,12 @@ namespace ModiBuff.Core
 			for (int i = 0; i < length; i++)
 				_modifiers[_modifierIndexes[i]].Update(delta);
 
-			if (_modifierChecksAppliers.Count > 0)
-				foreach (var check in _modifierChecksAppliers.Values)
+			if (_modifierCastChecksAppliers.Count > 0)
+				foreach (var check in _modifierCastChecksAppliers.Values)
+					check.Update(delta);
+
+			if (_modifierAttackChecksAppliers.Count > 0)
+				foreach (var check in _modifierAttackChecksAppliers.Values)
 					check.Update(delta);
 
 			int removeCount = _modifiersToRemove.Count;
@@ -45,13 +51,11 @@ namespace ModiBuff.Core
 			_modifiersToRemove.Clear();
 		}
 
-		public ICollection<ModifierCheck> GetApplierCheckModifiers() => _modifierChecksAppliers.Values;
+		public ICollection<ModifierCheck> GetApplierCastCheckModifiers() => _modifierCastChecksAppliers.Values;
+		public ICollection<ModifierCheck> GetApplierAttackCheckModifiers() => _modifierAttackChecksAppliers.Values;
 
-		public IReadOnlyList<int> GetApplierAttackModifiers() => _modifierAttackAppliers;
-
-		public IReadOnlyList<int> GetApplierCastModifiers() => _modifierCastAppliers;
-
-		public bool GetApplierCastModifier(int id) => _modifierCastAppliers.Contains(id);
+		public IReadOnlyList<int> GetApplierAttackModifierIds() => _modifierAttackAppliers;
+		public IReadOnlyList<int> GetApplierCastModifierIds() => _modifierCastAppliers;
 
 		public bool TryAdd(ModifierAddReference addReference, IUnit self, IUnit source)
 		{
@@ -82,32 +86,94 @@ namespace ModiBuff.Core
 			return true;
 		}
 
-		public bool TryAddApplier(int id, bool hasApplyChecks, ApplierType applierType = ApplierType.None)
+		public void TryCastModifier(int id, IUnit target, IUnit source)
 		{
-			if (!hasApplyChecks)
+			if (_modifierCastAppliers.Contains(id))
 			{
-				switch (applierType)
-				{
-					case ApplierType.Cast:
-						if (_modifierCastAppliers.Contains(id))
-							return false;
-						_modifierCastAppliers.Add(id);
-						return true;
-					case ApplierType.Attack:
-						if (_modifierAttackAppliers.Contains(id))
-							return false;
-						_modifierAttackAppliers.Add(id);
-						return true;
-				}
-
-				return false;
+				TryAdd(id, target, source);
+				return;
 			}
 
-			if (_modifierChecksAppliers.ContainsKey(id))
-				return false;
+			if (!_modifierCastChecksAppliers.ContainsKey(id) || !_modifierCastChecksAppliers[id].Check(source))
+				return;
 
-			_modifierChecksAppliers.Add(id, ModifierPool.Instance.RentModifierCheck(id));
-			return true;
+			TryAdd(id, target, source);
+		}
+
+		public void TryAddAttackModifier(int id, IUnit target, IModifierOwner source)
+		{
+			if (_modifierAttackAppliers.Contains(id))
+			{
+				TryAdd(id, target, source);
+				return;
+			}
+
+			if (!_modifierAttackChecksAppliers.ContainsKey(id) || !_modifierAttackChecksAppliers[id].Check(source))
+				return;
+
+			TryAdd(id, target, source);
+		}
+
+		public bool TryAddApplier(int id, bool hasApplyChecks, ApplierType applierType)
+		{
+			switch (applierType)
+			{
+				case ApplierType.Cast when hasApplyChecks:
+				{
+					if (_modifierCastChecksAppliers.ContainsKey(id))
+						return false;
+
+					_modifierCastChecksAppliers.Add(id, ModifierPool.Instance.RentModifierCheck(id));
+					return true;
+				}
+				case ApplierType.Cast:
+				{
+					if (_modifierCastAppliers.Contains(id))
+						return false;
+
+					_modifierCastAppliers.Add(id);
+					return true;
+				}
+				case ApplierType.Attack when hasApplyChecks:
+				{
+					if (_modifierAttackChecksAppliers.ContainsKey(id))
+						return false;
+
+					_modifierAttackChecksAppliers.Add(id, ModifierPool.Instance.RentModifierCheck(id));
+					return true;
+				}
+				case ApplierType.Attack:
+				{
+					if (_modifierAttackAppliers.Contains(id))
+						return false;
+
+					_modifierAttackAppliers.Add(id);
+					return true;
+				}
+				default:
+					Logger.LogError("Unknown applier type: " + applierType);
+					return false;
+			}
+		}
+
+		public void TryApplyAttackModifiers(IUnit target, IModifierOwner source)
+		{
+			foreach (int id in source.ModifierController.GetApplierAttackModifierIds())
+				TryAdd(id, target, source);
+
+			foreach (var check in source.ModifierController.GetApplierAttackCheckModifiers())
+				if (check.Check(source))
+					TryAdd(check.Id, target, source);
+		}
+
+		public void TryApplyCastModifiers(IUnit target, IModifierOwner source)
+		{
+			foreach (int id in source.ModifierController.GetApplierCastModifierIds())
+				TryAdd(id, target, source);
+
+			foreach (var check in source.ModifierController.GetApplierCastCheckModifiers())
+				if (check.Check(source))
+					TryAdd(check.Id, target, source);
 		}
 
 		private Modifier Add(int id, IUnit target, IUnit source)
@@ -165,14 +231,18 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _modifierIndexes.Count; i++)
 				Remove(_modifierIndexes[i]);
 
-			foreach (var check in _modifierChecksAppliers.Values)
+			foreach (var check in _modifierCastChecksAppliers.Values)
+				ModifierPool.Instance.ReturnCheck(check);
+
+			foreach (var check in _modifierAttackChecksAppliers.Values)
 				ModifierPool.Instance.ReturnCheck(check);
 
 			//Clear the rest, if the unit will be reused/pooled. Otherwise this is not needed
 			_modifierIndexes.Clear();
 			_modifierAttackAppliers.Clear();
 			_modifierCastAppliers.Clear();
-			_modifierChecksAppliers.Clear();
+			_modifierCastChecksAppliers.Clear();
+			_modifierAttackChecksAppliers.Clear();
 			_modifiersToRemove.Clear();
 		}
 	}

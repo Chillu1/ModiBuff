@@ -43,7 +43,7 @@ namespace ModiBuff.Tests
 
 			Assert.True(Unit.HasStatusEffect(StatusEffectType.Silence));
 
-			Unit.Cast(Enemy);
+			Unit.CastAll(Enemy);
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
 		}
 

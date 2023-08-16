@@ -45,7 +45,7 @@ namespace ModiBuff.Tests
 			var applier = Recipes.GetRecipe("InitDamage");
 			Unit.AddApplierModifier(applier, ApplierType.Cast);
 
-			Unit.Cast(Enemy);
+			Unit.CastAll(Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
@@ -69,7 +69,7 @@ namespace ModiBuff.Tests
 		{
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostMana"), ApplierType.Cast);
 
-			Unit.Cast(Enemy);
+			Unit.CastAll(Enemy);
 
 			Assert.AreEqual(UnitMana - 5, Unit.Mana);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);

@@ -75,21 +75,15 @@ namespace ModiBuff.Core.Units
 			if ((_statusEffectController.LegalActions & LegalAction.Cast) == 0)
 				return;
 
-			if (ModifierController.GetApplierCastModifier(id))
-				target.ModifierController.TryAdd(id, target, this);
-#if DEBUG && !MODIBUFF_PROFILE
-			else
-				Logger.LogError($"Modifier {id} not found in applier list.");
-#endif
+			target.ModifierController.TryCastModifier(id, target, this);
 		}
 
-		public void Cast(Unit target)
+		internal void CastAll(Unit target)
 		{
 			if ((_statusEffectController.LegalActions & LegalAction.Cast) == 0)
 				return;
 
-			target.TryApplyModifiers(ModifierController.GetApplierCheckModifiers(), this);
-			target.TryApplyModifiers(ModifierController.GetApplierCastModifiers(), this);
+			target.ModifierController.TryApplyCastModifiers(target, this);
 		}
 
 		public float Attack(IUnit target, bool triggersEvents = true)
@@ -102,8 +96,8 @@ namespace ModiBuff.Core.Units
 			if ((_statusEffectController.LegalActions & LegalAction.Act) == 0)
 				return 0;
 
-			target.TryApplyModifiers(ModifierController.GetApplierCheckModifiers(), this);
-			target.TryApplyModifiers(ModifierController.GetApplierAttackModifiers(), this);
+			ModifierController.TryApplyAttackModifiers(target, this);
+
 			for (int i = 0; i < _onAttackEffects.Count; i++)
 				_onAttackEffects[i].Effect(target, this);
 
@@ -295,26 +289,9 @@ namespace ModiBuff.Core.Units
 			return ModifierController.TryAdd(addReference, this, sender);
 		}
 
-		internal bool AddApplierModifier(IModifierRecipe recipe, ApplierType applierType = ApplierType.None)
+		internal bool AddApplierModifier(IModifierRecipe recipe, ApplierType applierType)
 		{
 			return ModifierController.TryAddApplier(recipe.Id, recipe.HasApplyChecks, applierType);
-		}
-
-		private void TryApplyModifiers(ICollection<ModifierCheck> modifierChecks, IUnit source)
-		{
-			foreach (var check in modifierChecks)
-			{
-				if (!check.Check(source))
-					continue;
-
-				ModifierController.TryAdd(check.Id, this, source);
-			}
-		}
-
-		private void TryApplyModifiers(IReadOnlyList<int> recipes, IUnit source)
-		{
-			for (int i = 0; i < recipes.Count; i++)
-				ModifierController.TryAdd(recipes[i], this, source);
 		}
 
 		//---Aura---

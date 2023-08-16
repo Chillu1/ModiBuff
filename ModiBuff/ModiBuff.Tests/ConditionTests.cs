@@ -11,7 +11,7 @@ namespace ModiBuff.Tests
 			Unit.TakeDamage(UnitHealth - 6, Unit); //6hp left
 
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_ApplyCondition_HealthAbove100"), ApplierType.Cast);
-			Unit.Cast(Unit);
+			Unit.CastAll(Unit);
 			Assert.AreEqual(UnitHealth - UnitHealth + 6, Unit.Health);
 		}
 
@@ -19,13 +19,13 @@ namespace ModiBuff.Tests
 		public void ManaCondition_OnApply_InitDamage()
 		{
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_ApplyCondition_ManaBelow100"), ApplierType.Cast);
-			Unit.Cast(Unit);
+			Unit.CastAll(Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.UseMana(UnitMana - 100); //100 mana left
 
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_ApplyCondition_ManaBelow100"), ApplierType.Cast);
-			Unit.Cast(Unit);
+			Unit.CastAll(Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
@@ -86,11 +86,11 @@ namespace ModiBuff.Tests
 		public void HasModifier_OnApply_InitDamage()
 		{
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_ApplyCondition_ContainsModifier"), ApplierType.Cast);
-			Unit.Cast(Unit);
+			Unit.CastAll(Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.TryAddModifierSelf("FlagApply");
-			Unit.Cast(Unit);
+			Unit.CastAll(Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
@@ -109,11 +109,11 @@ namespace ModiBuff.Tests
 		public void HasStatusEffect_OnApply_InitDamage()
 		{
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_ApplyCondition_FreezeStatusEffect"), ApplierType.Cast);
-			Unit.Cast(Unit);
+			Unit.CastAll(Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.TryAddModifierSelf("InitFreeze");
-			Unit.Cast(Unit);
+			Unit.CastAll(Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
@@ -132,11 +132,11 @@ namespace ModiBuff.Tests
 		public void HasLegalAction_OnApply_InitDamage()
 		{
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_ApplyCondition_ActLegalAction"), ApplierType.Cast);
-			Unit.Cast(Unit);
+			Unit.CastAll(Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
 			Unit.TryAddModifierSelf("InitFreeze");
-			Unit.Cast(Unit);
+			Unit.CastAll(Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
@@ -159,15 +159,15 @@ namespace ModiBuff.Tests
 		public void Combination_OnApply_InitDamage()
 		{
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_ApplyCondition_Combination"), ApplierType.Cast);
-			Unit.Cast(Unit);
+			Unit.CastAll(Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.TryAddModifierSelf("InitFreeze");
-			Unit.Cast(Unit);
+			Unit.CastAll(Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.TryAddModifierSelf("FlagApply");
-			Unit.Cast(Unit);
+			Unit.CastAll(Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 

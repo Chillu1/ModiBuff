@@ -114,16 +114,13 @@ For development net 6.0 is required to build and run all tests. The tests depend
 
 # Installation
 
-Currently the library is not on NuGet or any other package manager. You can download the source code and add it to your project directly.
+Currently the library is not on NuGet or any other package manager.
 
-Specifically, you should get [Core](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Scripts/Core),
-[Download Link](https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2FChillu1%2FModiBuff%2Ftree%2Fmaster%2FModiBuff%2FAssets%2FScripts%2FCore)
-.
+DLLs are available in the [Releases](https://github.com/Chillu1/ModiBuff/releases) tab.
 
-For a full implementation of all library features with Units, you should get
-[Core Units](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Scripts/CoreUnits),
-[Download Link](https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2FChillu1%2FModiBuff%2Ftree%2Fmaster%2FModiBuff%2FAssets%2FScripts%2FCoreUnits)
-.
+For finer control you can download the source code and add it to your project directly.
+
+For a full implementation of all library features with Units, you should get ModiBuff.Units DLL.
 
 ## Setup
 
@@ -518,7 +515,7 @@ Add("OneTimeInitDamage_LingerDuration")
     .Remove(1);
 ```
 
-50% chance to trigger effect (init dammage)
+50% chance to trigger effect (init damage)
 
 ```csharp
 Add("ChanceEffectInitDamage")

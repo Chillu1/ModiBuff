@@ -8,7 +8,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Random_InitDamage()
 		{
-			Unit.AddApplierModifier(Recipes.GetRecipe("ChanceInitDamage"));
+			Unit.AddApplierModifier(Recipes.GetRecipe("ChanceInitDamage"), ApplierType.Attack);
 
 			for (int i = 0; i < 50; i++)
 				Unit.Attack(Enemy);

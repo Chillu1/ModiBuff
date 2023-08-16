@@ -5,7 +5,7 @@ namespace ModiBuff.Examples.SimpleSolo
 	/// <summary>
 	///		Simple solo example, of player unit fighting a single enemy unit
 	/// </summary>
-	public sealed class GameController
+	public sealed class GameController : IGameController
 	{
 		private readonly Unit _unit;
 		private readonly Unit _enemy;
