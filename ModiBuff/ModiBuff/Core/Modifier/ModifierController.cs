@@ -86,32 +86,40 @@ namespace ModiBuff.Core
 			return true;
 		}
 
-		public void TryCastModifier(int id, IUnit target, IUnit source)
+		public bool TryCastModifier(int id, IUnit target, IModifierOwner source)
 		{
-			if (_modifierCastAppliers.Contains(id))
+			if (source.ModifierController._modifierCastAppliers.Contains(id))
 			{
 				TryAdd(id, target, source);
-				return;
+				return true;
 			}
 
-			if (!_modifierCastChecksAppliers.ContainsKey(id) || !_modifierCastChecksAppliers[id].Check(source))
-				return;
+			if (source.ModifierController._modifierCastChecksAppliers.ContainsKey(id) &&
+			    source.ModifierController._modifierCastChecksAppliers[id].Check(source))
+			{
+				TryAdd(id, target, source);
+				return true;
+			}
 
-			TryAdd(id, target, source);
+			return false;
 		}
 
-		public void TryAddAttackModifier(int id, IUnit target, IModifierOwner source)
+		public bool TryAddAttackModifier(int id, IUnit target, IModifierOwner source)
 		{
-			if (_modifierAttackAppliers.Contains(id))
+			if (source.ModifierController._modifierAttackAppliers.Contains(id))
 			{
 				TryAdd(id, target, source);
-				return;
+				return true;
 			}
 
-			if (!_modifierAttackChecksAppliers.ContainsKey(id) || !_modifierAttackChecksAppliers[id].Check(source))
-				return;
+			if (source.ModifierController._modifierAttackChecksAppliers.ContainsKey(id) &&
+			    source.ModifierController._modifierAttackChecksAppliers[id].Check(source))
+			{
+				TryAdd(id, target, source);
+				return true;
+			}
 
-			TryAdd(id, target, source);
+			return false;
 		}
 
 		public bool TryAddApplier(int id, bool hasApplyChecks, ApplierType applierType)
