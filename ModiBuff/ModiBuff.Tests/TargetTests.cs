@@ -11,8 +11,8 @@ namespace ModiBuff.Tests
 			var recipe = Recipes.GetRecipe("InitAddDamageRevertible");
 			Unit.AddApplierModifier(recipe, ApplierType.Cast);
 
-			Unit.TryCastAll(Enemy);
-			Unit.TryCastAll(Ally);
+			Unit.TryCast(recipe.Id, Enemy);
+			Unit.TryCast(recipe.Id, Ally);
 
 			Assert.AreEqual(EnemyDamage + 5, Enemy.Damage);
 			Assert.AreEqual(AllyDamage + 5, Ally.Damage);

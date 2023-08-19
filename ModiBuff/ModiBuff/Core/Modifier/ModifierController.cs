@@ -181,16 +181,6 @@ namespace ModiBuff.Core
 					TryAdd(check.Id, target, source);
 		}
 
-		internal void TryApplyCastModifiers(IUnit target, IModifierOwner source)
-		{
-			foreach (int id in source.ModifierController._modifierCastAppliers)
-				TryAdd(id, target, source);
-
-			foreach (var check in source.ModifierController._modifierCastChecksAppliers.Values)
-				if (check.Check(source))
-					TryAdd(check.Id, target, source);
-		}
-
 		private Modifier Add(int id, IUnit target, IUnit source)
 		{
 			var existingModifier = _modifiers[id];

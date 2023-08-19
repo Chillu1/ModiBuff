@@ -60,9 +60,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostHealth_HealSelf()
 		{
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostHealth_HealSelf"), ApplierType.Cast);
+			var recipe = Recipes.GetRecipe("InitDamage_CostHealth_HealSelf");
 
-			Unit.TryCastAll(Enemy);
+			Unit.AddApplierModifier(recipe, ApplierType.Cast);
+
+			Unit.TryCast(recipe.Id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 			Assert.AreEqual(UnitHealth, Unit.Health);

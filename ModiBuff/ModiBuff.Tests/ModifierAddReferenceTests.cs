@@ -61,7 +61,7 @@ namespace ModiBuff.Tests
 
 			Unit.TryAddModifier(modifierReference, Unit);
 
-			Unit.TryCastAll(Enemy);
+			Unit.TryCast(recipe.Id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
