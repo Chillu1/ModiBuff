@@ -26,7 +26,7 @@ namespace ModiBuff.Examples.BasicConsole
 			Health = MaxHealth = health;
 			Damage = damage;
 
-			ModifierController = new ModifierController();
+			ModifierController = new ModifierController(this);
 			_targetingSystem = new TargetingSystem();
 		}
 

@@ -1,11 +1,13 @@
+using System.Runtime.CompilerServices;
+
 namespace ModiBuff.Core.Units
 {
-	public sealed class StatusEffectController
+	public sealed class StatusEffectController : IStatusEffectController
 	{
 		private readonly float[] _legalActionTimers;
 
 		//If this is slow, change to a bunch of bools: CanAct, CanMove, etc...
-		public LegalAction LegalActions { get; private set; }
+		private LegalAction _legalActions;
 
 		public StatusEffectController()
 		{
@@ -14,7 +16,7 @@ namespace ModiBuff.Core.Units
 			for (int i = 0; i < _legalActionTimers.Length; i++)
 				_legalActionTimers[i] = 0;
 
-			LegalActions = LegalAction.All;
+			_legalActions = LegalAction.All;
 		}
 
 		public void Update(float deltaTime)
@@ -28,15 +30,13 @@ namespace ModiBuff.Core.Units
 				if (_legalActionTimers[i] <= 0)
 				{
 					_legalActionTimers[i] = 0;
-					LegalActions |= (LegalAction)(1 << i);
+					_legalActions |= (LegalAction)(1 << i);
 				}
 			}
 		}
 
-		public bool HasLegalAction(LegalAction legalAction)
-		{
-			return (LegalActions & legalAction) != 0;
-		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool HasLegalAction(LegalAction legalAction) => (_legalActions & legalAction) != 0;
 
 		public bool HasStatusEffect(StatusEffectType statusEffectType)
 		{
@@ -45,7 +45,7 @@ namespace ModiBuff.Core.Units
 			//Check if all of them are bigger than 0
 			for (int i = 0; i < legalActions.Length; i++)
 			{
-				if ((LegalActions & legalActions[i]) == 0)
+				if ((_legalActions & legalActions[i]) == 0)
 					continue;
 
 				return false;
@@ -64,7 +64,7 @@ namespace ModiBuff.Core.Units
 					continue;
 
 				_legalActionTimers[legalActionIndex] = duration;
-				LegalActions &= ~legalActions[i];
+				_legalActions &= ~legalActions[i];
 			}
 		}
 
@@ -82,7 +82,7 @@ namespace ModiBuff.Core.Units
 				if (currentDuration <= 0)
 				{
 					_legalActionTimers[legalActionIndex] = 0;
-					LegalActions |= legalActions[i];
+					_legalActions |= legalActions[i];
 				}
 				else
 				{

@@ -10,7 +10,7 @@ namespace ModiBuff.Tests
 		{
 			Unit.TryAddModifierSelf("InitStun");
 
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 		}
 
 		[Test]
@@ -18,7 +18,7 @@ namespace ModiBuff.Tests
 		{
 			Unit.TryAddModifierSelf("InitStun");
 
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 
 			Unit.Attack(Enemy);
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
@@ -29,7 +29,7 @@ namespace ModiBuff.Tests
 		{
 			Unit.TryAddModifierSelf("InitDisarm");
 
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Disarm));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Disarm));
 
 			Unit.Attack(Enemy);
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
@@ -41,9 +41,9 @@ namespace ModiBuff.Tests
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage"), ApplierType.Cast);
 			Unit.TryAddModifierSelf("InitSilence");
 
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Silence));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Silence));
 
-			Unit.CastAll(Enemy);
+			Unit.TryCastAll(Enemy);
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
 		}
 
@@ -62,9 +62,9 @@ namespace ModiBuff.Tests
 			Unit.TryAddModifierSelf("InitStun");
 
 			Unit.Update(1f);
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 			Unit.Update(1f);
-			Assert.False(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 
 			Unit.Attack(Enemy);
 			Assert.AreEqual(EnemyHealth - UnitDamage, Enemy.Health);
@@ -76,12 +76,12 @@ namespace ModiBuff.Tests
 			Unit.TryAddModifierSelf("InitStun");
 
 			Unit.Update(1f);
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 			Unit.TryAddModifierSelf("InitStun");
 			Unit.Update(1f);
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 			Unit.Update(1f);
-			Assert.False(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 		}
 
 		[Test]
@@ -90,13 +90,13 @@ namespace ModiBuff.Tests
 			Unit.TryAddModifierSelf("InitStun");
 
 			Unit.Update(1f);
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 			Unit.TryAddModifierSelf("InitDisarm");
 			Unit.Update(1f);
-			Assert.False(Unit.HasStatusEffect(StatusEffectType.Stun));
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Disarm));
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Disarm));
 			Unit.Update(1f);
-			Assert.False(Unit.HasStatusEffect(StatusEffectType.Disarm));
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Disarm));
 		}
 
 		[Test]
@@ -107,9 +107,9 @@ namespace ModiBuff.Tests
 			Unit.TryAddModifierSelf("InitShortStun");
 
 			Unit.Update(1f);
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 			Unit.Update(1f);
-			Assert.False(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 		}
 
 		[Test]
@@ -118,19 +118,19 @@ namespace ModiBuff.Tests
 			Unit.TryAddModifierSelf("InitDisarm");
 			Unit.TryAddModifierSelf("InitShortFreeze");
 
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Disarm));
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Freeze));
-			Assert.False(Unit.HasLegalAction(LegalAction.Act));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Disarm));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Freeze));
+			Assert.False(Unit.StatusEffectController.HasLegalAction(LegalAction.Act));
 
 			Unit.Update(1f);
 
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Disarm));
-			Assert.False(Unit.HasStatusEffect(StatusEffectType.Freeze));
-			Assert.False(Unit.HasLegalAction(LegalAction.Act));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Disarm));
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Freeze));
+			Assert.False(Unit.StatusEffectController.HasLegalAction(LegalAction.Act));
 
 			Unit.Update(1f);
 
-			Assert.True(Unit.HasLegalAction(LegalAction.Act));
+			Assert.True(Unit.StatusEffectController.HasLegalAction(LegalAction.Act));
 		}
 
 		[Test]
@@ -139,13 +139,13 @@ namespace ModiBuff.Tests
 			Unit.TryAddModifierSelf("InitShortStun");
 			Unit.TryAddModifierSelf("InitDisarm");
 
-			Assert.False(Unit.HasLegalAction(LegalAction.Act));
-			Assert.False(Unit.HasLegalAction(LegalAction.Move));
+			Assert.False(Unit.StatusEffectController.HasLegalAction(LegalAction.Act));
+			Assert.False(Unit.StatusEffectController.HasLegalAction(LegalAction.Move));
 
 			Unit.Update(1f);
 
-			Assert.False(Unit.HasLegalAction(LegalAction.Act));
-			Assert.True(Unit.HasLegalAction(LegalAction.Move));
+			Assert.False(Unit.StatusEffectController.HasLegalAction(LegalAction.Act));
+			Assert.True(Unit.StatusEffectController.HasLegalAction(LegalAction.Move));
 		}
 
 		[Test]
@@ -154,13 +154,13 @@ namespace ModiBuff.Tests
 			int modifierId = IdManager.GetId("InitStun_Revertible");
 			Unit.TryAddModifierSelf("InitStun_Revertible");
 
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
-			Assert.False(Unit.HasLegalAction(LegalAction.Act));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+			Assert.False(Unit.StatusEffectController.HasLegalAction(LegalAction.Act));
 
 			Unit.Update(1f); //Should trigger remove => revert
 
-			Assert.False(Unit.HasStatusEffect(StatusEffectType.Stun));
-			Assert.True(Unit.HasLegalAction(LegalAction.Act));
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.StatusEffectController.HasLegalAction(LegalAction.Act));
 		}
 	}
 }

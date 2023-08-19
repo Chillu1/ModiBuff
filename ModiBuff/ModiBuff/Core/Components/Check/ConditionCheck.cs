@@ -93,7 +93,7 @@ namespace ModiBuff.Core
 			{
 				if (unit is IStatusEffectOwner statusEffectOwner)
 				{
-					if (!statusEffectOwner.HasLegalAction(_legalAction))
+					if (!statusEffectOwner.StatusEffectController.HasLegalAction(_legalAction))
 						return false;
 				}
 #if DEBUG && !MODIBUFF_PROFILE
@@ -106,7 +106,7 @@ namespace ModiBuff.Core
 			{
 				if (unit is IStatusEffectOwner statusEffectOwner)
 				{
-					if (!statusEffectOwner.HasStatusEffect(_statusEffect))
+					if (!statusEffectOwner.StatusEffectController.HasStatusEffect(_statusEffect))
 						return false;
 				}
 #if DEBUG && !MODIBUFF_PROFILE

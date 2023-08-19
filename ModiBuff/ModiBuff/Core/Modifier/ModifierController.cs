@@ -5,6 +5,8 @@ namespace ModiBuff.Core
 {
 	public sealed class ModifierController
 	{
+		private readonly IUnit _owner;
+
 		private readonly Modifier[] _modifiers;
 		private readonly List<int> _modifierIndexes;
 
@@ -15,8 +17,10 @@ namespace ModiBuff.Core
 
 		private readonly List<int> _modifiersToRemove;
 
-		public ModifierController()
+		public ModifierController(IUnit owner)
 		{
+			_owner = owner;
+
 			_modifierIndexes = new List<int>(5);
 			_modifiers = new Modifier[ModifierRecipesBase.RecipesCount];
 			_modifierAttackAppliers = new List<int>(5);
@@ -68,6 +72,7 @@ namespace ModiBuff.Core
 			switch (applierType)
 			{
 				case ApplierType.None:
+					Logger.LogWarning("Trying to add a non applier modifier with apply checks");
 					return TryAdd(id, self, source);
 				case ApplierType.Cast:
 				case ApplierType.Attack:
@@ -86,40 +91,39 @@ namespace ModiBuff.Core
 			return true;
 		}
 
-		public bool TryCastModifier(int id, IUnit target, IModifierOwner source)
+		/// <summary>
+		///		Only triggers the check, does not trigger the modifiers effect. Used when modifiers 
+		/// </summary>
+		public bool TryCastCheck(int id)
 		{
-			if (source.ModifierController._modifierCastAppliers.Contains(id))
-			{
-				TryAdd(id, target, source);
-				return true;
-			}
-
-			if (source.ModifierController._modifierCastChecksAppliers.ContainsKey(id) &&
-			    source.ModifierController._modifierCastChecksAppliers[id].Check(source))
-			{
-				TryAdd(id, target, source);
-				return true;
-			}
-
-			return false;
+			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.Check(_owner);
 		}
 
-		public bool TryAddAttackModifier(int id, IUnit target, IModifierOwner source)
+		/// <summary>
+		///		Skips the check part for check modifiers, use this ONLY in case you're also using <see cref="TryCastCheck"/>
+		/// </summary>
+		public bool TryCastModifierWithoutCheck(int id, IUnit target, IModifierOwner source) //TODO Rename
 		{
-			if (source.ModifierController._modifierAttackAppliers.Contains(id))
-			{
-				TryAdd(id, target, source);
-				return true;
-			}
+			return source.ModifierController._modifierCastChecksAppliers.ContainsKey(id) && TryAdd(id, target, source);
+		}
 
-			if (source.ModifierController._modifierAttackChecksAppliers.ContainsKey(id) &&
-			    source.ModifierController._modifierAttackChecksAppliers[id].Check(source))
-			{
-				TryAdd(id, target, source);
+		/// <summary>
+		///		Checks if we can cast the modifier, triggers the check if it exists
+		/// </summary>
+		public bool CanCastModifier(int id)
+		{
+			if (_modifierCastAppliers.Contains(id))
 				return true;
-			}
 
-			return false;
+			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.Check(_owner);
+		}
+
+		public bool CanUseAttackModifier(int id)
+		{
+			if (_modifierAttackAppliers.Contains(id))
+				return true;
+
+			return _modifierAttackChecksAppliers.TryGetValue(id, out var check) && check.Check(_owner);
 		}
 
 		public bool TryAddApplier(int id, bool hasApplyChecks, ApplierType applierType)
@@ -164,22 +168,25 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public void TryApplyAttackModifiers(IUnit target, IModifierOwner source)
+		public void TryApplyAttackNonCheckModifiers(IEnumerable<int> modifierIds, IUnit target, IModifierOwner source)
 		{
-			foreach (int id in source.ModifierController.GetApplierAttackModifierIds())
+			foreach (int id in modifierIds)
 				TryAdd(id, target, source);
+		}
 
-			foreach (var check in source.ModifierController.GetApplierAttackCheckModifiers())
+		public void TryApplyAttackCheckModifiers(IEnumerable<ModifierCheck> modifierChecks, IUnit target, IModifierOwner source)
+		{
+			foreach (var check in modifierChecks)
 				if (check.Check(source))
 					TryAdd(check.Id, target, source);
 		}
 
-		public void TryApplyCastModifiers(IUnit target, IModifierOwner source)
+		internal void TryApplyCastModifiers(IUnit target, IModifierOwner source)
 		{
-			foreach (int id in source.ModifierController.GetApplierCastModifierIds())
+			foreach (int id in source.ModifierController._modifierCastAppliers)
 				TryAdd(id, target, source);
 
-			foreach (var check in source.ModifierController.GetApplierCastCheckModifiers())
+			foreach (var check in source.ModifierController._modifierCastChecksAppliers.Values)
 				if (check.Check(source))
 					TryAdd(check.Id, target, source);
 		}

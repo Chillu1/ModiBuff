@@ -10,7 +10,7 @@ namespace ModiBuff.Tests
 		{
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage"), ApplierType.Cast);
 
-			Unit.Cast(IdManager.GetId("InitDamage"), Enemy);
+			Unit.TryCast(IdManager.GetId("InitDamage"), Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
@@ -20,13 +20,13 @@ namespace ModiBuff.Tests
 		{
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamageFullHealth"), ApplierType.Cast);
 
-			Unit.Cast(IdManager.GetId("InitDamageFullHealth"), Enemy);
+			Unit.TryCast(IdManager.GetId("InitDamageFullHealth"), Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
 			Unit.TakeDamage(5, Enemy);
 
-			Unit.Cast(IdManager.GetId("InitDamageFullHealth"), Enemy);
+			Unit.TryCast(IdManager.GetId("InitDamageFullHealth"), Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}

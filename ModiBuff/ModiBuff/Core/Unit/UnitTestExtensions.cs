@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	internal static class UnitExtensions
+	internal static class UnitTestExtensions
 	{
 		internal static bool TryAddModifierSelf(this IModifierOwner unit, string name)
 		{
@@ -15,6 +15,11 @@ namespace ModiBuff.Core
 		internal static bool ContainsModifier(this IModifierOwner unit, string name)
 		{
 			return unit.ModifierController.Contains(ModifierIdManager.GetIdOld(name));
+		}
+
+		internal static bool AddApplierModifier(this IModifierOwner unit, IModifierRecipe recipe, ApplierType applierType)
+		{
+			return unit.ModifierController.TryAddApplier(recipe.Id, recipe.HasApplyChecks, applierType);
 		}
 
 		internal static float AttackN(this IAttacker unit, IUnit target, int n)

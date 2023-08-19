@@ -23,7 +23,7 @@ namespace ModiBuff.Tests
 
 			public NonDamagableUnit()
 			{
-				ModifierController = new ModifierController();
+				ModifierController = new ModifierController(this);
 			}
 
 			public bool TryAddModifier(int id, IUnit source)

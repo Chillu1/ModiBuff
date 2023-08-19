@@ -45,7 +45,7 @@ namespace ModiBuff.Tests
 			var applier = Recipes.GetRecipe("InitDamage");
 			Unit.AddApplierModifier(applier, ApplierType.Cast);
 
-			Unit.CastAll(Enemy);
+			Unit.TryCastAll(Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
@@ -69,7 +69,7 @@ namespace ModiBuff.Tests
 		{
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostMana"), ApplierType.Cast);
 
-			Unit.CastAll(Enemy);
+			Unit.TryCastAll(Enemy);
 
 			Assert.AreEqual(UnitMana - 5, Unit.Mana);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
@@ -87,19 +87,19 @@ namespace ModiBuff.Tests
 
 			Enemy.AttackN(Unit, 9); //Gets 9 more stacks
 
-			Assert.True(Enemy.HasStatusEffect(StatusEffectType.Disarm));
+			Assert.True(Enemy.StatusEffectController.HasStatusEffect(StatusEffectType.Disarm));
 
 			Enemy.Update(1f); //Rupture modifier interval ticks
 			Assert.AreEqual(EnemyHealth - 5 - 5, Enemy.Health);
 
 			Enemy.Update(4f);
-			Assert.False(Enemy.HasStatusEffect(StatusEffectType.Disarm));
+			Assert.False(Enemy.StatusEffectController.HasStatusEffect(StatusEffectType.Disarm));
 
 			Enemy.Update(5f);
 			Enemy.AttackN(Unit, 5);
 
 			//Only 1 stack of Disarm
-			Assert.False(Enemy.HasStatusEffect(StatusEffectType.Disarm));
+			Assert.False(Enemy.StatusEffectController.HasStatusEffect(StatusEffectType.Disarm));
 		}
 
 		[Test]

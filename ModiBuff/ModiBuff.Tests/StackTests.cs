@@ -76,17 +76,17 @@ namespace ModiBuff.Tests
 		{
 			Unit.TryAddModifierSelf("StunEveryTwoStacks");
 
-			Assert.False(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 			Unit.TryAddModifierSelf("StunEveryTwoStacks");
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 
 			Unit.Update(2);
 
-			Assert.False(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 			Unit.TryAddModifierSelf("StunEveryTwoStacks");
-			Assert.False(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 			Unit.TryAddModifierSelf("StunEveryTwoStacks");
-			Assert.True(Unit.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 		}
 
 		[Test]

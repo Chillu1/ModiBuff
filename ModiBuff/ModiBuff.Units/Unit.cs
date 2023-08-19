@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 namespace ModiBuff.Core.Units
 {
 	public class Unit : IUpdatable, IModifierOwner, IAttacker, IDamagable, IHealable, IHealer, IManaOwner, IHealthCost, IAddDamage,
-		IEventOwner, IStatusEffectOwner, IStatusResistance
+		IEventOwner, IStatusEffectOwner, IStatusResistance, IStatusEffectModifierOwner
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -19,6 +19,7 @@ namespace ModiBuff.Core.Units
 		public bool IsDead { get; private set; }
 
 		public ModifierController ModifierController { get; }
+		public IStatusEffectController StatusEffectController => _statusEffectController;
 
 		//Note: These event lists should only be used for classic effects.
 		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
@@ -52,14 +53,14 @@ namespace ModiBuff.Core.Units
 			_targetsInRange.Add(this);
 			_auraModifiers = new List<Modifier>();
 
-			ModifierController = new ModifierController();
+			ModifierController = new ModifierController(this);
 			_statusEffectController = new StatusEffectController();
 		}
 
 		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences) : this(health, damage)
 		{
 			foreach (var modifierAddReference in modifierAddReferences)
-				TryAddModifier(modifierAddReference, this);
+				this.TryAddModifier(modifierAddReference, this);
 		}
 
 		public void Update(float deltaTime)
@@ -70,22 +71,6 @@ namespace ModiBuff.Core.Units
 				_auraModifiers[i].Update(deltaTime);
 		}
 
-		public void Cast(int id, Unit target)
-		{
-			if ((_statusEffectController.LegalActions & LegalAction.Cast) == 0)
-				return;
-
-			target.ModifierController.TryCastModifier(id, target, this);
-		}
-
-		internal void CastAll(Unit target)
-		{
-			if ((_statusEffectController.LegalActions & LegalAction.Cast) == 0)
-				return;
-
-			target.ModifierController.TryApplyCastModifiers(target, this);
-		}
-
 		public float Attack(IUnit target, bool triggersEvents = true)
 		{
 			return Attack((Unit)target, triggersEvents);
@@ -93,10 +78,10 @@ namespace ModiBuff.Core.Units
 
 		public float Attack(Unit target, bool triggersEvents = true)
 		{
-			if ((_statusEffectController.LegalActions & LegalAction.Act) == 0)
+			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
-			ModifierController.TryApplyAttackModifiers(target, this);
+			this.ApplyAllAttackModifier(target);
 
 			for (int i = 0; i < _onAttackEffects.Count; i++)
 				_onAttackEffects[i].Effect(target, this);
@@ -145,7 +130,7 @@ namespace ModiBuff.Core.Units
 
 		public float Heal(IHealable target, bool triggersEvents = true)
 		{
-			if ((_statusEffectController.LegalActions & LegalAction.Act) == 0)
+			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
 			if (triggersEvents)
@@ -168,28 +153,6 @@ namespace ModiBuff.Core.Units
 		public void UseMana(float value)
 		{
 			Mana -= value;
-		}
-
-		//---StatusEffects---
-
-		public bool HasLegalAction(LegalAction legalAction)
-		{
-			return _statusEffectController.HasLegalAction(legalAction);
-		}
-
-		public bool HasStatusEffect(StatusEffectType statusEffect)
-		{
-			return _statusEffectController.HasStatusEffect(statusEffect);
-		}
-
-		public void ChangeStatusEffect(StatusEffectType statusEffectType, float duration)
-		{
-			_statusEffectController.ChangeStatusEffect(statusEffectType, duration);
-		}
-
-		public void DecreaseStatusEffect(StatusEffectType statusEffectType, float duration)
-		{
-			_statusEffectController.DecreaseStatusEffect(statusEffectType, duration);
 		}
 
 		//---StatusResistances---
@@ -282,16 +245,6 @@ namespace ModiBuff.Core.Units
 				if (!remove)
 					Logger.LogError("Could not remove event: " + effectToRemove.GetType());
 			}
-		}
-
-		public bool TryAddModifier(ModifierAddReference addReference, IUnit sender)
-		{
-			return ModifierController.TryAdd(addReference, this, sender);
-		}
-
-		internal bool AddApplierModifier(IModifierRecipe recipe, ApplierType applierType)
-		{
-			return ModifierController.TryAddApplier(recipe.Id, recipe.HasApplyChecks, applierType);
 		}
 
 		//---Aura---

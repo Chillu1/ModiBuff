@@ -32,7 +32,7 @@ namespace ModiBuff.Examples.SimpleSolo
 
 		public void Cast(int spellId)
 		{
-			Cast(spellId, (Core.Units.Unit)_targetingSystem.CastTarget);
+			this.TryCast(spellId, (Core.Units.Unit)_targetingSystem.CastTarget);
 		}
 
 		public void SetAttackTarget(IUnit target) => _targetingSystem.SetAttackTarget(target);

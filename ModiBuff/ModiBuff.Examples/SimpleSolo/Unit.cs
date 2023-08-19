@@ -24,7 +24,7 @@ namespace ModiBuff.Examples.SimpleSolo
 		{
 			_targetingSystem = new TargetingSystem();
 
-			ModifierController = new ModifierController();
+			ModifierController = new ModifierController(this);
 
 			Health = MaxHealth = health;
 			Damage = damage;
@@ -44,9 +44,9 @@ namespace ModiBuff.Examples.SimpleSolo
 			ModifierController.Update(deltaTime);
 		}
 
-		public void Cast(int id, IUnit target)
+		public void Cast(int id, IModifierOwner target)
 		{
-			((IModifierOwner)target).ModifierController.TryCastModifier(id, target, this);
+			this.TryCast(id, target);
 		}
 
 		public void SetAttackTarget(IUnit target) => _targetingSystem.SetAttackTarget(target);

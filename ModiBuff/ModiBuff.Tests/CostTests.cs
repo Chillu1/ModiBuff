@@ -62,7 +62,7 @@ namespace ModiBuff.Tests
 		{
 			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostHealth_HealSelf"), ApplierType.Cast);
 
-			Unit.CastAll(Enemy);
+			Unit.TryCastAll(Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 			Assert.AreEqual(UnitHealth, Unit.Health);
