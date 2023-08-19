@@ -111,8 +111,20 @@ namespace ModiBuff.Core
 	public enum WhenStackEffect
 	{
 		None,
+
+		/// <summary>
+		///		Always trigger the stack effects.
+		/// </summary>
 		Always,
+
+		/// <summary>
+		///		Only trigger the stack effects when the max stacks are reached.
+		/// </summary>
 		OnMaxStacks,
+
+		/// <summary>
+		///		Trigger the stack effects every X stacks.
+		/// </summary>
 		EveryXStacks,
 		//OnZeroStacks,
 	}

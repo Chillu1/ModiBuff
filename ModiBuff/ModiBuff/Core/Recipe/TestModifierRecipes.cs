@@ -158,14 +158,16 @@ namespace ModiBuff.Core
 				.Remove(1);
 
 			{
-				Add("InitAddDamageBuff")
-					.OneTimeInit()
-					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
-					.Remove(1.05f).Refresh(); //TODO standardized aura time & aura effects should always be refreshable
+				Register("InitAddDamageBuff_Interval", "InitAddDamageBuff");
 
 				Add("InitAddDamageBuff_Interval")
 					.Interval(1)
 					.Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval);
+
+				Add("InitAddDamageBuff")
+					.OneTimeInit()
+					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+					.Remove(1.05f).Refresh(); //TODO standardized aura time & aura effects should always be refreshable
 			}
 
 			Add("DoT")
@@ -219,11 +221,13 @@ namespace ModiBuff.Core
 				.EffectCondition(ConditionType.HealthIsFull)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			{
-				Add("Flag");
+				Register("InitDamage_EffectCondition_ContainsModifier", "Flag");
 
 				Add("InitDamage_EffectCondition_ContainsModifier")
 					.EffectCondition("Flag")
 					.Effect(new DamageEffect(5), EffectOn.Init);
+
+				Add("Flag");
 			}
 
 			{
@@ -275,11 +279,13 @@ namespace ModiBuff.Core
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			{
-				Add("FlagApply");
+				Register("InitDamage_ApplyCondition_ContainsModifier", "FlagApply");
 
 				Add("InitDamage_ApplyCondition_ContainsModifier")
 					.ApplyCondition("FlagApply")
 					.Effect(new DamageEffect(5), EffectOn.Init);
+
+				Add("FlagApply");
 			}
 
 			{
@@ -344,46 +350,47 @@ namespace ModiBuff.Core
 				.Effect(new SelfAttackActionEffect());
 
 			{
-				Add("PoisonDoT")
-					.Interval(1)
-					.Effect(new DamageEffect(5), EffectOn.Interval);
+				Register("PoisonDoT_OnHit_Event", "PoisonDoT");
 
 				AddEvent("PoisonDoT_OnHit_Event", EffectOnEvent.WhenAttacked)
 					.Effect(new ApplierEffect("PoisonDoT"), Targeting.SourceTarget);
+
+				Add("PoisonDoT")
+					.Interval(1)
+					.Effect(new DamageEffect(5), EffectOn.Interval);
 			}
 			{
-				//Disarm the target for 5 seconds. On 2 stacks, removable in 10 seconds, refreshable.
-				Add("ComplexApplier_Disarm")
-					.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect), EffectOn.Stack)
-					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2)
-					.Remove(10).Refresh();
+				Register("ComplexApplier_OnHit_Event", "ComplexApplier_Rupture", "ComplexApplier_Disarm");
+
+				//WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^
+				AddEvent("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
+					.Effect(new ApplierEffect("ComplexApplier_Rupture"), Targeting.SourceTarget);
+
 				//rupture modifier, that does DoT. When this gets to 5 stacks, apply the disarm effect.
 				Add("ComplexApplier_Rupture")
 					.Effect(new DamageEffect(5), EffectOn.Interval)
 					.Effect(new ApplierEffect("ComplexApplier_Disarm"), EffectOn.Stack)
 					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5);
-				//WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^
-				AddEvent("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
-					.Effect(new ApplierEffect("ComplexApplier_Rupture"), Targeting.SourceTarget);
+
+				//Disarm the target for 5 seconds. On 2 stacks, removable in 10 seconds, refreshable.
+				Add("ComplexApplier_Disarm")
+					.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect), EffectOn.Stack)
+					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2)
+					.Remove(10).Refresh();
 			}
 			{
+				Register("ComplexApplier2_WhenHealed_Event", "ComplexApplier2_WhenHealed", "ComplexApplier2_OnAttack_Event",
+					"ComplexApplier2_WhenAttacked_Event", "ComplexApplier2_AddDamageAdd", "ComplexApplier2_AddDamage");
 				//Add damage on 4 stacks buff, that you give someone when they heal you 5 times, for 60 seconds.
 
-				//AddDamage 5, one time init, remove in 10 seconds, refreshable.
-				Add("ComplexApplier2_AddDamage")
-					.OneTimeInit()
-					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
-					.Remove(10).Refresh();
+				//Apply the modifier to source (healer) WhenHealed
+				AddEvent("ComplexApplier2_WhenHealed_Event", EffectOnEvent.WhenHealed)
+					.Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), Targeting.SourceTarget);
 
-				//On 4 stacks, Add Damage to Unit source (attacker). TODO Maybe remove the modifier from you/reset stacks?
-				Add("ComplexApplier2_AddDamageAdd")
-					.Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)
-					//.Effect(new RemoveEffect(), EffectOn.Stack)
-					.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 4)
-					.Remove(5).Refresh();
-
-				AddEvent("ComplexApplier2_WhenAttacked_Event", EffectOnEvent.WhenAttacked)
-					.Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), Targeting.SourceTarget)
+				//On 5 stacks, apply the modifier to self.
+				Add("ComplexApplier2_WhenHealed")
+					.Effect(new ApplierEffect("ComplexApplier2_OnAttack_Event"), EffectOn.Stack)
+					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5)
 					.Remove(5).Refresh();
 
 				//Long main buff. Apply the modifier OnAttack.
@@ -391,15 +398,22 @@ namespace ModiBuff.Core
 					.Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"))
 					.Remove(60).Refresh();
 
-				//On 5 stacks, apply the modifier to self.
-				Add("ComplexApplier2_WhenHealed")
-					.Effect(new ApplierEffect("ComplexApplier2_OnAttack_Event"), EffectOn.Stack)
-					.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 5)
+				AddEvent("ComplexApplier2_WhenAttacked_Event", EffectOnEvent.WhenAttacked)
+					.Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), Targeting.SourceTarget)
 					.Remove(5).Refresh();
 
-				//Apply the modifier to source (healer) WhenHealed
-				AddEvent("ComplexApplier2_WhenHealed_Event", EffectOnEvent.WhenHealed)
-					.Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), Targeting.SourceTarget);
+				//On 4 stacks, Add Damage to Unit source (attacker). TODO Maybe remove the modifier from you/reset stacks?
+				Add("ComplexApplier2_AddDamageAdd")
+					.Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)
+					//.Effect(new RemoveEffect(), EffectOn.Stack)
+					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
+					.Remove(5).Refresh();
+
+				//AddDamage 5, one time init, remove in 10 seconds, refreshable.
+				Add("ComplexApplier2_AddDamage")
+					.OneTimeInit()
+					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+					.Remove(10).Refresh();
 			}
 		}
 
@@ -418,13 +432,15 @@ namespace ModiBuff.Core
 
 			//Stacking damage, more damage for every stack, removed after 5 seconds, refreshable duration
 			{
+				Register("StackingDamageApplier", "StackingDamage");
+
+				Add("StackingDamageApplier")
+					.Effect(new ApplierEffect("StackingDamage"), EffectOn.Init);
+
 				Add("StackingDamage")
 					.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
 					.Stack(WhenStackEffect.Always, value: 2, maxStacks: -1)
 					.Remove(5).Refresh();
-
-				Add("StackingDamageApplier")
-					.Effect(new ApplierEffect("StackingDamage"), EffectOn.Init);
 			}
 
 			//Self Damage, Damage Target

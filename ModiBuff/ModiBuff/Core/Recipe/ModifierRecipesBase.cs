@@ -9,11 +9,13 @@ namespace ModiBuff.Core
 
 		private readonly ModifierIdManager _idManager;
 		private readonly IDictionary<string, IModifierRecipe> _recipes;
+		private readonly List<RegisterData> _registeredNames;
 
 		public ModifierRecipesBase(ModifierIdManager idManager)
 		{
 			_idManager = idManager;
-			_recipes = new Dictionary<string, IModifierRecipe>();
+			_recipes = new Dictionary<string, IModifierRecipe>(64);
+			_registeredNames = new List<RegisterData>(16);
 
 			SetupRecipes();
 			foreach (var modifier in _recipes.Values)
@@ -38,7 +40,21 @@ namespace ModiBuff.Core
 				return (ModifierRecipe)localRecipe;
 			}
 
-			var recipe = new ModifierRecipe(name, _idManager);
+			int id = -1;
+
+			foreach (var registerData in _registeredNames)
+			{
+				if (registerData.Name == name)
+				{
+					id = registerData.Id;
+					break;
+				}
+			}
+
+			if (id == -1)
+				id = _idManager.GetFreeId(name);
+
+			var recipe = new ModifierRecipe(id, name, _idManager);
 			_recipes.Add(name, recipe);
 			return recipe;
 		}
@@ -51,9 +67,53 @@ namespace ModiBuff.Core
 				return (ModifierEventRecipe)localRecipe;
 			}
 
-			var recipe = new ModifierEventRecipe(_idManager.GetFreeId(name), name, effectOnEvent);
+			int id = -1;
+
+			foreach (var registerData in _registeredNames)
+			{
+				if (registerData.Name == name)
+				{
+					id = registerData.Id;
+					break;
+				}
+			}
+
+			if (id == -1)
+				id = _idManager.GetFreeId(name);
+
+			var recipe = new ModifierEventRecipe(id, name, effectOnEvent);
 			_recipes.Add(name, recipe);
 			return recipe;
+		}
+
+		/// <summary>
+		///		Special case when we want to use applier/conditional modifiers and want to set them up in order.
+		///		This can also be used to have the first original modifier take the first available id.
+		/// </summary>
+		protected void Register(params string[] names)
+		{
+			foreach (string name in names)
+			{
+				if (_registeredNames.Any(tuple => tuple.Name == name))
+				{
+					Logger.LogError($"Modifier with id {name} already exists");
+					continue;
+				}
+
+				_registeredNames.Add(new RegisterData(name, _idManager.GetFreeId(name)));
+			}
+		}
+
+		private struct RegisterData
+		{
+			public string Name;
+			public int Id;
+
+			public RegisterData(string name, int id)
+			{
+				Name = name;
+				Id = id;
+			}
 		}
 	}
 }

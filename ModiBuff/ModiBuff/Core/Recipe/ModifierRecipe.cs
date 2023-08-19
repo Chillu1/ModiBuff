@@ -65,9 +65,9 @@ namespace ModiBuff.Core
 		private CostCheck _effectCost;
 		private ChanceCheck _effectChance;
 
-		public ModifierRecipe(string name, ModifierIdManager idManager)
+		public ModifierRecipe(int id, string name, ModifierIdManager idManager)
 		{
-			Id = idManager.GetFreeId(name);
+			Id = id;
 			Name = name;
 			_idManager = idManager;
 
@@ -178,7 +178,7 @@ namespace ModiBuff.Core
 		}
 
 		/// <summary>
-		///		Chance for when trying to apply the modifier to a target.
+		///		When trying to apply a modifier, what should the chance be of it being applied?
 		/// </summary>
 		public ModifierRecipe ApplyChance(float chance)
 		{
@@ -265,6 +265,10 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		/// <summary>
+		///		How many seconds should pass between the interval effects get applied.
+		/// </summary>
+		/// <param name="affectedByStatusResistance">Should the interval be affected by status resistance</param>
 		public ModifierRecipe Interval(float interval, bool affectedByStatusResistance = false)
 		{
 			_interval = interval;
@@ -273,6 +277,9 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		/// <summary>
+		///		How many seconds should pass before the duration effects get triggered (usually modifier removal)
+		/// </summary>
 		public ModifierRecipe Duration(float duration)
 		{
 			_duration = duration;
@@ -280,6 +287,9 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		/// <summary>
+		///		How many seconds should pass before the modifier gets removed.
+		/// </summary>
 		public ModifierRecipe Remove(float duration)
 		{
 			Duration(duration);
@@ -287,6 +297,11 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		/// <summary>
+		///		If a modifier gets applied to a target that already has the modifier, should the interval or duration be reset?
+		///		Order matters, call after <see cref="Interval(float,bool)"/> or <see cref="Duration(float)"/>
+		/// </summary>
+		/// <remarks> This is most often used to refresh duration of the modifier, like refreshing DoT modifiers </remarks>
 		public ModifierRecipe Refresh()
 		{
 			if (_interval <= 0 && _duration <= 0)
@@ -306,6 +321,10 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		/// <summary>
+		///		If a modifier gets applied to a target that already has the modifier, should the interval or duration be reset?
+		/// </summary>
+		/// <remarks> This is most often used to refresh duration of the modifier, like refreshing DoT modifiers </remarks>
 		public ModifierRecipe Refresh(RefreshType type)
 		{
 			switch (type)
@@ -324,6 +343,13 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		/// <summary>
+		/// 	Adds stack functionality to the modifier. A stack is added every time the modifier gets re-added to the target.
+		/// </summary>
+		/// <param name="whenStackEffect">When should the stack effects be triggered.</param>
+		/// <param name="value">Values that can be used by the stack effects.</param>
+		/// <param name="maxStacks">Max amount of stacks that can be applied.</param>
+		/// <param name="everyXStacks">If <see cref="whenStackEffect"/> is set to <see cref="whenStackEffect.EveryXStacks"/>, this value will be used to determine when the stack effects should be triggered.</param>
 		public ModifierRecipe Stack(WhenStackEffect whenStackEffect, float value = -1, int maxStacks = -1, int everyXStacks = -1)
 		{
 			_whenStackEffect = whenStackEffect;
@@ -335,6 +361,12 @@ namespace ModiBuff.Core
 
 		//---Effects---
 
+		/// <summary>
+		///		Add an effect to the modifier.
+		/// </summary>
+		/// <param name="effect">Effects that get applied on specific actions (init, stack, interval, duration). </param>
+		/// <param name="effectOn">When the effect should trigger (init, stack, interval, duration). Can be multiple.</param>
+		/// <param name="targeting">Who should be the target and owner of the applied modifier. For further information, see <see cref="ModiBuff.Core.Targeting"/></param>
 		public ModifierRecipe Effect(IEffect effect, EffectOn effectOn, Targeting targeting = Targeting.TargetSource)
 		{
 			if (effect is ITargetEffect effectTarget)
