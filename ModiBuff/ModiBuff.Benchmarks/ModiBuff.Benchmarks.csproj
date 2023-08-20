@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <LangVersion>7</LangVersion>
+        <TargetFramework>net6.0</TargetFramework>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BenchmarkDotNet" Version="0.13.6" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ModiBuff.Tests\ModiBuff.Tests.csproj" />
+      <ProjectReference Include="..\ModiBuff.Units\ModiBuff.Units.csproj" />
+      <ProjectReference Include="..\ModiBuff\ModiBuff.csproj" />
+    </ItemGroup>
+
+</Project>

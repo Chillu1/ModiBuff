@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0;netstandard1.3</TargetFrameworks>
+        <LangVersion>7</LangVersion>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ModiBuff.Units\ModiBuff.Units.csproj" />
+      <ProjectReference Include="..\ModiBuff\ModiBuff.csproj" />
+    </ItemGroup>
+
+</Project>
