@@ -5,7 +5,7 @@ using ModiBuff.Core.Units;
 namespace ModiBuff.Tests
 {
 	[MemoryDiagnoser]
-	public class BenchModifierIteration : BaseModifierBenches
+	public class BenchModifierIteration : ModifierBenches
 	{
 		private const int UnitCount = 10_000;
 

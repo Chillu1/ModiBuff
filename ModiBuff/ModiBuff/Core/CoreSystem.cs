@@ -3,7 +3,7 @@ namespace ModiBuff.Core
 	public sealed class CoreSystem
 	{
 		public ModifierIdManager IdManager { get; }
-		public ModifierRecipesBase Recipes { get; }
+		public ModifierRecipes Recipes { get; }
 		public ModifierPool Pool { get; }
 
 		public CoreSystem(int initialPoolSize = 64)

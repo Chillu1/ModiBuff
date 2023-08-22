@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class ActionTests : BaseModifierTests
+	public sealed class ActionTests : ModifierTests
 	{
 		[Test]
 		public void AttackSelf_Action()

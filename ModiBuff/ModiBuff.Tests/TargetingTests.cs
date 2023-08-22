@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class TargetingTests : BaseModifierTests
+	public sealed class TargetingTests : ModifierTests
 	{
 		[Test]
 		public void InitSelfHeal_DamageTarget()

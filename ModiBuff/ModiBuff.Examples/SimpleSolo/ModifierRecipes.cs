@@ -2,7 +2,7 @@ using ModiBuff.Core;
 
 namespace ModiBuff.Examples.SimpleSolo
 {
-	public sealed class ModifierRecipes : ModifierRecipesBase
+	public sealed class ModifierRecipes : Core.ModifierRecipes
 	{
 		public ModifierRecipes(ModifierIdManager idManager) : base(idManager)
 		{

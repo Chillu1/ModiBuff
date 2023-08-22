@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class ConditionTests : BaseModifierTests
+	public sealed class ConditionTests : ModifierTests
 	{
 		[Test]
 		public void HealthCondition_OnApply_InitDamage()

@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class StatusResistanceTests : BaseModifierTests
+	public sealed class StatusResistanceTests : ModifierTests
 	{
 		[Test]
 		public void Dot_NoResistance()

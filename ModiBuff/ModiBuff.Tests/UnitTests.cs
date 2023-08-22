@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class UnitTests : BaseModifierTests
+	public sealed class UnitTests : ModifierTests
 	{
 		[Test]
 		public void DamageDamagableUnit()

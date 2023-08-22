@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class StatusEffectTests : BaseModifierTests
+	public sealed class StatusEffectTests : ModifierTests
 	{
 		[Test]
 		public void Stun()

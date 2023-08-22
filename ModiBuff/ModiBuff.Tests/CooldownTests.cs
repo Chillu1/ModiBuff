@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class CooldownTests : BaseModifierTests
+	public sealed class CooldownTests : ModifierTests
 	{
 		[Test]
 		public void InitDamage_Cooldown()

@@ -7,7 +7,7 @@ namespace ModiBuff.Tests
 	/// <summary>
 	///		Only tests for subsequent inits, not new modifier each time
 	/// </summary>
-	public class BenchAddModifier : BaseModifierBenches
+	public class BenchAddModifier : ModifierBenches
 	{
 		private Unit _unit;
 

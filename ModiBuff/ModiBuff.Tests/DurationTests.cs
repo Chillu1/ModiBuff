@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class DurationTests : BaseModifierTests
+	public sealed class DurationTests : ModifierTests
 	{
 		[Test]
 		public void Duration_Damage()

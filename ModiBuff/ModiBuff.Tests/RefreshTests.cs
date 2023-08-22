@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class RefreshTests : BaseModifierTests
+	public sealed class RefreshTests : ModifierTests
 	{
 		[Test]
 		public void NoRefresh()

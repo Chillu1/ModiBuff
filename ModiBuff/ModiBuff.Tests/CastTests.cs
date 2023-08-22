@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class CastTests : BaseModifierTests
+	public sealed class CastTests : ModifierTests
 	{
 		[Test]
 		public void CastInitDamageNoChecks_OnEnemy()

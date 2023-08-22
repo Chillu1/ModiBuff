@@ -5,13 +5,13 @@ using ModiBuff.Core;
 
 namespace ModiBuff.Extensions.Godot
 {
-	public abstract class ModifierRecipesGodotBase : ModifierRecipesBase
+	public abstract class ModifierRecipesGodot : ModifierRecipes
 	{
 		private const string DefaultPath = "res://resources/modibuff_recipes/";
 
 		private readonly string _path;
 
-		public ModifierRecipesGodotBase(ModifierIdManager idManager, string path = DefaultPath) : base(idManager)
+		public ModifierRecipesGodot(ModifierIdManager idManager, string path = DefaultPath) : base(idManager)
 		{
 			_path = path;
 		}

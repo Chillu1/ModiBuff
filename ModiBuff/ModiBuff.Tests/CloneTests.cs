@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class CloneTests : BaseModifierTests
+	public sealed class CloneTests : ModifierTests
 	{
 		[Test]
 		public void StackComponentClone()

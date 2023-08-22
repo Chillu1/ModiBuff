@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class RevertibleTests : BaseModifierTests
+	public sealed class RevertibleTests : ModifierTests
 	{
 		[Test]
 		public void Init_AddDamage_Remove_RevertDamage()

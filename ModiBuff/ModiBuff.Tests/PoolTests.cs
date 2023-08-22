@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class PoolTests : BaseModifierTests
+	public sealed class PoolTests : ModifierTests
 	{
 		[Test]
 		public void TimeStateReset()

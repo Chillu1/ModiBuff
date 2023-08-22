@@ -1,8 +1,8 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class TestUnitRecipes : UnitRecipesBase
+	public sealed class TestUnitRecipes : UnitRecipes
 	{
-		public TestUnitRecipes(ModifierRecipesBase modifierRecipes) : base(modifierRecipes)
+		public TestUnitRecipes(ModifierRecipes modifierRecipes) : base(modifierRecipes)
 		{
 		}
 

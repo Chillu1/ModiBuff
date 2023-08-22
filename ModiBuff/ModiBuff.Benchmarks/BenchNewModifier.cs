@@ -4,7 +4,7 @@ using ModiBuff.Core;
 namespace ModiBuff.Tests
 {
 	[MemoryDiagnoser]
-	public class BenchNewModifier : BaseModifierBenches
+	public class BenchNewModifier : ModifierBenches
 	{
 		private IModifierRecipe _initDamageRecipe;
 		private IModifierRecipe _initDoTSeparateDamageRemoveRecipe;

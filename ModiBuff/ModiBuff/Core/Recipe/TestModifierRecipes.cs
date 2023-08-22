@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public sealed class TestModifierRecipes : ModifierRecipesBase
+	public sealed class TestModifierRecipes : ModifierRecipes
 	{
 		public TestModifierRecipes(ModifierIdManager idManager) : base(idManager)
 		{

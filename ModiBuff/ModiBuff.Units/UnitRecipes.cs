@@ -3,14 +3,14 @@ using System.Linq;
 
 namespace ModiBuff.Core.Units
 {
-	public abstract class UnitRecipesBase
+	public abstract class UnitRecipes
 	{
 		public static int RecipesCount { get; private set; }
 
-		protected readonly ModifierRecipesBase ModifierRecipes;
+		protected readonly ModifierRecipes ModifierRecipes;
 		private readonly IDictionary<string, UnitRecipe> _recipes;
 
-		public UnitRecipesBase(ModifierRecipesBase modifierRecipes)
+		public UnitRecipes(ModifierRecipes modifierRecipes)
 		{
 			ModifierRecipes = modifierRecipes;
 			_recipes = new Dictionary<string, UnitRecipe>();

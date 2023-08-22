@@ -3,14 +3,14 @@ using ModiBuff.Core;
 
 namespace ModiBuff.Tests
 {
-	public abstract class BaseModifierBenches
+	public abstract class ModifierBenches
 	{
 		protected const int Iterations = 10_000;
 
 		private CoreSystem _coreSystem;
 
 		protected ModifierIdManager IdManager { get; private set; }
-		protected ModifierRecipesBase Recipes { get; private set; }
+		protected ModifierRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
 
 

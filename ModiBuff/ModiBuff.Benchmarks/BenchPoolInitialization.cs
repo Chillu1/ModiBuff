@@ -21,7 +21,7 @@ namespace ModiBuff.Tests
 			_recipes = new TestModifierRecipes(_modifierIdManager);
 			_pool = new ModifierPool(_recipes.GetRecipes(), AllocationCount);
 
-			Console.WriteLine("Allocated: " + ModifierRecipesBase.RecipesCount * AllocationCount + " modifiers");
+			Console.WriteLine("Allocated: " + ModifierRecipes.RecipesCount * AllocationCount + " modifiers");
 		}
 
 		[Benchmark]

@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class ModifierAddReferenceTests : BaseModifierTests
+	public sealed class ModifierAddReferenceTests : ModifierTests
 	{
 		[Test]
 		public void AddSelfModifier()

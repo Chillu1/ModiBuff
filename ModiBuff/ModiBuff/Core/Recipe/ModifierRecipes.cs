@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace ModiBuff.Core
 {
-	public abstract class ModifierRecipesBase
+	public abstract class ModifierRecipes
 	{
 		public static int RecipesCount { get; private set; }
 
@@ -11,7 +11,7 @@ namespace ModiBuff.Core
 		private readonly IDictionary<string, IModifierRecipe> _recipes;
 		private readonly List<RegisterData> _registeredNames;
 
-		public ModifierRecipesBase(ModifierIdManager idManager)
+		public ModifierRecipes(ModifierIdManager idManager)
 		{
 			_idManager = idManager;
 			_recipes = new Dictionary<string, IModifierRecipe>(64);

@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class CostTests : BaseModifierTests
+	public sealed class CostTests : ModifierTests
 	{
 		[Test]
 		public void CostHealth()

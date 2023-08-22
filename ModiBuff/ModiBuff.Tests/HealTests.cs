@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class HealTests : BaseModifierTests
+	public sealed class HealTests : ModifierTests
 	{
 		[Test]
 		public void SelfInit_Heal()

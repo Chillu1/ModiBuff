@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class StackTests : BaseModifierTests
+	public sealed class StackTests : ModifierTests
 	{
 		[Test]
 		public void Stack_Damage()

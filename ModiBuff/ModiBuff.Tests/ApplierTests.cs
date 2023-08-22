@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class ApplierTests : BaseModifierTests
+	public sealed class ApplierTests : ModifierTests
 	{
 		[Test]
 		public void DamageApplier_Attack_Damage()

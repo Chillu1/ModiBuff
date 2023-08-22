@@ -22,7 +22,7 @@ namespace ModiBuff.Core
 			_owner = owner;
 
 			_modifierIndexes = new List<int>(5);
-			_modifiers = new Modifier[ModifierRecipesBase.RecipesCount];
+			_modifiers = new Modifier[ModifierRecipes.RecipesCount];
 			_modifierAttackAppliers = new List<int>(5);
 			_modifierCastAppliers = new List<int>(5);
 			_modifierCastChecksAppliers = new Dictionary<int, ModifierCheck>(5);

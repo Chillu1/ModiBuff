@@ -4,12 +4,12 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public abstract class BaseModifierTests
+	public abstract class ModifierTests
 	{
 		private CoreSystem _coreSystem;
 
 		protected ModifierIdManager IdManager { get; private set; }
-		protected ModifierRecipesBase Recipes { get; private set; }
+		protected ModifierRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
 
 		protected Unit Unit { get; private set; }

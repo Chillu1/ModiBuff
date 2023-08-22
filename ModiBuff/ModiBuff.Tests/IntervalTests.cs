@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class IntervalTests : BaseModifierTests
+	public sealed class IntervalTests : ModifierTests
 	{
 		[Test]
 		public void Init_DoT()

@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class EffectsTests : BaseModifierTests
+	public sealed class EffectsTests : ModifierTests
 	{
 		[Test]
 		public void TwoEffects()

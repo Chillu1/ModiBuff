@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class AuraTests : BaseModifierTests
+	public sealed class AuraTests : ModifierTests
 	{
 		[Test]
 		public void AuraInterval()

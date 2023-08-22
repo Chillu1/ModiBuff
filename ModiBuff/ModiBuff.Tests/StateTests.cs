@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class StateTests : BaseModifierTests
+	public sealed class StateTests : ModifierTests
 	{
 		[Test]
 		public void TwoDurationModifiers_DifferentState()
