@@ -1,9 +1,11 @@
+using System;
+
 namespace ModiBuff.Core
 {
-	public interface IAttacker
+	public interface IAttacker<TDamage> where TDamage : IComparable<TDamage>
 	{
-		float Damage { get; }
+		TDamage Damage { get; }
 
-		float Attack(IUnit target, bool triggersEvents = true);
+		TDamage Attack(IUnit target, bool triggersEvents = true);
 	}
 }

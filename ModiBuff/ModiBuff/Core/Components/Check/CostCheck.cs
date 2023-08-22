@@ -1,3 +1,5 @@
+using System;
+
 namespace ModiBuff.Core
 {
 	public sealed class CostCheck

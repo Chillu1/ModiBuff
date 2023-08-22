@@ -6,8 +6,6 @@ namespace ModiBuff.Tests
 {
 	public abstract class ModifierTests
 	{
-		private CoreSystem _coreSystem;
-
 		protected ModifierIdManager IdManager { get; private set; }
 		protected ModifierRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
@@ -33,11 +31,10 @@ namespace ModiBuff.Tests
 		public void OneTimeSetup()
 		{
 			Logger.SetLogger<NUnitLogger>();
-			_coreSystem = new CoreSystem(1);
 
-			IdManager = _coreSystem.IdManager;
-			Recipes = _coreSystem.Recipes;
-			Pool = _coreSystem.Pool;
+			IdManager = new ModifierIdManager();
+			Recipes = new TestModifierRecipes(IdManager);
+			Pool = new ModifierPool(Recipes.GetRecipes(), 1);
 		}
 
 		[SetUp]
@@ -59,7 +56,9 @@ namespace ModiBuff.Tests
 		[OneTimeTearDown]
 		public void OneTimeTearDown()
 		{
-			_coreSystem.Dispose();
+			Pool.Dispose();
+			IdManager.Reset();
+
 			IdManager = null;
 			Recipes = null;
 			Pool = null;

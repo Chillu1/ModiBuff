@@ -35,10 +35,10 @@ namespace ModiBuff.Core
 			if (!(source is IDamagable) && _targeting == Targeting.SourceTarget || _targeting == Targeting.SourceSource)
 				throw new ArgumentException("Source must implement IDamagable when targeting source");
 #endif
-			Effect((IDamagable)target, source, _baseDamage + _extraDamage);
+			Effect((IDamagable<float>)target, source, _baseDamage + _extraDamage);
 		}
 
-		private void Effect(IDamagable target, IUnit source, float damage)
+		private void Effect(IDamagable<float> target, IUnit source, float damage)
 		{
 			switch (_targeting)
 			{
@@ -46,13 +46,13 @@ namespace ModiBuff.Core
 					target.TakeDamage(damage, source, !_isEventBased);
 					break;
 				case Targeting.SourceTarget:
-					((IDamagable)source).TakeDamage(damage, target, !_isEventBased);
+					((IDamagable<float>)source).TakeDamage(damage, target, !_isEventBased);
 					break;
 				case Targeting.TargetTarget:
 					target.TakeDamage(damage, target, !_isEventBased);
 					break;
 				case Targeting.SourceSource:
-					((IDamagable)source).TakeDamage(damage, source, !_isEventBased);
+					((IDamagable<float>)source).TakeDamage(damage, source, !_isEventBased);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();

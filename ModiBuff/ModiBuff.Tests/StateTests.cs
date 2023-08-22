@@ -99,7 +99,7 @@ namespace ModiBuff.Tests
 			void DoAndAssert(float expectedHealth, IModifierOwner unit)
 			{
 				unit.TryAddModifierSelf("DamageEveryTwoStacks");
-				Assert.AreEqual(expectedHealth, ((IDamagable)unit).Health);
+				Assert.AreEqual(expectedHealth, ((IDamagable<float>)unit).Health);
 			}
 		}
 

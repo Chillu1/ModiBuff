@@ -1,4 +1,4 @@
-namespace ModiBuff.Core
+namespace ModiBuff.Core.Units
 {
 	public sealed class AttackActionEffect : IEventTrigger, IEffect
 	{
@@ -8,7 +8,7 @@ namespace ModiBuff.Core
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			((IAttacker)source).Attack(target, !_isEventBased);
+			((IAttacker<float>)source).Attack(target, !_isEventBased);
 		}
 	}
 }

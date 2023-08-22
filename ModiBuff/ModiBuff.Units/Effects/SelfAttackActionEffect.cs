@@ -1,4 +1,4 @@
-namespace ModiBuff.Core
+namespace ModiBuff.Core.Units
 {
 	public sealed class SelfAttackActionEffect : IEventTrigger, IEffect
 	{
@@ -8,7 +8,7 @@ namespace ModiBuff.Core
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			((IAttacker)target).Attack(target, !_isEventBased);
+			((IAttacker<float>)target).Attack(target, !_isEventBased);
 		}
 	}
 }

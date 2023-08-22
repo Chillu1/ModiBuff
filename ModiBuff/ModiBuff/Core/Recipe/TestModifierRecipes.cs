@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public sealed class TestModifierRecipes : ModifierRecipes
+	public class TestModifierRecipes : ModifierRecipes
 	{
 		public TestModifierRecipes(ModifierIdManager idManager) : base(idManager)
 		{
@@ -75,9 +75,6 @@ namespace ModiBuff.Core
 				.Interval(4)
 				.Effect(new DamageEffect(5), EffectOn.Interval)
 				.Remove(5);
-
-			Add("InitAttackAction")
-				.Effect(new AttackActionEffect(), EffectOn.Init);
 
 			Add("InitHealAction")
 				.Effect(new HealActionEffect(), EffectOn.Init);
@@ -253,9 +250,6 @@ namespace ModiBuff.Core
 				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Init)
 				.Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceSource);
 
-			Add("InitAttackAction_Self")
-				.Effect(new AttackActionEffect(), EffectOn.Init, Targeting.TargetTarget);
-
 			//InitDamageOneTime With1Seconds linger, to not work again (global effect cooldown)
 			Add("OneTimeInitDamage_LingerDuration")
 				.OneTimeInit()
@@ -345,9 +339,6 @@ namespace ModiBuff.Core
 
 			AddEvent("Heal_OnHeal_Event", EffectOnEvent.OnHeal)
 				.Effect(new HealEffect(5), Targeting.SourceTarget);
-
-			AddEvent("AttackSelf_OnHit_Event", EffectOnEvent.WhenAttacked)
-				.Effect(new SelfAttackActionEffect());
 
 			{
 				Register("PoisonDoT_OnHit_Event", "PoisonDoT");

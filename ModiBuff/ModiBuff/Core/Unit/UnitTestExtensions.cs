@@ -22,7 +22,7 @@ namespace ModiBuff.Core
 			return unit.ModifierController.TryAddApplier(recipe.Id, recipe.HasApplyChecks, applierType);
 		}
 
-		internal static float AttackN(this IAttacker unit, IUnit target, int n)
+		internal static float AttackN(this IAttacker<float> unit, IUnit target, int n)
 		{
 			float totalDamage = 0;
 			for (int i = 0; i < n; i++)

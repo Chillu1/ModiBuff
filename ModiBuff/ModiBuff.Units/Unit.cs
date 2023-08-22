@@ -5,8 +5,8 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
-	public class Unit : IUpdatable, IModifierOwner, IAttacker, IDamagable, IHealable, IHealer, IManaOwner, IHealthCost, IAddDamage,
-		IEventOwner, IStatusEffectOwner, IStatusResistance, IStatusEffectModifierOwner
+	public class Unit : IUpdatable, IModifierOwner, IAttacker<float>, IDamagable<float>, IHealable, IHealer, IManaOwner, IHealthCost,
+		IAddDamage, IEventOwner, IStatusEffectOwner, IStatusResistance, IStatusEffectModifierOwner
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }

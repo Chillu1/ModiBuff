@@ -7,8 +7,6 @@ namespace ModiBuff.Tests
 	{
 		protected const int Iterations = 10_000;
 
-		private CoreSystem _coreSystem;
-
 		protected ModifierIdManager IdManager { get; private set; }
 		protected ModifierRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
@@ -17,17 +15,17 @@ namespace ModiBuff.Tests
 		[GlobalSetup]
 		public virtual void GlobalSetup()
 		{
-			_coreSystem = new CoreSystem(1024);
-
-			IdManager = _coreSystem.IdManager;
-			Recipes = _coreSystem.Recipes;
-			Pool = _coreSystem.Pool;
+			IdManager = new ModifierIdManager();
+			Recipes = new TestModifierRecipes(IdManager);
+			Pool = new ModifierPool(Recipes.GetRecipes(), 1024);
 		}
 
 		[GlobalCleanup]
 		public virtual void OneTimeTearDown()
 		{
-			_coreSystem.Dispose();
+			Pool.Dispose();
+			IdManager.Reset();
+
 			IdManager = null;
 			Recipes = null;
 			Pool = null;

@@ -5,7 +5,7 @@ namespace ModiBuff.Examples.SimpleSolo
 	/// <summary>
 	///		Custom basic unit implementation
 	/// </summary>
-	public sealed class Unit : IUnit, IUpdatable, IModifierOwner, IAttacker, IDamagable, IBlockOwner
+	public sealed class Unit : IUnit, IUpdatable, IModifierOwner, IAttacker<float>, IDamagable<float>, IBlockOwner
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -70,7 +70,7 @@ namespace ModiBuff.Examples.SimpleSolo
 
 		public float Attack(IUnit target, bool triggersEvents = true)
 		{
-			float dealtDamage = ((IDamagable)target).TakeDamage(Damage, this, triggersEvents);
+			float dealtDamage = ((IDamagable<float>)target).TakeDamage(Damage, this, triggersEvents);
 
 			return dealtDamage;
 		}
