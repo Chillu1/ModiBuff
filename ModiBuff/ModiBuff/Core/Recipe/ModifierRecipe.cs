@@ -15,8 +15,6 @@ namespace ModiBuff.Core
 
 		private readonly ModifierIdManager _idManager;
 
-		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
-
 		private ConditionType _applyConditionType;
 		private StatType _applyConditionStatType;
 		private float _applyConditionValue = -1;
@@ -374,13 +372,6 @@ namespace ModiBuff.Core
 			if (effect is IModifierIdOwner modifierIdOwner)
 				modifierIdOwner.SetModifierId(Id);
 			_effectWrappers.Add(new EffectWrapper(effect, effectOn));
-			return this;
-		}
-
-		//---Target---
-		public ModifierRecipe LegalTarget(LegalTargetType legalTargetType)
-		{
-			LegalTargetType = legalTargetType;
 			return this;
 		}
 

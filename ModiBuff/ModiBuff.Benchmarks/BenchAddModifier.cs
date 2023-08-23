@@ -29,19 +29,19 @@ namespace ModiBuff.Tests
 		[Benchmark]
 		public void BenchAddInitDamageBench()
 		{
-			bool result = _unit.TryAddModifier(_initDamageModifierId, _unit);
+			_unit.AddModifier(_initDamageModifierId, _unit);
 		}
 
 		[Benchmark]
 		public void BenchAddInitStackDamage()
 		{
-			bool result = _unit.TryAddModifier(_initStackDamageModifierId, _unit);
+			_unit.AddModifier(_initStackDamageModifierId, _unit);
 		}
 
 		[Benchmark]
 		public void BenchAddInitHeal()
 		{
-			bool result = _unit.TryAddModifier(_initHealModifierId, _unit);
+			_unit.AddModifier(_initHealModifierId, _unit);
 		}
 	}
 }

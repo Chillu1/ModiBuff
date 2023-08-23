@@ -8,7 +8,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void SelfInit_Damage()
 		{
-			Unit.TryAddModifierSelf("InitDamage"); //Init
+			Unit.AddModifierSelf("InitDamage"); //Init
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
@@ -16,7 +16,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void TargetInit_Damage()
 		{
-			Enemy.TryAddModifierTarget("InitDamage", Unit); //Init
+			Enemy.AddModifierTarget("InitDamage", Unit); //Init
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}

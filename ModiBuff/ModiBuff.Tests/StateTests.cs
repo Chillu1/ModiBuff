@@ -8,8 +8,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void TwoDurationModifiers_DifferentState()
 		{
-			Unit.TryAddModifierSelf("DurationDamage");
-			Enemy.TryAddModifierSelf("DurationDamage");
+			Unit.AddModifierSelf("DurationDamage");
+			Enemy.AddModifierSelf("DurationDamage");
 
 			Unit.Update(5);
 			Enemy.Update(2);
@@ -21,13 +21,13 @@ namespace ModiBuff.Tests
 		[Test]
 		public void TwoInitModifiers_DifferentState()
 		{
-			Unit.TryAddModifierSelf("InitDamage");
-			Enemy.TryAddModifierSelf("InitDamage");
+			Unit.AddModifierSelf("InitDamage");
+			Enemy.AddModifierSelf("InitDamage");
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
-			Unit.TryAddModifierSelf("InitDamage");
+			Unit.AddModifierSelf("InitDamage");
 			Assert.AreEqual(UnitHealth - 10, Unit.Health);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
@@ -35,8 +35,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void TwoDurationRemoveModifiers_DifferentState()
 		{
-			Unit.TryAddModifierSelf("DurationRemove");
-			Enemy.TryAddModifierSelf("DurationRemove");
+			Unit.AddModifierSelf("DurationRemove");
+			Enemy.AddModifierSelf("DurationRemove");
 
 			Unit.Update(5);
 			Enemy.Update(2);
@@ -48,8 +48,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void TwoDurationRemoveModifiers_DifferentState_ReverseOrder()
 		{
-			Unit.TryAddModifierSelf("DurationRemove");
-			Enemy.TryAddModifierSelf("DurationRemove");
+			Unit.AddModifierSelf("DurationRemove");
+			Enemy.AddModifierSelf("DurationRemove");
 
 			Unit.Update(2);
 			Enemy.Update(5);
@@ -63,7 +63,7 @@ namespace ModiBuff.Tests
 		{
 			string modifierName = "IntervalDamage_DurationRemove";
 
-			Unit.TryAddModifierSelf(modifierName);
+			Unit.AddModifierSelf(modifierName);
 
 			Unit.Update(4);
 			Assert.True(Unit.ContainsModifier(modifierName));
@@ -98,7 +98,7 @@ namespace ModiBuff.Tests
 
 			void DoAndAssert(float expectedHealth, IModifierOwner unit)
 			{
-				unit.TryAddModifierSelf("DamageEveryTwoStacks");
+				unit.AddModifierSelf("DamageEveryTwoStacks");
 				Assert.AreEqual(expectedHealth, ((IDamagable<float>)unit).Health);
 			}
 		}
@@ -106,29 +106,29 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stack_DamageStackBased()
 		{
-			Unit.TryAddModifierSelf("StackBasedDamage");
+			Unit.AddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health); //1 stack = +2 damage == 2
 
-			Enemy.TryAddModifierSelf("StackBasedDamage");
+			Enemy.AddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(EnemyHealth - 5 - 2, Enemy.Health);
-			Enemy.TryAddModifierSelf("StackBasedDamage");
+			Enemy.AddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(EnemyHealth - 10 - 6, Enemy.Health); //2 stacks = +4 damage == 4
 
-			Unit.TryAddModifierSelf("StackBasedDamage");
+			Unit.AddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health); //2 stacks = +4 damage == 6
 		}
 
 		[Test]
 		public void IntervalDamage_AddDamageOnStack()
 		{
-			Unit.TryAddModifierSelf("IntervalDamage_StackAddDamage");
+			Unit.AddModifierSelf("IntervalDamage_StackAddDamage");
 
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.Update(1);
 			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
 
-			Unit.TryAddModifierSelf("IntervalDamage_StackAddDamage");
+			Unit.AddModifierSelf("IntervalDamage_StackAddDamage");
 
 			Unit.Update(1);
 			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health);
@@ -137,19 +137,19 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddDamageOnStack_RevertibleRemove()
 		{
-			Unit.TryAddModifierSelf("StackAddDamageRevertible");
+			Unit.AddModifierSelf("StackAddDamageRevertible");
 			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
 
-			Unit.TryAddModifierSelf("StackAddDamageRevertible");
+			Unit.AddModifierSelf("StackAddDamageRevertible");
 			Assert.AreEqual(UnitDamage + 5 + 5 + 2 + 4, Unit.Damage);
 
-			Unit.TryAddModifierSelf("StackAddDamageRevertible");
+			Unit.AddModifierSelf("StackAddDamageRevertible");
 			Assert.AreEqual(UnitDamage + 5 + 5 + 5 + 2 + 4 + 6, Unit.Damage);
 
-			Enemy.TryAddModifierSelf("StackAddDamageRevertible");
+			Enemy.AddModifierSelf("StackAddDamageRevertible");
 			Assert.AreEqual(EnemyDamage + 5 + 2, Enemy.Damage);
 
-			Enemy.TryAddModifierSelf("StackAddDamageRevertible");
+			Enemy.AddModifierSelf("StackAddDamageRevertible");
 			Assert.AreEqual(EnemyDamage + 5 + 5 + 2 + 4, Enemy.Damage);
 
 			Enemy.Update(5); //Removed
@@ -166,12 +166,12 @@ namespace ModiBuff.Tests
 			int recipeId = IdManager.GetId("OneTimeInitDamage");
 			Pool.Allocate(recipeId, 1);
 
-			Unit.TryAddModifierSelf("OneTimeInitDamage"); //Init
-			Unit.TryAddModifierSelf("OneTimeInitDamage"); //No init
+			Unit.AddModifierSelf("OneTimeInitDamage"); //Init
+			Unit.AddModifierSelf("OneTimeInitDamage"); //No init
 
 			Unit.ModifierController.Remove(recipeId); //Remove, back to pool, reset state
 
-			Unit.TryAddModifierSelf("OneTimeInitDamage"); //Use again, init
+			Unit.AddModifierSelf("OneTimeInitDamage"); //Use again, init
 
 			Assert.AreEqual(UnitHealth - 10, Unit.Health);
 		}
@@ -179,10 +179,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamage_Cooldown_Effect()
 		{
-			Unit.TryAddModifierSelf("InitDamage_Cooldown_Effect");
+			Unit.AddModifierSelf("InitDamage_Cooldown_Effect");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
-			Enemy.TryAddModifierSelf("InitDamage_Cooldown_Effect");
+			Enemy.AddModifierSelf("InitDamage_Cooldown_Effect");
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
 	}

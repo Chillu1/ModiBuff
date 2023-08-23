@@ -8,7 +8,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackSelf_Action()
 		{
-			Unit.TryAddModifierSelf("InitAttackAction");
+			Unit.AddModifierSelf("InitAttackAction");
 
 			Assert.AreEqual(UnitHealth - UnitDamage, Unit.Health);
 		}
@@ -16,7 +16,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackEnemy_Action()
 		{
-			Unit.TryAddModifierTarget("InitAttackAction", Enemy);
+			Unit.AddModifierTarget("InitAttackAction", Enemy);
 
 			Assert.AreEqual(EnemyHealth - UnitDamage, Enemy.Health);
 		}
@@ -26,7 +26,7 @@ namespace ModiBuff.Tests
 		{
 			Unit.TakeDamage(UnitHeal + 5, Unit);
 
-			Unit.TryAddModifierSelf("InitHealAction");
+			Unit.AddModifierSelf("InitHealAction");
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
@@ -34,7 +34,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackSelfTarget_Action()
 		{
-			Unit.TryAddModifierSelf("InitAttackAction_Self");
+			Unit.AddModifierSelf("InitAttackAction_Self");
 
 			Assert.AreEqual(UnitHealth - UnitDamage, Unit.Health);
 		}

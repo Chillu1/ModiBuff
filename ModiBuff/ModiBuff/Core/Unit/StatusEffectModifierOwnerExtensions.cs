@@ -8,7 +8,7 @@ namespace ModiBuff.Core
 				return;
 
 			if (owner.ModifierController.CanCastModifier(modifierId))
-				target.ModifierController.TryAdd(modifierId, target, owner);
+				target.ModifierController.Add(modifierId, target, owner);
 		}
 	}
 }

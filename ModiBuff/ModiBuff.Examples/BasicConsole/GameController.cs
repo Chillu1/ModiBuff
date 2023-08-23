@@ -48,7 +48,7 @@ namespace ModiBuff.Examples.BasicConsole
 					//_recipes.GetRecipe()
 					break;
 				case "3":
-					_player.TryAddModifier(_defenseModifierId, _player);
+					_player.AddModifier(_defenseModifierId, _player);
 					break;
 			}
 

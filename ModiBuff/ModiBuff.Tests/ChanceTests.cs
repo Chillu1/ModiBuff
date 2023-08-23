@@ -23,7 +23,7 @@ namespace ModiBuff.Tests
 		public void Random_InitDamage_Effect()
 		{
 			for (int i = 0; i < 50; i++)
-				Unit.TryAddModifierSelf("ChanceEffectInitDamage");
+				Unit.AddModifierSelf("ChanceEffectInitDamage");
 
 			float totalDamage = UnitHealth - Unit.Health;
 			float averageDamage = totalDamage / 50;
@@ -34,7 +34,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Random_IntervalDamage_Effect()
 		{
-			Unit.TryAddModifierSelf("ChanceEffectIntervalDamage");
+			Unit.AddModifierSelf("ChanceEffectIntervalDamage");
 
 			for (int i = 0; i < 50; i++)
 				Unit.Update(1f);
@@ -50,7 +50,7 @@ namespace ModiBuff.Tests
 		{
 			for (int i = 0; i < 50; i++)
 			{
-				Unit.TryAddModifierSelf("ChanceEffectDurationDamage");
+				Unit.AddModifierSelf("ChanceEffectDurationDamage");
 				Unit.Update(1f);
 			}
 
@@ -64,7 +64,7 @@ namespace ModiBuff.Tests
 		public void Random_StackDamage_Effect()
 		{
 			for (int i = 0; i < 50; i++)
-				Unit.TryAddModifierSelf("ChanceEffectStackDamage");
+				Unit.AddModifierSelf("ChanceEffectStackDamage");
 
 			float totalDamage = UnitHealth - Unit.Health;
 			float averageDamage = totalDamage / 50;

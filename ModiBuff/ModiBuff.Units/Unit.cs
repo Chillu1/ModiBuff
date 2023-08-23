@@ -60,7 +60,7 @@ namespace ModiBuff.Core.Units
 		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences) : this(health, damage)
 		{
 			foreach (var modifierAddReference in modifierAddReferences)
-				this.TryAddModifier(modifierAddReference, this);
+				ModifierController.TryAdd(modifierAddReference);
 		}
 
 		public void Update(float deltaTime)

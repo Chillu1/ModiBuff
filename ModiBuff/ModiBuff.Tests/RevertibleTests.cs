@@ -8,7 +8,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Init_AddDamage_Remove_RevertDamage()
 		{
-			Unit.TryAddModifierSelf("InitAddDamageRevertible");
+			Unit.AddModifierSelf("InitAddDamageRevertible");
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 
 			Unit.Update(5);

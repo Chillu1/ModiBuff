@@ -53,7 +53,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageApplier_Interval()
 		{
-			Unit.TryAddModifierTarget("DamageApplier_Interval", Enemy);
+			Unit.AddModifierTarget("DamageApplier_Interval", Enemy);
 
 			Unit.Update(1f);
 
@@ -80,7 +80,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void NestedStackApplier()
 		{
-			Unit.TryAddModifierSelf("ComplexApplier_OnHit_Event");
+			Unit.AddModifierSelf("ComplexApplier_OnHit_Event");
 
 			Enemy.Attack(Unit); //Gets rupture modifier
 
@@ -108,7 +108,7 @@ namespace ModiBuff.Tests
 		public void AddDamageStacksEventsAppliers()
 		{
 			//Add damage on 4 stacks buff, that you give someone when they heal you 5 times, for 60 seconds.
-			Ally.TryAddModifierSelf("ComplexApplier2_WhenHealed_Event");
+			Ally.AddModifierSelf("ComplexApplier2_WhenHealed_Event");
 
 			Unit.HealN(Ally, 5);
 

@@ -10,12 +10,12 @@ namespace ModiBuff.Tests
 		{
 			string recipeId = "DurationRemove";
 
-			Unit.TryAddModifierSelf(recipeId);
+			Unit.AddModifierSelf(recipeId);
 			Unit.Update(4);
 
 			Assert.True(Unit.ContainsModifier(recipeId));
 
-			Unit.TryAddModifierSelf(recipeId);
+			Unit.AddModifierSelf(recipeId);
 			Unit.Update(4);
 
 			Assert.False(Unit.ContainsModifier(recipeId));
@@ -26,12 +26,12 @@ namespace ModiBuff.Tests
 		{
 			string recipeId = "DurationRefreshRemove";
 
-			Unit.TryAddModifierSelf(recipeId);
+			Unit.AddModifierSelf(recipeId);
 			Unit.Update(4);
 
 			Assert.True(Unit.ContainsModifier(recipeId));
 
-			Unit.TryAddModifierSelf(recipeId);
+			Unit.AddModifierSelf(recipeId);
 			Unit.Update(4);
 
 			Assert.True(Unit.ContainsModifier(recipeId));
@@ -42,12 +42,12 @@ namespace ModiBuff.Tests
 		{
 			string recipeId = "IntervalRefreshRemove";
 
-			Unit.TryAddModifierSelf(recipeId);
+			Unit.AddModifierSelf(recipeId);
 			Unit.Update(4);
 
 			Assert.True(Unit.ContainsModifier(recipeId));
 
-			Unit.TryAddModifierSelf(recipeId);
+			Unit.AddModifierSelf(recipeId);
 			Unit.Update(4);
 
 			Assert.True(Unit.ContainsModifier(recipeId));
@@ -58,12 +58,12 @@ namespace ModiBuff.Tests
 		{
 			string recipeId = "DurationRefreshRemove_IntervalDamage";
 
-			Unit.TryAddModifierSelf(recipeId);
+			Unit.AddModifierSelf(recipeId);
 			Unit.Update(4);
 
 			Assert.True(Unit.ContainsModifier(recipeId));
 
-			Unit.TryAddModifierSelf(recipeId);
+			Unit.AddModifierSelf(recipeId);
 			Unit.Update(4);
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);

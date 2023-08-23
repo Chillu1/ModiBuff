@@ -38,8 +38,6 @@ namespace ModiBuff.Examples.BasicConsole
 			ModifierController.Update(deltaTime);
 		}
 
-		public bool TryAddModifier(int id, IUnit source) => ModifierController.TryAdd(id, this, source);
-
 		public void SetAttackTarget(IUnit target)
 		{
 			((Unit)target).DeathEvent += delegate { _targetingSystem.SetAttackTarget(null); };

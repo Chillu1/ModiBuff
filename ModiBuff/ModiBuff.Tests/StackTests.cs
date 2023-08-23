@@ -8,10 +8,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stack_Damage()
 		{
-			Unit.TryAddModifierSelf("StackDamage");
+			Unit.AddModifierSelf("StackDamage");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
-			Unit.TryAddModifierSelf("StackDamage");
+			Unit.AddModifierSelf("StackDamage");
 			Assert.AreEqual(UnitHealth - 10, Unit.Health);
 		}
 
@@ -20,51 +20,51 @@ namespace ModiBuff.Tests
 		{
 			Unit.TakeDamage(UnitHealth - 5, Unit);
 
-			Unit.TryAddModifierSelf("StackHeal");
+			Unit.AddModifierSelf("StackHeal");
 			Assert.AreEqual(10, Unit.Health);
 
-			Unit.TryAddModifierSelf("StackHeal");
+			Unit.AddModifierSelf("StackHeal");
 			Assert.AreEqual(15, Unit.Health);
 		}
 
 		[Test]
 		public void DamageOnMaxStacks()
 		{
-			Unit.TryAddModifierSelf("DamageOnMaxStacks");
+			Unit.AddModifierSelf("DamageOnMaxStacks");
 			Assert.AreEqual(UnitHealth, Unit.Health);
-			Unit.TryAddModifierSelf("DamageOnMaxStacks");
+			Unit.AddModifierSelf("DamageOnMaxStacks");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
 		[Test]
 		public void DamageEveryTwoStacks()
 		{
-			Unit.TryAddModifierSelf("DamageEveryTwoStacks");
+			Unit.AddModifierSelf("DamageEveryTwoStacks");
 			Assert.AreEqual(UnitHealth, Unit.Health);
-			Unit.TryAddModifierSelf("DamageEveryTwoStacks");
+			Unit.AddModifierSelf("DamageEveryTwoStacks");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-			Unit.TryAddModifierSelf("DamageEveryTwoStacks");
+			Unit.AddModifierSelf("DamageEveryTwoStacks");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-			Unit.TryAddModifierSelf("DamageEveryTwoStacks");
+			Unit.AddModifierSelf("DamageEveryTwoStacks");
 			Assert.AreEqual(UnitHealth - 10, Unit.Health);
 		}
 
 		[Test]
 		public void Stack_DamageStackBased()
 		{
-			Unit.TryAddModifierSelf("StackBasedDamage");
+			Unit.AddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health); //1 stack = +2 damage == 2
-			Unit.TryAddModifierSelf("StackBasedDamage");
+			Unit.AddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health); //2 stacks = +4 damage == 6
 		}
 
 		[Test]
 		public void StackAddDamageRevertible()
 		{
-			Unit.TryAddModifierSelf("StackAddDamageRevertible"); //5 base, + 2 on stack
+			Unit.AddModifierSelf("StackAddDamageRevertible"); //5 base, + 2 on stack
 			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
 
-			Unit.TryAddModifierSelf("StackAddDamageRevertible"); //5 base, + 4 on stack
+			Unit.AddModifierSelf("StackAddDamageRevertible"); //5 base, + 4 on stack
 			Assert.AreEqual(UnitDamage + 10 + 6, Unit.Damage);
 
 			Unit.Update(5); //Modifier removed
@@ -74,31 +74,31 @@ namespace ModiBuff.Tests
 		[Test]
 		public void StunEveryTwoStacks()
 		{
-			Unit.TryAddModifierSelf("StunEveryTwoStacks");
+			Unit.AddModifierSelf("StunEveryTwoStacks");
 
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
-			Unit.TryAddModifierSelf("StunEveryTwoStacks");
+			Unit.AddModifierSelf("StunEveryTwoStacks");
 			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 
 			Unit.Update(2);
 
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
-			Unit.TryAddModifierSelf("StunEveryTwoStacks");
+			Unit.AddModifierSelf("StunEveryTwoStacks");
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
-			Unit.TryAddModifierSelf("StunEveryTwoStacks");
+			Unit.AddModifierSelf("StunEveryTwoStacks");
 			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 		}
 
 		[Test]
 		public void DamageOnMaxStacks_Limit()
 		{
-			Unit.TryAddModifierSelf("DamageOnMaxStacks");
+			Unit.AddModifierSelf("DamageOnMaxStacks");
 			Assert.AreEqual(UnitHealth, Unit.Health);
-			Unit.TryAddModifierSelf("DamageOnMaxStacks");
+			Unit.AddModifierSelf("DamageOnMaxStacks");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-			Unit.TryAddModifierSelf("DamageOnMaxStacks");
+			Unit.AddModifierSelf("DamageOnMaxStacks");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-			Unit.TryAddModifierSelf("DamageOnMaxStacks");
+			Unit.AddModifierSelf("DamageOnMaxStacks");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 	}

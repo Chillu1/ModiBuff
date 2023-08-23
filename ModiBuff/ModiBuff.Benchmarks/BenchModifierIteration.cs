@@ -28,7 +28,7 @@ namespace ModiBuff.Tests
 			for (int i = 0; i < _dotUnits.Length; i++)
 			{
 				_dotUnits[i] = new Unit();
-				_dotUnits[i].TryAddModifierSelf("DoT");
+				_dotUnits[i].AddModifierSelf("DoT");
 			}
 
 			_unit = new Unit();
@@ -61,7 +61,7 @@ namespace ModiBuff.Tests
 			for (int i = 0; i < _initDamageUnits.Length; i++)
 			{
 				var unit = _initDamageUnits[i];
-				unit.TryAddModifier(_initDamageId, unit);
+				unit.AddModifier(_initDamageId, unit);
 			}
 		}
 	}

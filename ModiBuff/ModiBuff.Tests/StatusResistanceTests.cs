@@ -8,7 +8,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Dot_NoResistance()
 		{
-			Unit.TryAddModifierSelf("DoTRemoveStatusResistance");
+			Unit.AddModifierSelf("DoTRemoveStatusResistance");
 
 			for (int i = 0; i < 6; i++)
 				Unit.Update(1f);
@@ -22,7 +22,7 @@ namespace ModiBuff.Tests
 		[TestCase(0.1f)]
 		public void Dot_XResistance(float resistance)
 		{
-			Unit.TryAddModifierSelf("DoTRemoveStatusResistance");
+			Unit.AddModifierSelf("DoTRemoveStatusResistance");
 			Unit.ChangeStatusResistance(resistance);
 
 			for (int i = 0; i < 6; i++)
@@ -35,7 +35,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Dot_StatusResistance_IntervalNotAffected()
 		{
-			Unit.TryAddModifierSelf("DoTRemove");
+			Unit.AddModifierSelf("DoTRemove");
 			Unit.ChangeStatusResistance(0.5f);
 
 			for (int i = 0; i < 12; i++)

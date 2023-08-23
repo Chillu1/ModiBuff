@@ -8,7 +8,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void TwoEffects()
 		{
-			Unit.TryAddModifierSelf("InitDoTSeparateDamageRemove");
+			Unit.AddModifierSelf("InitDoTSeparateDamageRemove");
 
 			Assert.AreEqual(UnitHealth - 10, Unit.Health);
 

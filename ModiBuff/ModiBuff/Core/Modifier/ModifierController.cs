@@ -61,19 +61,19 @@ namespace ModiBuff.Core
 		public IReadOnlyList<int> GetApplierAttackModifierIds() => _modifierAttackAppliers;
 		public IReadOnlyList<int> GetApplierCastModifierIds() => _modifierCastAppliers;
 
-		public bool TryAdd(ModifierAddReference addReference, IUnit self, IUnit source)
+		public bool TryAdd(ModifierAddReference addReference)
 		{
-			return TryAdd(addReference.Id, addReference.HasApplyChecks, addReference.ApplierType, self, source);
+			return TryAdd(addReference.Id, addReference.HasApplyChecks, addReference.ApplierType);
 		}
 
 		//TODO Refactor, make it easier to add appliers through API
-		private bool TryAdd(int id, bool hasApplyChecks, ApplierType applierType, IUnit self, IUnit source)
+		private bool TryAdd(int id, bool hasApplyChecks, ApplierType applierType)
 		{
 			switch (applierType)
 			{
 				case ApplierType.None:
-					Logger.LogWarning("Trying to add a non applier modifier with apply checks");
-					return TryAdd(id, self, source);
+					Logger.LogError("Trying to add a non applier modifier with apply checks");
+					return false;
 				case ApplierType.Cast:
 				case ApplierType.Attack:
 					return TryAddApplier(id, hasApplyChecks, applierType);
@@ -83,13 +83,6 @@ namespace ModiBuff.Core
 		}
 
 		//TODO do appliers make sense? Should we just store the id, what kind of state do appliers have?
-		public bool TryAdd(int id, IUnit target, IUnit source)
-		{
-			//TODO We should check if the target is legal here?
-			Add(id, target, source);
-
-			return true;
-		}
 
 		/// <summary>
 		///		Only triggers the check, does not trigger the modifiers effect. Used when modifiers 
@@ -104,7 +97,13 @@ namespace ModiBuff.Core
 		/// </summary>
 		public bool TryCastModifierWithoutCheck(int id, IUnit target, IModifierOwner source) //TODO Rename
 		{
-			return source.ModifierController._modifierCastChecksAppliers.ContainsKey(id) && TryAdd(id, target, source);
+			if (source.ModifierController._modifierCastChecksAppliers.ContainsKey(id))
+			{
+				Add(id, target, source);
+				return true;
+			}
+
+			return false;
 		}
 
 		/// <summary>
@@ -171,17 +170,17 @@ namespace ModiBuff.Core
 		public void TryApplyAttackNonCheckModifiers(IEnumerable<int> modifierIds, IUnit target, IModifierOwner source)
 		{
 			foreach (int id in modifierIds)
-				TryAdd(id, target, source);
+				Add(id, target, source);
 		}
 
 		public void TryApplyAttackCheckModifiers(IEnumerable<ModifierCheck> modifierChecks, IUnit target, IModifierOwner source)
 		{
 			foreach (var check in modifierChecks)
 				if (check.Check(source))
-					TryAdd(check.Id, target, source);
+					Add(check.Id, target, source);
 		}
 
-		private Modifier Add(int id, IUnit target, IUnit source)
+		public void Add(int id, IUnit target, IUnit source)
 		{
 			var existingModifier = _modifiers[id];
 			if (existingModifier != null)
@@ -192,7 +191,7 @@ namespace ModiBuff.Core
 				existingModifier.Init();
 				existingModifier.Refresh();
 				existingModifier.Stack();
-				return existingModifier;
+				return;
 			}
 
 			//Debug.Log("Adding new modifier");
@@ -206,7 +205,6 @@ namespace ModiBuff.Core
 			modifier.Init();
 			modifier.Refresh();
 			modifier.Stack();
-			return modifier;
 		}
 
 		public bool Contains(int id)
