@@ -79,10 +79,6 @@ namespace ModiBuff.Core
 			Add("InitHealAction")
 				.Effect(new HealActionEffect(), EffectOn.Init);
 
-			Add("InitDamage_CostHealth")
-				.ApplyCost(CostType.Health, 5)
-				.Effect(new DamageEffect(5), EffectOn.Init);
-
 			Add("Damage_OnHit") //Thorns
 				.Effect(new DamageEffect(5), EffectOn.Init); //Register on init?
 
@@ -193,10 +189,6 @@ namespace ModiBuff.Core
 				.EffectChance(0.5f)
 				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
-
-			Add("InitDamage_CostManaEffect")
-				.EffectCost(CostType.Mana, 5)
-				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("InitDamage_Cooldown_Effect")
 				.EffectCooldown(1)
@@ -448,7 +440,7 @@ namespace ModiBuff.Core
 				.ApplyChance(0.5f)
 				.EffectCondition(ConditionType.HealthIsFull)
 				.EffectCooldown(1)
-				.EffectCost(CostType.Mana, 5)
+				//.EffectCost(CostType.Mana, 5)
 				.EffectChance(0.5f)
 				.Effect(new DamageEffect(5), EffectOn.Init)
 				.Effect(new DamageEffect(5), EffectOn.Stack)

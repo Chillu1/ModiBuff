@@ -64,6 +64,10 @@ namespace ModiBuff.Core
 		private ConditionCheck _effectCondition;
 		private CostCheck _effectCost;
 		private ChanceCheck _effectChance;
+		private List<ICheck> _customEffectChecksList;
+		private List<IUsableCheck> _customEffectUsableChecksList;
+		private ICheck[] _customEffectChecks;
+		private IUsableCheck[] _customEffectUsableChecks;
 
 		public ModifierRecipe(int id, string name, ModifierIdManager idManager)
 		{
@@ -99,7 +103,8 @@ namespace ModiBuff.Core
 				cooldown = new CooldownCheck(_effectCooldown);
 			ModifierCheck effectCheck = null;
 			if (_hasEffectChecks)
-				effectCheck = new ModifierCheck(Id, Name, _effectCondition, cooldown, _effectCost, _effectChance);
+				effectCheck = new ModifierCheck(Id, Name, _effectCondition, cooldown, _effectCost, _effectChance, _customEffectChecks,
+					_customEffectUsableChecks);
 
 			if (creation.initEffects.Count > 0)
 				initComponent = new InitComponent(_oneTimeInit, creation.initEffects.ToArray(), effectCheck);
@@ -238,7 +243,7 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe EffectCost(CostType costType, float cost)
 		{
-			_effectCost = new CostCheck(costType, cost);
+			//_effectCost = new CostCheck(costType, cost);
 			_hasEffectChecks = true;
 			return this;
 		}
@@ -249,6 +254,24 @@ namespace ModiBuff.Core
 				chance /= 100;
 			//Debug.Assert(chance >= 0 && chance <= 1, "Chance must be between 0 and 1");//TODO
 			_effectChance = new ChanceCheck(chance);
+			_hasEffectChecks = true;
+			return this;
+		}
+
+		public ModifierRecipe EffectCheck(ICheck check)
+		{
+			if (_customEffectChecksList == null)
+				_customEffectChecksList = new List<ICheck>();
+			_customEffectChecksList.Add(check);
+			_hasEffectChecks = true;
+			return this;
+		}
+
+		public ModifierRecipe EffectCheck(IUsableCheck check)
+		{
+			if (_customEffectUsableChecksList == null)
+				_customEffectUsableChecksList = new List<IUsableCheck>();
+			_customEffectUsableChecksList.Add(check);
 			_hasEffectChecks = true;
 			return this;
 		}
@@ -393,26 +416,39 @@ namespace ModiBuff.Core
 			_modifierCreator = new ModifierCreator(_effectWrappers);
 
 			if (HasApplyChecks)
+			{
 				if (_applyConditionType != ConditionType.None
 				    || (_applyConditionStatType != StatType.None && _applyConditionValue != -1f)
 				    || _applyConditionLegalAction != LegalAction.None
 				    || _applyConditionStatusEffect != StatusEffectType.None
 				    || _applyConditionModifierId != -1)
+				{
 					_applyCondition = new ConditionCheck(_applyConditionType, _applyConditionStatType, _applyConditionValue,
 						_applyConditionComparisonType, _applyConditionLegalAction, _applyConditionStatusEffect,
 						_applyConditionModifierId);
+				}
+			}
 
 			if (_hasEffectChecks)
 				//Checking if condition is legal
+			{
 				if (_effectConditionType != ConditionType.None
 				    || (_effectConditionStatType != StatType.None && _effectConditionValue != -1 &&
 				        _effectConditionComparisonType != ComparisonType.None)
 				    || _effectConditionLegalAction != LegalAction.None
 				    || _effectConditionStatusEffect != StatusEffectType.None
-				    || _effectConditionModifierId != -1)
+				    || _effectConditionModifierId != -1
+				    || (_customEffectChecksList != null && _customEffectChecksList.Count > 0)
+				    || (_customEffectUsableChecksList != null && _customEffectUsableChecksList.Count > 0))
+				{
+					_customEffectChecks = _customEffectChecksList?.ToArray();
+					_customEffectUsableChecks = _customEffectUsableChecksList?.ToArray();
+
 					_effectCondition = new ConditionCheck(_effectConditionType, _effectConditionStatType, _effectConditionValue,
 						_effectConditionComparisonType, _effectConditionLegalAction, _effectConditionStatusEffect,
 						_effectConditionModifierId);
+				}
+			}
 		}
 
 		public int CompareTo(ModifierRecipe other)

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
-	public sealed class ConditionCheck
+	public sealed class ConditionCheck : ICheck
 	{
 		private readonly ConditionType _conditionType;
 		private readonly StatType _statType;
@@ -19,7 +19,7 @@ namespace ModiBuff.Core
 
 		private const float DeltaTolerance = 0.01f;
 
-		public ConditionCheck(ConditionType conditionType) : this(conditionType, StatType.None, -1f)
+		/*public ConditionCheck(ConditionType conditionType) : this(conditionType, StatType.None, -1f)
 		{
 		}
 
@@ -30,7 +30,7 @@ namespace ModiBuff.Core
 		public ConditionCheck(ConditionType conditionType, StatType statType, float statValue) :
 			this(conditionType, statType, statValue, ComparisonType.GreaterOrEqual, LegalAction.None, StatusEffectType.None, -1)
 		{
-		}
+		}*/
 
 		public ConditionCheck(ConditionType conditionType, StatType statType, float statValue, ComparisonType comparisonType,
 			LegalAction legalAction, StatusEffectType statusEffectType, int modifierId)
@@ -128,7 +128,7 @@ namespace ModiBuff.Core
 				case ConditionType.None:
 					break;
 				case ConditionType.HealthIsFull:
-					if (unit is IDamagable damagable)
+					if (unit is IDamagable<float, float> damagable)
 					{
 						if (!CheckValue(damagable.Health, damagable.MaxHealth, ComparisonType.Equal))
 							return false;
@@ -180,7 +180,7 @@ namespace ModiBuff.Core
 				case StatType.None:
 					break;
 				case StatType.Health:
-					if (unit is IDamagable damagable)
+					if (unit is IDamagable<float, float> damagable)
 					{
 						if (!CheckValue(damagable.Health, _statValue, _comparisonType))
 							return false;

@@ -2,13 +2,14 @@ using System;
 
 namespace ModiBuff.Core
 {
-	public interface IDamagable
+	public interface IDamagable<THealth> : IUnit where THealth : IComparable<THealth>
 	{
-		float Health { get; }
-		float MaxHealth { get; }
+		THealth Health { get; }
+		THealth MaxHealth { get; }
 	}
 
-	public interface IDamagable<TDamage> : IDamagable, IUnit where TDamage : IComparable<TDamage>
+	public interface IDamagable<THealth, TDamage> : IDamagable<THealth>
+		where TDamage : IComparable<TDamage> where THealth : IComparable<THealth>
 	{
 		TDamage TakeDamage(TDamage damage, IUnit source, bool triggersEvents = true);
 	}

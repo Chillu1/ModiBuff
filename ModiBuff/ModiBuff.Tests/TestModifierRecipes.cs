@@ -1,5 +1,6 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
+using CostCheck = ModiBuff.Core.Units.CostCheck;
 
 namespace ModiBuff.Tests
 {
@@ -18,6 +19,10 @@ namespace ModiBuff.Tests
 
 			Add("InitAttackAction_Self")
 				.Effect(new AttackActionEffect(), EffectOn.Init, Targeting.TargetTarget);
+
+			Add("InitDamage_CostManaEffect")
+				.EffectCheck(new CostCheck(CostType.Mana, 5))
+				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			AddEvent("AttackSelf_OnHit_Event", EffectOnEvent.WhenAttacked)
 				.Effect(new SelfAttackActionEffect());

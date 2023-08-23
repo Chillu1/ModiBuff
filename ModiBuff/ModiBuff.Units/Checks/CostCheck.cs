@@ -1,6 +1,4 @@
-using System;
-
-namespace ModiBuff.Core
+namespace ModiBuff.Core.Units
 {
 	public sealed class CostCheck : IUsableCheck
 	{
@@ -13,19 +11,14 @@ namespace ModiBuff.Core
 			_cost = cost;
 		}
 
-		//TODO Instead of feeding the owner, cache it?
 		public bool Check(IUnit unit)
 		{
 			switch (_costType)
 			{
 				case CostType.Health:
-					if (!(unit is IDamagable<float, float> damagable) || !(unit is IHealthCost))
+					if (!(unit is IDamagable<Damage, float> damagable) || !(unit is IHealthCost))
 						return false;
-					return damagable.Health >= _cost;
-				case CostType.Mana:
-					if (!(unit is IManaOwner manaOwner))
-						return false;
-					return manaOwner.Mana >= _cost;
+					return damagable.Health.Value >= _cost;
 				default:
 					Logger.LogError("Unknown cost type: " + _costType);
 					return false;
@@ -38,9 +31,6 @@ namespace ModiBuff.Core
 			{
 				case CostType.Health:
 					((IHealthCost)unit).UseHealth(_cost);
-					return;
-				case CostType.Mana:
-					((IManaOwner)unit).UseMana(_cost);
 					return;
 				default:
 					Logger.LogError("Unknown cost type: " + _costType);
