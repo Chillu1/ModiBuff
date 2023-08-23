@@ -30,7 +30,7 @@ namespace ModiBuff.Core
 			return totalDamage;
 		}
 
-		internal static float HealN(this IHealer unit, IHealable target, int n)
+		internal static float HealN(this IHealer<float> unit, IHealable<float> target, int n)
 		{
 			float totalHeal = 0;
 			for (int i = 0; i < n; i++)

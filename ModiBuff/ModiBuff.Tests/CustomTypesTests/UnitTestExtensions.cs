@@ -1,4 +1,6 @@
-namespace ModiBuff.Core.Units
+using ModiBuff.Core;
+
+namespace ModiBuff.Tests.CustomTypesTests
 {
 	internal static class UnitTestExtensions
 	{
@@ -10,7 +12,7 @@ namespace ModiBuff.Core.Units
 			return totalDamage;
 		}
 
-		internal static float TakeDamage(this IDamagable<float, Damage> damagable, float damage, IUnit source, bool triggersEvents = true)
+		internal static float TakeDamage(this IDamagable<double, Damage> damagable, float damage, IUnit source, bool triggersEvents = true)
 		{
 			return damagable.TakeDamage(new Damage(damage), source, triggersEvents).Value;
 		}

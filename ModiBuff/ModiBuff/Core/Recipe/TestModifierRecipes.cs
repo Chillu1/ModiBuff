@@ -79,6 +79,10 @@ namespace ModiBuff.Core
 			Add("InitHealAction")
 				.Effect(new HealActionEffect(), EffectOn.Init);
 
+			Add("InitDamage_CostHealth")
+				.ApplyCost(CostType.Health, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
 			Add("Damage_OnHit") //Thorns
 				.Effect(new DamageEffect(5), EffectOn.Init); //Register on init?
 

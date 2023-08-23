@@ -1,6 +1,6 @@
 using System;
 
-namespace ModiBuff.Core.Units
+namespace ModiBuff.Tests.CustomTypesTests
 {
 	public struct Damage : IComparable, IComparable<Damage>
 	{

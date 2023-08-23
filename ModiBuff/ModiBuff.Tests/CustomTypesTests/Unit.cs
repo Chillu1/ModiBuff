@@ -4,13 +4,13 @@ using ModiBuff.Core.Units;
 
 namespace ModiBuff.Tests.CustomTypesTests
 {
-	/*public class Unit : IUpdatable, IAttacker<double>, IDamagable<double>, IHealable, IHealer, IManaOwner, IHealthCost, IAddDamage,
-		IEventOwner, IStatusResistance, IStatusEffectModifierOwner
+	public class Unit : IUpdatable, IAttacker<Damage>, IDamagable<double, Damage>, IHealable<double>, IHealer<double>, IManaOwner,
+		IHealthCost, IAddDamage, IEventOwner, IStatusResistance, IStatusEffectModifierOwner
 	{
-		public float Health { get; private set; }
-		public float MaxHealth { get; private set; }
-		public double Damage { get; private set; }
-		public float HealValue { get; private set; }
+		public double Health { get; private set; }
+		public double MaxHealth { get; private set; }
+		public Damage Damage { get; private set; }
+		public double HealValue { get; private set; }
 		public float Mana { get; private set; }
 		public float MaxMana { get; private set; }
 		public float StatusResistance { get; private set; } = 1f;
@@ -70,12 +70,12 @@ namespace ModiBuff.Tests.CustomTypesTests
 				_auraModifiers[i].Update(deltaTime);
 		}
 
-		public double Attack(IUnit target, bool triggersEvents = true)
+		public Damage Attack(IUnit target, bool triggersEvents = true)
 		{
 			return Attack((Unit)target, triggersEvents);
 		}
 
-		public double Attack(Unit target, bool triggersEvents = true)
+		public Damage Attack(Unit target, bool triggersEvents = true)
 		{
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
@@ -85,7 +85,7 @@ namespace ModiBuff.Tests.CustomTypesTests
 			for (int i = 0; i < _onAttackEffects.Count; i++)
 				_onAttackEffects[i].Effect(target, this);
 
-			double dealtDamage = target.TakeDamage(Damage, this, triggersEvents);
+			Damage dealtDamage = target.TakeDamage(Damage, this, triggersEvents);
 
 			if (target.Health <= 0)
 				for (int i = 0; i < _onKillEffects.Count; i++)
@@ -94,15 +94,15 @@ namespace ModiBuff.Tests.CustomTypesTests
 			return dealtDamage;
 		}
 
-		public double TakeDamage(double damage, IUnit source, bool triggersEvents = true)
+		public Damage TakeDamage(Damage damage, IUnit source, bool triggersEvents = true)
 		{
 			if (triggersEvents)
 				for (int i = 0; i < _whenAttackedEffects.Count; i++)
 					_whenAttackedEffects[i].Effect(this, source);
 
-			float oldHealth = Health;
-			Health -= damage;
-			float dealtDamage = oldHealth - Health;
+			double oldHealth = Health;
+			Health -= damage.Value;
+			double dealtDamage = oldHealth - Health;
 
 			if (triggersEvents && Health <= 0 && !IsDead)
 			{
@@ -117,9 +117,9 @@ namespace ModiBuff.Tests.CustomTypesTests
 			return dealtDamage;
 		}
 
-		public float Heal(float heal, IUnit source, bool triggersEvents = true)
+		public double Heal(double heal, IUnit source, bool triggersEvents = true)
 		{
-			float oldHealth = Health;
+			double oldHealth = Health;
 			if (triggersEvents)
 				for (int i = 0; i < _whenHealedEffects.Count; i++)
 					_whenHealedEffects[i].Effect(this, source);
@@ -127,7 +127,7 @@ namespace ModiBuff.Tests.CustomTypesTests
 			return Health - oldHealth;
 		}
 
-		public float Heal(IHealable target, bool triggersEvents = true)
+		public double Heal(IHealable<double> target, bool triggersEvents = true)
 		{
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
@@ -264,5 +264,5 @@ namespace ModiBuff.Tests.CustomTypesTests
 		{
 			return $"Health: {Health}, Damage: {Damage}, HealValue: {HealValue}";
 		}
-	}*/
+	}
 }

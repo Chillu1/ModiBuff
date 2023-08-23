@@ -5,8 +5,8 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
-	public class Unit : IUpdatable, IModifierOwner, IAttacker<float>, IDamagable<float>, IHealable, IHealer, IManaOwner, IHealthCost,
-		IAddDamage, IEventOwner, IStatusEffectOwner, IStatusResistance, IStatusEffectModifierOwner
+	public class Unit : IUpdatable, IModifierOwner, IAttacker<float>, IDamagable<float, float>, IHealable<float>, IHealer<float>,
+		IManaOwner, IHealthCost, IAddDamage, IEventOwner, IStatusEffectOwner, IStatusResistance, IStatusEffectModifierOwner
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -128,7 +128,7 @@ namespace ModiBuff.Core.Units
 			return Health - oldHealth;
 		}
 
-		public float Heal(IHealable target, bool triggersEvents = true)
+		public float Heal(IHealable<float> target, bool triggersEvents = true)
 		{
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
