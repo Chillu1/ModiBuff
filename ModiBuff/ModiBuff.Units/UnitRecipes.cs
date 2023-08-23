@@ -33,7 +33,9 @@ namespace ModiBuff.Core.Units
 		{
 			if (_recipes.TryGetValue(name, out var localRecipe))
 			{
+#if DEBUG && !MODIBUFF_PROFILE
 				Logger.LogError($"Unit with id {name} already exists");
+#endif
 				return localRecipe;
 			}
 

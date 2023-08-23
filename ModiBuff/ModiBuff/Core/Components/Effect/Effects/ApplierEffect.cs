@@ -17,8 +17,10 @@ namespace ModiBuff.Core
 			}
 			catch (KeyNotFoundException)
 			{
+#if DEBUG && !MODIBUFF_PROFILE
 				Logger.LogError("Can't find modifier with name " + modifierName +
 				                ". Either wrong order of effect initialization or wrong modifier name.");
+#endif
 			}
 		}
 

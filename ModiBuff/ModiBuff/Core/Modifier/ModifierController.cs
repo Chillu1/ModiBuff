@@ -21,14 +21,14 @@ namespace ModiBuff.Core
 		{
 			_owner = owner;
 
-			_modifierIndexes = new List<int>(5);
+			_modifierIndexes = new List<int>(4);
 			_modifiers = new Modifier[ModifierRecipes.RecipesCount];
-			_modifierAttackAppliers = new List<int>(5);
-			_modifierCastAppliers = new List<int>(5);
-			_modifierCastChecksAppliers = new Dictionary<int, ModifierCheck>(5);
-			_modifierAttackChecksAppliers = new Dictionary<int, ModifierCheck>(5);
+			_modifierAttackAppliers = new List<int>(4);
+			_modifierCastAppliers = new List<int>(4);
+			_modifierCastChecksAppliers = new Dictionary<int, ModifierCheck>(4);
+			_modifierAttackChecksAppliers = new Dictionary<int, ModifierCheck>(4);
 
-			_modifiersToRemove = new List<int>(5);
+			_modifiersToRemove = new List<int>(4);
 		}
 
 		public void Update(float delta)
@@ -61,25 +61,15 @@ namespace ModiBuff.Core
 		public IReadOnlyList<int> GetApplierAttackModifierIds() => _modifierAttackAppliers;
 		public IReadOnlyList<int> GetApplierCastModifierIds() => _modifierCastAppliers;
 
-		public bool TryAdd(ModifierAddReference addReference)
-		{
-			return TryAdd(addReference.Id, addReference.HasApplyChecks, addReference.ApplierType);
-		}
+		public bool TryAdd(ModifierAddReference addReference) => TryAdd(addReference, _owner);
 
-		//TODO Refactor, make it easier to add appliers through API
-		private bool TryAdd(int id, bool hasApplyChecks, ApplierType applierType)
+		public bool TryAdd(ModifierAddReference addReference, IUnit target)
 		{
-			switch (applierType)
-			{
-				case ApplierType.None:
-					Logger.LogError("Trying to add a non applier modifier with apply checks");
-					return false;
-				case ApplierType.Cast:
-				case ApplierType.Attack:
-					return TryAddApplier(id, hasApplyChecks, applierType);
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+			if (addReference.IsApplierType)
+				return TryAddApplier(addReference.Id, addReference.HasApplyChecks, addReference.ApplierType);
+
+			Add(addReference.Id, target, _owner);
+			return true;
 		}
 
 		//TODO do appliers make sense? Should we just store the id, what kind of state do appliers have?
@@ -90,20 +80,6 @@ namespace ModiBuff.Core
 		public bool TryCastCheck(int id)
 		{
 			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.Check(_owner);
-		}
-
-		/// <summary>
-		///		Skips the check part for check modifiers, use this ONLY in case you're also using <see cref="TryCastCheck"/>
-		/// </summary>
-		public bool TryCastModifierWithoutCheck(int id, IUnit target, IModifierOwner source) //TODO Rename
-		{
-			if (source.ModifierController._modifierCastChecksAppliers.ContainsKey(id))
-			{
-				Add(id, target, source);
-				return true;
-			}
-
-			return false;
 		}
 
 		/// <summary>
@@ -162,7 +138,9 @@ namespace ModiBuff.Core
 					return true;
 				}
 				default:
+#if DEBUG && !MODIBUFF_PROFILE
 					Logger.LogError("Unknown applier type: " + applierType);
+#endif
 					return false;
 			}
 		}
@@ -207,10 +185,8 @@ namespace ModiBuff.Core
 			modifier.Stack();
 		}
 
-		public bool Contains(int id)
-		{
-			return _modifiers[id] != null;
-		}
+		public bool Contains(int id) => _modifiers[id] != null;
+		public bool ContainsApplier(int id) => _modifierCastAppliers.Contains(id) || _modifierCastChecksAppliers.ContainsKey(id);
 
 		public void PrepareRemove(int id)
 		{

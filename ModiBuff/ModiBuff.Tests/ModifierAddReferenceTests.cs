@@ -5,7 +5,7 @@ namespace ModiBuff.Tests
 {
 	public sealed class ModifierAddReferenceTests : ModifierTests
 	{
-		//[Test]//TODO Refactor
+		[Test]
 		public void AddSelfModifier()
 		{
 			var recipe = Recipes.GetRecipe("InitDamage");
@@ -16,13 +16,13 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
-		//[Test]//TODO Refactor
+		[Test]
 		public void AddTargetModifier()
 		{
-			var recipe = Recipes.GetRecipe("InitDamageSelf");
+			var recipe = Recipes.GetRecipe("InitDamage");
 			var modifierReference = new ModifierAddReference(recipe);
 
-			Unit.ModifierController.TryAdd(modifierReference);
+			Unit.ModifierController.TryAdd(modifierReference, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
