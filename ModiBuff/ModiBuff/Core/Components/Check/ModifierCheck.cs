@@ -3,36 +3,34 @@ namespace ModiBuff.Core
 	public sealed class ModifierCheck : IStateReset
 	{
 		public int Id { get; }
-		public string Name { get; }
 
-		private readonly bool _hasCondition, _hasCooldown, _hasCost, _hasChance, _hasCustomChecks, _hasCustomUsableChecks;
+		private readonly bool _hasCondition, _hasCooldown, _hasCost, _hasChance, _hasNoUnitChecks, _hasUnitChecks, _hasUsableChecks;
 
 		private readonly ConditionCheck _condition;
 		private readonly CooldownCheck _cooldown;
-		private readonly CostCheck _cost;
 		private readonly ChanceCheck _chance;
-		private readonly ICheck[] _customChecks;
+		private readonly INoUnitCheck[] _noUnitChecks;
+		private readonly IUnitCheck[] _unitChecks;
 		private readonly IUsableCheck[] _usableChecks;
 
-		public ModifierCheck(int id, string name, ConditionCheck condition = null, CooldownCheck cooldown = null, CostCheck cost = null,
-			ChanceCheck chance = null, ICheck[] customChecks = null, IUsableCheck[] customUsableChecks = null)
+		public ModifierCheck(int id, ConditionCheck condition = null, CooldownCheck cooldown = null, ChanceCheck chance = null,
+			INoUnitCheck[] noUnitChecks = null, IUnitCheck[] unitChecks = null, IUsableCheck[] usableChecks = null)
 		{
 			Id = id;
-			Name = name;
 
 			_condition = condition;
 			_cooldown = cooldown;
-			_cost = cost;
 			_chance = chance;
-			_customChecks = customChecks;
-			_usableChecks = customUsableChecks;
+			_noUnitChecks = noUnitChecks;
+			_unitChecks = unitChecks;
+			_usableChecks = usableChecks;
 
 			_hasCondition = condition != null;
 			_hasCooldown = cooldown != null;
-			_hasCost = cost != null;
 			_hasChance = chance != null;
-			_hasCustomChecks = customChecks != null && customChecks.Length > 0;
-			_hasCustomUsableChecks = customUsableChecks != null && customUsableChecks.Length > 0;
+			_hasNoUnitChecks = noUnitChecks != null && noUnitChecks.Length > 0;
+			_hasUnitChecks = unitChecks != null && unitChecks.Length > 0;
+			_hasUsableChecks = usableChecks != null && usableChecks.Length > 0;
 		}
 
 		public void Update(float delta)
@@ -49,18 +47,23 @@ namespace ModiBuff.Core
 				return false;
 			if (_hasCooldown && !_cooldown.IsReady)
 				return false;
-			if (_hasCost && !_cost.Check(unit))
-				return false;
 			if (_hasChance && !_chance.Roll())
 				return false;
-			if (_hasCustomChecks)
-				for (int i = 0; i < _customChecks.Length; i++)
+			if (_hasNoUnitChecks)
+				for (int i = 0; i < _noUnitChecks.Length; i++)
 				{
-					if (!_customChecks[i].Check(unit))
+					if (!_noUnitChecks[i].Check())
 						return false;
 				}
 
-			if (_hasCustomUsableChecks)
+			if (_hasUnitChecks)
+				for (int i = 0; i < _unitChecks.Length; i++)
+				{
+					if (!_unitChecks[i].Check(unit))
+						return false;
+				}
+
+			if (_hasUsableChecks)
 				for (int i = 0; i < _usableChecks.Length; i++)
 				{
 					if (!_usableChecks[i].Check(unit))
@@ -69,9 +72,7 @@ namespace ModiBuff.Core
 
 			if (_hasCooldown)
 				_cooldown.ResetCooldown();
-			if (_hasCost)
-				_cost.Use(unit);
-			if (_hasCustomUsableChecks)
+			if (_hasUsableChecks)
 				for (int i = 0; i < _usableChecks.Length; i++)
 					_usableChecks[i].Use(unit);
 

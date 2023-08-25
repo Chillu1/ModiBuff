@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
-	public sealed class ConditionCheck : ICheck
+	public sealed class ConditionCheck : IUnitCheck
 	{
 		private readonly ConditionType _conditionType;
 		private readonly StatType _statType;

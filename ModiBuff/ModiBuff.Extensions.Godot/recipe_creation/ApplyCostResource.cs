@@ -1,5 +1,6 @@
 using Godot;
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 
 namespace ModiBuff.Extensions.Godot
 {

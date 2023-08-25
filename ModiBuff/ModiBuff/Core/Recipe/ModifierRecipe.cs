@@ -58,16 +58,18 @@ namespace ModiBuff.Core
 		private ModifierCreator _modifierCreator;
 
 		private ConditionCheck _applyCondition;
-		private CostCheck _applyCostCheck;
 		private ChanceCheck _applyChanceCheck;
+		private List<ICheck> _applyCheckList;
+		private INoUnitCheck[] _noUnitApplyChecks;
+		private IUnitCheck[] _unitApplyChecks;
+		private IUsableCheck[] _usableApplyChecks;
 
 		private ConditionCheck _effectCondition;
-		private CostCheck _effectCost;
 		private ChanceCheck _effectChance;
-		private List<ICheck> _customEffectChecksList;
-		private List<IUsableCheck> _customEffectUsableChecksList;
-		private ICheck[] _customEffectChecks;
-		private IUsableCheck[] _customEffectUsableChecks;
+		private List<ICheck> _effectCheckList;
+		private INoUnitCheck[] _noUnitEffectChecks;
+		private IUnitCheck[] _unitEffectChecks;
+		private IUsableCheck[] _usableEffectChecks;
 
 		public ModifierRecipe(int id, string name, ModifierIdManager idManager)
 		{
@@ -87,7 +89,8 @@ namespace ModiBuff.Core
 			if (_applyCooldown > 0f)
 				cooldown = new CooldownCheck(_applyCooldown);
 
-			return new ModifierCheck(Id, Name, _applyCondition, cooldown, _applyCostCheck, _applyChanceCheck);
+			return new ModifierCheck(Id, _applyCondition, cooldown, _applyChanceCheck, _noUnitApplyChecks, _unitApplyChecks,
+				_usableApplyChecks);
 		}
 
 		Modifier IModifierRecipe.Create()
@@ -103,8 +106,8 @@ namespace ModiBuff.Core
 				cooldown = new CooldownCheck(_effectCooldown);
 			ModifierCheck effectCheck = null;
 			if (_hasEffectChecks)
-				effectCheck = new ModifierCheck(Id, Name, _effectCondition, cooldown, _effectCost, _effectChance, _customEffectChecks,
-					_customEffectUsableChecks);
+				effectCheck = new ModifierCheck(Id, _effectCondition, cooldown, _effectChance, _noUnitEffectChecks, _unitEffectChecks,
+					_usableEffectChecks);
 
 			if (creation.initEffects.Count > 0)
 				initComponent = new InitComponent(_oneTimeInit, creation.initEffects.ToArray(), effectCheck);
@@ -173,16 +176,6 @@ namespace ModiBuff.Core
 		}
 
 		/// <summary>
-		///		Cost for when we can try to apply the modifier to a target.
-		/// </summary>
-		public ModifierRecipe ApplyCost(CostType costType, float cost)
-		{
-			_applyCostCheck = new CostCheck(costType, cost);
-			HasApplyChecks = true;
-			return this;
-		}
-
-		/// <summary>
 		///		When trying to apply a modifier, what should the chance be of it being applied?
 		/// </summary>
 		public ModifierRecipe ApplyChance(float chance)
@@ -191,6 +184,15 @@ namespace ModiBuff.Core
 				chance /= 100;
 			//Debug.Assert(chance >= 0 && chance <= 1, "Chance must be between 0 and 1");//TODO
 			_applyChanceCheck = new ChanceCheck(chance);
+			HasApplyChecks = true;
+			return this;
+		}
+
+		public ModifierRecipe ApplyCheck(ICheck check)
+		{
+			if (_applyCheckList == null)
+				_applyCheckList = new List<ICheck>();
+			_applyCheckList.Add(check);
 			HasApplyChecks = true;
 			return this;
 		}
@@ -241,13 +243,6 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		public ModifierRecipe EffectCost(CostType costType, float cost)
-		{
-			//_effectCost = new CostCheck(costType, cost);
-			_hasEffectChecks = true;
-			return this;
-		}
-
 		public ModifierRecipe EffectChance(float chance)
 		{
 			if (chance > 1)
@@ -260,18 +255,9 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe EffectCheck(ICheck check)
 		{
-			if (_customEffectChecksList == null)
-				_customEffectChecksList = new List<ICheck>();
-			_customEffectChecksList.Add(check);
-			_hasEffectChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe EffectCheck(IUsableCheck check)
-		{
-			if (_customEffectUsableChecksList == null)
-				_customEffectUsableChecksList = new List<IUsableCheck>();
-			_customEffectUsableChecksList.Add(check);
+			if (_effectCheckList == null)
+				_effectCheckList = new List<ICheck>();
+			_effectCheckList.Add(check);
 			_hasEffectChecks = true;
 			return this;
 		}
@@ -417,37 +403,56 @@ namespace ModiBuff.Core
 
 			if (HasApplyChecks)
 			{
-				if (_applyConditionType != ConditionType.None
-				    || (_applyConditionStatType != StatType.None && _applyConditionValue != -1f)
-				    || _applyConditionLegalAction != LegalAction.None
-				    || _applyConditionStatusEffect != StatusEffectType.None
-				    || _applyConditionModifierId != -1)
-				{
-					_applyCondition = new ConditionCheck(_applyConditionType, _applyConditionStatType, _applyConditionValue,
-						_applyConditionComparisonType, _applyConditionLegalAction, _applyConditionStatusEffect,
-						_applyConditionModifierId);
-				}
+				var unitChecks = new List<IUnitCheck>();
+				var noUnitChecks = new List<INoUnitCheck>();
+				var usableChecks = new List<IUsableCheck>();
+				if (_applyCheckList != null)
+					foreach (var check in _applyCheckList)
+					{
+						if (check is IUsableCheck usableCheck)
+							usableChecks.Add(usableCheck);
+						else if (check is IUnitCheck unitCheck)
+							unitChecks.Add(unitCheck);
+						else if (check is INoUnitCheck noUnitCheck)
+							noUnitChecks.Add(noUnitCheck);
+						else
+							Logger.LogError("Unknown check type: " + check.GetType());
+					}
+
+				_unitApplyChecks = unitChecks.ToArray();
+				_noUnitApplyChecks = noUnitChecks.ToArray();
+				_usableApplyChecks = usableChecks.ToArray();
+
+				_applyCondition = new ConditionCheck(_applyConditionType, _applyConditionStatType, _applyConditionValue,
+					_applyConditionComparisonType, _applyConditionLegalAction, _applyConditionStatusEffect,
+					_applyConditionModifierId);
 			}
 
 			if (_hasEffectChecks)
-				//Checking if condition is legal
 			{
-				if (_effectConditionType != ConditionType.None
-				    || (_effectConditionStatType != StatType.None && _effectConditionValue != -1 &&
-				        _effectConditionComparisonType != ComparisonType.None)
-				    || _effectConditionLegalAction != LegalAction.None
-				    || _effectConditionStatusEffect != StatusEffectType.None
-				    || _effectConditionModifierId != -1
-				    || (_customEffectChecksList != null && _customEffectChecksList.Count > 0)
-				    || (_customEffectUsableChecksList != null && _customEffectUsableChecksList.Count > 0))
-				{
-					_customEffectChecks = _customEffectChecksList?.ToArray();
-					_customEffectUsableChecks = _customEffectUsableChecksList?.ToArray();
+				var unitChecks = new List<IUnitCheck>();
+				var noUnitChecks = new List<INoUnitCheck>();
+				var usableChecks = new List<IUsableCheck>();
+				if (_effectCheckList != null)
+					foreach (var check in _effectCheckList)
+					{
+						if (check is IUsableCheck usableCheck)
+							usableChecks.Add(usableCheck);
+						else if (check is IUnitCheck unitCheck)
+							unitChecks.Add(unitCheck);
+						else if (check is INoUnitCheck noUnitCheck)
+							noUnitChecks.Add(noUnitCheck);
+						else
+							Logger.LogError("Unknown check type: " + check.GetType());
+					}
 
-					_effectCondition = new ConditionCheck(_effectConditionType, _effectConditionStatType, _effectConditionValue,
-						_effectConditionComparisonType, _effectConditionLegalAction, _effectConditionStatusEffect,
-						_effectConditionModifierId);
-				}
+				_unitEffectChecks = unitChecks.ToArray();
+				_noUnitEffectChecks = noUnitChecks.ToArray();
+				_usableEffectChecks = usableChecks.ToArray();
+
+				_effectCondition = new ConditionCheck(_effectConditionType, _effectConditionStatType, _effectConditionValue,
+					_effectConditionComparisonType, _effectConditionLegalAction, _effectConditionStatusEffect,
+					_effectConditionModifierId);
 			}
 		}
 
