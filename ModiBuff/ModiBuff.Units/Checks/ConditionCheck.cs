@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
 
-namespace ModiBuff.Core
+namespace ModiBuff.Core.Units
 {
 	public sealed class ConditionCheck : IUnitCheck
 	{
@@ -15,7 +14,6 @@ namespace ModiBuff.Core
 
 		//private readonly string _modifierName; //For possible save/load feature
 		private readonly int _modifierId = -1;
-		private readonly Func<IUnit, bool> _checks;
 
 		private const float DeltaTolerance = 0.01f;
 
@@ -42,43 +40,6 @@ namespace ModiBuff.Core
 			_legalAction = legalAction;
 			_statusEffect = statusEffectType;
 			_modifierId = modifierId;
-
-			/*var conditionList = new List<Func<IUnit, bool>>();
-
-			switch (_conditionType)
-			{
-				case ConditionType.None:
-					break;
-				case ConditionType.HealthIsFull:
-					conditionList.Add(unit => Math.Abs(unit.MaxHealth - unit.Health) < DeltaTolerance);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-
-			switch (_statType)
-			{
-				case StatType.None:
-					break;
-				case StatType.Health:
-					conditionList.Add(unit => unit.Health >= _statValue);
-					break;
-				case StatType.Mana:
-					conditionList.Add(unit => unit.Mana >= _statValue);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-
-			if (_statusEffect != StatusEffectType.None)
-				conditionList.Add(unit => unit.HasStatusEffect(_statusEffect));
-
-			if (_modifierId != -1)
-				conditionList.Add(unit => unit.ContainsModifier(_modifierId));
-
-			//TODO set all checks into one func, so we don't check for negatives every time. Bench
-			//Current bench show that it's slower
-			_checks = Delegate.Combine(conditionList.ToArray()) as Func<IUnit, bool>;*/
 		}
 
 		public bool Check(IUnit unit)

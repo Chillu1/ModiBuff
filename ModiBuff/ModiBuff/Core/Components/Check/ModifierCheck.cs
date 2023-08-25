@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 
 namespace ModiBuff.Core
@@ -6,16 +7,17 @@ namespace ModiBuff.Core
 	{
 		public int Id { get; }
 
-		private readonly bool _hasCondition, _hasUpdatableChecks, _hasNoUnitChecks, _hasUnitChecks, _hasUsableChecks, _hasStateResetChecks;
+		private readonly bool _hasFuncChecks, _hasUpdatableChecks, _hasNoUnitChecks, _hasUnitChecks, _hasUsableChecks, _hasStateResetChecks;
 
-		private readonly ConditionCheck _condition;
+		private readonly Func<IUnit, bool>[] _funcChecks;
+
 		private readonly IUpdatableCheck[] _updatableChecks;
 		private readonly INoUnitCheck[] _noUnitChecks;
 		private readonly IUnitCheck[] _unitChecks;
 		private readonly IUsableCheck[] _usableChecks;
 		private readonly IStateCheck[] _stateResetChecks;
 
-		public ModifierCheck(int id, ConditionCheck condition = null, IUpdatableCheck[] updatableChecks = null,
+		public ModifierCheck(int id, Func<IUnit, bool>[] funcChecks = null, IUpdatableCheck[] updatableChecks = null,
 			INoUnitCheck[] noUnitChecks = null, IUnitCheck[] unitChecks = null, IUsableCheck[] usableChecks = null,
 			IStateCheck[] stateResetChecks = null)
 		{
@@ -35,14 +37,15 @@ namespace ModiBuff.Core
 				}
 			}
 
-			_condition = condition;
+			_funcChecks = funcChecks;
+
 			_updatableChecks = updatableChecks;
 			_noUnitChecks = noUnitChecks;
 			_unitChecks = unitChecks;
 			_usableChecks = usableChecks;
 			_stateResetChecks = stateResetChecks;
 
-			_hasCondition = condition != null;
+			_hasFuncChecks = funcChecks != null && funcChecks.Length > 0;
 			_hasUpdatableChecks = updatableChecks != null && updatableChecks.Length > 0;
 			_hasNoUnitChecks = noUnitChecks != null && noUnitChecks.Length > 0;
 			_hasUnitChecks = unitChecks != null && unitChecks.Length > 0;
@@ -61,8 +64,12 @@ namespace ModiBuff.Core
 
 		public bool Check(IUnit unit)
 		{
-			if (_hasCondition && !_condition.Check(unit))
-				return false;
+			if (_hasFuncChecks)
+				for (int i = 0; i < _funcChecks.Length; i++)
+				{
+					if (!_funcChecks[i](unit))
+						return false;
+				}
 
 			if (_hasUpdatableChecks)
 				for (int i = 0; i < _updatableChecks.Length; i++)

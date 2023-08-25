@@ -13,26 +13,11 @@ namespace ModiBuff.Core
 		public string Name { get; }
 		public bool HasApplyChecks { get; private set; }
 
-		private readonly ModifierIdManager _idManager;
+		public readonly ModifierIdManager IdManager; //TODO Refactor to make it private/not needed
 
 		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
 
-		private ConditionType _applyConditionType;
-		private StatType _applyConditionStatType;
-		private float _applyConditionValue = -1;
-		private ComparisonType _applyConditionComparisonType;
-		private LegalAction _applyConditionLegalAction;
-		private StatusEffectType _applyConditionStatusEffect;
-		private int _applyConditionModifierId = -1;
-
 		private bool _hasEffectChecks;
-		private ConditionType _effectConditionType;
-		private StatType _effectConditionStatType;
-		private float _effectConditionValue = -1;
-		private ComparisonType _effectConditionComparisonType;
-		private LegalAction _effectConditionLegalAction;
-		private StatusEffectType _effectConditionStatusEffect;
-		private int _effectConditionModifierId = -1;
 
 		private bool _oneTimeInit;
 
@@ -55,16 +40,18 @@ namespace ModiBuff.Core
 		private List<ITimeComponent> _timeComponents;
 		private ModifierCreator _modifierCreator;
 
-		private ConditionCheck _applyCondition;
 		private List<ICheck> _applyCheckList;
+		private List<Func<IUnit, bool>> _applyFuncCheckList;
+		private Func<IUnit, bool>[] _applyFuncChecks;
 		private IUpdatableCheck[] _updatableApplyChecks;
 		private INoUnitCheck[] _noUnitApplyChecks;
 		private IUnitCheck[] _unitApplyChecks;
 		private IUsableCheck[] _usableApplyChecks;
 		private IStateCheck[] _stateApplyChecks;
 
-		private ConditionCheck _effectCondition;
 		private List<ICheck> _effectCheckList;
+		private List<Func<IUnit, bool>> _effectFuncCheckList;
+		private Func<IUnit, bool>[] _effectFuncChecks;
 		private IUpdatableCheck[] _updatableEffectChecks;
 		private INoUnitCheck[] _noUnitEffectChecks;
 		private IUnitCheck[] _unitEffectChecks;
@@ -75,7 +62,7 @@ namespace ModiBuff.Core
 		{
 			Id = id;
 			Name = name;
-			_idManager = idManager;
+			IdManager = idManager;
 
 			_effectWrappers = new List<EffectWrapper>(3);
 		}
@@ -92,8 +79,8 @@ namespace ModiBuff.Core
 					stateChecks[i] = (IStateCheck)_stateApplyChecks[i].ShallowClone();
 			}
 
-			return new ModifierCheck(Id, _applyCondition, _updatableApplyChecks, _noUnitApplyChecks, _unitApplyChecks, _usableApplyChecks,
-				stateChecks);
+			return new ModifierCheck(Id, _applyFuncChecks, _updatableApplyChecks, _noUnitApplyChecks, _unitApplyChecks,
+				_usableApplyChecks, stateChecks);
 		}
 
 		Modifier IModifierRecipe.Create()
@@ -114,7 +101,7 @@ namespace ModiBuff.Core
 
 			ModifierCheck effectCheck = null;
 			if (_hasEffectChecks)
-				effectCheck = new ModifierCheck(Id, _effectCondition, _updatableEffectChecks, _noUnitEffectChecks, _unitEffectChecks,
+				effectCheck = new ModifierCheck(Id, _effectFuncChecks, _updatableEffectChecks, _noUnitEffectChecks, _unitEffectChecks,
 					_usableEffectChecks, stateChecks);
 
 			if (creation.initEffects.Count > 0)
@@ -136,43 +123,6 @@ namespace ModiBuff.Core
 
 		//---ApplyChecks---
 
-		public ModifierRecipe ApplyCondition(ConditionType conditionType)
-		{
-			_applyConditionType = conditionType;
-			HasApplyChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe ApplyCondition(StatType statType, float value, ComparisonType comparisonType = ComparisonType.GreaterOrEqual)
-		{
-			_applyConditionStatType = statType;
-			_applyConditionValue = value;
-			_applyConditionComparisonType = comparisonType;
-			HasApplyChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe ApplyCondition(LegalAction legalAction)
-		{
-			_applyConditionLegalAction = legalAction;
-			HasApplyChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe ApplyCondition(StatusEffectType statusEffectType)
-		{
-			_applyConditionStatusEffect = statusEffectType;
-			HasApplyChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe ApplyCondition(string modifierName)
-		{
-			_applyConditionModifierId = _idManager.GetId(modifierName);
-			HasApplyChecks = true;
-			return this;
-		}
-
 		public ModifierRecipe ApplyCheck(ICheck check)
 		{
 			if (_applyCheckList == null)
@@ -182,41 +132,23 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		public ModifierRecipe ApplyCheck(Func<IUnit, bool> check)
+		{
+			if (_applyFuncCheckList == null)
+				_applyFuncCheckList = new List<Func<IUnit, bool>>();
+			_applyFuncCheckList.Add(check);
+			HasApplyChecks = true;
+			return this;
+		}
+
 		//---EffectChecks---
 
-		public ModifierRecipe EffectCondition(ConditionType conditionType)
-		{
-			_effectConditionType = conditionType;
-			_hasEffectChecks = true;
-			return this;
-		}
 
-		public ModifierRecipe EffectCondition(StatType statType, float value, ComparisonType comparisonType = ComparisonType.GreaterOrEqual)
+		public ModifierRecipe EffectCheck(Func<IUnit, bool> check)
 		{
-			_effectConditionStatType = statType;
-			_effectConditionValue = value;
-			_effectConditionComparisonType = comparisonType;
-			_hasEffectChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe EffectCondition(LegalAction legalAction)
-		{
-			_effectConditionLegalAction = legalAction;
-			_hasEffectChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe EffectCondition(StatusEffectType statusEffectType)
-		{
-			_effectConditionStatusEffect = statusEffectType;
-			_hasEffectChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe EffectCondition(string modifierName)
-		{
-			_effectConditionModifierId = _idManager.GetId(modifierName);
+			if (_effectFuncCheckList == null)
+				_effectFuncCheckList = new List<Func<IUnit, bool>>();
+			_effectFuncCheckList.Add(check);
 			_hasEffectChecks = true;
 			return this;
 		}
@@ -399,9 +331,7 @@ namespace ModiBuff.Core
 				_usableApplyChecks = usableChecks.ToArray();
 				_stateApplyChecks = stateChecks.ToArray();
 
-				_applyCondition = new ConditionCheck(_applyConditionType, _applyConditionStatType, _applyConditionValue,
-					_applyConditionComparisonType, _applyConditionLegalAction, _applyConditionStatusEffect,
-					_applyConditionModifierId);
+				_applyFuncChecks = _applyFuncCheckList?.ToArray();
 			}
 
 			if (_hasEffectChecks)
@@ -434,9 +364,7 @@ namespace ModiBuff.Core
 				_usableEffectChecks = usableChecks.ToArray();
 				_stateEffectChecks = stateChecks.ToArray();
 
-				_effectCondition = new ConditionCheck(_effectConditionType, _effectConditionStatType, _effectConditionValue,
-					_effectConditionComparisonType, _effectConditionLegalAction, _effectConditionStatusEffect,
-					_effectConditionModifierId);
+				_effectFuncChecks = _effectFuncCheckList?.ToArray();
 			}
 		}
 
