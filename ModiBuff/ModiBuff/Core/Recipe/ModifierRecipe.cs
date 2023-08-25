@@ -58,14 +58,12 @@ namespace ModiBuff.Core
 		private ModifierCreator _modifierCreator;
 
 		private ConditionCheck _applyCondition;
-		private ChanceCheck _applyChanceCheck;
 		private List<ICheck> _applyCheckList;
 		private INoUnitCheck[] _noUnitApplyChecks;
 		private IUnitCheck[] _unitApplyChecks;
 		private IUsableCheck[] _usableApplyChecks;
 
 		private ConditionCheck _effectCondition;
-		private ChanceCheck _effectChance;
 		private List<ICheck> _effectCheckList;
 		private INoUnitCheck[] _noUnitEffectChecks;
 		private IUnitCheck[] _unitEffectChecks;
@@ -89,8 +87,7 @@ namespace ModiBuff.Core
 			if (_applyCooldown > 0f)
 				cooldown = new CooldownCheck(_applyCooldown);
 
-			return new ModifierCheck(Id, _applyCondition, cooldown, _applyChanceCheck, _noUnitApplyChecks, _unitApplyChecks,
-				_usableApplyChecks);
+			return new ModifierCheck(Id, _applyCondition, cooldown, _noUnitApplyChecks, _unitApplyChecks, _usableApplyChecks);
 		}
 
 		Modifier IModifierRecipe.Create()
@@ -106,7 +103,7 @@ namespace ModiBuff.Core
 				cooldown = new CooldownCheck(_effectCooldown);
 			ModifierCheck effectCheck = null;
 			if (_hasEffectChecks)
-				effectCheck = new ModifierCheck(Id, _effectCondition, cooldown, _effectChance, _noUnitEffectChecks, _unitEffectChecks,
+				effectCheck = new ModifierCheck(Id, _effectCondition, cooldown, _noUnitEffectChecks, _unitEffectChecks,
 					_usableEffectChecks);
 
 			if (creation.initEffects.Count > 0)
@@ -175,19 +172,6 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		/// <summary>
-		///		When trying to apply a modifier, what should the chance be of it being applied?
-		/// </summary>
-		public ModifierRecipe ApplyChance(float chance)
-		{
-			if (chance > 1)
-				chance /= 100;
-			//Debug.Assert(chance >= 0 && chance <= 1, "Chance must be between 0 and 1");//TODO
-			_applyChanceCheck = new ChanceCheck(chance);
-			HasApplyChecks = true;
-			return this;
-		}
-
 		public ModifierRecipe ApplyCheck(ICheck check)
 		{
 			if (_applyCheckList == null)
@@ -239,16 +223,6 @@ namespace ModiBuff.Core
 		public ModifierRecipe EffectCooldown(float cooldown)
 		{
 			_effectCooldown = cooldown;
-			_hasEffectChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe EffectChance(float chance)
-		{
-			if (chance > 1)
-				chance /= 100;
-			//Debug.Assert(chance >= 0 && chance <= 1, "Chance must be between 0 and 1");//TODO
-			_effectChance = new ChanceCheck(chance);
 			_hasEffectChecks = true;
 			return this;
 		}

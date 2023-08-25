@@ -1,6 +1,6 @@
 using System;
 
-namespace ModiBuff.Core
+namespace ModiBuff.Core.Units
 {
 	public static class Random
 	{
@@ -12,7 +12,7 @@ namespace ModiBuff.Core
 			_seed = Environment.TickCount;
 			_random = new System.Random(_seed);
 		}
-		
+
 		public static float Value => (float)_random.NextDouble();
 	}
 }
