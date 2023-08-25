@@ -1,4 +1,4 @@
-namespace ModiBuff.Core
+namespace ModiBuff.Core.Units
 {
 	public class TestModifierRecipes : ModifierRecipes
 	{

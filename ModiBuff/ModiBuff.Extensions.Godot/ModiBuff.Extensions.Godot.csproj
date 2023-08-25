@@ -7,11 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ModiBuff\ModiBuff.csproj" />
+        <ProjectReference Include="..\ModiBuff.Units\ModiBuff.Units.csproj"/>
+        <ProjectReference Include="..\ModiBuff\ModiBuff.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="GodotSharp" Version="4.1.1" />
+        <PackageReference Include="GodotSharp" Version="4.1.1"/>
     </ItemGroup>
 
 </Project>

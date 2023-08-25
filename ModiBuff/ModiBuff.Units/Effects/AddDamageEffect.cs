@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace ModiBuff.Core
+namespace ModiBuff.Core.Units
 {
 	public sealed class AddDamageEffect : ITargetEffect, IStackEffect, IStateEffect, IRevertEffect, IEffect
 	{

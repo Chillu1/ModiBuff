@@ -4,7 +4,7 @@ using CostCheck = ModiBuff.Core.Units.CostCheck;
 
 namespace ModiBuff.Tests
 {
-	public class TestModifierRecipes : Core.TestModifierRecipes
+	public class TestModifierRecipes : Core.Units.TestModifierRecipes
 	{
 		public TestModifierRecipes(ModifierIdManager idManager) : base(idManager)
 		{
