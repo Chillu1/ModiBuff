@@ -123,20 +123,20 @@ namespace ModiBuff.Core
 
 		//---ApplyChecks---
 
-		public ModifierRecipe ApplyCheck(ICheck check)
-		{
-			if (_applyCheckList == null)
-				_applyCheckList = new List<ICheck>();
-			_applyCheckList.Add(check);
-			HasApplyChecks = true;
-			return this;
-		}
-
 		public ModifierRecipe ApplyCheck(Func<IUnit, bool> check)
 		{
 			if (_applyFuncCheckList == null)
 				_applyFuncCheckList = new List<Func<IUnit, bool>>();
 			_applyFuncCheckList.Add(check);
+			HasApplyChecks = true;
+			return this;
+		}
+
+		public ModifierRecipe ApplyCheck(ICheck check)
+		{
+			if (_applyCheckList == null)
+				_applyCheckList = new List<ICheck>();
+			_applyCheckList.Add(check);
 			HasApplyChecks = true;
 			return this;
 		}

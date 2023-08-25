@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 using NUnit.Framework;
 
 namespace ModiBuff.Tests
@@ -45,7 +46,7 @@ namespace ModiBuff.Tests
 			var applier = Recipes.GetRecipe("InitDamage");
 			Unit.AddApplierModifier(applier, ApplierType.Cast);
 
-			Unit.TryCast(applier.Id, Enemy);
+			ModifierOwnerExtensions.TryCast(Unit, applier.Id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
@@ -71,7 +72,7 @@ namespace ModiBuff.Tests
 
 			Unit.AddApplierModifier(recipe, ApplierType.Cast);
 
-			Unit.TryCast(recipe.Id, Enemy);
+			ModifierOwnerExtensions.TryCast(Unit, recipe.Id, Enemy);
 
 			Assert.AreEqual(UnitMana - 5, Unit.Mana);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);

@@ -1,6 +1,6 @@
 using System;
 
-namespace ModiBuff.Core
+namespace ModiBuff.Core.Units
 {
 	public interface IAttacker<TDamage> where TDamage : IComparable<TDamage>
 	{

@@ -1,6 +1,6 @@
 using System;
 
-namespace ModiBuff.Core
+namespace ModiBuff.Core.Units
 {
 	public interface IHealable<THealth> : IUnit where THealth : IComparable<THealth>
 	{

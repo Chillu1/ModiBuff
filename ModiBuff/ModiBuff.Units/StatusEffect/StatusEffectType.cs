@@ -1,6 +1,6 @@
 using System;
 
-namespace ModiBuff.Core
+namespace ModiBuff.Core.Units
 {
 	/// <summary>
 	///     Special status effects changing Unit acts/lack of acts

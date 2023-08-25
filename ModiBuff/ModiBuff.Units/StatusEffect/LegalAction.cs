@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace ModiBuff.Core
+namespace ModiBuff.Core.Units
 {
 	[Flags]
 	public enum LegalAction
