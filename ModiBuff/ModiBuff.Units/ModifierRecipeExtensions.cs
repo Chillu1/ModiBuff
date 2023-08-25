@@ -3,6 +3,15 @@ namespace ModiBuff.Core.Units
 	public static class ModifierRecipeExtensions
 	{
 		/// <summary>
+		///		Cooldown set for when we can try to apply the modifier to a target.
+		/// </summary>
+		public static ModifierRecipe ApplyCooldown(this ModifierRecipe recipe, float cooldown)
+		{
+			recipe.ApplyCheck(new CooldownCheck(cooldown));
+			return recipe;
+		}
+
+		/// <summary>
 		///		When trying to apply a modifier, what should the chance be of it being applied?
 		/// </summary>
 		public static ModifierRecipe ApplyChance(this ModifierRecipe recipe, float chance)
@@ -21,6 +30,12 @@ namespace ModiBuff.Core.Units
 		public static ModifierRecipe ApplyCost(this ModifierRecipe recipe, CostType costType, float cost)
 		{
 			recipe.ApplyCheck(new CostCheck(costType, cost));
+			return recipe;
+		}
+
+		public static ModifierRecipe EffectCooldown(this ModifierRecipe recipe, float cooldown)
+		{
+			recipe.EffectCheck(new CooldownCheck(cooldown));
 			return recipe;
 		}
 

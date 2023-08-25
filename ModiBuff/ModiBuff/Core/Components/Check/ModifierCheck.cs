@@ -1,49 +1,76 @@
+using System.Linq;
+
 namespace ModiBuff.Core
 {
 	public sealed class ModifierCheck : IStateReset
 	{
 		public int Id { get; }
 
-		private readonly bool _hasCondition, _hasCooldown, _hasCost, _hasNoUnitChecks, _hasUnitChecks, _hasUsableChecks;
+		private readonly bool _hasCondition, _hasUpdatableChecks, _hasNoUnitChecks, _hasUnitChecks, _hasUsableChecks, _hasStateResetChecks;
 
 		private readonly ConditionCheck _condition;
-		private readonly CooldownCheck _cooldown;
+		private readonly IUpdatableCheck[] _updatableChecks;
 		private readonly INoUnitCheck[] _noUnitChecks;
 		private readonly IUnitCheck[] _unitChecks;
 		private readonly IUsableCheck[] _usableChecks;
+		private readonly IStateCheck[] _stateResetChecks;
 
-		public ModifierCheck(int id, ConditionCheck condition = null, CooldownCheck cooldown = null, INoUnitCheck[] noUnitChecks = null,
-			IUnitCheck[] unitChecks = null, IUsableCheck[] usableChecks = null)
+		public ModifierCheck(int id, ConditionCheck condition = null, IUpdatableCheck[] updatableChecks = null,
+			INoUnitCheck[] noUnitChecks = null, IUnitCheck[] unitChecks = null, IUsableCheck[] usableChecks = null,
+			IStateCheck[] stateResetChecks = null)
 		{
 			Id = id;
 
+			if (stateResetChecks != null)
+			{
+				foreach (var stateCheck in stateResetChecks) //TODO Refactor, same instance in both state & other check arrays
+				{
+					if (stateCheck is IUpdatableCheck)
+					{
+						if (updatableChecks == null)
+							updatableChecks = new[] { (IUpdatableCheck)stateCheck };
+						else
+							updatableChecks = updatableChecks.Concat(new[] { (IUpdatableCheck)stateCheck }).ToArray();
+					}
+				}
+			}
+
 			_condition = condition;
-			_cooldown = cooldown;
+			_updatableChecks = updatableChecks;
 			_noUnitChecks = noUnitChecks;
 			_unitChecks = unitChecks;
 			_usableChecks = usableChecks;
+			_stateResetChecks = stateResetChecks;
 
 			_hasCondition = condition != null;
-			_hasCooldown = cooldown != null;
+			_hasUpdatableChecks = updatableChecks != null && updatableChecks.Length > 0;
 			_hasNoUnitChecks = noUnitChecks != null && noUnitChecks.Length > 0;
 			_hasUnitChecks = unitChecks != null && unitChecks.Length > 0;
 			_hasUsableChecks = usableChecks != null && usableChecks.Length > 0;
+			_hasStateResetChecks = stateResetChecks != null && stateResetChecks.Length > 0;
 		}
 
 		public void Update(float delta)
 		{
-			if (!_hasCooldown)
+			if (!_hasUpdatableChecks)
 				return;
 
-			_cooldown.Update(delta);
+			for (int i = 0; i < _updatableChecks.Length; i++)
+				_updatableChecks[i].Update(delta);
 		}
 
 		public bool Check(IUnit unit)
 		{
 			if (_hasCondition && !_condition.Check(unit))
 				return false;
-			if (_hasCooldown && !_cooldown.IsReady)
-				return false;
+
+			if (_hasUpdatableChecks)
+				for (int i = 0; i < _updatableChecks.Length; i++)
+				{
+					if (!_updatableChecks[i].Check())
+						return false;
+				}
+
 			if (_hasNoUnitChecks)
 				for (int i = 0; i < _noUnitChecks.Length; i++)
 				{
@@ -65,8 +92,9 @@ namespace ModiBuff.Core
 						return false;
 				}
 
-			if (_hasCooldown)
-				_cooldown.ResetCooldown();
+			if (_hasStateResetChecks)
+				for (int i = 0; i < _stateResetChecks.Length; i++)
+					_stateResetChecks[i].ResetState();
 			if (_hasUsableChecks)
 				for (int i = 0; i < _usableChecks.Length; i++)
 					_usableChecks[i].Use(unit);
@@ -76,8 +104,9 @@ namespace ModiBuff.Core
 
 		public void ResetState()
 		{
-			if (_hasCooldown)
-				_cooldown.ResetCooldown();
+			if (_hasStateResetChecks)
+				for (int i = 0; i < _stateResetChecks.Length; i++)
+					_stateResetChecks[i].ResetState();
 		}
 	}
 }

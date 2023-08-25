@@ -24,7 +24,6 @@ namespace ModiBuff.Core
 		private LegalAction _applyConditionLegalAction;
 		private StatusEffectType _applyConditionStatusEffect;
 		private int _applyConditionModifierId = -1;
-		private float _applyCooldown = -1f;
 
 		private bool _hasEffectChecks;
 		private ConditionType _effectConditionType;
@@ -34,7 +33,6 @@ namespace ModiBuff.Core
 		private LegalAction _effectConditionLegalAction;
 		private StatusEffectType _effectConditionStatusEffect;
 		private int _effectConditionModifierId = -1;
-		private float _effectCooldown = -1f;
 
 		private bool _oneTimeInit;
 
@@ -59,15 +57,19 @@ namespace ModiBuff.Core
 
 		private ConditionCheck _applyCondition;
 		private List<ICheck> _applyCheckList;
+		private IUpdatableCheck[] _updatableApplyChecks;
 		private INoUnitCheck[] _noUnitApplyChecks;
 		private IUnitCheck[] _unitApplyChecks;
 		private IUsableCheck[] _usableApplyChecks;
+		private IStateCheck[] _stateApplyChecks;
 
 		private ConditionCheck _effectCondition;
 		private List<ICheck> _effectCheckList;
+		private IUpdatableCheck[] _updatableEffectChecks;
 		private INoUnitCheck[] _noUnitEffectChecks;
 		private IUnitCheck[] _unitEffectChecks;
 		private IUsableCheck[] _usableEffectChecks;
+		private IStateCheck[] _stateEffectChecks;
 
 		public ModifierRecipe(int id, string name, ModifierIdManager idManager)
 		{
@@ -82,12 +84,16 @@ namespace ModiBuff.Core
 
 		ModifierCheck IModifierRecipe.CreateApplyCheck()
 		{
-			CooldownCheck cooldown = null;
+			IStateCheck[] stateChecks = null;
+			if (_stateApplyChecks != null && _stateApplyChecks.Length > 0) //TODO Optimize
+			{
+				stateChecks = new IStateCheck[_stateApplyChecks.Length];
+				for (int i = 0; i < _stateApplyChecks.Length; i++)
+					stateChecks[i] = (IStateCheck)_stateApplyChecks[i].ShallowClone();
+			}
 
-			if (_applyCooldown > 0f)
-				cooldown = new CooldownCheck(_applyCooldown);
-
-			return new ModifierCheck(Id, _applyCondition, cooldown, _noUnitApplyChecks, _unitApplyChecks, _usableApplyChecks);
+			return new ModifierCheck(Id, _applyCondition, _updatableApplyChecks, _noUnitApplyChecks, _unitApplyChecks, _usableApplyChecks,
+				stateChecks);
 		}
 
 		Modifier IModifierRecipe.Create()
@@ -98,13 +104,18 @@ namespace ModiBuff.Core
 
 			var creation = _modifierCreator.Create(_removeEffectWrapper);
 
-			CooldownCheck cooldown = null;
-			if (_effectCooldown > 0f)
-				cooldown = new CooldownCheck(_effectCooldown);
+			IStateCheck[] stateChecks = null;
+			if (_stateEffectChecks != null && _stateEffectChecks.Length > 0) //TODO Optimize
+			{
+				stateChecks = new IStateCheck[_stateEffectChecks.Length];
+				for (int i = 0; i < _stateEffectChecks.Length; i++)
+					stateChecks[i] = (IStateCheck)_stateEffectChecks[i].ShallowClone();
+			}
+
 			ModifierCheck effectCheck = null;
 			if (_hasEffectChecks)
-				effectCheck = new ModifierCheck(Id, _effectCondition, cooldown, _noUnitEffectChecks, _unitEffectChecks,
-					_usableEffectChecks);
+				effectCheck = new ModifierCheck(Id, _effectCondition, _updatableEffectChecks, _noUnitEffectChecks, _unitEffectChecks,
+					_usableEffectChecks, stateChecks);
 
 			if (creation.initEffects.Count > 0)
 				initComponent = new InitComponent(_oneTimeInit, creation.initEffects.ToArray(), effectCheck);
@@ -162,16 +173,6 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		/// <summary>
-		///		Cooldown set for when we can try to apply the modifier to a target.
-		/// </summary>
-		public ModifierRecipe ApplyCooldown(float cooldown)
-		{
-			_applyCooldown = cooldown;
-			HasApplyChecks = true;
-			return this;
-		}
-
 		public ModifierRecipe ApplyCheck(ICheck check)
 		{
 			if (_applyCheckList == null)
@@ -216,13 +217,6 @@ namespace ModiBuff.Core
 		public ModifierRecipe EffectCondition(string modifierName)
 		{
 			_effectConditionModifierId = _idManager.GetId(modifierName);
-			_hasEffectChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe EffectCooldown(float cooldown)
-		{
-			_effectCooldown = cooldown;
 			_hasEffectChecks = true;
 			return this;
 		}
@@ -377,25 +371,33 @@ namespace ModiBuff.Core
 
 			if (HasApplyChecks)
 			{
-				var unitChecks = new List<IUnitCheck>();
+				var updatableChecks = new List<IUpdatableCheck>();
 				var noUnitChecks = new List<INoUnitCheck>();
+				var unitChecks = new List<IUnitCheck>();
 				var usableChecks = new List<IUsableCheck>();
+				var stateChecks = new List<IStateCheck>();
 				if (_applyCheckList != null)
 					foreach (var check in _applyCheckList)
 					{
-						if (check is IUsableCheck usableCheck)
+						if (check is IStateCheck stateCheck)
+							stateChecks.Add(stateCheck);
+						else if (check is IUsableCheck usableCheck)
 							usableChecks.Add(usableCheck);
 						else if (check is IUnitCheck unitCheck)
 							unitChecks.Add(unitCheck);
+						else if (check is IUpdatableCheck updatableCheck)
+							updatableChecks.Add(updatableCheck);
 						else if (check is INoUnitCheck noUnitCheck)
 							noUnitChecks.Add(noUnitCheck);
 						else
 							Logger.LogError("Unknown check type: " + check.GetType());
 					}
 
-				_unitApplyChecks = unitChecks.ToArray();
+				_updatableApplyChecks = updatableChecks.ToArray();
 				_noUnitApplyChecks = noUnitChecks.ToArray();
+				_unitApplyChecks = unitChecks.ToArray();
 				_usableApplyChecks = usableChecks.ToArray();
+				_stateApplyChecks = stateChecks.ToArray();
 
 				_applyCondition = new ConditionCheck(_applyConditionType, _applyConditionStatType, _applyConditionValue,
 					_applyConditionComparisonType, _applyConditionLegalAction, _applyConditionStatusEffect,
@@ -404,25 +406,33 @@ namespace ModiBuff.Core
 
 			if (_hasEffectChecks)
 			{
-				var unitChecks = new List<IUnitCheck>();
+				var updatableChecks = new List<IUpdatableCheck>();
 				var noUnitChecks = new List<INoUnitCheck>();
+				var unitChecks = new List<IUnitCheck>();
 				var usableChecks = new List<IUsableCheck>();
+				var stateChecks = new List<IStateCheck>();
 				if (_effectCheckList != null)
 					foreach (var check in _effectCheckList)
 					{
-						if (check is IUsableCheck usableCheck)
+						if (check is IStateCheck stateCheck)
+							stateChecks.Add(stateCheck);
+						else if (check is IUsableCheck usableCheck)
 							usableChecks.Add(usableCheck);
 						else if (check is IUnitCheck unitCheck)
 							unitChecks.Add(unitCheck);
+						else if (check is IUpdatableCheck updatableCheck)
+							updatableChecks.Add(updatableCheck);
 						else if (check is INoUnitCheck noUnitCheck)
 							noUnitChecks.Add(noUnitCheck);
 						else
 							Logger.LogError("Unknown check type: " + check.GetType());
 					}
 
-				_unitEffectChecks = unitChecks.ToArray();
+				_updatableEffectChecks = updatableChecks.ToArray();
 				_noUnitEffectChecks = noUnitChecks.ToArray();
+				_unitEffectChecks = unitChecks.ToArray();
 				_usableEffectChecks = usableChecks.ToArray();
+				_stateEffectChecks = stateChecks.ToArray();
 
 				_effectCondition = new ConditionCheck(_effectConditionType, _effectConditionStatType, _effectConditionValue,
 					_effectConditionComparisonType, _effectConditionLegalAction, _effectConditionStatusEffect,
