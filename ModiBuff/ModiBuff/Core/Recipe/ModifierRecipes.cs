@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,6 +11,8 @@ namespace ModiBuff.Core
 		private readonly ModifierIdManager _idManager;
 		private readonly IDictionary<string, IModifierRecipe> _recipes;
 		private readonly List<RegisterData> _registeredNames;
+
+		private Func<IEffect[], int, IEffect> _eventEffectFunc;
 
 		public ModifierRecipes(ModifierIdManager idManager)
 		{
@@ -26,6 +29,11 @@ namespace ModiBuff.Core
 		}
 
 		protected abstract void SetupRecipes();
+
+		/// <summary>
+		///		Call this, and feed an event effect func factory to use the event recipes.
+		/// </summary>
+		protected void SetupEventEffect(Func<IEffect[], int, IEffect> eventEffectFunc) => _eventEffectFunc = eventEffectFunc;
 
 		public IModifierRecipe GetRecipe(string id) => _recipes[id];
 		internal IModifierRecipe GetRecipe(int id) => _recipes.Values.ElementAt(id);
@@ -59,7 +67,9 @@ namespace ModiBuff.Core
 			return recipe;
 		}
 
-		protected ModifierEventRecipe AddEvent(string name, EffectOnEvent effectOnEvent)
+		protected ModifierEventRecipe AddEvent<T>(string name, T effectOnEvent) => AddEvent(name, (int)(object)effectOnEvent);
+
+		protected ModifierEventRecipe AddEvent(string name, int effectOnEvent)
 		{
 			if (_recipes.TryGetValue(name, out var localRecipe))
 			{
@@ -81,7 +91,7 @@ namespace ModiBuff.Core
 			if (id == -1)
 				id = _idManager.GetFreeId(name);
 
-			var recipe = new ModifierEventRecipe(id, name, effectOnEvent);
+			var recipe = new ModifierEventRecipe(id, name, effectOnEvent, _eventEffectFunc);
 			_recipes.Add(name, recipe);
 			return recipe;
 		}

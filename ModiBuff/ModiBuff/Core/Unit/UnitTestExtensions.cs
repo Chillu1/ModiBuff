@@ -19,7 +19,7 @@ namespace ModiBuff.Core
 
 		internal static bool AddApplierModifier(this IModifierOwner unit, IModifierRecipe recipe, ApplierType applierType)
 		{
-			return unit.ModifierController.TryAddApplier(recipe.Id, recipe.HasApplyChecks, applierType);
+			return unit.ModifierController.TryAddApplier(recipe.Id, ((IModifierApplyCheckRecipe)recipe).HasApplyChecks, applierType);
 		}
 	}
 }

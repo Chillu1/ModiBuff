@@ -7,7 +7,7 @@ namespace ModiBuff.Core
 	/// <summary>
 	///		High level API for creating modifiers.
 	/// </summary>
-	public sealed class ModifierRecipe : IModifierRecipe, IComparable<ModifierRecipe>
+	public sealed class ModifierRecipe : IModifierApplyCheckRecipe, IComparable<ModifierRecipe>
 	{
 		public int Id { get; }
 		public string Name { get; }
@@ -69,7 +69,7 @@ namespace ModiBuff.Core
 
 		//---PostFinish---
 
-		ModifierCheck IModifierRecipe.CreateApplyCheck()
+		ModifierCheck IModifierApplyCheckRecipe.CreateApplyCheck()
 		{
 			IStateCheck[] stateChecks = null;
 			if (_stateApplyChecks != null && _stateApplyChecks.Length > 0) //TODO Optimize

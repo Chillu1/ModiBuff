@@ -8,6 +8,8 @@ namespace ModiBuff.Core.Units
 
 		protected override void SetupRecipes()
 		{
+			SetupEventEffect((effects, effectOnEvent) => new EventEffect(effects, (EffectOnEvent)effectOnEvent));
+
 			//For now recipes only supports one interval, one duration.
 			Add("InitDoT")
 				.Interval(1)
