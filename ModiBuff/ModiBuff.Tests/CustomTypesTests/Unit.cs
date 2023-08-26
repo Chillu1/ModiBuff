@@ -59,7 +59,7 @@ namespace ModiBuff.Tests.CustomTypesTests
 		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences) : this(health, damage)
 		{
 			foreach (var modifierAddReference in modifierAddReferences)
-				this.TryAddModifier(modifierAddReference, this);
+				ModifierController.TryAdd(modifierAddReference, this);
 		}
 
 		public void Update(float deltaTime)
