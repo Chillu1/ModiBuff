@@ -48,6 +48,7 @@ namespace ModiBuff.Core
 		private IUnitCheck[] _unitApplyChecks;
 		private IUsableCheck[] _usableApplyChecks;
 		private IStateCheck[] _stateApplyChecks;
+		private bool _hasStateApplyChecks;
 
 		private List<ICheck> _effectCheckList;
 		private List<Func<IUnit, bool>> _effectFuncCheckList;
@@ -57,6 +58,7 @@ namespace ModiBuff.Core
 		private IUnitCheck[] _unitEffectChecks;
 		private IUsableCheck[] _usableEffectChecks;
 		private IStateCheck[] _stateEffectChecks;
+		private bool _hasStateEffectChecks;
 
 		public ModifierRecipe(int id, string name, ModifierIdManager idManager)
 		{
@@ -72,11 +74,22 @@ namespace ModiBuff.Core
 		ModifierCheck IModifierApplyCheckRecipe.CreateApplyCheck()
 		{
 			IStateCheck[] stateChecks = null;
-			if (_stateApplyChecks != null && _stateApplyChecks.Length > 0) //TODO Optimize
+			if (_hasStateApplyChecks)
 			{
 				stateChecks = new IStateCheck[_stateApplyChecks.Length];
 				for (int i = 0; i < _stateApplyChecks.Length; i++)
-					stateChecks[i] = (IStateCheck)_stateApplyChecks[i].ShallowClone();
+				{
+					var stateCheck = (IStateCheck)_stateApplyChecks[i].ShallowClone();
+					stateChecks[i] = stateCheck;
+					// if (stateCheck is IUsableCheck usableCheck)
+					// 	usableChecks.Add(usableCheck);
+					// if (stateCheck is IUnitCheck unitCheck)
+					// 	unitChecks.Add(unitCheck);
+					// if (stateCheck is IUpdatableCheck updatableCheck)
+					// 	updatableChecks.Add(updatableCheck);
+					// if (stateCheck is INoUnitCheck noUnitCheck)
+					// 	noUnitChecks.Add(noUnitCheck);
+				}
 			}
 
 			return new ModifierCheck(Id, _applyFuncChecks, _updatableApplyChecks, _noUnitApplyChecks, _unitApplyChecks,
@@ -92,7 +105,7 @@ namespace ModiBuff.Core
 			var creation = _modifierCreator.Create(_removeEffectWrapper);
 
 			IStateCheck[] stateChecks = null;
-			if (_stateEffectChecks != null && _stateEffectChecks.Length > 0) //TODO Optimize
+			if (_hasStateEffectChecks)
 			{
 				stateChecks = new IStateCheck[_stateEffectChecks.Length];
 				for (int i = 0; i < _stateEffectChecks.Length; i++)
@@ -330,6 +343,7 @@ namespace ModiBuff.Core
 				_unitApplyChecks = unitChecks.ToArray();
 				_usableApplyChecks = usableChecks.ToArray();
 				_stateApplyChecks = stateChecks.ToArray();
+				_hasStateApplyChecks = _stateApplyChecks.Length > 0;
 
 				_applyFuncChecks = _applyFuncCheckList?.ToArray();
 			}
@@ -363,6 +377,7 @@ namespace ModiBuff.Core
 				_unitEffectChecks = unitChecks.ToArray();
 				_usableEffectChecks = usableChecks.ToArray();
 				_stateEffectChecks = stateChecks.ToArray();
+				_hasStateEffectChecks = _stateEffectChecks.Length > 0;
 
 				_effectFuncChecks = _effectFuncCheckList?.ToArray();
 			}
