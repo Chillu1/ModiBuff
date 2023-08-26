@@ -13,7 +13,7 @@ namespace ModiBuff.Tests
 			var unit = new Unit();
 			float unitHealth = unit.Health;
 
-			unit.TryAddModifierSelf("InitDamage");
+			unit.AddModifierSelf("InitDamage");
 			Assert.AreEqual(unitHealth - 5, unit.Health);
 		}
 
@@ -25,11 +25,6 @@ namespace ModiBuff.Tests
 			{
 				ModifierController = new ModifierController(this);
 			}
-
-			public bool TryAddModifier(int id, IUnit source)
-			{
-				return ModifierController.TryAdd(id, this, source);
-			}
 		}
 
 		[Test]
@@ -37,7 +32,7 @@ namespace ModiBuff.Tests
 		{
 			var unit = new NonDamagableUnit();
 
-			Assert.Throws<ArgumentException>(() => unit.TryAddModifierSelf("InitDamage"));
+			Assert.Throws<ArgumentException>(() => unit.AddModifierSelf("InitDamage"));
 		}
 
 		[Test]
@@ -50,7 +45,7 @@ namespace ModiBuff.Tests
 
 			var unit = new Unit();
 
-			unit.TryAddModifierSelf("InitDamage");
+			unit.AddModifierSelf("InitDamage");
 			unit.AddApplierModifier(Recipes.GetRecipe("InitDamage"), ApplierType.Attack);
 			unit.AddApplierModifier(Recipes.GetRecipe("InitDamage"), ApplierType.Cast);
 			unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_ApplyCondition_HealthAbove100"), ApplierType.Attack);

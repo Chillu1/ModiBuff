@@ -8,8 +8,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void OneTimeInitDamage()
 		{
-			Unit.TryAddModifierSelf("OneTimeInitDamage");
-			Unit.TryAddModifierSelf("OneTimeInitDamage");
+			Unit.AddModifierSelf("OneTimeInitDamage");
+			Unit.AddModifierSelf("OneTimeInitDamage");
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}

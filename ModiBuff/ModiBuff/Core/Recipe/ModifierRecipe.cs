@@ -15,8 +15,6 @@ namespace ModiBuff.Core
 
 		public readonly ModifierIdManager IdManager; //TODO Refactor to make it private/not needed
 
-		public LegalTargetType LegalTargetType { get; private set; } = LegalTargetType.Self;
-
 		private bool _hasEffectChecks;
 
 		private bool _oneTimeInit;
@@ -228,7 +226,9 @@ namespace ModiBuff.Core
 		{
 			if (_interval <= 0 && _duration <= 0)
 			{
+#if DEBUG && !MODIBUFF_PROFILE
 				Logger.LogWarning("Refresh() called without a duration or interval set, defaulting to duration");
+#endif
 				Refresh(RefreshType.Duration);
 				return this;
 			}
@@ -258,7 +258,9 @@ namespace ModiBuff.Core
 					_refreshInterval = true;
 					break;
 				default:
+#if DEBUG && !MODIBUFF_PROFILE
 					Logger.LogError($"Unknown refresh type: {type}");
+#endif
 					return this;
 			}
 
@@ -299,17 +301,12 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		//---Target---
-		public ModifierRecipe LegalTarget(LegalTargetType legalTargetType)
-		{
-			LegalTargetType = legalTargetType;
-			return this;
-		}
-
 		public void Finish()
 		{
+#if DEBUG && !MODIBUFF_PROFILE
 			if (_modifierCreator != null)
 				Logger.LogError("Modifier recipe already finished, finishing again. Not intended?");
+#endif
 
 			_timeComponents = new List<ITimeComponent>(2);
 			_modifierCreator = new ModifierCreator(_effectWrappers);

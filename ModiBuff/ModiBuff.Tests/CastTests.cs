@@ -56,5 +56,20 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(EnemyHealth - UnitDamage * 2 - 5, Enemy.Health);
 		}
+
+		[Test]
+		public void CastInitDamageChecksDelayedUse_OnEnemy()
+		{
+			int id = IdManager.GetId("InitDamageFullHealth");
+
+			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamageFullHealth"), ApplierType.Cast);
+
+			Assert.True(Unit.ModifierController.TryCastCheck(id));
+			Assert.AreEqual(EnemyHealth, Enemy.Health);
+
+			Assert.True(Unit.TryCastNoChecks(id, Enemy));
+
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+		}
 	}
 }

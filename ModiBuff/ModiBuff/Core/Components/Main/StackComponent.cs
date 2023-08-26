@@ -58,7 +58,9 @@ namespace ModiBuff.Core
 						StackEffect();
 					return;
 				default:
+#if DEBUG && !MODIBUFF_PROFILE
 					Logger.LogError("Invalid stack effect: " + _whenStackEffect);
+#endif
 					return;
 			}
 		}

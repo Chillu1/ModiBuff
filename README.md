@@ -79,7 +79,7 @@ N: 10_000
 
 | Library                                               | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Update DoT*<br/>(10_000 units, N:1) |
 |-------------------------------------------------------|--------------------------------|-------------------------------------|-------------------------------------|
-| ModiBuff (this)                                       | 0.30ms, 0 B                    | 0.66ms, 0 B                         | 0.82ms, 0 B                         |
+| ModiBuff (this)                                       | 0.30ms, 0 B                    | 0.66ms, 0 B                         | 1.33ms, 0 B                         |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 1.02ms, 0 GC                   | ?                                   | 0.44ms, 0 GC                        |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | 21.4ms, 24 GC                  | ?                                   | ?                                   |
 
@@ -87,7 +87,7 @@ N: 10_000
 
 | Library                                               | New<br/>InitDmg | New<br/>DoT*  | DoT pool     | DoT pool<br/>reset return |
 |-------------------------------------------------------|-----------------|---------------|--------------|---------------------------|
-| ModiBuff (this)                                       | 1.25ms,  2 MB   | 3.3ms, 4.7 MB | 0.04ms, 0 GC | 0.20ms, 0 B               |
+| ModiBuff (this)                                       | 1.32ms,  2 MB   | 3.6ms, 4.8 MB | 0.04ms, 0 GC | 0.20ms, 0 B               |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 10.4ms,  2 GC   | 16.7ms,  2 GC | 1.64ms, 0 GC | 4.26ms, 0 GC              |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | 92.0ms, 90 GC   | 140ms, 126 GC | X            | X                         |
 

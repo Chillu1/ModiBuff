@@ -2,14 +2,14 @@ namespace ModiBuff.Core
 {
 	internal static class UnitTestExtensions
 	{
-		internal static bool TryAddModifierSelf(this IModifierOwner unit, string name)
+		internal static void AddModifierSelf(this IModifierOwner unit, string name)
 		{
-			return unit.TryAddModifier(ModifierIdManager.GetIdOld(name), unit);
+			unit.AddModifier(ModifierIdManager.GetIdOld(name), unit);
 		}
 
-		internal static bool TryAddModifierTarget(this IModifierOwner unit, string name, IUnit target)
+		internal static void AddModifierTarget(this IModifierOwner unit, string name, IUnit target)
 		{
-			return unit.ModifierController.TryAdd(ModifierIdManager.GetIdOld(name), target, unit);
+			unit.ModifierController.Add(ModifierIdManager.GetIdOld(name), target, unit);
 		}
 
 		internal static bool ContainsModifier(this IModifierOwner unit, string name)

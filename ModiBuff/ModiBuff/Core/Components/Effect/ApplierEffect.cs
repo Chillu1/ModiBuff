@@ -17,8 +17,10 @@ namespace ModiBuff.Core
 			}
 			catch (KeyNotFoundException)
 			{
+#if DEBUG && !MODIBUFF_PROFILE
 				Logger.LogError("Can't find modifier with name " + modifierName +
 				                ". Either wrong order of effect initialization or wrong modifier name.");
+#endif
 			}
 		}
 
@@ -29,16 +31,16 @@ namespace ModiBuff.Core
 			switch (_targeting)
 			{
 				case Targeting.TargetSource:
-					((IModifierOwner)target).TryAddModifier(_modifierId, source);
+					((IModifierOwner)target).AddModifier(_modifierId, source);
 					break;
 				case Targeting.SourceTarget:
-					((IModifierOwner)source).TryAddModifier(_modifierId, target);
+					((IModifierOwner)source).AddModifier(_modifierId, target);
 					break;
 				case Targeting.TargetTarget:
-					((IModifierOwner)target).TryAddModifier(_modifierId, target);
+					((IModifierOwner)target).AddModifier(_modifierId, target);
 					break;
 				case Targeting.SourceSource:
-					((IModifierOwner)source).TryAddModifier(_modifierId, source);
+					((IModifierOwner)source).AddModifier(_modifierId, source);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();

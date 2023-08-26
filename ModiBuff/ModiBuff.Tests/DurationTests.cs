@@ -8,7 +8,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Duration_Damage()
 		{
-			Unit.TryAddModifierSelf("DurationDamage");
+			Unit.AddModifierSelf("DurationDamage");
 
 			Unit.Update(5);
 
@@ -18,7 +18,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Duration_Remove()
 		{
-			Unit.TryAddModifierSelf("DurationRemove");
+			Unit.AddModifierSelf("DurationRemove");
 
 			Unit.Update(5);
 
@@ -28,7 +28,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Duration_Damage_Once()
 		{
-			Unit.TryAddModifierSelf("DurationDamage");
+			Unit.AddModifierSelf("DurationDamage");
 
 			Unit.Update(5);
 

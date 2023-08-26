@@ -24,7 +24,9 @@ namespace ModiBuff.Core.Units
 						return false;
 					return manaOwner.Mana >= _cost;
 				default:
+#if DEBUG && !MODIBUFF_PROFILE
 					Logger.LogError("Unknown cost type: " + _costType);
+#endif
 					return false;
 			}
 		}
@@ -40,7 +42,9 @@ namespace ModiBuff.Core.Units
 					((IManaOwner)unit).UseMana(_cost);
 					return;
 				default:
+#if DEBUG && !MODIBUFF_PROFILE
 					Logger.LogError("Unknown cost type: " + _costType);
+#endif
 					return;
 			}
 		}

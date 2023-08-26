@@ -21,14 +21,14 @@ namespace ModiBuff.Core
 		{
 			_owner = owner;
 
-			_modifierIndexes = new List<int>(5);
+			_modifierIndexes = new List<int>(4);
 			_modifiers = new Modifier[ModifierRecipes.RecipesCount];
-			_modifierAttackAppliers = new List<int>(5);
-			_modifierCastAppliers = new List<int>(5);
-			_modifierCastChecksAppliers = new Dictionary<int, ModifierCheck>(5);
-			_modifierAttackChecksAppliers = new Dictionary<int, ModifierCheck>(5);
+			_modifierAttackAppliers = new List<int>(4);
+			_modifierCastAppliers = new List<int>(4);
+			_modifierCastChecksAppliers = new Dictionary<int, ModifierCheck>(4);
+			_modifierAttackChecksAppliers = new Dictionary<int, ModifierCheck>(4);
 
-			_modifiersToRemove = new List<int>(5);
+			_modifiersToRemove = new List<int>(4);
 		}
 
 		public void Update(float delta)
@@ -61,35 +61,18 @@ namespace ModiBuff.Core
 		public IReadOnlyList<int> GetApplierAttackModifierIds() => _modifierAttackAppliers;
 		public IReadOnlyList<int> GetApplierCastModifierIds() => _modifierCastAppliers;
 
-		public bool TryAdd(ModifierAddReference addReference, IUnit self, IUnit source)
-		{
-			return TryAdd(addReference.Id, addReference.HasApplyChecks, addReference.ApplierType, self, source);
-		}
+		public bool TryAdd(ModifierAddReference addReference) => TryAdd(addReference, _owner);
 
-		//TODO Refactor, make it easier to add appliers through API
-		private bool TryAdd(int id, bool hasApplyChecks, ApplierType applierType, IUnit self, IUnit source)
+		public bool TryAdd(ModifierAddReference addReference, IUnit target)
 		{
-			switch (applierType)
-			{
-				case ApplierType.None:
-					Logger.LogWarning("Trying to add a non applier modifier with apply checks");
-					return TryAdd(id, self, source);
-				case ApplierType.Cast:
-				case ApplierType.Attack:
-					return TryAddApplier(id, hasApplyChecks, applierType);
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+			if (addReference.IsApplierType)
+				return TryAddApplier(addReference.Id, addReference.HasApplyChecks, addReference.ApplierType);
+
+			Add(addReference.Id, target, _owner);
+			return true;
 		}
 
 		//TODO do appliers make sense? Should we just store the id, what kind of state do appliers have?
-		public bool TryAdd(int id, IUnit target, IUnit source)
-		{
-			//TODO We should check if the target is legal here?
-			Add(id, target, source);
-
-			return true;
-		}
 
 		/// <summary>
 		///		Only triggers the check, does not trigger the modifiers effect. Used when modifiers 
@@ -97,14 +80,6 @@ namespace ModiBuff.Core
 		public bool TryCastCheck(int id)
 		{
 			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.Check(_owner);
-		}
-
-		/// <summary>
-		///		Skips the check part for check modifiers, use this ONLY in case you're also using <see cref="TryCastCheck"/>
-		/// </summary>
-		public bool TryCastModifierWithoutCheck(int id, IUnit target, IModifierOwner source) //TODO Rename
-		{
-			return source.ModifierController._modifierCastChecksAppliers.ContainsKey(id) && TryAdd(id, target, source);
 		}
 
 		/// <summary>
@@ -163,7 +138,9 @@ namespace ModiBuff.Core
 					return true;
 				}
 				default:
+#if DEBUG && !MODIBUFF_PROFILE
 					Logger.LogError("Unknown applier type: " + applierType);
+#endif
 					return false;
 			}
 		}
@@ -171,17 +148,17 @@ namespace ModiBuff.Core
 		public void TryApplyAttackNonCheckModifiers(IEnumerable<int> modifierIds, IUnit target, IModifierOwner source)
 		{
 			foreach (int id in modifierIds)
-				TryAdd(id, target, source);
+				Add(id, target, source);
 		}
 
 		public void TryApplyAttackCheckModifiers(IEnumerable<ModifierCheck> modifierChecks, IUnit target, IModifierOwner source)
 		{
 			foreach (var check in modifierChecks)
 				if (check.Check(source))
-					TryAdd(check.Id, target, source);
+					Add(check.Id, target, source);
 		}
 
-		private Modifier Add(int id, IUnit target, IUnit source)
+		public void Add(int id, IUnit target, IUnit source)
 		{
 			var existingModifier = _modifiers[id];
 			if (existingModifier != null)
@@ -192,7 +169,7 @@ namespace ModiBuff.Core
 				existingModifier.Init();
 				existingModifier.Refresh();
 				existingModifier.Stack();
-				return existingModifier;
+				return;
 			}
 
 			//Debug.Log("Adding new modifier");
@@ -206,13 +183,10 @@ namespace ModiBuff.Core
 			modifier.Init();
 			modifier.Refresh();
 			modifier.Stack();
-			return modifier;
 		}
 
-		public bool Contains(int id)
-		{
-			return _modifiers[id] != null;
-		}
+		public bool Contains(int id) => _modifiers[id] != null;
+		public bool ContainsApplier(int id) => _modifierCastAppliers.Contains(id) || _modifierCastChecksAppliers.ContainsKey(id);
 
 		public void PrepareRemove(int id)
 		{

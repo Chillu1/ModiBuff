@@ -8,7 +8,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Init_DoT()
 		{
-			Unit.TryAddModifierSelf("InitDoT"); //Init
+			Unit.AddModifierSelf("InitDoT"); //Init
 
 			Assert.AreEqual(UnitHealth - 10, Unit.Health);
 

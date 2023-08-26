@@ -37,7 +37,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Thorns_OnHit()
 		{
-			Unit.TryAddModifierSelf("ThornsOnHitEvent");
+			Unit.AddModifierSelf("ThornsOnHitEvent");
 
 			Enemy.Attack(Unit);
 
@@ -47,7 +47,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Thorns_OnHit_DurationRemove()
 		{
-			Unit.TryAddModifierSelf("ThornsOnHitEvent_Remove");
+			Unit.AddModifierSelf("ThornsOnHitEvent_Remove");
 
 			Enemy.Attack(Unit);
 
@@ -69,7 +69,7 @@ namespace ModiBuff.Tests
 		public void AddDamage_OnKill()
 		{
 			var weakEnemy = new Unit(1);
-			Unit.TryAddModifierSelf("AddDamage_OnKill_Event");
+			Unit.AddModifierSelf("AddDamage_OnKill_Event");
 
 			Assert.AreEqual(UnitDamage, Unit.Damage);
 
@@ -82,7 +82,7 @@ namespace ModiBuff.Tests
 		public void Damage_OnDeath()
 		{
 			var weakUnit = new Unit(1);
-			weakUnit.TryAddModifierSelf("Damage_OnDeath_Event");
+			weakUnit.AddModifierSelf("Damage_OnDeath_Event");
 
 			Enemy.Attack(weakUnit);
 
@@ -92,7 +92,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Heal_OnHeal()
 		{
-			Unit.TryAddModifierSelf("Heal_OnHeal_Event");
+			Unit.AddModifierSelf("Heal_OnHeal_Event");
 
 			Unit.TakeDamage(5, Enemy);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
@@ -104,7 +104,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackSelf_OnHit()
 		{
-			Unit.TryAddModifierSelf("AttackSelf_OnHit_Event");
+			Unit.AddModifierSelf("AttackSelf_OnHit_Event");
 
 			Enemy.Attack(Unit);
 
@@ -114,7 +114,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void PoisonDoT_OnHit()
 		{
-			Unit.TryAddModifierSelf("PoisonDoT_OnHit_Event");
+			Unit.AddModifierSelf("PoisonDoT_OnHit_Event");
 
 			Enemy.Attack(Unit);
 
@@ -128,8 +128,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Thorns_OnHit_Recursion()
 		{
-			Unit.TryAddModifierSelf("ThornsOnHitEvent");
-			Enemy.TryAddModifierSelf("ThornsOnHitEvent");
+			Unit.AddModifierSelf("ThornsOnHitEvent");
+			Enemy.AddModifierSelf("ThornsOnHitEvent");
 
 			Enemy.Attack(Unit);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);

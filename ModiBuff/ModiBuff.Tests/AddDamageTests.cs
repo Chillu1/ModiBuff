@@ -8,7 +8,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Init_AddDamage()
 		{
-			Unit.TryAddModifierSelf("InitAddDamage");
+			Unit.AddModifierSelf("InitAddDamage");
 
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 		}

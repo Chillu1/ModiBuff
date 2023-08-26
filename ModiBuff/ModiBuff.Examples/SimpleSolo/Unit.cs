@@ -64,11 +64,6 @@ namespace ModiBuff.Examples.SimpleSolo
 			return Health -= damage;
 		}
 
-		public bool TryAddModifier(int id, IUnit source)
-		{
-			return ModifierController.TryAdd(id, this, source);
-		}
-
 		public float Attack(IUnit target, bool triggersEvents = true)
 		{
 			float dealtDamage = ((IDamagable<float, float>)target).TakeDamage(Damage, this, triggersEvents);

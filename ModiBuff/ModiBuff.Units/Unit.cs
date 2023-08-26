@@ -60,7 +60,7 @@ namespace ModiBuff.Core.Units
 		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences) : this(health, damage)
 		{
 			foreach (var modifierAddReference in modifierAddReferences)
-				this.TryAddModifier(modifierAddReference, this);
+				ModifierController.TryAdd(modifierAddReference);
 		}
 
 		public void Update(float deltaTime)
@@ -200,7 +200,9 @@ namespace ModiBuff.Core.Units
 					_onHealEffects.Add(effect);
 					break;
 				default:
+#if DEBUG && !MODIBUFF_PROFILE
 					Logger.LogError("Unknown event type: " + @event);
+#endif
 					return;
 			}
 		}
@@ -234,7 +236,9 @@ namespace ModiBuff.Core.Units
 					Remove(_onHealEffects, effect);
 					break;
 				default:
+#if DEBUG && !MODIBUFF_PROFILE
 					Logger.LogError("Unknown event type: " + @event);
+#endif
 					return;
 			}
 
@@ -242,8 +246,10 @@ namespace ModiBuff.Core.Units
 			{
 				bool remove = effects.Remove(effectToRemove);
 
+#if DEBUG && !MODIBUFF_PROFILE
 				if (!remove)
 					Logger.LogError("Could not remove event: " + effectToRemove.GetType());
+#endif
 			}
 		}
 

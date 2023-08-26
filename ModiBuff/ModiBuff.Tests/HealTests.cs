@@ -11,7 +11,7 @@ namespace ModiBuff.Tests
 			Unit.TakeDamage(5, Unit);
 			Assert.AreEqual(AllyHealth - 5, Unit.Health);
 
-			Unit.TryAddModifierSelf("InitHeal"); //Init
+			Unit.AddModifierSelf("InitHeal"); //Init
 
 			Assert.AreEqual(UnitHealth, Unit.Health);
 		}
@@ -22,7 +22,7 @@ namespace ModiBuff.Tests
 			Ally.TakeDamage(5, Ally);
 			Assert.AreEqual(AllyHealth - 5, Ally.Health);
 
-			Unit.TryAddModifierTarget("InitHeal", Ally); //Init
+			Unit.AddModifierTarget("InitHeal", Ally); //Init
 
 			Assert.AreEqual(AllyHealth, Ally.Health);
 		}

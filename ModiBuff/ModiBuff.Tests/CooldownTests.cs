@@ -26,14 +26,14 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamage_Cooldown_Effect()
 		{
-			Unit.TryAddModifierSelf("InitDamage_Cooldown_Effect"); // 1 second cooldown
+			Unit.AddModifierSelf("InitDamage_Cooldown_Effect"); // 1 second cooldown
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
-			Unit.TryAddModifierSelf("InitDamage_Cooldown_Effect"); // On Cooldown
+			Unit.AddModifierSelf("InitDamage_Cooldown_Effect"); // On Cooldown
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
 			Unit.Update(1); //Cooldown gone
-			Unit.TryAddModifierSelf("InitDamage_Cooldown_Effect");
+			Unit.AddModifierSelf("InitDamage_Cooldown_Effect");
 			Assert.AreEqual(UnitHealth - 5 * 2, Unit.Health);
 		}
 	}
