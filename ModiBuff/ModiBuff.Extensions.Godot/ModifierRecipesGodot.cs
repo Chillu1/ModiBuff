@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 
 namespace ModiBuff.Extensions.Godot
 {

@@ -14,6 +14,14 @@ namespace ModiBuff.Core
 		public ModifierAddReference(IModifierRecipe recipe, ApplierType applierType = ApplierType.None)
 		{
 			Id = recipe.Id;
+			if (recipe is IModifierApplyCheckRecipe applyCheckRecipe)
+				HasApplyChecks = applyCheckRecipe.HasApplyChecks;
+			ApplierType = applierType;
+		}
+
+		public ModifierAddReference(IModifierApplyCheckRecipe recipe, ApplierType applierType = ApplierType.None)
+		{
+			Id = recipe.Id;
 			HasApplyChecks = recipe.HasApplyChecks;
 			ApplierType = applierType;
 		}

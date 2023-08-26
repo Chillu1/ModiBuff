@@ -7,32 +7,15 @@ namespace ModiBuff.Core
 	/// <summary>
 	///		High level API for creating modifiers.
 	/// </summary>
-	public sealed class ModifierRecipe : IModifierRecipe, IComparable<ModifierRecipe>
+	public sealed class ModifierRecipe : IModifierApplyCheckRecipe, IComparable<ModifierRecipe>
 	{
 		public int Id { get; }
 		public string Name { get; }
 		public bool HasApplyChecks { get; private set; }
 
-		private readonly ModifierIdManager _idManager;
-
-		private ConditionType _applyConditionType;
-		private StatType _applyConditionStatType;
-		private float _applyConditionValue = -1;
-		private ComparisonType _applyConditionComparisonType;
-		private LegalAction _applyConditionLegalAction;
-		private StatusEffectType _applyConditionStatusEffect;
-		private int _applyConditionModifierId = -1;
-		private float _applyCooldown = -1f;
+		public readonly ModifierIdManager IdManager; //TODO Refactor to make it private/not needed
 
 		private bool _hasEffectChecks;
-		private ConditionType _effectConditionType;
-		private StatType _effectConditionStatType;
-		private float _effectConditionValue = -1;
-		private ComparisonType _effectConditionComparisonType;
-		private LegalAction _effectConditionLegalAction;
-		private StatusEffectType _effectConditionStatusEffect;
-		private int _effectConditionModifierId = -1;
-		private float _effectCooldown = -1f;
 
 		private bool _oneTimeInit;
 
@@ -55,33 +38,60 @@ namespace ModiBuff.Core
 		private List<ITimeComponent> _timeComponents;
 		private ModifierCreator _modifierCreator;
 
-		private ConditionCheck _applyCondition;
-		private CostCheck _applyCostCheck;
-		private ChanceCheck _applyChanceCheck;
+		private List<ICheck> _applyCheckList;
+		private List<Func<IUnit, bool>> _applyFuncCheckList;
+		private Func<IUnit, bool>[] _applyFuncChecks;
+		private IUpdatableCheck[] _updatableApplyChecks;
+		private INoUnitCheck[] _noUnitApplyChecks;
+		private IUnitCheck[] _unitApplyChecks;
+		private IUsableCheck[] _usableApplyChecks;
+		private IStateCheck[] _stateApplyChecks;
+		private bool _hasStateApplyChecks;
 
-		private ConditionCheck _effectCondition;
-		private CostCheck _effectCost;
-		private ChanceCheck _effectChance;
+		private List<ICheck> _effectCheckList;
+		private List<Func<IUnit, bool>> _effectFuncCheckList;
+		private Func<IUnit, bool>[] _effectFuncChecks;
+		private IUpdatableCheck[] _updatableEffectChecks;
+		private INoUnitCheck[] _noUnitEffectChecks;
+		private IUnitCheck[] _unitEffectChecks;
+		private IUsableCheck[] _usableEffectChecks;
+		private IStateCheck[] _stateEffectChecks;
+		private bool _hasStateEffectChecks;
 
 		public ModifierRecipe(int id, string name, ModifierIdManager idManager)
 		{
 			Id = id;
 			Name = name;
-			_idManager = idManager;
+			IdManager = idManager;
 
 			_effectWrappers = new List<EffectWrapper>(3);
 		}
 
 		//---PostFinish---
 
-		ModifierCheck IModifierRecipe.CreateApplyCheck()
+		ModifierCheck IModifierApplyCheckRecipe.CreateApplyCheck()
 		{
-			CooldownCheck cooldown = null;
+			IStateCheck[] stateChecks = null;
+			if (_hasStateApplyChecks)
+			{
+				stateChecks = new IStateCheck[_stateApplyChecks.Length];
+				for (int i = 0; i < _stateApplyChecks.Length; i++)
+				{
+					var stateCheck = (IStateCheck)_stateApplyChecks[i].ShallowClone();
+					stateChecks[i] = stateCheck;
+					// if (stateCheck is IUsableCheck usableCheck)
+					// 	usableChecks.Add(usableCheck);
+					// if (stateCheck is IUnitCheck unitCheck)
+					// 	unitChecks.Add(unitCheck);
+					// if (stateCheck is IUpdatableCheck updatableCheck)
+					// 	updatableChecks.Add(updatableCheck);
+					// if (stateCheck is INoUnitCheck noUnitCheck)
+					// 	noUnitChecks.Add(noUnitCheck);
+				}
+			}
 
-			if (_applyCooldown > 0f)
-				cooldown = new CooldownCheck(_applyCooldown);
-
-			return new ModifierCheck(Id, Name, _applyCondition, cooldown, _applyCostCheck, _applyChanceCheck);
+			return new ModifierCheck(Id, _applyFuncChecks, _updatableApplyChecks, _noUnitApplyChecks, _unitApplyChecks,
+				_usableApplyChecks, stateChecks);
 		}
 
 		Modifier IModifierRecipe.Create()
@@ -92,12 +102,18 @@ namespace ModiBuff.Core
 
 			var creation = _modifierCreator.Create(_removeEffectWrapper);
 
-			CooldownCheck cooldown = null;
-			if (_effectCooldown > 0f)
-				cooldown = new CooldownCheck(_effectCooldown);
+			IStateCheck[] stateChecks = null;
+			if (_hasStateEffectChecks)
+			{
+				stateChecks = new IStateCheck[_stateEffectChecks.Length];
+				for (int i = 0; i < _stateEffectChecks.Length; i++)
+					stateChecks[i] = (IStateCheck)_stateEffectChecks[i].ShallowClone();
+			}
+
 			ModifierCheck effectCheck = null;
 			if (_hasEffectChecks)
-				effectCheck = new ModifierCheck(Id, Name, _effectCondition, cooldown, _effectCost, _effectChance);
+				effectCheck = new ModifierCheck(Id, _effectFuncChecks, _updatableEffectChecks, _noUnitEffectChecks, _unitEffectChecks,
+					_usableEffectChecks, stateChecks);
 
 			if (creation.initEffects.Count > 0)
 				initComponent = new InitComponent(_oneTimeInit, creation.initEffects.ToArray(), effectCheck);
@@ -118,135 +134,41 @@ namespace ModiBuff.Core
 
 		//---ApplyChecks---
 
-		public ModifierRecipe ApplyCondition(ConditionType conditionType)
+		public ModifierRecipe ApplyCheck(Func<IUnit, bool> check)
 		{
-			_applyConditionType = conditionType;
+			if (_applyFuncCheckList == null)
+				_applyFuncCheckList = new List<Func<IUnit, bool>>();
+			_applyFuncCheckList.Add(check);
 			HasApplyChecks = true;
 			return this;
 		}
 
-		public ModifierRecipe ApplyCondition(StatType statType, float value, ComparisonType comparisonType = ComparisonType.GreaterOrEqual)
+		public ModifierRecipe ApplyCheck(ICheck check)
 		{
-			_applyConditionStatType = statType;
-			_applyConditionValue = value;
-			_applyConditionComparisonType = comparisonType;
-			HasApplyChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe ApplyCondition(LegalAction legalAction)
-		{
-			_applyConditionLegalAction = legalAction;
-			HasApplyChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe ApplyCondition(StatusEffectType statusEffectType)
-		{
-			_applyConditionStatusEffect = statusEffectType;
-			HasApplyChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe ApplyCondition(string modifierName)
-		{
-			_applyConditionModifierId = _idManager.GetId(modifierName);
-			HasApplyChecks = true;
-			return this;
-		}
-
-		/// <summary>
-		///		Cooldown set for when we can try to apply the modifier to a target.
-		/// </summary>
-		public ModifierRecipe ApplyCooldown(float cooldown)
-		{
-			_applyCooldown = cooldown;
-			HasApplyChecks = true;
-			return this;
-		}
-
-		/// <summary>
-		///		Cost for when we can try to apply the modifier to a target.
-		/// </summary>
-		public ModifierRecipe ApplyCost(CostType costType, float cost)
-		{
-			_applyCostCheck = new CostCheck(costType, cost);
-			HasApplyChecks = true;
-			return this;
-		}
-
-		/// <summary>
-		///		When trying to apply a modifier, what should the chance be of it being applied?
-		/// </summary>
-		public ModifierRecipe ApplyChance(float chance)
-		{
-			if (chance > 1)
-				chance /= 100;
-			//Debug.Assert(chance >= 0 && chance <= 1, "Chance must be between 0 and 1");//TODO
-			_applyChanceCheck = new ChanceCheck(chance);
+			if (_applyCheckList == null)
+				_applyCheckList = new List<ICheck>();
+			_applyCheckList.Add(check);
 			HasApplyChecks = true;
 			return this;
 		}
 
 		//---EffectChecks---
 
-		public ModifierRecipe EffectCondition(ConditionType conditionType)
+
+		public ModifierRecipe EffectCheck(Func<IUnit, bool> check)
 		{
-			_effectConditionType = conditionType;
+			if (_effectFuncCheckList == null)
+				_effectFuncCheckList = new List<Func<IUnit, bool>>();
+			_effectFuncCheckList.Add(check);
 			_hasEffectChecks = true;
 			return this;
 		}
 
-		public ModifierRecipe EffectCondition(StatType statType, float value, ComparisonType comparisonType = ComparisonType.GreaterOrEqual)
+		public ModifierRecipe EffectCheck(ICheck check)
 		{
-			_effectConditionStatType = statType;
-			_effectConditionValue = value;
-			_effectConditionComparisonType = comparisonType;
-			_hasEffectChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe EffectCondition(LegalAction legalAction)
-		{
-			_effectConditionLegalAction = legalAction;
-			_hasEffectChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe EffectCondition(StatusEffectType statusEffectType)
-		{
-			_effectConditionStatusEffect = statusEffectType;
-			_hasEffectChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe EffectCondition(string modifierName)
-		{
-			_effectConditionModifierId = _idManager.GetId(modifierName);
-			_hasEffectChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe EffectCooldown(float cooldown)
-		{
-			_effectCooldown = cooldown;
-			_hasEffectChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe EffectCost(CostType costType, float cost)
-		{
-			_effectCost = new CostCheck(costType, cost);
-			_hasEffectChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe EffectChance(float chance)
-		{
-			if (chance > 1)
-				chance /= 100;
-			//Debug.Assert(chance >= 0 && chance <= 1, "Chance must be between 0 and 1");//TODO
-			_effectChance = new ChanceCheck(chance);
+			if (_effectCheckList == null)
+				_effectCheckList = new List<ICheck>();
+			_effectCheckList.Add(check);
 			_hasEffectChecks = true;
 			return this;
 		}
@@ -390,26 +312,72 @@ namespace ModiBuff.Core
 			_modifierCreator = new ModifierCreator(_effectWrappers);
 
 			if (HasApplyChecks)
-				if (_applyConditionType != ConditionType.None
-				    || (_applyConditionStatType != StatType.None && _applyConditionValue != -1f)
-				    || _applyConditionLegalAction != LegalAction.None
-				    || _applyConditionStatusEffect != StatusEffectType.None
-				    || _applyConditionModifierId != -1)
-					_applyCondition = new ConditionCheck(_applyConditionType, _applyConditionStatType, _applyConditionValue,
-						_applyConditionComparisonType, _applyConditionLegalAction, _applyConditionStatusEffect,
-						_applyConditionModifierId);
+			{
+				var updatableChecks = new List<IUpdatableCheck>();
+				var noUnitChecks = new List<INoUnitCheck>();
+				var unitChecks = new List<IUnitCheck>();
+				var usableChecks = new List<IUsableCheck>();
+				var stateChecks = new List<IStateCheck>();
+				if (_applyCheckList != null)
+					foreach (var check in _applyCheckList)
+					{
+						if (check is IStateCheck stateCheck)
+							stateChecks.Add(stateCheck);
+						else if (check is IUsableCheck usableCheck)
+							usableChecks.Add(usableCheck);
+						else if (check is IUnitCheck unitCheck)
+							unitChecks.Add(unitCheck);
+						else if (check is IUpdatableCheck updatableCheck)
+							updatableChecks.Add(updatableCheck);
+						else if (check is INoUnitCheck noUnitCheck)
+							noUnitChecks.Add(noUnitCheck);
+						else
+							Logger.LogError("Unknown check type: " + check.GetType());
+					}
+
+				_updatableApplyChecks = updatableChecks.ToArray();
+				_noUnitApplyChecks = noUnitChecks.ToArray();
+				_unitApplyChecks = unitChecks.ToArray();
+				_usableApplyChecks = usableChecks.ToArray();
+				_stateApplyChecks = stateChecks.ToArray();
+				_hasStateApplyChecks = _stateApplyChecks.Length > 0;
+
+				_applyFuncChecks = _applyFuncCheckList?.ToArray();
+			}
 
 			if (_hasEffectChecks)
-				//Checking if condition is legal
-				if (_effectConditionType != ConditionType.None
-				    || (_effectConditionStatType != StatType.None && _effectConditionValue != -1 &&
-				        _effectConditionComparisonType != ComparisonType.None)
-				    || _effectConditionLegalAction != LegalAction.None
-				    || _effectConditionStatusEffect != StatusEffectType.None
-				    || _effectConditionModifierId != -1)
-					_effectCondition = new ConditionCheck(_effectConditionType, _effectConditionStatType, _effectConditionValue,
-						_effectConditionComparisonType, _effectConditionLegalAction, _effectConditionStatusEffect,
-						_effectConditionModifierId);
+			{
+				var updatableChecks = new List<IUpdatableCheck>();
+				var noUnitChecks = new List<INoUnitCheck>();
+				var unitChecks = new List<IUnitCheck>();
+				var usableChecks = new List<IUsableCheck>();
+				var stateChecks = new List<IStateCheck>();
+				if (_effectCheckList != null)
+					foreach (var check in _effectCheckList)
+					{
+						if (check is IStateCheck stateCheck)
+							stateChecks.Add(stateCheck);
+						else if (check is IUsableCheck usableCheck)
+							usableChecks.Add(usableCheck);
+						else if (check is IUnitCheck unitCheck)
+							unitChecks.Add(unitCheck);
+						else if (check is IUpdatableCheck updatableCheck)
+							updatableChecks.Add(updatableCheck);
+						else if (check is INoUnitCheck noUnitCheck)
+							noUnitChecks.Add(noUnitCheck);
+						else
+							Logger.LogError("Unknown check type: " + check.GetType());
+					}
+
+				_updatableEffectChecks = updatableChecks.ToArray();
+				_noUnitEffectChecks = noUnitChecks.ToArray();
+				_unitEffectChecks = unitChecks.ToArray();
+				_usableEffectChecks = usableChecks.ToArray();
+				_stateEffectChecks = stateChecks.ToArray();
+				_hasStateEffectChecks = _stateEffectChecks.Length > 0;
+
+				_effectFuncChecks = _effectFuncCheckList?.ToArray();
+			}
 		}
 
 		public int CompareTo(ModifierRecipe other)

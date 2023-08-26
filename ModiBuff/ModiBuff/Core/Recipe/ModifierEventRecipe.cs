@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace ModiBuff.Core
@@ -10,9 +11,9 @@ namespace ModiBuff.Core
 	{
 		public int Id { get; }
 		public string Name { get; }
-		public bool HasApplyChecks { get; }
 
-		private readonly EffectOnEvent _effectOnEvent;
+		private readonly int _effectOnEvent;
+		private readonly Func<IEffect[], int, IEffect> _eventEffectFunc;
 
 		private readonly List<EffectWrapper> _effects;
 
@@ -23,11 +24,12 @@ namespace ModiBuff.Core
 
 		private readonly List<IRevertEffect> _revertEffects;
 
-		public ModifierEventRecipe(int id, string name, EffectOnEvent effectOnEvent)
+		public ModifierEventRecipe(int id, string name, int effectOnEvent, Func<IEffect[], int, IEffect> eventEffectFunc)
 		{
 			Id = id;
 			Name = name;
 			_effectOnEvent = effectOnEvent;
+			_eventEffectFunc = eventEffectFunc;
 
 			_effects = new List<EffectWrapper>(2);
 			_revertEffects = new List<IRevertEffect>(2);
@@ -41,7 +43,7 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _effects.Count; i++)
 				effects[i] = _effects[i].GetEffect();
 
-			var eventEffect = new EventEffect(effects, _effectOnEvent);
+			var eventEffect = _eventEffectFunc(effects, _effectOnEvent);
 			var initComponent = new InitComponent(true, eventEffect, null);
 
 			ITimeComponent[] timeComponents = null;
@@ -97,8 +99,6 @@ namespace ModiBuff.Core
 			_effects.Add(new EffectWrapper(effect, EffectOn.Init));
 			return this;
 		}
-
-		ModifierCheck IModifierRecipe.CreateApplyCheck() => throw new System.NotImplementedException();
 
 		public void Finish()
 		{

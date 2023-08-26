@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public interface IEventTrigger
+	public interface IEventTrigger //TODO Refactor/remove from Core
 	{
 		void SetEventBased();
 	}

@@ -1,5 +1,6 @@
 using Godot;
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 
 namespace ModiBuff.Extensions.Godot
 {
@@ -9,7 +10,7 @@ namespace ModiBuff.Extensions.Godot
 		/// <summary>
 		///		What unit event should trigger the modifier.
 		/// </summary>
-		/// <example> <see cref="EffectOnEvent.WhenAttacked"/> </example>
+		/// <example> <see cref="Core.Units.EffectOnEvent.WhenAttacked"/> </example>
 		/// <example> <see cref="EffectOnEvent.OnAttack"/> </example>
 		[Export]
 		public EffectOnEvent EffectOnEvent { get; set; }

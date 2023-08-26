@@ -14,6 +14,7 @@ namespace ModiBuff.Core
 		private readonly ModifierCheck[][] _checkPools;
 		private readonly int[] _checkPoolTops;
 		private readonly IModifierRecipe[] _recipes;
+		private readonly IModifierApplyCheckRecipe[] _applyCheckRecipes;
 
 		private int _stackCapacity = 64;
 
@@ -31,14 +32,16 @@ namespace ModiBuff.Core
 			_checkPools = new ModifierCheck[recipes.Length][];
 			_checkPoolTops = new int[recipes.Length];
 			_recipes = new IModifierRecipe[recipes.Length];
+			_applyCheckRecipes = new IModifierApplyCheckRecipe[recipes.Length];
 
 			foreach (var recipe in recipes)
 			{
 				_pools[recipe.Id] = new Modifier[initialSize];
 				_recipes[recipe.Id] = recipe;
 
-				//if (recipe.HasApplyChecks)
+				if (recipe is IModifierApplyCheckRecipe applyCheckRecipe)
 				{
+					_applyCheckRecipes[recipe.Id] = applyCheckRecipe;
 					_checkPools[recipe.Id] = new ModifierCheck[initialSize];
 					AllocateChecks(recipe.Id, initialSize);
 				}
@@ -104,7 +107,7 @@ namespace ModiBuff.Core
 
 		internal void AllocateChecks(int id, int count)
 		{
-			var recipe = _recipes[id];
+			var recipe = _applyCheckRecipes[id];
 			int poolLength = _checkPools[id].Length; //Don't cache pool array, it can be resized.
 
 			if (count > poolLength)
@@ -170,8 +173,11 @@ namespace ModiBuff.Core
 			{
 				Array.Clear(_pools[i], 0, _pools[i].Length);
 				_poolTops[i] = 0;
-				Array.Clear(_checkPools[i], 0, _checkPools[i].Length);
-				_checkPoolTops[i] = 0;
+				if (_checkPools[i] != null)
+				{
+					Array.Clear(_checkPools[i], 0, _checkPools[i].Length);
+					_checkPoolTops[i] = 0;
+				}
 			}
 		}
 
