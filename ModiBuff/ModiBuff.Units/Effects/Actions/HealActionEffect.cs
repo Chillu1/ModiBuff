@@ -8,7 +8,7 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			((IHealer<float>)source).Heal((IHealable<float>)target, !_isEventBased);
+			((IHealer<float, float>)source).Heal((IHealable<float, float>)target, !_isEventBased);
 		}
 	}
 }

@@ -1,11 +1,11 @@
 namespace ModiBuff.Core.Units
 {
-	public interface IStatusEffectController
+	public interface IStatusEffectController<TLegalAction, TStatusEffectType>
 	{
-		bool HasLegalAction(LegalAction legalAction);
-		bool HasStatusEffect(StatusEffectType statusEffectType);
+		bool HasLegalAction(TLegalAction legalAction);
+		bool HasStatusEffect(TStatusEffectType statusEffectType);
 
-		void ChangeStatusEffect(StatusEffectType statusEffectType, float duration);
-		void DecreaseStatusEffect(StatusEffectType statusEffectType, float duration);
+		void ChangeStatusEffect(TStatusEffectType statusEffectType, float duration);
+		void DecreaseStatusEffect(TStatusEffectType statusEffectType, float duration);
 	}
 }

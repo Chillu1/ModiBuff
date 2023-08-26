@@ -24,12 +24,14 @@ namespace ModiBuff.Core.Units
 		{
 			if (IsRevertible)
 				_totalDuration = _duration + _extraDuration;
-			((IStatusEffectOwner)target).StatusEffectController.ChangeStatusEffect(_statusEffectType, _duration + _extraDuration);
+			((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController.ChangeStatusEffect(_statusEffectType,
+				_duration + _extraDuration);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			((IStatusEffectOwner)target).StatusEffectController.DecreaseStatusEffect(_statusEffectType, _totalDuration);
+			((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController.DecreaseStatusEffect(_statusEffectType,
+				_totalDuration);
 		}
 
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)

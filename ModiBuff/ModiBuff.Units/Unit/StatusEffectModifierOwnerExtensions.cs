@@ -2,7 +2,8 @@ namespace ModiBuff.Core.Units
 {
 	public static class StatusEffectModifierOwnerExtensions
 	{
-		public static bool TryCast(this IStatusEffectModifierOwner owner, int modifierId, IModifierOwner target)
+		public static bool TryCast(this IStatusEffectModifierOwner<LegalAction, StatusEffectType> owner, int modifierId,
+			IModifierOwner target)
 		{
 			if (!owner.StatusEffectController.HasLegalAction(LegalAction.Cast))
 				return false;
@@ -17,7 +18,8 @@ namespace ModiBuff.Core.Units
 		/// <summary>
 		///		Skips the check part for check modifiers, use this ONLY in case you're also using <see cref="ModifierController.TryCastCheck"/>
 		/// </summary>
-		public static bool TryCastNoChecks(this IStatusEffectModifierOwner owner, int modifierId, IModifierOwner target)
+		public static bool TryCastNoChecks(this IStatusEffectModifierOwner<LegalAction, StatusEffectType> owner, int modifierId,
+			IModifierOwner target)
 		{
 			if (!owner.StatusEffectController.HasLegalAction(LegalAction.Cast))
 				return false;

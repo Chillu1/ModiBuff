@@ -24,14 +24,14 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			var eventOwner = (IEventOwner)target;
+			var eventOwner = (IEventOwner<EffectOnEvent>)target;
 			for (int i = 0; i < _effects.Length; i++)
 				eventOwner.AddEffectEvent(_effects[i], _effectOnEvent);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			var eventOwner = (IEventOwner)target;
+			var eventOwner = (IEventOwner<EffectOnEvent>)target;
 			for (int i = 0; i < _effects.Length; i++)
 				eventOwner.RemoveEffectEvent(_effects[i], _effectOnEvent);
 		}

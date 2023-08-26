@@ -48,16 +48,16 @@ namespace ModiBuff.Core.Units
 			switch (_targeting)
 			{
 				case Targeting.TargetSource:
-					((IAddDamage)target).AddDamage(damage);
+					((IAddDamage<float>)target).AddDamage(damage);
 					break;
 				case Targeting.SourceTarget:
-					((IAddDamage)source).AddDamage(damage);
+					((IAddDamage<float>)source).AddDamage(damage);
 					break;
 				case Targeting.TargetTarget:
-					((IAddDamage)target).AddDamage(damage);
+					((IAddDamage<float>)target).AddDamage(damage);
 					break;
 				case Targeting.SourceSource:
-					((IAddDamage)source).AddDamage(damage);
+					((IAddDamage<float>)source).AddDamage(damage);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();

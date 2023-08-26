@@ -1,10 +1,10 @@
 namespace ModiBuff.Core.Units
 {
-	public interface IManaOwner
+	public interface IManaOwner<TMana>
 	{
-		float Mana { get; }
-		float MaxMana { get; }
+		TMana Mana { get; }
+		TMana MaxMana { get; }
 
-		void UseMana(float value);
+		void UseMana(TMana value);
 	}
 }

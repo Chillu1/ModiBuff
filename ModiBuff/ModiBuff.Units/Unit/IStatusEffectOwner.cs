@@ -1,7 +1,7 @@
 namespace ModiBuff.Core.Units
 {
-	public interface IStatusEffectOwner
+	public interface IStatusEffectOwner<TLegalAction, TStatusEffectType>
 	{
-		IStatusEffectController StatusEffectController { get; }
+		IStatusEffectController<TLegalAction, TStatusEffectType> StatusEffectController { get; }
 	}
 }

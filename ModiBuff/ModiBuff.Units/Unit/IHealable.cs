@@ -2,8 +2,8 @@ using System;
 
 namespace ModiBuff.Core.Units
 {
-	public interface IHealable<THealth> : IUnit where THealth : IComparable<THealth>
+	public interface IHealable<THealth, TReturnHealthInfo> : IUnit
 	{
-		THealth Heal(THealth heal, IUnit source, bool triggersEvents = true);
+		TReturnHealthInfo Heal(THealth heal, IUnit source, bool triggersEvents = true);
 	}
 }

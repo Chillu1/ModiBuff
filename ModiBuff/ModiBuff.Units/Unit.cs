@@ -5,8 +5,9 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
-	public class Unit : IUpdatable, IModifierOwner, IAttacker<float>, IDamagable<float, float>, IHealable<float>, IHealer<float>,
-		IManaOwner, IHealthCost, IAddDamage, IEventOwner, IStatusEffectOwner, IStatusResistance, IStatusEffectModifierOwner
+	public class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float, float, float>, IHealable<float, float>,
+		IHealer<float, float>, IManaOwner<float>, IHealthCost<float>, IAddDamage<float>, IEventOwner<EffectOnEvent>,
+		IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance, IStatusEffectModifierOwner<LegalAction, StatusEffectType>
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -19,7 +20,7 @@ namespace ModiBuff.Core.Units
 		public bool IsDead { get; private set; }
 
 		public ModifierController ModifierController { get; }
-		public IStatusEffectController StatusEffectController => _statusEffectController;
+		public IStatusEffectController<LegalAction, StatusEffectType> StatusEffectController => _statusEffectController;
 
 		//Note: These event lists should only be used for classic effects.
 		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
@@ -128,7 +129,7 @@ namespace ModiBuff.Core.Units
 			return Health - oldHealth;
 		}
 
-		public float Heal(IHealable<float> target, bool triggersEvents = true)
+		public float Heal(IHealable<float, float> target, bool triggersEvents = true)
 		{
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;

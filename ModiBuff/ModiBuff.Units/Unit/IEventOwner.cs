@@ -1,8 +1,8 @@
 namespace ModiBuff.Core.Units
 {
-	public interface IEventOwner
+	public interface IEventOwner<TEvent>
 	{
-		void AddEffectEvent(IEffect effect, EffectOnEvent @event);
-		void RemoveEffectEvent(IEffect effect, EffectOnEvent @event);
+		void AddEffectEvent(IEffect effect, TEvent @event);
+		void RemoveEffectEvent(IEffect effect, TEvent @event);
 	}
 }

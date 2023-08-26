@@ -2,10 +2,10 @@ using System;
 
 namespace ModiBuff.Core.Units
 {
-	public interface IHealer<THealth> where THealth : IComparable<THealth>
+	public interface IHealer<THealth, TReturnHealthInfo> where THealth : IComparable<THealth>
 	{
 		THealth HealValue { get; }
 
-		THealth Heal(IHealable<THealth> target, bool triggersEvents = true);
+		TReturnHealthInfo Heal(IHealable<THealth, TReturnHealthInfo> target, bool triggersEvents = true);
 	}
 }

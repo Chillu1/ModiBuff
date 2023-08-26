@@ -16,11 +16,11 @@ namespace ModiBuff.Core.Units
 			switch (_costType)
 			{
 				case CostType.Health:
-					if (!(unit is IDamagable<float, float> damagable) || !(unit is IHealthCost))
+					if (!(unit is IDamagable<float> damagable) || !(unit is IHealthCost<float>))
 						return false;
 					return damagable.Health >= _cost;
 				case CostType.Mana:
-					if (!(unit is IManaOwner manaOwner))
+					if (!(unit is IManaOwner<float> manaOwner))
 						return false;
 					return manaOwner.Mana >= _cost;
 				default:
@@ -36,10 +36,10 @@ namespace ModiBuff.Core.Units
 			switch (_costType)
 			{
 				case CostType.Health:
-					((IHealthCost)unit).UseHealth(_cost);
+					((IHealthCost<float>)unit).UseHealth(_cost);
 					return;
 				case CostType.Mana:
-					((IManaOwner)unit).UseMana(_cost);
+					((IManaOwner<float>)unit).UseMana(_cost);
 					return;
 				default:
 #if DEBUG && !MODIBUFF_PROFILE

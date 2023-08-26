@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class StatusEffectController : IStatusEffectController
+	public sealed class StatusEffectController : IStatusEffectController<LegalAction, StatusEffectType>
 	{
 		private readonly float[] _legalActionTimers;
 

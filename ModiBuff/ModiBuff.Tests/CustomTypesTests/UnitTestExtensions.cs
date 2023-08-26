@@ -5,17 +5,18 @@ namespace ModiBuff.Tests.CustomTypesTests
 {
 	internal static class UnitTestExtensions
 	{
-		internal static float AttackN(this IAttacker<Damage> unit, IUnit target, int n)
+		internal static double AttackN(this IAttacker<Damage, double> unit, IUnit target, int n)
 		{
-			float totalDamage = 0;
+			double totalDamage = 0;
 			for (int i = 0; i < n; i++)
-				totalDamage += unit.Attack(target).Value;
+				totalDamage += unit.Attack(target);
 			return totalDamage;
 		}
 
-		internal static float TakeDamage(this IDamagable<double, Damage> damagable, float damage, IUnit source, bool triggersEvents = true)
+		internal static double TakeDamage(this IDamagable<double, Damage, double> damagable, float damage, IUnit source,
+			bool triggersEvents = true)
 		{
-			return damagable.TakeDamage(new Damage(damage), source, triggersEvents).Value;
+			return damagable.TakeDamage(new Damage(damage), source, triggersEvents);
 		}
 	}
 }
