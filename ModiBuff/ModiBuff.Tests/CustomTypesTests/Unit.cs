@@ -4,9 +4,9 @@ using ModiBuff.Core.Units;
 
 namespace ModiBuff.Tests.CustomTypesTests
 {
-	public class Unit : IUpdatable, IAttacker<Damage, double>, IDamagable<double, Damage, double>, IHealable<double, double>,
-		IHealer<double, double>, IManaOwner<double>, IHealthCost<double>, IAddDamage<double>, IEventOwner<EffectOnEvent>, IStatusResistance,
-		IStatusEffectModifierOwner<LegalAction, StatusEffectType>
+	public class Unit : IUpdatable, IAttacker<Damage, double>, IDamagable<double, double, Damage, double>, IHealable<double, double>,
+		IHealer<double, double>, IManaOwner<double, double>, IHealthCost<double>, IAddDamage<double>, IEventOwner<EffectOnEvent>,
+		IStatusResistance, IStatusEffectModifierOwner<LegalAction, StatusEffectType>
 	{
 		public double Health { get; private set; }
 		public double MaxHealth { get; private set; }

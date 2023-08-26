@@ -1,13 +1,23 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using ModiBuff.Core.Units.Interfaces.NonGeneric;
 
 [assembly: InternalsVisibleTo("ModiBuff.Tests")]
 
 namespace ModiBuff.Core.Units
 {
-	public class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float, float, float>, IHealable<float, float>,
-		IHealer<float, float>, IManaOwner<float>, IHealthCost<float>, IAddDamage<float>, IEventOwner<EffectOnEvent>,
-		IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance, IStatusEffectModifierOwner<LegalAction, StatusEffectType>
+	//Possible to implement through 3 ways, through interfaces:
+
+	//IMasterDamage<float, float, float>, IMasterHealth<float, float, float, float>
+
+	//NonGeneric default implementations (all float & other default Unit types):
+	//IDamagable, IHealable, IAttacker, IHealer, IManaOwner, IHealthCost, IAddDamage, IEventOwner, IStatusEffectOwner
+
+	//Or the manual generic one:
+	public class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float, float, float, float>,
+		IHealable<float, float>, IHealer<float, float>, IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>,
+		IEventOwner<EffectOnEvent>, IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
+		IStatusEffectModifierOwner<LegalAction, StatusEffectType>
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }

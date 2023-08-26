@@ -13,7 +13,7 @@ namespace ModiBuff.Tests.CustomTypesTests
 			return totalDamage;
 		}
 
-		internal static double TakeDamage(this IDamagable<double, Damage, double> damagable, float damage, IUnit source,
+		internal static double TakeDamage(this IDamagable<double, double, Damage, double> damagable, float damage, IUnit source,
 			bool triggersEvents = true)
 		{
 			return damagable.TakeDamage(new Damage(damage), source, triggersEvents);

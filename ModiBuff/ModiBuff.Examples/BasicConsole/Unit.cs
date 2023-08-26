@@ -5,7 +5,7 @@ namespace ModiBuff.Examples.BasicConsole
 {
 	public delegate void DeathEvent(IUnit target, IUnit source);
 
-	public sealed class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float>
+	public sealed class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float, float>
 	{
 		public string Name { get; }
 
@@ -55,7 +55,7 @@ namespace ModiBuff.Examples.BasicConsole
 
 		public float Attack(IUnit target, bool triggersEvents = true)
 		{
-			float damageDealt = ((IDamagable<float, float, float>)target).TakeDamage(Damage, this, triggersEvents);
+			float damageDealt = ((IDamagable<float, float, float, float>)target).TakeDamage(Damage, this, triggersEvents);
 
 			return damageDealt;
 		}

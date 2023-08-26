@@ -30,15 +30,15 @@ namespace ModiBuff.Core.Units
 		public void Effect(IUnit target, IUnit source)
 		{
 #if DEBUG && !MODIBUFF_PROFILE
-			if (!(target is IDamagable<float>))
+			if (!(target is IDamagable<float, float>))
 				throw new ArgumentException("Target must implement IDamagable");
-			if (!(source is IDamagable<float>) && _targeting == Targeting.SourceTarget || _targeting == Targeting.SourceSource)
+			if (!(source is IDamagable<float, float>) && _targeting == Targeting.SourceTarget || _targeting == Targeting.SourceSource)
 				throw new ArgumentException("Source must implement IDamagable when targeting source");
 #endif
-			Effect((IDamagable<float, float, float>)target, source, _baseDamage + _extraDamage);
+			Effect((IDamagable<float, float, float, float>)target, source, _baseDamage + _extraDamage);
 		}
 
-		private void Effect(IDamagable<float, float, float> target, IUnit source, float damage)
+		private void Effect(IDamagable<float, float, float, float> target, IUnit source, float damage)
 		{
 			switch (_targeting)
 			{
@@ -46,13 +46,13 @@ namespace ModiBuff.Core.Units
 					target.TakeDamage(damage, source, !_isEventBased);
 					break;
 				case Targeting.SourceTarget:
-					((IDamagable<float, float, float>)source).TakeDamage(damage, target, !_isEventBased);
+					((IDamagable<float, float, float, float>)source).TakeDamage(damage, target, !_isEventBased);
 					break;
 				case Targeting.TargetTarget:
 					target.TakeDamage(damage, target, !_isEventBased);
 					break;
 				case Targeting.SourceSource:
-					((IDamagable<float, float, float>)source).TakeDamage(damage, source, !_isEventBased);
+					((IDamagable<float, float, float, float>)source).TakeDamage(damage, source, !_isEventBased);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();

@@ -1,9 +1,9 @@
 namespace ModiBuff.Core.Units
 {
-	public interface IManaOwner<TMana>
+	public interface IManaOwner<TMana, TMaxMana>
 	{
 		TMana Mana { get; }
-		TMana MaxMana { get; }
+		TMaxMana MaxMana { get; }
 
 		void UseMana(TMana value);
 	}

@@ -52,7 +52,7 @@ namespace ModiBuff.Core.Units
 				case ConditionType.None:
 					break;
 				case ConditionType.HealthIsFull:
-					if (unit is IDamagable<float, float, float> damagable)
+					if (unit is IDamagable<float, float> damagable)
 					{
 						if (!ComparisonType.Equal.Check(damagable.Health, damagable.MaxHealth))
 							return false;
@@ -65,7 +65,7 @@ namespace ModiBuff.Core.Units
 					break;
 				case ConditionType.ManaIsFull:
 				{
-					if (unit is IManaOwner<float> manaOwner)
+					if (unit is IManaOwner<float, float> manaOwner)
 					{
 						if (!ComparisonType.Equal.Check(manaOwner.Mana, manaOwner.MaxMana))
 							return false;
@@ -79,7 +79,7 @@ namespace ModiBuff.Core.Units
 				}
 				case ConditionType.ManaIsEmpty:
 				{
-					if (unit is IManaOwner<float> manaOwner)
+					if (unit is IManaOwner<float, float> manaOwner)
 					{
 						if (!ComparisonType.Equal.Check(manaOwner.Mana, 0f))
 							return false;
@@ -105,7 +105,7 @@ namespace ModiBuff.Core.Units
 				case StatType.None:
 					break;
 				case StatType.Health:
-					if (unit is IDamagable<float, float, float> damagable)
+					if (unit is IDamagable<float, float> damagable)
 					{
 						if (!comparisonType.Check(damagable.Health, statValue))
 							return false;
@@ -117,7 +117,7 @@ namespace ModiBuff.Core.Units
 
 					break;
 				case StatType.Mana:
-					if (unit is IManaOwner<float> manaUser)
+					if (unit is IManaOwner<float, float> manaUser)
 					{
 						if (!comparisonType.Check(manaUser.Mana, statValue))
 							return false;

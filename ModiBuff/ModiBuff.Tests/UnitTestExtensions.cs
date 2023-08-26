@@ -1,4 +1,7 @@
-namespace ModiBuff.Core.Units
+using ModiBuff.Core;
+using ModiBuff.Core.Units;
+
+namespace ModiBuff.Tests
 {
 	internal static class UnitTestExtensions
 	{
