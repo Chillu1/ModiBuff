@@ -75,6 +75,11 @@ namespace ModiBuff.Core
 
 		protected ModifierEventRecipe AddEvent(string name, int effectOnEvent)
 		{
+#if DEBUG && !MODIBUFF_PROFILE
+			if (_eventEffectFunc == null)
+				Logger.LogError("Event effect func is not set up. But you are trying to create an event recipe.");
+#endif
+
 			if (_recipes.TryGetValue(name, out var localRecipe))
 			{
 #if DEBUG && !MODIBUFF_PROFILE

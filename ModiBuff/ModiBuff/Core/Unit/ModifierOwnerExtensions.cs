@@ -15,8 +15,10 @@ namespace ModiBuff.Core
 
 		public static void ApplyAllAttackModifier(this IModifierOwner owner, IModifierOwner target)
 		{
-			owner.ModifierController.TryApplyAttackNonCheckModifiers(owner.ModifierController.GetApplierAttackModifierIds(), target, owner);
-			owner.ModifierController.TryApplyAttackCheckModifiers(owner.ModifierController.GetApplierAttackCheckModifiers(), target, owner);
+			target.ModifierController.TryApplyAttackNonCheckModifiers(
+				owner.ModifierController.GetApplierAttackModifierIds(), target, owner);
+			target.ModifierController.TryApplyAttackCheckModifiers(
+				owner.ModifierController.GetApplierAttackCheckModifiers(), target, owner);
 		}
 	}
 }
