@@ -129,22 +129,18 @@ namespace ModiBuff.Core
 
 		public Modifier Rent(int id)
 		{
-			var pool = _pools[id];
-
 			if (_poolTops[id] == 0)
 				Allocate(id, _stackCapacity);
 
-			return pool[--_poolTops[id]];
+			return _pools[id][--_poolTops[id]];
 		}
 
 		public ModifierCheck RentModifierCheck(int id)
 		{
-			var pool = _checkPools[id];
-
 			if (_checkPoolTops[id] == 0)
 				AllocateChecks(id, _stackCapacity);
 
-			return pool[--_checkPoolTops[id]];
+			return _checkPools[id][--_checkPoolTops[id]];
 		}
 
 		public void Return(Modifier modifier)

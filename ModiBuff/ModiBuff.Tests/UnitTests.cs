@@ -30,6 +30,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageNonDamagableUnit()
 		{
+#if !DEBUG
+			Assert.Ignore("This test is only for debug mode");
+#endif
+
 			var unit = new NonDamagableUnit();
 
 			Assert.Throws<ArgumentException>(() => unit.AddModifierSelf("InitDamage"));

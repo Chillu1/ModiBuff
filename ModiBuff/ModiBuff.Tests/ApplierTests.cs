@@ -145,6 +145,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ApplierDoesntExist()
 		{
+#if !DEBUG
+			Assert.Ignore("This test is only for debug mode");
+#endif
+
 			var testLogger = new TestLogger();
 			Logger.SetLogger(testLogger);
 

@@ -5,7 +5,7 @@ namespace ModiBuff.Tests
 {
 	public abstract class ModifierBenches
 	{
-		protected const int Iterations = 10_000;
+		//protected const int Iterations = 10_000;
 
 		protected ModifierIdManager IdManager { get; private set; }
 		protected ModifierRecipes Recipes { get; private set; }

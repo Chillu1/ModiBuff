@@ -22,9 +22,9 @@ namespace ModiBuff.Tests
 			Pool.SetMaxPoolSize(1_000_000);
 			//Pool.Allocate(Recipes.GetRecipe("InitDoTSeparateDamageRemove").Id, 60 * Iterations);
 
-			Pool.Allocate(Recipes.GetRecipe("InitDoTSeparateDamageRemove").Id, Iterations);
+			Pool.Allocate(Recipes.GetRecipe("InitDoTSeparateDamageRemove").Id, 64);
 
-			Pool.Allocate(Recipes.GetRecipe("IntervalDamage_StackAddDamage").Id, Iterations);
+			Pool.Allocate(Recipes.GetRecipe("IntervalDamage_StackAddDamage").Id, 64);
 		}
 
 		[Benchmark]
@@ -39,12 +39,6 @@ namespace ModiBuff.Tests
 			var modifier = _initDoTSeparateDamageRemoveRecipe.Create();
 		}
 
-		//[Benchmark]//TODO This one needs work manipulation, because we can overflow the limit
-		public void BenchPooledMediumModifierFromRecipe()
-		{
-			var modifier = Pool.Rent(_initDoTSeparateDamageRemoveRecipe.Id);
-		}
-
 		[Benchmark]
 		public void BenchPooledMediumModifierFromRecipeReturn()
 		{
@@ -52,7 +46,7 @@ namespace ModiBuff.Tests
 			Pool.Return(modifier);
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void BenchPooledFullStateModifierFromRecipeReturn()
 		{
 			var modifier = Pool.Rent(_intervalDamageStackAddDamageRecipe.Id);
