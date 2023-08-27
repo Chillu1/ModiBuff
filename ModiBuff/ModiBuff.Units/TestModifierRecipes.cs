@@ -316,16 +316,29 @@ namespace ModiBuff.Core.Units
 				.Effect(new DamageEffect(5).SetPostEffects(new AddDamageOnKillPostEffect(2, Targeting.SourceTarget)), EffectOn.Init);
 
 			Add("InitDamageValueBasedOnStatMeta")
-				.Effect(new DamageEffect(5).SetMetaEffects(new ValueBasedOnStatPercentMetaEffect(StatType.Health, Targeting.SourceTarget)),
+				.Effect(new DamageEffect(5).SetMetaEffects(new StatPercentMetaEffect(StatType.Health, Targeting.SourceTarget)),
 					EffectOn.Init);
 
 			Add("HealDamageSelfPost")
 				.Effect(new HealEffect(5).SetPostEffects(new DamagePostEffect(Targeting.SourceTarget)), EffectOn.Init);
 
 			Add("InitDamageValueBasedOnHealthAndManaMeta")
-				.Effect(new DamageEffect(5).SetMetaEffects(
-						new ValueBasedOnStatPercentMetaEffect(StatType.Health, Targeting.SourceTarget),
-						new ValueBasedOnStatPercentMetaEffect(StatType.Mana, Targeting.SourceTarget)),
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(
+							new StatPercentMetaEffect(StatType.Health, Targeting.SourceTarget),
+							new StatPercentMetaEffect(StatType.Mana, Targeting.SourceTarget)),
+					EffectOn.Init);
+
+			Add("InitDamageValueBasedOnStatusEffectMeta")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(
+							new LegalActionMetaEffect(0.5f, LegalAction.Cast, false),
+							new LegalActionMetaEffect(2f, LegalAction.Act, false)),
+					EffectOn.Init);
+
+			Add("InitDamageValue2XWhenDisarmedMeta")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(new LegalActionMetaEffect(2f, LegalAction.Act, false, Targeting.SourceTarget)),
 					EffectOn.Init);
 
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 

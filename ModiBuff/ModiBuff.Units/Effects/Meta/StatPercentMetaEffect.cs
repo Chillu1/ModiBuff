@@ -2,12 +2,12 @@ using System;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class ValueBasedOnStatPercentMetaEffect : IMetaEffect<float, float>
+	public sealed class StatPercentMetaEffect : IMetaEffect<float, float>
 	{
 		private readonly StatType _statType;
 		private readonly Targeting _targeting;
 
-		public ValueBasedOnStatPercentMetaEffect(StatType statType, Targeting targeting = Targeting.TargetSource)
+		public StatPercentMetaEffect(StatType statType, Targeting targeting = Targeting.TargetSource)
 		{
 			_statType = statType;
 			_targeting = targeting;
