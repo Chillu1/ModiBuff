@@ -4,19 +4,20 @@ namespace ModiBuff.Core.Units
 	public sealed class AddDamageOnKillMetaEffect : IMetaEffect<float>
 	{
 		private readonly float _damage;
-
-		public Targeting Targeting { get; }
+		private readonly Targeting _targeting;
 
 		public AddDamageOnKillMetaEffect(float damage, Targeting targeting = Targeting.TargetSource)
 		{
 			_damage = damage;
-			Targeting = targeting;
+			_targeting = targeting;
 		}
 
 		public void Effect(float value, IUnit target, IUnit source, bool triggerEvents)
 		{
-			if (target is IDamagable<float, float> damagable && damagable.Health <= 0)
-				((IAddDamage<float>)source).AddDamage(_damage);
+			_targeting.UpdateTargetSource(ref target, ref source);
+
+			if (source is IDamagable<float, float> damagable && damagable.Health <= 0)
+				((IAddDamage<float>)target).AddDamage(_damage);
 		}
 	}
 }

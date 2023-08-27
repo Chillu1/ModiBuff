@@ -28,23 +28,8 @@ namespace ModiBuff.Core
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			switch (_targeting)
-			{
-				case Targeting.TargetSource:
-					((IModifierOwner)target).AddModifier(_modifierId, source);
-					break;
-				case Targeting.SourceTarget:
-					((IModifierOwner)source).AddModifier(_modifierId, target);
-					break;
-				case Targeting.TargetTarget:
-					((IModifierOwner)target).AddModifier(_modifierId, target);
-					break;
-				case Targeting.SourceSource:
-					((IModifierOwner)source).AddModifier(_modifierId, source);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+			_targeting.UpdateTargetSource(ref target, ref source);
+			((IModifierOwner)target).AddModifier(_modifierId, source);
 		}
 
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)

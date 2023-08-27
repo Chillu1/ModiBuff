@@ -39,24 +39,8 @@ namespace ModiBuff.Examples.SimpleSolo
 			if (!(source is IBlockOwner) && _targeting == Targeting.SourceTarget || _targeting == Targeting.SourceSource)
 				throw new ArgumentException("Source must implement IBlockOwner when targeting source");
 #endif
-			Effect((IBlockOwner)target, source, _baseBlock + _extraBlock);
-		}
-
-		private void Effect(IBlockOwner target, IUnit source, int block)
-		{
-			switch (_targeting)
-			{
-				case Targeting.TargetSource:
-				case Targeting.TargetTarget:
-					target.AddBlock(block);
-					break;
-				case Targeting.SourceTarget:
-				case Targeting.SourceSource:
-					((IBlockOwner)source).AddBlock(block);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+			_targeting.UpdateTarget(ref target, source);
+			((IBlockOwner)target).AddBlock(_baseBlock + _extraBlock);
 		}
 
 		public void StackEffect(int stacks, float block, IUnit target, IUnit source)

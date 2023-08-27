@@ -48,59 +48,16 @@ namespace ModiBuff.Core.Units
 			    (_targeting == Targeting.SourceTarget || _targeting == Targeting.SourceSource))
 				throw new ArgumentException("Source must implement IDamagable when targeting source");
 #endif
-			Effect(target, source, _baseDamage + _extraDamage);
-		}
+			_targeting.UpdateTargetSource(ref target, ref source);
 
-		private void Effect(IUnit target, IUnit source, float damage)
-		{
-			IDamagable<float, float, float, float> finalTarget;
-			IUnit finalSource;
-
-			switch (_targeting)
-			{
-				case Targeting.TargetSource:
-					finalTarget = (IDamagable<float, float, float, float>)target;
-					finalSource = source;
-					break;
-				case Targeting.SourceTarget:
-					finalTarget = (IDamagable<float, float, float, float>)source;
-					finalSource = target;
-					break;
-				case Targeting.TargetTarget:
-					finalTarget = (IDamagable<float, float, float, float>)target;
-					finalSource = target;
-					break;
-				case Targeting.SourceSource:
-					finalTarget = (IDamagable<float, float, float, float>)source;
-					finalSource = source;
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-
-			float damageInfo = finalTarget.TakeDamage(damage, finalSource, !_isEventBased);
+			float damageInfo =
+				((IDamagable<float, float, float, float>)target).TakeDamage(_baseDamage + _extraDamage, source, !_isEventBased);
 
 			if (!_hasMetaEffects)
 				return;
 
 			foreach (var metaEffect in _metaEffects)
-			{
-				switch (metaEffect.Targeting)
-				{
-					case Targeting.TargetSource:
-						metaEffect.Effect(damageInfo, target, source, !_isEventBased);
-						break;
-					case Targeting.SourceTarget:
-						metaEffect.Effect(damageInfo, source, target, !_isEventBased);
-						break;
-					case Targeting.TargetTarget:
-						metaEffect.Effect(damageInfo, target, target, !_isEventBased);
-						break;
-					case Targeting.SourceSource:
-						metaEffect.Effect(damageInfo, source, source, !_isEventBased);
-						break;
-				}
-			}
+				metaEffect.Effect(damageInfo, target, source, !_isEventBased);
 		}
 
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)

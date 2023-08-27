@@ -45,25 +45,10 @@ namespace ModiBuff.Core.Units
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void Effect(float value, IHealable<float, float> target, IUnit source)
+		private void Effect(float value, IUnit target, IUnit source)
 		{
-			switch (_targeting)
-			{
-				case Targeting.TargetSource:
-					target.Heal(value, source, !_isEventBased);
-					break;
-				case Targeting.SourceTarget:
-					((IHealable<float, float>)source).Heal(value, target, !_isEventBased);
-					break;
-				case Targeting.TargetTarget:
-					target.Heal(value, target, !_isEventBased);
-					break;
-				case Targeting.SourceSource:
-					((IHealable<float, float>)source).Heal(value, source, !_isEventBased);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+			_targeting.UpdateTargetSource(ref target, ref source);
+			((IHealable<float, float>)target).Heal(value, source, !_isEventBased);
 		}
 
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)

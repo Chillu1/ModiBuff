@@ -45,23 +45,8 @@ namespace ModiBuff.Core.Units
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void Effect(IUnit target, IUnit source, float damage)
 		{
-			switch (_targeting)
-			{
-				case Targeting.TargetSource:
-					((IAddDamage<float>)target).AddDamage(damage);
-					break;
-				case Targeting.SourceTarget:
-					((IAddDamage<float>)source).AddDamage(damage);
-					break;
-				case Targeting.TargetTarget:
-					((IAddDamage<float>)target).AddDamage(damage);
-					break;
-				case Targeting.SourceSource:
-					((IAddDamage<float>)source).AddDamage(damage);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+			_targeting.UpdateTarget(ref target, source);
+			((IAddDamage<float>)target).AddDamage(damage);
 		}
 
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)

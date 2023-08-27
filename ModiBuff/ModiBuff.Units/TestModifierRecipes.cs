@@ -313,7 +313,7 @@ namespace ModiBuff.Core.Units
 				.Effect(new DamageEffect(5).SetMetaEffects(new LifeStealMetaEffect(0.5f, Targeting.SourceTarget)), EffectOn.Init);
 
 			Add("InitDamageAddDamageOnKill")
-				.Effect(new DamageEffect(5).SetMetaEffects(new AddDamageOnKillMetaEffect(2)), EffectOn.Init);
+				.Effect(new DamageEffect(5).SetMetaEffects(new AddDamageOnKillMetaEffect(2, Targeting.SourceTarget)), EffectOn.Init);
 
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
