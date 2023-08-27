@@ -6,31 +6,20 @@ namespace ModiBuff.Tests
 	public sealed class MetaEffectTests : ModifierTests
 	{
 		[Test]
-		public void LifeSteal_OnDamageEffectInit()
+		public void DamageBasedOnHealth()
 		{
-			var recipe = Recipes.GetRecipe("InitDamageLifeStealMeta");
+			var recipe = Recipes.GetRecipe("InitDamageValueBasedOnStatMeta");
 			Unit.AddApplierModifier(recipe, ApplierType.Cast);
 
-			Unit.TakeDamage(2.5f, Unit);
+			Unit.TryCast(recipe.Id, Enemy); //5 * 1
 
-			Unit.TryCast(recipe.Id, Enemy);
-
-			Assert.AreEqual(UnitHealth, Unit.Health);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
-		}
 
-		[Test]
-		public void AddDamage_OnKill_WithDamageEffectInit()
-		{
-			var recipe = Recipes.GetRecipe("InitDamageAddDamageOnKill");
-			Unit.AddApplierModifier(recipe, ApplierType.Cast);
+			Unit.TakeDamage(UnitHealth / 2f, Unit);
 
-			Enemy.TakeDamage(EnemyHealth - 5, Unit);
+			Unit.TryCast(recipe.Id, Enemy); //5 * 0.5
 
-			Unit.TryCast(recipe.Id, Enemy);
-
-			Assert.AreEqual(UnitDamage + 2, Unit.Damage);
-			Assert.AreEqual(0, Enemy.Health);
+			Assert.AreEqual(EnemyHealth - 7.5f, Enemy.Health);
 		}
 	}
 }

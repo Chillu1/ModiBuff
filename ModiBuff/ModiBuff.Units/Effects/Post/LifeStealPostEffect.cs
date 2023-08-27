@@ -1,11 +1,11 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class LifeStealMetaEffect : IMetaEffect<float>
+	public sealed class LifeStealPostEffect : IPostEffect<float>
 	{
 		private readonly float _lifeStealPercent;
 		private readonly Targeting _targeting;
 
-		public LifeStealMetaEffect(float lifeStealPercent, Targeting targeting = Targeting.TargetSource)
+		public LifeStealPostEffect(float lifeStealPercent, Targeting targeting = Targeting.TargetSource)
 		{
 			_lifeStealPercent = lifeStealPercent;
 			_targeting = targeting;

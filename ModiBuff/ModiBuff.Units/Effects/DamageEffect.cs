@@ -2,24 +2,26 @@ using System;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class DamageEffect : IMetaEffectOwner<float>, ITargetEffect, IEventTrigger, IStackEffect, IStateEffect, IEffect
+	public sealed class DamageEffect : IPostEffectOwner<float>, ITargetEffect, IEventTrigger, IStackEffect, IStateEffect, IEffect
 	{
 		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;
 		private Targeting _targeting;
 		private bool _isEventBased;
-		private IMetaEffect<float>[] _metaEffects;
+		private IMetaEffect<float, float>[] _metaEffects;
 		private bool _hasMetaEffects;
+		private IPostEffect<float>[] _postEffects;
+		private bool _hasPostEffects;
 
 		private float _extraDamage;
 
 		public DamageEffect(float damage, StackEffectType stackEffect = StackEffectType.Effect) :
-			this(damage, stackEffect, Targeting.TargetSource, false, null)
+			this(damage, stackEffect, Targeting.TargetSource, false, null, null)
 		{
 		}
 
 		private DamageEffect(float damage, StackEffectType stackEffect, Targeting targeting, bool isEventBased,
-			IMetaEffect<float>[] metaEffects)
+			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
 		{
 			_baseDamage = damage;
 			_stackEffect = stackEffect;
@@ -27,15 +29,24 @@ namespace ModiBuff.Core.Units
 			_isEventBased = isEventBased;
 			_metaEffects = metaEffects;
 			_hasMetaEffects = metaEffects != null;
+			_postEffects = postEffects;
+			_hasPostEffects = postEffects != null;
 		}
 
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 		public void SetEventBased() => _isEventBased = true;
 
-		public IEffect SetMetaEffects(params IMetaEffect<float>[] metaEffects)
+		public IEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
 		{
 			_metaEffects = metaEffects;
 			_hasMetaEffects = true;
+			return this;
+		}
+
+		public IEffect SetPostEffects(params IPostEffect<float>[] postEffects)
+		{
+			_postEffects = postEffects;
+			_hasPostEffects = true;
 			return this;
 		}
 
@@ -50,14 +61,22 @@ namespace ModiBuff.Core.Units
 #endif
 			_targeting.UpdateTargetSource(ref target, ref source);
 
-			float damageInfo =
-				((IDamagable<float, float, float, float>)target).TakeDamage(_baseDamage + _extraDamage, source, !_isEventBased);
+			float damage = _baseDamage;
 
-			if (!_hasMetaEffects)
+			if (_hasMetaEffects)
+				foreach (var metaEffect in _metaEffects)
+					damage = metaEffect.Effect(damage, target, source);
+
+			damage += _extraDamage;
+
+			float returnDamageInfo =
+				((IDamagable<float, float, float, float>)target).TakeDamage(damage, source, !_isEventBased);
+
+			if (!_hasPostEffects)
 				return;
 
-			foreach (var metaEffect in _metaEffects)
-				metaEffect.Effect(damageInfo, target, source, !_isEventBased);
+			foreach (var postEffect in _postEffects)
+				postEffect.Effect(returnDamageInfo, target, source, !_isEventBased);
 		}
 
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
@@ -75,7 +94,9 @@ namespace ModiBuff.Core.Units
 
 		public void ResetState() => _extraDamage = 0;
 
-		public IStateEffect ShallowClone() => new DamageEffect(_baseDamage, _stackEffect, _targeting, _isEventBased, _metaEffects);
+		public IStateEffect ShallowClone() =>
+			new DamageEffect(_baseDamage, _stackEffect, _targeting, _isEventBased, _metaEffects, _postEffects);
+
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

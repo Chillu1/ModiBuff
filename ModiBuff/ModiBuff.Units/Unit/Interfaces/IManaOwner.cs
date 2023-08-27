@@ -7,4 +7,12 @@ namespace ModiBuff.Core.Units
 
 		void UseMana(TMana value);
 	}
+
+	public static class ManaOwnerExtensions
+	{
+		public static float PercentageMana(this IManaOwner<float, float> manaOwner)
+		{
+			return manaOwner.Mana / manaOwner.MaxMana;
+		}
+	}
 }

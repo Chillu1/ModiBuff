@@ -309,11 +309,15 @@ namespace ModiBuff.Core.Units
 				.ApplyCondition(ConditionType.HealthIsFull)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
-			Add("InitDamageLifeStealMeta")
-				.Effect(new DamageEffect(5).SetMetaEffects(new LifeStealMetaEffect(0.5f, Targeting.SourceTarget)), EffectOn.Init);
+			Add("InitDamageLifeStealPost")
+				.Effect(new DamageEffect(5).SetPostEffects(new LifeStealPostEffect(0.5f, Targeting.SourceTarget)), EffectOn.Init);
 
-			Add("InitDamageAddDamageOnKill")
-				.Effect(new DamageEffect(5).SetMetaEffects(new AddDamageOnKillMetaEffect(2, Targeting.SourceTarget)), EffectOn.Init);
+			Add("InitDamageAddDamageOnKillPost")
+				.Effect(new DamageEffect(5).SetPostEffects(new AddDamageOnKillPostEffect(2, Targeting.SourceTarget)), EffectOn.Init);
+
+			Add("InitDamageValueBasedOnStatMeta")
+				.Effect(new DamageEffect(5).SetMetaEffects(new ValueBasedOnStatPercentMetaEffect(StatType.Health, Targeting.SourceTarget)),
+					EffectOn.Init);
 
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")

@@ -1,7 +1,7 @@
 namespace ModiBuff.Core
 {
-	public interface IMetaEffect<TValue>
+	public interface IMetaEffect<TIn, TOut> //TODO Rename
 	{
-		void Effect(TValue value, IUnit target, IUnit source, bool triggerEvents);
+		TOut Effect(TIn value, IUnit target, IUnit source);
 	}
 }

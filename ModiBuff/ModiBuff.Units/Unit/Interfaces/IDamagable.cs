@@ -10,4 +10,12 @@ namespace ModiBuff.Core.Units
 	{
 		TReturnDamageInfo TakeDamage(TDamage damage, IUnit source, bool triggersEvents = true);
 	}
+
+	public static class DamagableExtensions
+	{
+		public static float PercentageHealth(this IDamagable<float, float> damagable)
+		{
+			return damagable.Health / damagable.MaxHealth;
+		}
+	}
 }
