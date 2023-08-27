@@ -32,5 +32,19 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitDamage + 2, Unit.Damage);
 			Assert.AreEqual(0, Enemy.Health);
 		}
+
+		[Test]
+		public void HealTargetDamageSelf()
+		{
+			var recipe = Recipes.GetRecipe("HealDamageSelfPost");
+			Unit.AddApplierModifier(recipe, ApplierType.Cast);
+
+			Enemy.TakeDamage(5, Enemy);
+
+			Unit.TryCast(recipe.Id, Enemy);
+
+			Assert.AreEqual(EnemyHealth, Enemy.Health);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
 	}
 }

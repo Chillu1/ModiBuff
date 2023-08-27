@@ -11,32 +11,67 @@ namespace ModiBuff.Core.Units
 		private readonly StackEffectType _stackEffect;
 		private Targeting _targeting;
 		private bool _isEventBased;
+		private IMetaEffect<float, float>[] _metaEffects;
+		private bool _hasMetaEffects;
+		private IPostEffect<float>[] _postEffects;
+		private bool _hasPostEffects;
 
 		private float _extraHeal;
 		private float _totalHeal;
 
 		public HealEffect(float heal, bool revertible = false, StackEffectType stack = StackEffectType.Effect) :
-			this(heal, revertible, stack, Targeting.TargetSource)
+			this(heal, revertible, stack, Targeting.TargetSource, null, null)
 		{
 		}
 
-		private HealEffect(float heal, bool revertible, StackEffectType stack, Targeting targeting)
+		private HealEffect(float heal, bool revertible, StackEffectType stack, Targeting targeting,
+			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
 		{
 			_heal = heal;
 			IsRevertible = revertible;
 			_stackEffect = stack;
 			_targeting = targeting;
+			_metaEffects = metaEffects;
+			_hasMetaEffects = metaEffects != null;
+			_postEffects = postEffects;
+			_hasPostEffects = postEffects != null;
 		}
 
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 		public void SetEventBased() => _isEventBased = true;
+
+		public IEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
+		{
+			_metaEffects = metaEffects;
+			_hasMetaEffects = true;
+			return this;
+		}
+
+		public IEffect SetPostEffects(params IPostEffect<float>[] postEffects)
+		{
+			_postEffects = postEffects;
+			_hasPostEffects = true;
+			return this;
+		}
 
 		public void Effect(IUnit target, IUnit source)
 		{
 			if (IsRevertible)
 				_totalHeal = _heal + _extraHeal;
 
-			Effect(_heal + _extraHeal, (IHealable<float, float>)target, source);
+			float heal = _heal;
+
+			if (_hasMetaEffects)
+				foreach (var metaEffect in _metaEffects)
+					heal = metaEffect.Effect(heal, target, source);
+
+			heal += _extraHeal;
+
+			float returnHeal = Effect(heal, (IHealable<float, float>)target, source);
+
+			if (_hasPostEffects)
+				foreach (var postEffect in _postEffects)
+					postEffect.Effect(returnHeal, target, source, !_isEventBased);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
@@ -45,10 +80,10 @@ namespace ModiBuff.Core.Units
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void Effect(float value, IUnit target, IUnit source)
+		private float Effect(float value, IUnit target, IUnit source)
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
-			((IHealable<float, float>)target).Heal(value, source, !_isEventBased);
+			return ((IHealable<float, float>)target).Heal(value, source, !_isEventBased);
 		}
 
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
@@ -69,7 +104,7 @@ namespace ModiBuff.Core.Units
 			_totalHeal = 0;
 		}
 
-		public IStateEffect ShallowClone() => new HealEffect(_heal, IsRevertible, _stackEffect, _targeting);
+		public IStateEffect ShallowClone() => new HealEffect(_heal, IsRevertible, _stackEffect, _targeting, _metaEffects, _postEffects);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }
