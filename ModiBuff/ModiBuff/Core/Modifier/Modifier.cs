@@ -10,6 +10,7 @@ namespace ModiBuff.Core
 	public sealed class Modifier : IModifier
 	{
 		public int Id { get; }
+		public int GenId { get; }
 		public string Name { get; }
 
 		private readonly bool _refresh;
@@ -27,10 +28,11 @@ namespace ModiBuff.Core
 		private bool _isTargetSetup;
 		private bool _multiTarget;
 
-		public Modifier(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents, IStackComponent stackComponent,
-			ModifierCheck effectCheck, ITargetComponent targetComponent)
+		public Modifier(int id, int genId, string name, InitComponent initComponent, ITimeComponent[] timeComponents,
+			IStackComponent stackComponent, ModifierCheck effectCheck, ITargetComponent targetComponent)
 		{
 			Id = id;
+			GenId = genId;
 			Name = name;
 
 			_initComponent = initComponent;

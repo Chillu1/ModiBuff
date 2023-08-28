@@ -108,7 +108,7 @@ So with 5_800 preallocated modifiers, the library will add 8ms to the game start
 
 # Requirements
 
-ModiBuff is compatible with .NETStandard 1.1, C# 7.0
+ModiBuff is compatible with .NETStandard 1.1, C# 7.2 (C# 7.0 is possible by removing readonly from ModifierReference)
 
 For development net 6.0 is required to build and run all tests. The tests depend on NUnit, and benchmarks depend on BenchmarkDotNet.
 

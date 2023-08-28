@@ -17,7 +17,7 @@ namespace ModiBuff.Examples.BasicConsole
 
 		public float Damage { get; private set; }
 
-		public ModifierController ModifierController { get; }
+		public MultipleModifiersModifierController ModifierController { get; }
 
 		private TargetingSystem _targetingSystem;
 
@@ -27,7 +27,7 @@ namespace ModiBuff.Examples.BasicConsole
 			Health = MaxHealth = health;
 			Damage = damage;
 
-			ModifierController = new ModifierController(this);
+			ModifierController = new MultipleModifiersModifierController(this);
 			_targetingSystem = new TargetingSystem();
 		}
 

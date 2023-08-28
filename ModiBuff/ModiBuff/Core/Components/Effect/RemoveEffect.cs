@@ -4,6 +4,7 @@ namespace ModiBuff.Core
 	{
 		private IRevertEffect[] _revertibleEffects;
 		private int _id;
+		private int _genId;
 
 		public RemoveEffect()
 		{
@@ -18,6 +19,8 @@ namespace ModiBuff.Core
 			_revertibleEffects = revertibleEffects;
 		}
 
+		public void SetGenId(int genId) => _id = genId;
+
 		public void Effect(IUnit target, IUnit source)
 		{
 			//Debug.Log("RemoveEffect Effect, modifier id: " + _modifier.Id);
@@ -25,7 +28,7 @@ namespace ModiBuff.Core
 				_revertibleEffects[i].RevertEffect(target, source);
 
 			//Still not fully ideal, but fixed the state issue 
-			((IModifierOwner)target).ModifierController.PrepareRemove(_id); //TODO From which collection? Applier support?
+			((IModifierOwner)target).ModifierController.PrepareRemove(_id, 0); //TODO From which collection? Applier support?
 		}
 
 		public RemoveEffect ShallowClone() => new RemoveEffect(_id);

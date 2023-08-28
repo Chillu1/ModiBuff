@@ -10,6 +10,7 @@ namespace ModiBuff.Core
 	public sealed class ModifierRecipe : IModifierApplyCheckRecipe, IComparable<ModifierRecipe>
 	{
 		public int Id { get; }
+		public int GenId { get; private set; }
 		public string Name { get; }
 		public bool HasApplyChecks { get; private set; }
 
@@ -130,8 +131,10 @@ namespace ModiBuff.Core
 
 			_modifierCreator.Clear();
 
-			return new Modifier(Id, Name, initComponent, _timeComponents.Count == 0 ? null : _timeComponents.ToArray(), stackComponent,
-				effectCheck, _isAura ? (ITargetComponent)new MultiTargetComponent() : new SingleTargetComponent());
+			int genId = GenId++;
+
+			return new Modifier(Id, genId, Name, initComponent, _timeComponents.Count == 0 ? null : _timeComponents.ToArray(),
+				stackComponent, effectCheck, _isAura ? (ITargetComponent)new MultiTargetComponent() : new SingleTargetComponent());
 		}
 
 		//---Misc---

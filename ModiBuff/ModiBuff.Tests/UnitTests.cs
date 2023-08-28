@@ -19,11 +19,11 @@ namespace ModiBuff.Tests
 
 		private sealed class NonDamagableUnit : IUnit, IModifierOwner
 		{
-			public ModifierController ModifierController { get; }
+			public MultipleModifiersModifierController ModifierController { get; }
 
 			public NonDamagableUnit()
 			{
-				ModifierController = new ModifierController(this);
+				ModifierController = new MultipleModifiersModifierController(this);
 			}
 		}
 

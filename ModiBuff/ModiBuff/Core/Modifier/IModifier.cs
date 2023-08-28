@@ -3,6 +3,7 @@ namespace ModiBuff.Core
 	public interface IModifier : IStateReset
 	{
 		int Id { get; }
+		int GenId { get; }
 		string Name { get; }
 
 		void Init();
