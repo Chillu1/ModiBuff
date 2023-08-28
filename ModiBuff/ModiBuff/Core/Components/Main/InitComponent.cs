@@ -7,7 +7,6 @@ namespace ModiBuff.Core
 		private readonly IEffect[] _effects;
 		private readonly bool _oneTime;
 		private readonly ModifierCheck _modifierCheck;
-		private readonly bool _check;
 
 		private bool _isInitialized;
 
@@ -20,8 +19,6 @@ namespace ModiBuff.Core
 			_oneTime = oneTimeInit;
 			_effects = effects;
 			_modifierCheck = check;
-
-			_check = check != null;
 		}
 
 		public void Init(IUnit target, IUnit owner)
@@ -29,7 +26,7 @@ namespace ModiBuff.Core
 			if (_oneTime && _isInitialized)
 				return;
 
-			if (_check && !_modifierCheck.Check(owner))
+			if (_modifierCheck != null && !_modifierCheck.Check(owner))
 				return;
 
 			int length = _effects.Length;
@@ -44,7 +41,7 @@ namespace ModiBuff.Core
 			if (_oneTime && _isInitialized)
 				return;
 
-			if (_check && !_modifierCheck.Check(owner))
+			if (_modifierCheck != null && !_modifierCheck.Check(owner))
 				return;
 
 			int length = _effects.Length;

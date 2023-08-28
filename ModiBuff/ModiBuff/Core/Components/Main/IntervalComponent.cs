@@ -14,7 +14,6 @@ namespace ModiBuff.Core
 		private IStatusResistance _statusResistanceTarget;
 
 		private readonly IEffect[] _effects;
-		private readonly bool _check;
 
 		private readonly ModifierCheck _modifierCheck;
 
@@ -28,8 +27,6 @@ namespace ModiBuff.Core
 			_effects = effects;
 			_modifierCheck = check;
 			_usesStatusResistance = affectedByStatusResistance;
-
-			_check = check != null;
 		}
 
 		public IntervalComponent(float interval, bool refreshable, IEffect effect, ModifierCheck check, bool usesStatusResistance) :
@@ -73,7 +70,7 @@ namespace ModiBuff.Core
 
 			_timer -= _interval;
 
-			if (_check && !_modifierCheck.Check(_targetComponent.Source))
+			if (_modifierCheck != null && !_modifierCheck.Check(_targetComponent.Source))
 				return;
 
 			int length = _effects.Length;
@@ -99,7 +96,6 @@ namespace ModiBuff.Core
 		public void ResetState()
 		{
 			_timer = 0;
-			_targetComponent.ResetState();
 			_statusResistanceImplemented = false;
 			_statusResistanceTarget = null;
 		}

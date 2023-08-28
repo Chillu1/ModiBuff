@@ -85,7 +85,6 @@ namespace ModiBuff.Core
 		public void ResetState()
 		{
 			_timer = 0;
-			_targetComponent.ResetState();
 			_statusResistanceImplemented = false;
 			_statusResistanceTarget = null;
 		}

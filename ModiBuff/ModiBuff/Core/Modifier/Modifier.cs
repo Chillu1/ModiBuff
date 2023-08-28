@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -13,7 +12,7 @@ namespace ModiBuff.Core
 		public int Id { get; }
 		public string Name { get; }
 
-		private readonly bool _init, _time, _refresh, _stack;
+		private readonly bool _refresh;
 
 		private readonly InitComponent _initComponent;
 
@@ -34,16 +33,11 @@ namespace ModiBuff.Core
 			Id = id;
 			Name = name;
 
-			if (initComponent != null)
-			{
-				_initComponent = initComponent;
-				_init = true;
-			}
+			_initComponent = initComponent;
 
-			if (timeComponents != null && timeComponents.Length > 0)
-			{
-				_timeComponents = timeComponents;
+			_timeComponents = timeComponents;
 
+			if (timeComponents != null)
 				for (int i = 0; i < timeComponents.Length; i++)
 				{
 					if (timeComponents[i].IsRefreshable)
@@ -53,14 +47,7 @@ namespace ModiBuff.Core
 					}
 				}
 
-				_time = true;
-			}
-
-			if (stackComponent != null)
-			{
-				_stackComponent = stackComponent;
-				_stack = true;
-			}
+			_stackComponent = stackComponent;
 
 			if (effectCheck != null)
 			{
@@ -88,17 +75,17 @@ namespace ModiBuff.Core
 			{
 				_isTargetSetup = true;
 
-				if (_time)
+				if (_timeComponents != null)
 					for (int i = 0; i < _timeComponents.Length; i++)
 						_timeComponents[i].SetupTarget(_targetComponent);
 
-				if (_stack)
+				if (_stackComponent != null)
 					_stackComponent.SetupTarget(_targetComponent);
 			}
 
 			_targetComponent.UpdateSource(source);
 			((MultiTargetComponent)_targetComponent).UpdateTargets(targetsInRange);
-			if (_time)
+			if (_timeComponents != null)
 				for (int i = 0; i < _timeComponents.Length; i++)
 					_timeComponents[i].UpdateOwner(source);
 		}
@@ -120,24 +107,24 @@ namespace ModiBuff.Core
 			{
 				_isTargetSetup = true;
 
-				if (_time)
+				if (_timeComponents != null)
 					for (int i = 0; i < _timeComponents.Length; i++)
 						_timeComponents[i].SetupTarget(_targetComponent);
 
-				if (_stack)
+				if (_stackComponent != null)
 					_stackComponent.SetupTarget(_targetComponent);
 			}
 
 			_targetComponent.UpdateSource(source);
 			((SingleTargetComponent)_targetComponent).UpdateTarget(target);
-			if (_time)
+			if (_timeComponents != null)
 				for (int i = 0; i < _timeComponents.Length; i++)
 					_timeComponents[i].UpdateOwner(source);
 		}
 
 		public void Init()
 		{
-			if (!_init)
+			if (_initComponent == null)
 				return;
 
 			if (_multiTarget)
@@ -151,7 +138,7 @@ namespace ModiBuff.Core
 			if (_check)
 				_effectCheck.Update(deltaTime);
 
-			if (!_time)
+			if (_timeComponents == null)
 				return;
 
 			int length = _timeComponents.Length;
@@ -161,7 +148,7 @@ namespace ModiBuff.Core
 
 		public void Refresh()
 		{
-			if (!_refresh || !_time)
+			if (!_refresh || _timeComponents == null)
 				return;
 
 			int length = _timeComponents.Length;
@@ -171,7 +158,7 @@ namespace ModiBuff.Core
 
 		public void Stack()
 		{
-			if (!_stack)
+			if (_stackComponent == null)
 				return;
 
 			_stackComponent.Stack();
@@ -179,14 +166,14 @@ namespace ModiBuff.Core
 
 		public void ResetState()
 		{
-			if (_init)
+			if (_initComponent != null)
 				_initComponent.ResetState();
-			if (_time)
+			if (_timeComponents != null)
 				for (int i = 0; i < _timeComponents.Length; i++)
 					_timeComponents[i].ResetState();
-			if (_stack)
+			if (_stackComponent != null)
 				_stackComponent.ResetState();
-			//No need to reset targetComponent references, because we overwrite them on SetTargets
+			_targetComponent.ResetState();
 		}
 	}
 }

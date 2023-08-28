@@ -11,7 +11,6 @@ namespace ModiBuff.Core
 		private readonly int _everyXStacks;
 		private readonly IStackEffect[] _effects;
 		private readonly ModifierCheck _modifierCheck;
-		private readonly bool _check;
 
 		private ITargetComponent _targetComponent;
 
@@ -28,8 +27,6 @@ namespace ModiBuff.Core
 
 			_effects = effects;
 			_modifierCheck = check;
-
-			_check = check != null;
 		}
 
 		public void SetupTarget(ITargetComponent targetComponent) => _targetComponent = targetComponent;
@@ -41,7 +38,7 @@ namespace ModiBuff.Core
 
 			_stacks++;
 
-			if (_check && !_modifierCheck.Check(_targetComponent.Source))
+			if (_modifierCheck != null && !_modifierCheck.Check(_targetComponent.Source))
 				return;
 
 			switch (_whenStackEffect)

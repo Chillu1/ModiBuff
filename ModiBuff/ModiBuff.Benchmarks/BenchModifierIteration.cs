@@ -9,8 +9,8 @@ namespace ModiBuff.Tests
 	{
 		private const int UnitCount = 10_000;
 
-		[Params(0.0167f /*, 1f*/)]
-		public float Delta;
+		//[Params(0.0167f /*, 1f*/)]
+		public const float Delta = 0.0167f;
 
 		private Unit[] _dotUnits;
 
