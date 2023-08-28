@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public interface ITargetComponent : IComponent
+	public interface ITargetComponent : IComponent, IStateReset
 	{
 		/// <summary>
 		///		Unit that applied the modifier.

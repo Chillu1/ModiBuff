@@ -69,7 +69,7 @@ namespace ModiBuff.Core
 				_effects[i].Reset();
 			_revertEffects.Clear();
 
-			return new Modifier(Id, Name, initComponent, timeComponents, null, null);
+			return new Modifier(Id, Name, initComponent, timeComponents, null, null, new SingleTargetComponent());
 		}
 
 		//---Actions---

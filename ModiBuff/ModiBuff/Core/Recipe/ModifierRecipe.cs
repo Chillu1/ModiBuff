@@ -15,6 +15,8 @@ namespace ModiBuff.Core
 
 		public readonly ModifierIdManager IdManager; //TODO Refactor to make it private/not needed
 
+		private bool _isAura;
+
 		private bool _hasEffectChecks;
 
 		private bool _oneTimeInit;
@@ -129,7 +131,15 @@ namespace ModiBuff.Core
 			_modifierCreator.Clear();
 
 			return new Modifier(Id, Name, initComponent, _timeComponents.Count == 0 ? null : _timeComponents.ToArray(), stackComponent,
-				effectCheck);
+				effectCheck, _isAura ? (ITargetComponent)new MultiTargetComponent() : new SingleTargetComponent());
+		}
+
+		//---Misc---
+
+		public ModifierRecipe Aura()
+		{
+			_isAura = true;
+			return this;
 		}
 
 		//---ApplyChecks---

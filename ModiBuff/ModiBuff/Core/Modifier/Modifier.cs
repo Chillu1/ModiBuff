@@ -25,10 +25,11 @@ namespace ModiBuff.Core
 		private readonly bool _check;
 
 		private ITargetComponent _targetComponent;
+		private bool _isTargetSetup;
 		private bool _multiTarget;
 
 		public Modifier(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents, IStackComponent stackComponent,
-			ModifierCheck effectCheck)
+			ModifierCheck effectCheck, ITargetComponent targetComponent)
 		{
 			Id = id;
 			Name = name;
@@ -66,22 +67,73 @@ namespace ModiBuff.Core
 				_effectCheck = effectCheck;
 				_check = true;
 			}
+
+			_targetComponent = targetComponent;
+			if (targetComponent is IMultiTargetComponent)
+				_multiTarget = true;
 		}
 
-		public void SetTarget(ITargetComponent targetComponent)
+		public void UpdateTargets(List<IUnit> targetsInRange, IUnit source)
 		{
-			_targetComponent = targetComponent;
-			_multiTarget = targetComponent is MultiTargetComponent;
+			//In case the user switches from single to multi target, which shouldn't be done, cause it causes GC
+			if (!_multiTarget)
+			{
+				_multiTarget = true;
+				_targetComponent = new MultiTargetComponent(targetsInRange, source);
 
+				_isTargetSetup = false;
+			}
+
+			if (!_isTargetSetup)
+			{
+				_isTargetSetup = true;
+
+				if (_time)
+					for (int i = 0; i < _timeComponents.Length; i++)
+						_timeComponents[i].SetupTarget(_targetComponent);
+
+				if (_stack)
+					_stackComponent.SetupTarget(_targetComponent);
+			}
+
+			_targetComponent.UpdateSource(source);
+			((MultiTargetComponent)_targetComponent).UpdateTargets(targetsInRange);
 			if (_time)
 				for (int i = 0; i < _timeComponents.Length; i++)
-					_timeComponents[i].SetupTarget(_targetComponent);
-
-			if (_stack)
-				_stackComponent.SetupTarget(_targetComponent);
+					_timeComponents[i].UpdateOwner(source);
 		}
 
 		public void UpdateSource(IUnit source) => _targetComponent.UpdateSource(source);
+
+		public void UpdateSingleTargetSource(IUnit target, IUnit source)
+		{
+			//In case the user switches from multi to single target, which shouldn't be done, cause it causes GC
+			if (_multiTarget)
+			{
+				_multiTarget = false;
+				_targetComponent = new SingleTargetComponent(target, source);
+
+				_isTargetSetup = false;
+			}
+
+			if (!_isTargetSetup)
+			{
+				_isTargetSetup = true;
+
+				if (_time)
+					for (int i = 0; i < _timeComponents.Length; i++)
+						_timeComponents[i].SetupTarget(_targetComponent);
+
+				if (_stack)
+					_stackComponent.SetupTarget(_targetComponent);
+			}
+
+			_targetComponent.UpdateSource(source);
+			((SingleTargetComponent)_targetComponent).UpdateTarget(target);
+			if (_time)
+				for (int i = 0; i < _timeComponents.Length; i++)
+					_timeComponents[i].UpdateOwner(source);
+		}
 
 		public void Init()
 		{

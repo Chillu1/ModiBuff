@@ -48,6 +48,16 @@ namespace ModiBuff.Core
 			}
 		}
 
+		public void UpdateOwner(IUnit owner)
+		{
+			if (_targetComponent is ISingleTargetComponent singleTargetComponent &&
+			    singleTargetComponent.Target is IStatusResistance statusResistance)
+			{
+				_statusResistanceImplemented = true;
+				_statusResistanceTarget = statusResistance;
+			}
+		}
+
 		public void Update(float deltaTime)
 		{
 			//Special calculation if target has status resistance functionality
@@ -89,7 +99,7 @@ namespace ModiBuff.Core
 		public void ResetState()
 		{
 			_timer = 0;
-			_targetComponent = null;
+			_targetComponent.ResetState();
 			_statusResistanceImplemented = false;
 			_statusResistanceTarget = null;
 		}

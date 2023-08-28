@@ -7,6 +7,10 @@ namespace ModiBuff.Core
 		public IUnit Source { get; private set; }
 		public List<IUnit> Targets { get; }
 
+		public MultiTargetComponent()
+		{
+			Targets = new List<IUnit>(4);
+		}
 
 		public MultiTargetComponent(List<IUnit> targets, IUnit source)
 		{
@@ -14,9 +18,18 @@ namespace ModiBuff.Core
 			Targets = targets;
 		}
 
-		public void UpdateSource(IUnit source)
+		public void UpdateSource(IUnit source) => Source = source;
+
+		public void UpdateTargets(List<IUnit> targets)
 		{
-			Source = source;
+			Targets.Clear();
+			Targets.AddRange(targets);
+		}
+
+		public void ResetState()
+		{
+			Source = null;
+			Targets.Clear();
 		}
 	}
 }

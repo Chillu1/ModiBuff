@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public interface ITimeComponent : IDeepClone<ITimeComponent>, IStateReset, ITarget, IComponent
+	public interface ITimeComponent : IDeepClone<ITimeComponent>, IStateReset, IUpdateOwner, ITarget, IComponent
 	{
 		bool IsRefreshable { get; }
 		void Update(float deltaTime);

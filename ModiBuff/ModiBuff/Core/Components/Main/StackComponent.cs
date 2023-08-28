@@ -68,7 +68,7 @@ namespace ModiBuff.Core
 		public void ResetState()
 		{
 			_stacks = 0;
-			_targetComponent = null;
+			_targetComponent.ResetState();
 			for (int i = 0; i < _effects.Length; i++)
 				if (_effects[i] is IStateReset effect)
 					effect.ResetState();

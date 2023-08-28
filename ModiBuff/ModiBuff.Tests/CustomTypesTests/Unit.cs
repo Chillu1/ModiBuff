@@ -257,7 +257,7 @@ namespace ModiBuff.Tests.CustomTypesTests
 		public void AddAuraModifier(int id)
 		{
 			var modifier = ModifierPool.Instance.Rent(id);
-			modifier.SetTarget(new MultiTargetComponent(_targetsInRange, this));
+			modifier.UpdateTargets(_targetsInRange, this);
 			_auraModifiers.Add(modifier);
 		}
 

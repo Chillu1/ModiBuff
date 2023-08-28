@@ -13,6 +13,11 @@ namespace ModiBuff.Tests
 		private StatType _statType;
 		private Func<IUnit, float> _checkStat;
 
+		private ITargetComponent[] _targetComponents;
+		private bool _hasTarget;
+		private ITimeComponent[] _timeComponents;
+		private bool _hasTime;
+
 		public override void GlobalSetup()
 		{
 			base.GlobalSetup();
@@ -34,9 +39,18 @@ namespace ModiBuff.Tests
 						throw new ArgumentOutOfRangeException();
 				}
 			};
+
+			_targetComponents = null; // new ITargetComponent[] { new SingleTargetComponent(), new MultiTargetComponent() };
+			_hasTarget = false;
+			_timeComponents = new ITimeComponent[]
+			{
+				new IntervalComponent(5, false, (IEffect)null, null, false), new IntervalComponent(5, false, (IEffect)null, null, false),
+				new DurationComponent(5, false, (IEffect)null),
+			};
+			_hasTime = true;
 		}
 
-		[Benchmark(Baseline = true)]
+		//[Benchmark(Baseline = true)]
 		public void TestSwitch()
 		{
 			float value;
@@ -58,12 +72,44 @@ namespace ModiBuff.Tests
 			float test = value;
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void TestDelegate()
 		{
 			float value = _checkStat(_unit);
 
 			float test = value;
+		}
+
+		[Benchmark(Baseline = true)]
+		public void ForLoopNotNull()
+		{
+			if (_targetComponents != null)
+				for (int i = 0; i < _targetComponents.Length; i++)
+				{
+					var targetComponent = _targetComponents[i];
+				}
+
+			if (_timeComponents != null)
+				for (int i = 0; i < _timeComponents.Length; i++)
+				{
+					var timeComponent = _timeComponents[i];
+				}
+		}
+
+		[Benchmark]
+		public void ForLoopBoolCheck()
+		{
+			if (_hasTarget)
+				for (int i = 0; i < _targetComponents.Length; i++)
+				{
+					var targetComponent = _targetComponents[i];
+				}
+
+			if (_hasTime)
+				for (int i = 0; i < _timeComponents.Length; i++)
+				{
+					var timeComponent = _timeComponents[i];
+				}
 		}
 	}
 }

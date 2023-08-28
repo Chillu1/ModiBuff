@@ -160,6 +160,7 @@ namespace ModiBuff.Core.Units
 				Register("InitAddDamageBuff_Interval", "InitAddDamageBuff");
 
 				Add("InitAddDamageBuff_Interval")
+					.Aura()
 					.Interval(1)
 					.Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval);
 
