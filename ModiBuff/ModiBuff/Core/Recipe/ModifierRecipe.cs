@@ -7,7 +7,7 @@ namespace ModiBuff.Core
 	/// <summary>
 	///		High level API for creating modifiers.
 	/// </summary>
-	public sealed class ModifierRecipe : IModifierApplyCheckRecipe, IComparable<ModifierRecipe>
+	public sealed class ModifierRecipe : IModifierApplyCheckRecipe, IEquatable<ModifierRecipe>, IComparable<ModifierRecipe>
 	{
 		public int Id { get; }
 		public int GenId { get; private set; }
@@ -401,9 +401,20 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public int CompareTo(ModifierRecipe other)
+		public int CompareTo(ModifierRecipe other) => Id.CompareTo(other.Id);
+
+		public bool Equals(ModifierRecipe other)
 		{
-			return Id.CompareTo(other.Id);
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
+			return Id == other.Id;
 		}
+
+		public override bool Equals(object obj)
+		{
+			return ReferenceEquals(this, obj) || obj is ModifierRecipe other && Equals(other);
+		}
+
+		public override int GetHashCode() => Id;
 	}
 }

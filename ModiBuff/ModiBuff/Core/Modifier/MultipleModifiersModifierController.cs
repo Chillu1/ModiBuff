@@ -14,6 +14,7 @@ namespace ModiBuff.Core
 		private readonly IUnit _owner;
 
 		private Modifier[] _modifiers;
+		private int[] _modifierIndexes;
 		private int _modifiersTop;
 
 		private readonly List<int> _modifierAttackAppliers;
@@ -28,6 +29,9 @@ namespace ModiBuff.Core
 			_owner = owner;
 
 			_modifiers = new Modifier[32];
+			_modifierIndexes = new int[ModifierRecipes.RecipesCount];
+			for (int i = 0; i < _modifierIndexes.Length; i++)
+				_modifierIndexes[i] = -1;
 
 			_modifierAttackAppliers = new List<int>(4);
 			_modifierCastAppliers = new List<int>(4);
@@ -165,21 +169,15 @@ namespace ModiBuff.Core
 
 		public void Add(int id, IUnit target, IUnit source)
 		{
-			if (!ModifierRecipes.IsInstanceStackable(id))
+			if (!ModifierRecipes.IsInstanceStackable(id) && _modifierIndexes[id] != -1)
 			{
-				for (int i = 0; i < _modifiersTop; i++)
-				{
-					var existingModifier = _modifiers[i];
-					if (existingModifier.Id == id)
-					{
-						//TODO should we update the modifier targets when init/refreshing/stacking?
-						existingModifier.UpdateSource(source);
-						existingModifier.Init();
-						existingModifier.Refresh();
-						existingModifier.Stack();
-						return;
-					}
-				}
+				var existingModifier = _modifiers[_modifierIndexes[id] - 1];
+				//TODO should we update the modifier targets when init/refreshing/stacking?
+				existingModifier.UpdateSource(source);
+				existingModifier.Init();
+				existingModifier.Refresh();
+				existingModifier.Stack();
+				return;
 			}
 
 			if (_modifiersTop == _modifiers.Length)
@@ -191,6 +189,8 @@ namespace ModiBuff.Core
 			modifier.UpdateSingleTargetSource(target, source);
 
 			_modifiers[_modifiersTop++] = modifier;
+			if (!ModifierRecipes.IsInstanceStackable(id))
+				_modifierIndexes[id] = _modifiersTop;
 			modifier.Init();
 			modifier.Refresh();
 			modifier.Stack();
@@ -198,6 +198,9 @@ namespace ModiBuff.Core
 
 		public bool Contains(int id)
 		{
+			if (!ModifierRecipes.IsInstanceStackable(id))
+				return _modifierIndexes[id] != -1;
+
 			for (int i = 0; i < _modifiersTop; i++)
 				if (_modifiers[i].Id == id)
 					return true;
@@ -215,18 +218,15 @@ namespace ModiBuff.Core
 		public void Remove(in ModifierReference modifierReference)
 		{
 			if (!ModifierRecipes.IsInstanceStackable(modifierReference.Id))
-				for (int i = 0; i < _modifiersTop; i++)
-				{
-					var modifier = _modifiers[i];
-					if (modifier.Id == modifierReference.Id)
-					{
-						ModifierPool.Instance.Return(modifier);
-						_modifiers[i] = _modifiers[--_modifiersTop];
-						_modifiers[_modifiersTop] = null;
-						break;
-					}
-				}
+			{
+				var modifier = _modifiers[_modifierIndexes[modifierReference.Id] - 1];
+				ModifierPool.Instance.Return(modifier);
+				_modifiers[_modifierIndexes[modifierReference.Id] - 1] = _modifiers[--_modifiersTop];
+				_modifiers[_modifiersTop] = null;
+				_modifierIndexes[modifierReference.Id] = -1;
+			}
 			else
+			{
 				for (int i = 0; i < _modifiersTop; i++)
 				{
 					var modifier = _modifiers[i];
@@ -238,6 +238,7 @@ namespace ModiBuff.Core
 						break;
 					}
 				}
+			}
 		}
 
 		/// <summary>
@@ -250,6 +251,9 @@ namespace ModiBuff.Core
 				ModifierPool.Instance.Return(_modifiers[i]);
 				_modifiers[i] = null;
 			}
+
+			for (int i = 0; i < _modifierIndexes.Length; i++)
+				_modifierIndexes[i] = -1;
 
 			_modifiersTop = 0;
 
@@ -265,18 +269,6 @@ namespace ModiBuff.Core
 			_modifierCastChecksAppliers.Clear();
 			_modifierAttackChecksAppliers.Clear();
 			_modifiersToRemove.Clear();
-		}
-	}
-
-	public readonly struct ModifierReference
-	{
-		public readonly int Id;
-		public readonly int GenId;
-
-		public ModifierReference(int id, int genId)
-		{
-			Id = id;
-			GenId = genId;
 		}
 	}
 }
