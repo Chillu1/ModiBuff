@@ -13,9 +13,11 @@ namespace ModiBuff.Tests
 		[GlobalSetup]
 		public virtual void GlobalSetup()
 		{
+			Config.PoolSize = 1024;
+
 			IdManager = new ModifierIdManager();
 			Recipes = new TestModifierRecipes(IdManager);
-			Pool = new ModifierPool(Recipes.GetRecipes(), 1024);
+			Pool = new ModifierPool(Recipes.GetRecipes());
 		}
 
 		[GlobalCleanup]

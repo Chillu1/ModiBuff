@@ -20,11 +20,6 @@ namespace ModiBuff.Tests
 
 			Pool.Clear();
 			Pool.SetMaxPoolSize(1_000_000);
-			//Pool.Allocate(Recipes.GetRecipe("InitDoTSeparateDamageRemove").Id, 60 * Iterations);
-
-			Pool.Allocate(Recipes.GetRecipe("InitDoTSeparateDamageRemove").Id, 64);
-
-			Pool.Allocate(Recipes.GetRecipe("IntervalDamage_StackAddDamage").Id, 64);
 		}
 
 		[Benchmark]

@@ -19,11 +19,11 @@ namespace ModiBuff.Tests
 
 		private sealed class NonDamagableUnit : IUnit, IModifierOwner
 		{
-			public MultipleModifiersModifierController ModifierController { get; }
+			public ModifierController ModifierController { get; }
 
 			public NonDamagableUnit()
 			{
-				ModifierController = new MultipleModifiersModifierController(this);
+				ModifierController = new ModifierController(this);
 			}
 		}
 
@@ -58,7 +58,7 @@ namespace ModiBuff.Tests
 
 			Assert.Throws<Exception>(() => Pool.Allocate(IdManager.GetId("InitDamage"), 1));
 
-			Pool.SetMaxPoolSize(ModifierPool.DefaultMaxPoolSize);
+			Pool.SetMaxPoolSize(Config.MaxPoolSize);
 		}
 	}
 }

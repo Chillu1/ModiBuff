@@ -29,7 +29,7 @@ namespace ModiBuff.Core.Units
 
 		public bool IsDead { get; private set; }
 
-		public MultipleModifiersModifierController ModifierController { get; }
+		public ModifierController ModifierController { get; }
 		public IStatusEffectController<LegalAction, StatusEffectType> StatusEffectController => _statusEffectController;
 
 		//Note: These event lists should only be used for classic effects.
@@ -64,7 +64,7 @@ namespace ModiBuff.Core.Units
 			_targetsInRange.Add(this);
 			_auraModifiers = new List<Modifier>();
 
-			ModifierController = new MultipleModifiersModifierController(this);
+			ModifierController = new ModifierController(this);
 			_statusEffectController = new StatusEffectController();
 		}
 

@@ -12,7 +12,7 @@ namespace ModiBuff.Examples.SimpleSolo
 		public float MaxHealth { get; private set; }
 		public float Damage { get; private set; }
 
-		public MultipleModifiersModifierController ModifierController { get; }
+		public ModifierController ModifierController { get; }
 
 		public int BlockInstance { get; private set; }
 
@@ -25,7 +25,7 @@ namespace ModiBuff.Examples.SimpleSolo
 		{
 			_targetingSystem = new TargetingSystem();
 
-			ModifierController = new MultipleModifiersModifierController(this);
+			ModifierController = new ModifierController(this);
 
 			Health = MaxHealth = health;
 			Damage = damage;

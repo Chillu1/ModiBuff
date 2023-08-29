@@ -6,8 +6,7 @@ namespace ModiBuff.Core
 	{
 		public static ModifierPool Instance { get; private set; }
 
-		public const int DefaultMaxPoolSize = 10_000;
-		public static int MaxPoolSize = DefaultMaxPoolSize;
+		public static int MaxPoolSize = Config.MaxPoolSize;
 
 		private readonly Modifier[][] _pools;
 		private readonly int[] _poolTops;
@@ -16,16 +15,14 @@ namespace ModiBuff.Core
 		private readonly IModifierRecipe[] _recipes;
 		private readonly IModifierApplyCheckRecipe[] _applyCheckRecipes;
 
-		private int _stackCapacity = 64;
-
-		public ModifierPool(IModifierRecipe[] recipes, int initialSize = 64)
+		public ModifierPool(IModifierRecipe[] recipes)
 		{
 			if (Instance != null)
 				return;
 
 			Instance = this;
 
-			initialSize = Math.Max(initialSize, 1);
+			int initialSize = Math.Max(Config.PoolSize, 1);
 
 			_pools = new Modifier[recipes.Length][];
 			_poolTops = new int[recipes.Length];
@@ -43,13 +40,11 @@ namespace ModiBuff.Core
 				{
 					_applyCheckRecipes[recipe.Id] = applyCheckRecipe;
 					_checkPools[recipe.Id] = new ModifierCheck[initialSize];
-					AllocateChecks(recipe.Id, initialSize);
+					AllocateDoubleChecks(recipe.Id);
 				}
 
-				Allocate(recipe.Id, initialSize);
+				AllocateDouble(recipe.Id);
 			}
-
-			_stackCapacity = initialSize;
 
 			Array.Sort(_pools, (x, y) => x[0].Id.CompareTo(y[0].Id));
 			Array.Sort(_poolTops, (x, y) => x.CompareTo(y));
@@ -63,8 +58,11 @@ namespace ModiBuff.Core
 			if (size < 0)
 				throw new ArgumentOutOfRangeException(nameof(size), "Max pool size cannot be negative.");
 
-			if (size < _stackCapacity)
-				throw new ArgumentOutOfRangeException(nameof(size), "Max pool size cannot be smaller than the current stack capacity.");
+			for (int i = 0; i < _poolTops.Length; i++)
+			{
+				if (_poolTops[i] > size)
+					throw new ArgumentOutOfRangeException(nameof(size), "Max pool size cannot be smaller than the current stack capacity.");
+			}
 
 			MaxPoolSize = size;
 		}
@@ -105,22 +103,34 @@ namespace ModiBuff.Core
 				throw new Exception($"Modifier pool for {recipe.Name} is over the max pool size of {MaxPoolSize}.");
 		}
 
-		internal void AllocateChecks(int id, int count)
+		/// <summary>
+		///		Doubles the size of the pool, can be very expensive.
+		/// </summary>
+		internal void AllocateDouble(int id)
+		{
+			var recipe = _recipes[id];
+			int poolLength = _pools[id].Length; //Don't cache pool array, it can be resized.
+
+			if (_poolTops[id] == poolLength)
+				Resize(id, poolLength << 1);
+
+			for (int i = 0; i < poolLength; i++)
+				_pools[id][_poolTops[id]++] = recipe.Create();
+
+			if (_poolTops[id] > MaxPoolSize)
+				throw new Exception($"Modifier pool for {recipe.Name} is over the max pool size of {MaxPoolSize}.");
+		}
+
+		internal void AllocateDoubleChecks(int id)
 		{
 			var recipe = _applyCheckRecipes[id];
 			int poolLength = _checkPools[id].Length; //Don't cache pool array, it can be resized.
 
-			if (count > poolLength)
-			{
-				int newSize = poolLength << 1;
-				while (newSize < poolLength + count)
-					newSize <<= 1;
-
-				ResizeChecks(id, newSize);
-			}
+			if (_checkPoolTops[id] == poolLength)
+				ResizeChecks(id, poolLength << 1);
 
 			if (recipe.HasApplyChecks)
-				for (int i = 0; i < count; i++)
+				for (int i = 0; i < poolLength; i++)
 					_checkPools[id][_checkPoolTops[id]++] = recipe.CreateApplyCheck();
 
 			if (_checkPoolTops[id] > MaxPoolSize)
@@ -130,7 +140,7 @@ namespace ModiBuff.Core
 		public Modifier Rent(int id)
 		{
 			if (_poolTops[id] == 0)
-				Allocate(id, _stackCapacity);
+				AllocateDouble(id);
 
 			return _pools[id][--_poolTops[id]];
 		}
@@ -138,7 +148,7 @@ namespace ModiBuff.Core
 		public ModifierCheck RentModifierCheck(int id)
 		{
 			if (_checkPoolTops[id] == 0)
-				AllocateChecks(id, _stackCapacity);
+				AllocateDoubleChecks(id);
 
 			return _checkPools[id][--_checkPoolTops[id]];
 		}
@@ -184,7 +194,6 @@ namespace ModiBuff.Core
 
 			Clear();
 
-			_stackCapacity = 1;
 			Instance = null;
 		}
 	}

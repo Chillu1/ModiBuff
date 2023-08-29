@@ -16,8 +16,6 @@ namespace ModiBuff.Core
 
 	public static class ComparisonTypeExtensions
 	{
-		private const float DeltaTolerance = 0.001f;
-
 		public static bool Check(this ComparisonType comparisonType, float valueOne, float valueTwo)
 		{
 			switch (comparisonType)
@@ -27,7 +25,7 @@ namespace ModiBuff.Core
 				case ComparisonType.Greater:
 					return valueOne > valueTwo;
 				case ComparisonType.Equal:
-					return Math.Abs(valueOne - valueTwo) < DeltaTolerance;
+					return Math.Abs(valueOne - valueTwo) < Config.DeltaTolerance;
 				case ComparisonType.Less:
 					return valueOne < valueTwo;
 				case ComparisonType.GreaterOrEqual:

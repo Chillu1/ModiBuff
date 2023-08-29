@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
@@ -17,6 +18,10 @@ namespace ModiBuff.Tests
 		private bool _hasTarget;
 		private ITimeComponent[] _timeComponents;
 		private bool _hasTime;
+
+		private const float Delta = 0.0167f;
+		private Dictionary<int, ModifierCheck> _modifierCastChecksAppliers;
+		private Dictionary<int, ModifierCheck> _modifierAttackChecksAppliers;
 
 		public override void GlobalSetup()
 		{
@@ -48,6 +53,13 @@ namespace ModiBuff.Tests
 				new DurationComponent(5, false, (IEffect)null),
 			};
 			_hasTime = true;
+
+			int applierId = IdManager.GetId("InitDamage_CostMana"),
+				applierTwoId = IdManager.GetId("InitDamage_ApplyCondition_HealthAbove100");
+			_modifierCastChecksAppliers = new Dictionary<int, ModifierCheck>();
+			_modifierAttackChecksAppliers = new Dictionary<int, ModifierCheck>();
+			_modifierAttackChecksAppliers.Add(applierId, Pool.RentModifierCheck(applierId));
+			_modifierAttackChecksAppliers.Add(applierTwoId, Pool.RentModifierCheck(applierTwoId));
 		}
 
 		//[Benchmark(Baseline = true)]
@@ -80,7 +92,7 @@ namespace ModiBuff.Tests
 			float test = value;
 		}
 
-		[Benchmark(Baseline = true)]
+		//[Benchmark(Baseline = true)]
 		public void ForLoopNotNull()
 		{
 			if (_targetComponents != null)
@@ -96,7 +108,7 @@ namespace ModiBuff.Tests
 				}
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void ForLoopBoolCheck()
 		{
 			if (_hasTarget)
@@ -110,6 +122,38 @@ namespace ModiBuff.Tests
 				{
 					var timeComponent = _timeComponents[i];
 				}
+		}
+
+		[Benchmark(Baseline = true)]
+		public void ForEachLoopNoCheck()
+		{
+			foreach (var check in _modifierCastChecksAppliers.Values)
+				check.Update(Delta);
+
+			foreach (var check in _modifierAttackChecksAppliers.Values)
+				check.Update(Delta);
+		}
+
+		[Benchmark]
+		public void ForEachLoopCheck()
+		{
+			if (_modifierCastChecksAppliers.Count > 0)
+				foreach (var check in _modifierCastChecksAppliers.Values)
+					check.Update(Delta);
+
+			if (_modifierAttackChecksAppliers.Count > 0)
+				foreach (var check in _modifierAttackChecksAppliers.Values)
+					check.Update(Delta);
+		}
+
+		[Benchmark]
+		public void ForEachLoopNoCheckKey()
+		{
+			foreach (var check in _modifierCastChecksAppliers)
+				check.Value.Update(Delta);
+
+			foreach (var check in _modifierAttackChecksAppliers)
+				check.Value.Update(Delta);
 		}
 	}
 }

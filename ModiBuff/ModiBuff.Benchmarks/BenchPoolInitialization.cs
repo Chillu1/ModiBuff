@@ -17,6 +17,8 @@ namespace ModiBuff.Tests
 		[GlobalSetup]
 		public void GlobalSetup()
 		{
+			Config.PoolSize = AllocationCount;
+
 			_modifierIdManager = new ModifierIdManager();
 			_recipes = new TestModifierRecipes(_modifierIdManager);
 
@@ -26,7 +28,7 @@ namespace ModiBuff.Tests
 		[Benchmark]
 		public void BenchAllocatePool()
 		{
-			_pool = new ModifierPool(_recipes.GetRecipes(), AllocationCount);
+			_pool = new ModifierPool(_recipes.GetRecipes());
 		}
 
 		[IterationCleanup]

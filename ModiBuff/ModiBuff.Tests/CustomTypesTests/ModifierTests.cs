@@ -30,10 +30,11 @@ namespace ModiBuff.Tests.CustomTypesTests
 		public void OneTimeSetup()
 		{
 			Logger.SetLogger<NUnitLogger>();
+			Config.PoolSize = 1;
 
 			IdManager = new ModifierIdManager();
 			Recipes = new TestModifierRecipes(IdManager);
-			Pool = new ModifierPool(Recipes.GetRecipes(), 1);
+			Pool = new ModifierPool(Recipes.GetRecipes());
 		}
 
 		[SetUp]
