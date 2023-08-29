@@ -108,6 +108,8 @@ Delta: 0.0167 * N
 
 Setting up all recipes, with 64 pool allocation per recipe takes 0.06µs, and 104KB.
 
+Preallocating 1_000 modifiers of each recipe (currently 100±) takes 67ms, and 35MB.
+
 Pooling in ModiBuff is 430X faster than original old version (because of pool & reset)  
 But it's also much faster in cases of doing init/stack/refresh on an existing modifier (we don't create a new modifier anymore)  
 ModiBuffEcs is a bit on the slow side for now, because of how pooling works, with enabling and disabling entities.

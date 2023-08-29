@@ -19,22 +19,20 @@ namespace ModiBuff.Tests
 		{
 			_modifierIdManager = new ModifierIdManager();
 			_recipes = new TestModifierRecipes(_modifierIdManager);
-			_pool = new ModifierPool(_recipes.GetRecipes(), AllocationCount);
 
-			Console.WriteLine("Allocated: " + ModifierRecipes.RecipesCount * AllocationCount + " modifiers");
+			Console.WriteLine("Allocated: " + ModifierRecipes.RecipesCount + " recipes, count: " + AllocationCount + " modifiers");
 		}
 
 		[Benchmark]
 		public void BenchAllocatePool()
 		{
-			//TODO This bench seems faulty
 			_pool = new ModifierPool(_recipes.GetRecipes(), AllocationCount);
 		}
 
 		[IterationCleanup]
 		public void IterationCleanUp()
 		{
-			_modifierIdManager.Reset();
+			//_modifierIdManager.Reset();
 			_pool.Dispose();
 		}
 	}
