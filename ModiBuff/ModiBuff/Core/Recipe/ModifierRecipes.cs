@@ -8,21 +8,31 @@ namespace ModiBuff.Core
 	{
 		public static int RecipesCount { get; private set; }
 
+		private static ModifierRecipes _instance; //TODO TEMP
+
 		private readonly ModifierIdManager _idManager;
 		private readonly IDictionary<string, IModifierRecipe> _recipes;
 		private readonly List<RegisterData> _registeredNames;
+		private readonly List<int> _instanceStackableIds;
 
 		private Func<IEffect[], int, IEffect> _eventEffectFunc;
 
 		public ModifierRecipes(ModifierIdManager idManager)
 		{
+			_instance = this;
+
 			_idManager = idManager;
 			_recipes = new Dictionary<string, IModifierRecipe>(64);
 			_registeredNames = new List<RegisterData>(16);
+			_instanceStackableIds = new List<int>(16);
 
 			SetupRecipes();
-			foreach (var modifier in _recipes.Values)
-				modifier.Finish();
+			foreach (var recipe in _recipes.Values)
+			{
+				if (recipe is ModifierRecipe modifierRecipe && modifierRecipe.IsInstanceStackable)
+					_instanceStackableIds.Add(modifierRecipe.Id);
+				recipe.Finish();
+			}
 
 			RecipesCount = _recipes.Count;
 #if DEBUG && !MODIBUFF_PROFILE
@@ -36,6 +46,8 @@ namespace ModiBuff.Core
 		///		Call this, and feed an event effect func factory to use the event recipes.
 		/// </summary>
 		protected void SetupEventEffect(Func<IEffect[], int, IEffect> eventEffectFunc) => _eventEffectFunc = eventEffectFunc;
+
+		public static bool IsInstanceStackable(int id) => _instance._instanceStackableIds.Contains(id);
 
 		public IModifierRecipe GetRecipe(string id) => _recipes[id];
 		internal IModifierRecipe GetRecipe(int id) => _recipes.Values.ElementAt(id);

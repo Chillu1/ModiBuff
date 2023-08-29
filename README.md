@@ -19,7 +19,6 @@
 - [When to use which library](#when-to-use-which-library)
 - [FAQ](#faq)
 - [Examples](#examples)
-- [Limitations](#limitations)
 
 # What is this?
 
@@ -74,41 +73,52 @@ Intel Core i7-4790 CPU 3.60GHz (Haswell), 1 CPU, 8 logical and 4 physical cores
  
 Preallocated Pools  
 N: 10_000
+Delta: 0.0167 * N
 
 #### Add/Apply/Update Modifier table
 
-| Library                                               | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Update DoT*<br/>(10_000 units, N:1) |
-|-------------------------------------------------------|--------------------------------|-------------------------------------|-------------------------------------|
-| ModiBuff (this)                                       | 0.32ms, 0 B                    | 0.64ms, 0 B                         | 1.18ms, 0 B                         |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 1.02ms, 0 GC                   | ?                                   | 0.44ms, 0 GC                        |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | 21.4ms, 24 GC                  | ?                                   | ?                                   |
+| Library                                               | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Apply Multi<br/>instance DoT |
+|-------------------------------------------------------|--------------------------------|-------------------------------------|------------------------------|
+| ModiBuff (this)                                       | 0.32ms, 0 B                    | 0.64ms, 0 B                         | 0.98ms, 0 B                  |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 1.02ms, 0 GC                   | ?                                   | X                            |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | 21.4ms, 24 GC                  | ?                                   | X                            |
+
+| Library                                               | Update DoT*<br/>(10_000 units, N:1) | Update Instance<br/>Stackable DoT |
+|-------------------------------------------------------|-------------------------------------|-----------------------------------|
+| ModiBuff (this)                                       | 1.09ms, 0 B                         | 0.11ms, 0 B                       |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 0.44ms, 0 B                         | X                                 |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                                   | X                                 |
 
 #### New Modifier/Pool table
 
-| Library                                               | New<br/>InitDmg | New<br/>DoT*  | DoT pool     | DoT pool<br/>reset return |
-|-------------------------------------------------------|-----------------|---------------|--------------|---------------------------|
-| ModiBuff (this)                                       | 1.40ms,  2 MB   | 3.5ms, 4.8 MB | 0.05ms, 0 GC | 0.20ms, 0 B               |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 10.4ms,  2 GC   | 16.7ms,  2 GC | 1.64ms, 0 GC | 4.26ms, 0 GC              |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | 92.0ms, 90 GC   | 140ms, 126 GC | X            | X                         |
+| Library                                               | DoT pool     | DoT pool<br/>reset return |
+|-------------------------------------------------------|--------------|---------------------------|
+| ModiBuff (this)                                       | 0.05ms, 0 GC | 0.20ms, 0 B               |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 1.64ms, 0 GC | 4.26ms, 0 GC              |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | X            | X                         |
 
 > Important: Non-pool ("New") benchmarks don't matter for ModiBuff and ModiBuffEcs, since it will only be slower when allocating the new
-> modifiers in the pools.
+> modifiers in the pools. Which if handled correctly, should only happen on initialization.
+
+| Library                                               | New<br/>InitDmg | New<br/>DoT*   |
+|-------------------------------------------------------|-----------------|----------------|
+| ModiBuff (this)                                       | 1.76ms, 2.4 MB  | 3.78ms, 5.5 MB |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 10.4ms,   2 GC  | 16.7ms,   2 GC |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | 92.0ms,  90 GC  | 140 ms, 126 GC |
+
+Setting up all recipes, with 64 pool allocation per recipe takes 0.06µs, and 104KB.
+
+Preallocating 1_000 modifiers of each recipe (currently 100±) takes 67ms, and 35MB.
 
 Pooling in ModiBuff is 430X faster than original old version (because of pool & reset)  
 But it's also much faster in cases of doing init/stack/refresh on an existing modifier (we don't create a new modifier anymore)  
 ModiBuffEcs is a bit on the slow side for now, because of how pooling works, with enabling and disabling entities.
 
-Mixed modifier = N of each. Ex. 100 instances * 58 recipes = 5_800 modifiers  
-5_000 mixed modifiers = 1MB  
-Modifier Recipes setup = 0.2ms  
-Preallocating 5_800 mixed modifiers = 7ms  
-So with 5_800 preallocated modifiers, the library will add 8ms to the game startup time.
-
 *DoT = InitDoTSeparateDamageRemove
 
 # Requirements
 
-ModiBuff is compatible with .NETStandard 1.1, C# 7.0
+ModiBuff is compatible with .NETStandard 1.1, C# 7.2 (C# 7.0 is possible by removing readonly from ModifierReference)
 
 For development net 6.0 is required to build and run all tests. The tests depend on NUnit, and benchmarks depend on BenchmarkDotNet.
 
@@ -619,10 +629,3 @@ AddEvent("AttackSelf_OnHit_Event", EffectOnEvent.WhenAttacked)
 
 [Simple solo](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Examples/SimpleSolo)
 example, of player unit fighting a single enemy unit
-
-# Limitations
-
-Currently the system is designed to max have **one** modifier instance type per Unit. In other words, an Unit can only store one InitDamage
-modifier instance.  
-This can be configured by using special containing logic in ModifierController, but then you'll need to keep track of all the instances, and
-init/stack/refresh them.

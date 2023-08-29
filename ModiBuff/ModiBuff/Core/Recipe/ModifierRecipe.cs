@@ -7,14 +7,16 @@ namespace ModiBuff.Core
 	/// <summary>
 	///		High level API for creating modifiers.
 	/// </summary>
-	public sealed class ModifierRecipe : IModifierApplyCheckRecipe, IComparable<ModifierRecipe>
+	public sealed class ModifierRecipe : IModifierApplyCheckRecipe, IEquatable<ModifierRecipe>, IComparable<ModifierRecipe>
 	{
 		public int Id { get; }
+		public int GenId { get; private set; }
 		public string Name { get; }
 		public bool HasApplyChecks { get; private set; }
 
 		public readonly ModifierIdManager IdManager; //TODO Refactor to make it private/not needed
 
+		public bool IsInstanceStackable { get; private set; }
 		private bool _isAura;
 
 		private bool _hasEffectChecks;
@@ -26,7 +28,7 @@ namespace ModiBuff.Core
 		private bool _intervalAffectedByStatusResistance;
 		private float _duration;
 
-		private EffectWrapper _removeEffectWrapper;
+		private EffectWrapper _removeEffectWrapper; //TODO Remove effect can come from other means than Remove function
 
 		private List<EffectWrapper> _effectWrappers;
 
@@ -102,6 +104,9 @@ namespace ModiBuff.Core
 			InitComponent initComponent = null;
 			IStackComponent stackComponent = null;
 
+			int genId = GenId++;
+			_removeEffectWrapper?.UpdateGenId(genId);
+
 			var creation = _modifierCreator.Create(_removeEffectWrapper);
 
 			IStateCheck[] stateChecks = null;
@@ -130,11 +135,17 @@ namespace ModiBuff.Core
 
 			_modifierCreator.Clear();
 
-			return new Modifier(Id, Name, initComponent, _timeComponents.Count == 0 ? null : _timeComponents.ToArray(), stackComponent,
-				effectCheck, _isAura ? (ITargetComponent)new MultiTargetComponent() : new SingleTargetComponent());
+			return new Modifier(Id, genId, Name, initComponent, _timeComponents.Count == 0 ? null : _timeComponents.ToArray(),
+				stackComponent, effectCheck, _isAura ? (ITargetComponent)new MultiTargetComponent() : new SingleTargetComponent());
 		}
 
 		//---Misc---
+
+		public ModifierRecipe InstanceStackable()
+		{
+			IsInstanceStackable = true;
+			return this;
+		}
 
 		public ModifierRecipe Aura()
 		{
@@ -390,9 +401,20 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public int CompareTo(ModifierRecipe other)
+		public int CompareTo(ModifierRecipe other) => Id.CompareTo(other.Id);
+
+		public bool Equals(ModifierRecipe other)
 		{
-			return Id.CompareTo(other.Id);
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
+			return Id == other.Id;
 		}
+
+		public override bool Equals(object obj)
+		{
+			return ReferenceEquals(this, obj) || obj is ModifierRecipe other && Equals(other);
+		}
+
+		public override int GetHashCode() => Id;
 	}
 }

@@ -10,6 +10,7 @@ namespace ModiBuff.Core
 	public sealed class ModifierEventRecipe : IModifierRecipe
 	{
 		public int Id { get; }
+		public int GenId { get; private set; }
 		public string Name { get; }
 
 		private readonly int _effectOnEvent;
@@ -69,7 +70,7 @@ namespace ModiBuff.Core
 				_effects[i].Reset();
 			_revertEffects.Clear();
 
-			return new Modifier(Id, Name, initComponent, timeComponents, null, null, new SingleTargetComponent());
+			return new Modifier(Id, GenId++, Name, initComponent, timeComponents, null, null, new SingleTargetComponent());
 		}
 
 		//---Actions---

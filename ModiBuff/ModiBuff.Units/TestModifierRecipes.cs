@@ -342,6 +342,22 @@ namespace ModiBuff.Core.Units
 						.SetMetaEffects(new LegalActionMetaEffect(2f, LegalAction.Act, false, Targeting.SourceTarget)),
 					EffectOn.Init);
 
+			Add("InstanceStackableDoT")
+				.InstanceStackable()
+				.Interval(1)
+				.Effect(new DamageEffect(5), EffectOn.Interval)
+				.Remove(5);
+
+			Add("InstanceStackableAddDamageRevertible")
+				.InstanceStackable()
+				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				.Remove(5);
+
+			Add("InstanceStackableDoTNoRemove")
+				.InstanceStackable()
+				.Interval(1)
+				.Effect(new DamageEffect(5), EffectOn.Interval);
+
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
 			//	.Effect(new StackEffectNew(StackEffectType.Add, new DamageEffect(5)), EffectOn.Interval)

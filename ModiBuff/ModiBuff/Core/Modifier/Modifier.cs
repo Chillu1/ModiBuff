@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -7,9 +8,10 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
-	public sealed class Modifier : IModifier
+	public sealed class Modifier : IModifier, IEquatable<Modifier>, IComparable<Modifier>
 	{
 		public int Id { get; }
+		public int GenId { get; }
 		public string Name { get; }
 
 		private readonly bool _refresh;
@@ -27,10 +29,11 @@ namespace ModiBuff.Core
 		private bool _isTargetSetup;
 		private bool _multiTarget;
 
-		public Modifier(int id, string name, InitComponent initComponent, ITimeComponent[] timeComponents, IStackComponent stackComponent,
-			ModifierCheck effectCheck, ITargetComponent targetComponent)
+		public Modifier(int id, int genId, string name, InitComponent initComponent, ITimeComponent[] timeComponents,
+			IStackComponent stackComponent, ModifierCheck effectCheck, ITargetComponent targetComponent)
 		{
 			Id = id;
+			GenId = genId;
 			Name = name;
 
 			_initComponent = initComponent;
@@ -174,6 +177,35 @@ namespace ModiBuff.Core
 			if (_stackComponent != null)
 				_stackComponent.ResetState();
 			_targetComponent.ResetState();
+		}
+
+		public bool Equals(Modifier other)
+		{
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
+			return Id == other.Id && GenId == other.GenId;
+		}
+
+		public override bool Equals(object obj)
+		{
+			return ReferenceEquals(this, obj) || obj is Modifier other && Equals(other);
+		}
+
+		public int CompareTo(Modifier other)
+		{
+			if (ReferenceEquals(this, other)) return 0;
+			if (ReferenceEquals(null, other)) return 1;
+			int idComparison = Id.CompareTo(other.Id);
+			if (idComparison != 0) return idComparison;
+			return GenId.CompareTo(other.GenId);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				return (Id * 397) ^ GenId;
+			}
 		}
 	}
 }

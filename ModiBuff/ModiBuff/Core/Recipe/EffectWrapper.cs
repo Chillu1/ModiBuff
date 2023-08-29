@@ -25,6 +25,16 @@ namespace ModiBuff.Core
 			return _effect;
 		}
 
+		public void UpdateGenId(int genId)
+		{
+			if (_effect is IRemoveEffect removeEffect)
+				removeEffect.SetGenId(genId);
+#if DEBUG && !MODIBUFF_PROFILE
+			else
+				Logger.LogWarning("EffectWrapper.UpdateGenId: Effect is not a RemoveEffect");
+#endif
+		}
+
 		public void Reset()
 		{
 			_effectClone = null;

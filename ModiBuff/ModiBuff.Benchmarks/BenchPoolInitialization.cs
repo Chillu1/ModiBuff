@@ -7,7 +7,7 @@ namespace ModiBuff.Tests
 	[MemoryDiagnoser]
 	public class BenchPoolInitialization
 	{
-		[Params(100, 500, 1000)]
+		[Params(100, 1000, 10000)]
 		public int AllocationCount;
 
 		private ModifierIdManager _modifierIdManager;
@@ -19,9 +19,8 @@ namespace ModiBuff.Tests
 		{
 			_modifierIdManager = new ModifierIdManager();
 			_recipes = new TestModifierRecipes(_modifierIdManager);
-			_pool = new ModifierPool(_recipes.GetRecipes(), AllocationCount);
 
-			Console.WriteLine("Allocated: " + ModifierRecipes.RecipesCount * AllocationCount + " modifiers");
+			Console.WriteLine("Allocated: " + ModifierRecipes.RecipesCount + " recipes, count: " + AllocationCount + " modifiers");
 		}
 
 		[Benchmark]
@@ -33,7 +32,7 @@ namespace ModiBuff.Tests
 		[IterationCleanup]
 		public void IterationCleanUp()
 		{
-			_modifierIdManager.Reset();
+			//_modifierIdManager.Reset();
 			_pool.Dispose();
 		}
 	}
