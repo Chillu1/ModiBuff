@@ -165,8 +165,7 @@ namespace ModiBuff.Core
 
 		public void Add(int id, IUnit target, IUnit source)
 		{
-			//TODO If refreshable & not instance stackable, refresh
-			//if (ModifierRecipes.Recipes[id].Refreshable)
+			if (!ModifierRecipes.IsInstanceStackable(id))
 			{
 				for (int i = 0; i < _modifiersTop; i++)
 				{
@@ -213,34 +212,32 @@ namespace ModiBuff.Core
 			_modifiersToRemove.Add(new ModifierReference(id, genId));
 		}
 
-		public void Remove(int id) => Remove(new ModifierReference(id, 0));
-
 		public void Remove(in ModifierReference modifierReference)
 		{
-			//if (ModifierRecipes.Recipes[id].Refreshable)
-			for (int i = 0; i < _modifiersTop; i++)
-			{
-				var modifier = _modifiers[i];
-				if (modifier.Id == modifierReference.Id)
+			if (!ModifierRecipes.IsInstanceStackable(modifierReference.Id))
+				for (int i = 0; i < _modifiersTop; i++)
 				{
-					ModifierPool.Instance.Return(modifier);
-					_modifiers[i] = _modifiers[--_modifiersTop];
-					_modifiers[_modifiersTop] = null;
-					break;
+					var modifier = _modifiers[i];
+					if (modifier.Id == modifierReference.Id)
+					{
+						ModifierPool.Instance.Return(modifier);
+						_modifiers[i] = _modifiers[--_modifiersTop];
+						_modifiers[_modifiersTop] = null;
+						break;
+					}
 				}
-			}
-			//else
-			// for (int i = 0; i < _modifiersTop; i++)
-			// {
-			// 	var modifier = _modifiers[i];
-			// 	if (modifier.Id == modifierReference.Id && modifier.GenId == modifierReference.GenId)
-			// 	{
-			// 		ModifierPool.Instance.Return(modifier);
-			// 		_modifiers[i] = _modifiers[--_modifiersTop];
-			// 		_modifiers[_modifiersTop] = null;
-			// 		break;
-			// 	}
-			// }
+			else
+				for (int i = 0; i < _modifiersTop; i++)
+				{
+					var modifier = _modifiers[i];
+					if (modifier.Id == modifierReference.Id && modifier.GenId == modifierReference.GenId)
+					{
+						ModifierPool.Instance.Return(modifier);
+						_modifiers[i] = _modifiers[--_modifiersTop];
+						_modifiers[_modifiersTop] = null;
+						break;
+					}
+				}
 		}
 
 		/// <summary>

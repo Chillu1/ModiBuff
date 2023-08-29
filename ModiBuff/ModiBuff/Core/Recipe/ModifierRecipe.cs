@@ -16,6 +16,7 @@ namespace ModiBuff.Core
 
 		public readonly ModifierIdManager IdManager; //TODO Refactor to make it private/not needed
 
+		public bool IsInstanceStackable { get; private set; }
 		private bool _isAura;
 
 		private bool _hasEffectChecks;
@@ -27,7 +28,7 @@ namespace ModiBuff.Core
 		private bool _intervalAffectedByStatusResistance;
 		private float _duration;
 
-		private EffectWrapper _removeEffectWrapper;
+		private EffectWrapper _removeEffectWrapper; //TODO Remove effect can come from other means than Remove function
 
 		private List<EffectWrapper> _effectWrappers;
 
@@ -103,6 +104,9 @@ namespace ModiBuff.Core
 			InitComponent initComponent = null;
 			IStackComponent stackComponent = null;
 
+			int genId = GenId++;
+			_removeEffectWrapper?.UpdateGenId(genId);
+
 			var creation = _modifierCreator.Create(_removeEffectWrapper);
 
 			IStateCheck[] stateChecks = null;
@@ -131,13 +135,17 @@ namespace ModiBuff.Core
 
 			_modifierCreator.Clear();
 
-			int genId = GenId++;
-
 			return new Modifier(Id, genId, Name, initComponent, _timeComponents.Count == 0 ? null : _timeComponents.ToArray(),
 				stackComponent, effectCheck, _isAura ? (ITargetComponent)new MultiTargetComponent() : new SingleTargetComponent());
 		}
 
 		//---Misc---
+
+		public ModifierRecipe InstanceStackable()
+		{
+			IsInstanceStackable = true;
+			return this;
+		}
 
 		public ModifierRecipe Aura()
 		{

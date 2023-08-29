@@ -170,7 +170,7 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("OneTimeInitDamage"); //Init
 			Unit.AddModifierSelf("OneTimeInitDamage"); //No init
 
-			Unit.ModifierController.Remove(recipeId); //Remove, back to pool, reset state
+			Unit.ModifierController.Remove(new ModifierReference(recipeId, 0)); //Remove, back to pool, reset state
 
 			Unit.AddModifierSelf("OneTimeInitDamage"); //Use again, init
 

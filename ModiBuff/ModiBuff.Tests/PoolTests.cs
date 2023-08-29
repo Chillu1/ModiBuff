@@ -40,7 +40,7 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health); //2 stacks = +4 damage == 4
 
-			Unit.ModifierController.Remove(IdManager.GetId("StackBasedDamage")); //Return to pool
+			Unit.ModifierController.Remove(new ModifierReference(IdManager.GetId("StackBasedDamage"), 0)); //Return to pool
 
 			Enemy.AddModifierSelf("StackBasedDamage"); //State should be reset
 			Assert.AreEqual(EnemyHealth - 5 - 2, Enemy.Health);
