@@ -7,7 +7,7 @@ namespace ModiBuff.Tests
 	[MemoryDiagnoser]
 	public class BenchPoolInitialization
 	{
-		[Params(100, 500, 1000)]
+		[Params(100, 1000, 10000)]
 		public int AllocationCount;
 
 		private ModifierIdManager _modifierIdManager;
@@ -27,6 +27,7 @@ namespace ModiBuff.Tests
 		[Benchmark]
 		public void BenchAllocatePool()
 		{
+			//TODO This bench seems faulty
 			_pool = new ModifierPool(_recipes.GetRecipes(), AllocationCount);
 		}
 

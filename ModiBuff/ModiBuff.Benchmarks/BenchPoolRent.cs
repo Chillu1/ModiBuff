@@ -30,7 +30,7 @@ namespace ModiBuff.Tests
 			Pool.Allocate(_initDoTSeparateDamageRemoveRecipe.Id, Iterations);
 		}
 
-		[Benchmark(OperationsPerInvoke = 1)]
+		[Benchmark(OperationsPerInvoke = Iterations)]
 		public void BenchPooledMediumModifierFromRecipe()
 		{
 			for (int i = 0; i < Iterations; i++)
