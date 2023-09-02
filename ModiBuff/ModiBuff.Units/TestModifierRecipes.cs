@@ -10,6 +10,8 @@ namespace ModiBuff.Core.Units
 		{
 			SetupEventEffect((effects, effectOnEvent) => new EventEffect(effects, (EffectOnEvent)effectOnEvent));
 
+			Add("NoOpFlag");
+
 			//For now recipes only supports one interval, one duration.
 			Add("InitDoT")
 				.Interval(1)
@@ -358,6 +360,28 @@ namespace ModiBuff.Core.Units
 				.Interval(1)
 				.Effect(new DamageEffect(5), EffectOn.Interval);
 
+			{
+				Register("AddModifierApplierInterval", "AddModifierApplier_Flag");
+
+				Add("AddModifierApplierInterval")
+					.Effect(new ApplierEffect("AddModifierApplier_Flag"), EffectOn.Interval)
+					.Interval(1);
+
+				Add("AddModifierApplier_Flag");
+			}
+
+			{
+				Register("AddModifierApplierIntervalApplier", "AddModifierApplierDamage");
+
+				Add("AddModifierApplierIntervalApplier")
+					.Effect(new ApplierEffect("AddModifierApplierDamage"), EffectOn.Interval)
+					.Interval(1);
+
+				Add("AddModifierApplierDamage")
+					.Effect(new DamageEffect(5), EffectOn.Interval)
+					.Interval(0.1f);
+			}
+
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
 			//	.Effect(new StackEffectNew(StackEffectType.Add, new DamageEffect(5)), EffectOn.Interval)
@@ -453,6 +477,9 @@ namespace ModiBuff.Core.Units
 					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
 					.Remove(10).Refresh();
 			}
+
+			AddEvent("InitDamageSelf_BeforeAttack_Event", EffectOnEvent.BeforeAttack)
+				.Effect(new DamageEffect(5), Targeting.SourceSource);
 		}
 
 		private void NonTestRecipes()

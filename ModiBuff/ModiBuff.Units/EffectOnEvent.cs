@@ -15,6 +15,7 @@ namespace ModiBuff.Core.Units
 		WhenHealed,
 
 		//When you're the source/acter of X
+		BeforeAttack,
 		OnAttack,
 
 		//OnEvade,

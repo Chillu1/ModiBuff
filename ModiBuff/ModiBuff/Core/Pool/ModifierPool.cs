@@ -15,6 +15,10 @@ namespace ModiBuff.Core
 		private readonly IModifierRecipe[] _recipes;
 		private readonly IModifierApplyCheckRecipe[] _applyCheckRecipes;
 
+#if DEBUG && !MODIBUFF_PROFILE
+		private readonly int[] _maxModifiersCreated;
+#endif
+
 		public ModifierPool(IModifierRecipe[] recipes)
 		{
 			if (Instance != null)
@@ -31,15 +35,26 @@ namespace ModiBuff.Core
 			_recipes = new IModifierRecipe[recipes.Length];
 			_applyCheckRecipes = new IModifierApplyCheckRecipe[recipes.Length];
 
+#if DEBUG && !MODIBUFF_PROFILE
+			_maxModifiersCreated = new int[recipes.Length];
+#endif
+
 			foreach (var recipe in recipes)
 			{
-				_pools[recipe.Id] = new Modifier[initialSize];
+				if (Config.ModifierAllocationsCount.TryGetValue(recipe.Name, out int count))
+					_pools[recipe.Id] = new Modifier[count];
+				else
+					_pools[recipe.Id] = new Modifier[initialSize];
 				_recipes[recipe.Id] = recipe;
 
 				if (recipe is IModifierApplyCheckRecipe applyCheckRecipe)
 				{
+					if (Config.ModifierAllocationsCount.TryGetValue(applyCheckRecipe.Name, out int applyCount))
+						_checkPools[recipe.Id] = new ModifierCheck[applyCount];
+					else
+						_checkPools[recipe.Id] = new ModifierCheck[initialSize];
 					_applyCheckRecipes[recipe.Id] = applyCheckRecipe;
-					_checkPools[recipe.Id] = new ModifierCheck[initialSize];
+
 					AllocateDoubleChecks(recipe.Id);
 				}
 
@@ -51,6 +66,11 @@ namespace ModiBuff.Core
 			Array.Sort(_recipes, (x, y) => x.Id.CompareTo(y.Id));
 			//Array.Sort(_checkPools, (x, y) => x[0].Id.CompareTo(y[0].Id));
 			//Array.Sort(_checkPoolTops, (x, y) => x.CompareTo(y));
+
+#if DEBUG && !MODIBUFF_PROFILE
+			for (int i = 0; i < _maxModifiersCreated.Length; i++)
+				_maxModifiersCreated[i] = _pools[i].Length;
+#endif
 		}
 
 		internal void SetMaxPoolSize(int size)
@@ -101,6 +121,11 @@ namespace ModiBuff.Core
 
 			if (_poolTops[id] > MaxPoolSize)
 				throw new Exception($"Modifier pool for {recipe.Name} is over the max pool size of {MaxPoolSize}.");
+
+#if DEBUG && !MODIBUFF_PROFILE
+			if (_pools[id].Length > _maxModifiersCreated[id])
+				_maxModifiersCreated[id] = _pools[id].Length;
+#endif
 		}
 
 		/// <summary>
@@ -119,6 +144,11 @@ namespace ModiBuff.Core
 
 			if (_poolTops[id] > MaxPoolSize)
 				throw new Exception($"Modifier pool for {recipe.Name} is over the max pool size of {MaxPoolSize}.");
+
+#if DEBUG && !MODIBUFF_PROFILE
+			if (_pools[id].Length > _maxModifiersCreated[id])
+				_maxModifiersCreated[id] = _pools[id].Length;
+#endif
 		}
 
 		internal void AllocateDoubleChecks(int id)
@@ -172,6 +202,18 @@ namespace ModiBuff.Core
 
 			_checkPools[check.Id][_checkPoolTops[check.Id]++] = check;
 		}
+
+#if DEBUG && !MODIBUFF_PROFILE
+		public void PrintMaxModifiersCreated()
+		{
+			//Print out max modifier sorted by biggest pool
+			int[] maxModifiersCreated = new int[_recipes.Length];
+			Array.Copy(_maxModifiersCreated, maxModifiersCreated, _recipes.Length);
+			Array.Sort(maxModifiersCreated, (x, y) => y.CompareTo(x));
+			for (int i = 0; i < maxModifiersCreated.Length; i++)
+				Logger.Log($"{_recipes[i].Name}: {maxModifiersCreated[i]}");
+		}
+#endif
 
 		internal void Clear()
 		{

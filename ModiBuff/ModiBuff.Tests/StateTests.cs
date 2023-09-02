@@ -186,5 +186,19 @@ namespace ModiBuff.Tests
 			Enemy.AddModifierSelf("InitDamage_Cooldown_Effect");
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
+
+		[Test]
+		public void NoUpdateOnSameUpdateTick()
+		{
+			Unit.AddModifierSelf("AddModifierApplierIntervalApplier");
+
+			Unit.Update(1); //Modifier should be added, but not updated
+
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.Update(0.1f);
+
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
 	}
 }

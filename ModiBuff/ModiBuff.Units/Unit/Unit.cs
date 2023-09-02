@@ -15,7 +15,7 @@ namespace ModiBuff.Core.Units
 
 	//Or the manual generic one:
 	public class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float, float, float, float>,
-		IHealable<float, float>, IHealer<float, float>, IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>,
+		IHealable<float, float>, IHealer<float, float>, IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker,
 		IEventOwner<EffectOnEvent>, IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
 		IStatusEffectModifierOwner<LegalAction, StatusEffectType>
 	{
@@ -35,7 +35,7 @@ namespace ModiBuff.Core.Units
 		//Note: These event lists should only be used for classic effects.
 		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
 		private List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
-		private List<IEffect> _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
+		private List<IEffect> _beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
 
 		private List<IUnit> _targetsInRange;
 		private List<Modifier> _auraModifiers;
@@ -55,6 +55,7 @@ namespace ModiBuff.Core.Units
 			_whenCastEffects = new List<IEffect>();
 			_whenDeathEffects = new List<IEffect>();
 			_whenHealedEffects = new List<IEffect>();
+			_beforeAttackEffects = new List<IEffect>();
 			_onAttackEffects = new List<IEffect>();
 			_onCastEffects = new List<IEffect>();
 			_onKillEffects = new List<IEffect>();
@@ -80,6 +81,19 @@ namespace ModiBuff.Core.Units
 			ModifierController.Update(deltaTime);
 			for (int i = 0; i < _auraModifiers.Count; i++)
 				_auraModifiers[i].Update(deltaTime);
+		}
+
+		/// <summary>
+		///		Should be called before we attack/on attack. For modifiers like split shot that we want to trigger when starting an attack.
+		/// </summary>
+		public void PreAttack(IUnit target, bool triggersEvents = true)
+		{
+			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
+				return;
+
+			if (triggersEvents)
+				for (int i = 0; i < _beforeAttackEffects.Count; i++)
+					_beforeAttackEffects[i].Effect(target, this);
 		}
 
 		public float Attack(IUnit target, bool triggersEvents = true)
@@ -198,6 +212,9 @@ namespace ModiBuff.Core.Units
 				case EffectOnEvent.WhenHealed:
 					_whenHealedEffects.Add(effect);
 					break;
+				case EffectOnEvent.BeforeAttack:
+					_beforeAttackEffects.Add(effect);
+					break;
 				case EffectOnEvent.OnAttack:
 					_onAttackEffects.Add(effect);
 					break;
@@ -233,6 +250,9 @@ namespace ModiBuff.Core.Units
 					break;
 				case EffectOnEvent.WhenHealed:
 					Remove(_whenHealedEffects, effect);
+					break;
+				case EffectOnEvent.BeforeAttack:
+					Remove(_beforeAttackEffects, effect);
 					break;
 				case EffectOnEvent.OnAttack:
 					Remove(_onAttackEffects, effect);

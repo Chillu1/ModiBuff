@@ -17,6 +17,11 @@ namespace ModiBuff.Core
 			return unit.ModifierController.Contains(ModifierIdManager.GetIdOld(name));
 		}
 
+		internal static bool ContainsApplier(this IModifierOwner unit, string name)
+		{
+			return unit.ModifierController.ContainsApplier(ModifierIdManager.GetIdOld(name));
+		}
+
 		internal static bool AddApplierModifier(this IModifierOwner unit, IModifierRecipe recipe, ApplierType applierType)
 		{
 			return unit.ModifierController.TryAddApplier(recipe.Id, ((IModifierApplyCheckRecipe)recipe).HasApplyChecks, applierType);

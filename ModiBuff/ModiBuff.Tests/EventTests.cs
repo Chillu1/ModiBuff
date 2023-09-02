@@ -137,5 +137,16 @@ namespace ModiBuff.Tests
 			Unit.Attack(Enemy);
 			Assert.AreEqual(UnitHealth - EnemyDamage - 5, Unit.Health);
 		}
+
+
+		[Test]
+		public void SelfDamage_PreAttack()
+		{
+			Unit.AddModifierSelf("InitDamageSelf_BeforeAttack_Event");
+
+			Unit.PreAttack(Enemy);
+
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
 	}
 }

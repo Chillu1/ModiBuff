@@ -157,5 +157,22 @@ namespace ModiBuff.Tests
 
 			Logger.SetLogger<NUnitLogger>();
 		}
+
+		[Test]
+		public void ApplyNewModifierOnIteration() //Checks that our collection is not modified during iteration
+		{
+			Config.ModifierArraySize = 1;
+			var unit = new Unit();
+
+			unit.AddModifierSelf("AddModifierApplierInterval");
+
+			Assert.False(unit.ContainsModifier("AddModifierApplier_Flag"));
+
+			unit.Update(1); //Adding modifier, forced resize
+
+			Assert.True(unit.ContainsModifier("AddModifierApplier_Flag"));
+
+			Config.Reset();
+		}
 	}
 }

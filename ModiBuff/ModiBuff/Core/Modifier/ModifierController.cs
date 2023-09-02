@@ -41,7 +41,8 @@ namespace ModiBuff.Core
 
 		public void Update(float delta)
 		{
-			for (int i = 0; i < _modifiersTop; i++)
+			int modifiersTop = _modifiersTop;
+			for (int i = 0; i < modifiersTop; i++)
 				_modifiers[i].Update(delta);
 
 			if (_modifierCastChecksAppliers.Count > 0)
@@ -231,7 +232,7 @@ namespace ModiBuff.Core
 					if (modifier.Id == modifierReference.Id && modifier.GenId == modifierReference.GenId)
 					{
 						ModifierPool.Instance.Return(modifier);
-						_modifiers[i] = _modifiers[--_modifiersTop];
+						_modifiers[i] = _modifiers[--_modifiersTop]; //TODO This switching might cause some order issues
 						_modifiers[_modifiersTop] = null;
 						break;
 					}
