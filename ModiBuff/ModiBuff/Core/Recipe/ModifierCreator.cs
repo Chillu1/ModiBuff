@@ -64,7 +64,7 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _effectWrappers.Count; i++)
 				_effectWrappers[i].Reset();
 
-			return new ModifierCreation(_revertList, _initEffects, _intervalEffects, _durationEffects, _stackEffects);
+			return new ModifierCreation(_initEffects, _intervalEffects, _durationEffects, _stackEffects);
 		}
 
 		public void Clear()
@@ -79,22 +79,22 @@ namespace ModiBuff.Core
 
 	public struct ModifierCreation
 	{
-		public List<IRevertEffect> revertList;
+		//public List<IRevertEffect> revertList;
 
-		public List<IEffect> initEffects;
-		public List<IEffect> intervalEffects;
-		public List<IEffect> durationEffects;
-		public List<IStackEffect> stackEffects;
+		public readonly List<IEffect> InitEffects;
+		public readonly List<IEffect> IntervalEffects;
+		public readonly List<IEffect> DurationEffects;
+		public readonly List<IStackEffect> StackEffects;
 
-		public ModifierCreation(List<IRevertEffect> revertList, List<IEffect> initEffects, List<IEffect> intervalEffects,
-			List<IEffect> durationEffects, List<IStackEffect> stackEffects)
+		public ModifierCreation(List<IEffect> initEffects, List<IEffect> intervalEffects, List<IEffect> durationEffects,
+			List<IStackEffect> stackEffects)
 		{
-			this.revertList = revertList;
+			//this.revertList = revertList;
 
-			this.initEffects = initEffects;
-			this.intervalEffects = intervalEffects;
-			this.durationEffects = durationEffects;
-			this.stackEffects = stackEffects;
+			InitEffects = initEffects;
+			IntervalEffects = intervalEffects;
+			DurationEffects = durationEffects;
+			StackEffects = stackEffects;
 		}
 	}
 }

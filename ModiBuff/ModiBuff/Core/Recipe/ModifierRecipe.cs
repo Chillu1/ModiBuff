@@ -122,16 +122,16 @@ namespace ModiBuff.Core
 				effectCheck = new ModifierCheck(Id, _effectFuncChecks, _updatableEffectChecks, _noUnitEffectChecks, _unitEffectChecks,
 					_usableEffectChecks, stateChecks);
 
-			if (creation.initEffects.Count > 0)
-				initComponent = new InitComponent(_oneTimeInit, creation.initEffects.ToArray(), effectCheck);
-			if (creation.intervalEffects.Count > 0)
-				_timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, creation.intervalEffects.ToArray(), effectCheck,
+			if (creation.InitEffects.Count > 0)
+				initComponent = new InitComponent(_oneTimeInit, creation.InitEffects.ToArray(), effectCheck);
+			if (creation.IntervalEffects.Count > 0)
+				_timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, creation.IntervalEffects.ToArray(), effectCheck,
 					_intervalAffectedByStatusResistance));
-			if (creation.durationEffects.Count > 0)
-				_timeComponents.Add(new DurationComponent(_duration, _refreshDuration, creation.durationEffects.ToArray()));
-			if (creation.stackEffects.Count > 0)
+			if (creation.DurationEffects.Count > 0)
+				_timeComponents.Add(new DurationComponent(_duration, _refreshDuration, creation.DurationEffects.ToArray()));
+			if (creation.StackEffects.Count > 0)
 				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _everyXStacks,
-					creation.stackEffects.Cast<IStackEffect>().ToArray(), effectCheck);
+					creation.StackEffects.ToArray(), effectCheck);
 
 			_modifierCreator.Clear();
 
