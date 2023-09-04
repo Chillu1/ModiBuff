@@ -1,6 +1,6 @@
 namespace ModiBuff.Core.Units
 {
-	public interface IAttacker<TDamage, TDamageReturnInfo>
+	public interface IAttacker<out TDamage, out TDamageReturnInfo>
 	{
 		TDamage Damage { get; }
 

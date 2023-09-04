@@ -1,6 +1,6 @@
 namespace ModiBuff.Core.Units
 {
-	public interface IHealthCost<THealth>
+	public interface IHealthCost<in THealth>
 	{
 		void UseHealth(THealth value);
 	}

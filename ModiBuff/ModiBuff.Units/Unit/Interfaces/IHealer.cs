@@ -2,7 +2,7 @@ using System;
 
 namespace ModiBuff.Core.Units
 {
-	public interface IHealer<THealth, TReturnHealthInfo> where THealth : IComparable<THealth>
+	public interface IHealer<out THealth, TReturnHealthInfo> where THealth : IComparable<THealth>
 	{
 		THealth HealValue { get; }
 
