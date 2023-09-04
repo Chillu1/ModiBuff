@@ -1,8 +1,12 @@
+using System;
+using System.Linq;
+
 namespace ModiBuff.Core.Units
 {
 	public static class StatusEffectTypeHelper
 	{
-		public static LegalAction[][] LegalActions;
+		public static readonly LegalAction[][] LegalActions;
+		public static readonly int[] LegalActionToIndex;
 
 		static StatusEffectTypeHelper()
 		{
@@ -49,6 +53,10 @@ namespace ModiBuff.Core.Units
 				LegalAction.Prioritize, LegalAction.Think
 			};
 			LegalActions[(int)StatusEffectType.Confuse] = confuseLegalAction;
+
+			LegalActionToIndex = new int[(int)Enum.GetValues(typeof(LegalAction)).Cast<LegalAction>().Max() + 1];
+			for (int i = 0; i < LegalActionToIndex.Length; i++)
+				LegalActionToIndex[i] = (int)Utilities.Utilities.FastLog2(i);
 		}
 	}
 }

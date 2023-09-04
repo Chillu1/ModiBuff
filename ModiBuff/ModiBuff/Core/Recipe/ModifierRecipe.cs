@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ModiBuff.Core
 {
@@ -121,17 +120,17 @@ namespace ModiBuff.Core
 					_usableEffectChecks, stateChecks);
 
 			if (creation.InitEffects.Length > 0)
-				initComponent = new InitComponent(_oneTimeInit, creation.InitEffects.ToArray(), effectCheck);
+				initComponent = new InitComponent(_oneTimeInit, creation.InitEffects, effectCheck);
 			if (creation.IntervalEffects.Length > 0)
-				_timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, creation.IntervalEffects.ToArray(), effectCheck,
+				_timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, creation.IntervalEffects, effectCheck,
 					_intervalAffectedByStatusResistance));
 			if (creation.DurationEffects.Length > 0)
-				_timeComponents.Add(new DurationComponent(_duration, _refreshDuration, creation.DurationEffects.ToArray()));
+				_timeComponents.Add(new DurationComponent(_duration, _refreshDuration, creation.DurationEffects));
 			if (creation.StackEffects.Length > 0)
-				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _everyXStacks,
-					creation.StackEffects.ToArray(), effectCheck);
+				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _everyXStacks, creation.StackEffects,
+					effectCheck);
 
-			_modifierCreator.Clear();
+			_modifierCreator.Reset();
 
 			return new Modifier(Id, genId, Name, initComponent, _timeComponents.Count == 0 ? null : _timeComponents.ToArray(),
 				stackComponent, effectCheck, _isAura ? (ITargetComponent)new MultiTargetComponent() : new SingleTargetComponent());

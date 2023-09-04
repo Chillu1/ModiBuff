@@ -115,7 +115,7 @@ namespace ModiBuff.Core
 			return new ModifierCreation(_initEffectsArray, _intervalEffectsArray, _durationEffectsArray, _stackEffectsArray);
 		}
 
-		public void Clear()
+		public void Reset()
 		{
 			_revertListIndex = 0;
 			_initEffectsIndex = 0;
@@ -125,7 +125,7 @@ namespace ModiBuff.Core
 		}
 	}
 
-	public struct ModifierCreation
+	public readonly struct ModifierCreation
 	{
 		public readonly IEffect[] InitEffects;
 		public readonly IEffect[] IntervalEffects;
@@ -134,10 +134,14 @@ namespace ModiBuff.Core
 
 		public ModifierCreation(IEffect[] initEffects, IEffect[] intervalEffects, IEffect[] durationEffects, IStackEffect[] stackEffects)
 		{
-			InitEffects = initEffects;
-			IntervalEffects = intervalEffects;
-			DurationEffects = durationEffects;
-			StackEffects = stackEffects;
+			InitEffects = new IEffect[initEffects.Length];
+			Array.Copy(initEffects, InitEffects, initEffects.Length);
+			IntervalEffects = new IEffect[intervalEffects.Length];
+			Array.Copy(intervalEffects, IntervalEffects, intervalEffects.Length);
+			DurationEffects = new IEffect[durationEffects.Length];
+			Array.Copy(durationEffects, DurationEffects, durationEffects.Length);
+			StackEffects = new IStackEffect[stackEffects.Length];
+			Array.Copy(stackEffects, StackEffects, stackEffects.Length);
 		}
 	}
 }

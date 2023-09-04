@@ -59,12 +59,13 @@ namespace ModiBuff.Core.Units
 			LegalAction[] legalActions = StatusEffectTypeHelper.LegalActions[(int)statusEffectType];
 			for (int i = 0; i < legalActions.Length; i++)
 			{
-				long legalActionIndex = Utilities.Utilities.FastLog2((double)legalActions[i]);
+				var legalAction = legalActions[i];
+				long legalActionIndex = StatusEffectTypeHelper.LegalActionToIndex[(int)legalAction];
 				if (_legalActionTimers[legalActionIndex] >= duration)
 					continue;
 
 				_legalActionTimers[legalActionIndex] = duration;
-				_legalActions &= ~legalActions[i];
+				_legalActions &= ~legalAction;
 			}
 		}
 
@@ -73,7 +74,8 @@ namespace ModiBuff.Core.Units
 			LegalAction[] legalActions = StatusEffectTypeHelper.LegalActions[(int)statusEffectType];
 			for (int i = 0; i < legalActions.Length; i++)
 			{
-				long legalActionIndex = Utilities.Utilities.FastLog2((double)legalActions[i]);
+				var legalAction = legalActions[i];
+				long legalActionIndex = StatusEffectTypeHelper.LegalActionToIndex[(int)legalAction];
 				float currentDuration = _legalActionTimers[legalActionIndex];
 				if (currentDuration <= 0)
 					continue;
@@ -82,7 +84,7 @@ namespace ModiBuff.Core.Units
 				if (currentDuration <= 0)
 				{
 					_legalActionTimers[legalActionIndex] = 0;
-					_legalActions |= legalActions[i];
+					_legalActions |= legalAction;
 				}
 				else
 				{

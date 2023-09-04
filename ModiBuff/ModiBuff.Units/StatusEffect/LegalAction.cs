@@ -33,7 +33,7 @@ namespace ModiBuff.Core.Units
 
 	public static class LegalActionHelper
 	{
-		public static int BaseCount => Enum.GetValues(typeof(LegalAction)).Cast<LegalAction>()
-			.Where(x => Utilities.Utilities.IsPowerOfTwo((int)x)).Count();
+		public static int BaseCount =>
+			Enum.GetValues(typeof(LegalAction)).Cast<LegalAction>().Count(x => Utilities.Utilities.IsPowerOfTwo((int)x));
 	}
 }

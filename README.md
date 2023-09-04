@@ -102,7 +102,7 @@ Delta: 0.0167 * N
 
 | Library                                               | New<br/>InitDmg | New<br/>DoT*   |
 |-------------------------------------------------------|-----------------|----------------|
-| ModiBuff (this)                                       | 1.76ms, 2.4 MB  | 3.78ms, 5.5 MB |
+| ModiBuff (this)                                       | 1.69ms, 3.1 MB  | 3.51ms, 6.0 MB |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 10.4ms,   2 GC  | 16.7ms,   2 GC |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | 92.0ms,  90 GC  | 140 ms, 126 GC |
 
