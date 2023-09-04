@@ -105,9 +105,7 @@ namespace ModiBuff.Core
 			IStackComponent stackComponent = null;
 
 			int genId = GenId++;
-			_removeEffectWrapper?.UpdateGenId(genId);
-
-			var creation = _modifierCreator.Create(_removeEffectWrapper);
+			var creation = _modifierCreator.Create(genId);
 
 			IStateCheck[] stateChecks = null;
 			if (_hasStateEffectChecks)
@@ -122,14 +120,14 @@ namespace ModiBuff.Core
 				effectCheck = new ModifierCheck(Id, _effectFuncChecks, _updatableEffectChecks, _noUnitEffectChecks, _unitEffectChecks,
 					_usableEffectChecks, stateChecks);
 
-			if (creation.InitEffects.Count > 0)
+			if (creation.InitEffects.Length > 0)
 				initComponent = new InitComponent(_oneTimeInit, creation.InitEffects.ToArray(), effectCheck);
-			if (creation.IntervalEffects.Count > 0)
+			if (creation.IntervalEffects.Length > 0)
 				_timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, creation.IntervalEffects.ToArray(), effectCheck,
 					_intervalAffectedByStatusResistance));
-			if (creation.DurationEffects.Count > 0)
+			if (creation.DurationEffects.Length > 0)
 				_timeComponents.Add(new DurationComponent(_duration, _refreshDuration, creation.DurationEffects.ToArray()));
-			if (creation.StackEffects.Count > 0)
+			if (creation.StackEffects.Length > 0)
 				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _everyXStacks,
 					creation.StackEffects.ToArray(), effectCheck);
 
@@ -330,7 +328,7 @@ namespace ModiBuff.Core
 #endif
 
 			_timeComponents = new List<ITimeComponent>(2);
-			_modifierCreator = new ModifierCreator(_effectWrappers);
+			_modifierCreator = new ModifierCreator(_effectWrappers, _removeEffectWrapper);
 
 			if (HasApplyChecks)
 			{

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace ModiBuff.Core
@@ -7,90 +8,132 @@ namespace ModiBuff.Core
 	/// </summary>
 	public sealed class ModifierCreator
 	{
-		private readonly List<EffectWrapper> _effectWrappers;
-		private readonly List<IRevertEffect> _revertList;
-		private readonly List<IEffect> _initEffects;
-		private readonly List<IEffect> _intervalEffects;
-		private readonly List<IEffect> _durationEffects;
-		private readonly List<IStackEffect> _stackEffects;
+		private readonly EffectWrapper[] _effectWrappersArray;
+		private readonly EffectWrapper _removeEffectWrapper;
 
-		public ModifierCreator(List<EffectWrapper> effectWrappers)
+		private readonly IRevertEffect[] _revertListArray;
+		private readonly IEffect[] _initEffectsArray;
+		private readonly IEffect[] _intervalEffectsArray;
+		private readonly IEffect[] _durationEffectsArray;
+		private readonly IStackEffect[] _stackEffectsArray;
+
+		private int _revertListIndex, _initEffectsIndex, _intervalEffectsIndex, _durationEffectsIndex, _stackEffectsIndex;
+
+		public ModifierCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper)
 		{
-			_effectWrappers = effectWrappers;
+			_effectWrappersArray = effectWrappers.ToArray();
+			_removeEffectWrapper = removeEffectWrapper;
 
-			_revertList = new List<IRevertEffect>();
-
-			_initEffects = new List<IEffect>();
-			_intervalEffects = new List<IEffect>();
-			_durationEffects = new List<IEffect>();
-			_stackEffects = new List<IStackEffect>();
+			SetupArrays(out int initEffectsCount, out int intervalEffectsCount, out int durationEffectsCount,
+				out int stackEffectsCount, out int revertListCount);
+			_revertListArray = new IRevertEffect[revertListCount];
+			_initEffectsArray = new IEffect[initEffectsCount];
+			_intervalEffectsArray = new IEffect[intervalEffectsCount];
+			_durationEffectsArray = new IEffect[durationEffectsCount];
+			_stackEffectsArray = new IStackEffect[stackEffectsCount];
 		}
 
-		public ModifierCreation Create(EffectWrapper removeEffectWrapper)
+		private void SetupArrays(out int initEffectsCount, out int intervalEffectsCount, out int durationEffectsCount,
+			out int stackEffectsCount, out int revertEffectsCount)
 		{
-			if (removeEffectWrapper != null)
+			initEffectsCount = 0;
+			intervalEffectsCount = 0;
+			durationEffectsCount = 0;
+			stackEffectsCount = 0;
+			revertEffectsCount = 0;
+
+			if (_removeEffectWrapper != null)
 			{
-				if ((removeEffectWrapper.EffectOn & EffectOn.Init) != 0) //Probably never a thing, but added just in case
-					_initEffects.Add(removeEffectWrapper.GetEffect());
-				if ((removeEffectWrapper.EffectOn & EffectOn.Interval) != 0)
-					_intervalEffects.Add(removeEffectWrapper.GetEffect());
-				if ((removeEffectWrapper.EffectOn & EffectOn.Duration) != 0)
-					_durationEffects.Add(removeEffectWrapper.GetEffect());
+				if ((_removeEffectWrapper.EffectOn & EffectOn.Init) != 0) //Probably never a thing, but added just in case
+					initEffectsCount++;
+				if ((_removeEffectWrapper.EffectOn & EffectOn.Interval) != 0)
+					intervalEffectsCount++;
+				if ((_removeEffectWrapper.EffectOn & EffectOn.Duration) != 0)
+					durationEffectsCount++;
 			}
 
-			for (int i = 0; i < _effectWrappers.Count; i++)
+			for (int i = 0; i < _effectWrappersArray.Length; i++)
 			{
-				var effectWrapper = _effectWrappers[i];
+				var effectWrapper = _effectWrappersArray[i];
 
 				if (effectWrapper.GetEffect() is IRevertEffect revertEffect && revertEffect.IsRevertible)
-					_revertList.Add((IRevertEffect)effectWrapper.GetEffect());
+					revertEffectsCount++;
 
 				if ((effectWrapper.EffectOn & EffectOn.Init) != 0)
-					_initEffects.Add(effectWrapper.GetEffect());
+					initEffectsCount++;
 				if ((effectWrapper.EffectOn & EffectOn.Interval) != 0)
-					_intervalEffects.Add(effectWrapper.GetEffect());
+					intervalEffectsCount++;
 				if ((effectWrapper.EffectOn & EffectOn.Duration) != 0)
-					_durationEffects.Add(effectWrapper.GetEffect());
+					durationEffectsCount++;
 				if ((effectWrapper.EffectOn & EffectOn.Stack) != 0)
-					_stackEffects.Add((IStackEffect)effectWrapper.GetEffect());
+					stackEffectsCount++;
 			}
+		}
 
-			if (removeEffectWrapper != null)
+		public ModifierCreation Create(int genId)
+		{
+			if (_removeEffectWrapper != null)
 			{
-				((RemoveEffect)removeEffectWrapper.GetEffect()).SetRevertibleEffects(_revertList.ToArray());
-				removeEffectWrapper.Reset();
+				_removeEffectWrapper.UpdateGenId(genId);
+
+				if ((_removeEffectWrapper.EffectOn & EffectOn.Init) != 0) //Probably never a thing, but added just in case
+					_initEffectsArray[_initEffectsIndex++] = _removeEffectWrapper.GetEffect();
+				if ((_removeEffectWrapper.EffectOn & EffectOn.Interval) != 0)
+					_intervalEffectsArray[_intervalEffectsIndex++] = _removeEffectWrapper.GetEffect();
+				if ((_removeEffectWrapper.EffectOn & EffectOn.Duration) != 0)
+					_durationEffectsArray[_durationEffectsIndex++] = _removeEffectWrapper.GetEffect();
 			}
 
-			for (int i = 0; i < _effectWrappers.Count; i++)
-				_effectWrappers[i].Reset();
+			for (int i = 0; i < _effectWrappersArray.Length; i++)
+			{
+				var effectWrapper = _effectWrappersArray[i];
 
-			return new ModifierCreation(_initEffects, _intervalEffects, _durationEffects, _stackEffects);
+				if (effectWrapper.GetEffect() is IRevertEffect revertEffect && revertEffect.IsRevertible)
+					_revertListArray[_revertListIndex++] = (IRevertEffect)effectWrapper.GetEffect();
+
+				if ((effectWrapper.EffectOn & EffectOn.Init) != 0)
+					_initEffectsArray[_initEffectsIndex++] = effectWrapper.GetEffect();
+				if ((effectWrapper.EffectOn & EffectOn.Interval) != 0)
+					_intervalEffectsArray[_intervalEffectsIndex++] = effectWrapper.GetEffect();
+				if ((effectWrapper.EffectOn & EffectOn.Duration) != 0)
+					_durationEffectsArray[_durationEffectsIndex++] = effectWrapper.GetEffect();
+				if ((effectWrapper.EffectOn & EffectOn.Stack) != 0)
+					_stackEffectsArray[_stackEffectsIndex++] = (IStackEffect)effectWrapper.GetEffect();
+			}
+
+			if (_removeEffectWrapper != null)
+			{
+				var clonedArray = new IRevertEffect[_revertListIndex];
+				Array.Copy(_revertListArray, clonedArray, _revertListIndex);
+				((RemoveEffect)_removeEffectWrapper.GetEffect()).SetRevertibleEffects(clonedArray);
+				_removeEffectWrapper.Reset();
+			}
+
+			for (int i = 0; i < _effectWrappersArray.Length; i++)
+				_effectWrappersArray[i].Reset();
+
+			return new ModifierCreation(_initEffectsArray, _intervalEffectsArray, _durationEffectsArray, _stackEffectsArray);
 		}
 
 		public void Clear()
 		{
-			_revertList.Clear();
-			_initEffects.Clear();
-			_intervalEffects.Clear();
-			_durationEffects.Clear();
-			_stackEffects.Clear();
+			_revertListIndex = 0;
+			_initEffectsIndex = 0;
+			_intervalEffectsIndex = 0;
+			_durationEffectsIndex = 0;
+			_stackEffectsIndex = 0;
 		}
 	}
 
 	public struct ModifierCreation
 	{
-		//public List<IRevertEffect> revertList;
+		public readonly IEffect[] InitEffects;
+		public readonly IEffect[] IntervalEffects;
+		public readonly IEffect[] DurationEffects;
+		public readonly IStackEffect[] StackEffects;
 
-		public readonly List<IEffect> InitEffects;
-		public readonly List<IEffect> IntervalEffects;
-		public readonly List<IEffect> DurationEffects;
-		public readonly List<IStackEffect> StackEffects;
-
-		public ModifierCreation(List<IEffect> initEffects, List<IEffect> intervalEffects, List<IEffect> durationEffects,
-			List<IStackEffect> stackEffects)
+		public ModifierCreation(IEffect[] initEffects, IEffect[] intervalEffects, IEffect[] durationEffects, IStackEffect[] stackEffects)
 		{
-			//this.revertList = revertList;
-
 			InitEffects = initEffects;
 			IntervalEffects = intervalEffects;
 			DurationEffects = durationEffects;
