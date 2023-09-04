@@ -49,13 +49,18 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AllocateModifiers_RentAll()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage");
-			Pool.Allocate(recipe.Id, 5000);
+			const int count = 5000;
 
-			for (int i = 0; i < 5000; i++)
-			{
-				var modifier = Pool.Rent(recipe.Id);
-			}
+			var modifiers = new Modifier[count];
+
+			var recipe = Recipes.GetRecipe("InitDamage");
+			Pool.Allocate(recipe.Id, count);
+
+			for (int i = 0; i < count; i++)
+				modifiers[i] = Pool.Rent(recipe.Id);
+
+			for (int i = 0; i < count; i++)
+				Pool.Return(modifiers[i]);
 		}
 
 		//TODO Pool AddedDamage revertible state reset

@@ -119,14 +119,14 @@ namespace ModiBuff.Core
 				effectCheck = new ModifierCheck(Id, _effectFuncChecks, _updatableEffectChecks, _noUnitEffectChecks, _unitEffectChecks,
 					_usableEffectChecks, stateChecks);
 
-			if (creation.InitEffects.Length > 0)
+			if (creation.InitEffects?.Length > 0)
 				initComponent = new InitComponent(_oneTimeInit, creation.InitEffects, effectCheck);
-			if (creation.IntervalEffects.Length > 0)
+			if (creation.IntervalEffects?.Length > 0)
 				_timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, creation.IntervalEffects, effectCheck,
 					_intervalAffectedByStatusResistance));
-			if (creation.DurationEffects.Length > 0)
+			if (creation.DurationEffects?.Length > 0)
 				_timeComponents.Add(new DurationComponent(_duration, _refreshDuration, creation.DurationEffects));
-			if (creation.StackEffects.Length > 0)
+			if (creation.StackEffects?.Length > 0)
 				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _everyXStacks, creation.StackEffects,
 					effectCheck);
 

@@ -4,7 +4,7 @@ namespace ModiBuff.Core
 	{
 	}
 
-	public interface IStateCheck<TSelf> : IShallowClone<TSelf>, IStateCheck
+	public interface IStateCheck<out TSelf> : IShallowClone<TSelf>, IStateCheck
 	{
 	}
 }

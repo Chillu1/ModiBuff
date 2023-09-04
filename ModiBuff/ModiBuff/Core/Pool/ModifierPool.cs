@@ -19,6 +19,10 @@ namespace ModiBuff.Core
 		private readonly int[] _maxModifiersCreated;
 #endif
 
+		public ModifierPool(ModifierRecipes recipes) : this(recipes.GetRecipes())
+		{
+		}
+
 		public ModifierPool(IModifierRecipe[] recipes)
 		{
 			if (Instance != null)
@@ -187,6 +191,7 @@ namespace ModiBuff.Core
 		{
 			modifier.ResetState();
 
+			//TODO We should never have to resize here, right?
 			if (_poolTops[modifier.Id] == _pools[modifier.Id].Length)
 				Resize(modifier.Id, _pools[modifier.Id].Length << 1);
 

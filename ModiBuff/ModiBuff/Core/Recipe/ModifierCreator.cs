@@ -87,18 +87,20 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _effectWrappersArray.Length; i++)
 			{
 				var effectWrapper = _effectWrappersArray[i];
+				var effect = effectWrapper.GetEffect();
+				var effectOn = effectWrapper.EffectOn;
 
-				if (effectWrapper.GetEffect() is IRevertEffect revertEffect && revertEffect.IsRevertible)
-					_revertListArray[_revertListIndex++] = (IRevertEffect)effectWrapper.GetEffect();
+				if (effect is IRevertEffect revertEffect && revertEffect.IsRevertible)
+					_revertListArray[_revertListIndex++] = revertEffect;
 
-				if ((effectWrapper.EffectOn & EffectOn.Init) != 0)
-					_initEffectsArray[_initEffectsIndex++] = effectWrapper.GetEffect();
-				if ((effectWrapper.EffectOn & EffectOn.Interval) != 0)
-					_intervalEffectsArray[_intervalEffectsIndex++] = effectWrapper.GetEffect();
-				if ((effectWrapper.EffectOn & EffectOn.Duration) != 0)
-					_durationEffectsArray[_durationEffectsIndex++] = effectWrapper.GetEffect();
-				if ((effectWrapper.EffectOn & EffectOn.Stack) != 0)
-					_stackEffectsArray[_stackEffectsIndex++] = (IStackEffect)effectWrapper.GetEffect();
+				if ((effectOn & EffectOn.Init) != 0)
+					_initEffectsArray[_initEffectsIndex++] = effect;
+				if ((effectOn & EffectOn.Interval) != 0)
+					_intervalEffectsArray[_intervalEffectsIndex++] = effect;
+				if ((effectOn & EffectOn.Duration) != 0)
+					_durationEffectsArray[_durationEffectsIndex++] = effect;
+				if ((effectOn & EffectOn.Stack) != 0)
+					_stackEffectsArray[_stackEffectsIndex++] = (IStackEffect)effect;
 			}
 
 			if (_removeEffectWrapper != null)
@@ -112,7 +114,8 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _effectWrappersArray.Length; i++)
 				_effectWrappersArray[i].Reset();
 
-			return new ModifierCreation(_initEffectsArray, _intervalEffectsArray, _durationEffectsArray, _stackEffectsArray);
+			return new ModifierCreation(_initEffectsIndex, _intervalEffectsIndex, _durationEffectsIndex, _stackEffectsIndex,
+				_initEffectsArray, _intervalEffectsArray, _durationEffectsArray, _stackEffectsArray);
 		}
 
 		public void Reset()
@@ -132,16 +135,40 @@ namespace ModiBuff.Core
 		public readonly IEffect[] DurationEffects;
 		public readonly IStackEffect[] StackEffects;
 
-		public ModifierCreation(IEffect[] initEffects, IEffect[] intervalEffects, IEffect[] durationEffects, IStackEffect[] stackEffects)
+		public ModifierCreation(int initEffectsIndex, int intervalEffectsIndex, int durationEffectsIndex, int stackEffectsIndex,
+			IEffect[] initEffectsArray, IEffect[] intervalEffectsArray, IEffect[] durationEffectsArray, IStackEffect[] stackEffectsArray)
 		{
-			InitEffects = new IEffect[initEffects.Length];
-			Array.Copy(initEffects, InitEffects, initEffects.Length);
-			IntervalEffects = new IEffect[intervalEffects.Length];
-			Array.Copy(intervalEffects, IntervalEffects, intervalEffects.Length);
-			DurationEffects = new IEffect[durationEffects.Length];
-			Array.Copy(durationEffects, DurationEffects, durationEffects.Length);
-			StackEffects = new IStackEffect[stackEffects.Length];
-			Array.Copy(stackEffects, StackEffects, stackEffects.Length);
+			if (initEffectsIndex > 0)
+			{
+				InitEffects = new IEffect[initEffectsIndex];
+				Array.Copy(initEffectsArray, InitEffects, initEffectsIndex);
+			}
+			else
+				InitEffects = null;
+
+			if (intervalEffectsIndex > 0)
+			{
+				IntervalEffects = new IEffect[intervalEffectsIndex];
+				Array.Copy(intervalEffectsArray, IntervalEffects, intervalEffectsIndex);
+			}
+			else
+				IntervalEffects = null;
+
+			if (durationEffectsIndex > 0)
+			{
+				DurationEffects = new IEffect[durationEffectsIndex];
+				Array.Copy(durationEffectsArray, DurationEffects, durationEffectsIndex);
+			}
+			else
+				DurationEffects = null;
+
+			if (stackEffectsIndex > 0)
+			{
+				StackEffects = new IStackEffect[stackEffectsIndex];
+				Array.Copy(stackEffectsArray, StackEffects, stackEffectsIndex);
+			}
+			else
+				StackEffects = null;
 		}
 	}
 }

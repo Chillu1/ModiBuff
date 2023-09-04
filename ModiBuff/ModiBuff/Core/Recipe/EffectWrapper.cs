@@ -3,7 +3,11 @@ namespace ModiBuff.Core
 	public sealed class EffectWrapper
 	{
 		private readonly IEffect _effect;
-		public EffectOn EffectOn { get; }
+		public readonly EffectOn EffectOn;
+
+		private readonly bool _effectIsCloneable;
+		private readonly IShallowClone _effectShallowClone;
+
 
 		private IEffect _effectClone;
 
@@ -11,28 +15,32 @@ namespace ModiBuff.Core
 		{
 			_effect = effect;
 			EffectOn = effectOn;
+
+			if (_effect is IShallowClone shallowClone)
+			{
+				_effectIsCloneable = true;
+				_effectShallowClone = shallowClone;
+			}
 		}
 
 		public IEffect GetEffect()
 		{
-			if (_effect is IShallowClone shallowClone)
+			if (_effectIsCloneable)
 			{
 				if (_effectClone == null)
-					_effectClone = (IEffect)shallowClone.ShallowClone();
+					_effectClone = (IEffect)_effectShallowClone.ShallowClone();
 				return _effectClone;
 			}
 
 			return _effect;
 		}
 
+		/// <summary>
+		///		Only called in remove effect wrapper
+		/// </summary>
 		public void UpdateGenId(int genId)
 		{
-			if (_effect is IRemoveEffect removeEffect)
-				removeEffect.SetGenId(genId);
-#if DEBUG && !MODIBUFF_PROFILE
-			else
-				Logger.LogWarning("EffectWrapper.UpdateGenId: Effect is not a RemoveEffect");
-#endif
+			((IRemoveEffect)GetEffect()).SetGenId(genId);
 		}
 
 		public void Reset()

@@ -9,7 +9,8 @@ namespace ModiBuff.Examples.BasicConsole
 	public sealed class GameController : IGameController
 	{
 		private readonly ModifierRecipes _recipes;
-		private readonly int _defenseModifierId;
+		private readonly ModifierPool _pool;
+		//private readonly int _defenseModifierId;
 
 		private readonly Unit _player;
 
@@ -18,10 +19,12 @@ namespace ModiBuff.Examples.BasicConsole
 		public GameController()
 		{
 			Logger.SetLogger<ConsoleLogger>();
+			Config.PoolSize = 100;
 
 			var idManager = new ModifierIdManager();
 			_recipes = new ModifierRecipes(idManager);
-			_defenseModifierId = idManager.GetId("Defense");
+			_pool = new ModifierPool(_recipes);
+			//_defenseModifierId = idManager.GetId("Defense");
 
 			_player = new Unit("Player", 100, 5);
 
@@ -48,11 +51,11 @@ namespace ModiBuff.Examples.BasicConsole
 					//_recipes.GetRecipe()
 					break;
 				case "3":
-					_player.AddModifier(_defenseModifierId, _player);
+					//_player.AddModifier(_defenseModifierId, _player);
 					break;
 			}
 
-			float delta = 1f;
+			const float delta = 0.0167f;
 
 			_player.Update(delta);
 
