@@ -63,6 +63,20 @@ namespace ModiBuff.Tests
 				Pool.Return(modifiers[i]);
 		}
 
+		//[Test]
+		public void FullLibraryInit()
+		{
+			Config.PoolSize = 512;
+			Pool.Dispose();
+			IdManager.Reset();
+
+			var idManager = new ModifierIdManager();
+			var recipes = new TestModifierRecipes(idManager);
+			var pool = new ModifierPool(recipes.GetRecipes());
+
+			Config.Reset();
+		}
+
 		//TODO Pool AddedDamage revertible state reset
 	}
 }

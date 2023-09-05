@@ -67,7 +67,7 @@ namespace ModiBuff.Core.Units
 			_totalAddedDamage = 0;
 		}
 
-		public IStateEffect ShallowClone() => new AddDamageEffect(_damage, IsRevertible, _stackEffect, _targeting);
+		public IEffect ShallowClone() => new AddDamageEffect(_damage, IsRevertible, _stackEffect, _targeting);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

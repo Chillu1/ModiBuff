@@ -94,8 +94,7 @@ namespace ModiBuff.Core.Units
 
 		public void ResetState() => _extraDamage = 0;
 
-		public IStateEffect ShallowClone() =>
-			new DamageEffect(_baseDamage, _stackEffect, _targeting, _isEventBased, _metaEffects, _postEffects);
+		public IEffect ShallowClone() => new DamageEffect(_baseDamage, _stackEffect, _targeting, _isEventBased, _metaEffects, _postEffects);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}

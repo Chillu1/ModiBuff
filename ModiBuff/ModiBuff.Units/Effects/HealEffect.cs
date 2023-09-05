@@ -104,7 +104,7 @@ namespace ModiBuff.Core.Units
 			_totalHeal = 0;
 		}
 
-		public IStateEffect ShallowClone() => new HealEffect(_heal, IsRevertible, _stackEffect, _targeting, _metaEffects, _postEffects);
+		public IEffect ShallowClone() => new HealEffect(_heal, IsRevertible, _stackEffect, _targeting, _metaEffects, _postEffects);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

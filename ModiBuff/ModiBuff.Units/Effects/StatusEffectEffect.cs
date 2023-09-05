@@ -52,7 +52,7 @@ namespace ModiBuff.Core.Units
 			_totalDuration = 0;
 		}
 
-		public IStateEffect ShallowClone() => new StatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect);
+		public IEffect ShallowClone() => new StatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

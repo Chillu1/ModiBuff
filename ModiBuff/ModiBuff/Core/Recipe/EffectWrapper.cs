@@ -6,8 +6,7 @@ namespace ModiBuff.Core
 		public readonly EffectOn EffectOn;
 
 		private readonly bool _effectIsCloneable;
-		private readonly IShallowClone _effectShallowClone;
-
+		private readonly IShallowClone<IEffect> _effectShallowClone;
 
 		private IEffect _effectClone;
 
@@ -16,7 +15,7 @@ namespace ModiBuff.Core
 			_effect = effect;
 			EffectOn = effectOn;
 
-			if (_effect is IShallowClone shallowClone)
+			if (_effect is IShallowClone<IEffect> shallowClone)
 			{
 				_effectIsCloneable = true;
 				_effectShallowClone = shallowClone;
@@ -28,7 +27,7 @@ namespace ModiBuff.Core
 			if (_effectIsCloneable)
 			{
 				if (_effectClone == null)
-					_effectClone = (IEffect)_effectShallowClone.ShallowClone();
+					_effectClone = _effectShallowClone.ShallowClone();
 				return _effectClone;
 			}
 

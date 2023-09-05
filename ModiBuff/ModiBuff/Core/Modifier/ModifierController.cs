@@ -12,7 +12,7 @@ namespace ModiBuff.Core
 		private readonly IUnit _owner;
 
 		private Modifier[] _modifiers;
-		private int[] _modifierIndexes;
+		private readonly int[] _modifierIndexes;
 		private int _modifiersTop;
 
 		private readonly List<int> _modifierAttackAppliers;
@@ -170,7 +170,7 @@ namespace ModiBuff.Core
 		{
 			if (!ModifierRecipes.IsInstanceStackable(id) && _modifierIndexes[id] != -1)
 			{
-				var existingModifier = _modifiers[_modifierIndexes[id] - 1];
+				var existingModifier = _modifiers[_modifierIndexes[id]];
 				//TODO should we update the modifier targets when init/refreshing/stacking?
 				existingModifier.UpdateSource(source);
 				existingModifier.Init();
@@ -187,9 +187,9 @@ namespace ModiBuff.Core
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
 			modifier.UpdateSingleTargetSource(target, source);
 
-			_modifiers[_modifiersTop++] = modifier;
 			if (!ModifierRecipes.IsInstanceStackable(id))
 				_modifierIndexes[id] = _modifiersTop;
+			_modifiers[_modifiersTop++] = modifier;
 			modifier.Init();
 			modifier.Refresh();
 			modifier.Stack();
@@ -218,9 +218,9 @@ namespace ModiBuff.Core
 		{
 			if (!ModifierRecipes.IsInstanceStackable(modifierReference.Id))
 			{
-				var modifier = _modifiers[_modifierIndexes[modifierReference.Id] - 1];
+				var modifier = _modifiers[_modifierIndexes[modifierReference.Id]];
 				ModifierPool.Instance.Return(modifier);
-				_modifiers[_modifierIndexes[modifierReference.Id] - 1] = _modifiers[--_modifiersTop];
+				_modifiers[_modifierIndexes[modifierReference.Id]] = _modifiers[--_modifiersTop];
 				_modifiers[_modifiersTop] = null;
 				_modifierIndexes[modifierReference.Id] = -1;
 			}

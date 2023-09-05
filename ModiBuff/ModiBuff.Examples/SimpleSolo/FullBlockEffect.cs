@@ -59,7 +59,7 @@ namespace ModiBuff.Examples.SimpleSolo
 
 		public void ResetState() => _extraBlock = 0;
 
-		public IStateEffect ShallowClone() => new FullBlockEffect(_baseBlock, _stackEffect, _targeting, _isEventBased);
+		public IEffect ShallowClone() => new FullBlockEffect(_baseBlock, _stackEffect, _targeting, _isEventBased);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 

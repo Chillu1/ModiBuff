@@ -128,7 +128,7 @@ namespace ModiBuff.Core
 		}
 	}
 
-	public readonly struct ModifierCreation
+	public readonly ref struct ModifierCreation
 	{
 		public readonly IEffect[] InitEffects;
 		public readonly IEffect[] IntervalEffects;
