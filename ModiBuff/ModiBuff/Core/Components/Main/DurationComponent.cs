@@ -25,11 +25,6 @@ namespace ModiBuff.Core
 		{
 		}
 
-		public DurationComponent(float duration, bool refreshable, IRemoveEffect effect) :
-			this(duration, refreshable, new IEffect[] { effect })
-		{
-		}
-
 		public void SetupTarget(ITargetComponent targetComponent)
 		{
 			_targetComponent = targetComponent;
@@ -88,7 +83,5 @@ namespace ModiBuff.Core
 			_statusResistanceImplemented = false;
 			_statusResistanceTarget = null;
 		}
-
-		public ITimeComponent DeepClone() => new DurationComponent(_duration, IsRefreshable, _effects);
 	}
 }

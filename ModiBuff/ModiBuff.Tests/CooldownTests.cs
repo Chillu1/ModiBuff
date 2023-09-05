@@ -36,5 +36,20 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("InitDamage_Cooldown_Effect");
 			Assert.AreEqual(UnitHealth - 5 * 2, Unit.Health);
 		}
+
+		[Test]
+		public void InitDamage_Cooldown_Pool()
+		{
+			int id = IdManager.GetId("InitDamage_Cooldown_Pool");
+			Pool.Clear();
+			Pool.Allocate(id, 1);
+
+			Unit.AddModifierSelf("InitDamage_Cooldown_Pool"); // 1 second cooldown
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.ModifierController.Remove(new ModifierReference(id, -1)); //State reset, back in pool, no cooldown
+
+			Unit.AddModifierSelf("InitDamage_Cooldown_Pool"); // No cooldown
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+		}
 	}
 }

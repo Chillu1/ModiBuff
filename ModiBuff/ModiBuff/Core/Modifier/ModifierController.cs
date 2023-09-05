@@ -223,19 +223,18 @@ namespace ModiBuff.Core
 				_modifiers[_modifierIndexes[modifierReference.Id]] = _modifiers[--_modifiersTop];
 				_modifiers[_modifiersTop] = null;
 				_modifierIndexes[modifierReference.Id] = -1;
+				return;
 			}
-			else
+
+			for (int i = 0; i < _modifiersTop; i++)
 			{
-				for (int i = 0; i < _modifiersTop; i++)
+				var modifier = _modifiers[i];
+				if (modifier.Id == modifierReference.Id && modifier.GenId == modifierReference.GenId)
 				{
-					var modifier = _modifiers[i];
-					if (modifier.Id == modifierReference.Id && modifier.GenId == modifierReference.GenId)
-					{
-						ModifierPool.Instance.Return(modifier);
-						_modifiers[i] = _modifiers[--_modifiersTop]; //TODO This switching might cause some order issues
-						_modifiers[_modifiersTop] = null;
-						break;
-					}
+					ModifierPool.Instance.Return(modifier);
+					_modifiers[i] = _modifiers[--_modifiersTop]; //TODO This switching might cause some order issues
+					_modifiers[_modifiersTop] = null;
+					break;
 				}
 			}
 		}

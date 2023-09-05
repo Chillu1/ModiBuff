@@ -45,5 +45,20 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 * 2, Unit.Health);
 			Assert.False(Unit.ContainsModifier("DoTRemove"));
 		}
+
+		[TestCase(0.5f)]
+		[TestCase(0.25f)]
+		[TestCase(0.1f)]
+		public void DurationXResistance(float resistance)
+		{
+			Unit.AddModifierSelf("DurationRemoveStatusResistance");
+			Unit.ChangeStatusResistance(resistance);
+
+			for (int i = 0; i < 6; i++)
+				Unit.Update(resistance);
+
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Assert.False(Unit.ContainsModifier("DurationRemoveStatusResistance"));
+		}
 	}
 }

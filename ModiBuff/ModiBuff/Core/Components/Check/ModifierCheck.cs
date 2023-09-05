@@ -27,12 +27,12 @@ namespace ModiBuff.Core
 			{
 				foreach (var stateCheck in stateResetChecks) //TODO Refactor, same instance in both state & other check arrays
 				{
-					if (stateCheck is IUpdatableCheck)
+					if (stateCheck is IUpdatableCheck updatableCheck)
 					{
 						if (updatableChecks == null)
-							updatableChecks = new[] { (IUpdatableCheck)stateCheck };
+							updatableChecks = new[] { updatableCheck };
 						else
-							updatableChecks = updatableChecks.Concat(new[] { (IUpdatableCheck)stateCheck }).ToArray();
+							updatableChecks = updatableChecks.Concat(new[] { updatableCheck }).ToArray();
 					}
 				}
 			}
@@ -101,7 +101,8 @@ namespace ModiBuff.Core
 
 			if (_hasStateResetChecks)
 				for (int i = 0; i < _stateResetChecks.Length; i++)
-					_stateResetChecks[i].ResetState();
+					_stateResetChecks[i].RestartState();
+
 			if (_hasUsableChecks)
 				for (int i = 0; i < _usableChecks.Length; i++)
 					_usableChecks[i].Use(unit);

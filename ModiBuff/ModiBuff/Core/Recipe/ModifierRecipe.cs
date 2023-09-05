@@ -80,8 +80,7 @@ namespace ModiBuff.Core
 				stateChecks = new IStateCheck[_stateApplyChecks.Length];
 				for (int i = 0; i < _stateApplyChecks.Length; i++)
 				{
-					var stateCheck = (IStateCheck)_stateApplyChecks[i].ShallowClone();
-					stateChecks[i] = stateCheck;
+					stateChecks[i] = (IStateCheck)_stateApplyChecks[i].ShallowClone();
 					// if (stateCheck is IUsableCheck usableCheck)
 					// 	usableChecks.Add(usableCheck);
 					// if (stateCheck is IUnitCheck unitCheck)

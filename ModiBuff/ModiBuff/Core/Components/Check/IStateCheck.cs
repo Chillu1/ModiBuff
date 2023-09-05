@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public interface IStateCheck : ICheck, IStateReset, IShallowClone
+	public interface IStateCheck : ICheck, IDefaultState, IStateReset, IShallowClone
 	{
 	}
 

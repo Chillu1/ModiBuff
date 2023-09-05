@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
-	public sealed class StackComponent : IStackComponent, IStateReset
+	public sealed class StackComponent : IStackComponent
 	{
 		private readonly WhenStackEffect _whenStackEffect;
 		private readonly int _maxStacks;
@@ -70,22 +70,6 @@ namespace ModiBuff.Core
 				if (_effects[i] is IStateReset effect)
 					effect.ResetState();
 		}
-
-		public IStackComponent ShallowClone()
-		{
-			var effects = new IStackEffect[_effects.Length];
-			for (int i = 0; i < _effects.Length; i++)
-			{
-				if (_effects[i] is IStateEffect effect)
-					effects[i] = (IStackEffect)effect.ShallowClone();
-				else
-					effects[i] = _effects[i];
-			}
-
-			return new StackComponent(_whenStackEffect, _value, _maxStacks, _everyXStacks, effects, _modifierCheck);
-		}
-
-		object IShallowClone.ShallowClone() => ShallowClone();
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void StackEffect()

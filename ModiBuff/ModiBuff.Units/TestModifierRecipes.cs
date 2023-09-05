@@ -382,6 +382,15 @@ namespace ModiBuff.Core.Units
 					.Interval(0.1f);
 			}
 
+			Add("DurationRemoveStatusResistance")
+				.Interval(1, true)
+				.Effect(new DamageEffect(5), EffectOn.Duration)
+				.Remove(5);
+
+			Add("InitDamage_Cooldown_Pool")
+				.EffectCooldown(1)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
 			//New stack as parent effect approach, making IEffect stateless, but seems to not work? 
 			//Add("IntervalDamage_StackAddDamage")
 			//	.Effect(new StackEffectNew(StackEffectType.Add, new DamageEffect(5)), EffectOn.Interval)

@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public interface IStackComponent : ITarget, IComponent, IStateReset, IShallowClone<IStackComponent>
+	public interface IStackComponent : ITarget, IComponent, IStateReset
 	{
 		void Stack();
 	}

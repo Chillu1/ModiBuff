@@ -23,7 +23,15 @@ namespace ModiBuff.Core.Units
 
 		public bool Check() => _timer >= _cooldown;
 
-		public void ResetState() => _timer = 0;
+		/// <summary>
+		///		Resets the timer to 0, so the check is not ready.
+		/// </summary>
+		public void RestartState() => _timer = 0;
+
+		/// <summary>
+		///		Sets the timer to the cooldown, so the check is ready.
+		/// </summary>
+		public void ResetState() => _timer = _cooldown;
 
 		public CooldownCheck ShallowClone() => new CooldownCheck(_cooldown);
 		object IShallowClone.ShallowClone() => ShallowClone();

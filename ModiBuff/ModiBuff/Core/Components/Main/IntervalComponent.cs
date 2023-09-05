@@ -9,7 +9,7 @@ namespace ModiBuff.Core
 
 		private ITargetComponent _targetComponent;
 
-		private bool _usesStatusResistance;
+		private readonly bool _usesStatusResistance;
 		private bool _statusResistanceImplemented;
 		private IStatusResistance _statusResistanceTarget;
 
@@ -99,8 +99,5 @@ namespace ModiBuff.Core
 			_statusResistanceImplemented = false;
 			_statusResistanceTarget = null;
 		}
-
-		public ITimeComponent DeepClone() =>
-			new IntervalComponent(_interval, IsRefreshable, _effects, _modifierCheck, _usesStatusResistance);
 	}
 }

@@ -176,6 +176,8 @@ namespace ModiBuff.Core
 					_timeComponents[i].ResetState();
 			if (_stackComponent != null)
 				_stackComponent.ResetState();
+			if (_check)
+				_effectCheck.ResetState();
 			_targetComponent.ResetState();
 		}
 
