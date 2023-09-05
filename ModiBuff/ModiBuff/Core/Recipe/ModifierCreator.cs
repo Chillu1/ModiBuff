@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace ModiBuff.Core
@@ -10,14 +9,15 @@ namespace ModiBuff.Core
 	{
 		private readonly EffectWrapper[] _effectWrappersArray;
 		private readonly EffectWrapper _removeEffectWrapper;
+		private readonly int _revertEffectsCount, _initEffectsCount, _intervalEffectsCount, _durationEffectsCount, _stackEffectsCount;
 
-		private readonly IRevertEffect[] _revertListArray;
-		private readonly IEffect[] _initEffectsArray;
-		private readonly IEffect[] _intervalEffectsArray;
-		private readonly IEffect[] _durationEffectsArray;
-		private readonly IStackEffect[] _stackEffectsArray;
+		private IRevertEffect[] _revertEffects;
+		private IEffect[] _initEffectsArray;
+		private IEffect[] _intervalEffectsArray;
+		private IEffect[] _durationEffectsArray;
+		private IStackEffect[] _stackEffectsArray;
 
-		private int _revertListIndex, _initEffectsIndex, _intervalEffectsIndex, _durationEffectsIndex, _stackEffectsIndex;
+		private int _revertEffectsIndex, _initEffectsIndex, _intervalEffectsIndex, _durationEffectsIndex, _stackEffectsIndex;
 
 		public ModifierCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper)
 		{
@@ -25,12 +25,13 @@ namespace ModiBuff.Core
 			_removeEffectWrapper = removeEffectWrapper;
 
 			SetupArrays(out int initEffectsCount, out int intervalEffectsCount, out int durationEffectsCount,
-				out int stackEffectsCount, out int revertListCount);
-			_revertListArray = new IRevertEffect[revertListCount];
-			_initEffectsArray = new IEffect[initEffectsCount];
-			_intervalEffectsArray = new IEffect[intervalEffectsCount];
-			_durationEffectsArray = new IEffect[durationEffectsCount];
-			_stackEffectsArray = new IStackEffect[stackEffectsCount];
+				out int stackEffectsCount, out int revertEffectsCount);
+			_revertEffectsCount = revertEffectsCount;
+			_initEffectsCount = initEffectsCount;
+			_intervalEffectsCount = intervalEffectsCount;
+			_durationEffectsCount = durationEffectsCount;
+			_stackEffectsCount = stackEffectsCount;
+			//_revertEffects = new IRevertEffect[revertEffectsCount];
 		}
 
 		private void SetupArrays(out int initEffectsCount, out int intervalEffectsCount, out int durationEffectsCount,
@@ -72,6 +73,36 @@ namespace ModiBuff.Core
 
 		public ModifierCreation Create(int genId)
 		{
+			if (_initEffectsCount > 0)
+			{
+				_initEffectsIndex = 0;
+				_initEffectsArray = new IEffect[_initEffectsCount];
+			}
+
+			if (_intervalEffectsCount > 0)
+			{
+				_intervalEffectsIndex = 0;
+				_intervalEffectsArray = new IEffect[_intervalEffectsCount];
+			}
+
+			if (_durationEffectsCount > 0)
+			{
+				_durationEffectsIndex = 0;
+				_durationEffectsArray = new IEffect[_durationEffectsCount];
+			}
+
+			if (_stackEffectsCount > 0)
+			{
+				_stackEffectsIndex = 0;
+				_stackEffectsArray = new IStackEffect[_stackEffectsCount];
+			}
+
+			if (_revertEffectsCount > 0)
+			{
+				_revertEffectsIndex = 0;
+				_revertEffects = new IRevertEffect[_revertEffectsCount];
+			}
+
 			if (_removeEffectWrapper != null)
 			{
 				_removeEffectWrapper.UpdateGenId(genId);
@@ -91,7 +122,7 @@ namespace ModiBuff.Core
 				var effectOn = effectWrapper.EffectOn;
 
 				if (effect is IRevertEffect revertEffect && revertEffect.IsRevertible)
-					_revertListArray[_revertListIndex++] = revertEffect;
+					_revertEffects[_revertEffectsIndex++] = revertEffect;
 
 				if ((effectOn & EffectOn.Init) != 0)
 					_initEffectsArray[_initEffectsIndex++] = effect;
@@ -105,26 +136,15 @@ namespace ModiBuff.Core
 
 			if (_removeEffectWrapper != null)
 			{
-				var clonedArray = new IRevertEffect[_revertListIndex];
-				Array.Copy(_revertListArray, clonedArray, _revertListIndex);
-				((RemoveEffect)_removeEffectWrapper.GetEffect()).SetRevertibleEffects(clonedArray);
+				if (_revertEffects != null)
+					((RemoveEffect)_removeEffectWrapper.GetEffect()).SetRevertibleEffects(_revertEffects);
 				_removeEffectWrapper.Reset();
 			}
 
 			for (int i = 0; i < _effectWrappersArray.Length; i++)
 				_effectWrappersArray[i].Reset();
 
-			return new ModifierCreation(_initEffectsIndex, _intervalEffectsIndex, _durationEffectsIndex, _stackEffectsIndex,
-				_initEffectsArray, _intervalEffectsArray, _durationEffectsArray, _stackEffectsArray);
-		}
-
-		public void Reset()
-		{
-			_revertListIndex = 0;
-			_initEffectsIndex = 0;
-			_intervalEffectsIndex = 0;
-			_durationEffectsIndex = 0;
-			_stackEffectsIndex = 0;
+			return new ModifierCreation(_initEffectsArray, _intervalEffectsArray, _durationEffectsArray, _stackEffectsArray);
 		}
 	}
 
@@ -135,40 +155,13 @@ namespace ModiBuff.Core
 		public readonly IEffect[] DurationEffects;
 		public readonly IStackEffect[] StackEffects;
 
-		public ModifierCreation(int initEffectsIndex, int intervalEffectsIndex, int durationEffectsIndex, int stackEffectsIndex,
-			IEffect[] initEffectsArray, IEffect[] intervalEffectsArray, IEffect[] durationEffectsArray, IStackEffect[] stackEffectsArray)
+		public ModifierCreation(IEffect[] initEffectsArray, IEffect[] intervalEffectsArray, IEffect[] durationEffectsArray,
+			IStackEffect[] stackEffectsArray)
 		{
-			if (initEffectsIndex > 0)
-			{
-				InitEffects = new IEffect[initEffectsIndex];
-				Array.Copy(initEffectsArray, InitEffects, initEffectsIndex);
-			}
-			else
-				InitEffects = null;
-
-			if (intervalEffectsIndex > 0)
-			{
-				IntervalEffects = new IEffect[intervalEffectsIndex];
-				Array.Copy(intervalEffectsArray, IntervalEffects, intervalEffectsIndex);
-			}
-			else
-				IntervalEffects = null;
-
-			if (durationEffectsIndex > 0)
-			{
-				DurationEffects = new IEffect[durationEffectsIndex];
-				Array.Copy(durationEffectsArray, DurationEffects, durationEffectsIndex);
-			}
-			else
-				DurationEffects = null;
-
-			if (stackEffectsIndex > 0)
-			{
-				StackEffects = new IStackEffect[stackEffectsIndex];
-				Array.Copy(stackEffectsArray, StackEffects, stackEffectsIndex);
-			}
-			else
-				StackEffects = null;
+			InitEffects = initEffectsArray;
+			IntervalEffects = intervalEffectsArray;
+			DurationEffects = durationEffectsArray;
+			StackEffects = stackEffectsArray;
 		}
 	}
 }

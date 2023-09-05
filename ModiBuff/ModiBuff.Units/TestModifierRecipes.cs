@@ -384,6 +384,7 @@ namespace ModiBuff.Core.Units
 
 			Add("DurationRemoveStatusResistance")
 				.Interval(1, true)
+				.Effect(new DamageEffect(0), EffectOn.Interval)
 				.Effect(new DamageEffect(5), EffectOn.Duration)
 				.Remove(5);
 

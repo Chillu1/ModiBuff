@@ -39,7 +39,7 @@ namespace ModiBuff.Core
 		private int _maxStacks;
 		private int _everyXStacks;
 
-		private ITimeComponent[] _timeComponentsArray;
+		private int _timeComponentCount;
 		private int _timeComponentIndex;
 
 		private ModifierCreator _modifierCreator;
@@ -123,30 +123,25 @@ namespace ModiBuff.Core
 
 			InitComponent initComponent = null;
 			IStackComponent stackComponent = null;
+			ITimeComponent[] timeComponents = null;
+			if (_timeComponentCount > 0)
+			{
+				_timeComponentIndex = 0;
+				timeComponents = new ITimeComponent[_timeComponentCount];
+			}
 
 			if (creation.InitEffects != null)
 				initComponent = new InitComponent(_oneTimeInit, creation.InitEffects, effectCheck);
 			if (creation.IntervalEffects != null)
-				_timeComponentsArray[_timeComponentIndex++] = new IntervalComponent(_interval, _refreshInterval, creation.IntervalEffects,
+				timeComponents[_timeComponentIndex++] = new IntervalComponent(_interval, _refreshInterval, creation.IntervalEffects,
 					effectCheck, _intervalAffectedByStatusResistance);
 			if (creation.DurationEffects != null)
-				_timeComponentsArray[_timeComponentIndex++] = new DurationComponent(_duration, _refreshDuration, creation.DurationEffects);
+				timeComponents[_timeComponentIndex++] = new DurationComponent(_duration, _refreshDuration, creation.DurationEffects);
 			if (creation.StackEffects != null)
 				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _everyXStacks, creation.StackEffects,
 					effectCheck);
 
-			ITimeComponent[] clonedTimeComponentsArray = null;
-			if (_timeComponentIndex != 0)
-			{
-				clonedTimeComponentsArray = new ITimeComponent[_timeComponentIndex];
-				Array.Copy(_timeComponentsArray, clonedTimeComponentsArray, _timeComponentIndex);
-				_timeComponentIndex = 0;
-			}
-
-			_modifierCreator.Reset();
-
-			return new Modifier(Id, genId, Name, initComponent, clonedTimeComponentsArray, stackComponent, effectCheck,
-				_targetComponentFunc());
+			return new Modifier(Id, genId, Name, initComponent, timeComponents, stackComponent, effectCheck, _targetComponentFunc());
 		}
 
 		//---Misc---
@@ -343,13 +338,11 @@ namespace ModiBuff.Core
 			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Duration)) && _duration == 0)
 				Logger.LogError("Duration not set, but we have duration effects, for modifier: " + Name + " id: " + Id);
 #endif
-			int timeComponentsCount = 0;
 			if (_interval > 0)
-				timeComponentsCount++;
+				_timeComponentCount++;
 			if (_duration > 0)
-				timeComponentsCount++;
-			if (timeComponentsCount > 0)
-				_timeComponentsArray = new ITimeComponent[timeComponentsCount];
+				_timeComponentCount++;
+			//_timeComponents = new ITimeComponent[_timeComponentCount];
 
 			_modifierCreator = new ModifierCreator(_effectWrappers, _removeEffectWrapper);
 
