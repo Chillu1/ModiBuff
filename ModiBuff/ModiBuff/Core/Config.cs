@@ -10,6 +10,8 @@ namespace ModiBuff.Core
 		private const int DefaultModifierArraySize = 32;
 		private const int DefaultModifierRemoveSize = 4;
 
+		private const int DefaultMultiTargetComponentInitialCapacity = 4;
+
 		private const int DefaultAttackApplierSize = 4,
 			DefaultCastApplierSize = 4,
 			DefaultAttackCheckApplierSize = 4,
@@ -23,6 +25,8 @@ namespace ModiBuff.Core
 
 		public static int ModifierArraySize = DefaultModifierArraySize;
 		public static int ModifierRemoveSize = DefaultModifierRemoveSize;
+
+		public static int MultiTargetComponentInitialCapacity = DefaultMultiTargetComponentInitialCapacity;
 
 		public static int AttackApplierSize = DefaultAttackApplierSize;
 		public static int CastApplierSize = DefaultCastApplierSize;
@@ -43,6 +47,7 @@ namespace ModiBuff.Core
 
 		public static void Set(int poolSize = DefaultPoolSize, int maxPoolSize = DefaultMaxPoolSize,
 			int modifierArraySize = DefaultModifierArraySize, int modifierRemoveSize = DefaultModifierRemoveSize,
+			int multiTargetComponentInitialCapacity = DefaultMultiTargetComponentInitialCapacity,
 			int attackApplierSize = DefaultAttackApplierSize, int castApplierSize = DefaultCastApplierSize,
 			int attackCheckApplierSize = DefaultAttackCheckApplierSize, int castCheckApplierSize = DefaultCastCheckApplierSize,
 			float deltaTolerance = DefaultDeltaTolerance)
@@ -52,6 +57,8 @@ namespace ModiBuff.Core
 
 			ModifierArraySize = modifierArraySize;
 			ModifierRemoveSize = modifierRemoveSize;
+
+			MultiTargetComponentInitialCapacity = multiTargetComponentInitialCapacity;
 
 			AttackApplierSize = attackApplierSize;
 			CastApplierSize = castApplierSize;
@@ -68,6 +75,8 @@ namespace ModiBuff.Core
 
 			ModifierArraySize = DefaultModifierArraySize;
 			ModifierRemoveSize = DefaultModifierRemoveSize;
+
+			MultiTargetComponentInitialCapacity = DefaultMultiTargetComponentInitialCapacity;
 
 			AttackApplierSize = DefaultAttackApplierSize;
 			CastApplierSize = DefaultCastApplierSize;

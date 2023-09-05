@@ -439,6 +439,7 @@ namespace ModiBuff.Core.Units
 
 				//rupture modifier, that does DoT. When this gets to 5 stacks, apply the disarm effect.
 				Add("ComplexApplier_Rupture")
+					.Interval(1)
 					.Effect(new DamageEffect(5), EffectOn.Interval)
 					.Effect(new ApplierEffect("ComplexApplier_Disarm"), EffectOn.Stack)
 					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5);

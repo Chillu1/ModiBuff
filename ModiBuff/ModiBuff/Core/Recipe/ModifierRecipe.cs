@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ModiBuff.Core
 {
@@ -38,8 +39,12 @@ namespace ModiBuff.Core
 		private int _maxStacks;
 		private int _everyXStacks;
 
-		private List<ITimeComponent> _timeComponents;
+		private ITimeComponent[] _timeComponentsArray;
+		private int _timeComponentIndex;
+
 		private ModifierCreator _modifierCreator;
+
+		private Func<ITargetComponent> _targetComponentFunc;
 
 		private List<ICheck> _applyCheckList;
 		private List<Func<IUnit, bool>> _applyFuncCheckList;
@@ -98,41 +103,50 @@ namespace ModiBuff.Core
 
 		Modifier IModifierRecipe.Create()
 		{
-			_timeComponents.Clear();
-			InitComponent initComponent = null;
-			IStackComponent stackComponent = null;
-
 			int genId = GenId++;
 			var creation = _modifierCreator.Create(genId);
 
-			IStateCheck[] stateChecks = null;
-			if (_hasStateEffectChecks)
-			{
-				stateChecks = new IStateCheck[_stateEffectChecks.Length];
-				for (int i = 0; i < _stateEffectChecks.Length; i++)
-					stateChecks[i] = (IStateCheck)_stateEffectChecks[i].ShallowClone();
-			}
-
 			ModifierCheck effectCheck = null;
 			if (_hasEffectChecks)
+			{
+				IStateCheck[] stateChecks = null;
+				if (_hasStateEffectChecks)
+				{
+					stateChecks = new IStateCheck[_stateEffectChecks.Length];
+					for (int i = 0; i < _stateEffectChecks.Length; i++)
+						stateChecks[i] = (IStateCheck)_stateEffectChecks[i].ShallowClone();
+				}
+
 				effectCheck = new ModifierCheck(Id, _effectFuncChecks, _updatableEffectChecks, _noUnitEffectChecks, _unitEffectChecks,
 					_usableEffectChecks, stateChecks);
+			}
+
+			InitComponent initComponent = null;
+			IStackComponent stackComponent = null;
 
 			if (creation.InitEffects != null)
 				initComponent = new InitComponent(_oneTimeInit, creation.InitEffects, effectCheck);
 			if (creation.IntervalEffects != null)
-				_timeComponents.Add(new IntervalComponent(_interval, _refreshInterval, creation.IntervalEffects, effectCheck,
-					_intervalAffectedByStatusResistance));
+				_timeComponentsArray[_timeComponentIndex++] = new IntervalComponent(_interval, _refreshInterval, creation.IntervalEffects,
+					effectCheck, _intervalAffectedByStatusResistance);
 			if (creation.DurationEffects != null)
-				_timeComponents.Add(new DurationComponent(_duration, _refreshDuration, creation.DurationEffects));
+				_timeComponentsArray[_timeComponentIndex++] = new DurationComponent(_duration, _refreshDuration, creation.DurationEffects);
 			if (creation.StackEffects != null)
 				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _everyXStacks, creation.StackEffects,
 					effectCheck);
 
+			ITimeComponent[] clonedTimeComponentsArray = null;
+			if (_timeComponentIndex != 0)
+			{
+				clonedTimeComponentsArray = new ITimeComponent[_timeComponentIndex];
+				Array.Copy(_timeComponentsArray, clonedTimeComponentsArray, _timeComponentIndex);
+				_timeComponentIndex = 0;
+			}
+
 			_modifierCreator.Reset();
 
-			return new Modifier(Id, genId, Name, initComponent, _timeComponents.Count == 0 ? null : _timeComponents.ToArray(),
-				stackComponent, effectCheck, _isAura ? (ITargetComponent)new MultiTargetComponent() : new SingleTargetComponent());
+			return new Modifier(Id, genId, Name, initComponent, clonedTimeComponentsArray, stackComponent, effectCheck,
+				_targetComponentFunc());
 		}
 
 		//---Misc---
@@ -323,12 +337,34 @@ namespace ModiBuff.Core
 #if DEBUG && !MODIBUFF_PROFILE
 			if (_modifierCreator != null)
 				Logger.LogError("Modifier recipe already finished, finishing again. Not intended?");
-#endif
 
-			_timeComponents = new List<ITimeComponent>(2);
+			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Interval)) && _interval == 0)
+				Logger.LogError("Interval not set, but we have interval effects, for modifier: " + Name + " id: " + Id);
+			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Duration)) && _duration == 0)
+				Logger.LogError("Duration not set, but we have duration effects, for modifier: " + Name + " id: " + Id);
+#endif
+			int timeComponentsCount = 0;
+			if (_interval > 0)
+				timeComponentsCount++;
+			if (_duration > 0)
+				timeComponentsCount++;
+			if (timeComponentsCount > 0)
+				_timeComponentsArray = new ITimeComponent[timeComponentsCount];
+
 			_modifierCreator = new ModifierCreator(_effectWrappers, _removeEffectWrapper);
 
+			if (_isAura)
+				_targetComponentFunc = () => new MultiTargetComponent();
+			else
+				_targetComponentFunc = () => new SingleTargetComponent();
+
 			if (HasApplyChecks)
+				SetupApplyChecks();
+
+			if (_hasEffectChecks)
+				SetupEffectChecks();
+
+			void SetupApplyChecks()
 			{
 				var updatableChecks = new List<IUpdatableCheck>();
 				var noUnitChecks = new List<INoUnitCheck>();
@@ -362,7 +398,7 @@ namespace ModiBuff.Core
 				_applyFuncChecks = _applyFuncCheckList?.ToArray();
 			}
 
-			if (_hasEffectChecks)
+			void SetupEffectChecks()
 			{
 				var updatableChecks = new List<IUpdatableCheck>();
 				var noUnitChecks = new List<INoUnitCheck>();

@@ -50,7 +50,6 @@ namespace ModiBuff.Core
 		public static bool IsInstanceStackable(int id) => _instance._instanceStackableIds[id];
 
 		public IModifierRecipe GetRecipe(string id) => _recipes[id];
-		internal IModifierRecipe GetRecipe(int id) => _recipes.Values.ElementAt(id);
 
 		internal IModifierRecipe[] GetRecipes() => _recipes.Values.ToArray();
 

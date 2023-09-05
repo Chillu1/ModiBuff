@@ -9,7 +9,7 @@ namespace ModiBuff.Core
 
 		public MultiTargetComponent()
 		{
-			Targets = new List<IUnit>(4);
+			Targets = new List<IUnit>(Config.MultiTargetComponentInitialCapacity);
 		}
 
 		public MultiTargetComponent(List<IUnit> targets, IUnit source)
