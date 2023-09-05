@@ -15,7 +15,7 @@ namespace ModiBuff.Core
 		private readonly List<RegisterData> _registeredNames;
 		private readonly List<int> _instanceStackableIds;
 
-		private Func<IEffect[], int, IEffect> _eventEffectFunc;
+		private EventEffectFactory _eventEffectFunc;
 
 		public ModifierRecipes(ModifierIdManager idManager)
 		{
@@ -45,7 +45,7 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Call this, and feed an event effect func factory to use the event recipes.
 		/// </summary>
-		protected void SetupEventEffect(Func<IEffect[], int, IEffect> eventEffectFunc) => _eventEffectFunc = eventEffectFunc;
+		protected void SetupEventEffect(EventEffectFactory eventEffectFunc) => _eventEffectFunc = eventEffectFunc;
 
 		public static bool IsInstanceStackable(int id) => _instance._instanceStackableIds.Contains(id);
 

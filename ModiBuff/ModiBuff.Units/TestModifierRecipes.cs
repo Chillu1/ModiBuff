@@ -8,7 +8,7 @@ namespace ModiBuff.Core.Units
 
 		protected override void SetupRecipes()
 		{
-			SetupEventEffect((effects, effectOnEvent) => new EventEffect(effects, (EffectOnEvent)effectOnEvent));
+			SetupEventEffect((effects, effectOnEvent) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)effectOnEvent));
 
 			Add("NoOpFlag");
 

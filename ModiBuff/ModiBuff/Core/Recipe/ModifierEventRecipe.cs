@@ -14,7 +14,7 @@ namespace ModiBuff.Core
 		public string Name { get; }
 
 		private readonly int _effectOnEvent;
-		private readonly Func<IEffect[], int, IEffect> _eventEffectFunc;
+		private readonly EventEffectFactory _eventEffectFunc;
 
 		private readonly List<EffectWrapper> _effects;
 
@@ -25,7 +25,7 @@ namespace ModiBuff.Core
 
 		private readonly List<IRevertEffect> _revertEffects;
 
-		public ModifierEventRecipe(int id, string name, int effectOnEvent, Func<IEffect[], int, IEffect> eventEffectFunc)
+		public ModifierEventRecipe(int id, string name, int effectOnEvent, EventEffectFactory eventEffectFunc)
 		{
 			Id = id;
 			Name = name;
