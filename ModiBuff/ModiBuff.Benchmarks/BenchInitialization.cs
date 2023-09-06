@@ -11,7 +11,7 @@ namespace ModiBuff.Tests
 		{
 			var idManager = new ModifierIdManager();
 			var recipes = new TestModifierRecipes(idManager);
-			var pool = new ModifierPool(recipes.GetRecipes());
+			var pool = new ModifierPool(recipes.GetGenerators());
 			idManager.Reset();
 		}
 	}

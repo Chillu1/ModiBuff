@@ -8,7 +8,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostHealth()
 		{
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostHealth"), ApplierType.Attack);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostHealth"), ApplierType.Attack);
 
 			Unit.Attack(Unit);
 
@@ -18,7 +18,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostHealth_NotLethal()
 		{
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostHealth"), ApplierType.Attack);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostHealth"), ApplierType.Attack);
 
 			Unit.TakeDamage(UnitHealth - 1, Unit);
 			Unit.Attack(Enemy); //Shouldn't activate, because the Unit would die
@@ -29,7 +29,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostMana()
 		{
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostMana"), ApplierType.Attack);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostMana"), ApplierType.Attack);
 
 			Unit.Attack(Unit);
 
@@ -39,7 +39,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostMana_NotEnough()
 		{
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_CostMana"), ApplierType.Attack);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostMana"), ApplierType.Attack);
 
 			Unit.UseMana(UnitMana - 1);
 			Unit.TakeDamage(UnitHealth - 1, Unit);
@@ -60,11 +60,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostHealth_HealSelf()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage_CostHealth_HealSelf");
+			var generator = Recipes.GetGenerator("InitDamage_CostHealth_HealSelf");
 
-			Unit.AddApplierModifier(recipe, ApplierType.Cast);
+			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
-			Unit.TryCast(recipe.Id, Enemy);
+			Unit.TryCast(generator.Id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 			Assert.AreEqual(UnitHealth, Unit.Health);

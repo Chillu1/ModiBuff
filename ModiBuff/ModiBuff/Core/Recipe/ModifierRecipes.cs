@@ -12,6 +12,7 @@ namespace ModiBuff.Core
 
 		private readonly ModifierIdManager _idManager;
 		private readonly IDictionary<string, IModifierRecipe> _recipes;
+		private readonly IDictionary<string, IModifierGenerator> _modifierGenerators;
 		private readonly List<RegisterData> _registeredNames;
 		private readonly bool[] _instanceStackableIds;
 
@@ -23,6 +24,7 @@ namespace ModiBuff.Core
 
 			_idManager = idManager;
 			_recipes = new Dictionary<string, IModifierRecipe>(64);
+			_modifierGenerators = new Dictionary<string, IModifierGenerator>(64);
 			_registeredNames = new List<RegisterData>(16);
 
 			SetupRecipes();
@@ -31,7 +33,7 @@ namespace ModiBuff.Core
 			{
 				if (recipe is ModifierRecipe modifierRecipe && modifierRecipe.IsInstanceStackable)
 					_instanceStackableIds[modifierRecipe.Id] = true;
-				recipe.Finish();
+				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
 			}
 
 			RecipesCount = _recipes.Count;
@@ -49,9 +51,9 @@ namespace ModiBuff.Core
 
 		public static bool IsInstanceStackable(int id) => _instance._instanceStackableIds[id];
 
-		public IModifierRecipe GetRecipe(string id) => _recipes[id];
+		public IModifierGenerator GetGenerator(string id) => _modifierGenerators[id];
 
-		internal IModifierRecipe[] GetRecipes() => _recipes.Values.ToArray();
+		internal IModifierGenerator[] GetGenerators() => _modifierGenerators.Values.ToArray();
 
 		protected ModifierRecipe Add(string name)
 		{
@@ -138,10 +140,10 @@ namespace ModiBuff.Core
 			}
 		}
 
-		private struct RegisterData
+		private readonly struct RegisterData
 		{
-			public string Name;
-			public int Id;
+			public readonly string Name;
+			public readonly int Id;
 
 			public RegisterData(string name, int id)
 			{

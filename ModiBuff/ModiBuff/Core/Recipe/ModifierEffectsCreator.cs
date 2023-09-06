@@ -5,7 +5,7 @@ namespace ModiBuff.Core
 	/// <summary>
 	///		Class responsible for handling the correct cloning and sync of modifiers
 	/// </summary>
-	public sealed class ModifierCreator
+	public sealed class ModifierEffectsCreator
 	{
 		private readonly EffectWrapper[] _effectWrappersArray;
 		private readonly EffectWrapper _removeEffectWrapper;
@@ -19,7 +19,7 @@ namespace ModiBuff.Core
 
 		private int _revertEffectsIndex, _initEffectsIndex, _intervalEffectsIndex, _durationEffectsIndex, _stackEffectsIndex;
 
-		public ModifierCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper)
+		public ModifierEffectsCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper)
 		{
 			_effectWrappersArray = effectWrappers.ToArray();
 			_removeEffectWrapper = removeEffectWrapper;
@@ -71,7 +71,7 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public ModifierCreation Create(int genId)
+		public SyncedModifierEffects Create(int genId)
 		{
 			if (_initEffectsCount > 0)
 			{
@@ -144,18 +144,18 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _effectWrappersArray.Length; i++)
 				_effectWrappersArray[i].Reset();
 
-			return new ModifierCreation(_initEffectsArray, _intervalEffectsArray, _durationEffectsArray, _stackEffectsArray);
+			return new SyncedModifierEffects(_initEffectsArray, _intervalEffectsArray, _durationEffectsArray, _stackEffectsArray);
 		}
 	}
 
-	public readonly ref struct ModifierCreation
+	public readonly ref struct SyncedModifierEffects
 	{
 		public readonly IEffect[] InitEffects;
 		public readonly IEffect[] IntervalEffects;
 		public readonly IEffect[] DurationEffects;
 		public readonly IStackEffect[] StackEffects;
 
-		public ModifierCreation(IEffect[] initEffectsArray, IEffect[] intervalEffectsArray, IEffect[] durationEffectsArray,
+		public SyncedModifierEffects(IEffect[] initEffectsArray, IEffect[] intervalEffectsArray, IEffect[] durationEffectsArray,
 			IStackEffect[] stackEffectsArray)
 		{
 			InitEffects = initEffectsArray;

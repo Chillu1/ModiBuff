@@ -1,25 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ModiBuff.Core
 {
 	/// <summary>
 	///		High level API for creating modifiers.
 	/// </summary>
-	public sealed class ModifierRecipe : IModifierApplyCheckRecipe, IEquatable<ModifierRecipe>, IComparable<ModifierRecipe>
+	public sealed class ModifierRecipe : IModifierRecipe, IEquatable<ModifierRecipe>, IComparable<ModifierRecipe>
 	{
 		public int Id { get; }
-		public int GenId { get; private set; }
 		public string Name { get; }
-		public bool HasApplyChecks { get; private set; }
 
 		public readonly ModifierIdManager IdManager; //TODO Refactor to make it private/not needed
 
 		public bool IsInstanceStackable { get; private set; }
 		private bool _isAura;
-
-		private bool _hasEffectChecks;
 
 		private bool _oneTimeInit;
 
@@ -30,7 +25,7 @@ namespace ModiBuff.Core
 
 		private EffectWrapper _removeEffectWrapper; //TODO Remove effect can come from other means than Remove function
 
-		private List<EffectWrapper> _effectWrappers;
+		private readonly List<EffectWrapper> _effectWrappers;
 
 		private bool _refreshDuration, _refreshInterval;
 
@@ -39,32 +34,13 @@ namespace ModiBuff.Core
 		private int _maxStacks;
 		private int _everyXStacks;
 
-		private int _timeComponentCount;
-		private int _timeComponentIndex;
-
-		private ModifierCreator _modifierCreator;
-
-		private Func<ITargetComponent> _targetComponentFunc;
-
+		private bool _hasApplyChecks;
 		private List<ICheck> _applyCheckList;
 		private List<Func<IUnit, bool>> _applyFuncCheckList;
-		private Func<IUnit, bool>[] _applyFuncChecks;
-		private IUpdatableCheck[] _updatableApplyChecks;
-		private INoUnitCheck[] _noUnitApplyChecks;
-		private IUnitCheck[] _unitApplyChecks;
-		private IUsableCheck[] _usableApplyChecks;
-		private IStateCheck[] _stateApplyChecks;
-		private bool _hasStateApplyChecks;
 
+		private bool _hasEffectChecks;
 		private List<ICheck> _effectCheckList;
 		private List<Func<IUnit, bool>> _effectFuncCheckList;
-		private Func<IUnit, bool>[] _effectFuncChecks;
-		private IUpdatableCheck[] _updatableEffectChecks;
-		private INoUnitCheck[] _noUnitEffectChecks;
-		private IUnitCheck[] _unitEffectChecks;
-		private IUsableCheck[] _usableEffectChecks;
-		private IStateCheck[] _stateEffectChecks;
-		private bool _hasStateEffectChecks;
 
 		public ModifierRecipe(int id, string name, ModifierIdManager idManager)
 		{
@@ -73,75 +49,6 @@ namespace ModiBuff.Core
 			IdManager = idManager;
 
 			_effectWrappers = new List<EffectWrapper>(3);
-		}
-
-		//---PostFinish---
-
-		ModifierCheck IModifierApplyCheckRecipe.CreateApplyCheck()
-		{
-			IStateCheck[] stateChecks = null;
-			if (_hasStateApplyChecks)
-			{
-				stateChecks = new IStateCheck[_stateApplyChecks.Length];
-				for (int i = 0; i < _stateApplyChecks.Length; i++)
-				{
-					stateChecks[i] = (IStateCheck)_stateApplyChecks[i].ShallowClone();
-					// if (stateCheck is IUsableCheck usableCheck)
-					// 	usableChecks.Add(usableCheck);
-					// if (stateCheck is IUnitCheck unitCheck)
-					// 	unitChecks.Add(unitCheck);
-					// if (stateCheck is IUpdatableCheck updatableCheck)
-					// 	updatableChecks.Add(updatableCheck);
-					// if (stateCheck is INoUnitCheck noUnitCheck)
-					// 	noUnitChecks.Add(noUnitCheck);
-				}
-			}
-
-			return new ModifierCheck(Id, _applyFuncChecks, _updatableApplyChecks, _noUnitApplyChecks, _unitApplyChecks,
-				_usableApplyChecks, stateChecks);
-		}
-
-		Modifier IModifierRecipe.Create()
-		{
-			int genId = GenId++;
-			var creation = _modifierCreator.Create(genId);
-
-			ModifierCheck effectCheck = null;
-			if (_hasEffectChecks)
-			{
-				IStateCheck[] stateChecks = null;
-				if (_hasStateEffectChecks)
-				{
-					stateChecks = new IStateCheck[_stateEffectChecks.Length];
-					for (int i = 0; i < _stateEffectChecks.Length; i++)
-						stateChecks[i] = (IStateCheck)_stateEffectChecks[i].ShallowClone();
-				}
-
-				effectCheck = new ModifierCheck(Id, _effectFuncChecks, _updatableEffectChecks, _noUnitEffectChecks, _unitEffectChecks,
-					_usableEffectChecks, stateChecks);
-			}
-
-			InitComponent initComponent = null;
-			IStackComponent stackComponent = null;
-			ITimeComponent[] timeComponents = null;
-			if (_timeComponentCount > 0)
-			{
-				_timeComponentIndex = 0;
-				timeComponents = new ITimeComponent[_timeComponentCount];
-			}
-
-			if (creation.InitEffects != null)
-				initComponent = new InitComponent(_oneTimeInit, creation.InitEffects, effectCheck);
-			if (creation.IntervalEffects != null)
-				timeComponents[_timeComponentIndex++] = new IntervalComponent(_interval, _refreshInterval, creation.IntervalEffects,
-					effectCheck, _intervalAffectedByStatusResistance);
-			if (creation.DurationEffects != null)
-				timeComponents[_timeComponentIndex++] = new DurationComponent(_duration, _refreshDuration, creation.DurationEffects);
-			if (creation.StackEffects != null)
-				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _everyXStacks, creation.StackEffects,
-					effectCheck);
-
-			return new Modifier(Id, genId, Name, initComponent, timeComponents, stackComponent, effectCheck, _targetComponentFunc());
 		}
 
 		//---Misc---
@@ -165,7 +72,7 @@ namespace ModiBuff.Core
 			if (_applyFuncCheckList == null)
 				_applyFuncCheckList = new List<Func<IUnit, bool>>();
 			_applyFuncCheckList.Add(check);
-			HasApplyChecks = true;
+			_hasApplyChecks = true;
 			return this;
 		}
 
@@ -174,12 +81,11 @@ namespace ModiBuff.Core
 			if (_applyCheckList == null)
 				_applyCheckList = new List<ICheck>();
 			_applyCheckList.Add(check);
-			HasApplyChecks = true;
+			_hasApplyChecks = true;
 			return this;
 		}
 
 		//---EffectChecks---
-
 
 		public ModifierRecipe EffectCheck(Func<IUnit, bool> check)
 		{
@@ -327,103 +233,12 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		public void Finish()
+		public IModifierGenerator CreateModifierGenerator()
 		{
-#if DEBUG && !MODIBUFF_PROFILE
-			if (_modifierCreator != null)
-				Logger.LogError("Modifier recipe already finished, finishing again. Not intended?");
-
-			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Interval)) && _interval == 0)
-				Logger.LogError("Interval not set, but we have interval effects, for modifier: " + Name + " id: " + Id);
-			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Duration)) && _duration == 0)
-				Logger.LogError("Duration not set, but we have duration effects, for modifier: " + Name + " id: " + Id);
-#endif
-			if (_interval > 0)
-				_timeComponentCount++;
-			if (_duration > 0)
-				_timeComponentCount++;
-			//_timeComponents = new ITimeComponent[_timeComponentCount];
-
-			_modifierCreator = new ModifierCreator(_effectWrappers, _removeEffectWrapper);
-
-			if (_isAura)
-				_targetComponentFunc = () => new MultiTargetComponent();
-			else
-				_targetComponentFunc = () => new SingleTargetComponent();
-
-			if (HasApplyChecks)
-				SetupApplyChecks();
-
-			if (_hasEffectChecks)
-				SetupEffectChecks();
-
-			void SetupApplyChecks()
-			{
-				var updatableChecks = new List<IUpdatableCheck>();
-				var noUnitChecks = new List<INoUnitCheck>();
-				var unitChecks = new List<IUnitCheck>();
-				var usableChecks = new List<IUsableCheck>();
-				var stateChecks = new List<IStateCheck>();
-				if (_applyCheckList != null)
-					foreach (var check in _applyCheckList)
-					{
-						if (check is IStateCheck stateCheck)
-							stateChecks.Add(stateCheck);
-						else if (check is IUsableCheck usableCheck)
-							usableChecks.Add(usableCheck);
-						else if (check is IUnitCheck unitCheck)
-							unitChecks.Add(unitCheck);
-						else if (check is IUpdatableCheck updatableCheck)
-							updatableChecks.Add(updatableCheck);
-						else if (check is INoUnitCheck noUnitCheck)
-							noUnitChecks.Add(noUnitCheck);
-						else
-							Logger.LogError("Unknown check type: " + check.GetType());
-					}
-
-				_updatableApplyChecks = updatableChecks.ToArray();
-				_noUnitApplyChecks = noUnitChecks.ToArray();
-				_unitApplyChecks = unitChecks.ToArray();
-				_usableApplyChecks = usableChecks.ToArray();
-				_stateApplyChecks = stateChecks.ToArray();
-				_hasStateApplyChecks = _stateApplyChecks.Length > 0;
-
-				_applyFuncChecks = _applyFuncCheckList?.ToArray();
-			}
-
-			void SetupEffectChecks()
-			{
-				var updatableChecks = new List<IUpdatableCheck>();
-				var noUnitChecks = new List<INoUnitCheck>();
-				var unitChecks = new List<IUnitCheck>();
-				var usableChecks = new List<IUsableCheck>();
-				var stateChecks = new List<IStateCheck>();
-				if (_effectCheckList != null)
-					foreach (var check in _effectCheckList)
-					{
-						if (check is IStateCheck stateCheck)
-							stateChecks.Add(stateCheck);
-						else if (check is IUsableCheck usableCheck)
-							usableChecks.Add(usableCheck);
-						else if (check is IUnitCheck unitCheck)
-							unitChecks.Add(unitCheck);
-						else if (check is IUpdatableCheck updatableCheck)
-							updatableChecks.Add(updatableCheck);
-						else if (check is INoUnitCheck noUnitCheck)
-							noUnitChecks.Add(noUnitCheck);
-						else
-							Logger.LogError("Unknown check type: " + check.GetType());
-					}
-
-				_updatableEffectChecks = updatableChecks.ToArray();
-				_noUnitEffectChecks = noUnitChecks.ToArray();
-				_unitEffectChecks = unitChecks.ToArray();
-				_usableEffectChecks = usableChecks.ToArray();
-				_stateEffectChecks = stateChecks.ToArray();
-				_hasStateEffectChecks = _stateEffectChecks.Length > 0;
-
-				_effectFuncChecks = _effectFuncCheckList?.ToArray();
-			}
+			return new ModifierGenerator(Id, Name, _effectWrappers, _removeEffectWrapper, _hasApplyChecks, _applyCheckList,
+				_hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura, _oneTimeInit, _interval,
+				_intervalAffectedByStatusResistance, _duration, _refreshDuration, _refreshInterval, _whenStackEffect, _stackValue,
+				_maxStacks, _everyXStacks);
 		}
 
 		public int CompareTo(ModifierRecipe other) => Id.CompareTo(other.Id);

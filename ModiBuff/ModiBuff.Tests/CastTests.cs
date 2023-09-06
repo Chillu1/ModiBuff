@@ -9,7 +9,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CastInitDamageNoChecks_OnEnemy()
 		{
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage"), ApplierType.Cast);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Cast);
 
 			Unit.TryCast(IdManager.GetId("InitDamage"), Enemy);
 
@@ -19,7 +19,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CastInitDamageChecks_OnEnemy()
 		{
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamageFullHealth"), ApplierType.Cast);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageFullHealth"), ApplierType.Cast);
 
 			Unit.TryCast(IdManager.GetId("InitDamageFullHealth"), Enemy);
 
@@ -35,7 +35,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackInitDamageNoChecks_OnEnemy()
 		{
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage"), ApplierType.Attack);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Attack);
 
 			Unit.Attack(Enemy);
 
@@ -45,7 +45,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackInitDamageChecks_OnEnemy()
 		{
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamageFullHealth"), ApplierType.Attack);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageFullHealth"), ApplierType.Attack);
 
 			Unit.Attack(Enemy);
 
@@ -63,7 +63,7 @@ namespace ModiBuff.Tests
 		{
 			int id = IdManager.GetId("InitDamageFullHealth");
 
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamageFullHealth"), ApplierType.Cast);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageFullHealth"), ApplierType.Cast);
 
 			Assert.True(Unit.ModifierController.TryCastCheck(id));
 			Assert.AreEqual(EnemyHealth, Enemy.Health);

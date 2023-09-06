@@ -12,18 +12,18 @@ namespace ModiBuff.Core
 		private readonly int[] _poolTops;
 		private readonly ModifierCheck[][] _checkPools;
 		private readonly int[] _checkPoolTops;
-		private readonly IModifierRecipe[] _recipes;
-		private readonly IModifierApplyCheckRecipe[] _applyCheckRecipes;
+		private readonly IModifierGenerator[] _generators;
+		private readonly IModifierApplyCheckGenerator[] _applyCheckRecipes;
 
 #if DEBUG && !MODIBUFF_PROFILE
 		private readonly int[] _maxModifiersCreated;
 #endif
 
-		public ModifierPool(ModifierRecipes recipes) : this(recipes.GetRecipes())
+		public ModifierPool(ModifierRecipes recipes) : this(recipes.GetGenerators())
 		{
 		}
 
-		public ModifierPool(IModifierRecipe[] recipes)
+		public ModifierPool(IModifierGenerator[] generators)
 		{
 			if (Instance != null)
 				return;
@@ -32,42 +32,42 @@ namespace ModiBuff.Core
 
 			int initialSize = Math.Max(Config.PoolSize, 1);
 
-			_pools = new Modifier[recipes.Length][];
-			_poolTops = new int[recipes.Length];
-			_checkPools = new ModifierCheck[recipes.Length][];
-			_checkPoolTops = new int[recipes.Length];
-			_recipes = new IModifierRecipe[recipes.Length];
-			_applyCheckRecipes = new IModifierApplyCheckRecipe[recipes.Length];
+			_pools = new Modifier[generators.Length][];
+			_poolTops = new int[generators.Length];
+			_checkPools = new ModifierCheck[generators.Length][];
+			_checkPoolTops = new int[generators.Length];
+			_generators = new IModifierGenerator[generators.Length];
+			_applyCheckRecipes = new IModifierApplyCheckGenerator[generators.Length];
 
 #if DEBUG && !MODIBUFF_PROFILE
-			_maxModifiersCreated = new int[recipes.Length];
+			_maxModifiersCreated = new int[generators.Length];
 #endif
 
-			foreach (var recipe in recipes)
+			foreach (var generator in generators)
 			{
-				if (Config.ModifierAllocationsCount.TryGetValue(recipe.Name, out int count))
-					_pools[recipe.Id] = new Modifier[count];
+				if (Config.ModifierAllocationsCount.TryGetValue(generator.Name, out int count))
+					_pools[generator.Id] = new Modifier[count];
 				else
-					_pools[recipe.Id] = new Modifier[initialSize];
-				_recipes[recipe.Id] = recipe;
+					_pools[generator.Id] = new Modifier[initialSize];
+				_generators[generator.Id] = generator;
 
-				if (recipe is IModifierApplyCheckRecipe applyCheckRecipe)
+				if (generator is IModifierApplyCheckGenerator applyCheckRecipe)
 				{
 					if (Config.ModifierAllocationsCount.TryGetValue(applyCheckRecipe.Name, out int applyCount))
-						_checkPools[recipe.Id] = new ModifierCheck[applyCount];
+						_checkPools[generator.Id] = new ModifierCheck[applyCount];
 					else
-						_checkPools[recipe.Id] = new ModifierCheck[initialSize];
-					_applyCheckRecipes[recipe.Id] = applyCheckRecipe;
+						_checkPools[generator.Id] = new ModifierCheck[initialSize];
+					_applyCheckRecipes[generator.Id] = applyCheckRecipe;
 
-					AllocateDoubleChecks(recipe.Id);
+					AllocateDoubleChecks(generator.Id);
 				}
 
-				AllocateDouble(recipe.Id);
+				AllocateDouble(generator.Id);
 			}
 
 			Array.Sort(_pools, (x, y) => x[0].Id.CompareTo(y[0].Id));
 			Array.Sort(_poolTops, (x, y) => x.CompareTo(y));
-			Array.Sort(_recipes, (x, y) => x.Id.CompareTo(y.Id));
+			Array.Sort(_generators, (x, y) => x.Id.CompareTo(y.Id));
 			//Array.Sort(_checkPools, (x, y) => x[0].Id.CompareTo(y[0].Id));
 			//Array.Sort(_checkPoolTops, (x, y) => x.CompareTo(y));
 
@@ -109,7 +109,7 @@ namespace ModiBuff.Core
 
 		internal void Allocate(int id, int count)
 		{
-			var recipe = _recipes[id];
+			var generator = _generators[id];
 			int poolLength = _pools[id].Length; //Don't cache pool array, it can be resized.
 
 			if (count + _poolTops[id] > poolLength)
@@ -121,10 +121,10 @@ namespace ModiBuff.Core
 			}
 
 			for (int i = 0; i < count; i++)
-				_pools[id][_poolTops[id]++] = recipe.Create();
+				_pools[id][_poolTops[id]++] = generator.Create();
 
 			if (_poolTops[id] > MaxPoolSize)
-				throw new Exception($"Modifier pool for {recipe.Name} is over the max pool size of {MaxPoolSize}.");
+				throw new Exception($"Modifier pool for {generator.Name} is over the max pool size of {MaxPoolSize}.");
 
 #if DEBUG && !MODIBUFF_PROFILE
 			if (_pools[id].Length > _maxModifiersCreated[id])
@@ -137,17 +137,17 @@ namespace ModiBuff.Core
 		/// </summary>
 		internal void AllocateDouble(int id)
 		{
-			var recipe = _recipes[id];
+			var generator = _generators[id];
 			int poolLength = _pools[id].Length; //Don't cache pool array, it can be resized.
 
 			if (_poolTops[id] == poolLength)
 				Resize(id, poolLength << 1);
 
 			for (int i = 0; i < poolLength; i++)
-				_pools[id][_poolTops[id]++] = recipe.Create();
+				_pools[id][_poolTops[id]++] = generator.Create();
 
 			if (_poolTops[id] > MaxPoolSize)
-				throw new Exception($"Modifier pool for {recipe.Name} is over the max pool size of {MaxPoolSize}.");
+				throw new Exception($"Modifier pool for {generator.Name} is over the max pool size of {MaxPoolSize}.");
 
 #if DEBUG && !MODIBUFF_PROFILE
 			if (_pools[id].Length > _maxModifiersCreated[id])
@@ -211,11 +211,11 @@ namespace ModiBuff.Core
 		public void PrintMaxModifiersCreated()
 		{
 			//Print out max modifier sorted by biggest pool
-			int[] maxModifiersCreated = new int[_recipes.Length];
-			Array.Copy(_maxModifiersCreated, maxModifiersCreated, _recipes.Length);
+			int[] maxModifiersCreated = new int[_generators.Length];
+			Array.Copy(_maxModifiersCreated, maxModifiersCreated, _generators.Length);
 			Array.Sort(maxModifiersCreated, (x, y) => y.CompareTo(x));
 			for (int i = 0; i < maxModifiersCreated.Length; i++)
-				Logger.Log($"{_recipes[i].Name}: {maxModifiersCreated[i]}");
+				Logger.Log($"{_generators[i].Name}: {maxModifiersCreated[i]}");
 		}
 #endif
 
@@ -233,7 +233,7 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public void Dispose()
+		public void Dispose() //TODO Not really disposable
 		{
 			if (_pools == null) //Somehow this is true in bench?
 				return;

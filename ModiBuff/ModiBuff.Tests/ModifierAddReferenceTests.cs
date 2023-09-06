@@ -8,8 +8,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddSelfModifier()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage");
-			var modifierReference = new ModifierAddReference(recipe);
+			var generator = Recipes.GetGenerator("InitDamage");
+			var modifierReference = new ModifierAddReference(generator);
 
 			Unit.ModifierController.TryAdd(modifierReference);
 
@@ -19,8 +19,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddTargetModifier()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage");
-			var modifierReference = new ModifierAddReference(recipe);
+			var generator = Recipes.GetGenerator("InitDamage");
+			var modifierReference = new ModifierAddReference(generator);
 
 			Unit.ModifierController.TryAdd(modifierReference, Enemy);
 
@@ -30,8 +30,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddTargetApplyAttackModifier()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage");
-			var modifierReference = new ModifierAddReference(recipe, ApplierType.Attack);
+			var generator = Recipes.GetGenerator("InitDamage");
+			var modifierReference = new ModifierAddReference(generator, ApplierType.Attack);
 
 			Unit.ModifierController.TryAdd(modifierReference);
 
@@ -43,8 +43,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddSelfApplyAttackModifier()
 		{
-			var recipe = Recipes.GetRecipe("InitDamageSelf");
-			var modifierReference = new ModifierAddReference(recipe, ApplierType.Attack);
+			var generator = Recipes.GetGenerator("InitDamageSelf");
+			var modifierReference = new ModifierAddReference(generator, ApplierType.Attack);
 
 			Unit.ModifierController.TryAdd(modifierReference);
 
@@ -56,12 +56,12 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddTargetApplyCastModifier()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage");
-			var modifierReference = new ModifierAddReference(recipe, ApplierType.Cast);
+			var generator = Recipes.GetGenerator("InitDamage");
+			var modifierReference = new ModifierAddReference(generator, ApplierType.Cast);
 
 			Unit.ModifierController.TryAdd(modifierReference);
 
-			Unit.TryCast(recipe.Id, Enemy);
+			Unit.TryCast(generator.Id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}

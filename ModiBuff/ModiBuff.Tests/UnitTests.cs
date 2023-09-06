@@ -50,9 +50,9 @@ namespace ModiBuff.Tests
 			var unit = new Unit();
 
 			unit.AddModifierSelf("InitDamage");
-			unit.AddApplierModifier(Recipes.GetRecipe("InitDamage"), ApplierType.Attack);
-			unit.AddApplierModifier(Recipes.GetRecipe("InitDamage"), ApplierType.Cast);
-			unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_ApplyCondition_HealthAbove100"), ApplierType.Attack);
+			unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Attack);
+			unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Cast);
+			unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_ApplyCondition_HealthAbove100"), ApplierType.Attack);
 
 			unit.TakeDamage(unit.Health, unit); //Unit dies, all modifiers should be returned to pool
 

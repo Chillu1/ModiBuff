@@ -5,8 +5,6 @@ namespace ModiBuff.Core
 		int Id { get; }
 		string Name { get; }
 
-		Modifier Create();
-
-		void Finish();
+		IModifierGenerator CreateModifierGenerator();
 	}
 }

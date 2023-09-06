@@ -204,6 +204,8 @@ namespace ModiBuff.Core
 				if (_modifiers[i].Id == id)
 					return true;
 
+			//TODO GenId if we want to check for specific modifiers
+
 			return false;
 		}
 

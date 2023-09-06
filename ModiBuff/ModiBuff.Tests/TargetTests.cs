@@ -8,11 +8,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void MultiTarget_AddDamage_Revertible()
 		{
-			var recipe = Recipes.GetRecipe("InitAddDamageRevertible");
-			Unit.AddApplierModifier(recipe, ApplierType.Cast);
+			var generator = Recipes.GetGenerator("InitAddDamageRevertible");
+			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
-			Unit.TryCast(recipe.Id, Enemy);
-			Unit.TryCast(recipe.Id, Ally);
+			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(generator.Id, Ally);
 
 			Assert.AreEqual(EnemyDamage + 5, Enemy.Damage);
 			Assert.AreEqual(AllyDamage + 5, Ally.Damage);

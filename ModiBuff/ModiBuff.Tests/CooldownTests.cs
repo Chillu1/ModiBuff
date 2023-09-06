@@ -8,7 +8,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamage_Cooldown()
 		{
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage_Cooldown"), ApplierType.Attack);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_Cooldown"), ApplierType.Attack);
 
 			Unit.Attack(Enemy);
 

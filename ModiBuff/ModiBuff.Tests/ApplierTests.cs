@@ -10,7 +10,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageApplier_Attack_Damage()
 		{
-			var applier = Recipes.GetRecipe("InitDamage");
+			var applier = Recipes.GetGenerator("InitDamage");
 			Unit.AddApplierModifier(applier, ApplierType.Attack);
 
 			Unit.Attack(Enemy);
@@ -21,7 +21,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealApplier_Attack_Heal()
 		{
-			var applier = Recipes.GetRecipe("InitStrongHeal");
+			var applier = Recipes.GetGenerator("InitStrongHeal");
 			Unit.AddApplierModifier(applier, ApplierType.Attack);
 
 			Unit.Attack(Enemy);
@@ -32,8 +32,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageSelfApplier_Attack_DamageSelf()
 		{
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamageSelf"), ApplierType.Attack);
-			Unit.AddApplierModifier(Recipes.GetRecipe("InitDamage"), ApplierType.Attack);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageSelf"), ApplierType.Attack);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Attack);
 
 			Unit.Attack(Enemy);
 
@@ -43,7 +43,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageApplier_Cast_Damage()
 		{
-			var applier = Recipes.GetRecipe("InitDamage");
+			var applier = Recipes.GetGenerator("InitDamage");
 			Unit.AddApplierModifier(applier, ApplierType.Cast);
 
 			ModifierOwnerExtensions.TryCast(Unit, applier.Id, Enemy);
@@ -68,11 +68,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamageCostMana()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage_CostMana");
+			var generator = Recipes.GetGenerator("InitDamage_CostMana");
 
-			Unit.AddApplierModifier(recipe, ApplierType.Cast);
+			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
-			ModifierOwnerExtensions.TryCast(Unit, recipe.Id, Enemy);
+			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
 
 			Assert.AreEqual(UnitMana - 5, Unit.Mana);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
@@ -121,7 +121,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ModifierDoesntExist()
 		{
-			Assert.Catch<KeyNotFoundException>(() => Recipes.GetRecipe("NonExistentApplier"));
+			Assert.Catch<KeyNotFoundException>(() => Recipes.GetGenerator("NonExistentApplier"));
 		}
 
 		private sealed class TestLogger : ILogger

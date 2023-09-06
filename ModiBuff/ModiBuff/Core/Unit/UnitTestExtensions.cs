@@ -22,9 +22,10 @@ namespace ModiBuff.Core
 			return unit.ModifierController.ContainsApplier(ModifierIdManager.GetIdOld(name));
 		}
 
-		internal static bool AddApplierModifier(this IModifierOwner unit, IModifierRecipe recipe, ApplierType applierType)
+		internal static bool AddApplierModifier(this IModifierOwner unit, IModifierGenerator generator, ApplierType applierType)
 		{
-			return unit.ModifierController.TryAddApplier(recipe.Id, ((IModifierApplyCheckRecipe)recipe).HasApplyChecks, applierType);
+			return unit.ModifierController.TryAddApplier(generator.Id, ((IModifierApplyCheckGenerator)generator).HasApplyChecks,
+				applierType);
 		}
 	}
 }

@@ -8,28 +8,28 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealthCondition_OnApply_InitDamage()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage_ApplyCondition_HealthAbove100");
+			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_HealthAbove100");
 
 			Unit.TakeDamage(UnitHealth - 6, Unit); //6hp left
 
-			Unit.AddApplierModifier(recipe, ApplierType.Cast);
-			Unit.TryCast(recipe.Id, Unit);
+			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			Unit.TryCast(generator.Id, Unit);
 			Assert.AreEqual(UnitHealth - UnitHealth + 6, Unit.Health);
 		}
 
 		[Test]
 		public void ManaCondition_OnApply_InitDamage()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage_ApplyCondition_ManaBelow100");
+			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_ManaBelow100");
 
-			Unit.AddApplierModifier(recipe, ApplierType.Cast);
-			Unit.TryCast(recipe.Id, Unit);
+			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			Unit.TryCast(generator.Id, Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.UseMana(UnitMana - 100); //100 mana left
 
-			Unit.AddApplierModifier(recipe, ApplierType.Cast);
-			Unit.TryCast(recipe.Id, Unit);
+			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			Unit.TryCast(generator.Id, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
@@ -89,14 +89,14 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HasModifier_OnApply_InitDamage()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage_ApplyCondition_ContainsModifier");
+			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_ContainsModifier");
 
-			Unit.AddApplierModifier(recipe, ApplierType.Cast);
-			Unit.TryCast(recipe.Id, Unit);
+			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			Unit.TryCast(generator.Id, Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.AddModifierSelf("FlagApply");
-			Unit.TryCast(recipe.Id, Unit);
+			Unit.TryCast(generator.Id, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
@@ -114,14 +114,14 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HasStatusEffect_OnApply_InitDamage()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage_ApplyCondition_FreezeStatusEffect");
+			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_FreezeStatusEffect");
 
-			Unit.AddApplierModifier(recipe, ApplierType.Cast);
-			Unit.TryCast(recipe.Id, Unit);
+			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			Unit.TryCast(generator.Id, Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.AddModifierSelf("InitFreeze");
-			Unit.TryCast(recipe.Id, Unit);
+			Unit.TryCast(generator.Id, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
@@ -139,14 +139,14 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HasLegalAction_OnApply_InitDamage()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage_ApplyCondition_ActLegalAction");
+			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_ActLegalAction");
 
-			Unit.AddApplierModifier(recipe, ApplierType.Cast);
-			Unit.TryCast(recipe.Id, Unit);
+			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			Unit.TryCast(generator.Id, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
 			Unit.AddModifierSelf("InitFreeze");
-			Unit.TryCast(recipe.Id, Unit);
+			Unit.TryCast(generator.Id, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
@@ -168,18 +168,18 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Combination_OnApply_InitDamage()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage_ApplyCondition_Combination");
+			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_Combination");
 
-			Unit.AddApplierModifier(recipe, ApplierType.Cast);
-			Unit.TryCast(recipe.Id, Unit);
+			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			Unit.TryCast(generator.Id, Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.AddModifierSelf("InitFreeze");
-			Unit.TryCast(recipe.Id, Unit);
+			Unit.TryCast(generator.Id, Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.AddModifierSelf("FlagApply");
-			Unit.TryCast(recipe.Id, Unit);
+			Unit.TryCast(generator.Id, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 

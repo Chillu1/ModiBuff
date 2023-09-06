@@ -39,14 +39,14 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Silence_CantCast()
 		{
-			var recipe = Recipes.GetRecipe("InitDamage");
+			var generator = Recipes.GetGenerator("InitDamage");
 
-			Unit.AddApplierModifier(recipe, ApplierType.Cast);
+			Unit.AddApplierModifier(generator, ApplierType.Cast);
 			Unit.AddModifierSelf("InitSilence");
 
 			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Silence));
 
-			Unit.TryCast(recipe.Id, Enemy);
+			Unit.TryCast(generator.Id, Enemy);
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
 		}
 

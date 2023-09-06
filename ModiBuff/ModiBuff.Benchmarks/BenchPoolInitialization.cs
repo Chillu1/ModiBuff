@@ -28,7 +28,7 @@ namespace ModiBuff.Tests
 		[Benchmark]
 		public void BenchAllocatePool()
 		{
-			_pool = new ModifierPool(_recipes.GetRecipes());
+			_pool = new ModifierPool(_recipes.GetGenerators());
 		}
 
 		[IterationCleanup]

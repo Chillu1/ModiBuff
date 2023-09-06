@@ -11,18 +11,18 @@ namespace ModiBuff.Core
 		public bool HasApplyChecks { get; }
 		public ApplierType ApplierType { get; }
 
-		public ModifierAddReference(IModifierRecipe recipe, ApplierType applierType = ApplierType.None)
+		public ModifierAddReference(IModifierGenerator generator, ApplierType applierType = ApplierType.None)
 		{
-			Id = recipe.Id;
-			if (recipe is IModifierApplyCheckRecipe applyCheckRecipe)
-				HasApplyChecks = applyCheckRecipe.HasApplyChecks;
+			Id = generator.Id;
+			if (generator is IModifierApplyCheckGenerator applyCheckGenerator)
+				HasApplyChecks = applyCheckGenerator.HasApplyChecks;
 			ApplierType = applierType;
 		}
 
-		public ModifierAddReference(IModifierApplyCheckRecipe recipe, ApplierType applierType = ApplierType.None)
+		public ModifierAddReference(IModifierApplyCheckGenerator generator, ApplierType applierType = ApplierType.None)
 		{
-			Id = recipe.Id;
-			HasApplyChecks = recipe.HasApplyChecks;
+			Id = generator.Id;
+			HasApplyChecks = generator.HasApplyChecks;
 			ApplierType = applierType;
 		}
 	}

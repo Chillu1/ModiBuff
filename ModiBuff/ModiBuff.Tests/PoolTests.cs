@@ -53,11 +53,11 @@ namespace ModiBuff.Tests
 
 			var modifiers = new Modifier[count];
 
-			var recipe = Recipes.GetRecipe("InitDamage");
-			Pool.Allocate(recipe.Id, count);
+			var generator = Recipes.GetGenerator("InitDamage");
+			Pool.Allocate(generator.Id, count);
 
 			for (int i = 0; i < count; i++)
-				modifiers[i] = Pool.Rent(recipe.Id);
+				modifiers[i] = Pool.Rent(generator.Id);
 
 			for (int i = 0; i < count; i++)
 				Pool.Return(modifiers[i]);
@@ -72,7 +72,7 @@ namespace ModiBuff.Tests
 
 			var idManager = new ModifierIdManager();
 			var recipes = new TestModifierRecipes(idManager);
-			var pool = new ModifierPool(recipes.GetRecipes());
+			var pool = new ModifierPool(recipes.GetGenerators());
 
 			Config.Reset();
 		}

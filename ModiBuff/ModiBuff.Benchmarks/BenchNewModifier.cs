@@ -6,17 +6,17 @@ namespace ModiBuff.Tests
 	[MemoryDiagnoser]
 	public class BenchNewModifier : ModifierBenches
 	{
-		private IModifierRecipe _initDamageRecipe;
-		private IModifierRecipe _initDoTSeparateDamageRemoveRecipe;
-		private IModifierRecipe _intervalDamageStackAddDamageRecipe;
+		private IModifierGenerator _initDamageRecipe;
+		private IModifierGenerator _initDoTSeparateDamageRemoveRecipe;
+		private IModifierGenerator _intervalDamageStackAddDamageRecipe;
 
 		public override void GlobalSetup()
 		{
 			base.GlobalSetup();
 
-			_initDamageRecipe = Recipes.GetRecipe("InitDamage");
-			_initDoTSeparateDamageRemoveRecipe = Recipes.GetRecipe("InitDoTSeparateDamageRemove");
-			_intervalDamageStackAddDamageRecipe = Recipes.GetRecipe("IntervalDamage_StackAddDamage");
+			_initDamageRecipe = Recipes.GetGenerator("InitDamage");
+			_initDoTSeparateDamageRemoveRecipe = Recipes.GetGenerator("InitDoTSeparateDamageRemove");
+			_intervalDamageStackAddDamageRecipe = Recipes.GetGenerator("IntervalDamage_StackAddDamage");
 
 			Pool.Clear();
 			Pool.SetMaxPoolSize(1_000_000);

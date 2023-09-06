@@ -17,7 +17,7 @@ namespace ModiBuff.Tests
 
 			IdManager = new ModifierIdManager();
 			Recipes = new TestModifierRecipes(IdManager);
-			Pool = new ModifierPool(Recipes.GetRecipes());
+			Pool = new ModifierPool(Recipes.GetGenerators());
 		}
 
 		[GlobalCleanup]

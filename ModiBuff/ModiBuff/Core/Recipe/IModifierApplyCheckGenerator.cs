@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public interface IModifierApplyCheckRecipe : IModifierRecipe
+	public interface IModifierApplyCheckGenerator : IModifierGenerator
 	{
 		bool HasApplyChecks { get; }
 
