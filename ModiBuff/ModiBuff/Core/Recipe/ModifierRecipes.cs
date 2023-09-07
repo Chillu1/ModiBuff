@@ -47,7 +47,15 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Call this, and feed an event effect func factory to use the event recipes.
 		/// </summary>
-		protected void SetupEventEffect(EventEffectFactory eventEffectFunc) => _eventEffectFunc = eventEffectFunc;
+		protected void SetupEventEffect<TEvent>(EventEffectFactory eventEffectFunc)
+		{
+#if DEBUG && !MODIBUFF_PROFILE
+			if (eventEffectFunc(new IEffect[0], default(TEvent)) is IRevertEffect revertEffect && revertEffect.IsRevertible)
+				Logger.LogError("Event effect func does not return an effect that implements IRevertEffect, or is not revertible.");
+#endif
+
+			_eventEffectFunc = eventEffectFunc;
+		}
 
 		public static bool IsInstanceStackable(int id) => _instance._instanceStackableIds[id];
 

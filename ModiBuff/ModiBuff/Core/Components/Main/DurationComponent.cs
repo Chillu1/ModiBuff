@@ -21,10 +21,6 @@ namespace ModiBuff.Core
 			_effects = effects;
 		}
 
-		public DurationComponent(float duration, bool refreshable, IEffect effect) : this(duration, refreshable, new[] { effect })
-		{
-		}
-
 		public void SetupTarget(ITargetComponent targetComponent)
 		{
 			_targetComponent = targetComponent;

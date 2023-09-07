@@ -10,10 +10,6 @@ namespace ModiBuff.Core
 
 		private bool _isInitialized;
 
-		public InitComponent(bool oneTimeInit, IEffect effect, ModifierCheck check) : this(oneTimeInit, new[] { effect }, check)
-		{
-		}
-
 		public InitComponent(bool oneTimeInit, IEffect[] effects, ModifierCheck check)
 		{
 			_oneTime = oneTimeInit;

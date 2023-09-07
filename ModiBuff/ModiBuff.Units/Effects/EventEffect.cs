@@ -8,10 +8,6 @@ namespace ModiBuff.Core.Units
 		private readonly IEffect[] _effects;
 		private readonly TEvent _effectOnEvent;
 
-		public EventEffect(IEffect effect, TEvent effectOnEvent) : this(new[] { effect }, effectOnEvent)
-		{
-		}
-
 		public EventEffect(IEffect[] effects, TEvent effectOnEvent)
 		{
 			for (int i = 0; i < effects.Length; i++)

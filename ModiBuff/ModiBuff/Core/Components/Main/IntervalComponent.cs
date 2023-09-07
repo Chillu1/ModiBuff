@@ -29,11 +29,6 @@ namespace ModiBuff.Core
 			_usesStatusResistance = affectedByStatusResistance;
 		}
 
-		public IntervalComponent(float interval, bool refreshable, IEffect effect, ModifierCheck check, bool usesStatusResistance) :
-			this(interval, refreshable, new[] { effect }, check, usesStatusResistance)
-		{
-		}
-
 		public void SetupTarget(ITargetComponent targetComponent)
 		{
 			_targetComponent = targetComponent;

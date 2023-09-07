@@ -53,8 +53,8 @@ namespace ModiBuff.Tests
 			_hasTarget = false;
 			_timeComponents = new ITimeComponent[]
 			{
-				new IntervalComponent(5, false, (IEffect)null, null, false), new IntervalComponent(5, false, (IEffect)null, null, false),
-				new DurationComponent(5, false, (IEffect)null),
+				new IntervalComponent(5, false, null, null, false), new IntervalComponent(5, false, null, null, false),
+				new DurationComponent(5, false, null),
 			};
 			_hasTime = true;
 
