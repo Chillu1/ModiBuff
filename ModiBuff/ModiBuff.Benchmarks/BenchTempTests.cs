@@ -23,6 +23,10 @@ namespace ModiBuff.Tests
 		private Dictionary<int, ModifierCheck> _modifierCastChecksAppliers;
 		private Dictionary<int, ModifierCheck> _modifierAttackChecksAppliers;
 
+		private int _timeComponentCount;
+		private int _timeComponentIndex;
+		private Func<ITimeComponent[]> _timeComponentFunc;
+
 		public override void GlobalSetup()
 		{
 			base.GlobalSetup();
@@ -60,6 +64,14 @@ namespace ModiBuff.Tests
 			_modifierAttackChecksAppliers = new Dictionary<int, ModifierCheck>();
 			_modifierAttackChecksAppliers.Add(applierId, Pool.RentModifierCheck(applierId));
 			_modifierAttackChecksAppliers.Add(applierTwoId, Pool.RentModifierCheck(applierTwoId));
+
+			_timeComponentCount = 0; //2
+			_timeComponentFunc = () => null;
+			//_timeComponentFunc = () =>
+			//{
+			//_timeComponentIndex = 0;
+			//return new ITimeComponent[_timeComponentCount];
+			//};
 		}
 
 		//[Benchmark(Baseline = true)]
@@ -124,7 +136,7 @@ namespace ModiBuff.Tests
 				}
 		}
 
-		[Benchmark(Baseline = true)]
+		//[Benchmark(Baseline = true)]
 		public void ForEachLoopNoCheck()
 		{
 			foreach (var check in _modifierCastChecksAppliers.Values)
@@ -134,7 +146,7 @@ namespace ModiBuff.Tests
 				check.Update(Delta);
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void ForEachLoopCheck()
 		{
 			if (_modifierCastChecksAppliers.Count > 0)
@@ -146,7 +158,7 @@ namespace ModiBuff.Tests
 					check.Update(Delta);
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void ForEachLoopNoCheckKey()
 		{
 			foreach (var check in _modifierCastChecksAppliers)
@@ -154,6 +166,27 @@ namespace ModiBuff.Tests
 
 			foreach (var check in _modifierAttackChecksAppliers)
 				check.Value.Update(Delta);
+		}
+
+		[Benchmark(Baseline = true)]
+		public void IfTimeComponentCount()
+		{
+			ITimeComponent[] timeComponents = null;
+			if (_timeComponentCount > 0)
+			{
+				_timeComponentIndex = 0;
+				timeComponents = new ITimeComponent[_timeComponentCount];
+			}
+
+			var test = timeComponents;
+		}
+
+		[Benchmark]
+		public void FuncTimeComponentCount()
+		{
+			var timeComponents = _timeComponentFunc();
+
+			var test = timeComponents;
 		}
 	}
 }

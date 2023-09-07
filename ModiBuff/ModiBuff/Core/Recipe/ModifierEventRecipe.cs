@@ -12,7 +12,7 @@ namespace ModiBuff.Core
 		public int Id { get; }
 		public string Name { get; }
 
-		private readonly int _effectOnEvent;
+		private readonly object _effectOnEvent;
 		private readonly EventEffectFactory _eventEffectFunc;
 
 		private readonly List<EffectWrapper> _effects;
@@ -22,7 +22,7 @@ namespace ModiBuff.Core
 
 		private bool _refreshDuration;
 
-		public ModifierEventRecipe(int id, string name, int effectOnEvent, EventEffectFactory eventEffectFunc)
+		public ModifierEventRecipe(int id, string name, object effectOnEvent, EventEffectFactory eventEffectFunc)
 		{
 			Id = id;
 			Name = name;

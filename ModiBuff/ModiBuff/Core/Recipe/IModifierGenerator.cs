@@ -5,6 +5,9 @@ namespace ModiBuff.Core
 		int Id { get; }
 		string Name { get; }
 
-		Modifier Create();
+		/// <summary>
+		///		Do not call manually, use pool instead.
+		/// </summary>
+		Modifier Create(); //TODO Refactor so this can't be used outside of pool/by user
 	}
 }

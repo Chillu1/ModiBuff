@@ -18,7 +18,7 @@ namespace ModiBuff.Core
 
 		private EventEffectFactory _eventEffectFunc;
 
-		public ModifierRecipes(ModifierIdManager idManager)
+		protected ModifierRecipes(ModifierIdManager idManager)
 		{
 			_instance = this;
 
@@ -84,9 +84,9 @@ namespace ModiBuff.Core
 			return recipe;
 		}
 
-		protected ModifierEventRecipe AddEvent<T>(string name, T effectOnEvent) => AddEvent(name, (int)(object)effectOnEvent);
+		protected ModifierEventRecipe AddEvent<T>(string name, T effectOnEvent) => AddEvent(name, (object)effectOnEvent);
 
-		protected ModifierEventRecipe AddEvent(string name, int effectOnEvent)
+		protected ModifierEventRecipe AddEvent(string name, object effectOnEvent)
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (_eventEffectFunc == null)

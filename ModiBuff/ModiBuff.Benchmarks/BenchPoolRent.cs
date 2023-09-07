@@ -8,18 +8,18 @@ namespace ModiBuff.Tests
 	{
 		private const int Iterations = (int)1e5;
 
-		private IModifierGenerator _initDoTSeparateDamageRemoveGenerator;
+		private int _initDoTSeparateDamageRemoveId;
 
 		public override void GlobalSetup()
 		{
 			base.GlobalSetup();
 
-			_initDoTSeparateDamageRemoveGenerator = Recipes.GetGenerator("InitDoTSeparateDamageRemove");
+			_initDoTSeparateDamageRemoveId = Recipes.GetGenerator("InitDoTSeparateDamageRemove").Id;
 
 			Pool.Clear();
 			Pool.SetMaxPoolSize(1_000_000);
 
-			Pool.Allocate(_initDoTSeparateDamageRemoveGenerator.Id, Iterations);
+			Pool.Allocate(_initDoTSeparateDamageRemoveId, Iterations);
 		}
 
 		[IterationSetup]
@@ -27,7 +27,7 @@ namespace ModiBuff.Tests
 		{
 			Pool.Clear();
 
-			Pool.Allocate(_initDoTSeparateDamageRemoveGenerator.Id, Iterations);
+			Pool.Allocate(_initDoTSeparateDamageRemoveId, Iterations);
 		}
 
 		[Benchmark(OperationsPerInvoke = Iterations)]
@@ -35,7 +35,7 @@ namespace ModiBuff.Tests
 		{
 			for (int i = 0; i < Iterations; i++)
 			{
-				var modifier = Pool.Rent(_initDoTSeparateDamageRemoveGenerator.Id);
+				var modifier = Pool.Rent(_initDoTSeparateDamageRemoveId);
 			}
 		}
 	}

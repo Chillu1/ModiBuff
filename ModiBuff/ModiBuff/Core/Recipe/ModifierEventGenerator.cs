@@ -8,7 +8,7 @@ namespace ModiBuff.Core
 		public int GenId { get; private set; }
 		public string Name { get; }
 
-		private readonly int _effectOnEvent;
+		private readonly object _effectOnEvent;
 		private readonly EventEffectFactory _eventEffectFunc;
 
 		private readonly List<EffectWrapper> _effects;
@@ -20,7 +20,7 @@ namespace ModiBuff.Core
 
 		private readonly List<IRevertEffect> _revertEffects;
 
-		public ModifierEventGenerator(int id, string name, int effectOnEvent, EventEffectFactory eventEffectFunc,
+		public ModifierEventGenerator(int id, string name, object effectOnEvent, EventEffectFactory eventEffectFunc,
 			List<EffectWrapper> effects, float removeDuration, EffectWrapper removeEffectWrapper, bool refreshDuration)
 		{
 			Id = id;

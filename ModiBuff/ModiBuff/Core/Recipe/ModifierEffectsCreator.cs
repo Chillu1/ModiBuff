@@ -7,7 +7,7 @@ namespace ModiBuff.Core
 	/// </summary>
 	public sealed class ModifierEffectsCreator
 	{
-		private readonly EffectWrapper[] _effectWrappersArray;
+		private readonly EffectWrapper[] _effectWrappers;
 		private readonly EffectWrapper _removeEffectWrapper;
 		private readonly int _revertEffectsCount, _initEffectsCount, _intervalEffectsCount, _durationEffectsCount, _stackEffectsCount;
 
@@ -21,53 +21,34 @@ namespace ModiBuff.Core
 
 		public ModifierEffectsCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper)
 		{
-			_effectWrappersArray = effectWrappers.ToArray();
+			_effectWrappers = effectWrappers.ToArray();
 			_removeEffectWrapper = removeEffectWrapper;
-
-			SetupArrays(out int initEffectsCount, out int intervalEffectsCount, out int durationEffectsCount,
-				out int stackEffectsCount, out int revertEffectsCount);
-			_revertEffectsCount = revertEffectsCount;
-			_initEffectsCount = initEffectsCount;
-			_intervalEffectsCount = intervalEffectsCount;
-			_durationEffectsCount = durationEffectsCount;
-			_stackEffectsCount = stackEffectsCount;
-			//_revertEffects = new IRevertEffect[revertEffectsCount];
-		}
-
-		private void SetupArrays(out int initEffectsCount, out int intervalEffectsCount, out int durationEffectsCount,
-			out int stackEffectsCount, out int revertEffectsCount)
-		{
-			initEffectsCount = 0;
-			intervalEffectsCount = 0;
-			durationEffectsCount = 0;
-			stackEffectsCount = 0;
-			revertEffectsCount = 0;
 
 			if (_removeEffectWrapper != null)
 			{
 				if ((_removeEffectWrapper.EffectOn & EffectOn.Init) != 0) //Probably never a thing, but added just in case
-					initEffectsCount++;
+					_initEffectsCount++;
 				if ((_removeEffectWrapper.EffectOn & EffectOn.Interval) != 0)
-					intervalEffectsCount++;
+					_intervalEffectsCount++;
 				if ((_removeEffectWrapper.EffectOn & EffectOn.Duration) != 0)
-					durationEffectsCount++;
+					_durationEffectsCount++;
 			}
 
-			for (int i = 0; i < _effectWrappersArray.Length; i++)
+			for (int i = 0; i < _effectWrappers.Length; i++)
 			{
-				var effectWrapper = _effectWrappersArray[i];
+				var effectWrapper = _effectWrappers[i];
 
 				if (effectWrapper.GetEffect() is IRevertEffect revertEffect && revertEffect.IsRevertible)
-					revertEffectsCount++;
+					_revertEffectsCount++;
 
 				if ((effectWrapper.EffectOn & EffectOn.Init) != 0)
-					initEffectsCount++;
+					_initEffectsCount++;
 				if ((effectWrapper.EffectOn & EffectOn.Interval) != 0)
-					intervalEffectsCount++;
+					_intervalEffectsCount++;
 				if ((effectWrapper.EffectOn & EffectOn.Duration) != 0)
-					durationEffectsCount++;
+					_durationEffectsCount++;
 				if ((effectWrapper.EffectOn & EffectOn.Stack) != 0)
-					stackEffectsCount++;
+					_stackEffectsCount++;
 			}
 		}
 
@@ -115,9 +96,9 @@ namespace ModiBuff.Core
 					_durationEffectsArray[_durationEffectsIndex++] = _removeEffectWrapper.GetEffect();
 			}
 
-			for (int i = 0; i < _effectWrappersArray.Length; i++)
+			for (int i = 0; i < _effectWrappers.Length; i++)
 			{
-				var effectWrapper = _effectWrappersArray[i];
+				var effectWrapper = _effectWrappers[i];
 				var effect = effectWrapper.GetEffect();
 				var effectOn = effectWrapper.EffectOn;
 
@@ -141,8 +122,8 @@ namespace ModiBuff.Core
 				_removeEffectWrapper.Reset();
 			}
 
-			for (int i = 0; i < _effectWrappersArray.Length; i++)
-				_effectWrappersArray[i].Reset();
+			for (int i = 0; i < _effectWrappers.Length; i++)
+				_effectWrappers[i].Reset();
 
 			return new SyncedModifierEffects(_initEffectsArray, _intervalEffectsArray, _durationEffectsArray, _stackEffectsArray);
 		}

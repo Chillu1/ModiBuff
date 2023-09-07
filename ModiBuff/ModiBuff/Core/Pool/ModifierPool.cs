@@ -191,10 +191,12 @@ namespace ModiBuff.Core
 		{
 			modifier.ResetState();
 
-			if (_poolTops[modifier.Id] == _pools[modifier.Id].Length)
-				Resize(modifier.Id, _pools[modifier.Id].Length << 1);
+			int id = modifier.Id;
 
-			_pools[modifier.Id][_poolTops[modifier.Id]++] = modifier;
+			if (_poolTops[id] == _pools[id].Length)
+				Resize(id, _pools[id].Length << 1);
+
+			_pools[id][_poolTops[id]++] = modifier;
 		}
 
 		public void ReturnCheck(ModifierCheck check)
