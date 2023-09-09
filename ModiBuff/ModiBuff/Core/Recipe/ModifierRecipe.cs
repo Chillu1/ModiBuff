@@ -235,10 +235,11 @@ namespace ModiBuff.Core
 
 		public IModifierGenerator CreateModifierGenerator()
 		{
-			return new ModifierGenerator(Id, Name, _effectWrappers, _removeEffectWrapper, _hasApplyChecks, _applyCheckList,
-				_hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura, _oneTimeInit, _interval,
-				_intervalAffectedByStatusResistance, _duration, _refreshDuration, _refreshInterval, _whenStackEffect, _stackValue,
-				_maxStacks, _everyXStacks);
+			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _hasApplyChecks,
+				_applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura, _oneTimeInit,
+				_interval, _intervalAffectedByStatusResistance, _duration, _refreshDuration, _refreshInterval, _whenStackEffect,
+				_stackValue, _maxStacks, _everyXStacks);
+			return new ModifierGenerator(in data);
 		}
 
 		public int CompareTo(ModifierRecipe other) => Id.CompareTo(other.Id);

@@ -51,63 +51,61 @@ namespace ModiBuff.Core
 		private IStateCheck[] _stateEffectChecks;
 		private bool _hasStateEffectChecks;
 
-		//TODO Refactor
-		public ModifierGenerator(int id, string name, List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper,
-			bool hasApplyChecks, List<ICheck> applyCheckList, bool hasEffectChecks, List<ICheck> effectCheckList,
-			List<Func<IUnit, bool>> applyFuncCheckList, List<Func<IUnit, bool>> effectFuncCheckList, bool isAura, bool oneTimeInit,
-			float interval, bool intervalAffectedByStatusResistance, float duration, bool refreshDuration, bool refreshInterval,
-			WhenStackEffect whenStackEffect, float stackValue, int maxStacks, int everyXStacks)
+		public ModifierGenerator(in ModifierRecipeData data)
 		{
-			Id = id;
-			Name = name;
+			Id = data.Id;
+			Name = data.Name;
 
-			HasApplyChecks = hasApplyChecks;
-			_hasEffectChecks = hasEffectChecks;
+			HasApplyChecks = data.HasApplyChecks;
+			_hasEffectChecks = data.HasEffectChecks;
 
-			_oneTimeInit = oneTimeInit;
-			_interval = interval;
-			_intervalAffectedByStatusResistance = intervalAffectedByStatusResistance;
-			_duration = duration;
-			_refreshDuration = refreshDuration;
-			_refreshInterval = refreshInterval;
-			_whenStackEffect = whenStackEffect;
-			_stackValue = stackValue;
-			_maxStacks = maxStacks;
-			_everyXStacks = everyXStacks;
+			_oneTimeInit = data.OneTimeInit;
+			_interval = data.Interval;
+			_intervalAffectedByStatusResistance = data.IntervalAffectedByStatusResistance;
+			_duration = data.Duration;
+			_refreshDuration = data.RefreshDuration;
+			_refreshInterval = data.RefreshInterval;
+			_whenStackEffect = data.WhenStackEffect;
+			_stackValue = data.StackValue;
+			_maxStacks = data.MaxStacks;
+			_everyXStacks = data.EveryXStacks;
+
 
 #if DEBUG && !MODIBUFF_PROFILE
-			if (effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Interval)) && interval == 0)
+			if (data.EffectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Interval)) && data.Interval == 0)
 				Logger.LogError("Interval not set, but we have interval effects, for modifier: " + Name + " id: " + Id);
-			if (effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Duration)) && duration == 0)
+			if (data.EffectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Duration)) && data.Duration == 0)
 				Logger.LogError("Duration not set, but we have duration effects, for modifier: " + Name + " id: " + Id);
 #endif
-			if (interval > 0)
+			if (data.Interval > 0)
 				_timeComponentCount++;
-			if (duration > 0)
+			if (data.Duration > 0)
 				_timeComponentCount++;
 
-			_modifierEffectsCreator = new ModifierEffectsCreator(effectWrappers, removeEffectWrapper);
+			_modifierEffectsCreator = new ModifierEffectsCreator(data.EffectWrappers, data.RemoveEffectWrapper);
 
-			if (isAura)
+			if (data.IsAura)
 				_targetComponentFunc = () => new MultiTargetComponent();
 			else
 				_targetComponentFunc = () => new SingleTargetComponent();
 
 			if (HasApplyChecks)
-				SetupApplyChecks();
+				SetupApplyChecks(in data);
 
 			if (_hasEffectChecks)
-				SetupEffectChecks();
+				SetupEffectChecks(in data);
 
-			void SetupApplyChecks()
+			return;
+
+			void SetupApplyChecks(in ModifierRecipeData localData)
 			{
 				var updatableChecks = new List<IUpdatableCheck>();
 				var noUnitChecks = new List<INoUnitCheck>();
 				var unitChecks = new List<IUnitCheck>();
 				var usableChecks = new List<IUsableCheck>();
 				var stateChecks = new List<IStateCheck>();
-				if (applyCheckList != null)
-					foreach (var check in applyCheckList)
+				if (localData.ApplyCheckList != null)
+					foreach (var check in localData.ApplyCheckList)
 					{
 						if (check is IStateCheck stateCheck)
 							stateChecks.Add(stateCheck);
@@ -130,18 +128,18 @@ namespace ModiBuff.Core
 				_stateApplyChecks = stateChecks.ToArray();
 				_hasStateApplyChecks = _stateApplyChecks.Length > 0;
 
-				_applyFuncChecks = applyFuncCheckList?.ToArray();
+				_applyFuncChecks = localData.ApplyFuncCheckList?.ToArray();
 			}
 
-			void SetupEffectChecks()
+			void SetupEffectChecks(in ModifierRecipeData localData)
 			{
 				var updatableChecks = new List<IUpdatableCheck>();
 				var noUnitChecks = new List<INoUnitCheck>();
 				var unitChecks = new List<IUnitCheck>();
 				var usableChecks = new List<IUsableCheck>();
 				var stateChecks = new List<IStateCheck>();
-				if (effectCheckList != null)
-					foreach (var check in effectCheckList)
+				if (localData.EffectCheckList != null)
+					foreach (var check in localData.EffectCheckList)
 					{
 						if (check is IStateCheck stateCheck)
 							stateChecks.Add(stateCheck);
@@ -164,14 +162,13 @@ namespace ModiBuff.Core
 				_stateEffectChecks = stateChecks.ToArray();
 				_hasStateEffectChecks = _stateEffectChecks.Length > 0;
 
-				_effectFuncChecks = effectFuncCheckList?.ToArray();
+				_effectFuncChecks = localData.EffectFuncCheckList?.ToArray();
 			}
 		}
 
 		Modifier IModifierGenerator.Create()
 		{
 			int genId = GenId++;
-			var effects = _modifierEffectsCreator.Create(genId);
 
 			ModifierCheck effectCheck = null;
 			if (_hasEffectChecks)
@@ -196,6 +193,8 @@ namespace ModiBuff.Core
 				_timeComponentIndex = 0;
 				timeComponents = new ITimeComponent[_timeComponentCount];
 			}
+
+			var effects = _modifierEffectsCreator.Create(genId);
 
 			if (effects.InitEffects != null)
 				initComponent = new InitComponent(_oneTimeInit, effects.InitEffects, effectCheck);
