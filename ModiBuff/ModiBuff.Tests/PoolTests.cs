@@ -67,7 +67,7 @@ namespace ModiBuff.Tests
 		public void FullLibraryInit()
 		{
 			Config.PoolSize = 512;
-			Pool.Dispose();
+			Pool.Reset();
 			IdManager.Reset();
 
 			var idManager = new ModifierIdManager();

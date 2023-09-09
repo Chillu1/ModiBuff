@@ -57,7 +57,7 @@ namespace ModiBuff.Tests
 		[OneTimeTearDown]
 		public void OneTimeTearDown()
 		{
-			Pool.Dispose();
+			Pool.Reset();
 			IdManager.Reset();
 
 			IdManager = null;

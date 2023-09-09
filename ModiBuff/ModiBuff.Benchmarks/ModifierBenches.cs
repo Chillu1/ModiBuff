@@ -23,7 +23,7 @@ namespace ModiBuff.Tests
 		[GlobalCleanup]
 		public virtual void OneTimeTearDown()
 		{
-			Pool.Dispose();
+			Pool.Reset();
 			IdManager.Reset();
 
 			IdManager = null;

@@ -35,7 +35,7 @@ namespace ModiBuff.Tests
 		public void IterationCleanUp()
 		{
 			//_modifierIdManager.Reset();
-			_pool.Dispose();
+			_pool.Reset();
 		}
 	}
 }

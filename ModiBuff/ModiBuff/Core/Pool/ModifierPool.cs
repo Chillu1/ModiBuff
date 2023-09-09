@@ -2,7 +2,7 @@ using System;
 
 namespace ModiBuff.Core
 {
-	public sealed class ModifierPool : IDisposable
+	public sealed class ModifierPool
 	{
 		public static ModifierPool Instance { get; private set; }
 
@@ -235,7 +235,7 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public void Dispose() //TODO Not really disposable
+		public void Reset()
 		{
 			if (_pools == null) //Somehow this is true in bench?
 				return;

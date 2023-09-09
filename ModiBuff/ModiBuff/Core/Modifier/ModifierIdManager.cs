@@ -7,7 +7,7 @@ namespace ModiBuff.Core
 		private static ModifierIdManager _instance;
 		private int _nextId;
 
-		private Dictionary<string, int> _idMap;
+		private readonly Dictionary<string, int> _idMap;
 
 		public ModifierIdManager()
 		{
