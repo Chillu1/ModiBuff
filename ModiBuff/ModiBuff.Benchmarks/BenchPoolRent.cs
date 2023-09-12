@@ -1,5 +1,4 @@
 using BenchmarkDotNet.Attributes;
-using ModiBuff.Core;
 
 namespace ModiBuff.Tests
 {

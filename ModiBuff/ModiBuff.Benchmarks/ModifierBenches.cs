@@ -1,6 +1,5 @@
 using BenchmarkDotNet.Attributes;
 using ModiBuff.Core;
-using ModiBuff.Core.Units;
 
 namespace ModiBuff.Tests
 {
@@ -17,7 +16,7 @@ namespace ModiBuff.Tests
 			Config.PoolSize = 1024;
 
 			IdManager = new ModifierIdManager();
-			Recipes = new TestModifierRecipes(IdManager);
+			Recipes = new BenchmarkModifierRecipes(IdManager);
 			Pool = new ModifierPool(Recipes.GetGenerators());
 		}
 

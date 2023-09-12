@@ -1,6 +1,5 @@
 using BenchmarkDotNet.Attributes;
 using ModiBuff.Core;
-using ModiBuff.Core.Units;
 
 namespace ModiBuff.Tests
 {
@@ -11,7 +10,7 @@ namespace ModiBuff.Tests
 		public void BenchSetupRecipes()
 		{
 			var idManager = new ModifierIdManager();
-			var recipes = new TestModifierRecipes(idManager);
+			var recipes = new BenchmarkModifierRecipes(idManager);
 			var pool = new ModifierPool(recipes.GetGenerators());
 			idManager.Reset();
 		}

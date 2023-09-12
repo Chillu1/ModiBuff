@@ -93,7 +93,7 @@ Delta: 0.0167 * N
 
 | Library                                               | DoT pool rent | DoT pool<br/>reset return |
 |-------------------------------------------------------|---------------|---------------------------|
-| ModiBuff (this)                                       | 0.03ms, 0 GC  | 0.17ms, 0 B               |
+| ModiBuff (this)                                       | 0.04ms, 0 GC  | 0.17ms, 0 B               |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 1.64ms, 0 GC  | 4.26ms, 0 GC              |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | X             | X                         |
 

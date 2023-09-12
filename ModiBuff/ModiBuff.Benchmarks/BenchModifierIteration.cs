@@ -46,7 +46,7 @@ namespace ModiBuff.Tests
 				_initDamageUnits[i] = new Unit();
 		}
 
-		//[Benchmark(OperationsPerInvoke = UnitCount)]
+		[Benchmark(OperationsPerInvoke = UnitCount)]
 		public void BenchDoTIteration()
 		{
 			for (int i = 0; i < _dotUnits.Length; i++)

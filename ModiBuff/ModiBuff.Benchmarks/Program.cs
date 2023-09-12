@@ -9,7 +9,7 @@ namespace ModiBuff.Tests
 	{
 		public static void Main(string[] args)
 		{
-			var config = new ManualConfig();
+			/*var config = new ManualConfig();
 			//Single
 			//config.AddJob(Job.MediumRun.WithUnrollFactor(1).WithInvocationCount(1));
 			//Normal
@@ -22,7 +22,7 @@ namespace ModiBuff.Tests
 			config.AddAnalyser(DefaultConfig.Instance.GetAnalysers().ToArray());
 			config.AddValidator(DefaultConfig.Instance.GetValidators().ToArray());
 			config.AddHardwareCounters(DefaultConfig.Instance.GetHardwareCounters().ToArray());
-			config.AddFilter(DefaultConfig.Instance.GetFilters().ToArray());
+			config.AddFilter(DefaultConfig.Instance.GetFilters().ToArray());*/
 			BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 
 			//BenchmarkRunner.Run<BenchInitialization>(config);

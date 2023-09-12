@@ -1,7 +1,6 @@
 using System;
 using BenchmarkDotNet.Attributes;
 using ModiBuff.Core;
-using ModiBuff.Core.Units;
 
 namespace ModiBuff.Tests
 {
@@ -12,7 +11,7 @@ namespace ModiBuff.Tests
 		public int AllocationCount;
 
 		private ModifierIdManager _modifierIdManager;
-		private TestModifierRecipes _recipes;
+		private BenchmarkModifierRecipes _recipes;
 		private ModifierPool _pool;
 
 		[GlobalSetup]
@@ -21,7 +20,7 @@ namespace ModiBuff.Tests
 			Config.PoolSize = AllocationCount;
 
 			_modifierIdManager = new ModifierIdManager();
-			_recipes = new TestModifierRecipes(_modifierIdManager);
+			_recipes = new BenchmarkModifierRecipes(_modifierIdManager);
 
 			Console.WriteLine("Allocated: " + ModifierRecipes.RecipesCount + " recipes, count: " + AllocationCount + " modifiers");
 		}
