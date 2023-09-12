@@ -9,6 +9,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ThornsEffect_OnHit()
 		{
+			SetupSystems();
+
 			var effect = new DamageEffect(5);
 			effect.SetTargeting(Targeting.SourceTarget);
 			Unit.AddEffectEvent(effect, EffectOnEvent.WhenAttacked);
@@ -21,6 +23,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ThornsEffect_OnHit_Remove()
 		{
+			SetupSystems();
+
 			var effect = new DamageEffect(5);
 			effect.SetTargeting(Targeting.SourceTarget);
 			Unit.AddEffectEvent(effect, EffectOnEvent.WhenAttacked);
@@ -37,6 +41,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Thorns_OnHit()
 		{
+			AddEventRecipes(add => add("ThornsOnHitEvent", EffectOnEvent.WhenAttacked)
+				.Effect(new DamageEffect(5), Targeting.SourceTarget));
+
 			Unit.AddModifierSelf("ThornsOnHitEvent");
 
 			Enemy.Attack(Unit);
@@ -47,6 +54,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Thorns_OnHit_DurationRemove()
 		{
+			AddEventRecipes(add => add("ThornsOnHitEvent_Remove", EffectOnEvent.WhenAttacked)
+				.Effect(new DamageEffect(5), Targeting.SourceTarget)
+				.Remove(5));
+
 			Unit.AddModifierSelf("ThornsOnHitEvent_Remove");
 
 			Enemy.Attack(Unit);
@@ -68,6 +79,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddDamage_OnKill()
 		{
+			AddEventRecipes(add => add("AddDamage_OnKill_Event", EffectOnEvent.OnKill)
+				.Effect(new AddDamageEffect(5), Targeting.SourceTarget));
+
 			var weakEnemy = new Unit(1);
 			Unit.AddModifierSelf("AddDamage_OnKill_Event");
 
@@ -81,6 +95,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Damage_OnDeath()
 		{
+			AddEventRecipes(add => add("Damage_OnDeath_Event", EffectOnEvent.WhenKilled)
+				.Effect(new DamageEffect(5), Targeting.SourceTarget));
+
 			var weakUnit = new Unit(1);
 			weakUnit.AddModifierSelf("Damage_OnDeath_Event");
 
@@ -92,6 +109,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Heal_OnHeal()
 		{
+			AddEventRecipes(add => add("Heal_OnHeal_Event", EffectOnEvent.OnHeal)
+				.Effect(new HealEffect(5), Targeting.SourceTarget));
+
 			Unit.AddModifierSelf("Heal_OnHeal_Event");
 
 			Unit.TakeDamage(5, Enemy);
@@ -104,6 +124,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackSelf_OnHit()
 		{
+			AddEventRecipes(add => add("AttackSelf_OnHit_Event", EffectOnEvent.WhenAttacked)
+				.Effect(new SelfAttackActionEffect()));
+
 			Unit.AddModifierSelf("AttackSelf_OnHit_Event");
 
 			Enemy.Attack(Unit);
@@ -114,6 +137,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void PoisonDoT_OnHit()
 		{
+			Assert.Fail("Combination of Event & Non-Event");
 			Unit.AddModifierSelf("PoisonDoT_OnHit_Event");
 
 			Enemy.Attack(Unit);
@@ -128,6 +152,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Thorns_OnHit_Recursion()
 		{
+			AddEventRecipes(add => add("ThornsOnHitEvent", EffectOnEvent.WhenAttacked)
+				.Effect(new DamageEffect(5), Targeting.SourceTarget));
+
 			Unit.AddModifierSelf("ThornsOnHitEvent");
 			Enemy.AddModifierSelf("ThornsOnHitEvent");
 
@@ -142,6 +169,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void SelfDamage_PreAttack()
 		{
+			AddEventRecipes(add => add("InitDamageSelf_BeforeAttack_Event", EffectOnEvent.BeforeAttack)
+				.Effect(new DamageEffect(5), Targeting.SourceSource));
+
 			Unit.AddModifierSelf("InitDamageSelf_BeforeAttack_Event");
 
 			Unit.PreAttack(Enemy);

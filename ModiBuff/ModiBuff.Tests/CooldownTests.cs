@@ -1,4 +1,5 @@
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 using NUnit.Framework;
 
 namespace ModiBuff.Tests
@@ -8,6 +9,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamage_Cooldown()
 		{
+			AddRecipes(add => add("InitDamage_Cooldown")
+				.ApplyCooldown(1)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_Cooldown"), ApplierType.Attack);
 
 			Unit.Attack(Enemy);
@@ -26,6 +31,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamage_Cooldown_Effect()
 		{
+			AddRecipes(add => add("InitDamage_Cooldown_Effect")
+				.EffectCooldown(1)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
 			Unit.AddModifierSelf("InitDamage_Cooldown_Effect"); // 1 second cooldown
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
@@ -40,6 +49,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamage_Cooldown_Pool()
 		{
+			AddRecipes(add => add("InitDamage_Cooldown_Pool")
+				.EffectCooldown(1)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
 			int id = IdManager.GetId("InitDamage_Cooldown_Pool");
 			Pool.Clear();
 			Pool.Allocate(id, 1);

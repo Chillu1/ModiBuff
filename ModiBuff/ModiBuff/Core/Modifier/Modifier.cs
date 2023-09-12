@@ -90,7 +90,7 @@ namespace ModiBuff.Core
 			((MultiTargetComponent)_targetComponent).UpdateTargets(targetsInRange);
 			if (_timeComponents != null)
 				for (int i = 0; i < _timeComponents.Length; i++)
-					_timeComponents[i].UpdateOwner(source);
+					_timeComponents[i].UpdateOwner();
 		}
 
 		public void UpdateSource(IUnit source) => _targetComponent.UpdateSource(source);
@@ -122,7 +122,7 @@ namespace ModiBuff.Core
 			((SingleTargetComponent)_targetComponent).UpdateTarget(target);
 			if (_timeComponents != null)
 				for (int i = 0; i < _timeComponents.Length; i++)
-					_timeComponents[i].UpdateOwner(source);
+					_timeComponents[i].UpdateOwner();
 		}
 
 		public void Init()

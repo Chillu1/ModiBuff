@@ -9,6 +9,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void TwoDurationModifiers_DifferentState()
 		{
+			AddRecipes(add => add("DurationDamage")
+				.Effect(new DamageEffect(5), EffectOn.Duration)
+				.Duration(5));
+
 			Unit.AddModifierSelf("DurationDamage");
 			Enemy.AddModifierSelf("DurationDamage");
 
@@ -22,6 +26,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void TwoInitModifiers_DifferentState()
 		{
+			SetupSystems();
+
 			Unit.AddModifierSelf("InitDamage");
 			Enemy.AddModifierSelf("InitDamage");
 
@@ -36,6 +42,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void TwoDurationRemoveModifiers_DifferentState()
 		{
+			AddRecipes(add => add("DurationRemove")
+				.Remove(5));
+
 			Unit.AddModifierSelf("DurationRemove");
 			Enemy.AddModifierSelf("DurationRemove");
 
@@ -49,6 +58,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void TwoDurationRemoveModifiers_DifferentState_ReverseOrder()
 		{
+			AddRecipes(add => add("DurationRemove")
+				.Remove(5));
+
 			Unit.AddModifierSelf("DurationRemove");
 			Enemy.AddModifierSelf("DurationRemove");
 
@@ -62,7 +74,12 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ModifierGoneWhenRemoved()
 		{
-			string modifierName = "IntervalDamage_DurationRemove";
+			AddRecipes(add => add("IntervalDamage_DurationRemove")
+				.Interval(4)
+				.Effect(new DamageEffect(5), EffectOn.Interval)
+				.Remove(5));
+
+			const string modifierName = "IntervalDamage_DurationRemove";
 
 			Unit.AddModifierSelf(modifierName);
 
@@ -82,6 +99,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageEveryTwoStacks_Twice()
 		{
+			AddRecipes(add => add("DamageEveryTwoStacks")
+				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2));
+
 			DoAndAssert(UnitHealth, Unit);
 
 			DoAndAssert(EnemyHealth, Enemy);
@@ -107,6 +128,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stack_DamageStackBased()
 		{
+			AddRecipes(add => add("StackBasedDamage")
+				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, value: 2));
+
 			Unit.AddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health); //1 stack = +2 damage == 2
 
@@ -122,6 +147,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void IntervalDamage_AddDamageOnStack()
 		{
+			AddRecipes(add => add("IntervalDamage_StackAddDamage")
+				.Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Interval | EffectOn.Stack)
+				.Interval(1)
+				.Stack(WhenStackEffect.Always, value: 2));
+
 			Unit.AddModifierSelf("IntervalDamage_StackAddDamage");
 
 			Assert.AreEqual(UnitHealth, Unit.Health);
@@ -138,6 +168,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddDamageOnStack_RevertibleRemove()
 		{
+			AddRecipes(add => add("StackAddDamageRevertible")
+				.Effect(new AddDamageEffect(5, true, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, value: 2)
+				.Remove(5));
+
 			Unit.AddModifierSelf("StackAddDamageRevertible");
 			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
 
@@ -163,6 +198,12 @@ namespace ModiBuff.Tests
 		[Test]
 		public void OneTimeInit_ResetState()
 		{
+			//InitDamageOneTime With1Seconds linger, to not work again (global effect cooldown)
+			AddRecipes(add => add("OneTimeInitDamage")
+				.OneTimeInit()
+				.Effect(new DamageEffect(5), EffectOn.Init)
+			);
+
 			Pool.Clear();
 			int recipeId = IdManager.GetId("OneTimeInitDamage");
 			Pool.Allocate(recipeId, 1);
@@ -180,6 +221,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamage_Cooldown_Effect()
 		{
+			AddRecipes(add => add("InitDamage_Cooldown_Effect")
+				.EffectCooldown(1)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
 			Unit.AddModifierSelf("InitDamage_Cooldown_Effect");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
@@ -190,6 +235,14 @@ namespace ModiBuff.Tests
 		[Test]
 		public void NoUpdateOnSameUpdateTick()
 		{
+			AddRecipes(
+				add => add("AddModifierApplierDamage")
+					.Effect(new DamageEffect(5), EffectOn.Interval)
+					.Interval(0.1f),
+				add => add("AddModifierApplierIntervalApplier")
+					.Effect(new ApplierEffect("AddModifierApplierDamage"), EffectOn.Interval)
+					.Interval(1));
+
 			Unit.AddModifierSelf("AddModifierApplierIntervalApplier");
 
 			Unit.Update(1); //Modifier should be added, but not updated

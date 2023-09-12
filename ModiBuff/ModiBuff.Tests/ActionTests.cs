@@ -1,4 +1,6 @@
+using System;
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 using NUnit.Framework;
 
 namespace ModiBuff.Tests
@@ -8,6 +10,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackSelf_Action()
 		{
+			AddRecipes(add => add("InitAttackAction")
+				.Effect(new AttackActionEffect(), EffectOn.Init));
+
 			Unit.AddModifierSelf("InitAttackAction");
 
 			Assert.AreEqual(UnitHealth - UnitDamage, Unit.Health);
@@ -16,6 +21,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackEnemy_Action()
 		{
+			AddRecipes(add => add("InitAttackAction")
+				.Effect(new AttackActionEffect(), EffectOn.Init));
+
 			Unit.AddModifierTarget("InitAttackAction", Enemy);
 
 			Assert.AreEqual(EnemyHealth - UnitDamage, Enemy.Health);
@@ -24,6 +32,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealSelf_Action()
 		{
+			AddRecipes(add => add("InitHealAction")
+				.Effect(new HealActionEffect(), EffectOn.Init));
+
 			Unit.TakeDamage(UnitHeal + 5, Unit);
 
 			Unit.AddModifierSelf("InitHealAction");
@@ -34,6 +45,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackSelfTarget_Action()
 		{
+			AddRecipes(add => add("InitAttackAction_Self")
+				.Effect(new AttackActionEffect(), EffectOn.Init, Targeting.TargetTarget));
+
 			Unit.AddModifierSelf("InitAttackAction_Self");
 
 			Assert.AreEqual(UnitHealth - UnitDamage, Unit.Health);

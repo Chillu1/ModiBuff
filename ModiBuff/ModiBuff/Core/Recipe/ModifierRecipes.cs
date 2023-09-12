@@ -4,7 +4,11 @@ using System.Linq;
 
 namespace ModiBuff.Core
 {
-	public abstract class ModifierRecipes
+	public delegate ModifierRecipe RecipeAddFunc(Func<string, ModifierRecipe> addFunc);
+
+	public delegate ModifierEventRecipe EventRecipeAddFunc(Func<string, object, ModifierEventRecipe> addFunc);
+
+	public class ModifierRecipes
 	{
 		public static int RecipesCount { get; private set; }
 
@@ -17,6 +21,37 @@ namespace ModiBuff.Core
 		private readonly bool[] _instanceStackableIds;
 
 		private EventEffectFactory _eventEffectFunc;
+
+		public ModifierRecipes(IReadOnlyList<RecipeAddFunc> recipes, IReadOnlyList<EventRecipeAddFunc> eventRecipes,
+			ModifierIdManager idManager, EventEffectFactory eventEffectFunc)
+		{
+			_instance = this;
+
+			_idManager = idManager;
+			_eventEffectFunc = eventEffectFunc;
+			_recipes = new Dictionary<string, IModifierRecipe>(64);
+			_modifierGenerators = new Dictionary<string, IModifierGenerator>(64);
+			_registeredNames = new List<RegisterData>(16);
+
+			for (int i = 0; i < recipes.Count; i++)
+				recipes[i](Add);
+			for (int i = 0; i < eventRecipes.Count; i++)
+				eventRecipes[i](AddEvent);
+
+			SetupRecipes();
+			_instanceStackableIds = new bool[_recipes.Count];
+			foreach (var recipe in _recipes.Values)
+			{
+				if (recipe is ModifierRecipe modifierRecipe && modifierRecipe.IsInstanceStackable)
+					_instanceStackableIds[modifierRecipe.Id] = true;
+				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
+			}
+
+			RecipesCount = _recipes.Count;
+#if DEBUG && !MODIBUFF_PROFILE
+			Logger.Log($"[ModiBuff] Loaded {RecipesCount} recipes.");
+#endif
+		}
 
 		protected ModifierRecipes(ModifierIdManager idManager)
 		{
@@ -42,12 +77,14 @@ namespace ModiBuff.Core
 #endif
 		}
 
-		protected abstract void SetupRecipes();
+		protected virtual void SetupRecipes()
+		{
+		}
 
 		/// <summary>
 		///		Call this, and feed an event effect func factory to use the event recipes.
 		/// </summary>
-		protected void SetupEventEffect<TEvent>(EventEffectFactory eventEffectFunc)
+		public void SetupEventEffect<TEvent>(EventEffectFactory eventEffectFunc)
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (eventEffectFunc(new IEffect[0], default(TEvent)) is IRevertEffect revertEffect && revertEffect.IsRevertible)
@@ -146,6 +183,14 @@ namespace ModiBuff.Core
 
 				_registeredNames.Add(new RegisterData(name, _idManager.GetFreeId(name)));
 			}
+		}
+
+		public void Clear()
+		{
+			_recipes.Clear();
+			_modifierGenerators.Clear();
+			_registeredNames.Clear();
+			Array.Clear(_instanceStackableIds, 0, _instanceStackableIds.Length);
 		}
 
 		private readonly struct RegisterData

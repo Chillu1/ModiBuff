@@ -22,7 +22,7 @@ namespace ModiBuff.Core
 		public int GetFreeId(string name)
 		{
 			int id = _nextId;
-			if(!_idMap.ContainsKey(name))
+			if (!_idMap.ContainsKey(name))
 				_idMap.Add(name, id);
 			_nextId++;
 			return id;
@@ -34,6 +34,12 @@ namespace ModiBuff.Core
 		internal static int GetIdOld(string name) => _instance._idMap[name];
 
 		public int GetId(string name) => _idMap[name];
+
+		public void Clear()
+		{
+			_nextId = 0;
+			_idMap.Clear();
+		}
 
 		public void Reset() => _instance = null;
 	}

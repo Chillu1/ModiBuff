@@ -1,5 +1,4 @@
-using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
@@ -11,6 +10,7 @@ namespace ModiBuff.Core
 		private readonly int _everyXStacks;
 		private readonly IStackEffect[] _effects;
 		private readonly ModifierCheck _modifierCheck;
+		private readonly IStateReset[] _stateResetEffects;
 
 		private ITargetComponent _targetComponent;
 
@@ -27,6 +27,15 @@ namespace ModiBuff.Core
 
 			_effects = effects;
 			_modifierCheck = check;
+
+			var stateEffectsList = new List<IStateReset>();
+			for (int i = 0; i < _effects.Length; i++)
+			{
+				if (_effects[i] is IStateReset stateResetEffect)
+					stateEffectsList.Add(stateResetEffect);
+			}
+
+			_stateResetEffects = stateEffectsList.ToArray();
 		}
 
 		public void SetupTarget(ITargetComponent targetComponent) => _targetComponent = targetComponent;
@@ -66,9 +75,8 @@ namespace ModiBuff.Core
 		{
 			_stacks = 0;
 			_targetComponent.ResetState();
-			for (int i = 0; i < _effects.Length; i++)
-				if (_effects[i] is IStateReset effect)
-					effect.ResetState();
+			for (int i = 0; i < _stateResetEffects.Length; i++)
+				_stateResetEffects[i].ResetState();
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

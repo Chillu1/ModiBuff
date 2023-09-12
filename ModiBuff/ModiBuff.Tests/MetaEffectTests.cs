@@ -9,6 +9,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageBasedOnHealth()
 		{
+			AddRecipes(add => add("InitDamageValueBasedOnStatMeta")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(new StatPercentMetaEffect(StatType.Health, Targeting.SourceTarget)),
+					EffectOn.Init));
+
 			var generator = Recipes.GetGenerator("InitDamageValueBasedOnStatMeta");
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
@@ -26,6 +31,13 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageBasedOnHealthAndMana()
 		{
+			AddRecipes(add => add("InitDamageValueBasedOnHealthAndManaMeta")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(
+							new StatPercentMetaEffect(StatType.Health, Targeting.SourceTarget),
+							new StatPercentMetaEffect(StatType.Mana, Targeting.SourceTarget)),
+					EffectOn.Init));
+
 			var generator = Recipes.GetGenerator("InitDamageValueBasedOnHealthAndManaMeta");
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
@@ -44,6 +56,13 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CanCastHalfMulti_IsStunnedDoubleMulti()
 		{
+			AddRecipes(add => add("InitDamageValueBasedOnStatusEffectMeta")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(
+							new LegalActionMetaEffect(0.5f, LegalAction.Cast, false),
+							new LegalActionMetaEffect(2f, LegalAction.Act, false)),
+					EffectOn.Init));
+
 			var generator = Recipes.GetGenerator("InitDamageValueBasedOnStatusEffectMeta");
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
@@ -65,6 +84,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DoubleMultiplierWhenSilenced()
 		{
+			AddRecipes(add => add("InitDamageValue2XWhenDisarmedMeta")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(new LegalActionMetaEffect(2f, LegalAction.Act, false, Targeting.SourceTarget)),
+					EffectOn.Init));
+
 			var generator = Recipes.GetGenerator("InitDamageValue2XWhenDisarmedMeta");
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
 

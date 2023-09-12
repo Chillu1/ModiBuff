@@ -9,6 +9,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stack_Damage()
 		{
+			AddRecipes(add => add("StackDamage")
+				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always));
+
 			Unit.AddModifierSelf("StackDamage");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
@@ -19,6 +23,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stack_Heal()
 		{
+			AddRecipes(add => add("StackHeal")
+				.Effect(new HealEffect(5, false, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always));
+
 			Unit.TakeDamage(UnitHealth - 5, Unit);
 
 			Unit.AddModifierSelf("StackHeal");
@@ -31,6 +39,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageOnMaxStacks()
 		{
+			AddRecipes(add => add("DamageOnMaxStacks")
+				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.OnMaxStacks, value: -1, maxStacks: 2));
+
 			Unit.AddModifierSelf("DamageOnMaxStacks");
 			Assert.AreEqual(UnitHealth, Unit.Health);
 			Unit.AddModifierSelf("DamageOnMaxStacks");
@@ -40,6 +52,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageEveryTwoStacks()
 		{
+			AddRecipes(add => add("DamageEveryTwoStacks")
+				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2));
+
 			Unit.AddModifierSelf("DamageEveryTwoStacks");
 			Assert.AreEqual(UnitHealth, Unit.Health);
 			Unit.AddModifierSelf("DamageEveryTwoStacks");
@@ -53,6 +69,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stack_DamageStackBased()
 		{
+			AddRecipes(add => add("StackBasedDamage")
+				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, value: 2));
+
 			Unit.AddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health); //1 stack = +2 damage == 2
 			Unit.AddModifierSelf("StackBasedDamage");
@@ -62,6 +82,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void StackAddDamageRevertible()
 		{
+			AddRecipes(add => add("StackAddDamageRevertible")
+				.Effect(new AddDamageEffect(5, true, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, value: 2)
+				.Remove(5));
+
 			Unit.AddModifierSelf("StackAddDamageRevertible"); //5 base, + 2 on stack
 			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
 
@@ -75,6 +100,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void StunEveryTwoStacks()
 		{
+			AddRecipes(add => add("StunEveryTwoStacks")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, false, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2));
+
 			Unit.AddModifierSelf("StunEveryTwoStacks");
 
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
@@ -93,6 +122,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageOnMaxStacks_Limit()
 		{
+			AddRecipes(add => add("DamageOnMaxStacks")
+				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.OnMaxStacks, value: -1, maxStacks: 2));
+
 			Unit.AddModifierSelf("DamageOnMaxStacks");
 			Assert.AreEqual(UnitHealth, Unit.Health);
 			Unit.AddModifierSelf("DamageOnMaxStacks");

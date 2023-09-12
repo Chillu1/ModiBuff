@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
@@ -9,6 +11,11 @@ namespace ModiBuff.Tests
 		protected ModifierIdManager IdManager { get; private set; }
 		protected ModifierRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
+
+		private readonly RecipeAddFunc[] _defaultRecipeAddFuncs =
+		{
+			add => add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init)
+		};
 
 		protected Unit Unit { get; private set; }
 		protected float UnitHealth { get; private set; }
@@ -32,13 +39,48 @@ namespace ModiBuff.Tests
 		{
 			Logger.SetLogger<NUnitLogger>();
 			Config.PoolSize = 1;
-
-			IdManager = new ModifierIdManager();
-			Recipes = new TestModifierRecipes(IdManager);
-			Pool = new ModifierPool(Recipes.GetGenerators());
 		}
 
-		[SetUp]
+		protected void AddRecipes(params RecipeAddFunc[] recipeAddFunc)
+		{
+			var newRecipeAddFuncs = new RecipeAddFunc[_defaultRecipeAddFuncs.Length + recipeAddFunc.Length];
+			_defaultRecipeAddFuncs.CopyTo(newRecipeAddFuncs, 0);
+			recipeAddFunc.CopyTo(newRecipeAddFuncs, _defaultRecipeAddFuncs.Length);
+			SetupSystems(newRecipeAddFuncs);
+		}
+
+		protected void AddEventRecipes(params EventRecipeAddFunc[] recipeAddFunc)
+		{
+			IdManager = new ModifierIdManager();
+			var eventEffectFactory =
+				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
+			Recipes = new ModifierRecipes(new RecipeAddFunc[0], recipeAddFunc, IdManager, eventEffectFactory);
+			Pool = new ModifierPool(Recipes.GetGenerators());
+
+			Setup();
+		}
+
+		public void SetupSystems()
+		{
+			IdManager = new ModifierIdManager();
+			var eventEffectFactory =
+				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
+			Recipes = new ModifierRecipes(_defaultRecipeAddFuncs, new EventRecipeAddFunc[0], IdManager, eventEffectFactory);
+			Pool = new ModifierPool(Recipes.GetGenerators());
+
+			Setup();
+		}
+
+		private void SetupSystems(IReadOnlyList<RecipeAddFunc> recipeAdd)
+		{
+			IdManager = new ModifierIdManager();
+			Recipes = new ModifierRecipes(recipeAdd, new EventRecipeAddFunc[0], IdManager, null);
+			Pool = new ModifierPool(Recipes.GetGenerators());
+
+			Setup();
+		}
+
+		//Setup needs to be called manually so we create the units after all recipes have been added
 		public void Setup()
 		{
 			UnitHealth = AllyHealth = 500;
@@ -54,11 +96,22 @@ namespace ModiBuff.Tests
 			Ally = new Unit(AllyHealth, AllyDamage, AllyHeal);
 		}
 
-		[OneTimeTearDown]
-		public void OneTimeTearDown()
+		[TearDown]
+		public void TearDown()
 		{
 			Pool.Reset();
 			IdManager.Reset();
+
+			IdManager = null;
+			Recipes = null;
+			Pool = null;
+		}
+
+		[OneTimeTearDown]
+		public void OneTimeTearDown()
+		{
+			Pool?.Reset();
+			IdManager?.Reset();
 
 			IdManager = null;
 			Recipes = null;

@@ -1,4 +1,5 @@
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 using NUnit.Framework;
 
 namespace ModiBuff.Tests
@@ -8,6 +9,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostHealth()
 		{
+			AddRecipes(add => add("InitDamage_CostHealth")
+				.ApplyCost(CostType.Health, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostHealth"), ApplierType.Attack);
 
 			Unit.Attack(Unit);
@@ -18,6 +23,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostHealth_NotLethal()
 		{
+			AddRecipes(add => add("InitDamage_CostHealth")
+				.ApplyCost(CostType.Health, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostHealth"), ApplierType.Attack);
 
 			Unit.TakeDamage(UnitHealth - 1, Unit);
@@ -29,6 +38,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostMana()
 		{
+			AddRecipes(add => add("InitDamage_CostMana")
+				.ApplyCost(CostType.Mana, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostMana"), ApplierType.Attack);
 
 			Unit.Attack(Unit);
@@ -39,6 +52,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostMana_NotEnough()
 		{
+			AddRecipes(add => add("InitDamage_CostMana")
+				.ApplyCost(CostType.Mana, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostMana"), ApplierType.Attack);
 
 			Unit.UseMana(UnitMana - 1);
@@ -51,6 +68,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostMana_Effect()
 		{
+			AddRecipes(add => add("InitDamage_CostManaEffect")
+				.EffectCost(CostType.Mana, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
 			Unit.AddModifierSelf("InitDamage_CostManaEffect");
 
 			Assert.AreEqual(UnitMana - 5, Unit.Mana);
@@ -60,11 +81,16 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostHealth_HealSelf()
 		{
+			AddRecipes(add => add("InitDamage_CostHealth_HealSelf")
+				.ApplyCost(CostType.Health, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceSource));
+
 			var generator = Recipes.GetGenerator("InitDamage_CostHealth_HealSelf");
 
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
-			Unit.TryCast(generator.Id, Enemy);
+			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 			Assert.AreEqual(UnitHealth, Unit.Health);

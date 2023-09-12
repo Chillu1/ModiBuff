@@ -1,4 +1,5 @@
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 using NUnit.Framework;
 
 namespace ModiBuff.Tests
@@ -8,6 +9,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Random_InitDamage()
 		{
+			AddRecipes(add => add("ChanceInitDamage")
+				.ApplyChance(0.5f)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
+
 			Unit.AddApplierModifier(Recipes.GetGenerator("ChanceInitDamage"), ApplierType.Attack);
 
 			for (int i = 0; i < 50; i++)
@@ -22,6 +28,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Random_InitDamage_Effect()
 		{
+			AddRecipes(add => add("ChanceEffectInitDamage")
+				.EffectChance(0.5f)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
 			for (int i = 0; i < 50; i++)
 				Unit.AddModifierSelf("ChanceEffectInitDamage");
 
@@ -34,6 +44,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Random_IntervalDamage_Effect()
 		{
+			AddRecipes(add => add("ChanceEffectIntervalDamage")
+				.EffectChance(0.5f)
+				.Interval(1)
+				.Effect(new DamageEffect(5), EffectOn.Interval));
+
 			Unit.AddModifierSelf("ChanceEffectIntervalDamage");
 
 			for (int i = 0; i < 50; i++)
@@ -48,6 +63,11 @@ namespace ModiBuff.Tests
 		//[Test]
 		public void Random_DurationDamage_Effect()
 		{
+			AddRecipes(add => add("ChanceEffectDurationDamage")
+				.EffectChance(0.5f)
+				.Effect(new DamageEffect(5), EffectOn.Duration)
+				.Remove(1));
+
 			for (int i = 0; i < 50; i++)
 			{
 				Unit.AddModifierSelf("ChanceEffectDurationDamage");
@@ -63,6 +83,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Random_StackDamage_Effect()
 		{
+			AddRecipes(add => add("ChanceEffectStackDamage")
+				.EffectChance(0.5f)
+				.Effect(new DamageEffect(5), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always));
+
 			for (int i = 0; i < 50; i++)
 				Unit.AddModifierSelf("ChanceEffectStackDamage");
 

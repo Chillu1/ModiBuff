@@ -40,7 +40,7 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public void UpdateOwner(IUnit owner)
+		public void UpdateOwner()
 		{
 			if (_targetComponent is ISingleTargetComponent singleTargetComponent &&
 			    singleTargetComponent.Target is IStatusResistance statusResistance)

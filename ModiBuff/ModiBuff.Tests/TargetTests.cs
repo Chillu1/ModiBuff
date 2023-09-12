@@ -1,4 +1,5 @@
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 using NUnit.Framework;
 
 namespace ModiBuff.Tests
@@ -8,11 +9,15 @@ namespace ModiBuff.Tests
 		[Test]
 		public void MultiTarget_AddDamage_Revertible()
 		{
+			AddRecipes(add => add("InitAddDamageRevertible")
+				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				.Remove(5));
+
 			var generator = Recipes.GetGenerator("InitAddDamageRevertible");
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
-			Unit.TryCast(generator.Id, Enemy);
-			Unit.TryCast(generator.Id, Ally);
+			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
+			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Ally);
 
 			Assert.AreEqual(EnemyDamage + 5, Enemy.Damage);
 			Assert.AreEqual(AllyDamage + 5, Ally.Damage);

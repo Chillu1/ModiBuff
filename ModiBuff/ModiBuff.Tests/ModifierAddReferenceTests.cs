@@ -1,4 +1,5 @@
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 using NUnit.Framework;
 
 namespace ModiBuff.Tests
@@ -8,6 +9,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddSelfModifier()
 		{
+			SetupSystems();
+            
 			var generator = Recipes.GetGenerator("InitDamage");
 			var modifierReference = new ModifierAddReference(generator);
 
@@ -19,6 +22,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddTargetModifier()
 		{
+			SetupSystems();
+            
 			var generator = Recipes.GetGenerator("InitDamage");
 			var modifierReference = new ModifierAddReference(generator);
 
@@ -30,6 +35,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddTargetApplyAttackModifier()
 		{
+			SetupSystems();
+			
 			var generator = Recipes.GetGenerator("InitDamage");
 			var modifierReference = new ModifierAddReference(generator, ApplierType.Attack);
 
@@ -43,6 +50,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddSelfApplyAttackModifier()
 		{
+			AddRecipes(add => add("InitDamageSelf")
+				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.SourceTarget)
+			);
+			
 			var generator = Recipes.GetGenerator("InitDamageSelf");
 			var modifierReference = new ModifierAddReference(generator, ApplierType.Attack);
 
@@ -56,12 +67,14 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddTargetApplyCastModifier()
 		{
+			SetupSystems();
+			
 			var generator = Recipes.GetGenerator("InitDamage");
 			var modifierReference = new ModifierAddReference(generator, ApplierType.Cast);
 
 			Unit.ModifierController.TryAdd(modifierReference);
 
-			Unit.TryCast(generator.Id, Enemy);
+			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}

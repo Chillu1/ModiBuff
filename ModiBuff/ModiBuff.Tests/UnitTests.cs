@@ -10,6 +10,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageDamagableUnit()
 		{
+			SetupSystems();
+
 			var unit = new Unit();
 			float unitHealth = unit.Health;
 
@@ -33,6 +35,7 @@ namespace ModiBuff.Tests
 #if !DEBUG
 			Assert.Ignore("This test is only for debug mode");
 #endif
+			SetupSystems();
 
 			var unit = new NonDamagableUnit();
 
@@ -42,6 +45,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void UnitDeath_ModifiersPooled()
 		{
+			AddRecipes(add => add("InitDamage_ApplyCondition_HealthAbove100")
+				.ApplyCondition(StatType.Health, 100, ComparisonType.GreaterOrEqual)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
+
 			Pool.Clear();
 			Pool.SetMaxPoolSize(3);
 			Pool.Allocate(IdManager.GetId("InitDamage"), 3);

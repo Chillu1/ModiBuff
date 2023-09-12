@@ -1,4 +1,5 @@
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 using NUnit.Framework;
 
 namespace ModiBuff.Tests
@@ -6,8 +7,32 @@ namespace ModiBuff.Tests
 	public sealed class TargetingTests : ModifierTests
 	{
 		[Test]
+		public void SelfInit_Damage()
+		{
+			SetupSystems();
+
+			Unit.AddModifierSelf("InitDamage"); //Init
+
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void TargetInit_Damage()
+		{
+			SetupSystems();
+
+			Enemy.AddModifierTarget("InitDamage", Unit); //Init
+
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
 		public void InitSelfHeal_DamageTarget()
 		{
+			AddRecipes(add => add("InitSelfHeal_DamageTarget")
+				.Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceTarget)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
 			Unit.TakeDamage(5, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 			Unit.AddModifierTarget("InitSelfHeal_DamageTarget", Enemy);

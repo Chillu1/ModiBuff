@@ -1,4 +1,5 @@
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 using NUnit.Framework;
 
 namespace ModiBuff.Tests
@@ -8,6 +9,12 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InstanceStackableDoT()
 		{
+			AddRecipes(add => add("InstanceStackableDoT")
+				.InstanceStackable()
+				.Interval(1)
+				.Effect(new DamageEffect(5), EffectOn.Interval)
+				.Remove(5));
+
 			Unit.AddModifierSelf("InstanceStackableDoT");
 
 			Unit.Update(1); //4
@@ -34,6 +41,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InstanceStackableAddDamage()
 		{
+			AddRecipes(add => add("InstanceStackableAddDamageRevertible")
+				.InstanceStackable()
+				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				.Remove(5));
+
 			Unit.AddModifierSelf("InstanceStackableAddDamageRevertible");
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 

@@ -1,4 +1,5 @@
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 using NUnit.Framework;
 
 namespace ModiBuff.Tests
@@ -8,12 +9,17 @@ namespace ModiBuff.Tests
 		[Test]
 		public void LifeSteal_OnDamageEffectInit()
 		{
+			AddRecipes(add => add("InitDamageLifeStealPost")
+				.Effect(new DamageEffect(5)
+						.SetPostEffects(new LifeStealPostEffect(0.5f, Targeting.SourceTarget))
+					, EffectOn.Init));
+
 			var generator = Recipes.GetGenerator("InitDamageLifeStealPost");
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
 			Unit.TakeDamage(2.5f, Unit);
 
-			Unit.TryCast(generator.Id, Enemy);
+			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
 
 			Assert.AreEqual(UnitHealth, Unit.Health);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
@@ -22,12 +28,17 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddDamage_OnKill_WithDamageEffectInit()
 		{
+			AddRecipes(add => add("InitDamageAddDamageOnKillPost")
+				.Effect(new DamageEffect(5)
+						.SetPostEffects(new AddDamageOnKillPostEffect(2, Targeting.SourceTarget))
+					, EffectOn.Init));
+
 			var generator = Recipes.GetGenerator("InitDamageAddDamageOnKillPost");
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
 			Enemy.TakeDamage(EnemyHealth - 5, Unit);
 
-			Unit.TryCast(generator.Id, Enemy);
+			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
 
 			Assert.AreEqual(UnitDamage + 2, Unit.Damage);
 			Assert.AreEqual(0, Enemy.Health);
@@ -36,12 +47,17 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealTargetDamageSelf()
 		{
+			AddRecipes(add => add("HealDamageSelfPost")
+				.Effect(new HealEffect(5)
+						.SetPostEffects(new DamagePostEffect(Targeting.SourceTarget))
+					, EffectOn.Init));
+
 			var generator = Recipes.GetGenerator("HealDamageSelfPost");
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
 			Enemy.TakeDamage(5, Enemy);
 
-			Unit.TryCast(generator.Id, Enemy);
+			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
 
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);

@@ -1,4 +1,5 @@
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 using NUnit.Framework;
 
 namespace ModiBuff.Tests
@@ -8,6 +9,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Init_AddDamage_Remove_RevertDamage()
 		{
+			AddRecipes(add => add("InitAddDamageRevertible")
+				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				.Remove(5));
+
 			Unit.AddModifierSelf("InitAddDamageRevertible");
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 

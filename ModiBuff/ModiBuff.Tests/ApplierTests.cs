@@ -10,6 +10,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageApplier_Attack_Damage()
 		{
+			SetupSystems();
+
 			var applier = Recipes.GetGenerator("InitDamage");
 			Unit.AddApplierModifier(applier, ApplierType.Attack);
 
@@ -21,6 +23,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealApplier_Attack_Heal()
 		{
+			AddRecipes(add => add("InitStrongHeal")
+				.Effect(new HealEffect(10), EffectOn.Init));
+
 			var applier = Recipes.GetGenerator("InitStrongHeal");
 			Unit.AddApplierModifier(applier, ApplierType.Attack);
 
@@ -32,6 +37,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageSelfApplier_Attack_DamageSelf()
 		{
+			AddRecipes(add => add("InitDamageSelf")
+				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.SourceTarget)
+			);
+
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageSelf"), ApplierType.Attack);
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Attack);
 
@@ -43,6 +52,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageApplier_Cast_Damage()
 		{
+			SetupSystems();
+
 			var applier = Recipes.GetGenerator("InitDamage");
 			Unit.AddApplierModifier(applier, ApplierType.Cast);
 
@@ -54,6 +65,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageApplier_Interval()
 		{
+			AddRecipes(add => add("DamageApplier_Interval")
+				.Effect(new ApplierEffect("InitDamage"), EffectOn.Interval)
+				.Interval(1));
+
 			Unit.AddModifierTarget("DamageApplier_Interval", Enemy);
 
 			Unit.Update(1f);
@@ -68,6 +83,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamageCostMana()
 		{
+			AddRecipes(add => add("InitDamage_CostMana")
+				.ApplyCost(CostType.Mana, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init));
+
 			var generator = Recipes.GetGenerator("InitDamage_CostMana");
 
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
@@ -81,6 +100,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void NestedStackApplier()
 		{
+			Assert.Fail("Combination of Event & Non-Event");
+
 			Unit.AddModifierSelf("ComplexApplier_OnHit_Event");
 
 			Enemy.Attack(Unit); //Gets rupture modifier
@@ -108,6 +129,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddDamageStacksEventsAppliers()
 		{
+			Assert.Fail("Combination of Event & Non-Event");
+
 			//Add damage on 4 stacks buff, that you give someone when they heal you 5 times, for 60 seconds.
 			Ally.AddModifierSelf("ComplexApplier2_WhenHealed_Event");
 
@@ -121,6 +144,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ModifierDoesntExist()
 		{
+			SetupSystems();
+
 			Assert.Catch<KeyNotFoundException>(() => Recipes.GetGenerator("NonExistentApplier"));
 		}
 
@@ -148,6 +173,7 @@ namespace ModiBuff.Tests
 #if !DEBUG
 			Assert.Ignore("This test is only for debug mode");
 #endif
+			SetupSystems();
 
 			var testLogger = new TestLogger();
 			Logger.SetLogger(testLogger);
@@ -161,6 +187,13 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ApplyNewModifierOnIteration() //Checks that our collection is not modified during iteration
 		{
+			AddRecipes(
+				add => add("AddModifierApplier_Flag"),
+				add => add("AddModifierApplierInterval")
+					.Effect(new ApplierEffect("AddModifierApplier_Flag"), EffectOn.Interval)
+					.Interval(1));
+
+
 			Config.ModifierArraySize = 1;
 			var unit = new Unit();
 
