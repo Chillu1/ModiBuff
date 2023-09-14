@@ -34,6 +34,26 @@ namespace ModiBuff.Core
 			_registeredNames = new List<RegisterData>(16);
 
 			for (int i = 0; i < recipes.Count; i++)
+			{
+				recipes[i](delegate(string name)
+				{
+					Register(name);
+					//TODO Terrible hack for terrible design, needs refactor ASAP
+					return new ModifierRecipe(0, name, _idManager);
+				});
+			}
+
+			for (int i = 0; i < eventRecipes.Count; i++)
+			{
+				eventRecipes[i](delegate(string name, object @event)
+				{
+					Register(name);
+					//TODO Terrible hack for terrible design, needs refactor ASAP
+					return new ModifierEventRecipe(0, name, _idManager, null);
+				});
+			}
+
+			for (int i = 0; i < recipes.Count; i++)
 				recipes[i](Add);
 			for (int i = 0; i < eventRecipes.Count; i++)
 				eventRecipes[i](AddEvent);

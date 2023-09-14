@@ -77,17 +77,17 @@ Delta: 0.0167 * N
 
 #### Add/Apply/Update Modifier table
 
-| Library                                               | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Apply Multi<br/>instance DoT |
-|-------------------------------------------------------|--------------------------------|-------------------------------------|------------------------------|
-| ModiBuff (this)                                       | 0.24ms, 0 B                    | 0.44ms, 0 B                         | 0.98ms, 0 B                  |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 1.02ms, 0 GC                   | ?                                   | X                            |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | 21.4ms, 24 GC                  | ?                                   | X                            |
+| Library                                               | NoOp* <br/>(1 unit) | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Apply Multi<br/>instance DoT |
+|-------------------------------------------------------|---------------------|--------------------------------|-------------------------------------|------------------------------|
+| ModiBuff (this)                                       | 0.16ms, 0 B         | 0.24ms, 0 B                    | 0.44ms, 0 B                         | 0.98ms, 0 B                  |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | ?                   | 1.02ms, 0 GC                   | ?                                   | X                            |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                   | 21.4ms, 24 GC                  | ?                                   | X                            |
 
-| Library                                               | Update DoT*<br/>(10_000 units, N:1) | Update Instance<br/>Stackable DoT |
-|-------------------------------------------------------|-------------------------------------|-----------------------------------|
-| ModiBuff (this)                                       | 1.09ms, 0 B                         | 0.11ms, 0 B                       |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 0.44ms, 0 B                         | X                                 |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                                   | X                                 |
+| Library                                               | Update DoT**<br/>(10_000 units, N:1) | Update Instance<br/>Stackable DoT |
+|-------------------------------------------------------|--------------------------------------|-----------------------------------|
+| ModiBuff (this)                                       | 1.09ms, 0 B                          | 0.11ms, 0 B                       |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 0.44ms, 0 B                          | X                                 |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                                    | X                                 |
 
 #### New Modifier/Pool table
 
@@ -114,7 +114,8 @@ Pooling in ModiBuff is 700X faster than original old version (because of pool re
 But it's also much faster in cases of doing init/stack/refresh on an existing modifier (we don't create a new modifier anymore)  
 ModiBuffEcs is a bit on the slow side for now, because of how pooling works, with enabling and disabling entities.
 
-*DoT = InitDoTSeparateDamageRemove
+*NoOp is an empty effect, so it just measures the benchmark time of the library without unit logic (ex. taking damage).
+**DoT = InitDoTSeparateDamageRemove
 
 # Requirements
 

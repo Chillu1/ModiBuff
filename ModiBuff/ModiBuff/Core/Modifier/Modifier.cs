@@ -18,8 +18,6 @@ namespace ModiBuff.Core
 		public int GenId { get; }
 		public string Name { get; }
 
-		private readonly bool _refresh;
-
 		private readonly InitComponent _initComponent;
 
 		private readonly ITimeComponent[] _timeComponents;
@@ -41,18 +39,7 @@ namespace ModiBuff.Core
 			Name = name;
 
 			_initComponent = initComponent;
-
 			_timeComponents = timeComponents;
-
-			for (int i = 0; i < timeComponents?.Length; i++)
-			{
-				if (timeComponents[i].IsRefreshable)
-				{
-					_refresh = true;
-					break;
-				}
-			}
-
 			_stackComponent = stackComponent;
 
 			if (effectCheck != null)
@@ -130,9 +117,6 @@ namespace ModiBuff.Core
 
 		public void Init()
 		{
-			if (_initComponent == null)
-				return;
-
 #if UNSAFE
 			if (_multiTarget)
 				_initComponent.Init(Unsafe.As<MultiTargetComponent>(_targetComponent).Targets, _targetComponent.Source);
@@ -161,9 +145,6 @@ namespace ModiBuff.Core
 
 		public void Refresh()
 		{
-			if (!_refresh)
-				return;
-
 			int length = _timeComponents.Length;
 			for (int i = 0; i < length; i++)
 				_timeComponents[i].Refresh();
@@ -171,9 +152,6 @@ namespace ModiBuff.Core
 
 		public void Stack()
 		{
-			if (_stackComponent == null)
-				return;
-
 			_stackComponent.Stack();
 		}
 

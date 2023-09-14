@@ -57,15 +57,11 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
-#if DEBUG && !MODIBUFF_PROFILE
-			if (!(target is IDamagable<float, float, float, float>) &&
-			    (_targeting == Targeting.TargetTarget || _targeting == Targeting.SourceTarget))
-				throw new ArgumentException("Target must implement IDamagable");
-			if (!(source is IDamagable<float, float, float, float>) &&
-			    (_targeting == Targeting.SourceTarget || _targeting == Targeting.SourceSource))
-				throw new ArgumentException("Source must implement IDamagable when targeting source");
-#endif
 			_targeting.UpdateTargetSource(ref target, ref source);
+#if DEBUG && !MODIBUFF_PROFILE
+			if (!(target is IDamagable<float, float, float, float>))
+				throw new ArgumentException("Target must implement IDamagable");
+#endif
 
 			float damage = _baseDamage;
 
@@ -76,7 +72,7 @@ namespace ModiBuff.Core.Units
 			damage += _extraDamage;
 
 			float returnDamageInfo =
-#if UNSAFE
+#if !DEBUG && UNSAFE
 				Unsafe.As<IDamagable<float, float, float, float>>(target).TakeDamage(damage, source, !_isEventBased);
 #else
 				((IDamagable<float, float, float, float>)target).TakeDamage(damage, source, !_isEventBased);

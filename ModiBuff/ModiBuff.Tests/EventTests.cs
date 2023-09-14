@@ -137,7 +137,15 @@ namespace ModiBuff.Tests
 		[Test]
 		public void PoisonDoT_OnHit()
 		{
-			Assert.Fail("Combination of Event & Non-Event");
+			AddMixedRecipes(new RecipeAddFunc[]
+			{
+				add => add("PoisonDoT").Interval(1).Effect(new DamageEffect(5), EffectOn.Interval)
+			}, new EventRecipeAddFunc[]
+			{
+				add => add("PoisonDoT_OnHit_Event", EffectOnEvent.WhenAttacked)
+					.Effect(new ApplierEffect("PoisonDoT"), Targeting.SourceTarget)
+			});
+
 			Unit.AddModifierSelf("PoisonDoT_OnHit_Event");
 
 			Enemy.Attack(Unit);

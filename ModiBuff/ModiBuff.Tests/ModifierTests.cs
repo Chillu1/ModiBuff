@@ -60,6 +60,17 @@ namespace ModiBuff.Tests
 			Setup();
 		}
 
+		protected void AddMixedRecipes(RecipeAddFunc[] recipeAddFunc, EventRecipeAddFunc[] eventRecipeAddFunc)
+		{
+			IdManager = new ModifierIdManager();
+			var eventEffectFactory =
+				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
+			Recipes = new ModifierRecipes(recipeAddFunc, eventRecipeAddFunc, IdManager, eventEffectFactory);
+			Pool = new ModifierPool(Recipes.GetGenerators());
+
+			Setup();
+		}
+
 		public void SetupSystems()
 		{
 			IdManager = new ModifierIdManager();

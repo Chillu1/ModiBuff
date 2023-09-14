@@ -100,7 +100,22 @@ namespace ModiBuff.Tests
 		[Test]
 		public void NestedStackApplier()
 		{
-			Assert.Fail("Combination of Event & Non-Event");
+			AddMixedRecipes(new RecipeAddFunc[]
+			{
+				add => add("ComplexApplier_Rupture")
+					.Interval(1)
+					.Effect(new DamageEffect(5), EffectOn.Interval)
+					.Effect(new ApplierEffect("ComplexApplier_Disarm"), EffectOn.Stack)
+					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5),
+				add => add("ComplexApplier_Disarm")
+					.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect), EffectOn.Stack)
+					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2)
+					.Remove(10).Refresh()
+			}, new EventRecipeAddFunc[]
+			{
+				add => add("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
+					.Effect(new ApplierEffect("ComplexApplier_Rupture"), Targeting.SourceTarget)
+			});
 
 			Unit.AddModifierSelf("ComplexApplier_OnHit_Event");
 
@@ -129,7 +144,31 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddDamageStacksEventsAppliers()
 		{
-			Assert.Fail("Combination of Event & Non-Event");
+			AddMixedRecipes(new RecipeAddFunc[]
+			{
+				add => add("ComplexApplier2_WhenHealed")
+					.Effect(new ApplierEffect("ComplexApplier2_OnAttack_Event"), EffectOn.Stack)
+					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5)
+					.Remove(5).Refresh(),
+				add => add("ComplexApplier2_AddDamageAdd")
+					.Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)
+					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
+					.Remove(5).Refresh(),
+				add => add("ComplexApplier2_AddDamage")
+					.OneTimeInit()
+					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+					.Remove(10).Refresh()
+			}, new EventRecipeAddFunc[]
+			{
+				add => add("ComplexApplier2_WhenHealed_Event", EffectOnEvent.WhenHealed)
+					.Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), Targeting.SourceTarget),
+				add => add("ComplexApplier2_OnAttack_Event", EffectOnEvent.OnAttack)
+					.Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"))
+					.Remove(60).Refresh(),
+				add => add("ComplexApplier2_WhenAttacked_Event", EffectOnEvent.WhenAttacked)
+					.Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), Targeting.SourceTarget)
+					.Remove(5).Refresh()
+			});
 
 			//Add damage on 4 stacks buff, that you give someone when they heal you 5 times, for 60 seconds.
 			Ally.AddModifierSelf("ComplexApplier2_WhenHealed_Event");

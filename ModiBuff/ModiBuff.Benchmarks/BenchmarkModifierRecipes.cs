@@ -11,6 +11,9 @@ namespace ModiBuff.Tests
 
 		protected override void SetupRecipes()
 		{
+			Add("NoOpEffect")
+				.Effect(new NoOpEffect(), EffectOn.Init);
+
 			Add("InitDamage")
 				.Effect(new DamageEffect(5), EffectOn.Init);
 

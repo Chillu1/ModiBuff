@@ -10,6 +10,7 @@ namespace ModiBuff.Tests
 	{
 		private Unit _unit;
 
+		private int _noOpModifierId;
 		private int _initDamageModifierId;
 		private int _initStackDamageModifierId;
 
@@ -19,11 +20,17 @@ namespace ModiBuff.Tests
 
 			_unit = new Unit(1_000_000_000, 5);
 
+			_noOpModifierId = IdManager.GetId("NoOpEffect");
 			_initDamageModifierId = IdManager.GetId("InitDamage");
 			_initStackDamageModifierId = IdManager.GetId("InitStackDamage");
 		}
 
 		[Benchmark]
+		public void BenchAddNoOpEffectBench()
+		{
+			_unit.ModifierController.Add(_noOpModifierId, _unit, _unit);
+		}
+
 		public void BenchAddInitDamageBench()
 		{
 			_unit.ModifierController.Add(_initDamageModifierId, _unit, _unit);
