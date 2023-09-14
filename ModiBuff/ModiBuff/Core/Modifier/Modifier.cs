@@ -1,3 +1,7 @@
+#if NET5_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP1_1_OR_GREATER
+#define UNSAFE
+#endif
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -20,7 +24,7 @@ namespace ModiBuff.Core
 
 		private readonly ITimeComponent[] _timeComponents;
 
-		private readonly IStackComponent _stackComponent;
+		private readonly StackComponent _stackComponent;
 
 		private readonly ModifierCheck _effectCheck;
 		private readonly bool _check;
@@ -30,7 +34,7 @@ namespace ModiBuff.Core
 		private bool _multiTarget;
 
 		public Modifier(int id, int genId, string name, InitComponent initComponent, ITimeComponent[] timeComponents,
-			IStackComponent stackComponent, ModifierCheck effectCheck, ITargetComponent targetComponent)
+			StackComponent stackComponent, ModifierCheck effectCheck, ITargetComponent targetComponent)
 		{
 			Id = id;
 			GenId = genId;
@@ -130,10 +134,17 @@ namespace ModiBuff.Core
 			if (_initComponent == null)
 				return;
 
+#if UNSAFE
+			if (_multiTarget)
+				_initComponent.Init(Unsafe.As<MultiTargetComponent>(_targetComponent).Targets, _targetComponent.Source);
+			else
+				_initComponent.Init(Unsafe.As<SingleTargetComponent>(_targetComponent).Target, _targetComponent.Source);
+#else
 			if (_multiTarget)
 				_initComponent.Init(((MultiTargetComponent)_targetComponent).Targets, _targetComponent.Source);
 			else
 				_initComponent.Init(((SingleTargetComponent)_targetComponent).Target, _targetComponent.Source);
+#endif
 		}
 
 		public void Update(float deltaTime)

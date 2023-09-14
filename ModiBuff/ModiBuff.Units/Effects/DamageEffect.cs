@@ -1,4 +1,9 @@
+#if NET5_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP1_1_OR_GREATER
+#define UNSAFE
+#endif
+
 using System;
+using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
@@ -53,7 +58,8 @@ namespace ModiBuff.Core.Units
 		public void Effect(IUnit target, IUnit source)
 		{
 #if DEBUG && !MODIBUFF_PROFILE
-			if (!(target is IDamagable<float, float, float, float>))
+			if (!(target is IDamagable<float, float, float, float>) &&
+			    (_targeting == Targeting.TargetTarget || _targeting == Targeting.SourceTarget))
 				throw new ArgumentException("Target must implement IDamagable");
 			if (!(source is IDamagable<float, float, float, float>) &&
 			    (_targeting == Targeting.SourceTarget || _targeting == Targeting.SourceSource))
@@ -70,8 +76,11 @@ namespace ModiBuff.Core.Units
 			damage += _extraDamage;
 
 			float returnDamageInfo =
+#if UNSAFE
+				Unsafe.As<IDamagable<float, float, float, float>>(target).TakeDamage(damage, source, !_isEventBased);
+#else
 				((IDamagable<float, float, float, float>)target).TakeDamage(damage, source, !_isEventBased);
-
+#endif
 			if (!_hasPostEffects)
 				return;
 

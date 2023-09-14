@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
-	public sealed class StackComponent : IStackComponent
+	public sealed class StackComponent : ITarget, IStateReset
 	{
 		private readonly WhenStackEffect _whenStackEffect;
 		private readonly int _maxStacks;
