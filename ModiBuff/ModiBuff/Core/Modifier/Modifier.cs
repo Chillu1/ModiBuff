@@ -1,4 +1,4 @@
-#if NET5_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP1_1_OR_GREATER
+#if NET5_0_OR_GREATER || NETSTANDARD2_0_OR_GREATER || NETCOREAPP1_1_OR_GREATER
 #define UNSAFE
 #endif
 
@@ -63,7 +63,7 @@ namespace ModiBuff.Core
 			}
 
 			_targetComponent = targetComponent;
-			if (targetComponent is IMultiTargetComponent)
+			if (targetComponent is MultiTargetComponent)
 				_multiTarget = true;
 		}
 
@@ -90,14 +90,14 @@ namespace ModiBuff.Core
 					_stackComponent.SetupTarget(_targetComponent);
 			}
 
-			_targetComponent.UpdateSource(source);
+			_targetComponent.Source = source;
 			((MultiTargetComponent)_targetComponent).UpdateTargets(targetsInRange);
 			if (_timeComponents != null)
 				for (int i = 0; i < _timeComponents.Length; i++)
-					_timeComponents[i].UpdateOwner();
+					_timeComponents[i].UpdateTargetStatusResistance();
 		}
 
-		public void UpdateSource(IUnit source) => _targetComponent.UpdateSource(source);
+		public void UpdateSource(IUnit source) => _targetComponent.Source = source;
 
 		public void UpdateSingleTargetSource(IUnit target, IUnit source)
 		{
@@ -122,11 +122,11 @@ namespace ModiBuff.Core
 					_stackComponent.SetupTarget(_targetComponent);
 			}
 
-			_targetComponent.UpdateSource(source);
-			((SingleTargetComponent)_targetComponent).UpdateTarget(target);
+			_targetComponent.Source = source;
+			((SingleTargetComponent)_targetComponent).Target = target;
 			if (_timeComponents != null)
 				for (int i = 0; i < _timeComponents.Length; i++)
-					_timeComponents[i].UpdateOwner();
+					_timeComponents[i].UpdateTargetStatusResistance();
 		}
 
 		public void Init()

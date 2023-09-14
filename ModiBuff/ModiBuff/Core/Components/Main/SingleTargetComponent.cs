@@ -1,13 +1,13 @@
 namespace ModiBuff.Core
 {
-	public sealed class SingleTargetComponent : ISingleTargetComponent
+	public sealed class SingleTargetComponent : ITargetComponent
 	{
 		/// <summary>
 		///		Unit that applied the modifier.
 		/// </summary>
-		public IUnit Source { get; private set; }
+		public IUnit Source { get; set; }
 
-		public IUnit Target { get; private set; }
+		public IUnit Target { get; set; }
 
 		public SingleTargetComponent()
 		{
@@ -18,9 +18,6 @@ namespace ModiBuff.Core
 			Target = target;
 			Source = source;
 		}
-
-		public void UpdateSource(IUnit source) => Source = source;
-		public void UpdateTarget(IUnit target) => Target = target;
 
 		public void ResetState()
 		{

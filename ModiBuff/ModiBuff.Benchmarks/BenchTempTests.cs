@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
@@ -26,6 +27,10 @@ namespace ModiBuff.Tests
 		private int _timeComponentCount;
 		private int _timeComponentIndex;
 		private Func<ITimeComponent[]> _timeComponentFunc;
+
+		private bool _isMulti;
+		private ITargetComponent _targetComponent;
+		private IEffect _noOpEffect;
 
 		public override void GlobalSetup()
 		{
@@ -72,6 +77,10 @@ namespace ModiBuff.Tests
 			//_timeComponentIndex = 0;
 			//return new ITimeComponent[_timeComponentCount];
 			//};
+
+			_targetComponent = new MultiTargetComponent();
+			_isMulti = true;
+			_noOpEffect = new NoOpEffect();
 		}
 
 		//[Benchmark(Baseline = true)]
@@ -168,7 +177,7 @@ namespace ModiBuff.Tests
 				check.Value.Update(Delta);
 		}
 
-		[Benchmark(Baseline = true)]
+		//[Benchmark(Baseline = true)]
 		public void IfTimeComponentCount()
 		{
 			ITimeComponent[] timeComponents = null;
@@ -181,12 +190,69 @@ namespace ModiBuff.Tests
 			var test = timeComponents;
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void FuncTimeComponentCount()
 		{
 			var timeComponents = _timeComponentFunc();
 
 			var test = timeComponents;
+		}
+
+		[Benchmark]
+		public void SwitchMatchClass()
+		{
+			switch (_targetComponent)
+			{
+				case SingleTargetComponent single:
+					_noOpEffect.Effect(single.Target, single.Source);
+					break;
+				case MultiTargetComponent multi:
+					_noOpEffect.Effect(multi.Targets, multi.Source);
+					break;
+			}
+		}
+
+		[Benchmark]
+		public void SafeCastIsCheckClass()
+		{
+			if (_targetComponent is SingleTargetComponent single)
+			{
+				_noOpEffect.Effect(single.Target, single.Source);
+			}
+			else if (_targetComponent is MultiTargetComponent multi)
+			{
+				_noOpEffect.Effect(multi.Targets, multi.Source);
+			}
+		}
+
+		[Benchmark]
+		public void IfCheckSafeCastClass()
+		{
+			if (!_isMulti)
+			{
+				var single = (SingleTargetComponent)_targetComponent;
+				_noOpEffect.Effect(single.Target, single.Source);
+			}
+			else
+			{
+				var multi = (MultiTargetComponent)_targetComponent;
+				_noOpEffect.Effect(multi.Targets, multi.Source);
+			}
+		}
+
+		[Benchmark]
+		public void IfCheckUnSafeCastClass()
+		{
+			if (!_isMulti)
+			{
+				var single = Unsafe.As<SingleTargetComponent>(_targetComponent);
+				_noOpEffect.Effect(single.Target, single.Source);
+			}
+			else
+			{
+				var multi = Unsafe.As<MultiTargetComponent>(_targetComponent);
+				_noOpEffect.Effect(multi.Targets, multi.Source);
+			}
 		}
 	}
 }

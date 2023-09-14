@@ -2,9 +2,9 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
-	public sealed class MultiTargetComponent : IMultiTargetComponent
+	public sealed class MultiTargetComponent : ITargetComponent
 	{
-		public IUnit Source { get; private set; }
+		public IUnit Source { get; set; }
 		public List<IUnit> Targets { get; }
 
 		public MultiTargetComponent()
@@ -17,8 +17,6 @@ namespace ModiBuff.Core
 			Source = source;
 			Targets = targets;
 		}
-
-		public void UpdateSource(IUnit source) => Source = source;
 
 		public void UpdateTargets(List<IUnit> targets)
 		{

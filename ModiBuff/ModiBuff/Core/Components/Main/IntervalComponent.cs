@@ -32,7 +32,7 @@ namespace ModiBuff.Core
 		public void SetupTarget(ITargetComponent targetComponent)
 		{
 			_targetComponent = targetComponent;
-			if (targetComponent is ISingleTargetComponent singleTargetComponent &&
+			if (targetComponent is SingleTargetComponent singleTargetComponent &&
 			    singleTargetComponent.Target is IStatusResistance statusResistance)
 			{
 				_statusResistanceImplemented = true;
@@ -40,9 +40,9 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public void UpdateOwner()
+		public void UpdateTargetStatusResistance()
 		{
-			if (_targetComponent is ISingleTargetComponent singleTargetComponent &&
+			if (_targetComponent is SingleTargetComponent singleTargetComponent &&
 			    singleTargetComponent.Target is IStatusResistance statusResistance)
 			{
 				_statusResistanceImplemented = true;
@@ -71,13 +71,13 @@ namespace ModiBuff.Core
 			int length = _effects.Length;
 			switch (_targetComponent)
 			{
-				case IMultiTargetComponent targetComponent:
+				case MultiTargetComponent multiTargetComponent:
 					for (int i = 0; i < length; i++)
-						_effects[i].Effect(targetComponent.Targets, targetComponent.Source);
+						_effects[i].Effect(multiTargetComponent.Targets, multiTargetComponent.Source);
 					break;
-				case ISingleTargetComponent targetComponent:
+				case SingleTargetComponent singleTargetComponent:
 					for (int i = 0; i < length; i++)
-						_effects[i].Effect(targetComponent.Target, targetComponent.Source);
+						_effects[i].Effect(singleTargetComponent.Target, singleTargetComponent.Source);
 					break;
 			}
 		}

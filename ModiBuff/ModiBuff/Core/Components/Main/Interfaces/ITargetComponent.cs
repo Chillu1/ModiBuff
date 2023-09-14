@@ -5,9 +5,7 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Unit that applied the modifier.
 		/// </summary>
-		IUnit Source { get; }
+		IUnit Source { get; set; }
 		//IUnit OriginalOwner { get; }
-
-		void UpdateSource(IUnit source);
 	}
 }

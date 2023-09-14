@@ -85,14 +85,14 @@ namespace ModiBuff.Core
 			int length = _effects.Length;
 			switch (_targetComponent)
 			{
-				case IMultiTargetComponent targetComponent:
+				case MultiTargetComponent multiTargetComponent:
 					for (int i = 0; i < length; i++)
-					for (int j = 0; j < targetComponent.Targets.Count; j++)
-						_effects[i].StackEffect(_stacks, _value, targetComponent.Targets[j], targetComponent.Source);
+					for (int j = 0; j < multiTargetComponent.Targets.Count; j++)
+						_effects[i].StackEffect(_stacks, _value, multiTargetComponent.Targets[j], multiTargetComponent.Source);
 					break;
-				case ISingleTargetComponent targetComponent:
+				case SingleTargetComponent singleTargetComponent:
 					for (int i = 0; i < length; i++)
-						_effects[i].StackEffect(_stacks, _value, targetComponent.Target, targetComponent.Source);
+						_effects[i].StackEffect(_stacks, _value, singleTargetComponent.Target, singleTargetComponent.Source);
 					break;
 			}
 		}
