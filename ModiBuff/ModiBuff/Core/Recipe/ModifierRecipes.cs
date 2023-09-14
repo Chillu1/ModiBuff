@@ -18,7 +18,7 @@ namespace ModiBuff.Core
 		private readonly IDictionary<string, IModifierRecipe> _recipes;
 		private readonly IDictionary<string, IModifierGenerator> _modifierGenerators;
 		private readonly List<RegisterData> _registeredNames;
-		private readonly bool[] _instanceStackableIds;
+		private readonly ModifierAddData[] _modifierAddData;
 
 		private EventEffectFactory _eventEffectFunc;
 
@@ -39,11 +39,10 @@ namespace ModiBuff.Core
 				eventRecipes[i](AddEvent);
 
 			SetupRecipes();
-			_instanceStackableIds = new bool[_recipes.Count];
+			_modifierAddData = new ModifierAddData[_recipes.Count];
 			foreach (var recipe in _recipes.Values)
 			{
-				if (recipe is ModifierRecipe modifierRecipe && modifierRecipe.IsInstanceStackable)
-					_instanceStackableIds[modifierRecipe.Id] = true;
+				_modifierAddData[recipe.Id] = recipe.CreateAddData();
 				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
 			}
 
@@ -63,11 +62,10 @@ namespace ModiBuff.Core
 			_registeredNames = new List<RegisterData>(16);
 
 			SetupRecipes();
-			_instanceStackableIds = new bool[_recipes.Count];
+			_modifierAddData = new ModifierAddData[_recipes.Count];
 			foreach (var recipe in _recipes.Values)
 			{
-				if (recipe is ModifierRecipe modifierRecipe && modifierRecipe.IsInstanceStackable)
-					_instanceStackableIds[modifierRecipe.Id] = true;
+				_modifierAddData[recipe.Id] = recipe.CreateAddData();
 				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
 			}
 
@@ -94,7 +92,7 @@ namespace ModiBuff.Core
 			_eventEffectFunc = eventEffectFunc;
 		}
 
-		public static bool IsInstanceStackable(int id) => _instance._instanceStackableIds[id];
+		public static ref readonly ModifierAddData GetAddData(int id) => ref _instance._modifierAddData[id];
 
 		public IModifierGenerator GetGenerator(string id) => _modifierGenerators[id];
 
@@ -188,9 +186,9 @@ namespace ModiBuff.Core
 		public void Clear()
 		{
 			_recipes.Clear();
+			Array.Clear(_modifierAddData, 0, _modifierAddData.Length);
 			_modifierGenerators.Clear();
 			_registeredNames.Clear();
-			Array.Clear(_instanceStackableIds, 0, _instanceStackableIds.Length);
 		}
 
 		private readonly struct RegisterData

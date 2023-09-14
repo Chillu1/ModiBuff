@@ -60,6 +60,11 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		public ModifierAddData CreateAddData()
+		{
+			return new ModifierAddData(true, _refreshDuration, false, false);
+		}
+
 		public IModifierGenerator CreateModifierGenerator()
 		{
 			return new ModifierEventGenerator(Id, Name, _effectOnEvent, _eventEffectFunc, _effects, _removeDuration, _removeEffectWrapper,

@@ -233,6 +233,23 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		//---Modifier Generation---
+
+		public ModifierAddData CreateAddData()
+		{
+			bool hasInit = false, hasStack = false;
+			for (int i = 0; i < _effectWrappers.Count; i++)
+			{
+				var effectWrapper = _effectWrappers[i];
+				if (effectWrapper.EffectOn.HasFlag(EffectOn.Init))
+					hasInit = true;
+				if (effectWrapper.EffectOn.HasFlag(EffectOn.Stack))
+					hasStack = true;
+			}
+
+			return new ModifierAddData(hasInit, _refreshDuration || _refreshInterval, hasStack, IsInstanceStackable);
+		}
+
 		public IModifierGenerator CreateModifierGenerator()
 		{
 			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _hasApplyChecks,

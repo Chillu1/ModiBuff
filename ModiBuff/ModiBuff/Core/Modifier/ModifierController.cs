@@ -168,14 +168,19 @@ namespace ModiBuff.Core
 
 		public void Add(int id, IUnit target, IUnit source)
 		{
-			if (!ModifierRecipes.IsInstanceStackable(id) && _modifierIndexes[id] != -1)
+			ref readonly var addData = ref ModifierRecipes.GetAddData(id);
+
+			if (!addData.IsInstanceStackable && _modifierIndexes[id] != -1)
 			{
 				var existingModifier = _modifiers[_modifierIndexes[id]];
 				//TODO should we update the modifier targets when init/refreshing/stacking?
 				existingModifier.UpdateSource(source);
-				existingModifier.Init();
-				existingModifier.Refresh();
-				existingModifier.Stack();
+				if (addData.HasInit)
+					existingModifier.Init();
+				if (addData.HasRefresh)
+					existingModifier.Refresh();
+				if (addData.HasStack)
+					existingModifier.Stack();
 				return;
 			}
 
@@ -187,17 +192,20 @@ namespace ModiBuff.Core
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
 			modifier.UpdateSingleTargetSource(target, source);
 
-			if (!ModifierRecipes.IsInstanceStackable(id))
+			if (!addData.IsInstanceStackable)
 				_modifierIndexes[id] = _modifiersTop;
 			_modifiers[_modifiersTop++] = modifier;
-			modifier.Init();
-			modifier.Refresh();
-			modifier.Stack();
+			if (addData.HasInit)
+				modifier.Init();
+			if (addData.HasRefresh)
+				modifier.Refresh();
+			if (addData.HasStack)
+				modifier.Stack();
 		}
 
 		public bool Contains(int id)
 		{
-			if (!ModifierRecipes.IsInstanceStackable(id))
+			if (!ModifierRecipes.GetAddData(id).IsInstanceStackable)
 				return _modifierIndexes[id] != -1;
 
 			for (int i = 0; i < _modifiersTop; i++)
@@ -218,7 +226,7 @@ namespace ModiBuff.Core
 
 		public void Remove(in ModifierReference modifierReference)
 		{
-			if (!ModifierRecipes.IsInstanceStackable(modifierReference.Id))
+			if (!ModifierRecipes.GetAddData(modifierReference.Id).IsInstanceStackable)
 			{
 				var modifier = _modifiers[_modifierIndexes[modifierReference.Id]];
 				ModifierPool.Instance.Return(modifier);

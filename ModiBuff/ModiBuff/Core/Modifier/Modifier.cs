@@ -44,15 +44,14 @@ namespace ModiBuff.Core
 
 			_timeComponents = timeComponents;
 
-			if (timeComponents != null)
-				for (int i = 0; i < timeComponents.Length; i++)
+			for (int i = 0; i < timeComponents?.Length; i++)
+			{
+				if (timeComponents[i].IsRefreshable)
 				{
-					if (timeComponents[i].IsRefreshable)
-					{
-						_refresh = true;
-						break;
-					}
+					_refresh = true;
+					break;
 				}
+			}
 
 			_stackComponent = stackComponent;
 
@@ -162,7 +161,7 @@ namespace ModiBuff.Core
 
 		public void Refresh()
 		{
-			if (!_refresh || _timeComponents == null)
+			if (!_refresh)
 				return;
 
 			int length = _timeComponents.Length;
