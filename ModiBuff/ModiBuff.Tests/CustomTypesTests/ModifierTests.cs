@@ -34,7 +34,7 @@ namespace ModiBuff.Tests.CustomTypesTests
 			Config.PoolSize = 1;
 
 			IdManager = new ModifierIdManager();
-			Recipes = new TestModifierRecipes(IdManager);
+			Recipes = new EmptyModifierRecipes(IdManager);
 			Pool = new ModifierPool(Recipes.GetGenerators());
 		}
 

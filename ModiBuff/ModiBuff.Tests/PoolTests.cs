@@ -77,12 +77,14 @@ namespace ModiBuff.Tests
 		[Explicit]
 		public void FullLibraryInit()
 		{
+			SetupSystems();
+			
 			Config.PoolSize = 512;
 			Pool.Reset();
 			IdManager.Reset();
 
 			var idManager = new ModifierIdManager();
-			var recipes = new TestModifierRecipes(idManager);
+			var recipes = new EmptyModifierRecipes(idManager);
 			var pool = new ModifierPool(recipes.GetGenerators());
 
 			Config.Reset();

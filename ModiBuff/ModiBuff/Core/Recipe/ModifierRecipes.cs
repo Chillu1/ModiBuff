@@ -22,7 +22,8 @@ namespace ModiBuff.Core
 
 		private EventEffectFactory _eventEffectFunc;
 
-		public ModifierRecipes(IReadOnlyList<RecipeAddFunc> recipes, IReadOnlyList<EventRecipeAddFunc> eventRecipes,
+		//TODO Refactor Unit tests recipe adding, and combines constructors
+		internal ModifierRecipes(IReadOnlyList<RecipeAddFunc> recipes, IReadOnlyList<EventRecipeAddFunc> eventRecipes,
 			ModifierIdManager idManager, EventEffectFactory eventEffectFunc)
 		{
 			_instance = this;

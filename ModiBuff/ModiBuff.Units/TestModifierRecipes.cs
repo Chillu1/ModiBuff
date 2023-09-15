@@ -1,6 +1,6 @@
 namespace ModiBuff.Core.Units
 {
-	public class TestModifierRecipes : ModifierRecipes
+	public sealed class TestModifierRecipes : ModifierRecipes
 	{
 		public TestModifierRecipes(ModifierIdManager idManager) : base(idManager)
 		{
@@ -11,80 +11,7 @@ namespace ModiBuff.Core.Units
 			SetupEventEffect<EffectOnEvent>((effects, effectOnEvent) =>
 				new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)effectOnEvent));
 
-			EventRecipes();
-
 			NonTestRecipes();
-		}
-
-		private void EventRecipes()
-		{
-			{
-				Register("PoisonDoT_OnHit_Event", "PoisonDoT");
-
-				AddEvent("PoisonDoT_OnHit_Event", EffectOnEvent.WhenAttacked)
-					.Effect(new ApplierEffect("PoisonDoT"), Targeting.SourceTarget);
-
-				Add("PoisonDoT")
-					.Interval(1)
-					.Effect(new DamageEffect(5), EffectOn.Interval);
-			}
-			{
-				Register("ComplexApplier_OnHit_Event", "ComplexApplier_Rupture", "ComplexApplier_Disarm");
-
-				//WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^
-				AddEvent("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
-					.Effect(new ApplierEffect("ComplexApplier_Rupture"), Targeting.SourceTarget);
-
-				//rupture modifier, that does DoT. When this gets to 5 stacks, apply the disarm effect.
-				Add("ComplexApplier_Rupture")
-					.Interval(1)
-					.Effect(new DamageEffect(5), EffectOn.Interval)
-					.Effect(new ApplierEffect("ComplexApplier_Disarm"), EffectOn.Stack)
-					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5);
-
-				//Disarm the target for 5 seconds. On 2 stacks, removable in 10 seconds, refreshable.
-				Add("ComplexApplier_Disarm")
-					.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect), EffectOn.Stack)
-					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2)
-					.Remove(10).Refresh();
-			}
-			{
-				Register("ComplexApplier2_WhenHealed_Event", "ComplexApplier2_WhenHealed", "ComplexApplier2_OnAttack_Event",
-					"ComplexApplier2_WhenAttacked_Event", "ComplexApplier2_AddDamageAdd", "ComplexApplier2_AddDamage");
-				//Add damage on 4 stacks buff, that you give someone when they heal you 5 times, for 60 seconds.
-
-				//Apply the modifier to source (healer) WhenHealed
-				AddEvent("ComplexApplier2_WhenHealed_Event", EffectOnEvent.WhenHealed)
-					.Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), Targeting.SourceTarget);
-
-				//On 5 stacks, apply the modifier to self.
-				Add("ComplexApplier2_WhenHealed")
-					.Effect(new ApplierEffect("ComplexApplier2_OnAttack_Event"), EffectOn.Stack)
-					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5)
-					.Remove(5).Refresh();
-
-				//Long main buff. Apply the modifier OnAttack.
-				AddEvent("ComplexApplier2_OnAttack_Event", EffectOnEvent.OnAttack)
-					.Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"))
-					.Remove(60).Refresh();
-
-				AddEvent("ComplexApplier2_WhenAttacked_Event", EffectOnEvent.WhenAttacked)
-					.Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), Targeting.SourceTarget)
-					.Remove(5).Refresh();
-
-				//On 4 stacks, Add Damage to Unit source (attacker). TODO Maybe remove the modifier from you/reset stacks?
-				Add("ComplexApplier2_AddDamageAdd")
-					.Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)
-					//.Effect(new RemoveEffect(), EffectOn.Stack)
-					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
-					.Remove(5).Refresh();
-
-				//AddDamage 5, one time init, remove in 10 seconds, refreshable.
-				Add("ComplexApplier2_AddDamage")
-					.OneTimeInit()
-					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
-					.Remove(10).Refresh();
-			}
 		}
 
 		private void NonTestRecipes()

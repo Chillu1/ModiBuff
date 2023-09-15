@@ -41,31 +41,25 @@ namespace ModiBuff.Tests
 			Config.PoolSize = 1;
 		}
 
-		protected void AddRecipes(params RecipeAddFunc[] recipeAddFunc)
+		protected void AddRecipes(params RecipeAddFunc[] recipeAddFunc) => SetupSystems(recipeAddFunc, new EventRecipeAddFunc[0]);
+
+		protected void AddEventRecipes(params EventRecipeAddFunc[] recipeAddFunc) => SetupSystems(new RecipeAddFunc[0], recipeAddFunc);
+
+		protected void AddMixedRecipes(RecipeAddFunc[] recipeAddFunc, EventRecipeAddFunc[] eventRecipeAddFunc)
+		{
+			SetupSystems(recipeAddFunc, eventRecipeAddFunc);
+		}
+
+		private void SetupSystems(RecipeAddFunc[] recipeAddFunc, EventRecipeAddFunc[] eventRecipeAddFunc)
 		{
 			var newRecipeAddFuncs = new RecipeAddFunc[_defaultRecipeAddFuncs.Length + recipeAddFunc.Length];
 			_defaultRecipeAddFuncs.CopyTo(newRecipeAddFuncs, 0);
 			recipeAddFunc.CopyTo(newRecipeAddFuncs, _defaultRecipeAddFuncs.Length);
-			SetupSystems(newRecipeAddFuncs);
-		}
 
-		protected void AddEventRecipes(params EventRecipeAddFunc[] recipeAddFunc)
-		{
 			IdManager = new ModifierIdManager();
 			var eventEffectFactory =
 				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
-			Recipes = new ModifierRecipes(new RecipeAddFunc[0], recipeAddFunc, IdManager, eventEffectFactory);
-			Pool = new ModifierPool(Recipes.GetGenerators());
-
-			Setup();
-		}
-
-		protected void AddMixedRecipes(RecipeAddFunc[] recipeAddFunc, EventRecipeAddFunc[] eventRecipeAddFunc)
-		{
-			IdManager = new ModifierIdManager();
-			var eventEffectFactory =
-				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
-			Recipes = new ModifierRecipes(recipeAddFunc, eventRecipeAddFunc, IdManager, eventEffectFactory);
+			Recipes = new ModifierRecipes(newRecipeAddFuncs, eventRecipeAddFunc, IdManager, eventEffectFactory);
 			Pool = new ModifierPool(Recipes.GetGenerators());
 
 			Setup();
@@ -77,15 +71,6 @@ namespace ModiBuff.Tests
 			var eventEffectFactory =
 				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
 			Recipes = new ModifierRecipes(_defaultRecipeAddFuncs, new EventRecipeAddFunc[0], IdManager, eventEffectFactory);
-			Pool = new ModifierPool(Recipes.GetGenerators());
-
-			Setup();
-		}
-
-		private void SetupSystems(IReadOnlyList<RecipeAddFunc> recipeAdd)
-		{
-			IdManager = new ModifierIdManager();
-			Recipes = new ModifierRecipes(recipeAdd, new EventRecipeAddFunc[0], IdManager, null);
 			Pool = new ModifierPool(Recipes.GetGenerators());
 
 			Setup();
