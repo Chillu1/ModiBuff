@@ -2,8 +2,10 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
-	public sealed class InitComponent : IStateReset
+	public struct InitComponent : IStateReset
 	{
+		public bool IsValid => _effects != null && _effects.Length > 0;
+
 		private readonly IEffect[] _effects;
 		private readonly bool _oneTime;
 		private readonly ModifierCheck _modifierCheck;
@@ -15,6 +17,8 @@ namespace ModiBuff.Core
 			_oneTime = oneTimeInit;
 			_effects = effects;
 			_modifierCheck = check;
+
+			_isInitialized = false;
 		}
 
 		public void Init(IUnit target, IUnit owner)

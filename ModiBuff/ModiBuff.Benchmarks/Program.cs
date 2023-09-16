@@ -13,7 +13,7 @@ namespace ModiBuff.Tests
 			//Single
 			//config.AddJob(Job.MediumRun.WithUnrollFactor(1).WithInvocationCount(1));
 			//Normal
-			config.AddJob(Job.MediumRun.WithLaunchCount(1));
+			config.AddJob(Job.ShortRun.WithLaunchCount(1).WithIterationCount(15));
 
 			config.AddLogger(DefaultConfig.Instance.GetLoggers().ToArray());
 			config.AddExporter(DefaultConfig.Instance.GetExporters().ToArray());

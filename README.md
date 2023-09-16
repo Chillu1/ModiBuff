@@ -79,13 +79,13 @@ Delta: 0.0167 * N
 
 | Library                                               | NoOp* <br/>(1 unit) | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Apply Multi<br/>instance DoT |
 |-------------------------------------------------------|---------------------|--------------------------------|-------------------------------------|------------------------------|
-| ModiBuff (this)                                       | 0.16ms, 0 B         | 0.24ms, 0 B                    | 0.44ms, 0 B                         | 0.98ms, 0 B                  |
+| ModiBuff (this)                                       | 0.16ms, 0 B         | 0.24ms, 0 B                    | 0.43ms, 0 B                         | 0.98ms, 0 B                  |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | ?                   | 1.02ms, 0 GC                   | ?                                   | X                            |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                   | 21.4ms, 24 GC                  | ?                                   | X                            |
 
 | Library                                               | Update DoT**<br/>(10_000 units, N:1) | Update Instance<br/>Stackable DoT |
 |-------------------------------------------------------|--------------------------------------|-----------------------------------|
-| ModiBuff (this)                                       | 1.09ms, 0 B                          | 0.11ms, 0 B                       |
+| ModiBuff (this)                                       | 1.37ms, 0 B                          | 0.12ms, 0 B                       |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 0.44ms, 0 B                          | X                                 |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                                    | X                                 |
 

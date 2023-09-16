@@ -14,6 +14,7 @@ namespace ModiBuff.Core
 
 		private readonly bool _hasEffectChecks;
 
+		private readonly bool _isAura;
 		private readonly bool _oneTimeInit;
 
 		private readonly float _interval;
@@ -32,8 +33,6 @@ namespace ModiBuff.Core
 		private int _timeComponentIndex;
 
 		private readonly ModifierEffectsCreator _modifierEffectsCreator;
-
-		private readonly Func<ITargetComponent> _targetComponentFunc;
 
 		private Func<IUnit, bool>[] _applyFuncChecks;
 		private IUpdatableCheck[] _updatableApplyChecks;
@@ -59,6 +58,7 @@ namespace ModiBuff.Core
 			HasApplyChecks = data.HasApplyChecks;
 			_hasEffectChecks = data.HasEffectChecks;
 
+			_isAura = data.IsAura;
 			_oneTimeInit = data.OneTimeInit;
 			_interval = data.Interval;
 			_intervalAffectedByStatusResistance = data.IntervalAffectedByStatusResistance;
@@ -83,11 +83,6 @@ namespace ModiBuff.Core
 				_timeComponentCount++;
 
 			_modifierEffectsCreator = new ModifierEffectsCreator(data.EffectWrappers, data.RemoveEffectWrapper);
-
-			if (data.IsAura)
-				_targetComponentFunc = () => new MultiTargetComponent();
-			else
-				_targetComponentFunc = () => new SingleTargetComponent();
 
 			if (HasApplyChecks)
 				SetupApplyChecks(in data);
@@ -185,9 +180,9 @@ namespace ModiBuff.Core
 					_usableEffectChecks, stateChecks);
 			}
 
-			InitComponent initComponent = null;
-			StackComponent stackComponent = null;
+			InitComponent initComponent = default;
 			ITimeComponent[] timeComponents = null;
+			StackComponent stackComponent = default;
 			if (_timeComponentCount > 0)
 			{
 				_timeComponentIndex = 0;
@@ -207,7 +202,13 @@ namespace ModiBuff.Core
 				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _everyXStacks, effects.StackEffects,
 					effectCheck);
 
-			return new Modifier(Id, genId, Name, initComponent, timeComponents, stackComponent, effectCheck, _targetComponentFunc());
+			ITargetComponent targetComponent;
+			if (!_isAura)
+				targetComponent = new SingleTargetComponent();
+			else
+				targetComponent = new MultiTargetComponent();
+
+			return new Modifier(Id, genId, Name, initComponent, timeComponents, stackComponent, effectCheck, targetComponent);
 		}
 
 		ModifierCheck IModifierApplyCheckGenerator.CreateApplyCheck()

@@ -18,14 +18,15 @@ namespace ModiBuff.Core
 		public int GenId { get; }
 		public string Name { get; }
 
-		private readonly InitComponent _initComponent;
+		private readonly bool _hasInit;
+		private InitComponent _initComponent;
 
 		private readonly ITimeComponent[] _timeComponents;
 
-		private readonly StackComponent _stackComponent;
+		private readonly bool _hasStack;
+		private StackComponent _stackComponent;
 
 		private readonly ModifierCheck _effectCheck;
-		private readonly bool _check;
 
 		private ITargetComponent _targetComponent;
 		private bool _isTargetSetup;
@@ -39,14 +40,12 @@ namespace ModiBuff.Core
 			Name = name;
 
 			_initComponent = initComponent;
+			_hasInit = initComponent.IsValid;
 			_timeComponents = timeComponents;
 			_stackComponent = stackComponent;
+			_hasStack = stackComponent.IsValid;
 
-			if (effectCheck != null)
-			{
-				_effectCheck = effectCheck;
-				_check = true;
-			}
+			_effectCheck = effectCheck;
 
 			_targetComponent = targetComponent;
 			if (targetComponent is MultiTargetComponent)
@@ -72,7 +71,7 @@ namespace ModiBuff.Core
 					for (int i = 0; i < _timeComponents.Length; i++)
 						_timeComponents[i].SetupTarget(_targetComponent);
 
-				if (_stackComponent != null)
+				if (_hasStack)
 					_stackComponent.SetupTarget(_targetComponent);
 			}
 
@@ -104,7 +103,7 @@ namespace ModiBuff.Core
 					for (int i = 0; i < _timeComponents.Length; i++)
 						_timeComponents[i].SetupTarget(_targetComponent);
 
-				if (_stackComponent != null)
+				if (_hasStack)
 					_stackComponent.SetupTarget(_targetComponent);
 			}
 
@@ -132,8 +131,7 @@ namespace ModiBuff.Core
 
 		public void Update(float deltaTime)
 		{
-			if (_check)
-				_effectCheck.Update(deltaTime);
+			_effectCheck?.Update(deltaTime);
 
 			if (_timeComponents == null)
 				return;
@@ -157,15 +155,14 @@ namespace ModiBuff.Core
 
 		public void ResetState()
 		{
-			if (_initComponent != null)
+			if (_hasInit)
 				_initComponent.ResetState();
 			if (_timeComponents != null)
 				for (int i = 0; i < _timeComponents.Length; i++)
 					_timeComponents[i].ResetState();
-			if (_stackComponent != null)
+			if (_hasStack)
 				_stackComponent.ResetState();
-			if (_check)
-				_effectCheck.ResetState();
+			_effectCheck?.ResetState();
 			_targetComponent.ResetState();
 		}
 

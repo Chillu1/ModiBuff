@@ -31,6 +31,7 @@ namespace ModiBuff.Tests
 			_unit.ModifierController.Add(_noOpModifierId, _unit, _unit);
 		}
 
+		[Benchmark]
 		public void BenchAddInitDamageBench()
 		{
 			_unit.ModifierController.Add(_initDamageModifierId, _unit, _unit);

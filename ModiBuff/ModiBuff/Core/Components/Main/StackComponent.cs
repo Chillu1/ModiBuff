@@ -3,8 +3,10 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
-	public sealed class StackComponent : ITarget, IStateReset
+	public struct StackComponent : ITarget, IStateReset
 	{
+		public bool IsValid => _effects != null && _effects.Length > 0;
+
 		private readonly WhenStackEffect _whenStackEffect;
 		private readonly int _maxStacks;
 		private readonly int _everyXStacks;
@@ -29,13 +31,16 @@ namespace ModiBuff.Core
 			_modifierCheck = check;
 
 			var stateEffectsList = new List<IStateReset>();
-			for (int i = 0; i < _effects.Length; i++)
+			for (int i = 0; i < effects.Length; i++)
 			{
-				if (_effects[i] is IStateReset stateResetEffect)
+				if (effects[i] is IStateReset stateResetEffect)
 					stateEffectsList.Add(stateResetEffect);
 			}
 
 			_stateResetEffects = stateEffectsList.ToArray();
+
+			_targetComponent = null;
+			_stacks = 0;
 		}
 
 		public void SetupTarget(ITargetComponent targetComponent) => _targetComponent = targetComponent;
@@ -74,7 +79,6 @@ namespace ModiBuff.Core
 		public void ResetState()
 		{
 			_stacks = 0;
-			_targetComponent.ResetState();
 			for (int i = 0; i < _stateResetEffects.Length; i++)
 				_stateResetEffects[i].ResetState();
 		}

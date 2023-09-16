@@ -34,6 +34,10 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5), EffectOn.Interval)
 				.Remove(5);
 
+			Add("InstanceStackableInitDamage")
+				.InstanceStackable()
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
 			Add("StackAddDamage")
 				.Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
