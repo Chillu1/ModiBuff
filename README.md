@@ -22,30 +22,50 @@
 
 # What is this?
 
-This zero dependency library was made to make a standarized powerful system that allows for manipulation of both effects and entities.
+This zero dependency library was made to make a standardized powerful system that allows for manipulation of effects on entities.
+
+**It focuses on Feature Set, Performance and Ease of use, in that order.**
+
+The library is split into two core parts:
+
+ModiBuff is the core backend part that handles all the modifier logic and is mostly unopinionated when it comes to the game logic.
+
+Meanwhile ModiBuff.Units is a fully featured implementation of the library, that showcases how to tie the library into a game. 
 
 > Note: The library is currently in development, and it will most likely encounter breaking API changes.
+
+## Why do I need this?
+
+The vast majority of games make their own buff/debuff systems, to fit their game logic.
+Examples of this are: Dota 2, League of Legends, Path of Exile, Diablo, World of Warcraft, etc.
+
+While this is a great approach, it's also very time consuming, and requires a fair amount of research to design well.
+
+This library solves that, but also allows for more complex and deeper modifiers than the aforementioned games.
 
 # Features
 
 * No GC/allocations (fully pooled with state reset)
-* Low memory usage (2 MB for 10_000 modifiers)
-* Fast effects [10_000 damage modifiers in 0.30ms](#benchmarks)
-* Fast iteration [10_000 interval modifiers & 10_000 units in 0.82ms](#benchmarks)
+* Low memory usage (2-5 MB for 10_000 modifiers)
+* Fast effects [10_000 damage modifiers in 0.24ms](#benchmarks)
+* Fast iteration [10_000 interval modifiers & 10_000 units in 1.37ms](#benchmarks)
 * Easy high level API [recipes](#recipe)
+* Instance Stackable modifiers (multiple instances of the same modifier)
 * Effects on actions
 	* Init
 	* Interval
 	* Duration
 	* Stack
-* Effects
+    * Callback (soon)
+* Effect examples
 	* Damage (& self damage)
 	* Heal
 	* Status effects (stun, silence, disarm, etc.)
 	* Add stat (Damage, Heal)
 	* Actions (Attack, Heal, etc.)
 	* [Special Applier (another Modifier)](#applier-effect)
-	* And more, see [the rest](ModiBuff/Assets/Scripts/Core/Components/Effect/Effects)
+	* And more, see [the rest](ModiBuff/ModiBuff.Units/Effects)
+* Meta & Post effect manipulation (ex. lifesteal)
 * Conditions (checks)
 	* Chance 0-100%
 	* Cooldown
@@ -66,13 +86,15 @@ This zero dependency library was made to make a standarized powerful system that
 
 # Benchmarks
 
+TL;DR: It's fast. Takes 1ms± to add & update 10000 modifiers every frame.
+
 BenchmarkDotNet v0.13.6, EndeavourOS  
 Intel Core i7-4790 CPU 3.60GHz (Haswell), 1 CPU, 8 logical and 4 physical cores  
 .NET SDK 6.0.120  
 .NET 6.0.20 (6.0.2023.36801), X64 RyuJIT AVX2
  
-Preallocated Pools  
-N: 10_000
+Pre-allocated Pools  
+N: 10_000  
 Delta: 0.0167 * N
 
 #### Add/Apply/Update Modifier table
@@ -97,8 +119,8 @@ Delta: 0.0167 * N
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 1.64ms, 0 GC  | 4.26ms, 0 GC              |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | X             | X                         |
 
-> Important: Non-pool ("New") benchmarks don't matter for runtime performance ModiBuff and ModiBuffEcs, since it will only be slower when 
-> allocating the new modifiers in the pools. Which if handled correctly, should only happen on initialization.
+> Important: Non-pool ("New") benchmarks below don't matter for runtime performance in ModiBuff and ModiBuffEcs, since it will only be 
+> slower when allocating the new modifiers in the pools. Which if handled correctly, should only happen on initialization.
 
 | Library                                               | New<br/>InitDmg | New<br/>DoT*   |
 |-------------------------------------------------------|-----------------|----------------|
@@ -114,7 +136,7 @@ Pooling in ModiBuff is 700X faster than original old version (because of pool re
 But it's also much faster in cases of doing init/stack/refresh on an existing modifier (we don't create a new modifier anymore)  
 ModiBuffEcs is a bit on the slow side for now, because of how pooling works, with enabling and disabling entities.
 
-*NoOp is an empty effect, so it just measures the benchmark time of the library without unit logic (ex. taking damage).
+*NoOp is an empty effect, so it just measures the benchmark time of the library without unit logic (ex. taking damage).  
 **DoT = InitDoTSeparateDamageRemove
 
 # Requirements
@@ -255,7 +277,7 @@ Which are needed for using custom game-based logic.
 
 Effects have to implement `IEffect`.
 They can also implement `ITargetEffect` for event targeting owner/source, `IEventTrigger` to avoid event recursion, `IStackEffect` for
-stacking functionality, `IStateEffect` for reseting runtime state.
+stacking functionality, `IStateEffect` for resetting runtime state.
 
 For fully featured effect implementation, look at
 [DamageEffect](https://github.com/Chillu1/ModiBuff/blob/a3131a122e4aacc54a05c2e0e657d053ffa27d42/ModiBuff/Assets/Scripts/Core/Components/Effect/Effects/DamageEffect.cs)
@@ -333,8 +355,9 @@ Add("ComplexApplier2_AddDamage")
 Modifiers are the core backend part of the library, they are the things that are applied to entities with effects on certain actions.    
 Ex. Init, Interval, Duration, Stack.  
 You should **NOT** use the Modifier class directly, but instead use the recipe system.
-Recipe system fixes a lot of internal complexity of setting up modifiers for you.  
-It's possible to use the Modifier class directly in cases where you'd want multiple interval/duration components.
+Recipe system fixes a lot of internal complexity of setting up modifiers for you.
+
+[//]: # (It's possible to use the Modifier class directly in cases where you'd want multiple interval/duration components.)
 
 > Note: Currently it's impossible to use internal modifiers directly with the library, since the systems rely on the recipe system
 > (pooling). This will be changed in the near future.
@@ -366,12 +389,12 @@ ModiBuff has:
 	* [Recipes](#recipe)
 	  vs [Properties](https://github.com/Chillu1/ModifierLibrary/blob/master/ModifierLibrary/Assets/Scripts/ModifierLibrary/ModifierPrototypes.cs#L126)
 * Better iteration speed, 25_000 interval modifiers (from 500), 5ms update, average complexity modifiers
-* Better memory managment (1MB for 5_000 modifiers)
+* Better memory management (1MB for 5_000 modifiers)
 * No arbitrary name constraints
 
 ---
 
-* Less features, missing:
+* Missing features:
 	* Two status effects: taunt, confuse
 	* Tags
 
@@ -379,8 +402,8 @@ ModiBuff has:
 
 ## ModiBuff
 
-Smmary: Very optimized, no GC, great featureset.  
-Ex. games: Rimworld, Hades, Binding of Isaac, Tiny Rogues, Enter the Gungeon  
+Summary: Very optimized, no GC, great feature-set.  
+Ex. games: RimWorld, Hades, Binding of Isaac, Tiny Rogues, Enter the Gungeon  
 Ex. genres: small arpg, small rts, pve, colony sim
 
 ModiBuff is the best choice 95% of the time. It's fast, lightweight, deeply redesigned core, has no GC/allocations, and is very easy to
@@ -389,7 +412,7 @@ It's also very well tested for most scenarios.
 
 ## ModiBuffEcs
 
-Summary: Fastest iteration, small featureset, needs ecs framework.  
+Summary: Fastest iteration, small feature-set, needs ecs framework.  
 Entities: Solo vs Thousands, or Thousands vs Thousands.  
 Ex. games: Path of Exile, Diablo, StarCraft, Warcraft  
 Ex. genres: arpg, rpg, rts, pve
@@ -400,7 +423,7 @@ Or just if you want to use it with an ecs framework.
 
 ## Original
 
-Summary: Not optimized, amazing featureset.  
+Summary: Not optimized, amazing feature-set.  
 Entities: Solo vs Solo, Solo vs Party, Party vs Party  
 Ex. games: dota, witcher 3  
 Ex. genres: moba, arena, duel
