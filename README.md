@@ -10,15 +10,15 @@
 - [What is this?](#what-is-this)
 - [Features](#features)
 - [Benchmarks](#benchmarks)
+- [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
 	- [Recipe](#recipe)
-	- [Modifier](#modifier)
+	- [Adding Modifiers to Units](#adding-modifiers-to-units)
 	- [Effect](#effect)
-- [Differences to ModiBuffEcs and Old](#differences-to-modibuffecs-and-old)
-- [When to use which library](#when-to-use-which-library)
 - [FAQ](#faq)
 - [Examples](#examples)
+- [Differences to ModiBuffEcs and Old](#differences-to-modibuffecs-and-old)
 
 # What is this?
 
@@ -45,7 +45,7 @@ This library solves that, but also allows for more complex and deeper modifiers 
 
 # Features
 
-* No GC/allocations (fully pooled with state reset)
+* No GC/heap allocations (fully pooled with state reset)
 * Low memory usage (2-5 MB for 10_000 modifiers)
 * Fast effects [10_000 damage modifiers in 0.24ms](#benchmarks)
 * Fast iteration [10_000 interval modifiers & 10_000 units in 1.37ms](#benchmarks)
@@ -57,7 +57,7 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Duration
 	* Stack
     * Callback (soon)
-* Effect examples
+* Effect implementation examples
 	* Damage (& self damage)
 	* Heal
 	* Status effects (stun, silence, disarm, etc.)
@@ -92,12 +92,13 @@ BenchmarkDotNet v0.13.6, EndeavourOS
 Intel Core i7-4790 CPU 3.60GHz (Haswell), 1 CPU, 8 logical and 4 physical cores  
 .NET SDK 6.0.120  
 .NET 6.0.20 (6.0.2023.36801), X64 RyuJIT AVX2
- 
-Pre-allocated Pools  
+
 N: 10_000  
 Delta: 0.0167 * N
 
 #### Add/Apply/Update Modifier table
+
+Pre-allocated Pools
 
 | Library                                               | NoOp* <br/>(1 unit) | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Apply Multi<br/>instance DoT |
 |-------------------------------------------------------|---------------------|--------------------------------|-------------------------------------|------------------------------|
@@ -130,7 +131,7 @@ Delta: 0.0167 * N
 
 Setting up all recipes, with 64 pool allocation per recipe takes 60ns, and 104KB.
 
-Preallocating 1_000 modifiers of each recipe (currently 100±) takes 67ms, and 35MB.
+Pre-allocating 1_000 modifiers of each recipe (currently 100±) takes 67ms, and 35MB.
 
 Pooling in ModiBuff is 700X faster than original old version (because of pool rent & return)  
 But it's also much faster in cases of doing init/stack/refresh on an existing modifier (we don't create a new modifier anymore)  
@@ -513,9 +514,47 @@ Recipe system fixes a lot of internal complexity of setting up modifiers for you
 > Note: Currently it's impossible to use internal modifiers directly with the library, since the systems rely on the recipe system
 > (pooling). This will be changed in the near future. Before the 1.0 release.
 
+# FAQ
+
+Q: ModiBuff.Units seems to use excessive casting in effects. Why not have a master unit interface?  
+A: This was a tough solution to make custom user effects work with their own unit implementations.
+And not force users to implement all methods for functionality, where it's not used.
+
+Q: How do I make "insert mechanic from a game" in ModiBuff?  
+A: Ask about how to make it in issues, will make a better platform for discussion if needed.
+
+Q: It's 100% not possible to make "mechanic from a game" in ModiBuff.  
+A: If the mechanic is lacking internal ModiBuff functionality to work, and isn't an effect implementation problem, make an issue about it.
+The goal of ModiBuff is to support as many unique mechanics as possible, that don't rely on game logic.
+
+Q: My stack effect is not working, what's wrong?  
+A: StackEffectType needs to be set in all: `IEffect` (ex. DamageEffect), `Recipe.Effect.EffectOn.Stack` and `Recipe.Stack()`  
+Ex:
+
+```csharp
+Add("StackDamage")
+    .Effect(new DamageEffect(5, StackEffectType.Effect/*<<THIS*/), EffectOn.Stack)
+    .Stack(WhenStackEffect.Always);
+```
+
+# Examples
+
+## Modifier/Effect/Recipe
+
+For a big list of implementation examples, see [ModifierExamples.md](ModifierExamples.md)
+
+## Full
+
+> Note: The current examples are very very bare bones, a proper implementation with custom game logic will be added soon. 
+
+[All examples](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/ModiBuff.Examples)
+
+[Simple solo](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/ModiBuff.Examples/SimpleSolo)
+example, of player unit fighting a single enemy unit
+
 # Differences to ModiBuffEcs and Old
 
-## [ModiBuffEcs]((https://github.com/Chillu1/ModiBuffEcs))
+## [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs)
 
 ModiBuff has:
 
@@ -524,7 +563,7 @@ ModiBuff has:
 * Worse iteration speed, 25_000 interval modifiers compared to 100_000 modifiers, 5ms update, average complexity modifiers
 * Many more features
 
-## [Old Modifier Library]((https://github.com/Chillu1/ModifierLibrary))
+## [Old Modifier Library](https://github.com/Chillu1/ModifierLibrary)
 
 ModiBuff has:
 
@@ -544,227 +583,3 @@ ModiBuff has:
 * Missing features:
 	* Two status effects: taunt, confuse
 	* Tags
-
-# FAQ
-
-Q: ModiBuff.Units seems to use excessive casting, in effects. Why not have master unit interface?
-A: This was a tough solution to make custom user effects work with their own unit implementations.
-
-Q: My stack effect is not working, what's wrong?  
-A: StackEffectType needs to be set in all: `IEffect` (ex. DamageEffect), `Recipe.Effect.EffectOn.Stack` and `Recipe.Stack()`  
-Ex:
-
-```csharp
-Add("StackDamage")
-    .Effect(new DamageEffect(5, StackEffectType.Effect/*<<THIS*/), EffectOn.Stack)
-    .Stack(WhenStackEffect.Always);
-```
-
-# Examples
-
-## Modifier/Effect/Recipe
-
-A list of a lot basic recipe examples.
-
-[//]: # (TODO Recipe examples for usual game mechanics)
-
-[//]: # (DoT, InitDoTSeparateDmg, OnXStacks, StackableDamage, StunEverySecondFor0.2Seconds)
-
-[//]: # ("Absoultely crazy modifiers": applying appliers on events, X stacks, etc)
-
-> Important: Damage being the default effect is just an example, it makes it easier to understand and test.
-
-Delayed damage
-
-```csharp
-Add("DurationDamage")
-    .Effect(new DamageEffect(5), EffectOn.Duration)
-    .Duration(5);
-```
-
-Add damage to unit, revert it on remove, remove it after 5 seconds.
-
-```csharp
-Add("InitAddDamageRevertible")
-    .Effect(new AddDamageEffect(5, true), EffectOn.Init)
-    .Remove(5);
-```
-
-50% chance to deal 5 damage on init
-
-```csharp
-Add("ChanceInitDamage")
-    .ApplyChance(0.5f)
-    .Effect(new DamageEffect(5), EffectOn.Init);
-```
-
-Apply a 5 damage modifier every 1s interval. We could be adding any type of modifier.
-
-```csharp
-Add("DamageApplier_Interval")
-    .Effect(new ApplierEffect("InitDamage"), EffectOn.Interval)
-    .Interval(1);
-```
-
-Self heal for 5, deal damage to target for 5
-
-```csharp
-Add("InitSelfHeal_DamageTarget")
-    .Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceTarget)
-    .Effect(new DamageEffect(5), EffectOn.Init);
-```
-
-5 damage when reaches max stacks (2)
-
-```csharp
-Add("DamageOnMaxStacks")
-    .Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
-    .Stack(WhenStackEffect.OnMaxStacks, value: -1, maxStacks: 2);
-```
-
-Every 2 stacks, deal 5 damage
-
-```csharp
-Add("DamageEveryTwoStacks")
-    .Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
-    .Stack(WhenStackEffect.OnXStacks, value: -1, maxStacks: -1, true, everyXStacks: 2);
-```
-
-Every stack, add 2 damage to the effect, then deal 5 base damage + 2 added damage.
-
-```csharp
-Add("StackBasedDamage")
-    .Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
-    .Stack(WhenStackEffect.Always, value: 2);
-```
-
-Costs 5 mana, deal 5 damage on init
-
-```csharp
-Add("InitDamage_CostMana")
-    .ApplyCost(CostType.Mana, 5)
-    .Effect(new DamageEffect(5), EffectOn.Init);
-```
-
-Every two stacks, stun.
-
-```csharp
-Add("StunEveryTwoStacks")
-    .Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, false, StackEffectType.Effect), EffectOn.Stack)
-    .Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2);
-```
-
-Init Damage. With 1 second linger. Won't work again if applied within 1 second, aka "global cooldown", shared between all X modifier
-instaces.
-
-```csharp
-Add("OneTimeInitDamage_LingerDuration")
-    .OneTimeInit()
-    .Effect(new DamageEffect(5), EffectOn.Init)
-    .Remove(1);
-```
-
-50% chance to trigger effect (init damage)
-
-```csharp
-Add("ChanceEffectInitDamage")
-    .EffectChance(0.5f)
-    .Effect(new DamageEffect(5), EffectOn.Init);
-```
-
-1 second cooldown, on effect. Basically the effect can only be triggered once every 1 second (not apply).
-
-```csharp
-Add("InitDamage_Cooldown_Effect")
-    .EffectCooldown(1)
-    .Effect(new DamageEffect(5), EffectOn.Init);
-```
-
-Deal 5 damage only when health is above 100
-
-```csharp
-Add("InitDamage_EffectCondition_HealthAbove100")
-    .EffectCondition(StatType.Health, 100, ComparisonType.GreaterOrEqual)
-    .Effect(new DamageEffect(5), EffectOn.Init);
-```
-
-Deal 5 damage only when unit has a modifier "Flag"
-
-```csharp
-Add("Flag");
-
-Add("InitDamage_EffectCondition_ContainsModifier")
-    .EffectCondition("Flag")
-    .Effect(new DamageEffect(5), EffectOn.Init);
-```
-
-Deal 5 damage only when unit is frozen
-
-```csharp
-Add("InitDamage_EffectCondition_FreezeStatusEffect")
-    .EffectCondition(StatusEffectType.Freeze)
-    .Effect(new DamageEffect(5), EffectOn.Init);
-```
-
-Deal 5 damage only when unit can act (move, attack, cast, etc)
-
-```csharp
-Add("InitDamage_EffectCondition_ActLegalAction")
-    .EffectCondition(LegalAction.Act)
-    .Effect(new DamageEffect(5), EffectOn.Init);
-```
-
-Combination of unit frozen and has a modifier "Flag"
-
-```csharp
-Add("InitDamage_EffectCondition_Combination")
-    .EffectCondition("Flag")
-    .EffectCondition(StatusEffectType.Freeze)
-    .Effect(new DamageEffect(5), EffectOn.Init);
-``` 
-
-Costs 5 health, deal 5 damage, heals 5 back. Basically a "barrier" for activating.
-
-```csharp
-Add("InitDamage_CostHealth_HealSelf")
-    .ApplyCost(CostType.Health, 5)
-    .Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Init)
-    .Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceSource);
-```
-
-### Event Recipes
-
-Thorns on hit (deal 5 damage to attacker)
-
-```csharp
-AddEvent("ThornsOnHitEvent", EffectOnEvent.WhenAttacked)
-    .Effect(new DamageEffect(5), Targeting.SourceTarget);
-```
-
-Add damage on kill
-
-```csharp
-AddEvent("AddDamage_OnKill_Event", EffectOnEvent.OnKill)
-    .Effect(new AddDamageEffect(5), Targeting.SourceTarget);
-```
-
-Damage attacker on death
-
-```csharp
-AddEvent("Damage_OnDeath_Event", EffectOnEvent.WhenKilled)
-    .Effect(new DamageEffect(5), Targeting.SourceTarget);
-```
-
-Attack self when attacked
-
-```csharp
-AddEvent("AttackSelf_OnHit_Event", EffectOnEvent.WhenAttacked)
-    .Effect(new SelfAttackActionEffect());
-```
-
-## Full
-
-[All examples](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Examples)
-
-[Simple solo](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/Assets/Examples/SimpleSolo)
-example, of player unit fighting a single enemy unit
