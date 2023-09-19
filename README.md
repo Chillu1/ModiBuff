@@ -207,8 +207,6 @@ Add("InitStun")
 
 [//]: # (TODO ## EventRecipe)
 
-[comment]: # (## Event Recipe)
-
 ## In-depth Recipe Creation
 
 Every modifier needs a unique name.
@@ -219,8 +217,99 @@ and assigned an unique ID.
 Add("ModifierName")
 ```
 
-Functions should be used in the operation order.
-This is optional, except for refresh functions, which should be called right after interval/duration.
+Recipes have a methods that determine the functionality of the made modifier.
+
+The only method to setup effects is `Effect(IEffect, EffectOn, Targeting)`.  
+`IEffect` is the effect that will be applied to the unit, it can be anything, as long as it implements IEffect interface.  
+`EffectOn` is the action that will trigger the effect: Init, Interval, Duration, Stack.
+`EffectOn` is a flag enum, so the effect can be triggered on multiple actions.  
+`Targeting` tells the effect how it should be targeted, if we should target the owner (source) of the modifier, or the targeted unit.
+If you're unsure what this means, leave it at default. There will be more examples of this later.
+
+```csharp
+Add("InitDamage")
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+The first most common action method is `Interval(float)`. It's used to set the interval of the modifier.
+And interval effects will be triggered every X seconds.
+
+```csharp
+Add("IntervalDamage")
+	.Interval(1)
+	.Effect(new DamageEffect(5), EffectOn.Interval);
+```
+
+Next is `Duration(float)`. It's used to set the duration of the duration effects. It's usually used to remove the modifier after X seconds.
+But it can be used for any effect.
+> Note: When we want to remove the modifier after X seconds, it's simpler to use the `Remove(float)` method,
+> which is just a QoL wrapper for `Duration(float)`.
+
+```csharp
+Add("InitDamageDurationRemove")
+	.Effect(new DamageEffect(5), EffectOn.Init)
+	.Effect(new RemoveEffect(), EffectOn.Duration)
+	.Duration(5);
+```
+
+Then we have `Refresh(RefreshType)` method. That makes either the interval or duration component refreshable.
+Meaning that if a modifier gets added again to a unit, it will refresh the timer. This is most often used with the duration timer.
+
+```csharp
+Add("DamageOverTimeRefreshableDuration")
+	.Interval(1)
+	.Effect(new DamageEffect(5), EffectOn.Interval)
+	.Effect(new RemoveEffect(), EffectOn.Duration)
+	.Duration(5)
+	.Refresh(RefreshType.Duration);
+```
+
+Calling `Refresh()` without any arguments will make the last time (interval/duration) component refreshable.
+
+```csharp
+Add("DamageOverTimeRefreshableDuration")
+	.Interval(1)
+	.Effect(new DamageEffect(5), EffectOn.Interval)
+	.Effect(new RemoveEffect(), EffectOn.Duration)
+	.Duration(5).Refresh();
+```
+
+Then there's `Stack(WhenStackEffect whenStackEffect, float value, int maxStacks, int everyXStacks)`.
+It's used for tracking how many times the modifier has been re-added to the unit, or other stacking logic.
+
+`WhenStackEffect` tells the modifier when the stack action should be triggered: Always, OnMaxStacks, EveryXStacks, etc.  
+`StackEffectType` tells the effect what to do when the stack action is triggered: 
+Trigger it's effect, add to it's effect, or both or all, etc.
+
+In this example we deal 5 damage every 1 second, but each time we add the modifier, we add 2 damage to the effect.
+Resulting in 7 damage every 1 second with 1 stack. 9 with 2 stacks, etc.
+
+```csharp
+Add("StackableDamage_DamageOverTime")
+	.Interval(1)
+	.Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Interval)
+	.Stack(WhenStackEffect.Always, value: 2);
+```
+
+`OneTimeInit()` makes the modifier only trigger the init effect once, when it's added to the unit.
+Any subsequent adds will not trigger the init effects, but refresh and stack effects will still work as usual.
+This is very useful for aura modifiers, where we don't want to stack the aura effect.
+
+For partial aura functionality, we can tell the recipe that it will trigger effects on multiple units at once with `Aura()`.
+
+```csharp
+Add("InitAddDamageBuff")
+	.OneTimeInit()
+	.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+	.Remove(1.05f).Refresh();
+Add("InitAddDamageBuff_Interval")
+	.Aura()
+	.Interval(1)
+	.Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval);
+```
+
+Functions should be used in the operation order, for clarity.
+This is optional, except for parameterless refresh functions, which should be called right after interval/duration.
 
 ```csharp
 Add("Full")

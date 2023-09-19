@@ -53,12 +53,18 @@ namespace ModiBuff.Core
 
 		//---Misc---
 
+		/// <summary>
+		///		Makes is possible to stack multiple modifiers of the same type on one target.
+		/// </summary>
 		public ModifierRecipe InstanceStackable()
 		{
 			_isInstanceStackable = true;
 			return this;
 		}
 
+		/// <summary>
+		///		Determines if the modifier should use <see cref="SingleTargetComponent"/> or <see cref="MultiTargetComponent"/>.
+		/// </summary>
 		public ModifierRecipe Aura()
 		{
 			_isAura = true;
