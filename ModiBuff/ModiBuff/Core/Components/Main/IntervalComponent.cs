@@ -2,9 +2,8 @@ namespace ModiBuff.Core
 {
 	public sealed class IntervalComponent : ITimeComponent
 	{
-		public bool IsRefreshable { get; }
-
 		private readonly float _interval;
+		private readonly bool _isRefreshable;
 		private float _timer;
 
 		private ITargetComponent _targetComponent;
@@ -23,7 +22,7 @@ namespace ModiBuff.Core
 		public IntervalComponent(float interval, bool refreshable, IEffect[] effects, ModifierCheck check, bool affectedByStatusResistance)
 		{
 			_interval = interval;
-			IsRefreshable = refreshable;
+			_isRefreshable = refreshable;
 			_effects = effects;
 			_modifierCheck = check;
 			_usesStatusResistance = affectedByStatusResistance;
@@ -84,7 +83,7 @@ namespace ModiBuff.Core
 
 		public void Refresh()
 		{
-			if (IsRefreshable)
+			if (_isRefreshable)
 				_timer = 0;
 		}
 

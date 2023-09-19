@@ -13,7 +13,7 @@ namespace ModiBuff.Core
 
 		public readonly ModifierIdManager IdManager; //TODO Refactor to make it private/not needed
 
-		public bool IsInstanceStackable { get; private set; }
+		private bool _isInstanceStackable;
 		private bool _isAura;
 
 		private bool _oneTimeInit;
@@ -55,7 +55,7 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe InstanceStackable()
 		{
-			IsInstanceStackable = true;
+			_isInstanceStackable = true;
 			return this;
 		}
 
@@ -247,7 +247,7 @@ namespace ModiBuff.Core
 					hasStack = true;
 			}
 
-			return new ModifierAddData(hasInit, _refreshDuration || _refreshInterval, hasStack, IsInstanceStackable);
+			return new ModifierAddData(hasInit, _refreshDuration || _refreshInterval, hasStack, _isInstanceStackable);
 		}
 
 		public IModifierGenerator CreateModifierGenerator()

@@ -2,9 +2,8 @@ namespace ModiBuff.Core
 {
 	public sealed class DurationComponent : ITimeComponent
 	{
-		public bool IsRefreshable { get; }
-
 		private readonly float _duration;
+		private readonly bool _isRefreshable;
 		private float _timer;
 
 		private ITargetComponent _targetComponent;
@@ -17,7 +16,7 @@ namespace ModiBuff.Core
 		public DurationComponent(float duration, bool refreshable, IEffect[] effects)
 		{
 			_duration = duration;
-			IsRefreshable = refreshable;
+			_isRefreshable = refreshable;
 			_effects = effects;
 		}
 
@@ -69,7 +68,7 @@ namespace ModiBuff.Core
 
 		public void Refresh()
 		{
-			if (IsRefreshable)
+			if (_isRefreshable)
 				_timer = 0;
 		}
 
