@@ -156,6 +156,35 @@ For finer control you can download the source code and add it to your project di
 
 For a full implementation of all library features with Units, you should get ModiBuff.Units DLL.
 
+## Step by step installation
+
+1. Download the latest DLL from [Releases](https://github.com/Chillu1/ModiBuff/releases) or ModiBuff source code.
+2. Add the DLL to your project.
+3. Make your own `ModifierRecipes` class that inherits from `ModiBuffModifierRecipes` and fill it with your modifier recipes.
+4. Make your own logger implementation, by inheriting `ILogger`, or use one of the built-in ones.
+5. Call ModiBuff setup systems in the initialization of your game.  
+5.1. You can change the internal config values inside `Config`
+```csharp
+Logger.SetLogger<MyLogger>();
+//Config.MaxPoolSize = 10000;
+
+var idManager = new ModifierIdManager();
+_recipes = new ModifierRecipes(idManager);
+_pool = new ModifierPool(_recipes);
+```
+If you want to use the Units implementation, go to [ModiBuff.Units](#modibuff.units).
+Otherwise go to [Custom Units](#custom-units).
+
+### ModiBuff.Units
+6. Download the latest ModiBuff.Units DLL from [Releases](https://github.com/Chillu1/ModiBuff/releases) or ModiBuff source code.
+7. Add the DLL to your project.
+8. Now you can create your units, and apply modifiers to them.
+
+### Custom Units
+6. Implement `IUnit` and `IModifierOwner` interfaces on your unit class.
+6.1. Optionally add some of the ModiBuff.Units `IUnit` [interfaces](ModiBuff/ModiBuff.Units/Unit/Interfaces) that you want to use.
+7. Create your own interfaces that your effects will use, and implement them on your unit class.
+
 ## Setup
 
 1. Make your own "ModifierRecipes" class that inherits from "ModifierRecipesBase" and fill it with your modifier recipes.
@@ -521,7 +550,8 @@ A: This was a tough solution to make custom user effects work with their own uni
 And not force users to implement all methods for functionality, where it's not used.
 
 Q: How do I make "insert mechanic from a game" in ModiBuff?  
-A: Ask about how to make it in issues, will make a better platform for discussion if needed.
+A: First check [ModifierExamples.md](ModifierExamples.md). Then if it isn't there, ask about how to make it in issues, will make a better 
+platform for discussion if needed.
 
 Q: It's 100% not possible to make "mechanic from a game" in ModiBuff.  
 A: If the mechanic is lacking internal ModiBuff functionality to work, and isn't an effect implementation problem, make an issue about it.
