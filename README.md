@@ -219,6 +219,8 @@ Add("ModifierName")
 
 Recipes have a methods that determine the functionality of the made modifier.
 
+### Effect
+
 The only method to setup effects is `Effect(IEffect, EffectOn, Targeting)`.  
 `IEffect` is the effect that will be applied to the unit, it can be anything, as long as it implements IEffect interface.  
 `EffectOn` is the action that will trigger the effect: Init, Interval, Duration, Stack.
@@ -231,6 +233,8 @@ Add("InitDamage")
     .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
+### Interval
+
 The first most common action method is `Interval(float)`. It's used to set the interval of the modifier.
 And interval effects will be triggered every X seconds.
 
@@ -239,6 +243,8 @@ Add("IntervalDamage")
 	.Interval(1)
 	.Effect(new DamageEffect(5), EffectOn.Interval);
 ```
+
+### Duration
 
 Next is `Duration(float)`. It's used to set the duration of the duration effects. It's usually used to remove the modifier after X seconds.
 But it can be used for any effect.
@@ -251,6 +257,8 @@ Add("InitDamageDurationRemove")
 	.Effect(new RemoveEffect(), EffectOn.Duration)
 	.Duration(5);
 ```
+
+### Refresh
 
 Then we have `Refresh(RefreshType)` method. That makes either the interval or duration component refreshable.
 Meaning that if a modifier gets added again to a unit, it will refresh the timer. This is most often used with the duration timer.
@@ -274,6 +282,8 @@ Add("DamageOverTimeRefreshableDuration")
 	.Duration(5).Refresh();
 ```
 
+### Stack
+
 Then there's `Stack(WhenStackEffect whenStackEffect, float value, int maxStacks, int everyXStacks)`.
 It's used for tracking how many times the modifier has been re-added to the unit, or other stacking logic.
 
@@ -291,6 +301,8 @@ Add("StackableDamage_DamageOverTime")
 	.Stack(WhenStackEffect.Always, value: 2);
 ```
 
+### OneTimeInit & Aura
+
 `OneTimeInit()` makes the modifier only trigger the init effect once, when it's added to the unit.
 Any subsequent adds will not trigger the init effects, but refresh and stack effects will still work as usual.
 This is very useful for aura modifiers, where we don't want to stack the aura effect.
@@ -307,6 +319,56 @@ Add("InitAddDamageBuff_Interval")
 	.Interval(1)
 	.Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval);
 ```
+
+### Meta-Effect
+
+Effects can store meta effects, that will manipulate the effect values with optional conditions.
+Meta effects, just like normal effects, are user-generated. Note that meta-effect can't have mutable state.
+Any mutable state should be stored in the effect itself. Effects support many meta effects after each other.
+Allowing for very complex interactions.
+
+This example scales our 5 damage value based on the source unit's health * some multiplier.
+
+```csharp
+Add("InitDamageValueBasedOnHealthMeta")
+	.Effect(new DamageEffect(5)
+		.SetMetaEffects(new StatPercentMetaEffect(StatType.Health, Targeting.SourceTarget)), EffectOn.Init);
+```
+
+### Post-Effect
+
+Post effects are effects that are applied after the main effect. And use the main effect as a source for their values.
+Most common example of this is lifesteal, where we deal damage, and then heal for a percentage of the damage dealt.
+Post effects also can't have any mutable state, and work fully in conjunction with meta effects.
+
+This example deals 5 damage on init, and then heals for 50% of the damage dealt.
+
+```csharp
+Add("InitDamageLifeStealPost")
+	.Effect(new DamageEffect(5)
+    	.SetPostEffects(new LifeStealPostEffect(0.5f, Targeting.SourceTarget)) , EffectOn.Init);
+```
+
+### Apply & Effect Condition (checks)
+
+Modifiers can have conditions, that will check if the modifier/target/source fulfills the condition before applying the modifier.
+`ModiBuff.Units` has a few built-in conditions, and custom conditions are fully supported.
+The common conditions are: cooldown, mana cost, chance, status effect, etc.
+
+This example deals 5 damage on init apply, only if:
+the source unit has at least 5 mana, passes the 50% roll, is not on 1 second cooldown, source is able to act (attack, heal), and target is silenced.
+
+```csharp
+Add("InitDamage_CostMana")
+	.ApplyCost(CostType.Mana, 5)
+	.ApplyChance(0.5f)
+	.ApplyCooldown(1f)
+	.ApplyCondition(LegalAction.Act)
+	.EffectCondition(LegalAction.Silence)
+	.Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+### Order
 
 Functions should be used in the operation order, for clarity.
 This is optional, except for parameterless refresh functions, which should be called right after interval/duration.
@@ -369,7 +431,7 @@ They can also implement `ITargetEffect` for event targeting owner/source, `IEven
 stacking functionality, `IStateEffect` for resetting runtime state.
 
 For fully featured effect implementation, look at
-[DamageEffect](https://github.com/Chillu1/ModiBuff/blob/a3131a122e4aacc54a05c2e0e657d053ffa27d42/ModiBuff/Assets/Scripts/Core/Components/Effect/Effects/DamageEffect.cs)
+[DamageEffect](https://github.com/Chillu1/ModiBuff/blob/master/ModiBuff/ModiBuff.Units/Effects/DamageEffect.cs)
 
 ### Applier Effect
 
@@ -449,7 +511,7 @@ Recipe system fixes a lot of internal complexity of setting up modifiers for you
 [//]: # (It's possible to use the Modifier class directly in cases where you'd want multiple interval/duration components.)
 
 > Note: Currently it's impossible to use internal modifiers directly with the library, since the systems rely on the recipe system
-> (pooling). This will be changed in the near future.
+> (pooling). This will be changed in the near future. Before the 1.0 release.
 
 # Differences to ModiBuffEcs and Old
 
@@ -460,11 +522,7 @@ ModiBuff has:
 * No GC/allocations
 * No ECS framework needed
 * Worse iteration speed, 25_000 interval modifiers compared to 100_000 modifiers, 5ms update, average complexity modifiers
-
----
-
-* More features
-	* ...
+* Many more features
 
 ## [Old Modifier Library]((https://github.com/Chillu1/ModifierLibrary))
 
@@ -487,42 +545,10 @@ ModiBuff has:
 	* Two status effects: taunt, confuse
 	* Tags
 
-# When to use which library
-
-## ModiBuff
-
-Summary: Very optimized, no GC, great feature-set.  
-Ex. games: RimWorld, Hades, Binding of Isaac, Tiny Rogues, Enter the Gungeon  
-Ex. genres: small arpg, small rts, pve, colony sim
-
-ModiBuff is the best choice 95% of the time. It's fast, lightweight, deeply redesigned core, has no GC/allocations, and is very easy to
-use.  
-It's also very well tested for most scenarios.
-
-## ModiBuffEcs
-
-Summary: Fastest iteration, small feature-set, needs ecs framework.  
-Entities: Solo vs Thousands, or Thousands vs Thousands.  
-Ex. games: Path of Exile, Diablo, StarCraft, Warcraft  
-Ex. genres: arpg, rpg, rts, pve
-
-ModiBuffEcs is a good choice if you don't care about about having a lot of features, and if your game will have hundreds of thousands of
-units.
-Or just if you want to use it with an ecs framework.
-
-## Original
-
-Summary: Not optimized, amazing feature-set.  
-Entities: Solo vs Solo, Solo vs Party, Party vs Party  
-Ex. games: dota, witcher 3  
-Ex. genres: moba, arena, duel
-
-Only choose original if you need the deep featureset, AND you don't expect to have more than 100 units in the game at the same time, all
-using/applying 5 modifiers each frame.
-If you're making a moba or a small PvP arena game, you can use the original library. That being said, **ModiBuff is a better choice for the
-vast majority of games.**
-
 # FAQ
+
+Q: ModiBuff.Units seems to use excessive casting, in effects. Why not have master unit interface?
+A: This was a tough solution to make custom user effects work with their own unit implementations.
 
 Q: My stack effect is not working, what's wrong?  
 A: StackEffectType needs to be set in all: `IEffect` (ex. DamageEffect), `Recipe.Effect.EffectOn.Stack` and `Recipe.Stack()`  
