@@ -168,7 +168,7 @@ var idManager = new ModifierIdManager();
 _recipes = new ModifierRecipes(idManager);
 _pool = new ModifierPool(_recipes);
 ```
-If you want to use the Units implementation, go to [ModiBuff.Units](#modibuff.units).
+If you want to use the Units implementation, go to [ModiBuff.Units](#modibuffunits).
 Otherwise go to [Custom Units](#custom-units).
 
 ### ModiBuff.Units
