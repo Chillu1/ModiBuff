@@ -9,6 +9,7 @@
 
 - [What is this?](#what-is-this)
 - [Features](#features)
+- [RoadMap](#roadmap)
 - [Benchmarks](#benchmarks)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -83,6 +84,15 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* When Attacked/Cast/Killed/Healed
 	* On Attack/Cast/Kill/Heal
 * Fully revertible effects
+
+# RoadMap
+
+| V0.1.3             | V0.2.0                                           | V0.3.0                            | V1.0.0                                                         |
+|--------------------|--------------------------------------------------|-----------------------------------|----------------------------------------------------------------|
+| Modifier Callbacks | Proper game examples<br/>(Godot and maybe Unity) | GenId based<br/>modifier stacking | Fully released open<br/>source game using ModiBuff at its core |
+|                    | Appliers refactor                                | Tags?                             | Manual modifier generation                                     |
+|                    | Improved event recursion solution                | Dispel(s)?                        |                                                                |
+|                    | Modifier-less init Effects?                      |                                   |                                                                |
 
 # Benchmarks
 
