@@ -1,5 +1,6 @@
 using BenchmarkDotNet.Attributes;
 using ModiBuff.Core;
+using ModiBuff.Core.Units;
 
 namespace ModiBuff.Tests
 {
@@ -48,6 +49,14 @@ namespace ModiBuff.Tests
 		{
 			var modifier = Pool.Rent(_intervalDamageStackAddDamageRecipe.Id);
 			Pool.Return(modifier);
+		}
+
+		[Benchmark]
+		public void BenchNewModifierManual()
+		{
+			var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
+
+			var modifier = new Modifier(0, 0, "Test", initComponent, null, default(StackComponent), null, new SingleTargetComponent());
 		}
 	}
 }

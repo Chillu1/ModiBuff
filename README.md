@@ -150,19 +150,15 @@ For development net 6.0 is required to build and run all tests. The tests depend
 
 Currently the library is not on NuGet or any other package manager.
 
-DLLs are available in the [Releases](https://github.com/Chillu1/ModiBuff/releases) tab.
-
-For finer control you can download the source code and add it to your project directly.
-
-For a full implementation of all library features with Units, you should get ModiBuff.Units DLL.
-
 ## Step by step installation
 
 1. Download the latest DLL from [Releases](https://github.com/Chillu1/ModiBuff/releases) or ModiBuff source code.
 2. Add the DLL to your project.
-3. Make your own `ModifierRecipes` class that inherits from `ModiBuffModifierRecipes` and fill it with your modifier recipes.
+3. Make your own `ModifierRecipes` class that inherits from `ModiBuffModifierRecipes` and fill it with your modifier recipes.  
+3.1. If you're planning to use event modifiers, call `SetupEventEffect<T>(EventEffectFactory)` and the beginning in `ModifierRecipes`
+  to register your event effect type, usually an enum.
 4. Make your own logger implementation, by inheriting `ILogger`, or use one of the built-in ones.
-5. Call ModiBuff setup systems in the initialization of your game.  
+5. Call ModiBuff setup systems in the initialization of your game.    
 5.1. You can change the internal config values inside `Config`
 ```csharp
 Logger.SetLogger<MyLogger>();
@@ -181,20 +177,15 @@ Otherwise go to [Custom Units](#custom-units).
 8. Now you can create your units, and apply modifiers to them.
 
 ### Custom Units
-6. Implement `IUnit` and `IModifierOwner` interfaces on your unit class.
+6. Implement `IUnit` and `IModifierOwner` interfaces on your unit class.  
 6.1. Optionally add some of the ModiBuff.Units `IUnit` [interfaces](ModiBuff/ModiBuff.Units/Unit/Interfaces) that you want to use.
 7. Create your own interfaces that your effects will use, and implement them on your unit class.
-
-## Setup
-
-1. Make your own "ModifierRecipes" class that inherits from "ModifierRecipesBase" and fill it with your modifier recipes.
-2. Create your own "Unit" class/implement "IUnit" interfaces or use the "Unit" class from CoreUnits.
 
 # Usage
 
 ## Recipe
 
-ModifierRecipes are the high level API for creating modifiers, they use the builder pattern/method chaining/fluent interface to create
+Modifier Recipes are the high level API for creating modifiers, they use the builder pattern/method chaining/fluent interface to create
 modifiers (without the need for calling a Finish/Complete method).
 
 Easiest modifier, that does 5 damage when added, can be created like this:
@@ -425,6 +416,25 @@ Add("Full")
 
 Each modifier should have at least one effect, unless it's used as a flag.
 
+## Event Recipe
+
+Event recipes are special recipes for creating event modifiers.
+Event modifiers use a `EventEffect`, that registers an event on a unit (this code needs to be implemented in the unit class).
+
+It uses the same builder pattern as the normal recipes, but with a few less methods.
+
+The `Effect(IEffect, Targeting)` method is very similar to the normal recipe, but we can't set the `EffectOn` action.
+Since it will always trigger on event.
+
+When adding an effect, we need to specify when the effect should trigger. In this example we deal 5 damage to a unit that attacks us.
+
+```csharp
+Add("ThornsOnHitEvent", EffectOnEvent.WhenAttacked)
+    .Effect(new DamageEffect(5), Targeting.SourceTarget);
+```
+
+Event recipe also has `Remove(float)` and `Refresh()` and they both work exactly the same way as in normal recipes.
+
 ## Recipe Limitations
 
 > Note that these limitations don't matter for 95% of the use cases.
@@ -456,12 +466,29 @@ Through `IEventOwner.AddEffectEvent(IEffect, EffectOnEvent)`.
 The library allows for easy creation of new effects.
 Which are needed for using custom game-based logic.
 
-Effects have to implement `IEffect`.
+Effects have to implement `IEffect`.  
 They can also implement `ITargetEffect` for event targeting owner/source, `IEventTrigger` to avoid event recursion, `IStackEffect` for
 stacking functionality, `IStateEffect` for resetting runtime state.
 
 For fully featured effect implementation, look at
 [DamageEffect](https://github.com/Chillu1/ModiBuff/blob/master/ModiBuff/ModiBuff.Units/Effects/DamageEffect.cs)
+
+#### In-depth Effect Creation
+
+We start by creating a new class that implements `IEffect`.  
+`IEffect` has a method `void Effect(IUnit target, IUnit source);` that gets fed the target and source of the cast/attack/apply.
+
+The next important thing is to identify if our effect will have mutable state.
+It will have state if we plan on reverting it, adding more value to it, or changing internal effect state.
+In that case, we need to implement `IStateEffect`, which has a method `void ResetState();` that gets called when the modifier is sent 
+back to pool, and also a clone `IEffect ShallowClone()` method. For cloning the effect so the state is not shared between modifiers.
+
+If we want to use stack logic, the effect needs to implement `IStackEffect`.
+
+If the effect can be used in events, it needs to implement `IEventTrigger`.
+That's because currently the event infinite loop is fixed by not having event effects trigger other events.
+
+If the effect should support non-standard targeting, it should implement `ITargetEffect`.
 
 ### Applier Effect
 

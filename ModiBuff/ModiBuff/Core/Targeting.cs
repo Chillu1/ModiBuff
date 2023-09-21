@@ -62,23 +62,18 @@ namespace ModiBuff.Core
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void UpdateTarget(this Targeting targeting, ref IUnit target, IUnit source)
 		{
-			IUnit finalTarget;
-
 			switch (targeting)
 			{
 				case Targeting.TargetSource:
 				case Targeting.TargetTarget:
-					finalTarget = target;
 					break;
 				case Targeting.SourceTarget:
 				case Targeting.SourceSource:
-					finalTarget = source;
+					target = source;
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
-
-			target = finalTarget;
 		}
 	}
 }
