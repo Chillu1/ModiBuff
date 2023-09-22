@@ -51,7 +51,7 @@ This library solves that, but also allows for more complex and deeper modifiers 
 * Fast effects [10_000 damage modifiers in 0.24ms](#benchmarks)
 * Fast iteration [10_000 interval modifiers & 10_000 units in 1.37ms](#benchmarks)
 * Easy high level API [recipes](#recipe)
-* Instance Stackable modifiers (multiple instances of the same modifier)
+* Instance Stackable modifiers (multiple instances of the same modifier type)
 * Effects on actions
 	* Init
 	* Interval

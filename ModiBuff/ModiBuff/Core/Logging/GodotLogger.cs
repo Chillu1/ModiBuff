@@ -1,4 +1,6 @@
 #if GODOT
+using Godot;
+
 namespace ModiBuff.Core
 {
 	public class GodotLogger : ILogger

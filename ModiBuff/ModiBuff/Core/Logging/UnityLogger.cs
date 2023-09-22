@@ -1,4 +1,6 @@
 #if UNITY_5_3_OR_NEWER //UNITY_2_6?
+using UnityEngine;
+
 namespace ModiBuff.Core
 {
 	public class UnityLogger : ILogger
