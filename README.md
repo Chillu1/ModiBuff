@@ -5,6 +5,7 @@
 
 <h1></h1>
 
+![Nuget](https://img.shields.io/nuget/v/ModiBuff)
 ![Coverage](Docs/badge_linecoverage.svg)
 
 - [What is this?](#what-is-this)
@@ -31,7 +32,7 @@ The library is split into two core parts:
 
 ModiBuff is the core backend part that handles all the modifier logic and is mostly unopinionated when it comes to the game logic.
 
-Meanwhile ModiBuff.Units is a fully featured implementation of the library, that showcases how to tie the library into a game. 
+Meanwhile ModiBuff.Units is a fully featured implementation of the library, that showcases how to tie the library into a game.
 
 > Note: The library is currently in development, and it will most likely encounter breaking API changes.
 
@@ -57,7 +58,7 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Interval
 	* Duration
 	* Stack
-    * Callback (soon)
+	* Callback (soon)
 * Effect implementation examples
 	* Damage (& self damage)
 	* Heal
@@ -130,7 +131,7 @@ Pre-allocated Pools
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 1.64ms, 0 GC  | 4.26ms, 0 GC              |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | X             | X                         |
 
-> Important: Non-pool ("New") benchmarks below don't matter for runtime performance in ModiBuff and ModiBuffEcs, since it will only be 
+> Important: Non-pool ("New") benchmarks below don't matter for runtime performance in ModiBuff and ModiBuffEcs, since it will only be
 > slower when allocating the new modifiers in the pools. Which if handled correctly, should only happen on initialization.
 
 | Library                                               | New<br/>InitDmg | New<br/>DoT*   |
@@ -165,11 +166,12 @@ Currently the library is not on NuGet or any other package manager.
 1. Download the latest DLL from [Releases](https://github.com/Chillu1/ModiBuff/releases) or ModiBuff source code.
 2. Add the DLL to your project.
 3. Make your own `ModifierRecipes` class that inherits from `ModiBuffModifierRecipes` and fill it with your modifier recipes.  
-3.1. If you're planning to use event modifiers, call `SetupEventEffect<T>(EventEffectFactory)` and the beginning in `ModifierRecipes`
-  to register your event effect type, usually an enum.
+   3.1. If you're planning to use event modifiers, call `SetupEventEffect<T>(EventEffectFactory)` and the beginning in `ModifierRecipes`
+   to register your event effect type, usually an enum.
 4. Make your own logger implementation, by inheriting `ILogger`, or use one of the built-in ones.
 5. Call ModiBuff setup systems in the initialization of your game.    
-5.1. You can change the internal config values inside `Config`
+   5.1. You can change the internal config values inside `Config`
+
 ```csharp
 Logger.SetLogger<MyLogger>();
 //Config.MaxPoolSize = 10000;
@@ -178,17 +180,20 @@ var idManager = new ModifierIdManager();
 _recipes = new ModifierRecipes(idManager);
 _pool = new ModifierPool(_recipes);
 ```
+
 If you want to use the Units implementation, go to [ModiBuff.Units](#modibuffunits).
 Otherwise go to [Custom Units](#custom-units).
 
 ### ModiBuff.Units
+
 6. Download the latest ModiBuff.Units DLL from [Releases](https://github.com/Chillu1/ModiBuff/releases) or ModiBuff source code.
 7. Add the DLL to your project.
 8. Now you can create your units, and apply modifiers to them.
 
 ### Custom Units
+
 6. Implement `IUnit` and `IModifierOwner` interfaces on your unit class.  
-6.1. Optionally add some of the ModiBuff.Units `IUnit` [interfaces](ModiBuff/ModiBuff.Units/Unit/Interfaces) that you want to use.
+   6.1. Optionally add some of the ModiBuff.Units `IUnit` [interfaces](ModiBuff/ModiBuff.Units/Unit/Interfaces) that you want to use.
 7. Create your own interfaces that your effects will use, and implement them on your unit class.
 
 # Usage
@@ -319,7 +324,7 @@ Then there's `Stack(WhenStackEffect whenStackEffect, float value, int maxStacks,
 It's used for tracking how many times the modifier has been re-added to the unit, or other stacking logic.
 
 `WhenStackEffect` tells the modifier when the stack action should be triggered: Always, OnMaxStacks, EveryXStacks, etc.  
-`StackEffectType` tells the effect what to do when the stack action is triggered: 
+`StackEffectType` tells the effect what to do when the stack action is triggered:
 Trigger it's effect, add to it's effect, or both or all, etc.
 
 In this example we deal 5 damage every 1 second, but each time we add the modifier, we add 2 damage to the effect.
@@ -387,7 +392,8 @@ Modifiers can have conditions, that will check if the modifier/target/source ful
 The common conditions are: cooldown, mana cost, chance, status effect, etc.
 
 This example deals 5 damage on init apply, only if:
-the source unit has at least 5 mana, passes the 50% roll, is not on 1 second cooldown, source is able to act (attack, heal), and target is silenced.
+the source unit has at least 5 mana, passes the 50% roll, is not on 1 second cooldown, source is able to act (attack, heal), and target is
+silenced.
 
 ```csharp
 Add("InitDamage_CostMana")
@@ -490,7 +496,7 @@ We start by creating a new class that implements `IEffect`.
 
 The next important thing is to identify if our effect will have mutable state.
 It will have state if we plan on reverting it, adding more value to it, or changing internal effect state.
-In that case, we need to implement `IStateEffect`, which has a method `void ResetState();` that gets called when the modifier is sent 
+In that case, we need to implement `IStateEffect`, which has a method `void ResetState();` that gets called when the modifier is sent
 back to pool, and also a clone `IEffect ShallowClone()` method. For cloning the effect so the state is not shared between modifiers.
 
 If we want to use stack logic, the effect needs to implement `IStackEffect`.
@@ -587,7 +593,7 @@ A: This was a tough solution to make custom user effects work with their own uni
 And not force users to implement all methods for functionality, where it's not used.
 
 Q: How do I make "insert mechanic from a game" in ModiBuff?  
-A: First check [ModifierExamples.md](ModifierExamples.md). Then if it isn't there, ask about how to make it in issues, will make a better 
+A: First check [ModifierExamples.md](ModifierExamples.md). Then if it isn't there, ask about how to make it in issues, will make a better
 platform for discussion if needed.
 
 Q: It's 100% not possible to make "mechanic from a game" in ModiBuff.  
@@ -612,7 +618,7 @@ For a big list of implementation examples, see [ModifierExamples.md](ModifierExa
 
 ## Full
 
-> Note: The current examples are very very bare bones, a proper implementation with custom game logic will be added soon. 
+> Note: The current examples are very very bare bones, a proper implementation with custom game logic will be added soon.
 
 [All examples](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/ModiBuff.Examples)
 

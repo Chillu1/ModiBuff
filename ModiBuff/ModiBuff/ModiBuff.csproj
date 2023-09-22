@@ -2,11 +2,31 @@
 
     <PropertyGroup>
         <LangVersion>7.2</LangVersion>
-        <TargetFramework>netstandard1.1</TargetFramework>
+        <TargetFrameworks>netstandard1.1;netstandard2.0</TargetFrameworks>
+        <PackageId>ModiBuff</PackageId>
+        <Version>0.1.2</Version>
+        <Authors>Chillu</Authors>
+        <Product>ModiBuff</Product>
+        <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/Chillu1/ModiBuff</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Chillu1/ModiBuff</RepositoryUrl>
+        <Copyright>Copyright (c) Chillu 2023</Copyright>
+        <Description>
+            Buff/Debuff/Modifier library focused on feature set and performance, while maintaining 0 GC. Fully pooled.
+        </Description>
+        <PackageTags>buff, debuff, modifier, gamedev, game</PackageTags>
+        <Title>ModiBuff</Title>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>ModiBuffSmallIcon.png</PackageIcon>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
         <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\..\Docs\ModiBuffSmallIcon.png" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
 </Project>

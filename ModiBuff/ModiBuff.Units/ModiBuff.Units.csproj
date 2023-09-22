@@ -3,12 +3,31 @@
     <PropertyGroup>
         <LangVersion>7</LangVersion>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-        <TargetFramework>netstandard1.1</TargetFramework>
+        <TargetFrameworks>netstandard1.1;netstandard2.0</TargetFrameworks>
+        <PackageId>ModiBuff.Units</PackageId>
+        <Version>0.1.0</Version>
+        <Authors>Chillu</Authors>
+        <Product>ModiBuff.Units</Product>
+        <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/Chillu1/ModiBuff</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Chillu1/ModiBuff</RepositoryUrl>
+        <Copyright>Copyright (c) Chillu 2023</Copyright>
+        <Description>
+            Sample implementation of game logic for Buff/Debuff/Modifier library ModiBuff
+        </Description>
+        <PackageTags>buff, debuff, modifier, gamedev, game</PackageTags>
+        <Title>ModiBuff.Units</Title>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>ModiBuffSmallIcon.png</PackageIcon>
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\ModiBuff\ModiBuff.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\..\Docs\ModiBuffSmallIcon.png" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
 </Project>
