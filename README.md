@@ -5,7 +5,7 @@
 
 <h1></h1>
 
-![Nuget](https://img.shields.io/nuget/v/ModiBuff)
+[![Nuget](https://img.shields.io/nuget/v/ModiBuff)](https://www.nuget.org/packages/ModiBuff/)
 ![Coverage](Docs/badge_linecoverage.svg)
 
 - [What is this?](#what-is-this)
