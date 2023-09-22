@@ -2,7 +2,7 @@ using System;
 
 namespace ModiBuff.Core
 {
-	public readonly struct ModifierReference : IEquatable<ModifierReference>, IComparable<ModifierReference>
+	public struct ModifierReference : IEquatable<ModifierReference>, IComparable<ModifierReference>
 	{
 		public readonly int Id;
 		public readonly int GenId;

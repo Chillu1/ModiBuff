@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public readonly struct ModifierAddData
+	public struct ModifierAddData
 	{
 		public readonly bool HasInit;
 		public readonly bool HasRefresh;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
-	public readonly struct ModifierRecipeData
+	public struct ModifierRecipeData
 	{
 		public readonly int Id;
 		public readonly string Name;

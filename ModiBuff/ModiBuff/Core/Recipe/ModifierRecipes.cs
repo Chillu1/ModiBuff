@@ -113,7 +113,7 @@ namespace ModiBuff.Core
 			_eventEffectFunc = eventEffectFunc;
 		}
 
-		public static ref readonly ModifierAddData GetAddData(int id) => ref _instance._modifierAddData[id];
+		public static ref ModifierAddData GetAddData(int id) => ref _instance._modifierAddData[id];
 
 		public IModifierGenerator GetGenerator(string id) => _modifierGenerators[id];
 
@@ -212,7 +212,7 @@ namespace ModiBuff.Core
 			_registeredNames.Clear();
 		}
 
-		private readonly struct RegisterData
+		private struct RegisterData
 		{
 			public readonly string Name;
 			public readonly int Id;

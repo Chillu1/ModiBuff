@@ -129,7 +129,7 @@ namespace ModiBuff.Core
 		}
 	}
 
-	public readonly ref struct SyncedModifierEffects
+	public struct SyncedModifierEffects
 	{
 		public readonly IEffect[] InitEffects;
 		public readonly IEffect[] IntervalEffects;

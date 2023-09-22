@@ -50,7 +50,7 @@ namespace ModiBuff.Core
 		private IStateCheck[] _stateEffectChecks;
 		private bool _hasStateEffectChecks;
 
-		public ModifierGenerator(in ModifierRecipeData data)
+		public ModifierGenerator(ModifierRecipeData data)
 		{
 			Id = data.Id;
 			Name = data.Name;
@@ -85,22 +85,22 @@ namespace ModiBuff.Core
 			_modifierEffectsCreator = new ModifierEffectsCreator(data.EffectWrappers, data.RemoveEffectWrapper);
 
 			if (HasApplyChecks)
-				SetupApplyChecks(in data);
+				SetupApplyChecks();
 
 			if (_hasEffectChecks)
-				SetupEffectChecks(in data);
+				SetupEffectChecks();
 
 			return;
 
-			void SetupApplyChecks(in ModifierRecipeData localData)
+			void SetupApplyChecks()
 			{
 				var updatableChecks = new List<IUpdatableCheck>();
 				var noUnitChecks = new List<INoUnitCheck>();
 				var unitChecks = new List<IUnitCheck>();
 				var usableChecks = new List<IUsableCheck>();
 				var stateChecks = new List<IStateCheck>();
-				if (localData.ApplyCheckList != null)
-					foreach (var check in localData.ApplyCheckList)
+				if (data.ApplyCheckList != null)
+					foreach (var check in data.ApplyCheckList)
 					{
 						if (check is IStateCheck stateCheck)
 							stateChecks.Add(stateCheck);
@@ -123,18 +123,18 @@ namespace ModiBuff.Core
 				_stateApplyChecks = stateChecks.ToArray();
 				_hasStateApplyChecks = _stateApplyChecks.Length > 0;
 
-				_applyFuncChecks = localData.ApplyFuncCheckList?.ToArray();
+				_applyFuncChecks = data.ApplyFuncCheckList?.ToArray();
 			}
 
-			void SetupEffectChecks(in ModifierRecipeData localData)
+			void SetupEffectChecks()
 			{
 				var updatableChecks = new List<IUpdatableCheck>();
 				var noUnitChecks = new List<INoUnitCheck>();
 				var unitChecks = new List<IUnitCheck>();
 				var usableChecks = new List<IUsableCheck>();
 				var stateChecks = new List<IStateCheck>();
-				if (localData.EffectCheckList != null)
-					foreach (var check in localData.EffectCheckList)
+				if (data.EffectCheckList != null)
+					foreach (var check in data.EffectCheckList)
 					{
 						if (check is IStateCheck stateCheck)
 							stateChecks.Add(stateCheck);
@@ -157,7 +157,7 @@ namespace ModiBuff.Core
 				_stateEffectChecks = stateChecks.ToArray();
 				_hasStateEffectChecks = _stateEffectChecks.Length > 0;
 
-				_effectFuncChecks = localData.EffectFuncCheckList?.ToArray();
+				_effectFuncChecks = data.EffectFuncCheckList?.ToArray();
 			}
 		}
 
@@ -180,9 +180,9 @@ namespace ModiBuff.Core
 					_usableEffectChecks, stateChecks);
 			}
 
-			InitComponent initComponent = default;
+			InitComponent initComponent = default(InitComponent);
 			ITimeComponent[] timeComponents = null;
-			StackComponent stackComponent = default;
+			StackComponent stackComponent = default(StackComponent);
 			if (_timeComponentCount > 0)
 			{
 				_timeComponentIndex = 0;

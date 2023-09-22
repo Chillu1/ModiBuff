@@ -168,7 +168,7 @@ namespace ModiBuff.Core
 
 		public void Add(int id, IUnit target, IUnit source)
 		{
-			ref readonly var addData = ref ModifierRecipes.GetAddData(id);
+			ref var addData = ref ModifierRecipes.GetAddData(id);
 
 			if (!addData.IsInstanceStackable && _modifierIndexes[id] != -1)
 			{
@@ -224,7 +224,7 @@ namespace ModiBuff.Core
 			_modifiersToRemove.Add(new ModifierReference(id, genId));
 		}
 
-		public void Remove(in ModifierReference modifierReference)
+		public void Remove(ModifierReference modifierReference)
 		{
 			if (!ModifierRecipes.GetAddData(modifierReference.Id).IsInstanceStackable)
 			{
