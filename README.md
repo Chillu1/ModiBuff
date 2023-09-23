@@ -159,7 +159,7 @@ For development net 6.0 is required to build and run all tests. The tests depend
 
 # Installation
 
-Currently the library is not on NuGet or any other package manager.
+Currently the library on NuGet and will be coming to Godot Asset Library and Unity Asset Store soon.
 
 ## Step by step installation
 
