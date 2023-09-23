@@ -135,6 +135,11 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		//public ModifierRecipe IntervalTurn(int turnCount)
+		//{
+		//	_intervalTurn = turnCount;
+		//}
+
 		/// <summary>
 		///		How many seconds should pass before the duration effects get triggered (usually modifier removal)
 		/// </summary>

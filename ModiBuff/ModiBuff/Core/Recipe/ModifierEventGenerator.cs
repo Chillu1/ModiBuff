@@ -50,10 +50,10 @@ namespace ModiBuff.Core
 			var eventEffect = _eventEffectFunc(effects, _effectOnEvent);
 			var initComponent = new InitComponent(true, new[] { eventEffect }, null);
 
-			ITimeComponent[] timeComponents = null;
+			IRealTimeComponent[] timeComponents = null;
 			if (_removeDuration > 0)
 			{
-				timeComponents = new ITimeComponent[]
+				timeComponents = new IRealTimeComponent[]
 				{
 					new DurationComponent(_removeDuration, _refreshDuration, new[] { _removeEffectWrapper.GetEffect() })
 				};

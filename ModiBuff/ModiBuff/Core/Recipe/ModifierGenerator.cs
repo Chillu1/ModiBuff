@@ -181,12 +181,13 @@ namespace ModiBuff.Core
 			}
 
 			InitComponent initComponent = default;
-			ITimeComponent[] timeComponents = null;
+			IRealTimeComponent[] realTimeComponents = null;
+			//ITurnTimeComponent[] turnTimeComponents = null;
 			StackComponent stackComponent = default;
 			if (_timeComponentCount > 0)
 			{
 				_timeComponentIndex = 0;
-				timeComponents = new ITimeComponent[_timeComponentCount];
+				realTimeComponents = new IRealTimeComponent[_timeComponentCount];
 			}
 
 			var effects = _modifierEffectsCreator.Create(genId);
@@ -194,10 +195,10 @@ namespace ModiBuff.Core
 			if (effects.InitEffects != null)
 				initComponent = new InitComponent(_oneTimeInit, effects.InitEffects, effectCheck);
 			if (effects.IntervalEffects != null)
-				timeComponents[_timeComponentIndex++] = new IntervalComponent(_interval, _refreshInterval, effects.IntervalEffects,
+				realTimeComponents[_timeComponentIndex++] = new IntervalComponent(_interval, _refreshInterval, effects.IntervalEffects,
 					effectCheck, _intervalAffectedByStatusResistance);
 			if (effects.DurationEffects != null)
-				timeComponents[_timeComponentIndex++] = new DurationComponent(_duration, _refreshDuration, effects.DurationEffects);
+				realTimeComponents[_timeComponentIndex++] = new DurationComponent(_duration, _refreshDuration, effects.DurationEffects);
 			if (effects.StackEffects != null)
 				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks, _everyXStacks, effects.StackEffects,
 					effectCheck);
@@ -208,7 +209,7 @@ namespace ModiBuff.Core
 			else
 				targetComponent = new MultiTargetComponent();
 
-			return new Modifier(Id, genId, Name, initComponent, timeComponents, stackComponent, effectCheck, targetComponent);
+			return new Modifier(Id, genId, Name, initComponent, realTimeComponents, stackComponent, effectCheck, targetComponent);
 		}
 
 		ModifierCheck IModifierApplyCheckGenerator.CreateApplyCheck()

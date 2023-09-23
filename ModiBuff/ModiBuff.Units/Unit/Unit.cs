@@ -83,6 +83,11 @@ namespace ModiBuff.Core.Units
 				_auraModifiers[i].Update(deltaTime);
 		}
 
+		public void UpdateTurn(int count = 1)
+		{
+			ModifierController.UpdateTurn(count);
+		}
+
 		/// <summary>
 		///		Should be called before we attack/on attack. For modifiers like split shot that we want to trigger when starting an attack.
 		/// </summary>

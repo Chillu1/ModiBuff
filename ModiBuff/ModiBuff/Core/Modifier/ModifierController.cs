@@ -63,6 +63,22 @@ namespace ModiBuff.Core
 			_modifiersToRemove.Clear();
 		}
 
+		public void UpdateTurn(int count = 1)
+		{
+			int modifiersTop = _modifiersTop;
+			for (int i = 0; i < modifiersTop; i++)
+				_modifiers[i].UpdateTurn(count);
+
+			int removeCount = _modifiersToRemove.Count;
+			if (removeCount == 0)
+				return;
+
+			for (int i = 0; i < removeCount; i++)
+				Remove(_modifiersToRemove[i]);
+
+			_modifiersToRemove.Clear();
+		}
+
 		public ICollection<ModifierCheck> GetApplierCastCheckModifiers() => _modifierCastChecksAppliers.Values;
 		public ICollection<ModifierCheck> GetApplierAttackCheckModifiers() => _modifierAttackChecksAppliers.Values;
 

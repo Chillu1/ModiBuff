@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public sealed class IntervalComponent : ITimeComponent
+	public sealed class IntervalComponent : IRealTimeComponent
 	{
 		private readonly float _interval;
 		private readonly bool _isRefreshable;
