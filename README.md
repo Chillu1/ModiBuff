@@ -88,12 +88,12 @@ This library solves that, but also allows for more complex and deeper modifiers 
 
 # RoadMap
 
-| V0.1.3             | V0.2.0                                           | V0.3.0                            | V1.0.0                                                         |
-|--------------------|--------------------------------------------------|-----------------------------------|----------------------------------------------------------------|
-| Modifier Callbacks | Proper game examples<br/>(Godot and maybe Unity) | GenId based<br/>modifier stacking | Fully released open<br/>source game using ModiBuff at its core |
-|                    | Appliers refactor                                | Tags?                             | Manual modifier generation                                     |
-|                    | Improved event recursion solution                | Dispel(s)?                        |                                                                |
-|                    | Modifier-less init Effects?                      |                                   |                                                                |
+| V0.1.3                     | V0.2.0                                           | V0.3.0                            | V1.0.0                                                         |
+|----------------------------|--------------------------------------------------|-----------------------------------|----------------------------------------------------------------|
+| Modifier Callbacks         | Proper game examples<br/>(Godot and maybe Unity) | GenId based<br/>modifier stacking | Fully released open<br/>source game using ModiBuff at its core |
+| Manual modifier generation | Appliers refactor                                | Tags?                             | Saving state?                                                  |
+|                            | Improved event recursion solution                | Dispel(s)?                        | ...                                                            |
+|                            | Modifier-less init Effects?                      |                                   |                                                                |
 
 # Benchmarks
 
@@ -581,10 +581,9 @@ Ex. Init, Interval, Duration, Stack.
 You should **NOT** use the Modifier class directly, but instead use the recipe system.
 Recipe system fixes a lot of internal complexity of setting up modifiers for you.
 
-[//]: # (It's possible to use the Modifier class directly in cases where you'd want multiple interval/duration components.)
-
-> Note: Currently it's impossible to use internal modifiers directly with the library, since the systems rely on the recipe system
-> (pooling). This will be changed in the near future. Before the 1.0 release.
+It's possible to make modifier directly now by using `ManualModifierGenerator` class,
+specifically `Add(string, ModifierGeneratorFunc, ModifierAddData)`.
+But only do so if you really know what you're doing, and need that extra functionality like multiple interval/duration components.
 
 # FAQ
 
@@ -624,6 +623,20 @@ For a big list of implementation examples, see [ModifierExamples.md](ModifierExa
 
 [Simple solo](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/ModiBuff.Examples/SimpleSolo)
 example, of player unit fighting a single enemy unit
+
+# Internals
+
+## Modifier lifetime process
+
+Recipes are only a initial intermediate step, to tell the system how to create modifiers.
+Recipes can also be fully skipped by using creating modifiers manually with the `ManualModifierGenerator` class.
+Recipes and generators are only created once in the initialization process.
+
+When the generators have been created, they're fed to the pool.
+That supplies it's internal stacks with modifier instances.
+There's a singleton pool that is used by every ModifierController.
+
+![InternalsDiagram](Docs/ModiBuffSystemsDiagram.png)
 
 # Differences to ModiBuffEcs and Old
 
