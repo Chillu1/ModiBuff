@@ -2,6 +2,9 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
+	/// <summary>
+	///		Simple status effect controller. Doesn't care about different status effect instances.
+	/// </summary>
 	public sealed class StatusEffectController : IStatusEffectController<LegalAction, StatusEffectType>
 	{
 		private readonly float[] _legalActionTimers;
@@ -60,7 +63,7 @@ namespace ModiBuff.Core.Units
 			for (int i = 0; i < legalActions.Length; i++)
 			{
 				var legalAction = legalActions[i];
-				long legalActionIndex = StatusEffectTypeHelper.LegalActionToIndex[(int)legalAction];
+				int legalActionIndex = StatusEffectTypeHelper.LegalActionToIndex[(int)legalAction];
 				if (_legalActionTimers[legalActionIndex] >= duration)
 					continue;
 
@@ -75,7 +78,7 @@ namespace ModiBuff.Core.Units
 			for (int i = 0; i < legalActions.Length; i++)
 			{
 				var legalAction = legalActions[i];
-				long legalActionIndex = StatusEffectTypeHelper.LegalActionToIndex[(int)legalAction];
+				int legalActionIndex = StatusEffectTypeHelper.LegalActionToIndex[(int)legalAction];
 				float currentDuration = _legalActionTimers[legalActionIndex];
 				if (currentDuration <= 0)
 					continue;

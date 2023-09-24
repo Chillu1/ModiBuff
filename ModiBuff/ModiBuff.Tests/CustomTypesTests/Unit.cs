@@ -19,7 +19,7 @@ namespace ModiBuff.Tests.CustomTypesTests
 		public bool IsDead { get; private set; }
 
 		public ModifierController ModifierController { get; }
-		public IStatusEffectController<LegalAction, StatusEffectType> StatusEffectController => _statusEffectController;
+		public IMultiInstanceStatusEffectController<LegalAction, StatusEffectType> StatusEffectController => _statusEffectController;
 
 		//Note: These event lists should only be used for classic effects.
 		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
@@ -29,7 +29,7 @@ namespace ModiBuff.Tests.CustomTypesTests
 		private List<IUnit> _targetsInRange;
 		private List<Modifier> _auraModifiers;
 
-		private readonly StatusEffectController _statusEffectController;
+		private readonly MultiInstanceStatusEffectController _statusEffectController;
 
 		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000)
 		{
@@ -54,7 +54,7 @@ namespace ModiBuff.Tests.CustomTypesTests
 			_auraModifiers = new List<Modifier>();
 
 			ModifierController = new ModifierController(this);
-			_statusEffectController = new StatusEffectController();
+			_statusEffectController = new MultiInstanceStatusEffectController();
 		}
 
 		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences) : this(health, damage)

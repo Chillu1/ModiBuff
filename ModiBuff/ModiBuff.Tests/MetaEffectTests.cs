@@ -69,13 +69,13 @@ namespace ModiBuff.Tests
 			Unit.TryCast(generator.Id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
-			Enemy.StatusEffectController.ChangeStatusEffect(StatusEffectType.Disarm, 1f);
+			Enemy.StatusEffectController.ChangeStatusEffect(0, StatusEffectType.Disarm, 1f);
 
 			Unit.TryCast(generator.Id, Enemy); //5 * 2f
 			Assert.AreEqual(EnemyHealth - 5 - 10f, Enemy.Health);
 
 			Enemy.Update(1f);
-			Enemy.StatusEffectController.ChangeStatusEffect(StatusEffectType.Silence, 1f);
+			Enemy.StatusEffectController.ChangeStatusEffect(0, StatusEffectType.Silence, 1f);
 
 			Unit.TryCast(generator.Id, Enemy); //5 * 0.5f
 			Assert.AreEqual(EnemyHealth - 5 - 10f - 2.5f, Enemy.Health);
@@ -95,7 +95,7 @@ namespace ModiBuff.Tests
 			Unit.TryCast(generator.Id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
-			Unit.StatusEffectController.ChangeStatusEffect(StatusEffectType.Disarm, 1f);
+			Unit.StatusEffectController.ChangeStatusEffect(0, StatusEffectType.Disarm, 1f);
 
 			Unit.TryCast(generator.Id, Enemy); //5 * 2f
 			Assert.AreEqual(EnemyHealth - 5 - 10f, Enemy.Health);

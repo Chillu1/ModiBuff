@@ -30,17 +30,17 @@ namespace ModiBuff.Core.Units
 		public bool IsDead { get; private set; }
 
 		public ModifierController ModifierController { get; }
-		public IStatusEffectController<LegalAction, StatusEffectType> StatusEffectController => _statusEffectController;
+		public IMultiInstanceStatusEffectController<LegalAction, StatusEffectType> StatusEffectController => _statusEffectController;
 
 		//Note: These event lists should only be used for classic effects.
 		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
-		private List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
-		private List<IEffect> _beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
+		private readonly List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
+		private readonly List<IEffect> _beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
 
-		private List<IUnit> _targetsInRange;
-		private List<Modifier> _auraModifiers;
+		private readonly List<IUnit> _targetsInRange;
+		private readonly List<Modifier> _auraModifiers;
 
-		private readonly StatusEffectController _statusEffectController;
+		private readonly MultiInstanceStatusEffectController _statusEffectController;
 
 		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000)
 		{
@@ -66,7 +66,7 @@ namespace ModiBuff.Core.Units
 			_auraModifiers = new List<Modifier>();
 
 			ModifierController = new ModifierController(this);
-			_statusEffectController = new StatusEffectController();
+			_statusEffectController = new MultiInstanceStatusEffectController();
 		}
 
 		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences) : this(health, damage)

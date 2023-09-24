@@ -196,7 +196,6 @@ namespace ModiBuff.Tests
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, true), EffectOn.Init)
 				.Remove(1));
 
-			int modifierId = IdManager.GetId("InitStun_Revertible");
 			Unit.AddModifierSelf("InitStun_Revertible");
 
 			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
@@ -206,6 +205,52 @@ namespace ModiBuff.Tests
 
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 			Assert.True(Unit.StatusEffectController.HasLegalAction(LegalAction.Act));
+		}
+
+		[Test]
+		public void StunTwice_RevertLonger_StillStunned()
+		{
+			AddRecipes(_initStun,
+				add => add("InitStunLong_Revertible")
+					.Effect(new StatusEffectEffect(StatusEffectType.Stun, 3, true), EffectOn.Init)
+					.Remove(1));
+
+			Unit.AddModifierSelf("InitStunLong_Revertible"); //3s
+			Unit.AddModifierSelf("InitStun"); //2s
+
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+			Assert.False(Unit.StatusEffectController.HasLegalAction(LegalAction.Act));
+
+			Unit.Update(1f); //Should trigger remove => revert, "InitStun" should still be at 1s
+
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+			Assert.False(Unit.StatusEffectController.HasLegalAction(LegalAction.Act));
+		}
+
+		[Test]
+		public void StunSilence_RevertStun_StillCantCast()
+		{
+			AddRecipes(
+				add => add("InitStunLong_Revertible")
+					.Effect(new StatusEffectEffect(StatusEffectType.Stun, 3, true), EffectOn.Init)
+					.Remove(1),
+				add => add("InitSilence")
+					.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2), EffectOn.Init));
+
+			Unit.AddModifierSelf("InitStunLong_Revertible"); //2s
+			Unit.AddModifierSelf("InitSilence"); //2s
+
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Silence));
+			Assert.False(Unit.StatusEffectController.HasLegalAction(LegalAction.Act));
+			Assert.False(Unit.StatusEffectController.HasLegalAction(LegalAction.Cast));
+
+			Unit.Update(1f); //Should trigger remove => revert, "InitSilence_Revertible" should still be at 1s
+
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Silence));
+			Assert.True(Unit.StatusEffectController.HasLegalAction(LegalAction.Act));
+			Assert.False(Unit.StatusEffectController.HasLegalAction(LegalAction.Cast));
 		}
 	}
 }
