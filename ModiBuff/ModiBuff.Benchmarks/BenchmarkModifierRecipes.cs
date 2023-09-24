@@ -17,6 +17,16 @@ namespace ModiBuff.Tests
 			Add("InitDamage")
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
+			Add("InitDamageManual", (id, genId, name) =>
+			{
+				var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
+
+				var modifier = new Modifier(id, genId, name, initComponent, null, default(StackComponent), null,
+					new SingleTargetComponent());
+
+				return modifier;
+			}, new ModifierAddData(true, false, false, false));
+
 			Add("DoT")
 				.Interval(1)
 				.Effect(new DamageEffect(2), EffectOn.Interval)

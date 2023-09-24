@@ -8,14 +8,17 @@ namespace ModiBuff.Core
 
 	public delegate ModifierEventRecipe EventRecipeAddFunc(Func<string, object, ModifierEventRecipe> addFunc);
 
+	public delegate Modifier ModifierGeneratorFunc(int id, int genId, string name);
+
 	public class ModifierRecipes
 	{
-		public static int RecipesCount { get; private set; }
+		public static int GeneratorCount { get; private set; }
 
 		private static ModifierRecipes _instance; //TODO TEMP
 
 		private readonly ModifierIdManager _idManager;
 		private readonly IDictionary<string, IModifierRecipe> _recipes;
+		private readonly IDictionary<string, ManualModifierGenerator> _manualGenerators;
 		private readonly IDictionary<string, IModifierGenerator> _modifierGenerators;
 		private readonly List<RegisterData> _registeredNames;
 		private readonly ModifierAddData[] _modifierAddData;
@@ -31,6 +34,7 @@ namespace ModiBuff.Core
 			_idManager = idManager;
 			_eventEffectFunc = eventEffectFunc;
 			_recipes = new Dictionary<string, IModifierRecipe>(64);
+			_manualGenerators = new Dictionary<string, ManualModifierGenerator>(64);
 			_modifierGenerators = new Dictionary<string, IModifierGenerator>(64);
 			_registeredNames = new List<RegisterData>(16);
 
@@ -60,16 +64,22 @@ namespace ModiBuff.Core
 				eventRecipes[i](AddEvent);
 
 			SetupRecipes();
-			_modifierAddData = new ModifierAddData[_recipes.Count];
+			_modifierAddData = new ModifierAddData[_recipes.Count + _manualGenerators.Count];
+			foreach (var generator in _manualGenerators.Values)
+			{
+				_modifierAddData[generator.Id] = generator.GetAddData();
+				_modifierGenerators.Add(generator.Name, generator);
+			}
+
 			foreach (var recipe in _recipes.Values)
 			{
 				_modifierAddData[recipe.Id] = recipe.CreateAddData();
 				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
 			}
 
-			RecipesCount = _recipes.Count;
+			GeneratorCount = _recipes.Count;
 #if DEBUG && !MODIBUFF_PROFILE
-			Logger.Log($"[ModiBuff] Loaded {RecipesCount} recipes.");
+			Logger.Log($"[ModiBuff] Loaded {GeneratorCount} modifier generators.");
 #endif
 		}
 
@@ -79,20 +89,27 @@ namespace ModiBuff.Core
 
 			_idManager = idManager;
 			_recipes = new Dictionary<string, IModifierRecipe>(64);
+			_manualGenerators = new Dictionary<string, ManualModifierGenerator>(64);
 			_modifierGenerators = new Dictionary<string, IModifierGenerator>(64);
 			_registeredNames = new List<RegisterData>(16);
 
 			SetupRecipes();
-			_modifierAddData = new ModifierAddData[_recipes.Count];
+			_modifierAddData = new ModifierAddData[_recipes.Count + _manualGenerators.Count];
+			foreach (var generator in _manualGenerators.Values)
+			{
+				_modifierAddData[generator.Id] = generator.GetAddData();
+				_modifierGenerators.Add(generator.Name, generator);
+			}
+
 			foreach (var recipe in _recipes.Values)
 			{
 				_modifierAddData[recipe.Id] = recipe.CreateAddData();
 				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
 			}
 
-			RecipesCount = _recipes.Count;
+			GeneratorCount = _modifierGenerators.Count;
 #if DEBUG && !MODIBUFF_PROFILE
-			Logger.Log($"[ModiBuff] Loaded {RecipesCount} recipes.");
+			Logger.Log($"[ModiBuff] Loaded {GeneratorCount} modifier generators.");
 #endif
 		}
 
@@ -124,7 +141,7 @@ namespace ModiBuff.Core
 			if (_recipes.TryGetValue(name, out var localRecipe))
 			{
 #if DEBUG && !MODIBUFF_PROFILE
-				Logger.LogError($"Modifier with id {name} already exists");
+				Logger.LogError($"Modifier recipe with name {name} already exists");
 #endif
 				return (ModifierRecipe)localRecipe;
 			}
@@ -146,6 +163,42 @@ namespace ModiBuff.Core
 			var recipe = new ModifierRecipe(id, name, _idManager);
 			_recipes.Add(name, recipe);
 			return recipe;
+		}
+
+		protected void Add(string name, in ModifierGeneratorFunc createFunc, in ModifierAddData addData)
+		{
+			if (_recipes.ContainsKey(name))
+			{
+#if DEBUG && !MODIBUFF_PROFILE
+				Logger.LogError($"Modifier recipe with name {name} already exists");
+#endif
+				return;
+			}
+
+			if (_manualGenerators.ContainsKey(name))
+			{
+#if DEBUG && !MODIBUFF_PROFILE
+				Logger.LogError($"Modifier generator with name {name} already exists");
+#endif
+				return;
+			}
+
+			int id = -1;
+
+			foreach (var registerData in _registeredNames)
+			{
+				if (registerData.Name == name)
+				{
+					id = registerData.Id;
+					break;
+				}
+			}
+
+			if (id == -1)
+				id = _idManager.GetFreeId(name);
+
+			var modifierGenerator = new ManualModifierGenerator(id, name, in createFunc, in addData);
+			_manualGenerators.Add(name, modifierGenerator);
 		}
 
 		protected ModifierEventRecipe AddEvent<T>(string name, T effectOnEvent) => AddEvent(name, (object)effectOnEvent);

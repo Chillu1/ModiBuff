@@ -22,6 +22,16 @@ namespace ModiBuff.Core.Units
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 0.2f), EffectOn.Init | EffectOn.Interval)
 				.Remove(5).Refresh();
 
+			Add("InitDamageManual", (id, genId, name) =>
+			{
+				var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
+
+				var modifier = new Modifier(id, genId, name, initComponent, null, default(StackComponent), null,
+					new SingleTargetComponent());
+
+				return modifier;
+			}, new ModifierAddData(true, false, false, false));
+
 			//Delayed Silence
 			Add("DelayedSilence")
 				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 1), EffectOn.Duration)

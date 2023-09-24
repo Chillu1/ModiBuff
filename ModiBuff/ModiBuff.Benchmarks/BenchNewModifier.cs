@@ -11,6 +11,7 @@ namespace ModiBuff.Tests
 		private IModifierGenerator _initDoTSeparateDamageRemoveRecipe;
 		private int _initDoTSeparateDamageRemoveId;
 		private IModifierGenerator _intervalDamageStackAddDamageRecipe;
+		private IModifierGenerator _initDamageModifierGenerator;
 
 		public override void GlobalSetup()
 		{
@@ -20,6 +21,8 @@ namespace ModiBuff.Tests
 			_initDoTSeparateDamageRemoveRecipe = Recipes.GetGenerator("InitDoTSeparateDamageRemove");
 			_initDoTSeparateDamageRemoveId = _initDoTSeparateDamageRemoveRecipe.Id;
 			_intervalDamageStackAddDamageRecipe = Recipes.GetGenerator("IntervalDamage_StackAddDamage");
+
+			_initDamageModifierGenerator = Recipes.GetGenerator("InitDamageManual");
 
 			Pool.Clear();
 			Pool.SetMaxPoolSize(1_000_000);
@@ -57,6 +60,12 @@ namespace ModiBuff.Tests
 			var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
 
 			var modifier = new Modifier(0, 0, "Test", initComponent, null, default(StackComponent), null, new SingleTargetComponent());
+		}
+
+		[Benchmark]
+		public void BenchNewModifierGeneratorManual()
+		{
+			var modifier = _initDamageModifierGenerator.Create();
 		}
 	}
 }

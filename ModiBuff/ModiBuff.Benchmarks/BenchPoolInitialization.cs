@@ -22,7 +22,7 @@ namespace ModiBuff.Tests
 			_modifierIdManager = new ModifierIdManager();
 			_recipes = new BenchmarkModifierRecipes(_modifierIdManager);
 
-			Console.WriteLine("Allocated: " + ModifierRecipes.RecipesCount + " recipes, count: " + AllocationCount + " modifiers");
+			Console.WriteLine("Allocated: " + ModifierRecipes.GeneratorCount + " recipes, count: " + AllocationCount + " modifiers");
 		}
 
 		[Benchmark]

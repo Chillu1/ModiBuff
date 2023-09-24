@@ -27,7 +27,7 @@ namespace ModiBuff.Core
 			_owner = owner;
 
 			_modifiers = new Modifier[Config.ModifierArraySize];
-			_modifierIndexes = new int[ModifierRecipes.RecipesCount];
+			_modifierIndexes = new int[ModifierRecipes.GeneratorCount];
 			for (int i = 0; i < _modifierIndexes.Length; i++)
 				_modifierIndexes[i] = -1;
 

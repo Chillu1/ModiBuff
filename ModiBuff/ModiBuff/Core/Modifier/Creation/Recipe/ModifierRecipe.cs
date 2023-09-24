@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ModiBuff.Core
 {
@@ -258,11 +259,53 @@ namespace ModiBuff.Core
 
 		public IModifierGenerator CreateModifierGenerator()
 		{
+#if DEBUG && !MODIBUFF_PROFILE
+			Validate();
+#endif
+
 			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _hasApplyChecks,
 				_applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura, _oneTimeInit,
 				_interval, _intervalAffectedByStatusResistance, _duration, _refreshDuration, _refreshInterval, _whenStackEffect,
 				_stackValue, _maxStacks, _everyXStacks);
 			return new ModifierGenerator(in data);
+		}
+
+		private void Validate()
+		{
+			bool validRecipe = true;
+
+			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Interval)) && _interval == 0)
+			{
+				validRecipe = false;
+				Logger.LogError("Interval not set, but we have interval effects, for modifier: " + Name + " id: " + Id);
+			}
+
+			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Duration)) && _duration == 0)
+			{
+				validRecipe = false;
+				Logger.LogError("Duration not set, but we have duration effects, for modifier: " + Name + " id: " + Id);
+			}
+
+			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Stack)) && _whenStackEffect == WhenStackEffect.None)
+			{
+				validRecipe = false;
+				Logger.LogError("Stack effects set, but no stack effect type set, for modifier: " + Name + " id: " + Id);
+			}
+
+			if (_refreshInterval && _interval == 0)
+			{
+				validRecipe = false;
+				Logger.LogError("Refresh interval set, but interval is 0, for modifier: " + Name + " id: " + Id);
+			}
+
+			if (_refreshDuration && _duration == 0)
+			{
+				validRecipe = false;
+				Logger.LogError("Refresh duration set, but duration is 0, for modifier: " + Name + " id: " + Id);
+			}
+
+			if (!validRecipe)
+				Logger.LogError($"Recipe validation failed for {Name}, with Id: {Id}, see above for more info.");
 		}
 
 		public int CompareTo(ModifierRecipe other) => Id.CompareTo(other.Id);

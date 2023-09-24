@@ -134,11 +134,11 @@ Pre-allocated Pools
 > Important: Non-pool ("New") benchmarks below don't matter for runtime performance in ModiBuff and ModiBuffEcs, since it will only be
 > slower when allocating the new modifiers in the pools. Which if handled correctly, should only happen on initialization.
 
-| Library                                               | New<br/>InitDmg | New<br/>DoT*   |
-|-------------------------------------------------------|-----------------|----------------|
-| ModiBuff (this)                                       | 0.97ms, 2.4 MB  | 2.36ms, 5.5 MB |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 10.4ms,   2 GC  | 16.7ms,   2 GC |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | 92.0ms,  90 GC  | 140 ms, 126 GC |
+| Library                                               | New<br/>InitDmg<br/>Manual | New<br/>InitDmg<br/>Recipe | New<br/>DoT*<br/>Recipe |
+|-------------------------------------------------------|----------------------------|----------------------------|-------------------------|
+| ModiBuff (this)                                       | 0.63ms, 2.6 MB             | 1.09ms, 2.6 MB             | 2.36ms, 5.5 MB          |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | X                          | 10.4ms,   2 GC             | 16.7ms,   2 GC          |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | 92.0ms,  90 GC             | X                          | 140 ms, 126 GC          |
 
 Setting up all recipes, with 64 pool allocation per recipe takes 60ns, and 104KB.
 

@@ -70,13 +70,6 @@ namespace ModiBuff.Core
 			_maxStacks = data.MaxStacks;
 			_everyXStacks = data.EveryXStacks;
 
-
-#if DEBUG && !MODIBUFF_PROFILE
-			if (data.EffectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Interval)) && data.Interval == 0)
-				Logger.LogError("Interval not set, but we have interval effects, for modifier: " + Name + " id: " + Id);
-			if (data.EffectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Duration)) && data.Duration == 0)
-				Logger.LogError("Duration not set, but we have duration effects, for modifier: " + Name + " id: " + Id);
-#endif
 			if (data.Interval > 0)
 				_timeComponentCount++;
 			if (data.Duration > 0)
