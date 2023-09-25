@@ -102,6 +102,8 @@ namespace ModiBuff.Core
 				var effect = effectWrapper.GetEffect();
 				var effectOn = effectWrapper.EffectOn;
 
+				if (effect is IModifierGenIdOwner modifierGenIdOwner)
+					modifierGenIdOwner.SetGenId(genId);
 				if (effect is IRevertEffect revertEffect && revertEffect.IsRevertible)
 					_revertEffects[_revertEffectsIndex++] = revertEffect;
 

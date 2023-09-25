@@ -1,6 +1,6 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class StatusEffectEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect, IModifierIdOwner
+	public sealed class StatusEffectEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect, IModifierIdOwner, IModifierGenIdOwner
 	{
 		public bool IsRevertible { get; }
 
@@ -8,37 +8,43 @@ namespace ModiBuff.Core.Units
 		private readonly float _duration;
 		private readonly StackEffectType _stackEffect;
 		private int _id;
+		private int _genId;
 
 		private float _extraDuration;
 		private float _totalDuration;
 
 		public StatusEffectEffect(StatusEffectType statusEffectType, float duration, bool revertible = false,
-			StackEffectType stackEffect = StackEffectType.Effect) : this(statusEffectType, duration, revertible, stackEffect, -1)
+			StackEffectType stackEffect = StackEffectType.Effect) : this(statusEffectType, duration, revertible, stackEffect, -1, -1)
 		{
 		}
 
-		private StatusEffectEffect(StatusEffectType statusEffectType, float duration, bool revertible, StackEffectType stackEffect, int id)
+		private StatusEffectEffect(StatusEffectType statusEffectType, float duration, bool revertible, StackEffectType stackEffect, int id,
+			int genId)
 		{
 			_statusEffectType = statusEffectType;
 			_duration = duration;
 			IsRevertible = revertible;
 			_stackEffect = stackEffect;
 			_id = id;
+			_genId = genId;
 		}
 
 		public void SetModifierId(int id) => _id = id;
+		public void SetGenId(int genId) => _genId = genId;
 
 		public void Effect(IUnit target, IUnit source)
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (_id == -1)
 				Logger.LogError("ModifierId is not set for status effect effect.");
+			if (_genId == -1)
+				Logger.LogError("GenId is not set for status effect effect.");
 #endif
 
 			if (IsRevertible)
 				_totalDuration = _duration + _extraDuration;
 			((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
-				.ChangeStatusEffect(_id, _statusEffectType, _duration + _extraDuration);
+				.ChangeStatusEffect(_id, _genId, _statusEffectType, _duration + _extraDuration);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
@@ -46,10 +52,12 @@ namespace ModiBuff.Core.Units
 #if DEBUG && !MODIBUFF_PROFILE
 			if (_id == -1)
 				Logger.LogError("ModifierId is not set for status effect effect.");
+			if (_genId == -1)
+				Logger.LogError("GenId is not set for status effect effect.");
 #endif
 
 			((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
-				.DecreaseStatusEffect(_id, _statusEffectType, _totalDuration);
+				.DecreaseStatusEffect(_id, _genId, _statusEffectType, _totalDuration);
 		}
 
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
@@ -70,7 +78,7 @@ namespace ModiBuff.Core.Units
 			_totalDuration = 0;
 		}
 
-		public IEffect ShallowClone() => new StatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect, _id);
+		public IEffect ShallowClone() => new StatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect, _id, _genId);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

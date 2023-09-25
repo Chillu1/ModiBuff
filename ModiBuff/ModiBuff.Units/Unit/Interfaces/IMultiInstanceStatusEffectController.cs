@@ -5,7 +5,7 @@ namespace ModiBuff.Core.Units
 		bool HasLegalAction(TLegalAction legalAction);
 		bool HasStatusEffect(TStatusEffectType statusEffectType);
 
-		void ChangeStatusEffect(int id, TStatusEffectType statusEffectType, float duration);
-		void DecreaseStatusEffect(int id, TStatusEffectType statusEffectType, float duration);
+		void ChangeStatusEffect(int id, int genId, TStatusEffectType statusEffectType, float duration);
+		void DecreaseStatusEffect(int id, int genId, TStatusEffectType statusEffectType, float duration);
 	}
 }

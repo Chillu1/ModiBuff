@@ -252,5 +252,29 @@ namespace ModiBuff.Tests
 			Assert.True(Unit.StatusEffectController.HasLegalAction(LegalAction.Act));
 			Assert.False(Unit.StatusEffectController.HasLegalAction(LegalAction.Cast));
 		}
+
+		[Test]
+		public void StunTwice_SameIdDifferentGenId_RevertFirst()
+		{
+			AddRecipes(add => add("InitStunInstanceStackable_Revertible")
+				.InstanceStackable()
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 3, true), EffectOn.Init)
+				.Remove(2));
+
+			int id = IdManager.GetId("InitStunInstanceStackable_Revertible");
+			Ally.ModifierController.TryAddApplier(id, false, ApplierType.Cast);
+
+			Unit.AddModifierSelf("InitStunInstanceStackable_Revertible"); //3s
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+			Unit.Update(1);
+			Ally.TryCast(id, Unit); //3s 2nd instance, 2s 1st instance
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+
+			Unit.Update(1); //First instance removed & reverted, second instance at 2s
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+
+			Unit.Update(1); //Second instance removed & reverted
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+		}
 	}
 }

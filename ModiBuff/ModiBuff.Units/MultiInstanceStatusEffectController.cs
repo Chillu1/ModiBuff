@@ -81,9 +81,9 @@ namespace ModiBuff.Core.Units
 			return true;
 		}
 
-		public void ChangeStatusEffect(int id, StatusEffectType statusEffectType, float duration)
+		public void ChangeStatusEffect(int id, int genId, StatusEffectType statusEffectType, float duration)
 		{
-			var statusEffectInstance = new StatusEffectInstance(id, statusEffectType);
+			var statusEffectInstance = new StatusEffectInstance(id, genId, statusEffectType);
 			//If an instance with same id and status effect type exists, refresh it
 			if (_legalActionsTimers.TryGetValue(statusEffectInstance, out float currentDuration))
 			{
@@ -104,9 +104,9 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public void DecreaseStatusEffect(int id, StatusEffectType statusEffectType, float duration)
+		public void DecreaseStatusEffect(int id, int genId, StatusEffectType statusEffectType, float duration)
 		{
-			var statusEffectInstance = new StatusEffectInstance(id, statusEffectType);
+			var statusEffectInstance = new StatusEffectInstance(id, genId, statusEffectType);
 			if (!_legalActionsTimers.TryGetValue(statusEffectInstance, out float currentDuration))
 				return;
 
@@ -131,24 +131,35 @@ namespace ModiBuff.Core.Units
 
 		private struct StatusEffectInstance : IEquatable<StatusEffectInstance>
 		{
-			public readonly int Id;
+			private readonly int _id;
+			private readonly int _genId;
 			public readonly StatusEffectType StatusEffectType;
 
-			public StatusEffectInstance(int id, StatusEffectType statusEffectType)
+			public StatusEffectInstance(int id, int genId, StatusEffectType statusEffectType)
 			{
-				Id = id;
+				_id = id;
+				_genId = genId;
 				StatusEffectType = statusEffectType;
 			}
 
-			public bool Equals(StatusEffectInstance other) => Id == other.Id && StatusEffectType == other.StatusEffectType;
+			public bool Equals(StatusEffectInstance other)
+			{
+				return _id == other._id && _genId == other._genId && StatusEffectType == other.StatusEffectType;
+			}
 
-			public override bool Equals(object obj) => obj is StatusEffectInstance other && Equals(other);
+			public override bool Equals(object obj)
+			{
+				return obj is StatusEffectInstance other && Equals(other);
+			}
 
 			public override int GetHashCode()
 			{
 				unchecked
 				{
-					return (Id * 397) ^ (int)StatusEffectType;
+					int hashCode = _id;
+					hashCode = (hashCode * 397) ^ _genId;
+					hashCode = (hashCode * 397) ^ (int)StatusEffectType;
+					return hashCode;
 				}
 			}
 		}

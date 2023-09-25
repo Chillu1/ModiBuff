@@ -39,7 +39,7 @@ namespace ModiBuff.Core
 		/// </summary>
 		public void UpdateGenId(int genId)
 		{
-			((IRemoveEffect)GetEffect()).SetGenId(genId);
+			((IModifierGenIdOwner)GetEffect()).SetGenId(genId);
 		}
 
 		public void Reset()

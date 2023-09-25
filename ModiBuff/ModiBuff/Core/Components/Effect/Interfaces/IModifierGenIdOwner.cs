@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public interface IRemoveEffect : IEffect
+	public interface IModifierGenIdOwner
 	{
 		void SetGenId(int genId);
 	}
