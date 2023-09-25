@@ -24,7 +24,8 @@
 
 # What is this?
 
-This zero dependency library was made to make a standardized powerful system that allows for manipulation of effects on entities.
+This zero dependency, engine-agnostic library was made to make a standardized powerful system that allows for manipulation of effects on
+entities.
 
 **It focuses on Feature Set, Performance and Ease of use, in that order.**
 

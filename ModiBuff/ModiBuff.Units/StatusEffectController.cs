@@ -4,8 +4,9 @@ namespace ModiBuff.Core.Units
 {
 	/// <summary>
 	///		Simple status effect controller. Doesn't care about different status effect instances.
+	///		Much faster than <see cref="MultiInstanceStatusEffectController"/> but can't have infinite unique status effect instances.
 	/// </summary>
-	public sealed class StatusEffectController : IStatusEffectController<LegalAction, StatusEffectType>
+	public sealed class StatusEffectController : ISingleInstanceStatusEffectController<LegalAction, StatusEffectType>
 	{
 		private readonly float[] _legalActionTimers;
 

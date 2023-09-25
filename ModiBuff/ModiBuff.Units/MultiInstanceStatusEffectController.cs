@@ -6,12 +6,15 @@ namespace ModiBuff.Core.Units
 {
 	/// <summary>
 	///		Status effect controller that allows multiple instances of the same status effect type.
+	///		Note that this approach is much slower than having a simple timer for each legal action.
+	///		But allows for infinite unique status effect instances.
 	/// </summary>
 	public sealed class MultiInstanceStatusEffectController : IMultiInstanceStatusEffectController<LegalAction, StatusEffectType>
 	{
 		//TODO Instead of dict we could preload all the possible status effect instances, and have an array instead
 		//But then we'll have a problem with genIds, but then we can have arrays of arrays
-		//TODO Check performance is terrible, we could hack it by doing the hash check manually, and having key be an int
+		//TODO Check if performance is terrible, we could hack it by doing the hash check manually, and having key be an int
+		//But then we'll have an issue with getting the underlying status effect type
 		private readonly Dictionary<StatusEffectInstance, float> _legalActionsTimers;
 		private readonly List<StatusEffectInstance> _stackEffectInstancesForRemoval;
 
@@ -38,7 +41,7 @@ namespace ModiBuff.Core.Units
 				{
 					_stackEffectInstancesForRemoval.Add(kvp.Key);
 					//Have to deconstruct the status effect type to legal actions, then decrement the counters on each
-					var legalActions = StatusEffectTypeHelper.LegalActions[(int)kvp.Key.StatusEffectType];
+					var legalActions = StatusEffectTypeHelper.LegalActions[kvp.Key.StatusEffectTypeInt];
 					for (int i = 0; i < legalActions.Length; i++)
 					{
 						var legalAction = legalActions[i];
@@ -133,18 +136,19 @@ namespace ModiBuff.Core.Units
 		{
 			private readonly int _id;
 			private readonly int _genId;
-			public readonly StatusEffectType StatusEffectType;
+			public readonly int StatusEffectTypeInt;
+			//public readonly StatusEffectType StatusEffectType;
 
 			public StatusEffectInstance(int id, int genId, StatusEffectType statusEffectType)
 			{
 				_id = id;
 				_genId = genId;
-				StatusEffectType = statusEffectType;
+				StatusEffectTypeInt = (int)statusEffectType;
 			}
 
 			public bool Equals(StatusEffectInstance other)
 			{
-				return _id == other._id && _genId == other._genId && StatusEffectType == other.StatusEffectType;
+				return _id == other._id && _genId == other._genId && StatusEffectTypeInt == other.StatusEffectTypeInt;
 			}
 
 			public override bool Equals(object obj)
@@ -158,7 +162,7 @@ namespace ModiBuff.Core.Units
 				{
 					int hashCode = _id;
 					hashCode = (hashCode * 397) ^ _genId;
-					hashCode = (hashCode * 397) ^ (int)StatusEffectType;
+					hashCode = (hashCode * 397) ^ StatusEffectTypeInt;
 					return hashCode;
 				}
 			}
