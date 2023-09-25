@@ -18,7 +18,7 @@ namespace ModiBuff.Core.Units
 	public class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float, float, float, float>,
 		IHealable<float, float>, IHealer<float, float>, IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker,
 		IEventOwner<EffectOnEvent>, IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
-		IStatusEffectModifierOwner<LegalAction, StatusEffectType>, ICallbackRegistrable
+		IStatusEffectModifierOwner<LegalAction, StatusEffectType>, ICallbackRegistrable<CallbackType>
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -295,9 +295,16 @@ namespace ModiBuff.Core.Units
 		}
 
 		//---Callbacks---
-		public void RegisterCallback(Action<IUnit, IUnit> callback)
+		public void RegisterCallback(CallbackType callbackType, Action<IUnit, IUnit> callback)
 		{
-			_strongAttackCallbacks.Add(callback);
+			switch (callbackType)
+			{
+				case CallbackType.StrongHit:
+					_strongAttackCallbacks.Add(callback);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+			}
 		}
 
 		//---Aura---

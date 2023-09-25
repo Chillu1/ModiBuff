@@ -4,6 +4,7 @@ namespace ModiBuff.Core.Units
 	{
 		None,
 		Health,
+		MaxHealth,
 		Mana,
 		Damage,
 	}

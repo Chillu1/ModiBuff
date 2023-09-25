@@ -40,14 +40,14 @@ namespace ModiBuff.Core.Units
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 		public void SetEventBased() => _isEventBased = true;
 
-		public IEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
+		public HealEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
 		{
 			_metaEffects = metaEffects;
 			_hasMetaEffects = true;
 			return this;
 		}
 
-		public IEffect SetPostEffects(params IPostEffect<float>[] postEffects)
+		public HealEffect SetPostEffects(params IPostEffect<float>[] postEffects)
 		{
 			_postEffects = postEffects;
 			_hasPostEffects = true;

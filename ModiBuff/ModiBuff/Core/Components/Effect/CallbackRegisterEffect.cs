@@ -2,15 +2,20 @@ using System;
 
 namespace ModiBuff.Core
 {
-	public sealed class CallbackRegisterEffect : IEffect
+	public sealed class CallbackRegisterEffect<TCallback> : IEffect
 	{
+		private readonly TCallback _callbackType;
 		private readonly Action<IUnit, IUnit> _callback;
 
-		public CallbackRegisterEffect(Action<IUnit, IUnit> callback) => _callback = callback;
+		public CallbackRegisterEffect(TCallback callbackType, Action<IUnit, IUnit> callback)
+		{
+			_callbackType = callbackType;
+			_callback = callback;
+		}
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			((ICallbackRegistrable)target).RegisterCallback(_callback);
+			((ICallbackRegistrable<TCallback>)target).RegisterCallback(_callbackType, _callback);
 		}
 	}
 }

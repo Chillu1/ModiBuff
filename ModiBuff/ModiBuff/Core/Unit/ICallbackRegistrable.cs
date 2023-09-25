@@ -2,8 +2,8 @@ using System;
 
 namespace ModiBuff.Core
 {
-	public interface ICallbackRegistrable
+	public interface ICallbackRegistrable<in TCallback>
 	{
-		void RegisterCallback(Action<IUnit, IUnit> callback);
+		void RegisterCallback(TCallback callbackType, Action<IUnit, IUnit> callback);
 	}
 }
