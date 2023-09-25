@@ -25,6 +25,7 @@ namespace ModiBuff.Core
 		private float _duration;
 
 		private EffectWrapper _removeEffectWrapper; //TODO Remove effect can come from other means than Remove function
+		private EffectWrapper _callbackRegisterWrapper;
 
 		private readonly List<EffectWrapper> _effectWrappers;
 
@@ -240,6 +241,23 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		/// <summary>
+		///		Registers a callback effect to a unit, will trigger the callback when <see cref="callbackType"/> is triggered.
+		/// </summary>
+		public ModifierRecipe Callback<TCallback>(TCallback callbackType, UnitCallback callback)
+		{
+			Effect(new CallbackRegisterEffect<TCallback>(callbackType, callback), EffectOn.Init);
+			return this;
+		}
+
+		public ModifierRecipe Callback<TCallback>(TCallback callbackType)
+		{
+			var effect = new CallbackRegisterEffect<TCallback>(callbackType);
+			_callbackRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
+			_effectWrappers.Add(_callbackRegisterWrapper);
+			return this;
+		}
+
 		//---Modifier Generation---
 
 		public ModifierAddData CreateAddData()
@@ -263,7 +281,7 @@ namespace ModiBuff.Core
 			Validate();
 #endif
 
-			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _hasApplyChecks,
+			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _callbackRegisterWrapper, _hasApplyChecks,
 				_applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura, _oneTimeInit,
 				_interval, _intervalAffectedByStatusResistance, _duration, _refreshDuration, _refreshInterval, _whenStackEffect,
 				_stackValue, _maxStacks, _everyXStacks);

@@ -38,7 +38,7 @@ namespace ModiBuff.Core.Units
 		private readonly List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
 		private readonly List<IEffect> _beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
 
-		private readonly List<Action<IUnit, IUnit>> _strongAttackCallbacks;
+		private readonly List<UnitCallback> _strongAttackCallbacks;
 
 		private readonly List<IUnit> _targetsInRange;
 		private readonly List<Modifier> _auraModifiers;
@@ -64,7 +64,7 @@ namespace ModiBuff.Core.Units
 			_onKillEffects = new List<IEffect>();
 			_onHealEffects = new List<IEffect>();
 
-			_strongAttackCallbacks = new List<Action<IUnit, IUnit>>();
+			_strongAttackCallbacks = new List<UnitCallback>();
 
 			_targetsInRange = new List<IUnit>();
 			_targetsInRange.Add(this);
@@ -295,7 +295,7 @@ namespace ModiBuff.Core.Units
 		}
 
 		//---Callbacks---
-		public void RegisterCallback(CallbackType callbackType, Action<IUnit, IUnit> callback)
+		public void RegisterCallback(CallbackType callbackType, UnitCallback callback)
 		{
 			switch (callbackType)
 			{

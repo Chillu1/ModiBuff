@@ -24,14 +24,13 @@ namespace ModiBuff.Core
 
 		public IEffect GetEffect()
 		{
-			if (_effectIsCloneable)
-			{
-				if (_effectClone == null)
-					_effectClone = _effectShallowClone.ShallowClone();
-				return _effectClone;
-			}
+			if (!_effectIsCloneable)
+				return _effect;
 
-			return _effect;
+			if (_effectClone == null)
+				_effectClone = _effectShallowClone.ShallowClone();
+
+			return _effectClone;
 		}
 
 		/// <summary>

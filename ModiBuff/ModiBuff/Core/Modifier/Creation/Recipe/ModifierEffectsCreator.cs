@@ -9,6 +9,7 @@ namespace ModiBuff.Core
 	{
 		private readonly EffectWrapper[] _effectWrappers;
 		private readonly EffectWrapper _removeEffectWrapper;
+		private readonly EffectWrapper _callbackRegisterWrapper;
 		private readonly int _revertEffectsCount, _initEffectsCount, _intervalEffectsCount, _durationEffectsCount, _stackEffectsCount;
 
 		private IRevertEffect[] _revertEffects;
@@ -16,13 +17,16 @@ namespace ModiBuff.Core
 		private IEffect[] _intervalEffects;
 		private IEffect[] _durationEffects;
 		private IStackEffect[] _stackEffects;
+		private UnitCallback _callback;
 
 		private int _revertEffectsIndex, _initEffectsIndex, _intervalEffectsIndex, _durationEffectsIndex, _stackEffectsIndex;
 
-		public ModifierEffectsCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper)
+		public ModifierEffectsCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper,
+			EffectWrapper callbackRegisterWrapper)
 		{
 			_effectWrappers = effectWrappers.ToArray();
 			_removeEffectWrapper = removeEffectWrapper;
+			_callbackRegisterWrapper = callbackRegisterWrapper;
 
 			if (_removeEffectWrapper != null)
 			{
@@ -115,6 +119,8 @@ namespace ModiBuff.Core
 					_durationEffects[_durationEffectsIndex++] = effect;
 				if ((effectOn & EffectOn.Stack) != 0)
 					_stackEffects[_stackEffectsIndex++] = (IStackEffect)effect;
+				if ((effectOn & EffectOn.Callback) != 0)
+					_callback = (target, source) => effect.Effect(target, source); //TODO Array
 			}
 
 			if (_removeEffectWrapper != null)
@@ -122,6 +128,12 @@ namespace ModiBuff.Core
 				if (_revertEffects != null)
 					((RemoveEffect)_removeEffectWrapper.GetEffect()).SetRevertibleEffects(_revertEffects);
 				_removeEffectWrapper.Reset();
+			}
+
+			if (_callbackRegisterWrapper != null)
+			{
+				((ICallbackEffect)_callbackRegisterWrapper.GetEffect()).SetCallback(_callback);
+				_callbackRegisterWrapper.Reset();
 			}
 
 			for (int i = 0; i < _effectWrappers.Length; i++)

@@ -10,5 +10,6 @@ namespace ModiBuff.Core
 		Interval = 2,
 		Duration = 4,
 		Stack = 8,
+		Callback = 16,
 	}
 }
