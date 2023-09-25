@@ -1,8 +1,3 @@
-<p align="center">
-<img src="Docs/LogoTest.png" width="500"/>
-<img src="Docs/ModiBuff.png" width="500"/>
-</p>
-
 <h1></h1>
 
 ![Coverage](Docs/badge_linecoverage.svg)
