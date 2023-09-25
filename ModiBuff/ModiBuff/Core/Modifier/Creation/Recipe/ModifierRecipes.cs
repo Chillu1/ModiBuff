@@ -77,7 +77,7 @@ namespace ModiBuff.Core
 				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
 			}
 
-			GeneratorCount = _recipes.Count;
+			GeneratorCount = _modifierGenerators.Count;
 #if DEBUG && !MODIBUFF_PROFILE
 			Logger.Log($"[ModiBuff] Loaded {GeneratorCount} modifier generators.");
 #endif
