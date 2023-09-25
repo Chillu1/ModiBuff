@@ -322,6 +322,18 @@ namespace ModiBuff.Core
 				Logger.LogError("Refresh duration set, but duration is 0, for modifier: " + Name + " id: " + Id);
 			}
 
+			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Callback)) && _callbackRegisterWrapper == null)
+			{
+				validRecipe = false;
+				Logger.LogError("Effects on callback set, but no callback registration type set, for modifier: " + Name + " id: " + Id);
+			}
+
+			if (_callbackRegisterWrapper != null && !_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Callback)))
+			{
+				validRecipe = false;
+				Logger.LogError("Callback registration type set, but no effects on callback set, for modifier: " + Name + " id: " + Id);
+			}
+
 			if (!validRecipe)
 				Logger.LogError($"Recipe validation failed for {Name}, with Id: {Id}, see above for more info.");
 		}

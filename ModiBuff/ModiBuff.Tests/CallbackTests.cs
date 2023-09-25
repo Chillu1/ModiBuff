@@ -97,7 +97,7 @@ namespace ModiBuff.Tests
 		public void Init_RegisterCallbackHealToFullWhenTakingStrongHit_RecipeEffect()
 		{
 			AddRecipes(add => add("InitHealToFullHalfHealthCallback")
-				.Effect(new HealEffect(0).SetMetaEffects(new AddValueBasedOnStatDiffMetaEffect(StatType.MaxHealth)), EffectOn.Callback)
+				.Effect(new HealEffect(10), EffectOn.Callback)
 				.Callback(CallbackType.StrongHit)
 			);
 
@@ -105,9 +105,54 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			//Take enough damage to trigger the callback
-			Unit.TakeDamage(UnitHealth * 0.6f, Unit); //Takes 60% of max hp damage, triggers callback, heals to full
+			float damage = UnitHealth * 0.6f;
+			Unit.TakeDamage(damage, Unit); //Takes 60% of max hp damage, triggers callback
+
+			Assert.AreEqual(UnitHealth - damage + 10, Unit.Health);
+		}
+
+		[Test]
+		public void Init_RegisterCallbackHealTenWhenTakingStrongHit_ThenTakeFiveDamage_RecipeEffect()
+		{
+			AddRecipes(add => add("InitHealDamageWhenStrongHitCallback")
+				.Effect(new HealEffect(10), EffectOn.Callback)
+				.Effect(new DamageEffect(5), EffectOn.Callback)
+				.Callback(CallbackType.StrongHit)
+			);
+
+			Unit.AddModifierSelf("InitHealDamageWhenStrongHitCallback");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			//Take enough damage to trigger the callback
+			float damage = UnitHealth * 0.6f;
+			Unit.TakeDamage(damage, Unit); //Takes 60% of max hp damage, triggers callbacks
+
+			Assert.AreEqual(UnitHealth - damage + 10 - 5, Unit.Health);
+		}
+
+		[Test]
+		public void Init_InstanceCheck_RecipeEffect()
+		{
+			AddRecipes(add => add("InitHealDamageWhenStrongHitCallback")
+				.Effect(new HealEffect(10), EffectOn.Callback)
+				.Effect(new DamageEffect(5), EffectOn.Callback)
+				.Callback(CallbackType.StrongHit)
+			);
+
+			Unit.AddModifierSelf("InitHealDamageWhenStrongHitCallback");
+			Enemy.AddModifierSelf("InitHealDamageWhenStrongHitCallback");
+
+			float enemyDamage = EnemyHealth * 0.6f;
+			Enemy.TakeDamage(enemyDamage, Enemy); //Takes 60% of max hp damage, triggers callbacks
+			Assert.AreEqual(EnemyHealth - enemyDamage + 10 - 5, Enemy.Health);
 
 			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			//Take enough damage to trigger the callback
+			float unitDamage = UnitHealth * 0.6f;
+			Unit.TakeDamage(unitDamage, Unit); //Takes 60% of max hp damage, triggers callbacks
+
+			Assert.AreEqual(UnitHealth - unitDamage + 10 - 5, Unit.Health);
 		}
 	}
 }
