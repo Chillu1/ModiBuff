@@ -127,7 +127,7 @@ Pre-allocated Pools
 
 | Library                                               | DoT pool rent | DoT pool<br/>reset return |
 |-------------------------------------------------------|---------------|---------------------------|
-| ModiBuff (this)                                       | 0.04ms, 0 GC  | 0.17ms, 0 B               |
+| ModiBuff (this)                                       | 0.04ms, 0 B   | 0.17ms, 0 B               |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 1.64ms, 0 GC  | 4.26ms, 0 GC              |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | X             | X                         |
 
@@ -153,7 +153,8 @@ ModiBuffEcs is a bit on the slow side for now, because of how pooling works, wit
 
 # Requirements
 
-ModiBuff is compatible with .NETStandard 1.1, C# 7.2 (C# 7.0 is possible by removing readonly from ModifierReference)
+ModiBuff is compatible with .NETStandard 1.1 and .NETStandard 2.0, C# 7.2 (C# 7.0 is also possible, take a look
+at [Godot Branch](https://github.com/Chillu1/ModiBuff/tree/feature/godot-compatible))
 
 For development net 6.0 is required to build and run all tests. The tests depend on NUnit, and benchmarks depend on BenchmarkDotNet.
 
@@ -584,6 +585,9 @@ Recipe system fixes a lot of internal complexity of setting up modifiers for you
 It's possible to make modifier directly now by using `ManualModifierGenerator` class,
 specifically `Add(string, ModifierGeneratorFunc, ModifierAddData)`.
 But only do so if you really know what you're doing, and need that extra functionality like multiple interval/duration components.
+
+> Important: Some modifier component and effect functionality is set indirectly by checking for interfaces, like `IModifierIdOwner`
+> so manual modifier creation needs extra care to use properly (this will be refactored to make it easier later on).
 
 # FAQ
 
