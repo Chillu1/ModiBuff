@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ModiBuff.Core.Units.Interfaces.NonGeneric;
@@ -17,7 +18,7 @@ namespace ModiBuff.Core.Units
 	public class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float, float, float, float>,
 		IHealable<float, float>, IHealer<float, float>, IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker,
 		IEventOwner<EffectOnEvent>, IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
-		IStatusEffectModifierOwner<LegalAction, StatusEffectType>
+		IStatusEffectModifierOwner<LegalAction, StatusEffectType>, ICallbackRegistrable
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -36,6 +37,8 @@ namespace ModiBuff.Core.Units
 		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
 		private readonly List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
 		private readonly List<IEffect> _beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
+
+		private readonly List<Action<IUnit, IUnit>> _strongAttackCallbacks;
 
 		private readonly List<IUnit> _targetsInRange;
 		private readonly List<Modifier> _auraModifiers;
@@ -60,6 +63,8 @@ namespace ModiBuff.Core.Units
 			_onCastEffects = new List<IEffect>();
 			_onKillEffects = new List<IEffect>();
 			_onHealEffects = new List<IEffect>();
+
+			_strongAttackCallbacks = new List<Action<IUnit, IUnit>>();
 
 			_targetsInRange = new List<IUnit>();
 			_targetsInRange.Add(this);
@@ -129,6 +134,11 @@ namespace ModiBuff.Core.Units
 			float oldHealth = Health;
 			Health -= damage;
 			float dealtDamage = oldHealth - Health;
+
+			//if damage was bigger than half health, trigger strong attack callbacks
+			if (dealtDamage > MaxHealth * 0.5f)
+				for (int i = 0; i < _strongAttackCallbacks.Count; i++)
+					_strongAttackCallbacks[i](this, source);
 
 			if (triggersEvents && Health <= 0 && !IsDead)
 			{
@@ -282,6 +292,12 @@ namespace ModiBuff.Core.Units
 					Logger.LogError("Could not remove event: " + effectToRemove.GetType());
 #endif
 			}
+		}
+
+		//---Callbacks---
+		public void RegisterCallback(Action<IUnit, IUnit> callback)
+		{
+			_strongAttackCallbacks.Add(callback);
 		}
 
 		//---Aura---

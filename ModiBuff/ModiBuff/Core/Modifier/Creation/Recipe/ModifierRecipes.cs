@@ -8,8 +8,6 @@ namespace ModiBuff.Core
 
 	public delegate ModifierEventRecipe EventRecipeAddFunc(Func<string, object, ModifierEventRecipe> addFunc);
 
-	public delegate Modifier ModifierGeneratorFunc(int id, int genId, string name);
-
 	public class ModifierRecipes
 	{
 		public static int GeneratorCount { get; private set; }
@@ -27,7 +25,7 @@ namespace ModiBuff.Core
 
 		//TODO Refactor Unit tests recipe adding, and combines constructors
 		internal ModifierRecipes(IReadOnlyList<RecipeAddFunc> recipes, IReadOnlyList<EventRecipeAddFunc> eventRecipes,
-			ModifierIdManager idManager, EventEffectFactory eventEffectFunc)
+			ModifierIdManager idManager, EventEffectFactory eventEffectFunc, ManualGeneratorData[] manualGeneratorData = null)
 		{
 			_instance = this;
 
@@ -62,6 +60,9 @@ namespace ModiBuff.Core
 				recipes[i](Add);
 			for (int i = 0; i < eventRecipes.Count; i++)
 				eventRecipes[i](AddEvent);
+
+			for (int i = 0; i < manualGeneratorData?.Length; i++)
+				Add(manualGeneratorData[i]);
 
 			SetupRecipes();
 			_modifierAddData = new ModifierAddData[_recipes.Count + _manualGenerators.Count];
@@ -164,6 +165,8 @@ namespace ModiBuff.Core
 			_recipes.Add(name, recipe);
 			return recipe;
 		}
+
+		protected void Add(in ManualGeneratorData data) => Add(data.Name, in data.CreateFunc, in data.AddData);
 
 		protected void Add(string name, in ModifierGeneratorFunc createFunc, in ModifierAddData addData)
 		{

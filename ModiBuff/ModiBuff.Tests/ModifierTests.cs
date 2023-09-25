@@ -50,6 +50,8 @@ namespace ModiBuff.Tests
 			SetupSystems(recipeAddFunc, eventRecipeAddFunc);
 		}
 
+		protected void AddGenerators(params ManualGeneratorData[] genData) => SetupSystems(genData);
+
 		private void SetupSystems(RecipeAddFunc[] recipeAddFunc, EventRecipeAddFunc[] eventRecipeAddFunc)
 		{
 			var newRecipeAddFuncs = new RecipeAddFunc[_defaultRecipeAddFuncs.Length + recipeAddFunc.Length];
@@ -60,6 +62,17 @@ namespace ModiBuff.Tests
 			var eventEffectFactory =
 				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
 			Recipes = new ModifierRecipes(newRecipeAddFuncs, eventRecipeAddFunc, IdManager, eventEffectFactory);
+			Pool = new ModifierPool(Recipes.GetGenerators());
+
+			Setup();
+		}
+
+		private void SetupSystems(ManualGeneratorData[] genData)
+		{
+			IdManager = new ModifierIdManager();
+			var eventEffectFactory =
+				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
+			Recipes = new ModifierRecipes(_defaultRecipeAddFuncs, new EventRecipeAddFunc[0], IdManager, eventEffectFactory, genData);
 			Pool = new ModifierPool(Recipes.GetGenerators());
 
 			Setup();
