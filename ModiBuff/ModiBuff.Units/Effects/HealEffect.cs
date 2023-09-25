@@ -1,9 +1,9 @@
-using System;
 using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class HealEffect : ITargetEffect, IEventTrigger, IStateEffect, IStackEffect, IRevertEffect, IEffect
+	public sealed class HealEffect : ITargetEffect, IEventTrigger, IStateEffect, IStackEffect, IRevertEffect, IEffect,
+		IMetaEffectOwner<HealEffect, float, float>, IPostEffectOwner<HealEffect, float>
 	{
 		public bool IsRevertible { get; }
 

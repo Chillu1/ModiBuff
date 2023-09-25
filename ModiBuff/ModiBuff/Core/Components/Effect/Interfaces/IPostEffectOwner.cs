@@ -1,7 +1,10 @@
 namespace ModiBuff.Core
 {
-	public interface IPostEffectOwner<TValue> //TODO Rename
+	/// <summary>
+	///		Marker/helper interface (currently, might change in the future) for effects that can have post effects.
+	/// </summary>
+	public interface IPostEffectOwner<out TEffect, out TValue> //TODO Rename
 	{
-		IEffect SetPostEffects(params IPostEffect<TValue>[] postEffects);
+		TEffect SetPostEffects(params IPostEffect<TValue>[] postEffects);
 	}
 }
