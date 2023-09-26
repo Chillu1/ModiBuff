@@ -316,17 +316,17 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		// public void RegisterCallback(CallbackType callbackType, UnitCallback callbacks)
-		// {
-		// 	switch (callbackType)
-		// 	{
-		// 		case CallbackType.StrongHit:
-		// 			_strongAttackDelegateCallbacks += callbacks;
-		// 			break;
-		// 		default:
-		// 			throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
-		// 	}
-		// }
+		public void RegisterCallback(CallbackType callbackType, UnitCallback callbacks)
+		{
+			switch (callbackType)
+			{
+				case CallbackType.StrongHit:
+					_strongAttackDelegateCallbacks += callbacks;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+			}
+		}
 
 		//---Aura---
 

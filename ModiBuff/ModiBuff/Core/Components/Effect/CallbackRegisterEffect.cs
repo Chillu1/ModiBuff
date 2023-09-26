@@ -1,5 +1,8 @@
 namespace ModiBuff.Core
 {
+	/// <summary>
+	///		Registers a callback of effects to the target, for non-IEffect version see <see cref="CallbackRegisterDelegateEffect{TCallback}"/>
+	/// </summary>
 	public sealed class CallbackRegisterEffect<TCallback> : ICallbackEffect, IEffect, IShallowClone<CallbackRegisterEffect<TCallback>>
 	{
 		private readonly TCallback _callbackType;
