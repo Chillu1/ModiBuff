@@ -60,7 +60,7 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Interval
 	* Duration
 	* Stack
-	* Callback (soon)
+	* Callback (any user logic)
 * Effect implementation examples
 	* Damage (& self damage)
 	* Heal
@@ -162,7 +162,8 @@ For development net 6.0 is required to build and run all tests. The tests depend
 
 # Installation
 
-Currently the library on NuGet and will be coming to Godot Asset Library and Unity Asset Store soon.
+Currently the library is on [NuGet](https://www.nuget.org/packages/ModiBuff/) and
+[Godot Asset Library](https://godotengine.org/asset-library/asset/2166), it will also be coming to Unity Asset Store soon.
 
 ## Step by step installation
 
@@ -279,8 +280,8 @@ And interval effects will be triggered every X seconds.
 
 ```csharp
 Add("IntervalDamage")
-	.Interval(1)
-	.Effect(new DamageEffect(5), EffectOn.Interval);
+    .Interval(1)
+    .Effect(new DamageEffect(5), EffectOn.Interval);
 ```
 
 ### Duration
@@ -292,9 +293,9 @@ But it can be used for any effect.
 
 ```csharp
 Add("InitDamageDurationRemove")
-	.Effect(new DamageEffect(5), EffectOn.Init)
-	.Effect(new RemoveEffect(), EffectOn.Duration)
-	.Duration(5);
+    .Effect(new DamageEffect(5), EffectOn.Init)
+    .Effect(new RemoveEffect(), EffectOn.Duration)
+    .Duration(5);
 ```
 
 ### Refresh
@@ -304,21 +305,21 @@ Meaning that if a modifier gets added again to a unit, it will refresh the timer
 
 ```csharp
 Add("DamageOverTimeRefreshableDuration")
-	.Interval(1)
-	.Effect(new DamageEffect(5), EffectOn.Interval)
-	.Effect(new RemoveEffect(), EffectOn.Duration)
-	.Duration(5)
-	.Refresh(RefreshType.Duration);
+    .Interval(1)
+    .Effect(new DamageEffect(5), EffectOn.Interval)
+    .Effect(new RemoveEffect(), EffectOn.Duration)
+    .Duration(5)
+    .Refresh(RefreshType.Duration);
 ```
 
 Calling `Refresh()` without any arguments will make the last time (interval/duration) component refreshable.
 
 ```csharp
 Add("DamageOverTimeRefreshableDuration")
-	.Interval(1)
-	.Effect(new DamageEffect(5), EffectOn.Interval)
-	.Effect(new RemoveEffect(), EffectOn.Duration)
-	.Duration(5).Refresh();
+    .Interval(1)
+    .Effect(new DamageEffect(5), EffectOn.Interval)
+    .Effect(new RemoveEffect(), EffectOn.Duration)
+    .Duration(5).Refresh();
 ```
 
 ### Stack
@@ -335,9 +336,9 @@ Resulting in 7 damage every 1 second with 1 stack. 9 with 2 stacks, etc.
 
 ```csharp
 Add("StackableDamage_DamageOverTime")
-	.Interval(1)
-	.Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Interval)
-	.Stack(WhenStackEffect.Always, value: 2);
+    .Interval(1)
+    .Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Interval)
+    .Stack(WhenStackEffect.Always, value: 2);
 ```
 
 ### OneTimeInit & Aura
@@ -350,13 +351,13 @@ For partial aura functionality, we can tell the recipe that it will trigger effe
 
 ```csharp
 Add("InitAddDamageBuff")
-	.OneTimeInit()
-	.Effect(new AddDamageEffect(5, true), EffectOn.Init)
-	.Remove(1.05f).Refresh();
+    .OneTimeInit()
+    .Effect(new AddDamageEffect(5, true), EffectOn.Init)
+    .Remove(1.05f).Refresh();
 Add("InitAddDamageBuff_Interval")
-	.Aura()
-	.Interval(1)
-	.Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval);
+    .Aura()
+    .Interval(1)
+    .Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval);
 ```
 
 ### Meta-Effect
@@ -370,8 +371,8 @@ This example scales our 5 damage value based on the source unit's health * some 
 
 ```csharp
 Add("InitDamageValueBasedOnHealthMeta")
-	.Effect(new DamageEffect(5)
-		.SetMetaEffects(new StatPercentMetaEffect(StatType.Health, Targeting.SourceTarget)), EffectOn.Init);
+    .Effect(new DamageEffect(5)
+        .SetMetaEffects(new StatPercentMetaEffect(StatType.Health, Targeting.SourceTarget)), EffectOn.Init);
 ```
 
 ### Post-Effect
@@ -384,8 +385,8 @@ This example deals 5 damage on init, and then heals for 50% of the damage dealt.
 
 ```csharp
 Add("InitDamageLifeStealPost")
-	.Effect(new DamageEffect(5)
-    	.SetPostEffects(new LifeStealPostEffect(0.5f, Targeting.SourceTarget)) , EffectOn.Init);
+    .Effect(new DamageEffect(5)
+        .SetPostEffects(new LifeStealPostEffect(0.5f, Targeting.SourceTarget)) , EffectOn.Init);
 ```
 
 ### Apply & Effect Condition (checks)
@@ -400,13 +401,54 @@ silenced.
 
 ```csharp
 Add("InitDamage_CostMana")
-	.ApplyCost(CostType.Mana, 5)
-	.ApplyChance(0.5f)
-	.ApplyCooldown(1f)
-	.ApplyCondition(LegalAction.Act)
-	.EffectCondition(LegalAction.Silence)
-	.Effect(new DamageEffect(5), EffectOn.Init);
+    .ApplyCost(CostType.Mana, 5)
+    .ApplyChance(0.5f)
+    .ApplyCooldown(1f)
+    .ApplyCondition(LegalAction.Act)
+    .EffectCondition(LegalAction.Silence)
+    .Effect(new DamageEffect(5), EffectOn.Init);
 ```
+
+### Callback
+
+Callbacks are a way to add logic that can be triggered on any user/game-based action.
+This is particularly useful for removing modifiers on certain non-standard cases.
+
+In this example we add 5 damage to unit on Init, and the modifier can only be removed if the unit gets hit by a "StrongHit".
+Essentially a hit that deals more than half units health in damage (ex. game logic).
+
+```csharp
+Add("InitAddDamageRevertibleHalfHealthCallback")
+    .Effect(new AddDamageEffect(5, true), EffectOn.Init)
+    .Remove(RemoveEffectOn.Callback)
+    .Callback(CallbackType.StrongHit);
+```
+
+It's possible to use any IEffect for callbacks,
+so we can for example heal the unit to full health every time they get hit by a "StrongHit".
+
+```csharp
+Add("InitHealToFullWhenStrongHitCallback")
+    .Effect(new HealEffect(0)
+        .SetMetaEffects(new AddValueBasedOnStatDiffMetaEffect(StatType.MaxHealth)), EffectOn.Callback)
+    .Callback(CallbackType.StrongHit);
+```
+
+#### Callback Unit delegate
+
+There's another version of callbacks, based on delegates instead of IEffects.
+It can be useful for simple one-off effects.
+
+```csharp
+Add("InitHealToFullHalfHealthCallback")
+    .Callback(CallbackType.StrongHit, (target, source) =>
+    {
+        var damageable = (IDamagable<float, float>)target;
+        ((IHealable<float, float>)target).Heal(damageable.MaxHealth - damageable.Health, source);
+    });
+```
+
+Note that no effect or state can be defined here, being mostly a downside.
 
 ### Order
 

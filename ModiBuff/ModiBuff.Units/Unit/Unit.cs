@@ -38,8 +38,8 @@ namespace ModiBuff.Core.Units
 		private readonly List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
 		private readonly List<IEffect> _beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
 
-		private readonly List<IEffect> _strongAttackCallbacks;
-		private UnitCallback _strongAttackDelegateCallbacks;
+		private readonly List<IEffect> _strongHitCallbacks;
+		private UnitCallback _strongHitDelegateCallbacks;
 
 		private readonly List<IUnit> _targetsInRange;
 		private readonly List<Modifier> _auraModifiers;
@@ -65,7 +65,7 @@ namespace ModiBuff.Core.Units
 			_onKillEffects = new List<IEffect>();
 			_onHealEffects = new List<IEffect>();
 
-			_strongAttackCallbacks = new List<IEffect>();
+			_strongHitCallbacks = new List<IEffect>();
 
 			_targetsInRange = new List<IUnit>();
 			_targetsInRange.Add(this);
@@ -139,9 +139,9 @@ namespace ModiBuff.Core.Units
 			//if damage was bigger than half health, trigger strong attack callbacks
 			if (dealtDamage > MaxHealth * 0.5f)
 			{
-				for (int i = 0; i < _strongAttackCallbacks.Count; i++)
-					_strongAttackCallbacks[i].Effect(this, source);
-				_strongAttackDelegateCallbacks?.Invoke(this, source);
+				for (int i = 0; i < _strongHitCallbacks.Count; i++)
+					_strongHitCallbacks[i].Effect(this, source);
+				_strongHitDelegateCallbacks?.Invoke(this, source);
 			}
 
 			if (triggersEvents && Health <= 0 && !IsDead)
@@ -164,6 +164,8 @@ namespace ModiBuff.Core.Units
 				for (int i = 0; i < _whenHealedEffects.Count; i++)
 					_whenHealedEffects[i].Effect(this, source);
 			Health += heal;
+			if (Health > MaxHealth)
+				Health = MaxHealth;
 			return Health - oldHealth;
 		}
 
@@ -309,7 +311,7 @@ namespace ModiBuff.Core.Units
 			switch (callbackType)
 			{
 				case CallbackType.StrongHit:
-					_strongAttackCallbacks.AddRange(callbacks);
+					_strongHitCallbacks.AddRange(callbacks);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
@@ -321,7 +323,7 @@ namespace ModiBuff.Core.Units
 			switch (callbackType)
 			{
 				case CallbackType.StrongHit:
-					_strongAttackDelegateCallbacks += callbacks;
+					_strongHitDelegateCallbacks += callbacks;
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);

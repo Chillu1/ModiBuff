@@ -138,18 +138,22 @@ namespace ModiBuff.Core
 					_callbacks[_callbackEffectsIndex++] = effect;
 			}
 
+			if (_callbackRegisterWrapper != null)
+			{
+				//Manually register remove effect wrapper if it's EffectOn is Callback
+				//Since remove effect should never be fed as a normal effect wrapper (it's a special case)
+				if (_removeEffectWrapper != null && _removeEffectWrapper.EffectOn.HasFlag(EffectOn.Callback))
+					_callbacks[_callbackEffectsIndex++] = _removeEffectWrapper.GetEffect();
+				((ICallbackEffect)_callbackRegisterWrapper.GetEffect()).SetCallback(_callbacks);
+				_callbackRegisterWrapper.Reset();
+				_callbacks = null;
+			}
+
 			if (_removeEffectWrapper != null)
 			{
 				if (_revertEffects != null)
 					((RemoveEffect)_removeEffectWrapper.GetEffect()).SetRevertibleEffects(_revertEffects);
 				_removeEffectWrapper.Reset();
-			}
-
-			if (_callbackRegisterWrapper != null)
-			{
-				((ICallbackEffect)_callbackRegisterWrapper.GetEffect()).SetCallback(_callbacks);
-				_callbackRegisterWrapper.Reset();
-				_callbacks = null;
 			}
 
 			for (int i = 0; i < _effectWrappers.Length; i++)

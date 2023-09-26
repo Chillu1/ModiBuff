@@ -29,9 +29,10 @@ namespace ModiBuff.Tests
 			var applier = Recipes.GetGenerator("InitStrongHeal");
 			Unit.AddApplierModifier(applier, ApplierType.Attack);
 
-			Unit.Attack(Enemy);
+			Enemy.TakeDamage(10, Enemy);
+			Unit.Attack(Enemy); //Heal appliers triggers first, then attack damage
 
-			Assert.AreEqual(EnemyHealth, Enemy.Health);
+			Assert.AreEqual(EnemyHealth - 10, Enemy.Health);
 		}
 
 		[Test]

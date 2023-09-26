@@ -158,6 +158,15 @@ namespace ModiBuff.Core
 		}
 
 		/// <summary>
+		///		Adds a basic remove effect, that should be triggered on either stack, or callback
+		/// </summary>
+		public ModifierRecipe Remove(RemoveEffectOn removeEffectOn = RemoveEffectOn.Callback)
+		{
+			_removeEffectWrapper = new EffectWrapper(new RemoveEffect(Id), removeEffectOn.ToEffectOn());
+			return this;
+		}
+
+		/// <summary>
 		///		If a modifier gets applied to a target that already has the modifier, should the interval or duration be reset?
 		///		Order matters, call after <see cref="Interval(float,bool)"/> or <see cref="Duration(float)"/>
 		/// </summary>
@@ -233,6 +242,16 @@ namespace ModiBuff.Core
 		/// <param name="targeting">Who should be the target and owner of the applied modifier. For further information, see <see cref="ModiBuff.Core.Targeting"/></param>
 		public ModifierRecipe Effect(IEffect effect, EffectOn effectOn, Targeting targeting = Targeting.TargetSource)
 		{
+			if (effect is RemoveEffect)
+			{
+#if DEBUG && !MODIBUFF_PROFILE
+				Logger.LogWarning(
+					"Adding a remove effect through Effect() is not recommended, use Remove(RemoveEffectOn) or Remove(float) instead");
+#endif
+				_removeEffectWrapper = new EffectWrapper(effect, effectOn);
+				return this;
+			}
+
 			if (effect is ITargetEffect effectTarget)
 				effectTarget.SetTargeting(targeting);
 			if (effect is IModifierIdOwner modifierIdOwner)
