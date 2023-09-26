@@ -38,7 +38,8 @@ namespace ModiBuff.Core.Units
 		private readonly List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
 		private readonly List<IEffect> _beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
 
-		private readonly List<UnitCallback> _strongAttackCallbacks;
+		private readonly List<IEffect> _strongAttackCallbacks;
+		private UnitCallback _strongAttackDelegateCallbacks;
 
 		private readonly List<IUnit> _targetsInRange;
 		private readonly List<Modifier> _auraModifiers;
@@ -64,7 +65,7 @@ namespace ModiBuff.Core.Units
 			_onKillEffects = new List<IEffect>();
 			_onHealEffects = new List<IEffect>();
 
-			_strongAttackCallbacks = new List<UnitCallback>();
+			_strongAttackCallbacks = new List<IEffect>();
 
 			_targetsInRange = new List<IUnit>();
 			_targetsInRange.Add(this);
@@ -137,8 +138,11 @@ namespace ModiBuff.Core.Units
 
 			//if damage was bigger than half health, trigger strong attack callbacks
 			if (dealtDamage > MaxHealth * 0.5f)
+			{
 				for (int i = 0; i < _strongAttackCallbacks.Count; i++)
-					_strongAttackCallbacks[i](this, source);
+					_strongAttackCallbacks[i].Effect(this, source);
+				_strongAttackDelegateCallbacks?.Invoke(this, source);
+			}
 
 			if (triggersEvents && Health <= 0 && !IsDead)
 			{
@@ -295,17 +299,34 @@ namespace ModiBuff.Core.Units
 		}
 
 		//---Callbacks---
-		public void RegisterCallback(CallbackType callbackType, UnitCallback callback)
+
+		//Something to think about when implementing callbacks:
+		//single delegates are 76% faster than arrays of IEffects with 1 subscriber/item
+		//But arrays are much faster when there are multiple subscribers/items, 58% faster with 2 items, 150% faster with 5 items.
+		//It's recommended to use the array version generally. But in cases where most modifiers have single callbacks, use delegates.
+		public void RegisterCallback(CallbackType callbackType, IEffect[] callbacks)
 		{
 			switch (callbackType)
 			{
 				case CallbackType.StrongHit:
-					_strongAttackCallbacks.Add(callback);
+					_strongAttackCallbacks.AddRange(callbacks);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
 			}
 		}
+
+		// public void RegisterCallback(CallbackType callbackType, UnitCallback callbacks)
+		// {
+		// 	switch (callbackType)
+		// 	{
+		// 		case CallbackType.StrongHit:
+		// 			_strongAttackDelegateCallbacks += callbacks;
+		// 			break;
+		// 		default:
+		// 			throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+		// 	}
+		// }
 
 		//---Aura---
 

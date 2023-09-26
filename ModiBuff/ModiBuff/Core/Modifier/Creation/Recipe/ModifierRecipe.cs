@@ -241,14 +241,14 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		/// <summary>
+		/*/// <summary>
 		///		Registers a callback effect to a unit, will trigger the callback when <see cref="callbackType"/> is triggered.
 		/// </summary>
 		public ModifierRecipe Callback<TCallback>(TCallback callbackType, UnitCallback callback)
 		{
 			Effect(new CallbackRegisterEffect<TCallback>(callbackType, callback), EffectOn.Init);
 			return this;
-		}
+		}*/
 
 		public ModifierRecipe Callback<TCallback>(TCallback callbackType)
 		{

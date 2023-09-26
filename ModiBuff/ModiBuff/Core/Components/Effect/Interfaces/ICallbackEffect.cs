@@ -2,6 +2,6 @@ namespace ModiBuff.Core
 {
 	public interface ICallbackEffect
 	{
-		void SetCallback(UnitCallback callback);
+		void SetCallback(IEffect[] callbacks);
 	}
 }

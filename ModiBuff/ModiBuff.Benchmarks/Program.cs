@@ -12,6 +12,8 @@ namespace ModiBuff.Tests
 			/*var config = new ManualConfig();
 			//Single
 			//config.AddJob(Job.MediumRun.WithUnrollFactor(1).WithInvocationCount(1));
+			//Fast
+			//config.AddJob(Job.ShortRun.WithInvocationCount(131072).WithIterationCount(10));
 			//Normal
 			config.AddJob(Job.ShortRun.WithLaunchCount(1).WithIterationCount(15));
 
@@ -25,7 +27,7 @@ namespace ModiBuff.Tests
 			config.AddFilter(DefaultConfig.Instance.GetFilters().ToArray());*/
 			BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 
-			//BenchmarkRunner.Run<BenchInitialization>(config);
+			//BenchmarkRunner.Run<BenchTempTests>(/*config*/);
 		}
 	}
 }

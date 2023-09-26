@@ -4,6 +4,7 @@ namespace ModiBuff.Core
 
 	public interface ICallbackRegistrable<in TCallback>
 	{
-		void RegisterCallback(TCallback callbackType, UnitCallback callback);
+		void RegisterCallback(TCallback callbackType, IEffect[] callbacks);
+		//void RegisterCallback(TCallback callbackType, UnitCallback callback);
 	}
 }

@@ -3,6 +3,7 @@
 #endif
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {

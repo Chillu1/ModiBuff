@@ -32,11 +32,16 @@ namespace ModiBuff.Tests
 		private ITargetComponent _targetComponent;
 		private IEffect _noOpEffect;
 
+		private Unit _callbackTarget, _callbackSource;
+		private CallbackRegisterEffect<CallbackType> _callbackRegisterEffect;
+		private IEffect _callbackNoOpEffect;
+		private UnitCallback _unitCallbacks;
+
 		public override void GlobalSetup()
 		{
 			base.GlobalSetup();
 
-			_unit = new Unit();
+			/*_unit = new Unit();
 			_statType = StatType.Mana;
 
 			_checkStat = (unit) =>
@@ -81,6 +86,11 @@ namespace ModiBuff.Tests
 			_targetComponent = new MultiTargetComponent();
 			_isMulti = true;
 			_noOpEffect = new NoOpEffect();
+
+			_callbackTarget = new Unit();
+			_callbackSource = new Unit();
+			_callbackRegisterEffect = new CallbackRegisterEffect<CallbackType>(CallbackType.StrongHit);
+			_callbackNoOpEffect = new NoOpEffect();*/
 		}
 
 		//[Benchmark(Baseline = true)]
@@ -198,7 +208,7 @@ namespace ModiBuff.Tests
 			var test = timeComponents;
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void SwitchMatchClass()
 		{
 			switch (_targetComponent)
@@ -212,7 +222,7 @@ namespace ModiBuff.Tests
 			}
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void SafeCastIsCheckClass()
 		{
 			if (_targetComponent is SingleTargetComponent single)
@@ -225,7 +235,7 @@ namespace ModiBuff.Tests
 			}
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void IfCheckSafeCastClass()
 		{
 			if (!_isMulti)
@@ -240,7 +250,7 @@ namespace ModiBuff.Tests
 			}
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void IfCheckUnSafeCastClass()
 		{
 			if (!_isMulti)
@@ -253,6 +263,42 @@ namespace ModiBuff.Tests
 				var multi = Unsafe.As<MultiTargetComponent>(_targetComponent);
 				_noOpEffect.Effect(multi.Targets, multi.Source);
 			}
+		}
+
+		//[Benchmark]
+		public void CallbackDelegate()
+		{
+			_unitCallbacks += (target, source) => _callbackNoOpEffect.Effect(target, source);
+			_unitCallbacks += (target, source) => _callbackNoOpEffect.Effect(target, source);
+			//_callbackRegisterEffect.SetCallback(_unitCallbacks);
+			_callbackRegisterEffect.Effect(_callbackTarget, _callbackSource);
+
+			//_callbackTarget.Test();
+
+			_unitCallbacks = null;
+		}
+
+		//[Benchmark]
+		public void CallbackLocalDelegate()
+		{
+			UnitCallback unitCallbacks = (target, source) => _callbackNoOpEffect.Effect(target, source);
+			unitCallbacks += (target, source) => _callbackNoOpEffect.Effect(target, source);
+			//_callbackRegisterEffect.SetCallback(unitCallbacks);
+			_callbackRegisterEffect.Effect(_callbackTarget, _callbackSource);
+
+			//_callbackTarget.Test();
+		}
+
+		//[Benchmark]
+		public void CallbackArray()
+		{
+			var callbackEffects = new IEffect[2];
+			callbackEffects[0] = _callbackNoOpEffect;
+			callbackEffects[1] = _callbackNoOpEffect;
+			//_callbackRegisterEffect.SetCallbackArray(callbackEffects);
+			//_callbackRegisterEffect.EffectTest(_callbackTarget, _callbackSource);
+
+			//_callbackTarget.Test();
 		}
 	}
 }
