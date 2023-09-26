@@ -5,6 +5,7 @@
 
 <h1></h1>
 
+[![Godot](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgodotengine.org%2Fasset-library%2Fapi%2Fasset%2F2166&query=%24.version_string&logo=GodotEngine&label=Godot)](https://godotengine.org/asset-library/asset/2166)
 [![Nuget](https://img.shields.io/nuget/v/ModiBuff)](https://www.nuget.org/packages/ModiBuff/)
 ![Coverage](Docs/badge_linecoverage.svg)
 
