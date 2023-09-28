@@ -148,10 +148,8 @@ namespace ModiBuff.Core
 				_timeComponents[i].Refresh();
 		}
 
-		public void Stack()
-		{
-			_stackComponent.Stack();
-		}
+		public void Stack() => _stackComponent.Stack();
+		public void ResetStacks() => _stackComponent.ResetStacks();
 
 		public void ResetState()
 		{

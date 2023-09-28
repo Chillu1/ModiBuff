@@ -76,6 +76,11 @@ namespace ModiBuff.Core
 			}
 		}
 
+		public void ResetStacks()
+		{
+			_stacks = 0;
+		}
+
 		public void ResetState()
 		{
 			_stacks = 0;

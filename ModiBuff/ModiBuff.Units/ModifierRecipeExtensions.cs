@@ -102,5 +102,10 @@ namespace ModiBuff.Core.Units
 		{
 			return recipe.EffectCheck(new CostCheck(costType, cost));
 		}
+
+		public static ModifierRecipe Callback(this ModifierRecipe recipe, CallbackType callbackType)
+		{
+			return recipe.Callback(callbackType);
+		}
 	}
 }

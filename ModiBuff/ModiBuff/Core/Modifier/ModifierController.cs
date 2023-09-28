@@ -222,6 +222,57 @@ namespace ModiBuff.Core
 			_modifiersToRemove.Add(new ModifierReference(id, genId));
 		}
 
+		public void ModifierAction(int id, int genId, ModifierAction action)
+		{
+			Modifier modifier = null;
+			ref readonly var addData = ref ModifierRecipes.GetAddData(id);
+
+			if (!addData.IsInstanceStackable && _modifierIndexes[id] != -1)
+			{
+				modifier = _modifiers[_modifierIndexes[id]];
+			}
+			else
+			{
+				for (int i = 0; i < _modifiersTop; i++)
+				{
+					var localModifier = _modifiers[i];
+					if (localModifier.Id == id && localModifier.GenId == genId)
+					{
+						modifier = localModifier;
+						break;
+					}
+				}
+
+				if (modifier == null)
+				{
+#if DEBUG && !MODIBUFF_PROFILE
+					Logger.LogError($"Tried to call modifier action {action} on a modifier that doesn't exist, id: {id}, genId: {genId}");
+#endif
+					return;
+				}
+			}
+
+			switch (action)
+			{
+				case Core.ModifierAction.Refresh:
+#if DEBUG && !MODIBUFF_PROFILE
+					if (!addData.HasRefresh)
+						Logger.LogWarning("ModifierAction: Refresh was called on a modifier that doesn't have a refresh flag set");
+#endif
+					modifier.Refresh();
+					break;
+				case Core.ModifierAction.ResetStacks:
+#if DEBUG && !MODIBUFF_PROFILE
+					if (!addData.HasStack)
+						Logger.LogWarning("ModifierAction: ResetStacks was called on a modifier that doesn't have a stack flag set");
+#endif
+					modifier.ResetStacks();
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(action), action, "Invalid modifier action");
+			}
+		}
+
 		public void Remove(in ModifierReference modifierReference)
 		{
 			if (!ModifierRecipes.GetAddData(modifierReference.Id).IsInstanceStackable)

@@ -262,6 +262,19 @@ namespace ModiBuff.Core
 		}
 
 		/// <summary>
+		///		Trigger a modifier action on the target on <see cref="effectOn"/>.
+		/// </summary>
+		/// <example> Usually used to refresh the duration/interval timers or reset stacks on game logic callbacks </example>
+		public ModifierRecipe ModifierAction(ModifierAction modifierAction, EffectOn effectOn)
+		{
+#if DEBUG && !MODIBUFF_PROFILE
+			ValidateModifierAction(modifierAction, effectOn);
+#endif
+			Effect(new ModifierActionEffect(modifierAction, Id), effectOn);
+			return this;
+		}
+
+		/// <summary>
 		///		Registers a callback register effect to a unit, will trigger all <see cref="EffectOn.Callback"/>
 		///		effects when <see cref="callbackType"/> is triggered.
 		/// </summary>
@@ -311,6 +324,19 @@ namespace ModiBuff.Core
 				_interval, _intervalAffectedByStatusResistance, _duration, _refreshDuration, _refreshInterval, _whenStackEffect,
 				_stackValue, _maxStacks, _everyXStacks);
 			return new ModifierGenerator(in data);
+		}
+
+		private static void ValidateModifierAction(ModifierAction modifierAction, EffectOn effectOn)
+		{
+			string initialMessage = $"ModifierAction set to {modifierAction}, and effectOn to {effectOn}. ";
+
+			if (modifierAction == Core.ModifierAction.Refresh && effectOn == EffectOn.Init)
+				Logger.LogError(initialMessage +
+				                "Time components always get refreshed on init (if refreshable), no need to add a modifier action for it");
+
+			if (modifierAction == Core.ModifierAction.ResetStacks && effectOn == EffectOn.Init)
+				Logger.LogError(initialMessage +
+				                "Stack component will always reset on init, removing the purpose of it, use init effects instead");
 		}
 
 		private void Validate()
