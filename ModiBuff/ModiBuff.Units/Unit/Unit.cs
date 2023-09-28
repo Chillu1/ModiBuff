@@ -306,7 +306,7 @@ namespace ModiBuff.Core.Units
 		//single delegates are 76% faster than arrays of IEffects with 1 subscriber/item
 		//But arrays are much faster when there are multiple subscribers/items, 58% faster with 2 items, 150% faster with 5 items.
 		//It's recommended to use the array version generally. But in cases where most modifiers have single callbacks, use delegates.
-		public void RegisterCallback(CallbackType callbackType, IEffect[] callbacks)
+		public void RegisterCallbacks(CallbackType callbackType, IEffect[] callbacks)
 		{
 			switch (callbackType)
 			{
@@ -318,12 +318,37 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public void RegisterCallback(CallbackType callbackType, UnitCallback callbacks)
+		public void UnRegisterCallbacks(CallbackType callbackType, IEffect[] callbacks)
+		{
+			switch (callbackType)
+			{
+				case CallbackType.StrongHit:
+					for (int i = 0; i < callbacks.Length; i++)
+						_strongHitCallbacks.Remove(callbacks[i]);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+			}
+		}
+
+		public void RegisterCallbacks(CallbackType callbackType, UnitCallback callbacks)
 		{
 			switch (callbackType)
 			{
 				case CallbackType.StrongHit:
 					_strongHitDelegateCallbacks += callbacks;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+			}
+		}
+
+		public void UnRegisterCallbacks(CallbackType callbackType, UnitCallback callbacks)
+		{
+			switch (callbackType)
+			{
+				case CallbackType.StrongHit:
+					_strongHitDelegateCallbacks -= callbacks;
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);

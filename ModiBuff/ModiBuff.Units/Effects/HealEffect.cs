@@ -67,7 +67,7 @@ namespace ModiBuff.Core.Units
 
 			heal += _extraHeal;
 
-			float returnHeal = Effect(heal, (IHealable<float, float>)target, source);
+			float returnHeal = Effect(heal, target, source);
 
 			if (_hasPostEffects)
 				foreach (var postEffect in _postEffects)
@@ -76,7 +76,7 @@ namespace ModiBuff.Core.Units
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			Effect(-_totalHeal, (IHealable<float, float>)target, source);
+			Effect(-_totalHeal, target, source);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

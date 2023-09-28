@@ -24,7 +24,7 @@ namespace ModiBuff.Core
 		private bool _intervalAffectedByStatusResistance;
 		private float _duration;
 
-		private EffectWrapper _removeEffectWrapper; //TODO Remove effect can come from other means than Remove function
+		private EffectWrapper _removeEffectWrapper;
 		private EffectWrapper _callbackRegisterWrapper;
 
 		private readonly List<EffectWrapper> _effectWrappers;
@@ -242,6 +242,9 @@ namespace ModiBuff.Core
 		/// <param name="targeting">Who should be the target and owner of the applied modifier. For further information, see <see cref="ModiBuff.Core.Targeting"/></param>
 		public ModifierRecipe Effect(IEffect effect, EffectOn effectOn, Targeting targeting = Targeting.TargetSource)
 		{
+			if (effect is IModifierIdOwner modifierIdOwner)
+				modifierIdOwner.SetModifierId(Id);
+
 			if (effect is RemoveEffect)
 			{
 #if DEBUG && !MODIBUFF_PROFILE
@@ -254,8 +257,6 @@ namespace ModiBuff.Core
 
 			if (effect is ITargetEffect effectTarget)
 				effectTarget.SetTargeting(targeting);
-			if (effect is IModifierIdOwner modifierIdOwner)
-				modifierIdOwner.SetModifierId(Id);
 			_effectWrappers.Add(new EffectWrapper(effect, effectOn));
 			return this;
 		}
@@ -276,9 +277,9 @@ namespace ModiBuff.Core
 		///		Registers a callback effect to a unit, will trigger the callback when <see cref="callbackType"/> is triggered.
 		///		It will NOT trigger any EffectOn.<see cref="EffectOn.Callback"/> effects, only the supplied callback.
 		/// </summary>
-		public ModifierRecipe Callback<TCallback>(TCallback callbackType, UnitCallback callback)
+		public ModifierRecipe Callback<TCallback>(TCallback callbackType, UnitCallback callback, bool isRevertible = true)
 		{
-			Effect(new CallbackRegisterDelegateEffect<TCallback>(callbackType, callback), EffectOn.Init);
+			Effect(new CallbackRegisterDelegateEffect<TCallback>(callbackType, callback, isRevertible), EffectOn.Init);
 			return this;
 		}
 

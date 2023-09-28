@@ -143,5 +143,55 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(UnitHealth - unitDamage + 10 - 5, Unit.Health);
 		}
+
+		[Test]
+		public void Init_RegisterCallbackHeal10WhenTakingStrongHitRevert()
+		{
+			AddRecipes(add => add("InitHealToFullHalfHealthCallback")
+				.Effect(new HealEffect(10), EffectOn.Callback)
+				.Callback(CallbackType.StrongHit)
+				.Remove(1)
+			);
+
+			Unit.AddModifierSelf("InitHealToFullHalfHealthCallback");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			//Take enough damage to trigger the callback
+			float damage = UnitHealth * 0.6f;
+			Unit.TakeDamage(damage, Unit); //Takes 60% of max hp damage, triggers callback
+
+			Assert.AreEqual(UnitHealth - damage + 10, Unit.Health);
+
+			//Heal to full
+			Unit.Heal(UnitHealth, Unit);
+
+			Unit.Update(1); //Removes the modifier => reverts the register effect => removes the callback
+			Unit.TakeDamage(damage, Unit);
+			Assert.AreEqual(UnitHealth - damage, Unit.Health);
+		}
+
+		[Test]
+		public void Init_RegisterCallbackHealToFullWhenTakingStrongHitRevert()
+		{
+			AddRecipes(add => add("InitHealToFullHalfHealthCallback")
+				.Callback(CallbackType.StrongHit, (target, source) =>
+				{
+					var damageable = (IDamagable<float, float>)target;
+					((IHealable<float, float>)target).Heal(damageable.MaxHealth - damageable.Health, source);
+				})
+				.Remove(1)
+			);
+
+			Unit.AddModifierSelf("InitHealToFullHalfHealthCallback");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			//Take enough damage to trigger the callback
+			Unit.TakeDamage(UnitHealth * 0.6f, Unit); //Takes 60% of max hp damage, triggers callback, heals to full
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.Update(1);
+			Unit.TakeDamage(UnitHealth * 0.6f, Unit);
+			Assert.AreEqual(UnitHealth * 0.4f, Unit.Health);
+		}
 	}
 }

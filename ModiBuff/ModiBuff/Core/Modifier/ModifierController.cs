@@ -197,8 +197,6 @@ namespace ModiBuff.Core
 			_modifiers[_modifiersTop++] = modifier;
 			if (addData.HasInit)
 				modifier.Init();
-			if (addData.HasRefresh)
-				modifier.Refresh();
 			if (addData.HasStack)
 				modifier.Stack();
 		}
