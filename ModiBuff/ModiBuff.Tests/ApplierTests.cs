@@ -10,7 +10,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageApplier_Attack_Damage()
 		{
-			SetupSystems();
+			Setup();
 
 			var applier = Recipes.GetGenerator("InitDamage");
 			Unit.AddApplierModifier(applier, ApplierType.Attack);
@@ -23,8 +23,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealApplier_Attack_Heal()
 		{
-			AddRecipes(add => add("InitStrongHeal")
-				.Effect(new HealEffect(10), EffectOn.Init));
+			AddRecipe("InitStrongHeal")
+				.Effect(new HealEffect(10), EffectOn.Init);
+			Setup();
 
 			var applier = Recipes.GetGenerator("InitStrongHeal");
 			Unit.AddApplierModifier(applier, ApplierType.Attack);
@@ -38,9 +39,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageSelfApplier_Attack_DamageSelf()
 		{
-			AddRecipes(add => add("InitDamageSelf")
-				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.SourceTarget)
-			);
+			AddRecipe("InitDamageSelf")
+				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.SourceTarget);
+			Setup();
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageSelf"), ApplierType.Attack);
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Attack);
@@ -53,7 +54,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageApplier_Cast_Damage()
 		{
-			SetupSystems();
+			Setup();
 
 			var applier = Recipes.GetGenerator("InitDamage");
 			Unit.AddApplierModifier(applier, ApplierType.Cast);
@@ -66,9 +67,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void DamageApplier_Interval()
 		{
-			AddRecipes(add => add("DamageApplier_Interval")
+			AddRecipe("DamageApplier_Interval")
 				.Effect(new ApplierEffect("InitDamage"), EffectOn.Interval)
-				.Interval(1));
+				.Interval(1);
+			Setup();
 
 			Unit.AddModifierTarget("DamageApplier_Interval", Enemy);
 
@@ -84,9 +86,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamageCostMana()
 		{
-			AddRecipes(add => add("InitDamage_CostMana")
+			AddRecipe("InitDamage_CostMana")
 				.ApplyCost(CostType.Mana, 5)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			var generator = Recipes.GetGenerator("InitDamage_CostMana");
 
@@ -101,22 +104,18 @@ namespace ModiBuff.Tests
 		[Test]
 		public void NestedStackApplier()
 		{
-			AddMixedRecipes(new RecipeAddFunc[]
-			{
-				add => add("ComplexApplier_Rupture")
-					.Interval(1)
-					.Effect(new DamageEffect(5), EffectOn.Interval)
-					.Effect(new ApplierEffect("ComplexApplier_Disarm"), EffectOn.Stack)
-					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5),
-				add => add("ComplexApplier_Disarm")
-					.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect), EffectOn.Stack)
-					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2)
-					.Remove(10).Refresh()
-			}, new EventRecipeAddFunc[]
-			{
-				add => add("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
-					.Effect(new ApplierEffect("ComplexApplier_Rupture"), Targeting.SourceTarget)
-			});
+			AddRecipe("ComplexApplier_Disarm")
+				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2)
+				.Remove(10).Refresh();
+			AddRecipe("ComplexApplier_Rupture")
+				.Interval(1)
+				.Effect(new DamageEffect(5), EffectOn.Interval)
+				.Effect(new ApplierEffect("ComplexApplier_Disarm"), EffectOn.Stack)
+				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5);
+			AddEventRecipe("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
+				.Effect(new ApplierEffect("ComplexApplier_Rupture"), Targeting.SourceTarget);
+			Setup();
 
 			Unit.AddModifierSelf("ComplexApplier_OnHit_Event");
 
@@ -145,31 +144,27 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddDamageStacksEventsAppliers()
 		{
-			AddMixedRecipes(new RecipeAddFunc[]
-			{
-				add => add("ComplexApplier2_WhenHealed")
-					.Effect(new ApplierEffect("ComplexApplier2_OnAttack_Event"), EffectOn.Stack)
-					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5)
-					.Remove(5).Refresh(),
-				add => add("ComplexApplier2_AddDamageAdd")
-					.Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)
-					.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
-					.Remove(5).Refresh(),
-				add => add("ComplexApplier2_AddDamage")
-					.OneTimeInit()
-					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
-					.Remove(10).Refresh()
-			}, new EventRecipeAddFunc[]
-			{
-				add => add("ComplexApplier2_WhenHealed_Event", EffectOnEvent.WhenHealed)
-					.Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), Targeting.SourceTarget),
-				add => add("ComplexApplier2_OnAttack_Event", EffectOnEvent.OnAttack)
-					.Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"))
-					.Remove(60).Refresh(),
-				add => add("ComplexApplier2_WhenAttacked_Event", EffectOnEvent.WhenAttacked)
-					.Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), Targeting.SourceTarget)
-					.Remove(5).Refresh()
-			});
+			AddRecipe("ComplexApplier2_AddDamage")
+				.OneTimeInit()
+				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				.Remove(10).Refresh();
+			AddRecipe("ComplexApplier2_AddDamageAdd")
+				.Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)
+				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
+				.Remove(5).Refresh();
+			AddEventRecipe("ComplexApplier2_WhenAttacked_Event", EffectOnEvent.WhenAttacked)
+				.Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), Targeting.SourceTarget)
+				.Remove(5).Refresh();
+			AddEventRecipe("ComplexApplier2_OnAttack_Event", EffectOnEvent.OnAttack)
+				.Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"))
+				.Remove(60).Refresh();
+			AddRecipe("ComplexApplier2_WhenHealed")
+				.Effect(new ApplierEffect("ComplexApplier2_OnAttack_Event"), EffectOn.Stack)
+				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5)
+				.Remove(5).Refresh();
+			AddEventRecipe("ComplexApplier2_WhenHealed_Event", EffectOnEvent.WhenHealed)
+				.Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), Targeting.SourceTarget);
+			Setup();
 
 			//Add damage on 4 stacks buff, that you give someone when they heal you 5 times, for 60 seconds.
 			Ally.AddModifierSelf("ComplexApplier2_WhenHealed_Event");
@@ -184,7 +179,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ModifierDoesntExist()
 		{
-			SetupSystems();
+			Setup();
 
 			Assert.Catch<KeyNotFoundException>(() => Recipes.GetGenerator("NonExistentApplier"));
 		}
@@ -213,7 +208,7 @@ namespace ModiBuff.Tests
 #if !DEBUG
 			Assert.Ignore("This test is only for debug mode");
 #endif
-			SetupSystems();
+			Setup();
 
 			var testLogger = new TestLogger();
 			Logger.SetLogger(testLogger);
@@ -227,11 +222,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ApplyNewModifierOnIteration() //Checks that our collection is not modified during iteration
 		{
-			AddRecipes(
-				add => add("AddModifierApplier_Flag"),
-				add => add("AddModifierApplierInterval")
-					.Effect(new ApplierEffect("AddModifierApplier_Flag"), EffectOn.Interval)
-					.Interval(1));
+			AddRecipe("AddModifierApplier_Flag");
+			AddRecipe("AddModifierApplierInterval")
+				.Effect(new ApplierEffect("AddModifierApplier_Flag"), EffectOn.Interval)
+				.Interval(1);
+			Setup();
 
 
 			Config.ModifierArraySize = 1;

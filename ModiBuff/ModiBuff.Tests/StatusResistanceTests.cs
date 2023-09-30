@@ -9,10 +9,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Dot_NoResistance()
 		{
-			AddRecipes(add => add("DoTRemoveStatusResistance")
+			AddRecipe("DoTRemoveStatusResistance")
 				.Interval(1, true)
 				.Effect(new DamageEffect(5), EffectOn.Interval)
-				.Remove(5));
+				.Remove(5);
+			Setup();
 
 			Unit.AddModifierSelf("DoTRemoveStatusResistance");
 
@@ -28,10 +29,11 @@ namespace ModiBuff.Tests
 		[TestCase(0.1f)]
 		public void Dot_XResistance(float resistance)
 		{
-			AddRecipes(add => add("DoTRemoveStatusResistance")
+			AddRecipe("DoTRemoveStatusResistance")
 				.Interval(1, true)
 				.Effect(new DamageEffect(5), EffectOn.Interval)
-				.Remove(5));
+				.Remove(5);
+			Setup();
 
 			Unit.AddModifierSelf("DoTRemoveStatusResistance");
 			Unit.ChangeStatusResistance(resistance);
@@ -46,10 +48,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Dot_StatusResistance_IntervalNotAffected()
 		{
-			AddRecipes(add => add("DoTRemove")
+			AddRecipe("DoTRemove")
 				.Interval(1)
 				.Effect(new DamageEffect(5), EffectOn.Interval)
-				.Remove(5));
+				.Remove(5);
+			Setup();
 
 			Unit.AddModifierSelf("DoTRemove");
 			Unit.ChangeStatusResistance(0.5f);
@@ -67,11 +70,12 @@ namespace ModiBuff.Tests
 		[TestCase(0.1f)]
 		public void DurationXResistance(float resistance)
 		{
-			AddRecipes(add => add("DurationRemoveStatusResistance")
+			AddRecipe("DurationRemoveStatusResistance")
 				.Interval(1, true)
 				.Effect(new DamageEffect(0), EffectOn.Interval)
 				.Effect(new DamageEffect(5), EffectOn.Duration)
-				.Remove(5));
+				.Remove(5);
+			Setup();
 
 			Unit.AddModifierSelf("DurationRemoveStatusResistance");
 			Unit.ChangeStatusResistance(resistance);

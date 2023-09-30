@@ -9,9 +9,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostHealth()
 		{
-			AddRecipes(add => add("InitDamage_CostHealth")
+			AddRecipe("InitDamage_CostHealth")
 				.ApplyCost(CostType.Health, 5)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostHealth"), ApplierType.Attack);
 
@@ -23,9 +24,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostHealth_NotLethal()
 		{
-			AddRecipes(add => add("InitDamage_CostHealth")
+			AddRecipe("InitDamage_CostHealth")
 				.ApplyCost(CostType.Health, 5)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostHealth"), ApplierType.Attack);
 
@@ -38,9 +40,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostMana()
 		{
-			AddRecipes(add => add("InitDamage_CostMana")
+			AddRecipe("InitDamage_CostMana")
 				.ApplyCost(CostType.Mana, 5)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostMana"), ApplierType.Attack);
 
@@ -52,9 +55,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostMana_NotEnough()
 		{
-			AddRecipes(add => add("InitDamage_CostMana")
+			AddRecipe("InitDamage_CostMana")
 				.ApplyCost(CostType.Mana, 5)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostMana"), ApplierType.Attack);
 
@@ -68,9 +72,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostMana_Effect()
 		{
-			AddRecipes(add => add("InitDamage_CostManaEffect")
+			AddRecipe("InitDamage_CostManaEffect")
 				.EffectCost(CostType.Mana, 5)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitDamage_CostManaEffect");
 
@@ -81,10 +86,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CostHealth_HealSelf()
 		{
-			AddRecipes(add => add("InitDamage_CostHealth_HealSelf")
+			AddRecipe("InitDamage_CostHealth_HealSelf")
 				.ApplyCost(CostType.Health, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init)
-				.Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceSource));
+				.Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceSource);
+			Setup();
 
 			var generator = Recipes.GetGenerator("InitDamage_CostHealth_HealSelf");
 

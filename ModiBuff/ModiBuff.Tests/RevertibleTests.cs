@@ -9,9 +9,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Init_AddDamage_Remove_RevertDamage()
 		{
-			AddRecipes(add => add("InitAddDamageRevertible")
+			AddRecipe("InitAddDamageRevertible")
 				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
-				.Remove(5));
+				.Remove(5);
+			Setup();
 
 			Unit.AddModifierSelf("InitAddDamageRevertible");
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);

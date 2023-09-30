@@ -9,12 +9,12 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddDamageDurationRefreshOnStrongHit()
 		{
-			AddRecipes(add => add("DurationAddDamageStrongHitRefresh")
+			AddRecipe("DurationAddDamageStrongHitRefresh")
 				.Effect(new AddDamageEffect(5), EffectOn.Duration)
 				.ModifierAction(ModifierAction.Refresh, EffectOn.Callback)
 				.Callback(CallbackType.StrongHit)
-				.Duration(2).Refresh()
-			);
+				.Duration(2).Refresh();
+			Setup();
 
 			Unit.AddModifierSelf("DurationAddDamageStrongHitRefresh");
 			Unit.Update(1);
@@ -31,12 +31,12 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddDamageOn2StacksResetStacksOnStrongHit()
 		{
-			AddRecipes(add => add("StackAddDamageStrongHitResetStacks")
+			AddRecipe("StackAddDamageStrongHitResetStacks")
 				.Effect(new AddDamageEffect(5), EffectOn.Stack)
 				.ModifierAction(ModifierAction.ResetStacks, EffectOn.Callback)
 				.Callback(CallbackType.StrongHit)
-				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2)
-			);
+				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2);
+			Setup();
 
 			Unit.AddModifierSelf("StackAddDamageStrongHitResetStacks");
 			Assert.AreEqual(UnitDamage, Unit.Damage);

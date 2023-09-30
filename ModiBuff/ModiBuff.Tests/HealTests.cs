@@ -9,8 +9,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void SelfInit_Heal()
 		{
-			AddRecipes(add => add("InitHeal")
-				.Effect(new HealEffect(5), EffectOn.Init));
+			AddRecipe("InitHeal")
+				.Effect(new HealEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.TakeDamage(5, Unit);
 			Assert.AreEqual(AllyHealth - 5, Unit.Health);
@@ -23,8 +24,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void TargetInit_Heal()
 		{
-			AddRecipes(add => add("InitHeal")
-				.Effect(new HealEffect(5), EffectOn.Init));
+			AddRecipe("InitHeal")
+				.Effect(new HealEffect(5), EffectOn.Init);
+			Setup();
 
 			Ally.TakeDamage(5, Ally);
 			Assert.AreEqual(AllyHealth - 5, Ally.Health);

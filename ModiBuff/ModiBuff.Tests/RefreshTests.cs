@@ -9,8 +9,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void NoRefresh()
 		{
-			AddRecipes(add => add("DurationRemove")
-				.Remove(5));
+			AddRecipe("DurationRemove")
+				.Remove(5);
+			Setup();
 
 			const string recipeId = "DurationRemove";
 
@@ -28,8 +29,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Refresh_Duration()
 		{
-			AddRecipes(add => add("DurationRefreshRemove")
-				.Remove(5).Refresh());
+			AddRecipe("DurationRefreshRemove")
+				.Remove(5).Refresh();
+			Setup();
 
 			const string recipeId = "DurationRefreshRemove";
 
@@ -47,9 +49,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Refresh_Interval()
 		{
-			AddRecipes(add => add("IntervalRefreshRemove")
+			AddRecipe("IntervalRefreshRemove")
 				.Effect(new RemoveEffect(), EffectOn.Interval)
-				.Interval(5).Refresh());
+				.Interval(5).Refresh();
+			Setup();
 
 			const string recipeId = "IntervalRefreshRemove";
 
@@ -67,10 +70,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Refresh_DurationNotInterval()
 		{
-			AddRecipes(add => add("DurationRefreshRemove_IntervalDamage")
+			AddRecipe("DurationRefreshRemove_IntervalDamage")
 				.Effect(new DamageEffect(5), EffectOn.Interval)
 				.Interval(5)
-				.Remove(5).Refresh());
+				.Remove(5).Refresh();
+			Setup();
 
 			const string recipeId = "DurationRefreshRemove_IntervalDamage";
 

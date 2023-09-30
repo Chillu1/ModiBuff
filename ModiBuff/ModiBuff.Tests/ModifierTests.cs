@@ -41,7 +41,24 @@ namespace ModiBuff.Tests
 			Config.PoolSize = 1;
 		}
 
+		[SetUp]
+		public void IterationSetup()
+		{
+			IdManager = new ModifierIdManager();
+			Recipes = new ModifierCompositionRecipes(IdManager,
+				(effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
+			Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
+			//Pool = new ModifierPool(Recipes.GetGenerators());
+		}
+
 		protected void AddRecipes(params RecipeAddFunc[] recipeAddFunc) => SetupSystems(recipeAddFunc, new EventRecipeAddFunc[0]);
+		protected ModifierRecipe AddRecipe(string name) => Recipes.Add(name);
+		protected ModifierEventRecipe AddEventRecipe(string name, EffectOnEvent @event) => Recipes.AddEvent(name, @event);
+
+		public void AddGenerator(in ManualGeneratorData data) => Recipes.Add(data.Name, in data.CreateFunc, in data.AddData);
+
+		public void AddGenerator(string name, in ModifierGeneratorFunc createFunc, in ModifierAddData addData) =>
+			Recipes.Add(name, in createFunc, in addData);
 
 		protected void AddEventRecipes(params EventRecipeAddFunc[] recipeAddFunc) => SetupSystems(new RecipeAddFunc[0], recipeAddFunc);
 
@@ -49,8 +66,6 @@ namespace ModiBuff.Tests
 		{
 			SetupSystems(recipeAddFunc, eventRecipeAddFunc);
 		}
-
-		protected void AddGenerators(params ManualGeneratorData[] genData) => SetupSystems(genData);
 
 		private void SetupSystems(RecipeAddFunc[] recipeAddFunc, EventRecipeAddFunc[] eventRecipeAddFunc)
 		{
@@ -67,32 +82,12 @@ namespace ModiBuff.Tests
 			Setup();
 		}
 
-		private void SetupSystems(ManualGeneratorData[] genData)
-		{
-			IdManager = new ModifierIdManager();
-			var eventEffectFactory =
-				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
-			Recipes = new ModifierCompositionRecipes(_defaultRecipeAddFuncs, new EventRecipeAddFunc[0], IdManager, eventEffectFactory,
-				genData);
-			Pool = new ModifierPool(Recipes.GetGenerators());
-
-			Setup();
-		}
-
-		public void SetupSystems()
-		{
-			IdManager = new ModifierIdManager();
-			var eventEffectFactory =
-				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
-			Recipes = new ModifierCompositionRecipes(_defaultRecipeAddFuncs, new EventRecipeAddFunc[0], IdManager, eventEffectFactory);
-			Pool = new ModifierPool(Recipes.GetGenerators());
-
-			Setup();
-		}
-
 		//Setup needs to be called manually so we create the units after all recipes have been added
 		public void Setup()
 		{
+			Recipes.CreateGenerators();
+			Pool = new ModifierPool(Recipes.GetGenerators());
+
 			UnitHealth = AllyHealth = 500;
 			UnitDamage = AllyDamage = 10;
 			UnitHeal = AllyHeal = 5;

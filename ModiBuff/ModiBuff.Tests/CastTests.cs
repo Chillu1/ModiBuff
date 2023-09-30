@@ -9,7 +9,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CastInitDamageNoChecks_OnEnemy()
 		{
-			SetupSystems();
+			Setup();
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Cast);
 
@@ -21,9 +21,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CastInitDamageChecks_OnEnemy()
 		{
-			AddRecipes(add => add("InitDamageFullHealth")
+			AddRecipe("InitDamageFullHealth")
 				.ApplyCondition(ConditionType.HealthIsFull)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageFullHealth"), ApplierType.Cast);
 
@@ -41,7 +42,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackInitDamageNoChecks_OnEnemy()
 		{
-			SetupSystems();
+			Setup();
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Attack);
 
@@ -53,9 +54,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackInitDamageChecks_OnEnemy()
 		{
-			AddRecipes(add => add("InitDamageFullHealth")
+			AddRecipe("InitDamageFullHealth")
 				.ApplyCondition(ConditionType.HealthIsFull)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageFullHealth"), ApplierType.Attack);
 
@@ -73,9 +75,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CastInitDamageChecksDelayedUse_OnEnemy()
 		{
-			AddRecipes(add => add("InitDamageFullHealth")
+			AddRecipe("InitDamageFullHealth")
 				.ApplyCondition(ConditionType.HealthIsFull)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			int id = IdManager.GetId("InitDamageFullHealth");
 

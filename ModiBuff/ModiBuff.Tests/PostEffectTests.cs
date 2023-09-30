@@ -9,10 +9,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void LifeSteal_OnDamageEffectInit()
 		{
-			AddRecipes(add => add("InitDamageLifeStealPost")
+			AddRecipe("InitDamageLifeStealPost")
 				.Effect(new DamageEffect(5)
-						.SetPostEffects(new LifeStealPostEffect(0.5f, Targeting.SourceTarget))
-					, EffectOn.Init));
+					.SetPostEffects(new LifeStealPostEffect(0.5f, Targeting.SourceTarget)), EffectOn.Init);
+			Setup();
 
 			var generator = Recipes.GetGenerator("InitDamageLifeStealPost");
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
@@ -28,10 +28,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddDamage_OnKill_WithDamageEffectInit()
 		{
-			AddRecipes(add => add("InitDamageAddDamageOnKillPost")
+			AddRecipe("InitDamageAddDamageOnKillPost")
 				.Effect(new DamageEffect(5)
-						.SetPostEffects(new AddDamageOnKillPostEffect(2, Targeting.SourceTarget))
-					, EffectOn.Init));
+					.SetPostEffects(new AddDamageOnKillPostEffect(2, Targeting.SourceTarget)), EffectOn.Init);
+			Setup();
 
 			var generator = Recipes.GetGenerator("InitDamageAddDamageOnKillPost");
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
@@ -47,10 +47,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealTargetDamageSelf()
 		{
-			AddRecipes(add => add("HealDamageSelfPost")
+			AddRecipe("HealDamageSelfPost")
 				.Effect(new HealEffect(5)
-						.SetPostEffects(new DamagePostEffect(Targeting.SourceTarget))
-					, EffectOn.Init));
+					.SetPostEffects(new DamagePostEffect(Targeting.SourceTarget)), EffectOn.Init);
+			Setup();
 
 			var generator = Recipes.GetGenerator("HealDamageSelfPost");
 			Unit.AddApplierModifier(generator, ApplierType.Cast);

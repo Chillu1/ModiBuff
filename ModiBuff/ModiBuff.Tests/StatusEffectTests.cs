@@ -12,7 +12,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun()
 		{
-			AddRecipes(_initStun);
+			_initStun(AddRecipe);
+			Setup();
 
 			Unit.AddModifierSelf("InitStun");
 
@@ -22,7 +23,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun_CantAttack()
 		{
-			AddRecipes(_initStun);
+			_initStun(AddRecipe);
+			Setup();
 
 			Unit.AddModifierSelf("InitStun");
 
@@ -35,8 +37,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Disarm_CantAttack()
 		{
-			AddRecipes(add => add("InitDisarm")
-				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 2), EffectOn.Init));
+			AddRecipe("InitDisarm")
+				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 2), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitDisarm");
 
@@ -49,8 +52,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Silence_CantCast()
 		{
-			AddRecipes(add => add("InitSilence")
-				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2), EffectOn.Init));
+			AddRecipe("InitSilence")
+				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2), EffectOn.Init);
+			Setup();
 
 			var generator = Recipes.GetGenerator("InitDamage");
 
@@ -66,8 +70,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Silence_CanAct()
 		{
-			AddRecipes(add => add("InitSilence")
-				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2), EffectOn.Init));
+			AddRecipe("InitSilence")
+				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitSilence");
 
@@ -78,7 +83,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun_DurationOver()
 		{
-			AddRecipes(_initStun);
+			_initStun(AddRecipe);
+			Setup();
 
 			Unit.AddModifierSelf("InitStun");
 
@@ -94,7 +100,8 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun_OverwriteDuration()
 		{
-			AddRecipes(_initStun);
+			_initStun(AddRecipe);
+			Setup();
 
 			Unit.AddModifierSelf("InitStun");
 
@@ -110,8 +117,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun_OverwriteDuration_DifferentStatus()
 		{
-			AddRecipes(_initStun, add => add("InitDisarm")
-				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 2), EffectOn.Init));
+			_initStun(AddRecipe);
+			AddRecipe("InitDisarm")
+				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 2), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitStun");
 
@@ -128,8 +137,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun_DontOverwriteDuration()
 		{
-			AddRecipes(_initStun, add => add("InitShortStun")
-				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 1), EffectOn.Init));
+			_initStun(AddRecipe);
+			AddRecipe("InitShortStun")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 1), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitStun");
 
@@ -144,11 +155,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Disarm_DontOverwriteDuration_SeparateStatusEffect()
 		{
-			AddRecipes(
-				add => add("InitDisarm")
-					.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 2), EffectOn.Init),
-				add => add("InitShortFreeze")
-					.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 1), EffectOn.Init));
+			AddRecipe("InitDisarm")
+				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 2), EffectOn.Init);
+			AddRecipe("InitShortFreeze")
+				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 1), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitDisarm");
 			Unit.AddModifierSelf("InitShortFreeze");
@@ -171,11 +182,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ShortStun_LongDisarm_CantAct_CanMove()
 		{
-			AddRecipes(
-				add => add("InitDisarm")
-					.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 2), EffectOn.Init),
-				add => add("InitShortStun")
-					.Effect(new StatusEffectEffect(StatusEffectType.Stun, 1), EffectOn.Init));
+			AddRecipe("InitDisarm")
+				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 2), EffectOn.Init);
+			AddRecipe("InitShortStun")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 1), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitShortStun");
 			Unit.AddModifierSelf("InitDisarm");
@@ -192,9 +203,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun_Revert()
 		{
-			AddRecipes(add => add("InitStun_Revertible")
+			AddRecipe("InitStun_Revertible")
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, true), EffectOn.Init)
-				.Remove(1));
+				.Remove(1);
+			Setup();
 
 			Unit.AddModifierSelf("InitStun_Revertible");
 
@@ -210,10 +222,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void StunTwice_RevertLonger_StillStunned()
 		{
-			AddRecipes(_initStun,
-				add => add("InitStunLong_Revertible")
-					.Effect(new StatusEffectEffect(StatusEffectType.Stun, 3, true), EffectOn.Init)
-					.Remove(1));
+			_initStun(AddRecipe);
+			AddRecipe("InitStunLong_Revertible")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 3, true), EffectOn.Init)
+				.Remove(1);
+			Setup();
 
 			Unit.AddModifierSelf("InitStunLong_Revertible"); //3s
 			Unit.AddModifierSelf("InitStun"); //2s
@@ -230,12 +243,12 @@ namespace ModiBuff.Tests
 		[Test]
 		public void StunSilence_RevertStun_StillCantCast()
 		{
-			AddRecipes(
-				add => add("InitStunLong_Revertible")
-					.Effect(new StatusEffectEffect(StatusEffectType.Stun, 3, true), EffectOn.Init)
-					.Remove(1),
-				add => add("InitSilence")
-					.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2), EffectOn.Init));
+			AddRecipe("InitStunLong_Revertible")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 3, true), EffectOn.Init)
+				.Remove(1);
+			AddRecipe("InitSilence")
+				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitStunLong_Revertible"); //2s
 			Unit.AddModifierSelf("InitSilence"); //2s
@@ -256,10 +269,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void StunTwice_SameIdDifferentGenId_RevertFirst()
 		{
-			AddRecipes(add => add("InitStunInstanceStackable_Revertible")
+			AddRecipe("InitStunInstanceStackable_Revertible")
 				.InstanceStackable()
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 3, true), EffectOn.Init)
-				.Remove(2));
+				.Remove(2);
+			Setup();
 
 			int id = IdManager.GetId("InitStunInstanceStackable_Revertible");
 			Ally.ModifierController.TryAddApplier(id, false, ApplierType.Cast);

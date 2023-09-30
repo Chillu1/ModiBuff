@@ -9,7 +9,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void SelfInit_Damage()
 		{
-			SetupSystems();
+			Setup();
 
 			Unit.AddModifierSelf("InitDamage"); //Init
 
@@ -19,7 +19,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void TargetInit_Damage()
 		{
-			SetupSystems();
+			Setup();
 
 			Enemy.AddModifierTarget("InitDamage", Unit); //Init
 
@@ -29,9 +29,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitSelfHeal_DamageTarget()
 		{
-			AddRecipes(add => add("InitSelfHeal_DamageTarget")
+			AddRecipe("InitSelfHeal_DamageTarget")
 				.Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceTarget)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.TakeDamage(5, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);

@@ -10,8 +10,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackSelf_Action()
 		{
-			AddRecipes(add => add("InitAttackAction")
-				.Effect(new AttackActionEffect(), EffectOn.Init));
+			AddRecipe("InitAttackAction")
+				.Effect(new AttackActionEffect(), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitAttackAction");
 
@@ -21,8 +22,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackEnemy_Action()
 		{
-			AddRecipes(add => add("InitAttackAction")
-				.Effect(new AttackActionEffect(), EffectOn.Init));
+			AddRecipe("InitAttackAction")
+				.Effect(new AttackActionEffect(), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierTarget("InitAttackAction", Enemy);
 
@@ -32,8 +34,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealSelf_Action()
 		{
-			AddRecipes(add => add("InitHealAction")
-				.Effect(new HealActionEffect(), EffectOn.Init));
+			AddRecipe("InitHealAction")
+				.Effect(new HealActionEffect(), EffectOn.Init);
+			Setup();
 
 			Unit.TakeDamage(UnitHeal + 5, Unit);
 
@@ -45,8 +48,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AttackSelfTarget_Action()
 		{
-			AddRecipes(add => add("InitAttackAction_Self")
-				.Effect(new AttackActionEffect(), EffectOn.Init, Targeting.TargetTarget));
+			AddRecipe("InitAttackAction_Self")
+				.Effect(new AttackActionEffect(), EffectOn.Init, Targeting.TargetTarget);
+			Setup();
 
 			Unit.AddModifierSelf("InitAttackAction_Self");
 

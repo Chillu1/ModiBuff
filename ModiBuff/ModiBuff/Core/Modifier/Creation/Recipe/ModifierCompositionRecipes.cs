@@ -20,7 +20,7 @@ namespace ModiBuff.Core
 
 		private EventEffectFactory _eventEffectFunc;
 
-		public ModifierCompositionRecipes(ModifierIdManager idManager)
+		public ModifierCompositionRecipes(ModifierIdManager idManager, EventEffectFactory eventEffectFunc = null)
 		{
 			_instance = this;
 
@@ -29,14 +29,14 @@ namespace ModiBuff.Core
 			_manualGenerators = new Dictionary<string, ManualModifierGenerator>(64);
 			_modifierGenerators = new Dictionary<string, IModifierGenerator>(64);
 			_registeredNames = new List<RegisterData>(16);
+
+			_eventEffectFunc = eventEffectFunc;
 		}
 
 		public ModifierCompositionRecipes(IReadOnlyList<RecipeAddFunc> recipes, IReadOnlyList<EventRecipeAddFunc> eventRecipes,
 			ModifierIdManager idManager, EventEffectFactory eventEffectFunc, ManualGeneratorData[] manualGeneratorData = null)
-			: this(idManager)
+			: this(idManager, eventEffectFunc)
 		{
-			_eventEffectFunc = eventEffectFunc;
-
 			for (int i = 0; i < recipes.Count; i++)
 			{
 				recipes[i](delegate(string name)

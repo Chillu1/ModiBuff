@@ -9,9 +9,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealthCondition_OnApply_InitDamage()
 		{
-			AddRecipes(add => add("InitDamage_ApplyCondition_HealthAbove100")
+			AddRecipe("InitDamage_ApplyCondition_HealthAbove100")
 				.ApplyCondition(StatType.Health, 100, ComparisonType.GreaterOrEqual)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_HealthAbove100");
 
@@ -25,9 +26,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ManaCondition_OnApply_InitDamage()
 		{
-			AddRecipes(add => add("InitDamage_ApplyCondition_ManaBelow100")
+			AddRecipe("InitDamage_ApplyCondition_ManaBelow100")
 				.ApplyCondition(StatType.Mana, 100, ComparisonType.LessOrEqual)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_ManaBelow100");
 
@@ -45,9 +47,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealthCondition_OnEffect_InitDamage()
 		{
-			AddRecipes(add => add("InitDamage_EffectCondition_HealthAbove100")
+			AddRecipe("InitDamage_EffectCondition_HealthAbove100")
 				.EffectCondition(StatType.Health, 100, ComparisonType.GreaterOrEqual)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitDamage_EffectCondition_HealthAbove100");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health); //995
@@ -60,9 +63,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealthIsFullCondition_OnEffect_InitDamage()
 		{
-			AddRecipes(add => add("InitDamage_EffectCondition_HealthFull")
+			AddRecipe("InitDamage_EffectCondition_HealthFull")
 				.EffectCondition(ConditionType.HealthIsFull)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitDamage_EffectCondition_HealthFull");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
@@ -74,9 +78,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealthIsFullCondition_OnApply_InitDamage()
 		{
-			AddRecipes(add => add("InitDamage_EffectCondition_HealthFull")
+			AddRecipe("InitDamage_EffectCondition_HealthFull")
 				.EffectCondition(ConditionType.HealthIsFull)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitDamage_EffectCondition_HealthFull");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
@@ -88,9 +93,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void ManaIsFullCondition_OnEffect_InitDamage()
 		{
-			AddRecipes(add => add("InitDamage_EffectCondition_ManaFull")
+			AddRecipe("InitDamage_EffectCondition_ManaFull")
 				.EffectCondition(ConditionType.ManaIsFull)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitDamage_EffectCondition_ManaFull");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
@@ -103,11 +109,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HasModifier_OnEffect_InitDamage()
 		{
-			AddRecipes(
-				add => add("Flag"),
-				add => add("InitDamage_EffectCondition_ContainsModifier")
-					.EffectCondition("Flag")
-					.Effect(new DamageEffect(5), EffectOn.Init));
+			AddRecipe("Flag");
+			AddRecipe("InitDamage_EffectCondition_ContainsModifier")
+				.EffectCondition("Flag")
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitDamage_EffectCondition_ContainsModifier");
 			Assert.AreEqual(UnitHealth, Unit.Health);
@@ -120,11 +126,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HasModifier_OnApply_InitDamage()
 		{
-			AddRecipes(
-				add => add("FlagApply"),
-				add => add("InitDamage_ApplyCondition_ContainsModifier")
-					.ApplyCondition("FlagApply")
-					.Effect(new DamageEffect(5), EffectOn.Init));
+			AddRecipe("FlagApply");
+			AddRecipe("InitDamage_ApplyCondition_ContainsModifier")
+				.ApplyCondition("FlagApply")
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_ContainsModifier");
 
@@ -140,15 +146,15 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HasStatusEffect_OnEffect_InitDamage()
 		{
-			AddRecipes(
-				add => add("InitFreeze")
-					.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init),
-				add => add("InitDamage_EffectCondition_FreezeStatusEffect")
-					.EffectCondition(StatusEffectType.Freeze)
-					.Effect(new DamageEffect(5), EffectOn.Init),
-				add => add("InitDamage_EffectCondition_ActLegalAction")
-					.EffectCondition(LegalAction.Act)
-					.Effect(new DamageEffect(5), EffectOn.Init));
+			AddRecipe("InitFreeze")
+				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init);
+			AddRecipe("InitDamage_EffectCondition_FreezeStatusEffect")
+				.EffectCondition(StatusEffectType.Freeze)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			AddRecipe("InitDamage_EffectCondition_ActLegalAction")
+				.EffectCondition(LegalAction.Act)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitDamage_EffectCondition_FreezeStatusEffect");
 			Assert.AreEqual(UnitHealth, Unit.Health);
@@ -161,15 +167,15 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HasStatusEffect_OnApply_InitDamage()
 		{
-			AddRecipes(
-				add => add("InitFreeze")
-					.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init),
-				add => add("InitDamage_ApplyCondition_FreezeStatusEffect")
-					.ApplyCondition(StatusEffectType.Freeze)
-					.Effect(new DamageEffect(5), EffectOn.Init),
-				add => add("InitDamage_ApplyCondition_ActLegalAction")
-					.ApplyCondition(LegalAction.Act)
-					.Effect(new DamageEffect(5), EffectOn.Init));
+			AddRecipe("InitFreeze")
+				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init);
+			AddRecipe("InitDamage_ApplyCondition_FreezeStatusEffect")
+				.ApplyCondition(StatusEffectType.Freeze)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			AddRecipe("InitDamage_ApplyCondition_ActLegalAction")
+				.ApplyCondition(LegalAction.Act)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_FreezeStatusEffect");
 
@@ -185,15 +191,15 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HasLegalAction_OnEffect_InitDamage()
 		{
-			AddRecipes(
-				add => add("InitFreeze")
-					.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init),
-				add => add("InitDamage_EffectCondition_FreezeStatusEffect")
-					.EffectCondition(StatusEffectType.Freeze)
-					.Effect(new DamageEffect(5), EffectOn.Init),
-				add => add("InitDamage_EffectCondition_ActLegalAction")
-					.EffectCondition(LegalAction.Act)
-					.Effect(new DamageEffect(5), EffectOn.Init));
+			AddRecipe("InitFreeze")
+				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init);
+			AddRecipe("InitDamage_EffectCondition_FreezeStatusEffect")
+				.EffectCondition(StatusEffectType.Freeze)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			AddRecipe("InitDamage_EffectCondition_ActLegalAction")
+				.EffectCondition(LegalAction.Act)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitDamage_EffectCondition_ActLegalAction");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
@@ -206,12 +212,12 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HasLegalAction_OnApply_InitDamage()
 		{
-			AddRecipes(
-				add => add("InitFreeze")
-					.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init),
-				add => add("InitDamage_ApplyCondition_ActLegalAction")
-					.ApplyCondition(LegalAction.Act)
-					.Effect(new DamageEffect(5), EffectOn.Init));
+			AddRecipe("InitFreeze")
+				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init);
+			AddRecipe("InitDamage_ApplyCondition_ActLegalAction")
+				.ApplyCondition(LegalAction.Act)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_ActLegalAction");
 
@@ -227,14 +233,14 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Combination_OnEffect_InitDamage()
 		{
-			AddRecipes(
-				add => add("Flag"),
-				add => add("InitFreeze")
-					.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init),
-				add => add("InitDamage_EffectCondition_Combination")
-					.EffectCondition("Flag")
-					.EffectCondition(StatusEffectType.Freeze)
-					.Effect(new DamageEffect(5), EffectOn.Init));
+			AddRecipe("Flag");
+			AddRecipe("InitFreeze")
+				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init);
+			AddRecipe("InitDamage_EffectCondition_Combination")
+				.EffectCondition("Flag")
+				.EffectCondition(StatusEffectType.Freeze)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitDamage_EffectCondition_Combination");
 			Assert.AreEqual(UnitHealth, Unit.Health);
@@ -251,14 +257,14 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Combination_OnApply_InitDamage()
 		{
-			AddRecipes(
-				add => add("FlagApply"),
-				add => add("InitFreeze")
-					.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init),
-				add => add("InitDamage_ApplyCondition_Combination")
-					.ApplyCondition("FlagApply")
-					.ApplyCondition(StatusEffectType.Freeze)
-					.Effect(new DamageEffect(5), EffectOn.Init));
+			AddRecipe("FlagApply");
+			AddRecipe("InitFreeze")
+				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init);
+			AddRecipe("InitDamage_ApplyCondition_Combination")
+				.ApplyCondition("FlagApply")
+				.ApplyCondition(StatusEffectType.Freeze)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_Combination");
 
