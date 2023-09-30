@@ -6,20 +6,25 @@ namespace ModiBuff.Tests
 {
 	public sealed class AuraTests : ModifierTests
 	{
+		private readonly RecipeAddFunc[] _defaultAuraRecipeAddFuncs =
+		{
+			add => add("InitAddDamageBuff")
+				.OneTimeInit()
+				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				//TODO standardized aura time & aura effects should always be refreshable
+				.Remove(1.05f).Refresh(),
+			add => add("InitAddDamageBuff_Interval")
+				.Aura()
+				.Interval(1)
+				.Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval)
+		};
+
 		[Test]
 		public void AuraInterval()
 		{
-			AddRecipes(
-				add => add("InitAddDamageBuff")
-					.OneTimeInit()
-					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
-					//TODO standardized aura time & aura effects should always be refreshable
-					.Remove(1.05f).Refresh(),
-				add => add("InitAddDamageBuff_Interval")
-					.Aura()
-					.Interval(1)
-					.Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval)
-			);
+			for (int i = 0; i < _defaultAuraRecipeAddFuncs.Length; i++)
+				_defaultAuraRecipeAddFuncs[i](AddRecipe);
+			Setup();
 
 			Unit.AddCloseTargets(Ally);
 			Unit.AddAuraModifier(IdManager.GetId("InitAddDamageBuff_Interval"));
@@ -36,17 +41,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Aura_AddDamage_Timeout()
 		{
-			AddRecipes(
-				add => add("InitAddDamageBuff")
-					.OneTimeInit()
-					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
-					//TODO standardized aura time & aura effects should always be refreshable
-					.Remove(1.05f).Refresh(),
-				add => add("InitAddDamageBuff_Interval")
-					.Aura()
-					.Interval(1)
-					.Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval)
-			);
+			for (int i = 0; i < _defaultAuraRecipeAddFuncs.Length; i++)
+				_defaultAuraRecipeAddFuncs[i](AddRecipe);
+			Setup();
 
 			Unit.AddCloseTargets(Ally);
 			Unit.AddAuraModifier(IdManager.GetId("InitAddDamageBuff_Interval"));
@@ -64,17 +61,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AuraAddedDamageRefresh()
 		{
-			AddRecipes(
-				add => add("InitAddDamageBuff")
-					.OneTimeInit()
-					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
-					//TODO standardized aura time & aura effects should always be refreshable
-					.Remove(1.05f).Refresh(),
-				add => add("InitAddDamageBuff_Interval")
-					.Aura()
-					.Interval(1)
-					.Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval)
-			);
+			for (int i = 0; i < _defaultAuraRecipeAddFuncs.Length; i++)
+				_defaultAuraRecipeAddFuncs[i](AddRecipe);
+			Setup();
 
 			Unit.AddCloseTargets(Ally);
 			Unit.AddAuraModifier(IdManager.GetId("InitAddDamageBuff_Interval"));
@@ -93,17 +82,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Aura_AddDamage_Timeout_AddAgain()
 		{
-			AddRecipes(
-				add => add("InitAddDamageBuff")
-					.OneTimeInit()
-					.Effect(new AddDamageEffect(5, true), EffectOn.Init)
-					//TODO standardized aura time & aura effects should always be refreshable
-					.Remove(1.05f).Refresh(),
-				add => add("InitAddDamageBuff_Interval")
-					.Aura()
-					.Interval(1)
-					.Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval)
-			);
+			for (int i = 0; i < _defaultAuraRecipeAddFuncs.Length; i++)
+				_defaultAuraRecipeAddFuncs[i](AddRecipe);
+			Setup();
 
 			Unit.AddCloseTargets(Ally);
 			Unit.AddAuraModifier(IdManager.GetId("InitAddDamageBuff_Interval"));

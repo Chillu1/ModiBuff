@@ -9,11 +9,12 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InstanceStackableDoT()
 		{
-			AddRecipes(add => add("InstanceStackableDoT")
+			AddRecipe("InstanceStackableDoT")
 				.InstanceStackable()
 				.Interval(1)
 				.Effect(new DamageEffect(5), EffectOn.Interval)
-				.Remove(5));
+				.Remove(5);
+			Setup();
 
 			Unit.AddModifierSelf("InstanceStackableDoT");
 
@@ -41,10 +42,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InstanceStackableAddDamage()
 		{
-			AddRecipes(add => add("InstanceStackableAddDamageRevertible")
+			AddRecipe("InstanceStackableAddDamageRevertible")
 				.InstanceStackable()
 				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
-				.Remove(5));
+				.Remove(5);
+			Setup();
 
 			Unit.AddModifierSelf("InstanceStackableAddDamageRevertible");
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);

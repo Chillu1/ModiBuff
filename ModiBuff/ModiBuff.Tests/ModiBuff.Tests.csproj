@@ -5,7 +5,7 @@
 
         <IsPackable>false</IsPackable>
 
-        <LangVersion>7</LangVersion>
+        <LangVersion>7.2</LangVersion>
 
         <OutputType>Library</OutputType>
 

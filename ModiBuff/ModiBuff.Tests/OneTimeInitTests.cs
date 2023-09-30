@@ -9,9 +9,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void OneTimeInitDamage()
 		{
-			AddRecipes(add => add("OneTimeInitDamage")
+			AddRecipe("OneTimeInitDamage")
 				.OneTimeInit()
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("OneTimeInitDamage");
 			Unit.AddModifierSelf("OneTimeInitDamage");

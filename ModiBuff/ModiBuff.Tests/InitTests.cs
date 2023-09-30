@@ -9,7 +9,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamage()
 		{
-			SetupSystems();
+			Setup();
 
 			Unit.AddModifierSelf("InitDamage");
 
@@ -19,7 +19,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamage_InitTwice_DamageTwice()
 		{
-			SetupSystems();
+			Setup();
 
 			Unit.AddModifierSelf("InitDamage");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
@@ -31,10 +31,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void OneTimeInitDamage_LingerDuration()
 		{
-			AddRecipes(add => add("OneTimeInitDamage_LingerDuration")
+			AddRecipe("OneTimeInitDamage_LingerDuration")
 				.OneTimeInit()
 				.Effect(new DamageEffect(5), EffectOn.Init)
-				.Remove(1));
+				.Remove(1);
+			Setup();
 
 			Unit.AddModifierSelf("OneTimeInitDamage_LingerDuration");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
@@ -50,10 +51,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Init_DoT()
 		{
-			AddRecipes(add => add("InitDoT")
+			AddRecipe("InitDoT")
 				.Interval(1)
 				.Effect(new DamageEffect(10), EffectOn.Init | EffectOn.Interval)
-				.Remove(5));
+				.Remove(5);
+			Setup();
 
 			Unit.AddModifierSelf("InitDoT"); //Init
 

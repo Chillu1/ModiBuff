@@ -9,10 +9,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Random_InitDamage()
 		{
-			AddRecipes(add => add("ChanceInitDamage")
+			AddRecipe("ChanceInitDamage")
 				.ApplyChance(0.5f)
-				.Effect(new DamageEffect(5), EffectOn.Init));
-
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("ChanceInitDamage"), ApplierType.Attack);
 
@@ -28,9 +28,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Random_InitDamage_Effect()
 		{
-			AddRecipes(add => add("ChanceEffectInitDamage")
+			AddRecipe("ChanceEffectInitDamage")
 				.EffectChance(0.5f)
-				.Effect(new DamageEffect(5), EffectOn.Init));
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
 
 			for (int i = 0; i < 50; i++)
 				Unit.AddModifierSelf("ChanceEffectInitDamage");
@@ -44,10 +45,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Random_IntervalDamage_Effect()
 		{
-			AddRecipes(add => add("ChanceEffectIntervalDamage")
+			AddRecipe("ChanceEffectIntervalDamage")
 				.EffectChance(0.5f)
 				.Interval(1)
-				.Effect(new DamageEffect(5), EffectOn.Interval));
+				.Effect(new DamageEffect(5), EffectOn.Interval);
+			Setup();
 
 			Unit.AddModifierSelf("ChanceEffectIntervalDamage");
 
@@ -63,10 +65,11 @@ namespace ModiBuff.Tests
 		//[Test]
 		public void Random_DurationDamage_Effect()
 		{
-			AddRecipes(add => add("ChanceEffectDurationDamage")
+			AddRecipe("ChanceEffectDurationDamage")
 				.EffectChance(0.5f)
 				.Effect(new DamageEffect(5), EffectOn.Duration)
-				.Remove(1));
+				.Remove(1);
+			Setup();
 
 			for (int i = 0; i < 50; i++)
 			{
@@ -83,10 +86,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Random_StackDamage_Effect()
 		{
-			AddRecipes(add => add("ChanceEffectStackDamage")
+			AddRecipe("ChanceEffectStackDamage")
 				.EffectChance(0.5f)
 				.Effect(new DamageEffect(5), EffectOn.Stack)
-				.Stack(WhenStackEffect.Always));
+				.Stack(WhenStackEffect.Always);
+			Setup();
 
 			for (int i = 0; i < 50; i++)
 				Unit.AddModifierSelf("ChanceEffectStackDamage");

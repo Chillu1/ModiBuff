@@ -9,9 +9,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void MultiTarget_AddDamage_Revertible()
 		{
-			AddRecipes(add => add("InitAddDamageRevertible")
+			AddRecipe("InitAddDamageRevertible")
 				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
-				.Remove(5));
+				.Remove(5);
+			Setup();
 
 			var generator = Recipes.GetGenerator("InitAddDamageRevertible");
 			Unit.AddApplierModifier(generator, ApplierType.Cast);

@@ -9,8 +9,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void TimeStateReset()
 		{
-			AddRecipes(add => add("DurationRemove")
-				.Remove(5));
+			AddRecipe("DurationRemove")
+				.Remove(5);
+			Setup();
 
 			Pool.Clear();
 			Pool.Allocate(IdManager.GetId("DurationRemove"), 1);
@@ -35,9 +36,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void StackStateReset()
 		{
-			AddRecipes(add => add("StackBasedDamage")
+			AddRecipe("StackBasedDamage")
 				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
-				.Stack(WhenStackEffect.Always, value: 2));
+				.Stack(WhenStackEffect.Always, value: 2);
+			Setup();
 
 			Pool.Clear();
 			Pool.Allocate(IdManager.GetId("StackBasedDamage"), 1);
@@ -57,7 +59,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AllocateModifiers_RentAll()
 		{
-			SetupSystems();
+			Setup();
 
 			const int count = 5000;
 
@@ -77,8 +79,8 @@ namespace ModiBuff.Tests
 		[Explicit]
 		public void FullLibraryInit()
 		{
-			SetupSystems();
-			
+			Setup();
+
 			Config.PoolSize = 512;
 			Pool.Reset();
 			IdManager.Reset();

@@ -9,9 +9,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Duration_Damage()
 		{
-			AddRecipes(add => add("DurationDamage")
+			AddRecipe("DurationDamage")
 				.Effect(new DamageEffect(5), EffectOn.Duration)
-				.Duration(5));
+				.Duration(5);
+			Setup();
 
 			Unit.AddModifierSelf("DurationDamage");
 
@@ -23,8 +24,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Duration_Remove()
 		{
-			AddRecipes(add => add("DurationRemove")
-				.Remove(5));
+			AddRecipe("DurationRemove")
+				.Remove(5);
+			Setup();
 
 			Unit.AddModifierSelf("DurationRemove");
 
@@ -36,9 +38,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Duration_Damage_Once()
 		{
-			AddRecipes(add => add("DurationDamage")
+			AddRecipe("DurationDamage")
 				.Effect(new DamageEffect(5), EffectOn.Duration)
-				.Duration(5));
+				.Duration(5);
+			Setup();
 
 			Unit.AddModifierSelf("DurationDamage");
 

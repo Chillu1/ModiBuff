@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
@@ -11,11 +9,6 @@ namespace ModiBuff.Tests
 		protected ModifierIdManager IdManager { get; private set; }
 		protected ModifierRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
-
-		private readonly RecipeAddFunc[] _defaultRecipeAddFuncs =
-		{
-			add => add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init)
-		};
 
 		protected Unit Unit { get; private set; }
 		protected float UnitHealth { get; private set; }
@@ -39,59 +32,7 @@ namespace ModiBuff.Tests
 		{
 			Logger.SetLogger<NUnitLogger>();
 			Config.PoolSize = 1;
-		}
 
-		protected void AddRecipes(params RecipeAddFunc[] recipeAddFunc) => SetupSystems(recipeAddFunc, new EventRecipeAddFunc[0]);
-
-		protected void AddEventRecipes(params EventRecipeAddFunc[] recipeAddFunc) => SetupSystems(new RecipeAddFunc[0], recipeAddFunc);
-
-		protected void AddMixedRecipes(RecipeAddFunc[] recipeAddFunc, EventRecipeAddFunc[] eventRecipeAddFunc)
-		{
-			SetupSystems(recipeAddFunc, eventRecipeAddFunc);
-		}
-
-		protected void AddGenerators(params ManualGeneratorData[] genData) => SetupSystems(genData);
-
-		private void SetupSystems(RecipeAddFunc[] recipeAddFunc, EventRecipeAddFunc[] eventRecipeAddFunc)
-		{
-			var newRecipeAddFuncs = new RecipeAddFunc[_defaultRecipeAddFuncs.Length + recipeAddFunc.Length];
-			_defaultRecipeAddFuncs.CopyTo(newRecipeAddFuncs, 0);
-			recipeAddFunc.CopyTo(newRecipeAddFuncs, _defaultRecipeAddFuncs.Length);
-
-			IdManager = new ModifierIdManager();
-			var eventEffectFactory =
-				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
-			Recipes = new ModifierRecipes(newRecipeAddFuncs, eventRecipeAddFunc, IdManager, eventEffectFactory);
-			Pool = new ModifierPool(Recipes.GetGenerators());
-
-			Setup();
-		}
-
-		private void SetupSystems(ManualGeneratorData[] genData)
-		{
-			IdManager = new ModifierIdManager();
-			var eventEffectFactory =
-				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
-			Recipes = new ModifierRecipes(_defaultRecipeAddFuncs, new EventRecipeAddFunc[0], IdManager, eventEffectFactory, genData);
-			Pool = new ModifierPool(Recipes.GetGenerators());
-
-			Setup();
-		}
-
-		public void SetupSystems()
-		{
-			IdManager = new ModifierIdManager();
-			var eventEffectFactory =
-				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
-			Recipes = new ModifierRecipes(_defaultRecipeAddFuncs, new EventRecipeAddFunc[0], IdManager, eventEffectFactory);
-			Pool = new ModifierPool(Recipes.GetGenerators());
-
-			Setup();
-		}
-
-		//Setup needs to be called manually so we create the units after all recipes have been added
-		public void Setup()
-		{
 			UnitHealth = AllyHealth = 500;
 			UnitDamage = AllyDamage = 10;
 			UnitHeal = AllyHeal = 5;
@@ -99,6 +40,32 @@ namespace ModiBuff.Tests
 			EnemyHealth = 1000;
 			EnemyDamage = 20;
 			EnemyHeal = 10;
+		}
+
+		[SetUp]
+		public void IterationSetup()
+		{
+			IdManager = new ModifierIdManager();
+			Recipes = new ModifierRecipes(IdManager,
+				(effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
+			Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
+		}
+
+		protected ModifierRecipe AddRecipe(string name) => Recipes.Add(name);
+		protected ModifierEventRecipe AddEventRecipe(string name, EffectOnEvent @event) => Recipes.AddEvent(name, @event);
+
+		protected void AddGenerator(in ManualGeneratorData data) => Recipes.Add(data.Name, in data.CreateFunc, in data.AddData);
+
+		protected void AddGenerator(string name, in ModifierGeneratorFunc createFunc, in ModifierAddData addData) =>
+			Recipes.Add(name, in createFunc, in addData);
+
+		/// <summary>
+		///		Setup needs to be called manually so we create the units after all recipes have been added
+		/// </summary>
+		public void Setup()
+		{
+			Recipes.CreateGenerators();
+			Pool = new ModifierPool(Recipes.GetGenerators());
 
 			Unit = new Unit(UnitHealth, UnitDamage, UnitHeal, UnitMana);
 			Enemy = new Unit(EnemyHealth, EnemyDamage, EnemyHeal);

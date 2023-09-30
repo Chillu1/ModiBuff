@@ -9,8 +9,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Init_AddDamage()
 		{
-			AddRecipes(add => add("InitAddDamage")
-				.Effect(new AddDamageEffect(5), EffectOn.Init));
+			AddRecipe("InitAddDamage")
+				.Effect(new AddDamageEffect(5), EffectOn.Init);
+			Setup();
 
 			Unit.AddModifierSelf("InitAddDamage");
 
