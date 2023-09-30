@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 namespace ModiBuff.Core.Units
 {
 	public sealed class DamageEffect : ITargetEffect, IStackEffect, IStateEffect, IEffect,
-		IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>
+		IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>, IEquatable<DamageEffect>
 	{
 		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;
@@ -17,6 +17,9 @@ namespace ModiBuff.Core.Units
 		private bool _hasMetaEffects;
 		private IPostEffect<float>[] _postEffects;
 		private bool _hasPostEffects;
+		private static int _effectId = 0, _staticId = 0, _staticGenId;
+		private readonly int _id, _genId;
+		private readonly int _hash;
 
 		private float _extraDamage;
 
@@ -35,9 +38,23 @@ namespace ModiBuff.Core.Units
 			_hasMetaEffects = metaEffects != null;
 			_postEffects = postEffects;
 			_hasPostEffects = postEffects != null;
+
+			_id = _staticId;
+			_genId = _staticGenId++;
+			int cantorOne = (_id + _genId) * (_id + _genId + 1) / 2 + _genId;
+			_hash = (cantorOne + _effectId) * (cantorOne + _effectId + 1) / 2 + _effectId;
 		}
 
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
+
+		public void UpdateHash(int id, int genId)
+		{
+			unchecked
+			{
+				//int cantorOne = (id + genId) * (id + genId + 1) / 2 + genId;
+				//_hash = (cantorOne + _effectId) * (cantorOne + _effectId + 1) / 2 + _effectId;
+			}
+		}
 
 		public DamageEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
 		{
@@ -71,9 +88,9 @@ namespace ModiBuff.Core.Units
 
 			float returnDamageInfo =
 #if !DEBUG && UNSAFE
-				Unsafe.As<IDamagable<float, float, float, float>>(target).TakeDamage(damage, source);
+				Unsafe.As<IDamagable<float, float, float, float>>(target).TakeDamage(damage, source, _hash);
 #else
-				((IDamagable<float, float, float, float>)target).TakeDamage(damage, source);
+				((IDamagable<float, float, float, float>)target).TakeDamage(damage, source, _hash);
 #endif
 			if (!_hasPostEffects)
 				return;
@@ -100,5 +117,24 @@ namespace ModiBuff.Core.Units
 		public IEffect ShallowClone() => new DamageEffect(_baseDamage, _stackEffect, _targeting, _metaEffects, _postEffects);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
+
+		public static void Reset()
+		{
+			_staticId = _staticGenId = _effectId = 0;
+		}
+
+		public bool Equals(DamageEffect other)
+		{
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
+			return _hash == other._hash;
+		}
+
+		public override bool Equals(object obj)
+		{
+			return ReferenceEquals(this, obj) || obj is DamageEffect other && Equals(other);
+		}
+
+		public override int GetHashCode() => _hash;
 	}
 }

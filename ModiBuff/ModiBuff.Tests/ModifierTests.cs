@@ -81,6 +81,7 @@ namespace ModiBuff.Tests
 			IdManager = null;
 			Recipes = null;
 			Pool = null;
+			DamageEffect.Reset(); //TODO Remove this
 		}
 
 		[OneTimeTearDown]

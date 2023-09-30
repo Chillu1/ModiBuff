@@ -39,6 +39,7 @@ namespace ModiBuff.Core.Units
 		private readonly List<IEffect> _beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
 		private int _whenAttackedCount, _whenCastCount, _whenDeathCount, _whenHealedCount;
 		private int _beforeAttackCount, _onAttackCount, _onCastCount, _onKillCount, _onHealCount;
+		private readonly HashSet<int> _whenAttackSet;
 
 		private readonly List<IEffect> _strongHitCallbacks;
 		private UnitCallback _strongHitDelegateCallbacks;
@@ -67,6 +68,8 @@ namespace ModiBuff.Core.Units
 			_onKillEffects = new List<IEffect>();
 			_onHealEffects = new List<IEffect>();
 
+			_whenAttackSet = new HashSet<int>();
+
 			_strongHitCallbacks = new List<IEffect>();
 
 			_targetsInRange = new List<IUnit>();
@@ -87,6 +90,7 @@ namespace ModiBuff.Core.Units
 		{
 			_whenAttackedCount = _whenCastCount = _whenDeathCount = _whenHealedCount = 0;
 			_beforeAttackCount = _onAttackCount = _onCastCount = _onKillCount = _onHealCount = 0;
+			_whenAttackSet.Clear();
 
 			_statusEffectController.Update(deltaTime);
 			ModifierController.Update(deltaTime);
@@ -141,11 +145,14 @@ namespace ModiBuff.Core.Units
 			return dealtDamage;
 		}
 
-		public float TakeDamage(float damage, IUnit source)
+		//TODO Feeding effectHash here doesn't work, since we're reusing the modifier and their effects when they're not instance stackable
+		//We'd need to feed the original sender hash instead, which seems very hard/not worth. We could get that info by
+		//Querying source or target modifiers, but that's terrible.
+		public float TakeDamage(float damage, IUnit source, int effectHash = 0)
 		{
-			if (_whenAttackedCount == 0)
+			if (!_whenAttackSet.Contains(effectHash))
 			{
-				_whenAttackedCount++;
+				_whenAttackSet.Add(effectHash);
 				for (int i = 0; i < _whenAttackedEffects.Count; i++)
 					_whenAttackedEffects[i].Effect(this, source);
 			}

@@ -196,5 +196,26 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
+
+		[Test]
+		public void TwoUniqueDamageEffectsActivatingThorns()
+		{
+			AddEventRecipe("ThornsWhenAttackedEvent", EffectOnEvent.WhenAttacked)
+				.Effect(new DamageEffect(5), Targeting.SourceTarget);
+			Setup();
+
+			Unit.AddModifierSelf("ThornsWhenAttackedEvent");
+
+			Enemy.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Cast);
+			Ally.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Cast);
+
+			int initDamageId = Recipes.GetGenerator("InitDamage").Id;
+			Enemy.TryCast(initDamageId, Unit);
+			Ally.TryCast(initDamageId, Unit);
+
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+			Assert.AreEqual(AllyHealth - 5, Ally.Health);
+		}
 	}
 }
