@@ -9,7 +9,7 @@ namespace ModiBuff.Tests
 	public abstract class ModifierTests
 	{
 		protected ModifierIdManager IdManager { get; private set; }
-		protected ModifierRecipes Recipes { get; private set; }
+		protected ModifierCompositionRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
 
 		private readonly RecipeAddFunc[] _defaultRecipeAddFuncs =
@@ -61,7 +61,7 @@ namespace ModiBuff.Tests
 			IdManager = new ModifierIdManager();
 			var eventEffectFactory =
 				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
-			Recipes = new ModifierRecipes(newRecipeAddFuncs, eventRecipeAddFunc, IdManager, eventEffectFactory);
+			Recipes = new ModifierCompositionRecipes(newRecipeAddFuncs, eventRecipeAddFunc, IdManager, eventEffectFactory);
 			Pool = new ModifierPool(Recipes.GetGenerators());
 
 			Setup();
@@ -72,7 +72,8 @@ namespace ModiBuff.Tests
 			IdManager = new ModifierIdManager();
 			var eventEffectFactory =
 				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
-			Recipes = new ModifierRecipes(_defaultRecipeAddFuncs, new EventRecipeAddFunc[0], IdManager, eventEffectFactory, genData);
+			Recipes = new ModifierCompositionRecipes(_defaultRecipeAddFuncs, new EventRecipeAddFunc[0], IdManager, eventEffectFactory,
+				genData);
 			Pool = new ModifierPool(Recipes.GetGenerators());
 
 			Setup();
@@ -83,7 +84,7 @@ namespace ModiBuff.Tests
 			IdManager = new ModifierIdManager();
 			var eventEffectFactory =
 				new EventEffectFactory((effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
-			Recipes = new ModifierRecipes(_defaultRecipeAddFuncs, new EventRecipeAddFunc[0], IdManager, eventEffectFactory);
+			Recipes = new ModifierCompositionRecipes(_defaultRecipeAddFuncs, new EventRecipeAddFunc[0], IdManager, eventEffectFactory);
 			Pool = new ModifierPool(Recipes.GetGenerators());
 
 			Setup();
