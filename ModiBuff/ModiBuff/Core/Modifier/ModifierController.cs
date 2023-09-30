@@ -27,7 +27,7 @@ namespace ModiBuff.Core
 			_owner = owner;
 
 			_modifiers = new Modifier[Config.ModifierArraySize];
-			_modifierIndexes = new int[ModifierCompositionRecipes.GeneratorCount];
+			_modifierIndexes = new int[ModifierRecipes.GeneratorCount];
 			for (int i = 0; i < _modifierIndexes.Length; i++)
 				_modifierIndexes[i] = -1;
 
@@ -168,7 +168,7 @@ namespace ModiBuff.Core
 
 		public void Add(int id, IUnit target, IUnit source)
 		{
-			ref readonly var addData = ref ModifierCompositionRecipes.GetAddData(id);
+			ref readonly var addData = ref ModifierRecipes.GetAddData(id);
 
 			if (!addData.IsInstanceStackable && _modifierIndexes[id] != -1)
 			{
@@ -203,7 +203,7 @@ namespace ModiBuff.Core
 
 		public bool Contains(int id)
 		{
-			if (!ModifierCompositionRecipes.GetAddData(id).IsInstanceStackable)
+			if (!ModifierRecipes.GetAddData(id).IsInstanceStackable)
 				return _modifierIndexes[id] != -1;
 
 			for (int i = 0; i < _modifiersTop; i++)
@@ -225,7 +225,7 @@ namespace ModiBuff.Core
 		public void ModifierAction(int id, int genId, ModifierAction action)
 		{
 			Modifier modifier = null;
-			ref readonly var addData = ref ModifierCompositionRecipes.GetAddData(id);
+			ref readonly var addData = ref ModifierRecipes.GetAddData(id);
 
 			if (!addData.IsInstanceStackable && _modifierIndexes[id] != -1)
 			{
@@ -275,7 +275,7 @@ namespace ModiBuff.Core
 
 		public void Remove(in ModifierReference modifierReference)
 		{
-			if (!ModifierCompositionRecipes.GetAddData(modifierReference.Id).IsInstanceStackable)
+			if (!ModifierRecipes.GetAddData(modifierReference.Id).IsInstanceStackable)
 			{
 				var modifier = _modifiers[_modifierIndexes[modifierReference.Id]];
 				ModifierPool.Instance.Return(modifier);

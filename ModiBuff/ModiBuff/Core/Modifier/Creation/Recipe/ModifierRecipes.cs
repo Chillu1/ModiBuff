@@ -19,103 +19,52 @@ namespace ModiBuff.Core
 		private readonly IDictionary<string, ManualModifierGenerator> _manualGenerators;
 		private readonly IDictionary<string, IModifierGenerator> _modifierGenerators;
 		private readonly List<RegisterData> _registeredNames;
-		private readonly ModifierAddData[] _modifierAddData;
+
+		private ModifierAddData[] _modifierAddData;
 
 		private EventEffectFactory _eventEffectFunc;
 
-		//TODO Refactor Unit tests recipe adding, and combines constructors
-		internal ModifierRecipes(IReadOnlyList<RecipeAddFunc> recipes, IReadOnlyList<EventRecipeAddFunc> eventRecipes,
-			ModifierIdManager idManager, EventEffectFactory eventEffectFunc, ManualGeneratorData[] manualGeneratorData = null)
+		public ModifierRecipes(ModifierIdManager idManager, EventEffectFactory eventEffectFunc = null)
 		{
 			_instance = this;
 
 			_idManager = idManager;
+			_recipes = new Dictionary<string, IModifierRecipe>(64);
+			_manualGenerators = new Dictionary<string, ManualModifierGenerator>(64);
+			_modifierGenerators = new Dictionary<string, IModifierGenerator>(64);
+			_registeredNames = new List<RegisterData>(16);
+
 			_eventEffectFunc = eventEffectFunc;
-			_recipes = new Dictionary<string, IModifierRecipe>(64);
-			_manualGenerators = new Dictionary<string, ManualModifierGenerator>(64);
-			_modifierGenerators = new Dictionary<string, IModifierGenerator>(64);
-			_registeredNames = new List<RegisterData>(16);
-
-			for (int i = 0; i < recipes.Count; i++)
-			{
-				recipes[i](delegate(string name)
-				{
-					Register(name);
-					//TODO Terrible hack for terrible design, needs refactor ASAP
-					return new ModifierRecipe(0, name, _idManager);
-				});
-			}
-
-			for (int i = 0; i < eventRecipes.Count; i++)
-			{
-				eventRecipes[i](delegate(string name, object @event)
-				{
-					Register(name);
-					//TODO Terrible hack for terrible design, needs refactor ASAP
-					return new ModifierEventRecipe(0, name, _idManager, null);
-				});
-			}
-
-			for (int i = 0; i < recipes.Count; i++)
-				recipes[i](Add);
-			for (int i = 0; i < eventRecipes.Count; i++)
-				eventRecipes[i](AddEvent);
-
-			for (int i = 0; i < manualGeneratorData?.Length; i++)
-				Add(manualGeneratorData[i]);
-
-			SetupRecipes();
-			_modifierAddData = new ModifierAddData[_recipes.Count + _manualGenerators.Count];
-			foreach (var generator in _manualGenerators.Values)
-			{
-				_modifierAddData[generator.Id] = generator.GetAddData();
-				_modifierGenerators.Add(generator.Name, generator);
-			}
-
-			foreach (var recipe in _recipes.Values)
-			{
-				_modifierAddData[recipe.Id] = recipe.CreateAddData();
-				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
-			}
-
-			GeneratorCount = _modifierGenerators.Count;
-#if DEBUG && !MODIBUFF_PROFILE
-			Logger.Log($"[ModiBuff] Loaded {GeneratorCount} modifier generators.");
-#endif
-		}
-
-		protected ModifierRecipes(ModifierIdManager idManager)
-		{
-			_instance = this;
-
-			_idManager = idManager;
-			_recipes = new Dictionary<string, IModifierRecipe>(64);
-			_manualGenerators = new Dictionary<string, ManualModifierGenerator>(64);
-			_modifierGenerators = new Dictionary<string, IModifierGenerator>(64);
-			_registeredNames = new List<RegisterData>(16);
-
-			SetupRecipes();
-			_modifierAddData = new ModifierAddData[_recipes.Count + _manualGenerators.Count];
-			foreach (var generator in _manualGenerators.Values)
-			{
-				_modifierAddData[generator.Id] = generator.GetAddData();
-				_modifierGenerators.Add(generator.Name, generator);
-			}
-
-			foreach (var recipe in _recipes.Values)
-			{
-				_modifierAddData[recipe.Id] = recipe.CreateAddData();
-				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
-			}
-
-			GeneratorCount = _modifierGenerators.Count;
-#if DEBUG && !MODIBUFF_PROFILE
-			Logger.Log($"[ModiBuff] Loaded {GeneratorCount} modifier generators.");
-#endif
 		}
 
 		protected virtual void SetupRecipes()
 		{
+		}
+
+		/// <summary>
+		///		Finishes the setup of the recipes, and creates the generators.
+		/// </summary>
+		public void CreateGenerators()
+		{
+			SetupRecipes();
+
+			_modifierAddData = new ModifierAddData[_recipes.Count + _manualGenerators.Count];
+			foreach (var generator in _manualGenerators.Values)
+			{
+				_modifierAddData[generator.Id] = generator.GetAddData();
+				_modifierGenerators.Add(generator.Name, generator);
+			}
+
+			foreach (var recipe in _recipes.Values)
+			{
+				_modifierAddData[recipe.Id] = recipe.CreateAddData();
+				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
+			}
+
+			GeneratorCount = _modifierGenerators.Count;
+#if DEBUG && !MODIBUFF_PROFILE
+			Logger.Log($"[ModiBuff] Loaded {GeneratorCount} modifier generators.");
+#endif
 		}
 
 		/// <summary>
@@ -133,11 +82,11 @@ namespace ModiBuff.Core
 
 		public static ref readonly ModifierAddData GetAddData(int id) => ref _instance._modifierAddData[id];
 
-		public IModifierGenerator GetGenerator(string id) => _modifierGenerators[id];
+		public IModifierGenerator GetGenerator(string name) => _modifierGenerators[name];
 
 		internal IModifierGenerator[] GetGenerators() => _modifierGenerators.Values.ToArray();
 
-		protected ModifierRecipe Add(string name)
+		public ModifierRecipe Add(string name)
 		{
 			if (_recipes.TryGetValue(name, out var localRecipe))
 			{
@@ -166,9 +115,9 @@ namespace ModiBuff.Core
 			return recipe;
 		}
 
-		protected void Add(in ManualGeneratorData data) => Add(data.Name, in data.CreateFunc, in data.AddData);
+		public void Add(in ManualGeneratorData data) => Add(data.Name, in data.CreateFunc, in data.AddData);
 
-		protected void Add(string name, in ModifierGeneratorFunc createFunc, in ModifierAddData addData)
+		public void Add(string name, in ModifierGeneratorFunc createFunc, in ModifierAddData addData)
 		{
 			if (_recipes.ContainsKey(name))
 			{
@@ -204,9 +153,9 @@ namespace ModiBuff.Core
 			_manualGenerators.Add(name, modifierGenerator);
 		}
 
-		protected ModifierEventRecipe AddEvent<T>(string name, T effectOnEvent) => AddEvent(name, (object)effectOnEvent);
+		public ModifierEventRecipe AddEvent<T>(string name, T effectOnEvent) => AddEvent(name, (object)effectOnEvent);
 
-		protected ModifierEventRecipe AddEvent(string name, object effectOnEvent)
+		public ModifierEventRecipe AddEvent(string name, object effectOnEvent)
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (_eventEffectFunc == null)
@@ -244,7 +193,7 @@ namespace ModiBuff.Core
 		///		Special case when we want to use applier/conditional modifiers and want to set them up in order.
 		///		This can also be used to have the first original modifier take the first available id.
 		/// </summary>
-		protected void Register(params string[] names)
+		public void Register(params string[] names)
 		{
 			foreach (string name in names)
 			{

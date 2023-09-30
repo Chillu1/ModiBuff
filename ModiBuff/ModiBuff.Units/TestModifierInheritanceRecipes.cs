@@ -1,29 +1,17 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class TestModifierRecipes
+	/// <summary>
+	///		Example of how to setup recipes for modifier through inheritance
+	/// </summary>
+	public sealed class TestModifierInheritanceRecipes : ModifierRecipes
 	{
-		private readonly ModifierRecipes _modifierRecipes;
-
-		public TestModifierRecipes(ModifierIdManager idManager)
+		public TestModifierInheritanceRecipes(ModifierIdManager idManager, EventEffectFactory eventEffectFunc = null) : base(idManager,
+			eventEffectFunc)
 		{
-			_modifierRecipes = new ModifierRecipes(idManager,
-				(effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
-			SetupRecipes();
-			_modifierRecipes.CreateGenerators();
+			CreateGenerators();
 		}
 
-		private void Register(params string[] names) => _modifierRecipes.Register(names);
-		private ModifierRecipe Add(string name) => _modifierRecipes.Add(name);
-		private void Add(in ManualGeneratorData data) => Add(data.Name, in data.CreateFunc, in data.AddData);
-
-		private void Add(string name, in ModifierGeneratorFunc createFunc, in ModifierAddData addData)
-		{
-			_modifierRecipes.Add(name, in createFunc, in addData);
-		}
-
-		private ModifierEventRecipe AddEvent(string name, EffectOnEvent effectOnEvent) => _modifierRecipes.AddEvent(name, effectOnEvent);
-
-		private void SetupRecipes()
+		protected override void SetupRecipes()
 		{
 			Add("StunEverySecond")
 				.Interval(1)
