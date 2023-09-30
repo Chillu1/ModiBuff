@@ -6,6 +6,6 @@ namespace ModiBuff.Core.Units
 	{
 		THealth HealValue { get; }
 
-		TReturnHealthInfo Heal(IHealable<THealth, TReturnHealthInfo> target, bool triggersEvents = true);
+		TReturnHealthInfo Heal(IHealable<THealth, TReturnHealthInfo> target);
 	}
 }

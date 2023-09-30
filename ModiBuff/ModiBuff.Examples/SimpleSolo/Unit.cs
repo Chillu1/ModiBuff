@@ -53,7 +53,7 @@ namespace ModiBuff.Examples.SimpleSolo
 		public void SetAttackTarget(IUnit target) => _targetingSystem.SetAttackTarget(target);
 		public void SetCastTarget(IUnit target) => _targetingSystem.SetCastTarget(target);
 
-		public float TakeDamage(float damage, IUnit source, bool triggersEvents = true)
+		public float TakeDamage(float damage, IUnit source)
 		{
 			if (BlockInstance > 0) //Example custom game logic implementation
 			{
@@ -64,7 +64,7 @@ namespace ModiBuff.Examples.SimpleSolo
 			return Health -= damage;
 		}
 
-		public float Attack(IUnit target, bool triggersEvents = true)
+		public float Attack(IUnit target)
 		{
 			float dealtDamage = ((IDamagable<float, float, float, float>)target).TakeDamage(Damage, this);
 

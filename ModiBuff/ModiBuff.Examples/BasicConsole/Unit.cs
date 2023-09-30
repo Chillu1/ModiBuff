@@ -53,14 +53,14 @@ namespace ModiBuff.Examples.BasicConsole
 			return Attack(_targetingSystem.AttackTarget);
 		}
 
-		public float Attack(IUnit target, bool triggersEvents = true)
+		public float Attack(IUnit target)
 		{
 			float damageDealt = ((IDamagable<float, float, float, float>)target).TakeDamage(Damage, this);
 
 			return damageDealt;
 		}
 
-		public float TakeDamage(float damage, IUnit source, bool triggersEvents = true)
+		public float TakeDamage(float damage, IUnit source)
 		{
 			if (IsDead)
 				return 0;

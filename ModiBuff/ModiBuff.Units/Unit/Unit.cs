@@ -110,12 +110,12 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public float Attack(IUnit target, bool triggersEvents = true)
+		public float Attack(IUnit target)
 		{
-			return Attack((Unit)target, triggersEvents);
+			return Attack((Unit)target);
 		}
 
-		public float Attack(Unit target, bool triggersEvents = true)
+		public float Attack(Unit target)
 		{
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
@@ -192,7 +192,7 @@ namespace ModiBuff.Core.Units
 			return Health - oldHealth;
 		}
 
-		public float Heal(IHealable<float, float> target, bool triggersEvents = true)
+		public float Heal(IHealable<float, float> target)
 		{
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;

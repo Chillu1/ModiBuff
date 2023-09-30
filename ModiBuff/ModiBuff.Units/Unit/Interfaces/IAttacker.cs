@@ -4,6 +4,6 @@ namespace ModiBuff.Core.Units
 	{
 		TDamage Damage { get; }
 
-		TDamageReturnInfo Attack(IUnit target, bool triggersEvents = true);
+		TDamageReturnInfo Attack(IUnit target);
 	}
 }
