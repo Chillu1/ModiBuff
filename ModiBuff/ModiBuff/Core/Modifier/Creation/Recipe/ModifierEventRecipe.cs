@@ -53,8 +53,6 @@ namespace ModiBuff.Core
 		{
 			if (effect is ITargetEffect effectTarget)
 				effectTarget.SetTargeting(targeting);
-			if (effect is IEventTrigger eventTrigger)
-				eventTrigger.SetEventBased();
 
 			_effects.Add(new EffectWrapper(effect, EffectOn.Init));
 			return this;

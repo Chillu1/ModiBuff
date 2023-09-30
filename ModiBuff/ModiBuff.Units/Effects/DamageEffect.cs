@@ -7,13 +7,12 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class DamageEffect : ITargetEffect, IEventTrigger, IStackEffect, IStateEffect, IEffect,
+	public sealed class DamageEffect : ITargetEffect, IStackEffect, IStateEffect, IEffect,
 		IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>
 	{
 		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;
 		private Targeting _targeting;
-		private bool _isEventBased;
 		private IMetaEffect<float, float>[] _metaEffects;
 		private bool _hasMetaEffects;
 		private IPostEffect<float>[] _postEffects;
@@ -21,18 +20,17 @@ namespace ModiBuff.Core.Units
 
 		private float _extraDamage;
 
-		public DamageEffect(float damage, StackEffectType stackEffect = StackEffectType.Effect) :
-			this(damage, stackEffect, Targeting.TargetSource, false, null, null)
+		public DamageEffect(float damage, StackEffectType stackEffect = StackEffectType.Effect)
+			: this(damage, stackEffect, Targeting.TargetSource, null, null)
 		{
 		}
 
-		private DamageEffect(float damage, StackEffectType stackEffect, Targeting targeting, bool isEventBased,
-			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
+		private DamageEffect(float damage, StackEffectType stackEffect, Targeting targeting, IMetaEffect<float, float>[] metaEffects,
+			IPostEffect<float>[] postEffects)
 		{
 			_baseDamage = damage;
 			_stackEffect = stackEffect;
 			_targeting = targeting;
-			_isEventBased = isEventBased;
 			_metaEffects = metaEffects;
 			_hasMetaEffects = metaEffects != null;
 			_postEffects = postEffects;
@@ -40,7 +38,6 @@ namespace ModiBuff.Core.Units
 		}
 
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
-		public void SetEventBased() => _isEventBased = true;
 
 		public DamageEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
 		{
@@ -74,15 +71,15 @@ namespace ModiBuff.Core.Units
 
 			float returnDamageInfo =
 #if !DEBUG && UNSAFE
-				Unsafe.As<IDamagable<float, float, float, float>>(target).TakeDamage(damage, source, !_isEventBased);
+				Unsafe.As<IDamagable<float, float, float, float>>(target).TakeDamage(damage, source);
 #else
-				((IDamagable<float, float, float, float>)target).TakeDamage(damage, source, !_isEventBased);
+				((IDamagable<float, float, float, float>)target).TakeDamage(damage, source);
 #endif
 			if (!_hasPostEffects)
 				return;
 
 			foreach (var postEffect in _postEffects)
-				postEffect.Effect(returnDamageInfo, target, source, !_isEventBased);
+				postEffect.Effect(returnDamageInfo, target, source);
 		}
 
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
@@ -100,7 +97,7 @@ namespace ModiBuff.Core.Units
 
 		public void ResetState() => _extraDamage = 0;
 
-		public IEffect ShallowClone() => new DamageEffect(_baseDamage, _stackEffect, _targeting, _isEventBased, _metaEffects, _postEffects);
+		public IEffect ShallowClone() => new DamageEffect(_baseDamage, _stackEffect, _targeting, _metaEffects, _postEffects);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}

@@ -1,4 +1,4 @@
-namespace ModiBuff.Core.Units
+namespace ModiBuff.Core
 {
 	public sealed class EventEffect<TEvent> : IRevertEffect, IEffect
 	{
@@ -10,10 +10,6 @@ namespace ModiBuff.Core.Units
 
 		public EventEffect(IEffect[] effects, TEvent effectOnEvent)
 		{
-			for (int i = 0; i < effects.Length; i++)
-				if (effects[i] is IEventTrigger eventTrigger)
-					eventTrigger.SetEventBased();
-
 			_effects = effects;
 			_effectOnEvent = effectOnEvent;
 		}

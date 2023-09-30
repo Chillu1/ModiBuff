@@ -66,7 +66,7 @@ namespace ModiBuff.Examples.SimpleSolo
 
 		public float Attack(IUnit target, bool triggersEvents = true)
 		{
-			float dealtDamage = ((IDamagable<float, float, float, float>)target).TakeDamage(Damage, this, triggersEvents);
+			float dealtDamage = ((IDamagable<float, float, float, float>)target).TakeDamage(Damage, this);
 
 			return dealtDamage;
 		}

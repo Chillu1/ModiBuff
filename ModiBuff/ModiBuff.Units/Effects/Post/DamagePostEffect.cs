@@ -9,11 +9,11 @@ namespace ModiBuff.Core.Units
 			_targeting = targeting;
 		}
 
-		public void Effect(float value, IUnit target, IUnit source, bool triggerEvents)
+		public void Effect(float value, IUnit target, IUnit source)
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
 
-			((IDamagable<float, float, float, float>)target).TakeDamage(value, source, triggerEvents);
+			((IDamagable<float, float, float, float>)target).TakeDamage(value, source);
 		}
 	}
 }

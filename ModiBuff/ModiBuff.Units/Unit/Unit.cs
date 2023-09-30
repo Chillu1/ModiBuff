@@ -37,6 +37,8 @@ namespace ModiBuff.Core.Units
 		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
 		private readonly List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
 		private readonly List<IEffect> _beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
+		private int _whenAttackedCount, _whenCastCount, _whenDeathCount, _whenHealedCount;
+		private int _beforeAttackCount, _onAttackCount, _onCastCount, _onKillCount, _onHealCount;
 
 		private readonly List<IEffect> _strongHitCallbacks;
 		private UnitCallback _strongHitDelegateCallbacks;
@@ -83,6 +85,9 @@ namespace ModiBuff.Core.Units
 
 		public void Update(float deltaTime)
 		{
+			_whenAttackedCount = _whenCastCount = _whenDeathCount = _whenHealedCount = 0;
+			_beforeAttackCount = _onAttackCount = _onCastCount = _onKillCount = _onHealCount = 0;
+
 			_statusEffectController.Update(deltaTime);
 			ModifierController.Update(deltaTime);
 			for (int i = 0; i < _auraModifiers.Count; i++)
@@ -92,14 +97,17 @@ namespace ModiBuff.Core.Units
 		/// <summary>
 		///		Should be called before we attack/on attack. For modifiers like split shot that we want to trigger when starting an attack.
 		/// </summary>
-		public void PreAttack(IUnit target, bool triggersEvents = true)
+		public void PreAttack(IUnit target)
 		{
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
 				return;
 
-			if (triggersEvents)
+			if (_beforeAttackCount == 0)
+			{
+				_beforeAttackCount++;
 				for (int i = 0; i < _beforeAttackEffects.Count; i++)
 					_beforeAttackEffects[i].Effect(target, this);
+			}
 		}
 
 		public float Attack(IUnit target, bool triggersEvents = true)
@@ -114,23 +122,33 @@ namespace ModiBuff.Core.Units
 
 			this.ApplyAllAttackModifier(target);
 
-			for (int i = 0; i < _onAttackEffects.Count; i++)
-				_onAttackEffects[i].Effect(target, this);
+			if (_onAttackCount == 0)
+			{
+				_onAttackCount++;
+				for (int i = 0; i < _onAttackEffects.Count; i++)
+					_onAttackEffects[i].Effect(target, this);
+			}
 
-			float dealtDamage = target.TakeDamage(Damage, this, triggersEvents);
+			float dealtDamage = target.TakeDamage(Damage, this);
 
-			if (target.Health <= 0)
+			if (target.Health <= 0 && _onKillCount == 0)
+			{
+				_onKillCount++;
 				for (int i = 0; i < _onKillEffects.Count; i++)
 					_onKillEffects[i].Effect(target, this);
+			}
 
 			return dealtDamage;
 		}
 
-		public float TakeDamage(float damage, IUnit source, bool triggersEvents = true)
+		public float TakeDamage(float damage, IUnit source)
 		{
-			if (triggersEvents)
+			if (_whenAttackedCount == 0)
+			{
+				_whenAttackedCount++;
 				for (int i = 0; i < _whenAttackedEffects.Count; i++)
 					_whenAttackedEffects[i].Effect(this, source);
+			}
 
 			float oldHealth = Health;
 			Health -= damage;
@@ -144,8 +162,9 @@ namespace ModiBuff.Core.Units
 				_strongHitDelegateCallbacks?.Invoke(this, source);
 			}
 
-			if (triggersEvents && Health <= 0 && !IsDead)
+			if (_whenDeathCount == 0 && Health <= 0 && !IsDead)
 			{
+				_whenDeathCount++;
 				for (int i = 0; i < _whenDeathEffects.Count; i++)
 					_whenDeathEffects[i].Effect(this, source);
 				//Unit Death TODO Destroy/pool unit
@@ -157,12 +176,16 @@ namespace ModiBuff.Core.Units
 			return dealtDamage;
 		}
 
-		public float Heal(float heal, IUnit source, bool triggersEvents = true)
+		public float Heal(float heal, IUnit source)
 		{
 			float oldHealth = Health;
-			if (triggersEvents)
+			if (_whenHealedCount == 0)
+			{
+				_whenHealedCount++;
 				for (int i = 0; i < _whenHealedEffects.Count; i++)
 					_whenHealedEffects[i].Effect(this, source);
+			}
+
 			Health += heal;
 			if (Health > MaxHealth)
 				Health = MaxHealth;
@@ -174,11 +197,14 @@ namespace ModiBuff.Core.Units
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
-			if (triggersEvents)
+			if (_onHealCount == 0)
+			{
+				_onHealCount++;
 				for (int i = 0; i < _onHealEffects.Count; i++)
 					_onHealEffects[i].Effect(target, this);
+			}
 
-			return target.Heal(HealValue, this, triggersEvents);
+			return target.Heal(HealValue, this);
 		}
 
 		public void AddDamage(float damage)

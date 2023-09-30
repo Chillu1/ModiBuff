@@ -162,22 +162,26 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-		public void Thorns_OnHit_Recursion()
+		public void DoubleThorns_WhenAttacked_OneRecursion()
 		{
-			AddEventRecipe("ThornsOnHitEvent", EffectOnEvent.WhenAttacked)
-				.Effect(new DamageEffect(5), Targeting.SourceTarget);
+			float thornsDamage = 5;
+			AddEventRecipe("ThornsWhenAttackedEvent", EffectOnEvent.WhenAttacked)
+				.Effect(new DamageEffect(thornsDamage), Targeting.SourceTarget);
 			Setup();
 
-			Unit.AddModifierSelf("ThornsOnHitEvent");
-			Enemy.AddModifierSelf("ThornsOnHitEvent");
+			Unit.AddModifierSelf("ThornsWhenAttackedEvent");
+			Enemy.AddModifierSelf("ThornsWhenAttackedEvent");
 
-			Enemy.Attack(Unit);
-			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+			Enemy.Attack(Unit); //Enemy gets thorned, and recursively thorns Unit
+			Assert.AreEqual(EnemyHealth - thornsDamage, Enemy.Health);
+			Assert.AreEqual(UnitHealth - EnemyDamage - thornsDamage, Unit.Health);
+
+			Enemy.Update(0); //Refresh event count
+			Unit.Update(0);
 
 			Unit.Attack(Enemy);
-			Assert.AreEqual(UnitHealth - EnemyDamage - 5, Unit.Health);
+			Assert.AreEqual(UnitHealth - EnemyDamage - thornsDamage - thornsDamage, Unit.Health);
 		}
-
 
 		[Test]
 		public void SelfDamage_PreAttack()

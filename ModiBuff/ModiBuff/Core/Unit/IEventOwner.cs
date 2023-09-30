@@ -1,4 +1,4 @@
-namespace ModiBuff.Core.Units
+namespace ModiBuff.Core
 {
 	public interface IEventOwner<in TEvent>
 	{

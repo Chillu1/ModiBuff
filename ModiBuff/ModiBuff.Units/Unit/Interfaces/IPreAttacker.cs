@@ -2,6 +2,6 @@ namespace ModiBuff.Core.Units
 {
 	public interface IPreAttacker
 	{
-		void PreAttack(IUnit target, bool triggersEvents = true);
+		void PreAttack(IUnit target);
 	}
 }

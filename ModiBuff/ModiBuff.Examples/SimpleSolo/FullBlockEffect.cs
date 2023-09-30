@@ -6,30 +6,27 @@ namespace ModiBuff.Examples.SimpleSolo
 	/// <summary>
 	///		Full example of a custom effect implementation
 	/// </summary>
-	public sealed class FullBlockEffect : IEffect, ITargetEffect, IEventTrigger, IStackEffect, IStateEffect
+	public sealed class FullBlockEffect : IEffect, ITargetEffect, IStackEffect, IStateEffect
 	{
 		private readonly int _baseBlock;
 		private readonly StackBlockEffectType _stackEffect;
 		private Targeting _targeting;
-		private bool _isEventBased;
 
 		private int _extraBlock;
 
 		public FullBlockEffect(int block, StackBlockEffectType stackEffect = StackBlockEffectType.Effect) :
-			this(block, stackEffect, Targeting.TargetSource, false)
+			this(block, stackEffect, Targeting.TargetSource)
 		{
 		}
 
-		private FullBlockEffect(int block, StackBlockEffectType stackEffect, Targeting targeting, bool isEventBased)
+		private FullBlockEffect(int block, StackBlockEffectType stackEffect, Targeting targeting)
 		{
 			_baseBlock = block;
 			_stackEffect = stackEffect;
 			_targeting = targeting;
-			_isEventBased = isEventBased;
 		}
 
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
-		public void SetEventBased() => _isEventBased = true;
 
 		public void Effect(IUnit target, IUnit source)
 		{
@@ -59,7 +56,7 @@ namespace ModiBuff.Examples.SimpleSolo
 
 		public void ResetState() => _extraBlock = 0;
 
-		public IEffect ShallowClone() => new FullBlockEffect(_baseBlock, _stackEffect, _targeting, _isEventBased);
+		public IEffect ShallowClone() => new FullBlockEffect(_baseBlock, _stackEffect, _targeting);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 

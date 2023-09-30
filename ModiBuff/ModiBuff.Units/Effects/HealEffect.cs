@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class HealEffect : ITargetEffect, IEventTrigger, IStateEffect, IStackEffect, IRevertEffect, IEffect,
+	public sealed class HealEffect : ITargetEffect, IStateEffect, IStackEffect, IRevertEffect, IEffect,
 		IMetaEffectOwner<HealEffect, float, float>, IPostEffectOwner<HealEffect, float>
 	{
 		public bool IsRevertible { get; }
@@ -10,7 +10,6 @@ namespace ModiBuff.Core.Units
 		private readonly float _heal;
 		private readonly StackEffectType _stackEffect;
 		private Targeting _targeting;
-		private bool _isEventBased;
 		private IMetaEffect<float, float>[] _metaEffects;
 		private bool _hasMetaEffects;
 		private IPostEffect<float>[] _postEffects;
@@ -38,7 +37,6 @@ namespace ModiBuff.Core.Units
 		}
 
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
-		public void SetEventBased() => _isEventBased = true;
 
 		public HealEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
 		{
@@ -71,7 +69,7 @@ namespace ModiBuff.Core.Units
 
 			if (_hasPostEffects)
 				foreach (var postEffect in _postEffects)
-					postEffect.Effect(returnHeal, target, source, !_isEventBased);
+					postEffect.Effect(returnHeal, target, source);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
@@ -83,7 +81,7 @@ namespace ModiBuff.Core.Units
 		private float Effect(float value, IUnit target, IUnit source)
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
-			return ((IHealable<float, float>)target).Heal(value, source, !_isEventBased);
+			return ((IHealable<float, float>)target).Heal(value, source);
 		}
 
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
