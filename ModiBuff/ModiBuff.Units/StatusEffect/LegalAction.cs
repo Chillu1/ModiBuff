@@ -27,6 +27,7 @@ namespace ModiBuff.Core.Units
 		Disarm = Act,
 		Silence = Cast | Think,
 		Taunt = Cast | Prioritize,
+		Sleep = Act | Cast | Move | Prioritize,
 
 		All = Act | Cast | Move | Prioritize | Think
 	}

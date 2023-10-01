@@ -16,16 +16,16 @@ namespace ModiBuff.Core.Units
 		Silence = 16,
 		Taunt = 32,
 		Confuse = 64,
+		Sleep = 128,
 		//Hex?
 		//Blind?
 		//Mute?
 		//Fear?
 		//Break?
-		//Sleep?
 		//Airborne/Suspension (ranged attacks work)?
 		//Stasis?
 		//Charm?
 
-		Last = Confuse
+		Last = Sleep
 	}
 }

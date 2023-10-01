@@ -206,6 +206,7 @@ namespace ModiBuff.Tests
 		public void ApplierDoesntExist()
 		{
 #if !DEBUG
+			Setup();
 			Assert.Ignore("This test is only for debug mode");
 #endif
 			Setup();

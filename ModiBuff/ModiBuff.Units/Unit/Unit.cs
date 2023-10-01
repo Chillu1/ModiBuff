@@ -42,8 +42,9 @@ namespace ModiBuff.Core.Units
 		private readonly List<IEffect> _strongHitCallbacks;
 		private UnitCallback _strongHitDelegateCallbacks;
 
-		private readonly List<DamagedChangedEvent> _damageChangedEvent;
-		private int _damageChangedCount;
+		private readonly List<HealthChangedEvent> _healthChangedEvent;
+		private readonly List<DamageChangedEvent> _damageChangedEvent;
+		private int _healthChangedCount = -1, _damageChangedCount;
 
 		private readonly List<IUnit> _targetsInRange;
 		private readonly List<Modifier> _auraModifiers;
@@ -71,7 +72,8 @@ namespace ModiBuff.Core.Units
 
 			_strongHitCallbacks = new List<IEffect>();
 
-			_damageChangedEvent = new List<DamagedChangedEvent>();
+			_healthChangedEvent = new List<HealthChangedEvent>();
+			_damageChangedEvent = new List<DamageChangedEvent>();
 
 			_targetsInRange = new List<IUnit>();
 			_targetsInRange.Add(this);
@@ -91,6 +93,7 @@ namespace ModiBuff.Core.Units
 		{
 			_whenAttackedCount = _whenCastCount = _whenDeathCount = _whenHealedCount = 0;
 			_beforeAttackCount = _onAttackCount = _onCastCount = _onKillCount = _onHealCount = 0;
+			_healthChangedCount = -1;
 			_damageChangedCount = 0;
 
 			_statusEffectController.Update(deltaTime);
@@ -158,6 +161,15 @@ namespace ModiBuff.Core.Units
 			float oldHealth = Health;
 			Health -= damage;
 			float dealtDamage = oldHealth - Health;
+
+			//TODO This counting becomes a problem, since we'll miss on damage after the first damage instance this frame
+			//One solution could be to sum all the changes this frame, and then trigger the event once at the end of the frame.
+			if (_healthChangedCount <= 0)
+			{
+				_healthChangedCount++;
+				for (int i = 0; i < _healthChangedEvent.Count; i++)
+					_healthChangedEvent[i](this, Health, dealtDamage);
+			}
 
 			//if damage was bigger than half health, trigger strong attack callbacks
 			if (dealtDamage > MaxHealth * 0.5f)
@@ -399,15 +411,25 @@ namespace ModiBuff.Core.Units
 				ref readonly var callback = ref reactCallbacks[i];
 				switch (callback.ReactType)
 				{
-					case ReactType.DamageChanged:
-						if (!(callback.Action is DamagedChangedEvent @event))
+					case ReactType.CurrentHealthChanged:
+						if (!(callback.Action is HealthChangedEvent healthEvent))
 						{
-							Logger.LogError("objectDelegate is not of type DamagedChangedEvent, use named delegates instead.");
-							return;
+							Logger.LogError("objectDelegate is not of type HealthChangedEvent, use named delegates instead.");
+							break;
 						}
 
-						@event.DynamicInvoke(this, Damage, 0f);
-						_damageChangedEvent.Add(@event);
+						healthEvent.DynamicInvoke(this, Health, 0f);
+						_healthChangedEvent.Add(healthEvent);
+						break;
+					case ReactType.DamageChanged:
+						if (!(callback.Action is DamageChangedEvent damageEvent))
+						{
+							Logger.LogError("objectDelegate is not of type DamagedChangedEvent, use named delegates instead.");
+							break;
+						}
+
+						damageEvent.DynamicInvoke(this, Damage, 0f);
+						_damageChangedEvent.Add(damageEvent);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException(nameof(reactCallbacks), callback.ReactType, null);
@@ -424,7 +446,7 @@ namespace ModiBuff.Core.Units
 				{
 					case ReactType.DamageChanged:
 						//TODO Always revert internal effect?
-						var @event = (DamagedChangedEvent)callback.Action;
+						var @event = (DamageChangedEvent)callback.Action;
 						@event.DynamicInvoke(this, Damage, 0f);
 						_damageChangedEvent.Remove(@event);
 						break;

@@ -33,6 +33,7 @@ namespace ModiBuff.Tests
 		public void DamageNonDamagableUnit()
 		{
 #if !DEBUG
+			Setup();
 			Assert.Ignore("This test is only for debug mode");
 #endif
 			Setup();

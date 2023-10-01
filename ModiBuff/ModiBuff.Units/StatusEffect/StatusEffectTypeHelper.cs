@@ -54,6 +54,12 @@ namespace ModiBuff.Core.Units
 			};
 			LegalActions[(int)StatusEffectType.Confuse] = confuseLegalAction;
 
+			var sleepLegalAction = new[]
+			{
+				LegalAction.Act, LegalAction.Cast, LegalAction.Move, LegalAction.Prioritize
+			};
+			LegalActions[(int)StatusEffectType.Sleep] = sleepLegalAction;
+
 			LegalActionToIndex = new int[(int)Enum.GetValues(typeof(LegalAction)).Cast<LegalAction>().Max() + 1];
 			for (int i = 0; i < LegalActionToIndex.Length; i++)
 				LegalActionToIndex[i] = (int)Utilities.Utilities.FastLog2(i);

@@ -1,4 +1,8 @@
 namespace ModiBuff.Core.Units
 {
-	public delegate void DamagedChangedEvent(Unit unit, float newDamage, float deltaDamage);
+	//Often updated delegates
+	public delegate void HealthChangedEvent(Unit unit, float newHealth, float deltaHealth);
+
+	//Rarely updated delegates
+	public delegate void DamageChangedEvent(Unit unit, float newDamage, float deltaDamage);
 }

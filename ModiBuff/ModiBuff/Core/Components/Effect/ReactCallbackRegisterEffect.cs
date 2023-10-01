@@ -6,7 +6,7 @@ using System;
 
 namespace ModiBuff.Core
 {
-	public sealed class ReactCallbackRegisterEffect<TReact> : IRevertEffect, IEffect
+	public sealed class ReactCallbackRegisterEffect<TReact> : IRevertEffect, IEffect, IShallowClone<ReactCallbackRegisterEffect<TReact>>
 	{
 		public bool IsRevertible => true;
 
@@ -33,6 +33,9 @@ namespace ModiBuff.Core
 		{
 			((IReactable<TReact>)target).UnRegisterReact(_reactCallbacks);
 		}
+
+		public ReactCallbackRegisterEffect<TReact> ShallowClone() => new ReactCallbackRegisterEffect<TReact>(_reactCallbacks);
+		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 
 	public readonly struct ReactCallback<TReact>
