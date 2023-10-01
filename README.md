@@ -106,7 +106,7 @@ Intel Core i7-4790 CPU 3.60GHz (Haswell), 1 CPU, 8 logical and 4 physical cores
 .NET SDK 6.0.120  
 .NET 6.0.20 (6.0.2023.36801), X64 RyuJIT AVX2
 
-N: 10_000  
+**N: 10_000**  
 Delta: 0.0167 * N
 
 #### Add/Apply/Update Modifier table
