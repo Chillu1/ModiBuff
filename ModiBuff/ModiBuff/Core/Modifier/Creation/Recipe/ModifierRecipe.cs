@@ -379,7 +379,8 @@ namespace ModiBuff.Core
 				Logger.LogError("Effects on callback set, but no callback registration type set, for modifier: " + Name + " id: " + Id);
 			}
 
-			if (_callbackRegisterWrapper != null && !_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Callback)))
+			if (_callbackRegisterWrapper != null && !_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Callback)) &&
+			    _removeEffectWrapper?.EffectOn != EffectOn.Callback)
 			{
 				validRecipe = false;
 				Logger.LogError("Callback registration type set, but no effects on callback set, for modifier: " + Name + " id: " + Id);

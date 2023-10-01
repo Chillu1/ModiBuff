@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using ModiBuff.Core.Units.Interfaces.NonGeneric;
 
 [assembly: InternalsVisibleTo("ModiBuff.Tests")]
 
@@ -18,7 +17,7 @@ namespace ModiBuff.Core.Units
 	public class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float, float, float, float>,
 		IHealable<float, float>, IHealer<float, float>, IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker,
 		IEventOwner<EffectOnEvent>, IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
-		IStatusEffectModifierOwner<LegalAction, StatusEffectType>, ICallbackRegistrable<CallbackType>
+		IStatusEffectModifierOwner<LegalAction, StatusEffectType>, ICallbackRegistrable<CallbackType>, IReactable<ReactType>
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -42,6 +41,9 @@ namespace ModiBuff.Core.Units
 
 		private readonly List<IEffect> _strongHitCallbacks;
 		private UnitCallback _strongHitDelegateCallbacks;
+
+		private readonly List<DamagedChangedEvent> _damageChangedEvent;
+		private int _damageChangedCount;
 
 		private readonly List<IUnit> _targetsInRange;
 		private readonly List<Modifier> _auraModifiers;
@@ -69,6 +71,8 @@ namespace ModiBuff.Core.Units
 
 			_strongHitCallbacks = new List<IEffect>();
 
+			_damageChangedEvent = new List<DamagedChangedEvent>();
+
 			_targetsInRange = new List<IUnit>();
 			_targetsInRange.Add(this);
 			_auraModifiers = new List<Modifier>();
@@ -87,6 +91,7 @@ namespace ModiBuff.Core.Units
 		{
 			_whenAttackedCount = _whenCastCount = _whenDeathCount = _whenHealedCount = 0;
 			_beforeAttackCount = _onAttackCount = _onCastCount = _onKillCount = _onHealCount = 0;
+			_damageChangedCount = 0;
 
 			_statusEffectController.Update(deltaTime);
 			ModifierController.Update(deltaTime);
@@ -210,6 +215,12 @@ namespace ModiBuff.Core.Units
 		public void AddDamage(float damage)
 		{
 			Damage += damage;
+			if (_damageChangedCount == 0)
+			{
+				_damageChangedCount++;
+				for (int i = 0; i < _damageChangedEvent.Count; i++)
+					_damageChangedEvent[i](this, Damage, damage);
+			}
 		}
 
 		public void UseHealth(float value)
@@ -378,6 +389,48 @@ namespace ModiBuff.Core.Units
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+			}
+		}
+
+		public void RegisterReact(ReactCallback<ReactType>[] reactCallbacks)
+		{
+			for (int i = 0; i < reactCallbacks.Length; i++)
+			{
+				ref readonly var callback = ref reactCallbacks[i];
+				switch (callback.ReactType)
+				{
+					case ReactType.DamageChanged:
+						if (!(callback.Action is DamagedChangedEvent @event))
+						{
+							Logger.LogError("objectDelegate is not of type DamagedChangedEvent, use named delegates instead.");
+							return;
+						}
+
+						@event.DynamicInvoke(this, Damage, 0f);
+						_damageChangedEvent.Add(@event);
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(nameof(reactCallbacks), callback.ReactType, null);
+				}
+			}
+		}
+
+		public void UnRegisterReact(ReactCallback<ReactType>[] reactCallbacks)
+		{
+			for (int i = 0; i < reactCallbacks.Length; i++)
+			{
+				ref readonly var callback = ref reactCallbacks[i];
+				switch (callback.ReactType)
+				{
+					case ReactType.DamageChanged:
+						//TODO Always revert internal effect?
+						var @event = (DamagedChangedEvent)callback.Action;
+						@event.DynamicInvoke(this, Damage, 0f);
+						_damageChangedEvent.Remove(@event);
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(nameof(reactCallbacks), callback.ReactType, null);
+				}
 			}
 		}
 

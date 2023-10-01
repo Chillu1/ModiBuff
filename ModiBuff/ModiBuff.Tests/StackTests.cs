@@ -88,7 +88,7 @@ namespace ModiBuff.Tests
 		public void StackAddDamageRevertible()
 		{
 			AddRecipe("StackAddDamageRevertible")
-				.Effect(new AddDamageEffect(5, true, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
+				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always, value: 2)
 				.Remove(5);
 			Setup();
