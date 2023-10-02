@@ -25,16 +25,19 @@
 
 # What is this?
 
-This zero dependency, engine-agnostic library was made to make a standardized powerful system that allows for manipulation of effects on
+This zero dependency, engine-agnostic library was made to make a standardized powerful system that allows for
+manipulation of effects on
 entities.
 
 **It focuses on Feature Set, Performance and Ease of use, in that order.**
 
 The library is split into two core parts:
 
-ModiBuff is the core backend part that handles all the modifier logic and is mostly unopinionated when it comes to the game logic.
+ModiBuff is the core backend part that handles all the modifier logic and is mostly unopinionated when it comes to the
+game logic.
 
-Meanwhile ModiBuff.Units is a fully featured implementation of the library, that showcases how to tie the library into a game.
+Meanwhile ModiBuff.Units is a fully featured implementation of the library, that showcases how to tie the library into a
+game.
 
 > Note: The library is currently in development, and it will most likely encounter breaking API changes.
 
@@ -133,8 +136,10 @@ Pre-allocated Pools
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 1.64ms, 0 GC  | 4.26ms, 0 GC              |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | X             | X                         |
 
-> Important: Non-pool ("New") benchmarks below don't matter for runtime performance in ModiBuff and ModiBuffEcs, since it will only be
-> slower when allocating the new modifiers in the pools. Which if handled correctly, should only happen on initialization.
+> Important: Non-pool ("New") benchmarks below don't matter for runtime performance in ModiBuff and ModiBuffEcs, since
+> it will only be
+> slower when allocating the new modifiers in the pools. Which if handled correctly, should only happen on
+> initialization.
 
 | Library                                               | New<br/>InitDmg<br/>Manual | New<br/>InitDmg<br/>Recipe | New<br/>DoT*<br/>Recipe |
 |-------------------------------------------------------|----------------------------|----------------------------|-------------------------|
@@ -147,10 +152,12 @@ Setting up all recipes, with 64 pool allocation per recipe takes 60ns, and 104KB
 Pre-allocating 1_000 modifiers of each recipe (currently 100±) takes 67ms, and 35MB.
 
 Pooling in ModiBuff is 700X faster than original old version (because of pool rent & return)  
-But it's also much faster in cases of doing init/stack/refresh on an existing modifier (we don't create a new modifier anymore)  
+But it's also much faster in cases of doing init/stack/refresh on an existing modifier (we don't create a new modifier
+anymore)  
 ModiBuffEcs is a bit on the slow side for now, because of how pooling works, with enabling and disabling entities.
 
-*NoOp is an empty effect, so it just measures the benchmark time of the library without unit logic (ex. taking damage).  
+*NoOp is an empty effect, so it just measures the benchmark time of the library without unit logic (ex. taking
+damage).  
 **DoT = InitDoTSeparateDamageRemove
 
 # Requirements
@@ -158,19 +165,23 @@ ModiBuffEcs is a bit on the slow side for now, because of how pooling works, wit
 ModiBuff is compatible with .NETStandard 1.1 and .NETStandard 2.0, C# 7.2 (C# 7.0 is also possible, take a look
 at [Godot Branch](https://github.com/Chillu1/ModiBuff/tree/feature/godot-compatible))
 
-For development net 6.0 is required to build and run all tests. The tests depend on NUnit, and benchmarks depend on BenchmarkDotNet.
+For development net 6.0 is required to build and run all tests. The tests depend on NUnit, and benchmarks depend on
+BenchmarkDotNet.
 
 # Installation
 
 Currently the library is on [NuGet](https://www.nuget.org/packages/ModiBuff/) and
-[Godot Asset Library](https://godotengine.org/asset-library/asset/2166), it will also be coming to Unity Asset Store soon.
+[Godot Asset Library](https://godotengine.org/asset-library/asset/2166), it will also be coming to Unity Asset Store
+soon.
 
 ## Step by step installation
 
 1. Download the latest DLL from [Releases](https://github.com/Chillu1/ModiBuff/releases) or ModiBuff source code.
 2. Add the DLL to your project.
-3. Make your own `ModifierRecipes` class that inherits from `ModiBuffModifierRecipes` and fill it with your modifier recipes.  
-   3.1. If you're planning to use event modifiers, call `SetupEventEffect<T>(EventEffectFactory)` and the beginning in `ModifierRecipes`
+3. Make your own `ModifierRecipes` class that inherits from `ModiBuffModifierRecipes` and fill it with your modifier
+   recipes.  
+   3.1. If you're planning to use event modifiers, call `SetupEventEffect<T>(EventEffectFactory)` and the beginning
+   in `ModifierRecipes`
    to register your event effect type, usually an enum.
 4. Make your own logger implementation, by inheriting `ILogger`, or use one of the built-in ones.
 5. Call ModiBuff setup systems in the initialization of your game.    
@@ -190,21 +201,24 @@ Otherwise go to [Custom Units](#custom-units).
 
 ### ModiBuff.Units
 
-6. Download the latest ModiBuff.Units DLL from [Releases](https://github.com/Chillu1/ModiBuff/releases) or ModiBuff source code.
+6. Download the latest ModiBuff.Units DLL from [Releases](https://github.com/Chillu1/ModiBuff/releases) or ModiBuff
+   source code.
 7. Add the DLL to your project.
 8. Now you can create your units, and apply modifiers to them.
 
 ### Custom Units
 
 6. Implement `IUnit` and `IModifierOwner` interfaces on your unit class.  
-   6.1. Optionally add some of the ModiBuff.Units `IUnit` [interfaces](ModiBuff/ModiBuff.Units/Unit/Interfaces) that you want to use.
+   6.1. Optionally add some of the ModiBuff.Units `IUnit` [interfaces](ModiBuff/ModiBuff.Units/Unit/Interfaces) that you
+   want to use.
 7. Create your own interfaces that your effects will use, and implement them on your unit class.
 
 # Usage
 
 ## Recipe
 
-Modifier Recipes are the high level API for creating modifiers, they use the builder pattern/method chaining/fluent interface to create
+Modifier Recipes are the high level API for creating modifiers, they use the builder pattern/method chaining/fluent
+interface to create
 modifiers (without the need for calling a Finish/Complete method).
 
 Easiest modifier, that does 5 damage when added, can be created like this:
@@ -262,10 +276,12 @@ Recipes have a methods that determine the functionality of the made modifier.
 ### Effect
 
 The only method to setup effects is `Effect(IEffect, EffectOn, Targeting)`.  
-`IEffect` is the effect that will be applied to the unit, it can be anything, as long as it implements IEffect interface.  
+`IEffect` is the effect that will be applied to the unit, it can be anything, as long as it implements IEffect
+interface.  
 `EffectOn` is the action that will trigger the effect: Init, Interval, Duration, Stack.
 `EffectOn` is a flag enum, so the effect can be triggered on multiple actions.  
-`Targeting` tells the effect how it should be targeted, if we should target the owner (source) of the modifier, or the targeted unit.
+`Targeting` tells the effect how it should be targeted, if we should target the owner (source) of the modifier, or the
+targeted unit.
 If you're unsure what this means, leave it at default. There will be more examples of this later.
 
 ```csharp
@@ -286,7 +302,8 @@ Add("IntervalDamage")
 
 ### Duration
 
-Next is `Duration(float)`. It's used to set the duration of the duration effects. It's usually used to remove the modifier after X seconds.
+Next is `Duration(float)`. It's used to set the duration of the duration effects. It's usually used to remove the
+modifier after X seconds.
 But it can be used for any effect.
 > Note: When we want to remove the modifier after X seconds, it's simpler to use the `Remove(float)` method,
 > which is just a QoL wrapper for `Duration(float)`.
@@ -301,7 +318,8 @@ Add("InitDamageDurationRemove")
 ### Refresh
 
 Then we have `Refresh(RefreshType)` method. That makes either the interval or duration component refreshable.
-Meaning that if a modifier gets added again to a unit, it will refresh the timer. This is most often used with the duration timer.
+Meaning that if a modifier gets added again to a unit, it will refresh the timer. This is most often used with the
+duration timer.
 
 ```csharp
 Add("DamageOverTimeRefreshableDuration")
@@ -327,7 +345,8 @@ Add("DamageOverTimeRefreshableDuration")
 Then there's `Stack(WhenStackEffect whenStackEffect, float value, int maxStacks, int everyXStacks)`.
 It's used for tracking how many times the modifier has been re-added to the unit, or other stacking logic.
 
-`WhenStackEffect` tells the modifier when the stack action should be triggered: Always, OnMaxStacks, EveryXStacks, etc.  
+`WhenStackEffect` tells the modifier when the stack action should be triggered: Always, OnMaxStacks, EveryXStacks,
+etc.  
 `StackEffectType` tells the effect what to do when the stack action is triggered:
 Trigger it's effect, add to it's effect, or both or all, etc.
 
@@ -347,7 +366,8 @@ Add("StackableDamage_DamageOverTime")
 Any subsequent adds will not trigger the init effects, but refresh and stack effects will still work as usual.
 This is very useful for aura modifiers, where we don't want to stack the aura effect.
 
-For partial aura functionality, we can tell the recipe that it will trigger effects on multiple units at once with `Aura()`.
+For partial aura functionality, we can tell the recipe that it will trigger effects on multiple units at once
+with `Aura()`.
 
 ```csharp
 Add("InitAddDamageBuff")
@@ -391,12 +411,14 @@ Add("InitDamageLifeStealPost")
 
 ### Apply & Effect Condition (checks)
 
-Modifiers can have conditions, that will check if the modifier/target/source fulfills the condition before applying the modifier.
+Modifiers can have conditions, that will check if the modifier/target/source fulfills the condition before applying the
+modifier.
 `ModiBuff.Units` has a few built-in conditions, and custom conditions are fully supported.
 The common conditions are: cooldown, mana cost, chance, status effect, etc.
 
 This example deals 5 damage on init apply, only if:
-the source unit has at least 5 mana, passes the 50% roll, is not on 1 second cooldown, source is able to act (attack, heal), and target is
+the source unit has at least 5 mana, passes the 50% roll, is not on 1 second cooldown, source is able to act (attack,
+heal), and target is
 silenced.
 
 ```csharp
@@ -414,7 +436,8 @@ Add("InitDamage_CostMana")
 Callbacks are a way to add logic that can be triggered on any user/game-based action.
 This is particularly useful for removing modifiers on certain non-standard cases.
 
-In this example we add 5 damage to unit on Init, and the modifier can only be removed if the unit gets hit by a "StrongHit".
+In this example we add 5 damage to unit on Init, and the modifier can only be removed if the unit gets hit by a "
+StrongHit".
 Essentially a hit that deals more than half units health in damage (ex. game logic).
 
 ```csharp
@@ -480,14 +503,16 @@ Each modifier should have at least one effect, unless it's used as a flag.
 ## Event Recipe
 
 Event recipes are special recipes for creating event modifiers.
-Event modifiers use a `EventEffect`, that registers an event on a unit (this code needs to be implemented in the unit class).
+Event modifiers use a `EventEffect`, that registers an event on a unit (this code needs to be implemented in the unit
+class).
 
 It uses the same builder pattern as the normal recipes, but with a few less methods.
 
 The `Effect(IEffect, Targeting)` method is very similar to the normal recipe, but we can't set the `EffectOn` action.
 Since it will always trigger on event.
 
-When adding an effect, we need to specify when the effect should trigger. In this example we deal 5 damage to a unit that attacks us.
+When adding an effect, we need to specify when the effect should trigger. In this example we deal 5 damage to a unit
+that attacks us.
 
 ```csharp
 Add("ThornsOnHitEvent", EffectOnEvent.WhenAttacked)
@@ -512,7 +537,8 @@ There's multiple ways to add modifiers to a unit.
 For normal modifiers, the best approach is to use `IModifierOwner.TryAddModifier(int, IUnit)`.
 By feeding the modifier ID, and the source unit.
 
-For applier (attack, cast, etc) modifiers, `IModifierOwner.ModifierController.TryAddApplier(int, bool, ApplierType)` should be used.
+For applier (attack, cast, etc) modifiers, `IModifierOwner.ModifierController.TryAddApplier(int, bool, ApplierType)`
+should be used.
 
 Currently for aura modifiers it has to be implemented directly into the unit. An example of this can be found
 in `CoreUnits.Unit.AddAuraModifier(int)`.
@@ -528,7 +554,8 @@ The library allows for easy creation of new effects.
 Which are needed for using custom game-based logic.
 
 Effects have to implement `IEffect`.  
-They can also implement `ITargetEffect` for event targeting owner/source, `IEventTrigger` to avoid event recursion, `IStackEffect` for
+They can also implement `ITargetEffect` for event targeting owner/source, `IEventTrigger` to avoid event
+recursion, `IStackEffect` for
 stacking functionality, `IStateEffect` for resetting runtime state.
 
 For fully featured effect implementation, look at
@@ -537,12 +564,15 @@ For fully featured effect implementation, look at
 #### In-depth Effect Creation
 
 We start by creating a new class that implements `IEffect`.  
-`IEffect` has a method `void Effect(IUnit target, IUnit source);` that gets fed the target and source of the cast/attack/apply.
+`IEffect` has a method `void Effect(IUnit target, IUnit source);` that gets fed the target and source of the
+cast/attack/apply.
 
 The next important thing is to identify if our effect will have mutable state.
 It will have state if we plan on reverting it, adding more value to it, or changing internal effect state.
-In that case, we need to implement `IStateEffect`, which has a method `void ResetState();` that gets called when the modifier is sent
-back to pool, and also a clone `IEffect ShallowClone()` method. For cloning the effect so the state is not shared between modifiers.
+In that case, we need to implement `IStateEffect`, which has a method `void ResetState();` that gets called when the
+modifier is sent
+back to pool, and also a clone `IEffect ShallowClone()` method. For cloning the effect so the state is not shared
+between modifiers.
 
 If we want to use stack logic, the effect needs to implement `IStackEffect`.
 
@@ -621,16 +651,19 @@ Add("ComplexApplier2_AddDamage")
 
 ## Modifier
 
-Modifiers are the core backend part of the library, they are the things that are applied to entities with effects on certain actions.    
+Modifiers are the core backend part of the library, they are the things that are applied to entities with effects on
+certain actions.    
 Ex. Init, Interval, Duration, Stack.  
 You should **NOT** use the Modifier class directly, but instead use the recipe system.
 Recipe system fixes a lot of internal complexity of setting up modifiers for you.
 
 It's possible to make modifier directly now by using `ManualModifierGenerator` class,
 specifically `Add(string, ModifierGeneratorFunc, ModifierAddData)`.
-But only do so if you really know what you're doing, and need that extra functionality like multiple interval/duration components.
+But only do so if you really know what you're doing, and need that extra functionality like multiple interval/duration
+components.
 
-> Important: Some modifier component and effect functionality is set indirectly by checking for interfaces, like `IModifierIdOwner`
+> Important: Some modifier component and effect functionality is set indirectly by checking for interfaces,
+> like `IModifierIdOwner`
 > so manual modifier creation needs extra care to use properly (this will be refactored to make it easier later on).
 
 # FAQ
@@ -640,15 +673,18 @@ A: This was a tough solution to make custom user effects work with their own uni
 And not force users to implement all methods for functionality, where it's not used.
 
 Q: How do I make "insert mechanic from a game" in ModiBuff?  
-A: First check [ModifierExamples.md](ModifierExamples.md). Then if it isn't there, ask about how to make it in issues, will make a better
+A: First check [ModifierExamples.md](ModifierExamples.md). Then if it isn't there, ask about how to make it in issues,
+will make a better
 platform for discussion if needed.
 
 Q: It's 100% not possible to make "mechanic from a game" in ModiBuff.  
-A: If the mechanic is lacking internal ModiBuff functionality to work, and isn't an effect implementation problem, make an issue about it.
+A: If the mechanic is lacking internal ModiBuff functionality to work, and isn't an effect implementation problem, make
+an issue about it.
 The goal of ModiBuff is to support as many unique mechanics as possible, that don't rely on game logic.
 
 Q: My stack effect is not working, what's wrong?  
-A: StackEffectType needs to be set in all: `IEffect` (ex. DamageEffect), `Recipe.Effect.EffectOn.Stack` and `Recipe.Stack()`  
+A: StackEffectType needs to be set in all: `IEffect` (ex. DamageEffect), `Recipe.Effect.EffectOn.Stack`
+and `Recipe.Stack()`  
 Ex:
 
 ```csharp
@@ -665,12 +701,13 @@ For a big list of implementation examples, see [ModifierExamples.md](ModifierExa
 
 ## Full
 
-> Note: The current examples are very very bare bones, a proper implementation with custom game logic will be added soon.
+> Note: The current examples are very very bare bones, a proper implementation with custom game logic will be added
+> soon.
 
-[All examples](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/ModiBuff.Examples)
+[All samples](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/ModiBuff.Examples)
 
-[Simple solo](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/ModiBuff.Examples/SimpleSolo)
-example, of player unit fighting a single enemy unit
+[Basic console](https://github.com/Chillu1/ModiBuff/tree/master/ModiBuff/ModiBuff.Examples/BasicConsole)
+sample, of player unit fighting a single enemy unit at a time.
 
 # Internals
 
@@ -694,7 +731,8 @@ ModiBuff has:
 
 * No GC/allocations
 * No ECS framework needed
-* Worse iteration speed, 25_000 interval modifiers compared to 100_000 modifiers, 5ms update, average complexity modifiers
+* Worse iteration speed, 25_000 interval modifiers compared to 100_000 modifiers, 5ms update, average complexity
+  modifiers
 * Many more features
 
 ## [Old Modifier Library](https://github.com/Chillu1/ModifierLibrary)

@@ -22,6 +22,9 @@ namespace ModiBuff.Examples.BasicConsole
 
 		public void Update(float delta)
 		{
+			if (_enemy.IsDead)
+				Spawn();
+
 			_enemy.AutoAttack();
 			_enemy.Update(delta);
 		}

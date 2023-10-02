@@ -6,9 +6,9 @@ namespace ModiBuff.Examples
 	{
 		public static void Main()
 		{
-			Console.WriteLine("Which example do you want to run?\n" +
-			                  "1. BasicConsole\n" +
-			                  "2. SimpleSolo\n");
+			//Console.WriteLine("Which example do you want to run?\n" +
+			//                  "1. BasicConsole\n" +
+			//                  "2. SimpleSolo\n");
 
 			IGameController gameController = null;
 			gameController = new BasicConsole.GameController();

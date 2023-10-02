@@ -54,8 +54,14 @@ namespace ModiBuff.Examples.BasicConsole
 
 		public void SetAttackTarget(IUnit target)
 		{
-			((Unit)target).DeathEvent += delegate { _targetingSystem.SetAttackTarget(null); };
+			((Unit)target).DeathEvent += ResetTarget;
 			_targetingSystem.SetAttackTarget(target);
+
+			void ResetTarget(IUnit unit, IUnit source)
+			{
+				_targetingSystem.SetAttackTarget(null);
+				((Unit)target).DeathEvent -= ResetTarget;
+			}
 		}
 
 		public float AutoAttack()
@@ -66,9 +72,14 @@ namespace ModiBuff.Examples.BasicConsole
 			return Attack(_targetingSystem.AttackTarget);
 		}
 
-		public float Attack(IUnit target)
+		public float Attack(IUnit target) => Attack((Unit)target);
+
+		public float Attack(Unit target)
 		{
-			float damageDealt = ((IDamagable)target).TakeDamage(Damage, this);
+			//This method will try to apply all our applier attack modifiers to the target
+			this.ApplyAllAttackModifier(target);
+
+			float damageDealt = target.TakeDamage(Damage, this);
 
 			return damageDealt;
 		}
