@@ -37,6 +37,10 @@ namespace ModiBuff.Tests
 		private IEffect _callbackNoOpEffect;
 		private UnitCallback _unitCallbacks;
 
+		private int _id = 100;
+		private int _genId = 5000;
+		private int StatusEffectTypeInt = 128;
+
 		public override void GlobalSetup()
 		{
 			base.GlobalSetup();
@@ -299,6 +303,35 @@ namespace ModiBuff.Tests
 			//_callbackRegisterEffect.EffectTest(_callbackTarget, _callbackSource);
 
 			//_callbackTarget.Test();
+		}
+
+		[Benchmark(OperationsPerInvoke = 1000)]
+		public void UsualHash()
+		{
+			for (int i = 0; i < 1000; i++)
+			{
+				unchecked
+				{
+					int hash = _id;
+					hash = (hash * 397) ^ _genId;
+					hash = (hash * 397) ^ StatusEffectTypeInt;
+					int test = hash;
+				}
+			}
+		}
+
+		[Benchmark(OperationsPerInvoke = 1000)]
+		public void CentorHash()
+		{
+			for (int i = 0; i < 1000; i++)
+			{
+				unchecked
+				{
+					int centorOne = (_id + _genId) * (_id + _genId + 1) / 2 + _genId;
+					int hash = (centorOne + StatusEffectTypeInt) * (centorOne + StatusEffectTypeInt + 1) / 2 + StatusEffectTypeInt;
+					int test = hash;
+				}
+			}
 		}
 	}
 }

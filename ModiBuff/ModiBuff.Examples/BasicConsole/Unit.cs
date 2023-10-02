@@ -1,12 +1,24 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
+using ModiBuff.Core.Units.Interfaces.NonGeneric;
 
 namespace ModiBuff.Examples.BasicConsole
 {
 	public delegate void DeathEvent(IUnit target, IUnit source);
 
-	public sealed class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float, float>
+	/// <summary>
+	///		Our own unit class, which implements the IUnit interface,
+	///		we inherit from ModiBuff.Units interfaces, to use one effect from there
+	/// </summary>
+	public sealed class Unit : IModifierOwner, IUpdatable, IDamagable, IAttacker, IHealable
 	{
+		//Every unit that can have modifiers needs to inherit IModifierOwner
+		//By inheriting it we need to implement the ModifierController property
+		//The modifier controller is the only class for units that manages modifiers
+		//We simply add modifier ids to it, and it will handle the rest
+		public ModifierController ModifierController { get; }
+
+		//The rest are all game logic fields/properties
 		public string Name { get; }
 
 		public bool IsDead { get; private set; }
@@ -14,19 +26,18 @@ namespace ModiBuff.Examples.BasicConsole
 
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
-
 		public float Damage { get; private set; }
 
-		public ModifierController ModifierController { get; }
+		private readonly TargetingSystem _targetingSystem;
 
-		private TargetingSystem _targetingSystem;
-
-		public Unit(string name, float health, float damage, float attackCooldown = 1f)
+		public Unit(string name, float health, float damage)
 		{
 			Name = name;
 			Health = MaxHealth = health;
 			Damage = damage;
 
+			//Remember to create the modifier controller in the constructor
+			//and feed it the owner (this)
 			ModifierController = new ModifierController(this);
 			_targetingSystem = new TargetingSystem();
 		}
@@ -36,6 +47,8 @@ namespace ModiBuff.Examples.BasicConsole
 			if (IsDead)
 				return;
 
+			//We need to update the modifier controller each frame/tick
+			//To update the modifier timers (interval, duration)
 			ModifierController.Update(deltaTime);
 		}
 
@@ -45,7 +58,7 @@ namespace ModiBuff.Examples.BasicConsole
 			_targetingSystem.SetAttackTarget(target);
 		}
 
-		public float Attack()
+		public float AutoAttack()
 		{
 			if (_targetingSystem.AttackTarget == null)
 				return 0;
@@ -55,7 +68,7 @@ namespace ModiBuff.Examples.BasicConsole
 
 		public float Attack(IUnit target)
 		{
-			float damageDealt = ((IDamagable<float, float, float, float>)target).TakeDamage(Damage, this);
+			float damageDealt = ((IDamagable)target).TakeDamage(Damage, this);
 
 			return damageDealt;
 		}
@@ -79,6 +92,22 @@ namespace ModiBuff.Examples.BasicConsole
 			}
 
 			return originalHealth - Health;
+		}
+
+		public float Heal(float heal, IUnit source)
+		{
+			if (IsDead)
+				return 0;
+
+			float originalHealth = Health;
+			Health += heal;
+
+			if (Health > MaxHealth)
+				Health = MaxHealth;
+
+			Console.GameMessage($"{this} healed {heal} from {source}. Health: {Health}/{MaxHealth}");
+
+			return Health - originalHealth;
 		}
 
 		public string GetDebugString()

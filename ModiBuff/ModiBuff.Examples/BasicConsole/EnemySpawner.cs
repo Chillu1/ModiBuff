@@ -22,6 +22,7 @@ namespace ModiBuff.Examples.BasicConsole
 
 		public void Update(float delta)
 		{
+			_enemy.AutoAttack();
 			_enemy.Update(delta);
 		}
 	}

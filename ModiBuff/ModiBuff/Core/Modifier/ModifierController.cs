@@ -4,19 +4,24 @@ using System.Collections.Generic;
 namespace ModiBuff.Core
 {
 	/// <summary>
-	///		Modifier controller that supports multiple modifiers of the same type.
+	///		ModifierController is the class that handles all modifiers for a unit
+	///		It allows us to add and update modifier by id
 	/// </summary>
-	//A dict with multikey can be used, but we run into problems with modifiers that don't use instance stacking
+	/// <remarks>This version supports multiple modifiers of the same type</remarks>
 	public sealed class ModifierController
 	{
 		private readonly IUnit _owner;
 
+		//A dict with multikey can be used, but we run into problems with modifiers that don't use instance stacking
 		private Modifier[] _modifiers;
 		private readonly int[] _modifierIndexes;
 		private int _modifiersTop;
 
 		private readonly List<int> _modifierAttackAppliers;
-		private readonly List<int> _modifierCastAppliers; //TODO Will there be cast modifier without any appliers?
+
+		//TODO Will there be cast modifier without any appliers?
+		private readonly List<int> _modifierCastAppliers;
+
 		private readonly Dictionary<int, ModifierCheck> _modifierCastChecksAppliers;
 		private readonly Dictionary<int, ModifierCheck> _modifierAttackChecksAppliers;
 
@@ -159,7 +164,8 @@ namespace ModiBuff.Core
 				Add(id, target, source);
 		}
 
-		public void TryApplyAttackCheckModifiers(IEnumerable<ModifierCheck> modifierChecks, IUnit target, IModifierOwner source)
+		public void TryApplyAttackCheckModifiers(IEnumerable<ModifierCheck> modifierChecks, IUnit target,
+			IModifierOwner source)
 		{
 			foreach (var check in modifierChecks)
 				if (check.Check(source))
@@ -215,7 +221,8 @@ namespace ModiBuff.Core
 			return false;
 		}
 
-		public bool ContainsApplier(int id) => _modifierCastAppliers.Contains(id) || _modifierCastChecksAppliers.ContainsKey(id);
+		public bool ContainsApplier(int id) =>
+			_modifierCastAppliers.Contains(id) || _modifierCastChecksAppliers.ContainsKey(id);
 
 		public void PrepareRemove(int id, int genId)
 		{
@@ -246,7 +253,8 @@ namespace ModiBuff.Core
 				if (modifier == null)
 				{
 #if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError($"Tried to call modifier action {action} on a modifier that doesn't exist, id: {id}, genId: {genId}");
+					Logger.LogError($"Tried to call modifier action {action} on a modifier that " +
+					                $"doesn't exist, id: {id}, genId: {genId}");
 #endif
 					return;
 				}
@@ -257,14 +265,16 @@ namespace ModiBuff.Core
 				case Core.ModifierAction.Refresh:
 #if DEBUG && !MODIBUFF_PROFILE
 					if (!addData.HasRefresh)
-						Logger.LogWarning("ModifierAction: Refresh was called on a modifier that doesn't have a refresh flag set");
+						Logger.LogWarning("ModifierAction: Refresh was called on a modifier that " +
+						                  "doesn't have a refresh flag set");
 #endif
 					modifier.Refresh();
 					break;
 				case Core.ModifierAction.ResetStacks:
 #if DEBUG && !MODIBUFF_PROFILE
 					if (!addData.HasStack)
-						Logger.LogWarning("ModifierAction: ResetStacks was called on a modifier that doesn't have a stack flag set");
+						Logger.LogWarning("ModifierAction: ResetStacks was called on a modifier " +
+						                  "that doesn't have a stack flag set");
 #endif
 					modifier.ResetStacks();
 					break;

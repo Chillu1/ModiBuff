@@ -11,8 +11,9 @@ namespace ModiBuff.Examples
 			                  "2. SimpleSolo\n");
 
 			IGameController gameController = null;
+			gameController = new BasicConsole.GameController();
 
-			while (gameController == null)
+			/*while (gameController == null)
 			{
 				string input = Console.ReadLine();
 				switch (input)
@@ -22,20 +23,15 @@ namespace ModiBuff.Examples
 						gameController = new BasicConsole.GameController();
 						break;
 
-					case "SimpleSolo":
-					case "2":
-						gameController = new SimpleSolo.GameController();
-						break;
 					default:
 						Console.WriteLine("Unknown example");
 						break;
 				}
-			}
+			}*/
 
-			while (true)
-			{
-				gameController.Update();
-			}
+			bool running = true;
+			while (running)
+				running = gameController.Update();
 		}
 	}
 }
