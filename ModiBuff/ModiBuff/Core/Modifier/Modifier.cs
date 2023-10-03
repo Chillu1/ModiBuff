@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
-	public sealed class Modifier : IModifier, IEquatable<Modifier>, IComparable<Modifier>
+	public sealed class Modifier : IModifier, IDisplayInfo, IEquatable<Modifier>, IComparable<Modifier>
 	{
 		public int Id { get; }
 		public int GenId { get; }
@@ -150,6 +150,22 @@ namespace ModiBuff.Core
 
 		public void Stack() => _stackComponent.Stack();
 		public void ResetStacks() => _stackComponent.ResetStacks();
+
+		public string DisplayInfo()
+		{
+			string info = "";
+			if (_hasInit)
+				info += _initComponent.DisplayInfo();
+			// if (_timeComponents != null)
+			// 	for (int i = 0; i < _timeComponents.Length; i++)
+			// 		info += _timeComponents[i].DisplayInfo();
+			// if (_hasStack)
+			// 	info += _stackComponent.DisplayInfo();
+			// if (_effectCheck != null)
+			// 	info += _effectCheck.DisplayInfo();
+			// info += _targetComponent.DisplayInfo();
+			return info;
+		}
 
 		public void ResetState()
 		{

@@ -11,6 +11,7 @@ namespace ModiBuff.Core
 	{
 		public int Id { get; }
 		public string Name { get; }
+		private readonly string _displayName;
 
 		public readonly ModifierIdManager IdManager; //TODO Refactor to make it private/not needed
 
@@ -334,6 +335,11 @@ namespace ModiBuff.Core
 				_effectFuncCheckList, _isAura, _oneTimeInit, _interval, _intervalAffectedByStatusResistance, _duration,
 				_refreshDuration, _refreshInterval, _whenStackEffect, _stackValue, _maxStacks, _everyXStacks);
 			return new ModifierGenerator(in data);
+		}
+
+		public ModifierInfo CreateModifierInfo()
+		{
+			return new ModifierInfo(Id, Name, _displayName);
 		}
 
 		private static void ValidateModifierAction(ModifierAction modifierAction, EffectOn effectOn)

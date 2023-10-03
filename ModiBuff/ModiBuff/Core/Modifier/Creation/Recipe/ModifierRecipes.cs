@@ -21,7 +21,6 @@ namespace ModiBuff.Core
 		private readonly List<RegisterData> _registeredNames;
 
 		private ModifierAddData[] _modifierAddData;
-
 		private ModifierInfo[] _modifierInfos;
 
 		private EventEffectFactory _eventEffectFunc;
@@ -51,24 +50,28 @@ namespace ModiBuff.Core
 			SetupRecipes();
 
 			_modifierAddData = new ModifierAddData[_recipes.Count + _manualGenerators.Count];
+			_modifierInfos = new ModifierInfo[_recipes.Count + _manualGenerators.Count];
 			foreach (var generator in _manualGenerators.Values)
 			{
 				_modifierAddData[generator.Id] = generator.GetAddData();
 				_modifierGenerators.Add(generator.Name, generator);
+				//TODO Info from manual generators
+				_modifierInfos[generator.Id] = new ModifierInfo(generator.Id, generator.Name, generator.Name);
 			}
 
 			foreach (var recipe in _recipes.Values)
 			{
 				_modifierAddData[recipe.Id] = recipe.CreateAddData();
 				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
+				_modifierInfos[recipe.Id] = recipe.CreateModifierInfo();
 			}
 
-			_modifierInfos = new ModifierInfo[_modifierGenerators.Count];
-			foreach (var generator in _modifierGenerators.Values)
-			{
-				//generator.CreateModifierInfo();
-				_modifierInfos[generator.Id] = new ModifierInfo(generator.Id, generator.Name);
-			}
+			//_modifierInfos = new ModifierInfo[_modifierGenerators.Count];
+			//foreach (var generator in _modifierGenerators.Values)
+			//{
+			//	//generator.CreateModifierInfo();
+			//	_modifierInfos[generator.Id] = new ModifierInfo(generator.Id, generator.Name);
+			//}
 
 			GeneratorCount = _modifierGenerators.Count;
 #if DEBUG && !MODIBUFF_PROFILE

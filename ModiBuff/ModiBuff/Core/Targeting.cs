@@ -75,5 +75,23 @@ namespace ModiBuff.Core
 					throw new ArgumentOutOfRangeException();
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string DisplayInfo(this Targeting targeting)
+		{
+			switch (targeting)
+			{
+				case Targeting.TargetSource:
+					return "target from source";
+				case Targeting.SourceTarget:
+					return "source from target";
+				case Targeting.TargetTarget:
+					return "target from target";
+				case Targeting.SourceSource:
+					return "source from source";
+				default:
+					throw new ArgumentOutOfRangeException(nameof(targeting), targeting, null);
+			}
+		}
 	}
 }

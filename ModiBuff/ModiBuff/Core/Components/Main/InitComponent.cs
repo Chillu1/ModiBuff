@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
-	public struct InitComponent : IStateReset
+	public struct InitComponent : IStateReset, IDisplayInfo
 	{
 		public bool IsValid => _effects != null && _effects.Length > 0;
 
@@ -49,6 +49,19 @@ namespace ModiBuff.Core
 				_effects[i].Effect(targets, owner);
 
 			_isInitialized = true;
+		}
+
+		public string DisplayInfo()
+		{
+			string info = "Effects on init: ";
+			//TODO ModifierCheck
+			for (int i = 0; i < _effects.Length; i++)
+			{
+				if (_effects[i] is IDisplayInfo displayInfo)
+					info += displayInfo.DisplayInfo();
+			}
+
+			return info;
 		}
 
 		public void ResetState() => _isInitialized = false;
