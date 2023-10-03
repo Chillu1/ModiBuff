@@ -222,8 +222,10 @@ namespace ModiBuff.Core
 		/// <param name="whenStackEffect">When should the stack effects be triggered.</param>
 		/// <param name="value">Values that can be used by the stack effects.</param>
 		/// <param name="maxStacks">Max amount of stacks that can be applied.</param>
-		/// <param name="everyXStacks">If <see cref="whenStackEffect"/> is set to <see cref="whenStackEffect.EveryXStacks"/>, this value will be used to determine when the stack effects should be triggered.</param>
-		public ModifierRecipe Stack(WhenStackEffect whenStackEffect, float value = -1, int maxStacks = -1, int everyXStacks = -1)
+		/// <param name="everyXStacks">If <see cref="whenStackEffect"/> is set to
+		/// <see cref="whenStackEffect.EveryXStacks"/>, this value will be used to determine when the stack effects should be triggered.</param>
+		public ModifierRecipe Stack(WhenStackEffect whenStackEffect, float value = -1, int maxStacks = -1,
+			int everyXStacks = -1)
 		{
 			_whenStackEffect = whenStackEffect;
 			_stackValue = value;
@@ -242,14 +244,21 @@ namespace ModiBuff.Core
 		/// <param name="targeting">Who should be the target and owner of the applied modifier. For further information, see <see cref="ModiBuff.Core.Targeting"/></param>
 		public ModifierRecipe Effect(IEffect effect, EffectOn effectOn, Targeting targeting = Targeting.TargetSource)
 		{
+			if (ManualOnlyEffects.IsManualOnlyEffect(effect))
+			{
+				Logger.LogError($"Effect: {effect} isn't supported in ModifierRecipes yet, " +
+				                "use manual modifier generation if the effect is needed");
+				return this;
+			}
+
 			if (effect is IModifierIdOwner modifierIdOwner)
 				modifierIdOwner.SetModifierId(Id);
 
 			if (effect is RemoveEffect)
 			{
 #if DEBUG && !MODIBUFF_PROFILE
-				Logger.LogWarning(
-					"Adding a remove effect through Effect() is not recommended, use Remove(RemoveEffectOn) or Remove(float) instead");
+				Logger.LogWarning("Adding a remove effect through Effect() is not recommended, " +
+				                  "use Remove(RemoveEffectOn) or Remove(float) instead");
 #endif
 				_removeEffectWrapper = new EffectWrapper(effect, effectOn);
 				return this;
@@ -290,7 +299,8 @@ namespace ModiBuff.Core
 		///		Registers a callback effect to a unit, will trigger the callback when <see cref="callbackType"/> is triggered.
 		///		It will NOT trigger any EffectOn.<see cref="EffectOn.Callback"/> effects, only the supplied callback.
 		/// </summary>
-		public ModifierRecipe Callback<TCallback>(TCallback callbackType, UnitCallback callback, bool isRevertible = true)
+		public ModifierRecipe Callback<TCallback>(TCallback callbackType, UnitCallback callback,
+			bool isRevertible = true)
 		{
 			Effect(new CallbackRegisterDelegateEffect<TCallback>(callbackType, callback, isRevertible), EffectOn.Init);
 			return this;
@@ -319,10 +329,10 @@ namespace ModiBuff.Core
 			Validate();
 #endif
 
-			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _callbackRegisterWrapper, _hasApplyChecks,
-				_applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura, _oneTimeInit,
-				_interval, _intervalAffectedByStatusResistance, _duration, _refreshDuration, _refreshInterval, _whenStackEffect,
-				_stackValue, _maxStacks, _everyXStacks);
+			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _callbackRegisterWrapper,
+				_hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList,
+				_effectFuncCheckList, _isAura, _oneTimeInit, _interval, _intervalAffectedByStatusResistance, _duration,
+				_refreshDuration, _refreshInterval, _whenStackEffect, _stackValue, _maxStacks, _everyXStacks);
 			return new ModifierGenerator(in data);
 		}
 
@@ -346,19 +356,23 @@ namespace ModiBuff.Core
 			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Interval)) && _interval == 0)
 			{
 				validRecipe = false;
-				Logger.LogError("Interval not set, but we have interval effects, for modifier: " + Name + " id: " + Id);
+				Logger.LogError("Interval not set, but we have interval effects, for modifier: " +
+				                "" + Name + " id: " + Id);
 			}
 
 			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Duration)) && _duration == 0)
 			{
 				validRecipe = false;
-				Logger.LogError("Duration not set, but we have duration effects, for modifier: " + Name + " id: " + Id);
+				Logger.LogError("Duration not set, but we have duration effects, for modifier: " +
+				                "" + Name + " id: " + Id);
 			}
 
-			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Stack)) && _whenStackEffect == WhenStackEffect.None)
+			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Stack)) &&
+			    _whenStackEffect == WhenStackEffect.None)
 			{
 				validRecipe = false;
-				Logger.LogError("Stack effects set, but no stack effect type set, for modifier: " + Name + " id: " + Id);
+				Logger.LogError("Stack effects set, but no stack effect type set, for modifier: " +
+				                "" + Name + " id: " + Id);
 			}
 
 			if (_refreshInterval && _interval == 0)
@@ -376,14 +390,16 @@ namespace ModiBuff.Core
 			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Callback)) && _callbackRegisterWrapper == null)
 			{
 				validRecipe = false;
-				Logger.LogError("Effects on callback set, but no callback registration type set, for modifier: " + Name + " id: " + Id);
+				Logger.LogError("Effects on callback set, but no callback registration type set, " +
+				                "for modifier: " + Name + " id: " + Id);
 			}
 
 			if (_callbackRegisterWrapper != null && !_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Callback)) &&
 			    _removeEffectWrapper?.EffectOn != EffectOn.Callback)
 			{
 				validRecipe = false;
-				Logger.LogError("Callback registration type set, but no effects on callback set, for modifier: " + Name + " id: " + Id);
+				Logger.LogError("Callback registration type set, but no effects on callback set, " +
+				                "for modifier: " + Name + " id: " + Id);
 			}
 
 			if (!validRecipe)
