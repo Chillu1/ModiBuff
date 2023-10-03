@@ -10,13 +10,18 @@ namespace ModiBuff.Examples.BasicConsole
 	///		Our own unit class, which implements the IUnit interface,
 	///		we inherit from ModiBuff.Units interfaces, to use one effect from there
 	/// </summary>
-	public sealed class Unit : IModifierOwner, IUpdatable, IDamagable, IAttacker, IHealable
+	public sealed class Unit : IModifierOwner, IUpdatable, IDamagable, IAttacker, IHealable,
+		ISingleStatusEffectOwner
 	{
 		//Every unit that can have modifiers needs to inherit IModifierOwner
 		//By inheriting it we need to implement the ModifierController property
 		//The modifier controller is the only class for units that manages modifiers
 		//We simply add modifier ids to it, and it will handle the rest
 		public ModifierController ModifierController { get; }
+
+		//Basic implementation of status effects, unit can't attack when it's disarmed
+		//Move when it's rooted/frozen/stunned, etc.
+		public ISingleInstanceStatusEffectController<LegalAction, StatusEffectType> StatusEffectController { get; }
 
 		//The rest are all game logic fields/properties
 		public string Name { get; }
@@ -39,6 +44,7 @@ namespace ModiBuff.Examples.BasicConsole
 			//Remember to create the modifier controller in the constructor
 			//and feed it the owner (this)
 			ModifierController = new ModifierController(this);
+			StatusEffectController = new StatusEffectController();
 			_targetingSystem = new TargetingSystem();
 		}
 
@@ -50,6 +56,7 @@ namespace ModiBuff.Examples.BasicConsole
 			//We need to update the modifier controller each frame/tick
 			//To update the modifier timers (interval, duration)
 			ModifierController.Update(deltaTime);
+			StatusEffectController.Update(deltaTime);
 		}
 
 		public void SetAttackTarget(IUnit target)
@@ -74,8 +81,15 @@ namespace ModiBuff.Examples.BasicConsole
 
 		public float Attack(IUnit target) => Attack((Unit)target);
 
+		/// <summary>
+		///		Attempts to attack the target, returns the damage dealt
+		///		Will not work if the unit is stunned or disarmed
+		/// </summary>
 		public float Attack(Unit target)
 		{
+			if (!StatusEffectController.HasLegalAction(LegalAction.Act))
+				return 0;
+
 			//This method will try to apply all our applier attack modifiers to the target
 			this.ApplyAllAttackModifier(target);
 

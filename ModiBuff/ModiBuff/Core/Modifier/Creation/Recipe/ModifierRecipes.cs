@@ -22,6 +22,8 @@ namespace ModiBuff.Core
 
 		private ModifierAddData[] _modifierAddData;
 
+		private ModifierInfo[] _modifierInfos;
+
 		private EventEffectFactory _eventEffectFunc;
 
 		public ModifierRecipes(ModifierIdManager idManager, EventEffectFactory eventEffectFunc = null)
@@ -61,10 +63,29 @@ namespace ModiBuff.Core
 				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
 			}
 
+			_modifierInfos = new ModifierInfo[_modifierGenerators.Count];
+			foreach (var generator in _modifierGenerators.Values)
+			{
+				//generator.CreateModifierInfo();
+				_modifierInfos[generator.Id] = new ModifierInfo(generator.Id, generator.Name);
+			}
+
 			GeneratorCount = _modifierGenerators.Count;
 #if DEBUG && !MODIBUFF_PROFILE
 			Logger.Log($"[ModiBuff] Loaded {GeneratorCount} modifier generators.");
 #endif
+		}
+
+		public ModifierInfo GetModifierInfo(int id)
+		{
+			if (id < 0 || id >= _modifierInfos.Length)
+			{
+				Logger.LogError($"Modifier with id {id} does not exist.");
+				return null;
+			}
+
+			var modifierInfo = _modifierInfos[id];
+			return modifierInfo;
 		}
 
 		/// <summary>
@@ -73,8 +94,10 @@ namespace ModiBuff.Core
 		public void SetupEventEffect<TEvent>(EventEffectFactory eventEffectFunc)
 		{
 #if DEBUG && !MODIBUFF_PROFILE
-			if (eventEffectFunc(new IEffect[0], default(TEvent)) is IRevertEffect revertEffect && revertEffect.IsRevertible)
-				Logger.LogError("Event effect func does not return an effect that implements IRevertEffect, or is not revertible.");
+			if (eventEffectFunc(new IEffect[0], default(TEvent)) is IRevertEffect revertEffect &&
+			    revertEffect.IsRevertible)
+				Logger.LogError("Event effect func does not return an effect that implements " +
+				                "IRevertEffect, or is not revertible.");
 #endif
 
 			_eventEffectFunc = eventEffectFunc;

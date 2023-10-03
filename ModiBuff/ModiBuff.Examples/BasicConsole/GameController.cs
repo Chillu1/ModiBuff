@@ -49,10 +49,25 @@ namespace ModiBuff.Examples.BasicConsole
 
 		public bool Update()
 		{
-			Console.GameMessage("Actions: Attack - 1, Heal - 2, Quit - q");
+			bool isRunning = PlayerAction();
+			if (isRunning == false)
+				return false;
+
+			//We're making the game turn-based, by having a constant 1 delta
+			const float delta = 1;
+
+			_player.Update(delta);
+			_enemySpawner.Update(delta);
+
+			return true;
+		}
+
+		private bool PlayerAction()
+		{
 			bool validAction = false;
 			while (validAction == false)
 			{
+				Console.GameMessage("Actions: Attack - 1, Cast - 2, Quit - q");
 				string action = System.Console.ReadLine();
 				switch (action)
 				{
@@ -61,9 +76,7 @@ namespace ModiBuff.Examples.BasicConsole
 						_player.AutoAttack();
 						break;
 					case "2":
-						validAction = true;
-						//Id's should be cached, and found dynamically instead
-						_player.TryCast(_idManager.GetId("InitHeal"), _player);
+						validAction = PlayerCastAction();
 						break;
 					case "q":
 						return false;
@@ -73,11 +86,36 @@ namespace ModiBuff.Examples.BasicConsole
 				}
 			}
 
-			//We're making the game turn-based, by having a constant 1 delta
-			const float delta = 1;
+			return true;
+		}
 
-			_player.Update(delta);
-			_enemySpawner.Update(delta);
+		private bool PlayerCastAction()
+		{
+			//Display all possible modifiers to cast, then when one was chosen, choose the target
+			var modifierIds = _player.ModifierController.GetApplierCastModifierIds();
+
+			while (true)
+			{
+				Console.GameMessage("Choose modifier to cast, or c to cancel");
+				for (int i = 0; i < modifierIds.Count; i++)
+					Console.GameMessage($"{i + 1} - {_recipes.GetModifierInfo(modifierIds[i]).Name}");
+				
+				string castAction = System.Console.ReadLine();
+				if (int.TryParse(castAction, out int castActionInt))
+				{
+					if (castActionInt > 0 && castActionInt <= modifierIds.Count)
+					{
+						//TODO: choosing target
+						_player.TryCast(modifierIds[castActionInt - 1], _player);
+						break;
+					}
+				}
+
+				if (castAction == "c")
+					return false;
+
+				Console.GameMessage("Invalid action");
+			}
 
 			return true;
 		}
