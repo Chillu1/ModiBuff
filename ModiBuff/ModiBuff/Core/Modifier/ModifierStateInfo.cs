@@ -1,0 +1,48 @@
+namespace ModiBuff.Core
+{
+	/// <summary>
+	///		Holds all effects that have state information, used for UI/UX
+	/// </summary>
+	public sealed class ModifierStateInfo
+	{
+		private readonly IEffect[] _effects;
+
+		public ModifierStateInfo(params IEffect[] effects)
+		{
+			_effects = effects;
+		}
+
+		/// <summary>
+		///		Gets state from effect
+		/// </summary>
+		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
+		public TState GetState<TState>(int stateNumber = 0) where TState : struct
+		{
+#if DEBUG && !MODIBUFF_PROFILE
+			if (stateNumber < 0 || stateNumber >= _effects.Length)
+			{
+				Logger.LogError("State number can't be lower than 0 or higher than effects length");
+				return default;
+			}
+#endif
+
+			int currentNumber = stateNumber;
+			for (int i = 0; i < _effects.Length; i++)
+			{
+				if (!(_effects[i] is IModifierStateInfo<TState> stateInfo))
+					continue;
+
+				if (currentNumber > 0)
+				{
+					currentNumber--;
+					continue;
+				}
+
+				return stateInfo.GetEffectData();
+			}
+
+			Logger.LogError($"Couldn't find {typeof(TState)} at number {stateNumber}");
+			return default;
+		}
+	}
+}

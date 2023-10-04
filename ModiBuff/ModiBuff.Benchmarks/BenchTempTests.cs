@@ -305,7 +305,7 @@ namespace ModiBuff.Tests
 			//_callbackTarget.Test();
 		}
 
-		[Benchmark(OperationsPerInvoke = 1000)]
+		//[Benchmark(OperationsPerInvoke = 1000)]
 		public void UsualHash()
 		{
 			for (int i = 0; i < 1000; i++)
@@ -320,7 +320,7 @@ namespace ModiBuff.Tests
 			}
 		}
 
-		[Benchmark(OperationsPerInvoke = 1000)]
+		//[Benchmark(OperationsPerInvoke = 1000)]
 		public void CentorHash()
 		{
 			for (int i = 0; i < 1000; i++)
@@ -328,9 +328,30 @@ namespace ModiBuff.Tests
 				unchecked
 				{
 					int centorOne = (_id + _genId) * (_id + _genId + 1) / 2 + _genId;
-					int hash = (centorOne + StatusEffectTypeInt) * (centorOne + StatusEffectTypeInt + 1) / 2 + StatusEffectTypeInt;
+					int hash = (centorOne + StatusEffectTypeInt) * (centorOne + StatusEffectTypeInt + 1) / 2 +
+					           StatusEffectTypeInt;
 					int test = hash;
 				}
+			}
+		}
+
+		//[Benchmark(OperationsPerInvoke = 1000)]
+		public void StringLiteralInterpolation()
+		{
+			float lifeStealPercent = 0.5f;
+			for (int i = 0; i < 1000; i++)
+			{
+				string test = $"Life steal: {lifeStealPercent * 100f}%";
+			}
+		}
+
+		//[Benchmark(OperationsPerInvoke = 1000)]
+		public void StringLiteralAdd()
+		{
+			float lifeStealPercent = 0.5f;
+			for (int i = 0; i < 1000; i++)
+			{
+				string test = "Life steal: " + lifeStealPercent * 100f + "%";
 			}
 		}
 	}

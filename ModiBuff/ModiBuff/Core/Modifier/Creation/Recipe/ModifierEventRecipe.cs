@@ -65,8 +65,14 @@ namespace ModiBuff.Core
 
 		public IModifierGenerator CreateModifierGenerator()
 		{
-			return new ModifierEventGenerator(Id, Name, _effectOnEvent, _eventEffectFunc, _effects, _removeDuration, _removeEffectWrapper,
+			return new ModifierEventGenerator(Id, Name, _effectOnEvent, _eventEffectFunc, _effects, _removeDuration,
+				_removeEffectWrapper,
 				_refreshDuration);
+		}
+
+		public ModifierInfo CreateModifierInfo()
+		{
+			return new ModifierInfo(Id, Name, Name, "");
 		}
 	}
 }

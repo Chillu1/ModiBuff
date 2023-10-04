@@ -5,8 +5,8 @@ namespace ModiBuff.Core.Units
 	/// </summary>
 	public sealed class TestModifierInheritanceRecipes : ModifierRecipes
 	{
-		public TestModifierInheritanceRecipes(ModifierIdManager idManager, EventEffectFactory eventEffectFunc = null) : base(idManager,
-			eventEffectFunc)
+		public TestModifierInheritanceRecipes(ModifierIdManager idManager, EventEffectFactory eventEffectFunc = null) :
+			base(idManager, eventEffectFunc)
 		{
 			CreateGenerators();
 		}
@@ -23,7 +23,7 @@ namespace ModiBuff.Core.Units
 				var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
 
 				var modifier = new Modifier(id, genId, name, initComponent, null, default(StackComponent), null,
-					new SingleTargetComponent());
+					new SingleTargetComponent(), null);
 
 				return modifier;
 			}, new ModifierAddData(true, false, false, false));

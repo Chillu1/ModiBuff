@@ -17,7 +17,8 @@ namespace ModiBuff.Tests
 				var registerEffect = new CallbackRegisterDelegateEffect<CallbackType>(CallbackType.StrongHit,
 					(target, source) => removeEffect.Effect(target, source));
 				var initComponent = new InitComponent(false, new IEffect[] { effect, registerEffect }, null);
-				return new Modifier(id, genId, name, initComponent, null, default(StackComponent), null, new SingleTargetComponent());
+				return new Modifier(id, genId, name, initComponent, null, default(StackComponent), null,
+					new SingleTargetComponent(), null);
 			}, new ModifierAddData(true, false, false, false));
 			Setup();
 
@@ -70,7 +71,8 @@ namespace ModiBuff.Tests
 		public void Init_RegisterCallbackHealToFullWhenTakingStrongHit_RecipeEffect()
 		{
 			AddRecipe("InitHealToFullHalfHealthCallback")
-				.Effect(new HealEffect(0).SetMetaEffects(new AddValueBasedOnStatDiffMetaEffect(StatType.MaxHealth)), EffectOn.Callback)
+				.Effect(new HealEffect(0).SetMetaEffects(new AddValueBasedOnStatDiffMetaEffect(StatType.MaxHealth)),
+					EffectOn.Callback)
 				.Callback(CallbackType.StrongHit);
 			Setup();
 

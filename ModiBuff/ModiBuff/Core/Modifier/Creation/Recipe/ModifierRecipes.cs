@@ -21,7 +21,6 @@ namespace ModiBuff.Core
 		private readonly List<RegisterData> _registeredNames;
 
 		private ModifierAddData[] _modifierAddData;
-
 		private ModifierInfo[] _modifierInfos;
 
 		private EventEffectFactory _eventEffectFunc;
@@ -51,24 +50,28 @@ namespace ModiBuff.Core
 			SetupRecipes();
 
 			_modifierAddData = new ModifierAddData[_recipes.Count + _manualGenerators.Count];
+			_modifierInfos = new ModifierInfo[_recipes.Count + _manualGenerators.Count];
 			foreach (var generator in _manualGenerators.Values)
 			{
 				_modifierAddData[generator.Id] = generator.GetAddData();
 				_modifierGenerators.Add(generator.Name, generator);
+				//TODO Info from manual generators
+				_modifierInfos[generator.Id] = new ModifierInfo(generator.Id, generator.Name, generator.Name, "");
 			}
 
 			foreach (var recipe in _recipes.Values)
 			{
 				_modifierAddData[recipe.Id] = recipe.CreateAddData();
 				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
+				_modifierInfos[recipe.Id] = recipe.CreateModifierInfo();
 			}
 
-			_modifierInfos = new ModifierInfo[_modifierGenerators.Count];
-			foreach (var generator in _modifierGenerators.Values)
-			{
-				//generator.CreateModifierInfo();
-				_modifierInfos[generator.Id] = new ModifierInfo(generator.Id, generator.Name);
-			}
+			//_modifierInfos = new ModifierInfo[_modifierGenerators.Count];
+			//foreach (var generator in _modifierGenerators.Values)
+			//{
+			//	//generator.CreateModifierInfo();
+			//	_modifierInfos[generator.Id] = new ModifierInfo(generator.Id, generator.Name);
+			//}
 
 			GeneratorCount = _modifierGenerators.Count;
 #if DEBUG && !MODIBUFF_PROFILE
@@ -109,7 +112,7 @@ namespace ModiBuff.Core
 
 		internal IModifierGenerator[] GetGenerators() => _modifierGenerators.Values.ToArray();
 
-		public ModifierRecipe Add(string name)
+		public ModifierRecipe Add(string name, string displayName = "", string description = "")
 		{
 			if (_recipes.TryGetValue(name, out var localRecipe))
 			{
@@ -133,7 +136,9 @@ namespace ModiBuff.Core
 			if (id == -1)
 				id = _idManager.GetFreeId(name);
 
-			var recipe = new ModifierRecipe(id, name, _idManager);
+			if (string.IsNullOrEmpty(displayName))
+				displayName = name;
+			var recipe = new ModifierRecipe(id, name, displayName, description, _idManager);
 			_recipes.Add(name, recipe);
 			return recipe;
 		}

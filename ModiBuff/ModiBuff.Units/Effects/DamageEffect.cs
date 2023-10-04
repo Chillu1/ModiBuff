@@ -8,7 +8,8 @@ using System.Runtime.CompilerServices;
 namespace ModiBuff.Core.Units
 {
 	public sealed class DamageEffect : ITargetEffect, IStackEffect, IStateEffect, IEffect,
-		IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>
+		IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
+		IModifierStateInfo<DamageEffect.DamageData>
 	{
 		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;
@@ -25,8 +26,8 @@ namespace ModiBuff.Core.Units
 		{
 		}
 
-		private DamageEffect(float damage, StackEffectType stackEffect, Targeting targeting, IMetaEffect<float, float>[] metaEffects,
-			IPostEffect<float>[] postEffects)
+		private DamageEffect(float damage, StackEffectType stackEffect, Targeting targeting,
+			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
 		{
 			_baseDamage = damage;
 			_stackEffect = stackEffect;
@@ -95,10 +96,28 @@ namespace ModiBuff.Core.Units
 			//Debug.Log($"Base damage: {_baseDamage}. Extra damage: {_extraDamage}. StackEffect: {_stackEffect}");
 		}
 
+		public DamageData GetEffectData()
+		{
+			return new DamageData(_baseDamage, _extraDamage);
+		}
+
 		public void ResetState() => _extraDamage = 0;
 
-		public IEffect ShallowClone() => new DamageEffect(_baseDamage, _stackEffect, _targeting, _metaEffects, _postEffects);
+		public IEffect ShallowClone() =>
+			new DamageEffect(_baseDamage, _stackEffect, _targeting, _metaEffects, _postEffects);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
+
+		public readonly struct DamageData
+		{
+			public readonly float BaseDamage;
+			public readonly float ExtraDamage;
+
+			public DamageData(float baseDamage, float extraDamage)
+			{
+				BaseDamage = baseDamage;
+				ExtraDamage = extraDamage;
+			}
+		}
 	}
 }

@@ -21,7 +21,8 @@ namespace ModiBuff.Core.Units
 			_modifierRecipes.Add(name, in createFunc, in addData);
 		}
 
-		private ModifierEventRecipe AddEvent(string name, EffectOnEvent effectOnEvent) => _modifierRecipes.AddEvent(name, effectOnEvent);
+		private ModifierEventRecipe AddEvent(string name, EffectOnEvent effectOnEvent) =>
+			_modifierRecipes.AddEvent(name, effectOnEvent);
 
 		private void SetupRecipes()
 		{
@@ -35,7 +36,7 @@ namespace ModiBuff.Core.Units
 				var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
 
 				var modifier = new Modifier(id, genId, name, initComponent, null, default(StackComponent), null,
-					new SingleTargetComponent());
+					new SingleTargetComponent(), null);
 
 				return modifier;
 			}, new ModifierAddData(true, false, false, false));

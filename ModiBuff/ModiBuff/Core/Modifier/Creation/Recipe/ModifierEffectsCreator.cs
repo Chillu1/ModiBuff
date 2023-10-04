@@ -8,9 +8,15 @@ namespace ModiBuff.Core
 	public sealed class ModifierEffectsCreator
 	{
 		private readonly EffectWrapper[] _effectWrappers;
+		private readonly EffectWrapper[] _effectsWithModifierInfoWrappers;
 		private readonly EffectWrapper _removeEffectWrapper;
 		private readonly EffectWrapper _callbackRegisterWrapper;
-		private readonly int _revertEffectsCount, _initEffectsCount, _intervalEffectsCount, _durationEffectsCount, _stackEffectsCount;
+
+		private readonly int _revertEffectsCount,
+			_initEffectsCount,
+			_intervalEffectsCount,
+			_durationEffectsCount,
+			_stackEffectsCount;
 
 		private IRevertEffect[] _revertEffects;
 		private IEffect[] _initEffects;
@@ -29,13 +35,15 @@ namespace ModiBuff.Core
 		public ModifierEffectsCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper,
 			EffectWrapper callbackRegisterWrapper)
 		{
+			var effectsWithModifierInfoWrappers = new List<EffectWrapper>();
 			_effectWrappers = effectWrappers.ToArray();
 			_removeEffectWrapper = removeEffectWrapper;
 			_callbackRegisterWrapper = callbackRegisterWrapper;
 
 			if (_removeEffectWrapper != null)
 			{
-				if ((_removeEffectWrapper.EffectOn & EffectOn.Init) != 0) //Probably never a thing, but added just in case
+				//Probably never a thing, but added just in case
+				if ((_removeEffectWrapper.EffectOn & EffectOn.Init) != 0)
 					_initEffectsCount++;
 				if ((_removeEffectWrapper.EffectOn & EffectOn.Interval) != 0)
 					_intervalEffectsCount++;
@@ -52,6 +60,9 @@ namespace ModiBuff.Core
 			{
 				var effectWrapper = _effectWrappers[i];
 
+				if (effectWrapper.GetEffect() is IModifierStateInfo)
+					effectsWithModifierInfoWrappers.Add(effectWrapper);
+
 				if (effectWrapper.GetEffect() is IRevertEffect revertEffect && revertEffect.IsRevertible)
 					_revertEffectsCount++;
 
@@ -66,6 +77,8 @@ namespace ModiBuff.Core
 				if ((effectWrapper.EffectOn & EffectOn.Callback) != 0)
 					_callbackEffectsIndex++;
 			}
+
+			_effectsWithModifierInfoWrappers = effectsWithModifierInfoWrappers.ToArray();
 		}
 
 		public SyncedModifierEffects Create(int genId)
@@ -110,7 +123,8 @@ namespace ModiBuff.Core
 			{
 				_removeEffectWrapper.UpdateGenId(genId);
 
-				if ((_removeEffectWrapper.EffectOn & EffectOn.Init) != 0) //Probably never a thing, but added just in case
+				//Probably never a thing, but added just in case
+				if ((_removeEffectWrapper.EffectOn & EffectOn.Init) != 0)
 					_initEffects[_initEffectsIndex++] = _removeEffectWrapper.GetEffect();
 				if ((_removeEffectWrapper.EffectOn & EffectOn.Interval) != 0)
 					_intervalEffects[_intervalEffectsIndex++] = _removeEffectWrapper.GetEffect();
@@ -141,6 +155,15 @@ namespace ModiBuff.Core
 					_callbacks[_callbackEffectsIndex++] = effect;
 			}
 
+			ModifierStateInfo modifierStateInfo = null;
+			if (_effectsWithModifierInfoWrappers.Length > 0)
+			{
+				var modifierStateInfoEffects = new IEffect[_effectsWithModifierInfoWrappers.Length];
+				for (int i = 0; i < _effectsWithModifierInfoWrappers.Length; i++)
+					modifierStateInfoEffects[i] = _effectsWithModifierInfoWrappers[i].GetEffect();
+				modifierStateInfo = new ModifierStateInfo(modifierStateInfoEffects);
+			}
+
 			if (_callbackRegisterWrapper != null)
 			{
 				//Manually register remove effect wrapper if it's EffectOn is Callback
@@ -164,7 +187,8 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _effectWrappers.Length; i++)
 				_effectWrappers[i].Reset();
 
-			return new SyncedModifierEffects(_initEffects, _intervalEffects, _durationEffects, _stackEffects);
+			return new SyncedModifierEffects(_initEffects, _intervalEffects, _durationEffects, _stackEffects,
+				modifierStateInfo);
 		}
 	}
 
@@ -174,14 +198,17 @@ namespace ModiBuff.Core
 		public readonly IEffect[] IntervalEffects;
 		public readonly IEffect[] DurationEffects;
 		public readonly IStackEffect[] StackEffects;
+		public readonly ModifierStateInfo ModifierStateInfo;
 
-		public SyncedModifierEffects(IEffect[] initEffectsArray, IEffect[] intervalEffectsArray, IEffect[] durationEffectsArray,
-			IStackEffect[] stackEffectsArray)
+		public SyncedModifierEffects(IEffect[] initEffectsArray, IEffect[] intervalEffectsArray,
+			IEffect[] durationEffectsArray, IStackEffect[] stackEffectsArray,
+			ModifierStateInfo modifierStateInfo)
 		{
 			InitEffects = initEffectsArray;
 			IntervalEffects = intervalEffectsArray;
 			DurationEffects = durationEffectsArray;
 			StackEffects = stackEffectsArray;
+			ModifierStateInfo = modifierStateInfo;
 		}
 	}
 }

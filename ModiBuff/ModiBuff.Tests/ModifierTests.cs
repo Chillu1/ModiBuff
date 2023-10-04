@@ -51,10 +51,13 @@ namespace ModiBuff.Tests
 			Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
 		}
 
-		protected ModifierRecipe AddRecipe(string name) => Recipes.Add(name);
-		protected ModifierEventRecipe AddEventRecipe(string name, EffectOnEvent @event) => Recipes.AddEvent(name, @event);
+		protected ModifierRecipe AddRecipe(string name) => Recipes.Add(name, "", "");
 
-		protected void AddGenerator(in ManualGeneratorData data) => Recipes.Add(data.Name, in data.CreateFunc, in data.AddData);
+		protected ModifierEventRecipe AddEventRecipe(string name, EffectOnEvent @event) =>
+			Recipes.AddEvent(name, @event);
+
+		protected void AddGenerator(in ManualGeneratorData data) =>
+			Recipes.Add(data.Name, in data.CreateFunc, in data.AddData);
 
 		protected void AddGenerator(string name, in ModifierGeneratorFunc createFunc, in ModifierAddData addData) =>
 			Recipes.Add(name, in createFunc, in addData);

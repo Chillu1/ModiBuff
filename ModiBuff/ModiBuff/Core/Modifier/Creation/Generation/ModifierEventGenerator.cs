@@ -70,7 +70,7 @@ namespace ModiBuff.Core
 			for (int i = 0; i < effectsLength; i++)
 				_effects[i].Reset();
 
-			return new Modifier(Id, GenId++, Name, initComponent, timeComponents, default, null, new SingleTargetComponent());
+			return new Modifier(Id, GenId++, Name, initComponent, timeComponents, default, null, new SingleTargetComponent(), null);
 		}
 	}
 }
