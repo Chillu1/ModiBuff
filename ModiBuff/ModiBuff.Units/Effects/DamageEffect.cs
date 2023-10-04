@@ -93,7 +93,6 @@ namespace ModiBuff.Core.Units
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
-			//Debug.Log($"Base damage: {_baseDamage}. Extra damage: {_extraDamage}. StackEffect: {_stackEffect}");
 		}
 
 		public DamageData GetEffectData()

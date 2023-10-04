@@ -87,8 +87,7 @@ namespace ModiBuff.Core
 				return null;
 			}
 
-			var modifierInfo = _modifierInfos[id];
-			return modifierInfo;
+			return _modifierInfos[id];
 		}
 
 		/// <summary>

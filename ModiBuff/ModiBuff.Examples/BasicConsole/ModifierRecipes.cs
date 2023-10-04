@@ -25,7 +25,8 @@ namespace ModiBuff.Examples.BasicConsole
 
 			//This is the most basic modifier possible
 			//When this modifiers gets added to a unit, it will deal 5 damage to it
-			Add("InitDamage")
+			//The display name (Light Blow) and description are optional, they're used for UI/UX
+			Add("InitDamage", "Light Blow", "Description")
 				//The EffectOn.Init means that the effect will be triggered each time the modifier is added
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
@@ -33,19 +34,19 @@ namespace ModiBuff.Examples.BasicConsole
 			//Once this modifier is added to a unit, it will deal 2 damage to it each second
 			//It will also remove itself after 5 seconds
 			//The refresh method means that the remove timer will be reset if the modifier is added again
-			Add("DoT")
+			Add("DoT", "Poison Dart", "Poisons target for 5 seconds, doing damage over time, refreshable")
 				//Trigger effect(s) each second
 				.Interval(1)
 				.Effect(new DamageEffect(2), EffectOn.Interval)
 				//Remove after 5 seconds, refresh timer if modifier is added again
 				.Remove(5).Refresh();
 
-			Add("FireSlimeSelfDoT")
+			Add("FireSlimeSelfDoT", "Fireball", "Burns target for 5 seconds, doing damage over time, refreshable")
 				.Interval(1)
 				.Effect(new DamageEffect(1), EffectOn.Interval);
 
 			//Here we introduce a new effect, and a chance for the modifier to be applied
-			Add("DisarmChance")
+			Add("DisarmChance", "Disarm", "Disarms target for 1 second, 20% chance to apply")
 				//When applying a modifier (through attacking or casting it)
 				//It will have 20% chance to apply the modifier to the unit
 				.ApplyChance(0.2f)
@@ -53,7 +54,7 @@ namespace ModiBuff.Examples.BasicConsole
 				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 1f), EffectOn.Init)
 				.Remove(1f).Refresh();
 
-			Add("InitHeal")
+			Add("InitHeal", "Healing Touch", "Heals the target")
 				.Effect(new HealEffect(5), EffectOn.Init);
 		}
 	}

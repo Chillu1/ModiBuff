@@ -29,7 +29,6 @@ namespace ModiBuff.Core
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			//Debug.Log("RemoveEffect Effect, modifier id: " + _modifier.Id);
 			for (int i = 0; i < _revertibleEffects?.Length; i++)
 				_revertibleEffects[i].RevertEffect(target, source);
 

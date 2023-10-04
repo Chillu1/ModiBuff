@@ -98,7 +98,10 @@ namespace ModiBuff.Examples.BasicConsole
 			{
 				Console.GameMessage("Choose modifier to cast, or c to cancel");
 				for (int i = 0; i < modifierIds.Count; i++)
-					Console.GameMessage($"{i + 1} - {_recipes.GetModifierInfo(modifierIds[i]).DisplayName}");
+				{
+					var modifierInfo = _recipes.GetModifierInfo(modifierIds[i]);
+					Console.GameMessage($"{i + 1} - {modifierInfo.DisplayName} - {modifierInfo.Description}");
+				}
 
 				string castAction = System.Console.ReadLine();
 				if (int.TryParse(castAction, out int castActionInt))
