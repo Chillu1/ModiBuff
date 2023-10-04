@@ -7,7 +7,7 @@ namespace ModiBuff.Core
 	{
 		private readonly IEffect[] _effects;
 
-		public ModifierStateInfo(IEffect[] effects)
+		public ModifierStateInfo(params IEffect[] effects)
 		{
 			_effects = effects;
 		}
@@ -19,12 +19,6 @@ namespace ModiBuff.Core
 		public TState GetState<TState>(int stateNumber = 0) where TState : struct
 		{
 #if DEBUG && !MODIBUFF_PROFILE
-			if (_effects == null)
-			{
-				Logger.LogError("No state effects stored in ModifierStateInfo");
-				return default;
-			}
-
 			if (stateNumber < 0 || stateNumber >= _effects.Length)
 			{
 				Logger.LogError("State number can't be lower than 0 or higher than effects length");
