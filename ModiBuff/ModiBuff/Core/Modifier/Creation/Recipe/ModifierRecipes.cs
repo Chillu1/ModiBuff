@@ -56,7 +56,7 @@ namespace ModiBuff.Core
 				_modifierAddData[generator.Id] = generator.GetAddData();
 				_modifierGenerators.Add(generator.Name, generator);
 				//TODO Info from manual generators
-				_modifierInfos[generator.Id] = new ModifierInfo(generator.Id, generator.Name, generator.Name);
+				_modifierInfos[generator.Id] = new ModifierInfo(generator.Id, generator.Name, generator.Name, "");
 			}
 
 			foreach (var recipe in _recipes.Values)
@@ -112,7 +112,7 @@ namespace ModiBuff.Core
 
 		internal IModifierGenerator[] GetGenerators() => _modifierGenerators.Values.ToArray();
 
-		public ModifierRecipe Add(string name)
+		public ModifierRecipe Add(string name, string displayName = "", string description = "")
 		{
 			if (_recipes.TryGetValue(name, out var localRecipe))
 			{
@@ -136,7 +136,9 @@ namespace ModiBuff.Core
 			if (id == -1)
 				id = _idManager.GetFreeId(name);
 
-			var recipe = new ModifierRecipe(id, name, _idManager);
+			if (string.IsNullOrEmpty(displayName))
+				displayName = name;
+			var recipe = new ModifierRecipe(id, name, displayName, description, _idManager);
 			_recipes.Add(name, recipe);
 			return recipe;
 		}

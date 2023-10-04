@@ -51,19 +51,6 @@ namespace ModiBuff.Core
 			_isInitialized = true;
 		}
 
-		public string DisplayInfo()
-		{
-			string info = "Effects on init: ";
-			//TODO ModifierCheck
-			for (int i = 0; i < _effects.Length; i++)
-			{
-				if (_effects[i] is IDisplayInfo displayInfo)
-					info += displayInfo.DisplayInfo();
-			}
-
-			return info;
-		}
-
 		public void ResetState() => _isInitialized = false;
 	}
 }

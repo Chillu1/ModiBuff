@@ -72,7 +72,7 @@ namespace ModiBuff.Core
 
 		public ModifierInfo CreateModifierInfo()
 		{
-			return new ModifierInfo(Id, Name, Name);
+			return new ModifierInfo(Id, Name, Name, "");
 		}
 	}
 }

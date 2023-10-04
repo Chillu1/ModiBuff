@@ -82,13 +82,13 @@ namespace ModiBuff.Core
 			switch (targeting)
 			{
 				case Targeting.TargetSource:
-					return "target from source";
+					return "to target from source";
 				case Targeting.SourceTarget:
-					return "source from target";
+					return "to source from target";
 				case Targeting.TargetTarget:
-					return "target from target";
+					return "to target from target";
 				case Targeting.SourceSource:
-					return "source from source";
+					return "to source from source";
 				default:
 					throw new ArgumentOutOfRangeException(nameof(targeting), targeting, null);
 			}

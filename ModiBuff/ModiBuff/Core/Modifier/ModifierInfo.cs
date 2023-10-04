@@ -8,12 +8,14 @@ namespace ModiBuff.Core
 		public readonly int Id;
 		public readonly string InternalName;
 		public readonly string DisplayName;
+		public readonly string Description;
 
-		public ModifierInfo(int id, string internalName, string displayName)
+		public ModifierInfo(int id, string internalName, string displayName, string description)
 		{
 			Id = id;
 			InternalName = internalName;
 			DisplayName = displayName;
+			Description = description;
 		}
 	}
 }

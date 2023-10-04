@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
-	public sealed class Modifier : IModifier, IDisplayInfo, IEquatable<Modifier>, IComparable<Modifier>
+	public sealed class Modifier : IModifier, IEquatable<Modifier>, IComparable<Modifier>
 	{
 		public int Id { get; }
 		public int GenId { get; }
@@ -32,6 +32,9 @@ namespace ModiBuff.Core
 		private bool _isTargetSetup;
 		private bool _multiTarget;
 
+		//TODO TEMP
+		private ModifierStateInfo _stateInfo;
+
 		public Modifier(int id, int genId, string name, InitComponent initComponent, ITimeComponent[] timeComponents,
 			StackComponent stackComponent, ModifierCheck effectCheck, ITargetComponent targetComponent)
 		{
@@ -50,6 +53,9 @@ namespace ModiBuff.Core
 			_targetComponent = targetComponent;
 			if (targetComponent is MultiTargetComponent)
 				_multiTarget = true;
+
+			if (initComponent.Effects != null)
+				_stateInfo = new ModifierStateInfo(initComponent.Effects);
 		}
 
 		public void UpdateTargets(List<IUnit> targetsInRange, IUnit source)
@@ -151,20 +157,16 @@ namespace ModiBuff.Core
 		public void Stack() => _stackComponent.Stack();
 		public void ResetStacks() => _stackComponent.ResetStacks();
 
-		public string DisplayInfo()
+		/// <summary>
+		///		Gets state from effect
+		/// </summary>
+		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
+		public TState GetState<TState>(int stateNumber = 0) where TState : struct
 		{
-			string info = "";
-			if (_hasInit)
-				info += _initComponent.DisplayInfo();
-			// if (_timeComponents != null)
-			// 	for (int i = 0; i < _timeComponents.Length; i++)
-			// 		info += _timeComponents[i].DisplayInfo();
-			// if (_hasStack)
-			// 	info += _stackComponent.DisplayInfo();
-			// if (_effectCheck != null)
-			// 	info += _effectCheck.DisplayInfo();
-			// info += _targetComponent.DisplayInfo();
-			return info;
+			if (_stateInfo == null)
+				return default;
+
+			return _stateInfo.GetState<TState>(stateNumber);
 		}
 
 		public void ResetState()

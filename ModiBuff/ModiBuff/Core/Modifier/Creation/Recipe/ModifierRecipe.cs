@@ -12,6 +12,7 @@ namespace ModiBuff.Core
 		public int Id { get; }
 		public string Name { get; }
 		private readonly string _displayName;
+		private readonly string _description;
 
 		public readonly ModifierIdManager IdManager; //TODO Refactor to make it private/not needed
 
@@ -45,10 +46,12 @@ namespace ModiBuff.Core
 		private List<ICheck> _effectCheckList;
 		private List<Func<IUnit, bool>> _effectFuncCheckList;
 
-		public ModifierRecipe(int id, string name, ModifierIdManager idManager)
+		public ModifierRecipe(int id, string name, string displayName, string description, ModifierIdManager idManager)
 		{
 			Id = id;
 			Name = name;
+			_displayName = displayName;
+			_description = description;
 			IdManager = idManager;
 
 			_effectWrappers = new List<EffectWrapper>(3);
@@ -339,7 +342,7 @@ namespace ModiBuff.Core
 
 		public ModifierInfo CreateModifierInfo()
 		{
-			return new ModifierInfo(Id, Name, _displayName);
+			return new ModifierInfo(Id, Name, _displayName, _description);
 		}
 
 		private static void ValidateModifierAction(ModifierAction modifierAction, EffectOn effectOn)
