@@ -32,11 +32,12 @@ namespace ModiBuff.Core
 		private bool _isTargetSetup;
 		private bool _multiTarget;
 
-		//TODO TEMP
-		private ModifierStateInfo _stateInfo;
+		//TODO ideally this would be outside of the modifier, but renting (returning) a tuple/wrapper is kinda meh
+		private readonly ModifierStateInfo _stateInfo;
 
-		public Modifier(int id, int genId, string name, InitComponent initComponent, ITimeComponent[] timeComponents,
-			StackComponent stackComponent, ModifierCheck effectCheck, ITargetComponent targetComponent)
+		public Modifier(int id, int genId, string name, InitComponent initComponent,
+			ITimeComponent[] timeComponents, StackComponent stackComponent, ModifierCheck effectCheck,
+			ITargetComponent targetComponent, ModifierStateInfo stateInfo)
 		{
 			Id = id;
 			GenId = genId;
@@ -54,8 +55,7 @@ namespace ModiBuff.Core
 			if (targetComponent is MultiTargetComponent)
 				_multiTarget = true;
 
-			if (initComponent.Effects != null)
-				_stateInfo = new ModifierStateInfo(initComponent.Effects);
+			_stateInfo = stateInfo;
 		}
 
 		public void UpdateTargets(List<IUnit> targetsInRange, IUnit source)
@@ -164,7 +164,10 @@ namespace ModiBuff.Core
 		public TState GetState<TState>(int stateNumber = 0) where TState : struct
 		{
 			if (_stateInfo == null)
+			{
+				Logger.LogWarning("Trying to get state info from a modifier that doesn't have any.");
 				return default;
+			}
 
 			return _stateInfo.GetState<TState>(stateNumber);
 		}

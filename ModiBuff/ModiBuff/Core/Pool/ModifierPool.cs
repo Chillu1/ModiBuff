@@ -41,6 +41,9 @@ namespace ModiBuff.Core
 
 #if DEBUG && !MODIBUFF_PROFILE
 			_maxModifiersCreated = new int[generators.Length];
+
+			if (generators.Length == 0)
+				Logger.LogError("No modifier generators found, did you forget to call ModifierRecipes.CreateGenerators()?");
 #endif
 
 			foreach (var generator in generators)

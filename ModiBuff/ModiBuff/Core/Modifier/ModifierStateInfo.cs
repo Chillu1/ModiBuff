@@ -1,5 +1,8 @@
 namespace ModiBuff.Core
 {
+	/// <summary>
+	///		Holds all effects that have state information, used for UI/UX
+	/// </summary>
 	public sealed class ModifierStateInfo
 	{
 		private readonly IEffect[] _effects;
@@ -29,14 +32,15 @@ namespace ModiBuff.Core
 			}
 #endif
 
+			int currentNumber = stateNumber;
 			for (int i = 0; i < _effects.Length; i++)
 			{
 				if (!(_effects[i] is IModifierStateInfo<TState> stateInfo))
 					continue;
 
-				if (stateNumber > 0)
+				if (currentNumber > 0)
 				{
-					stateNumber--;
+					currentNumber--;
 					continue;
 				}
 

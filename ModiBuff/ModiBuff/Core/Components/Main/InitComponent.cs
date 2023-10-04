@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
-	public struct InitComponent : IStateReset, IDisplayInfo
+	public struct InitComponent : IStateReset
 	{
 		public bool IsValid => _effects != null && _effects.Length > 0;
 

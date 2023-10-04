@@ -1,6 +1,10 @@
 namespace ModiBuff.Core
 {
-	public interface IModifierStateInfo<out TState> where TState : struct
+	public interface IModifierStateInfo
+	{
+	}
+
+	public interface IModifierStateInfo<out TState> : IModifierStateInfo where TState : struct
 	{
 		TState GetEffectData();
 	}

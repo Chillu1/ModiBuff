@@ -7,6 +7,7 @@ namespace ModiBuff.Tests
 	{
 		public BenchmarkModifierRecipes(ModifierIdManager idManager) : base(idManager)
 		{
+			CreateGenerators();
 		}
 
 		protected override void SetupRecipes()
@@ -22,7 +23,7 @@ namespace ModiBuff.Tests
 				var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
 
 				var modifier = new Modifier(id, genId, name, initComponent, null, default(StackComponent), null,
-					new SingleTargetComponent());
+					new SingleTargetComponent(), null);
 
 				return modifier;
 			}, new ModifierAddData(true, false, false, false));
