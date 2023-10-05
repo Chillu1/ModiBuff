@@ -36,7 +36,7 @@ namespace ModiBuff.Tests
 			_instanceUnit = new Unit(int.MaxValue);
 			int instanceDoTId = IdManager.GetId("InstanceStackableDoTNoRemove");
 			for (int i = 0; i < UnitCount; i++)
-				_instanceUnit.AddModifier(instanceDoTId, _instanceUnit);
+				_instanceUnit.ModifierController.Add(instanceDoTId, _instanceUnit, _instanceUnit);
 
 			_initDamageId = IdManager.GetId("InitDamage");
 			Pool.Allocate(_initDamageId, UnitCount);
@@ -66,15 +66,14 @@ namespace ModiBuff.Tests
 			for (int i = 0; i < _initDamageUnits.Length; i++)
 			{
 				var unit = _initDamageUnits[i];
-				unit.AddModifier(_initDamageId, unit);
+				unit.ModifierController.Add(_initDamageId, unit, unit);
 			}
 		}
 
-		[Benchmark(OperationsPerInvoke = UnitCount)]
+		[Benchmark]
 		public void BenchDoTIterationSingleInstanceStackable()
 		{
-			for (int i = 0; i < UnitCount; i++)
-				_instanceUnit.Update(Delta);
+			_instanceUnit.Update(Delta);
 		}
 	}
 }

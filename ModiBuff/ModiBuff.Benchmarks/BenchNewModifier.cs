@@ -55,14 +55,6 @@ namespace ModiBuff.Tests
 		}
 
 		[Benchmark]
-		public void BenchNewModifierManual()
-		{
-			var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
-
-			var modifier = new Modifier(0, 0, "Test", initComponent, null, default(StackComponent), null, new SingleTargetComponent(), null);
-		}
-
-		[Benchmark]
 		public void BenchNewModifierGeneratorManual()
 		{
 			var modifier = _initDamageModifierGenerator.Create();

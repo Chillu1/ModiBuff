@@ -4,7 +4,7 @@ namespace ModiBuff.Core
 	{
 		internal static void AddModifierSelf(this IModifierOwner unit, string name)
 		{
-			unit.AddModifier(ModifierIdManager.GetIdOld(name), unit);
+			unit.ModifierController.Add(ModifierIdManager.GetIdOld(name), unit, unit);
 		}
 
 		internal static void AddModifierTarget(this IModifierOwner unit, string name, IUnit target)

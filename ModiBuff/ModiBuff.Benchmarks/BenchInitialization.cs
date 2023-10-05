@@ -6,6 +6,12 @@ namespace ModiBuff.Tests
 	[MemoryDiagnoser]
 	public class BenchInitialization
 	{
+		[GlobalSetup]
+		public void GlobalSetup()
+		{
+			Config.PoolSize = 1024;
+		}
+
 		[Benchmark]
 		public void BenchSetupRecipes()
 		{

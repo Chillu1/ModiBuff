@@ -118,13 +118,13 @@ Pre-allocated Pools
 
 | Library                                               | NoOp* <br/>(1 unit) | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Apply Multi<br/>instance DoT |
 |-------------------------------------------------------|---------------------|--------------------------------|-------------------------------------|------------------------------|
-| ModiBuff (this)                                       | 0.16ms, 0 B         | 0.24ms, 0 B                    | 0.43ms, 0 B                         | 0.98ms, 0 B                  |
+| ModiBuff (this)                                       | 0.16ms, 0 B         | 0.25ms, 0 B                    | 0.43ms, 0 B                         | 0.88ms, 0 B                  |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | ?                   | 1.02ms, 0 GC                   | ?                                   | X                            |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                   | 21.4ms, 24 GC                  | ?                                   | X                            |
 
 | Library                                               | Update DoT**<br/>(10_000 units, N:1) | Update Instance<br/>Stackable DoT |
 |-------------------------------------------------------|--------------------------------------|-----------------------------------|
-| ModiBuff (this)                                       | 1.37ms, 0 B                          | 0.12ms, 0 B                       |
+| ModiBuff (this)                                       | 1.61ms, 0 B                          | 0.13ms, 0 B                       |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 0.44ms, 0 B                          | X                                 |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                                    | X                                 |
 
@@ -132,7 +132,7 @@ Pre-allocated Pools
 
 | Library                                               | DoT pool rent | DoT pool<br/>reset return |
 |-------------------------------------------------------|---------------|---------------------------|
-| ModiBuff (this)                                       | 0.04ms, 0 B   | 0.17ms, 0 B               |
+| ModiBuff (this)                                       | 0.04ms, 0 B   | 0.18ms, 0 B               |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 1.64ms, 0 GC  | 4.26ms, 0 GC              |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | X             | X                         |
 
@@ -143,7 +143,7 @@ Pre-allocated Pools
 
 | Library                                               | New<br/>InitDmg<br/>Manual | New<br/>InitDmg<br/>Recipe | New<br/>DoT*<br/>Recipe |
 |-------------------------------------------------------|----------------------------|----------------------------|-------------------------|
-| ModiBuff (this)                                       | 0.63ms, 2.6 MB             | 1.09ms, 2.6 MB             | 2.36ms, 5.5 MB          |
+| ModiBuff (this)                                       | 0.76ms, 2.7 MB             | 1.56ms, 3.3 MB             | 3.42ms, 6.5 MB          |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | X                          | 10.4ms,   2 GC             | 16.7ms,   2 GC          |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | 92.0ms,  90 GC             | X                          | 140 ms, 126 GC          |
 

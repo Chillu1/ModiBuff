@@ -29,7 +29,7 @@ namespace ModiBuff.Core
 		public void Effect(IUnit target, IUnit source)
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
-			((IModifierOwner)target).AddModifier(_modifierId, source);
+			((IModifierOwner)target).ModifierController.Add(_modifierId, target, source);
 		}
 
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
