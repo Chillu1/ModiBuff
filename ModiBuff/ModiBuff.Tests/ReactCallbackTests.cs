@@ -79,11 +79,11 @@ namespace ModiBuff.Tests
 				effect.SetGenId(genId);
 				var removeEffect = new RemoveEffect(id, genId);
 				float totalDamageTaken = 0f;
-				var @event = new HealthChangedEvent((unit, health, deltaHealth) =>
+				var @event = new HealthChangedEvent((target, source, health, deltaHealth) =>
 				{
 					totalDamageTaken += deltaHealth;
 					if (totalDamageTaken >= 10)
-						removeEffect.Effect(unit, unit);
+						removeEffect.Effect(target, source);
 				});
 				var registerReactEffect = new ReactCallbackRegisterEffect<ReactType>(
 					new ReactCallback<ReactType>(ReactType.CurrentHealthChanged, @event));
@@ -146,11 +146,11 @@ namespace ModiBuff.Tests
 				effect.SetGenId(genId);
 				var removeEffect = new RemoveEffect(id, genId);
 				float totalDamageTaken = 0f;
-				var @event = new HealthChangedEvent((unit, health, deltaHealth) =>
+				var @event = new HealthChangedEvent((target, source, health, deltaHealth) =>
 				{
 					totalDamageTaken += deltaHealth;
 					if (totalDamageTaken >= 10)
-						removeEffect.Effect(unit, unit);
+						removeEffect.Effect(target, source);
 				});
 				var registerReactEffect = new ReactCallbackRegisterEffect<ReactType>(
 					new ReactCallback<ReactType>(ReactType.CurrentHealthChanged, @event));

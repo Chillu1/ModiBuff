@@ -177,7 +177,7 @@ namespace ModiBuff.Core.Units
 			{
 				_healthChangedCount++;
 				for (int i = 0; i < _healthChangedEvent.Count; i++)
-					_healthChangedEvent[i](this, Health, dealtDamage);
+					_healthChangedEvent[i](this, source, Health, dealtDamage);
 			}
 
 			//if damage was bigger than half health, trigger strong attack callbacks
@@ -428,7 +428,7 @@ namespace ModiBuff.Core.Units
 							break;
 						}
 
-						healthEvent.DynamicInvoke(this, Health, 0f);
+						healthEvent.DynamicInvoke(this, this, Health, 0f);
 						_healthChangedEvent.Add(healthEvent);
 						break;
 					case ReactType.DamageChanged:
@@ -459,7 +459,7 @@ namespace ModiBuff.Core.Units
 						//TODO Always revert internal effect?
 						var healthChangedEvent = (HealthChangedEvent)callback.Action;
 						if (_healthChangedEvent.Remove(healthChangedEvent))
-							healthChangedEvent.DynamicInvoke(this, Health, 0f);
+							healthChangedEvent.DynamicInvoke(this, this, Health, 0f);
 #if DEBUG && !MODIBUFF_PROFILE
 						else
 							Logger.LogError("Could not remove healthChangedEvent: " + healthChangedEvent);
