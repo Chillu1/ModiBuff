@@ -15,9 +15,10 @@ namespace ModiBuff.Core.Units
 
 	//Or the manual generic one:
 	public class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float, float, float, float>,
-		IHealable<float, float>, IHealer<float, float>, IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker,
-		IEventOwner<EffectOnEvent>, IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
-		IStatusEffectModifierOwner<LegalAction, StatusEffectType>, ICallbackRegistrable<CallbackType>, IReactable<ReactType>
+		IHealable<float, float>, IHealer<float, float>, IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>,
+		IPreAttacker, IEventOwner<EffectOnEvent>, IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
+		IStatusEffectModifierOwner<LegalAction, StatusEffectType>, ICallbackRegistrable<CallbackType>,
+		IReactable<ReactType>
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -30,12 +31,20 @@ namespace ModiBuff.Core.Units
 		public bool IsDead { get; private set; }
 
 		public ModifierController ModifierController { get; }
-		public IMultiInstanceStatusEffectController<LegalAction, StatusEffectType> StatusEffectController => _statusEffectController;
+
+		public IMultiInstanceStatusEffectController<LegalAction, StatusEffectType> StatusEffectController =>
+			_statusEffectController;
 
 		//Note: These event lists should only be used for classic effects.
 		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
 		private readonly List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
-		private readonly List<IEffect> _beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects;
+
+		private readonly List<IEffect> _beforeAttackEffects,
+			_onAttackEffects,
+			_onCastEffects,
+			_onKillEffects,
+			_onHealEffects;
+
 		private int _whenAttackedCount, _whenCastCount, _whenDeathCount, _whenHealedCount;
 		private int _beforeAttackCount, _onAttackCount, _onCastCount, _onKillCount, _onHealCount;
 
@@ -414,7 +423,8 @@ namespace ModiBuff.Core.Units
 					case ReactType.CurrentHealthChanged:
 						if (!(callback.Action is HealthChangedEvent healthEvent))
 						{
-							Logger.LogError("objectDelegate is not of type HealthChangedEvent, use named delegates instead.");
+							Logger.LogError(
+								"objectDelegate is not of type HealthChangedEvent, use named delegates instead.");
 							break;
 						}
 
@@ -424,7 +434,8 @@ namespace ModiBuff.Core.Units
 					case ReactType.DamageChanged:
 						if (!(callback.Action is DamageChangedEvent damageEvent))
 						{
-							Logger.LogError("objectDelegate is not of type DamagedChangedEvent, use named delegates instead.");
+							Logger.LogError(
+								"objectDelegate is not of type DamagedChangedEvent, use named delegates instead.");
 							break;
 						}
 
@@ -444,11 +455,25 @@ namespace ModiBuff.Core.Units
 				ref readonly var callback = ref reactCallbacks[i];
 				switch (callback.ReactType)
 				{
+					case ReactType.CurrentHealthChanged:
+						//TODO Always revert internal effect?
+						var healthChangedEvent = (HealthChangedEvent)callback.Action;
+						if (_healthChangedEvent.Remove(healthChangedEvent))
+							healthChangedEvent.DynamicInvoke(this, Health, 0f);
+#if DEBUG && !MODIBUFF_PROFILE
+						else
+							Logger.LogError("Could not remove healthChangedEvent: " + healthChangedEvent);
+#endif
+						break;
 					case ReactType.DamageChanged:
 						//TODO Always revert internal effect?
-						var @event = (DamageChangedEvent)callback.Action;
-						@event.DynamicInvoke(this, Damage, 0f);
-						_damageChangedEvent.Remove(@event);
+						var damageChangedEvent = (DamageChangedEvent)callback.Action;
+						if (_damageChangedEvent.Remove(damageChangedEvent))
+							damageChangedEvent.DynamicInvoke(this, Damage, 0f);
+#if DEBUG && !MODIBUFF_PROFILE
+						else
+							Logger.LogError("Could not remove damageChangedEvent: " + damageChangedEvent);
+#endif
 						break;
 					default:
 						throw new ArgumentOutOfRangeException(nameof(reactCallbacks), callback.ReactType, null);

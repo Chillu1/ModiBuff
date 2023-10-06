@@ -287,6 +287,14 @@ namespace ModiBuff.Core
 		{
 			if (!ModifierRecipes.GetAddData(modifierReference.Id).IsInstanceStackable)
 			{
+#if DEBUG && !MODIBUFF_PROFILE
+				if (_modifierIndexes[modifierReference.Id] == -1)
+				{
+					Logger.LogError("Tried to remove a modifier that doesn't exist on entity, id: " +
+					                $"{modifierReference.Id}, genId: {modifierReference.GenId}");
+					return;
+				}
+#endif
 				var modifier = _modifiers[_modifierIndexes[modifierReference.Id]];
 				ModifierPool.Instance.Return(modifier);
 				_modifiers[_modifierIndexes[modifierReference.Id]] = _modifiers[--_modifiersTop];

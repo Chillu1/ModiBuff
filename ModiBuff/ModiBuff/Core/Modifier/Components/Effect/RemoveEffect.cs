@@ -37,8 +37,8 @@ namespace ModiBuff.Core
 				Logger.LogWarning("RemoveEffect.Effect: genId wasn't set");
 #endif
 
-			//Still not fully ideal, but fixed the state issue 
-			((IModifierOwner)target).ModifierController.PrepareRemove(_id, _genId); //TODO From which collection? Applier support?
+			//TODO From which collection? Applier support?
+			((IModifierOwner)target).ModifierController.PrepareRemove(_id, _genId);
 		}
 
 		public RemoveEffect ShallowClone() => new RemoveEffect(_id, _genId);

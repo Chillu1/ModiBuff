@@ -310,6 +310,11 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		// public ModifierRecipe ReactCallback<TReact, TEvent>(TReact reactType, Func<ReactState, IEffect, TEvent> func)
+		// {
+		// 	return this;
+		// }
+
 		//---Modifier Generation---
 
 		public ModifierAddData CreateAddData()
