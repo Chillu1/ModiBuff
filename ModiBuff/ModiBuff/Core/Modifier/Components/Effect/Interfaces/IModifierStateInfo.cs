@@ -4,8 +4,12 @@ namespace ModiBuff.Core
 	{
 	}
 
-	public interface IModifierStateInfo<out TState> : IModifierStateInfo where TState : struct
+	/// <summary>
+	///		Interface for effects that have state information, used for UI/UX
+	/// </summary>
+	/// <typeparam name="TData"></typeparam>
+	public interface IModifierStateInfo<out TData> : IModifierStateInfo where TData : struct
 	{
-		TState GetEffectData();
+		TData GetEffectData();
 	}
 }

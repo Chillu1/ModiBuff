@@ -158,9 +158,9 @@ namespace ModiBuff.Core
 			ModifierStateInfo modifierStateInfo = null;
 			if (_effectsWithModifierInfoWrappers.Length > 0)
 			{
-				var modifierStateInfoEffects = new IEffect[_effectsWithModifierInfoWrappers.Length];
+				var modifierStateInfoEffects = new IModifierStateInfo[_effectsWithModifierInfoWrappers.Length];
 				for (int i = 0; i < _effectsWithModifierInfoWrappers.Length; i++)
-					modifierStateInfoEffects[i] = _effectsWithModifierInfoWrappers[i].GetEffect();
+					modifierStateInfoEffects[i] = (IModifierStateInfo)_effectsWithModifierInfoWrappers[i].GetEffect();
 				modifierStateInfo = new ModifierStateInfo(modifierStateInfoEffects);
 			}
 

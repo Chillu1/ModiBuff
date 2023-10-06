@@ -1,6 +1,7 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class SingleInstanceStatusEffectEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect
+	public sealed class SingleInstanceStatusEffectEffect : IStateEffect, IStackEffect, IRevertEffect,
+		IEffect, IModifierStateInfo<SingleInstanceStatusEffectEffect.Data>
 	{
 		public bool IsRevertible { get; }
 
@@ -11,7 +12,8 @@ namespace ModiBuff.Core.Units
 		private float _extraDuration;
 		private float _totalDuration;
 
-		public SingleInstanceStatusEffectEffect(StatusEffectType statusEffectType, float duration, bool revertible = false,
+		public SingleInstanceStatusEffectEffect(StatusEffectType statusEffectType, float duration,
+			bool revertible = false,
 			StackEffectType stackEffect = StackEffectType.Effect)
 		{
 			_statusEffectType = statusEffectType;
@@ -47,13 +49,29 @@ namespace ModiBuff.Core.Units
 				Effect(target, source);
 		}
 
+		public Data GetEffectData() => new Data(_duration, _extraDuration);
+
 		public void ResetState()
 		{
 			_extraDuration = 0;
 			_totalDuration = 0;
 		}
 
-		public IEffect ShallowClone() => new SingleInstanceStatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect);
+		public IEffect ShallowClone() =>
+			new SingleInstanceStatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect);
+
 		object IShallowClone.ShallowClone() => ShallowClone();
+
+		public readonly struct Data
+		{
+			public readonly float BaseDuration;
+			public readonly float ExtraDuration;
+
+			public Data(float baseDuration, float extraDuration)
+			{
+				BaseDuration = baseDuration;
+				ExtraDuration = extraDuration;
+			}
+		}
 	}
 }

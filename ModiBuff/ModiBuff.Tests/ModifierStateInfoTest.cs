@@ -14,7 +14,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			var modifier = Pool.Rent(IdManager.GetId("InitDamage"));
-			var state = modifier.GetState<DamageEffect.DamageData>();
+			var state = modifier.GetState<DamageEffect.Data>();
 			Assert.AreEqual(5, state.BaseDamage);
 			Assert.AreEqual(0, state.ExtraDamage);
 		}
@@ -33,7 +33,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			var modifier = Pool.Rent(IdManager.GetId("InitDamage"));
-			var state = modifier.GetState<DamageEffect.DamageData>();
+			var state = modifier.GetState<DamageEffect.Data>();
 			Assert.AreEqual(5, state.BaseDamage);
 			Assert.AreEqual(0, state.ExtraDamage);
 		}
@@ -49,17 +49,17 @@ namespace ModiBuff.Tests
 			Setup();
 
 			var modifier = Pool.Rent(IdManager.GetId("DoubleStackDamage"));
-			var firstDamageState = modifier.GetState<DamageEffect.DamageData>();
+			var firstDamageState = modifier.GetState<DamageEffect.Data>();
 			Assert.AreEqual(5, firstDamageState.BaseDamage);
 			Assert.AreEqual(0, firstDamageState.ExtraDamage);
-			var secondDamageState = modifier.GetState<DamageEffect.DamageData>(1);
+			var secondDamageState = modifier.GetState<DamageEffect.Data>(1);
 			Assert.AreEqual(10, secondDamageState.BaseDamage);
 			Assert.AreEqual(0, secondDamageState.ExtraDamage);
 
 			modifier.UpdateSingleTargetSource(Unit, Unit);
 			modifier.Stack();
 
-			secondDamageState = modifier.GetState<DamageEffect.DamageData>(1);
+			secondDamageState = modifier.GetState<DamageEffect.Data>(1);
 			Assert.AreEqual(10, secondDamageState.BaseDamage);
 			Assert.AreEqual(2, secondDamageState.ExtraDamage);
 		}

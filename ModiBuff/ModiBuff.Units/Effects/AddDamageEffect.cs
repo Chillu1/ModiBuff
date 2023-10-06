@@ -1,6 +1,7 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class AddDamageEffect : ITargetEffect, IStackEffect, IStateEffect, IRevertEffect, IEffect
+	public sealed class AddDamageEffect : ITargetEffect, IStackEffect, IStateEffect, IRevertEffect,
+		IEffect, IModifierStateInfo<AddDamageEffect.Data>
 	{
 		public bool IsRevertible { get; }
 
@@ -14,11 +15,13 @@ namespace ModiBuff.Core.Units
 		private float _totalAddedDamage;
 
 		public AddDamageEffect(float damage, bool revertible = false, bool togglable = false,
-			StackEffectType stackEffect = StackEffectType.Effect) : this(damage, revertible, togglable, stackEffect, Targeting.TargetSource)
+			StackEffectType stackEffect = StackEffectType.Effect) : this(damage, revertible, togglable, stackEffect,
+			Targeting.TargetSource)
 		{
 		}
 
-		private AddDamageEffect(float damage, bool revertible, bool togglable, StackEffectType stackEffect, Targeting targeting)
+		private AddDamageEffect(float damage, bool revertible, bool togglable, StackEffectType stackEffect,
+			Targeting targeting)
 		{
 			_damage = damage;
 			IsRevertible = revertible;
@@ -67,6 +70,8 @@ namespace ModiBuff.Core.Units
 				Effect(target, source);
 		}
 
+		public Data GetEffectData() => new Data(_damage, _extraDamage);
+
 		public void ResetState()
 		{
 			_isEnabled = false;
@@ -74,7 +79,21 @@ namespace ModiBuff.Core.Units
 			_totalAddedDamage = 0;
 		}
 
-		public IEffect ShallowClone() => new AddDamageEffect(_damage, IsRevertible, _isTogglable, _stackEffect, _targeting);
+		public IEffect ShallowClone() =>
+			new AddDamageEffect(_damage, IsRevertible, _isTogglable, _stackEffect, _targeting);
+
 		object IShallowClone.ShallowClone() => ShallowClone();
+
+		public readonly struct Data
+		{
+			public readonly float BaseDamage;
+			public readonly float ExtraDamage;
+
+			public Data(float baseDamage, float extraDamage)
+			{
+				BaseDamage = baseDamage;
+				ExtraDamage = extraDamage;
+			}
+		}
 	}
 }

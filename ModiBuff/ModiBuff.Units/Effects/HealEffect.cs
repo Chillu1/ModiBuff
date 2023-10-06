@@ -3,7 +3,8 @@ using System.Runtime.CompilerServices;
 namespace ModiBuff.Core.Units
 {
 	public sealed class HealEffect : ITargetEffect, IStateEffect, IStackEffect, IRevertEffect, IEffect,
-		IMetaEffectOwner<HealEffect, float, float>, IPostEffectOwner<HealEffect, float>
+		IMetaEffectOwner<HealEffect, float, float>, IPostEffectOwner<HealEffect, float>,
+		IModifierStateInfo<HealEffect.Data>
 	{
 		public bool IsRevertible { get; }
 
@@ -96,13 +97,29 @@ namespace ModiBuff.Core.Units
 				Effect(target, source);
 		}
 
+		public Data GetEffectData() => new Data(_heal, _extraHeal);
+
 		public void ResetState()
 		{
 			_extraHeal = 0;
 			_totalHeal = 0;
 		}
 
-		public IEffect ShallowClone() => new HealEffect(_heal, IsRevertible, _stackEffect, _targeting, _metaEffects, _postEffects);
+		public IEffect ShallowClone() =>
+			new HealEffect(_heal, IsRevertible, _stackEffect, _targeting, _metaEffects, _postEffects);
+
 		object IShallowClone.ShallowClone() => ShallowClone();
+
+		public readonly struct Data
+		{
+			public readonly float BaseHeal;
+			public readonly float ExtraHeal;
+
+			public Data(float baseHeal, float extraHeal)
+			{
+				BaseHeal = baseHeal;
+				ExtraHeal = extraHeal;
+			}
+		}
 	}
 }

@@ -161,7 +161,7 @@ namespace ModiBuff.Core
 		///		Gets state from effect
 		/// </summary>
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
-		public TState GetState<TState>(int stateNumber = 0) where TState : struct
+		public TData GetState<TData>(int stateNumber = 0) where TData : struct
 		{
 			if (_stateInfo == null)
 			{
@@ -169,7 +169,7 @@ namespace ModiBuff.Core
 				return default;
 			}
 
-			return _stateInfo.GetState<TState>(stateNumber);
+			return _stateInfo.GetState<TData>(stateNumber);
 		}
 
 		public void ResetState()

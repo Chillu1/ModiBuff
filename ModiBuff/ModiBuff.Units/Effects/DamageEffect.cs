@@ -1,15 +1,15 @@
 #if NET5_0_OR_GREATER || NETSTANDARD2_0_OR_GREATER || NETCOREAPP1_1_OR_GREATER
 #define UNSAFE
+using System.Runtime.CompilerServices;
 #endif
 
 using System;
-using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
 	public sealed class DamageEffect : ITargetEffect, IStackEffect, IStateEffect, IEffect,
 		IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
-		IModifierStateInfo<DamageEffect.DamageData>
+		IModifierStateInfo<DamageEffect.Data>
 	{
 		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;
@@ -95,10 +95,7 @@ namespace ModiBuff.Core.Units
 				Effect(target, source);
 		}
 
-		public DamageData GetEffectData()
-		{
-			return new DamageData(_baseDamage, _extraDamage);
-		}
+		public Data GetEffectData() => new Data(_baseDamage, _extraDamage);
 
 		public void ResetState() => _extraDamage = 0;
 
@@ -107,12 +104,12 @@ namespace ModiBuff.Core.Units
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 
-		public readonly struct DamageData
+		public readonly struct Data
 		{
 			public readonly float BaseDamage;
 			public readonly float ExtraDamage;
 
-			public DamageData(float baseDamage, float extraDamage)
+			public Data(float baseDamage, float extraDamage)
 			{
 				BaseDamage = baseDamage;
 				ExtraDamage = extraDamage;

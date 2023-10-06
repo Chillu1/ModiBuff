@@ -5,9 +5,9 @@ namespace ModiBuff.Core
 	/// </summary>
 	public sealed class ModifierStateInfo
 	{
-		private readonly IEffect[] _effects;
+		private readonly IModifierStateInfo[] _effects;
 
-		public ModifierStateInfo(params IEffect[] effects)
+		public ModifierStateInfo(params IModifierStateInfo[] effects)
 		{
 			_effects = effects;
 		}
@@ -16,7 +16,7 @@ namespace ModiBuff.Core
 		///		Gets state from effect
 		/// </summary>
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
-		public TState GetState<TState>(int stateNumber = 0) where TState : struct
+		public TData GetState<TData>(int stateNumber = 0) where TData : struct
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (stateNumber < 0 || stateNumber >= _effects.Length)
@@ -29,7 +29,7 @@ namespace ModiBuff.Core
 			int currentNumber = stateNumber;
 			for (int i = 0; i < _effects.Length; i++)
 			{
-				if (!(_effects[i] is IModifierStateInfo<TState> stateInfo))
+				if (!(_effects[i] is IModifierStateInfo<TData> stateInfo))
 					continue;
 
 				if (currentNumber > 0)
@@ -41,7 +41,7 @@ namespace ModiBuff.Core
 				return stateInfo.GetEffectData();
 			}
 
-			Logger.LogError($"Couldn't find {typeof(TState)} at number {stateNumber}");
+			Logger.LogError($"Couldn't find {typeof(TData)} at number {stateNumber}");
 			return default;
 		}
 	}

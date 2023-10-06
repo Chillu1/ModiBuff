@@ -1,6 +1,7 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class StatusEffectEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect, IModifierIdOwner, IModifierGenIdOwner
+	public sealed class StatusEffectEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect,
+		IModifierIdOwner, IModifierGenIdOwner, IModifierStateInfo<StatusEffectEffect.Data>
 	{
 		public bool IsRevertible { get; }
 
@@ -14,12 +15,13 @@ namespace ModiBuff.Core.Units
 		private float _totalDuration;
 
 		public StatusEffectEffect(StatusEffectType statusEffectType, float duration, bool revertible = false,
-			StackEffectType stackEffect = StackEffectType.Effect) : this(statusEffectType, duration, revertible, stackEffect, -1, -1)
+			StackEffectType stackEffect = StackEffectType.Effect) :
+			this(statusEffectType, duration, revertible, stackEffect, -1, -1)
 		{
 		}
 
-		private StatusEffectEffect(StatusEffectType statusEffectType, float duration, bool revertible, StackEffectType stackEffect, int id,
-			int genId)
+		private StatusEffectEffect(StatusEffectType statusEffectType, float duration, bool revertible,
+			StackEffectType stackEffect, int id, int genId)
 		{
 			_statusEffectType = statusEffectType;
 			_duration = duration;
@@ -60,6 +62,8 @@ namespace ModiBuff.Core.Units
 				.DecreaseStatusEffect(_id, _genId, _statusEffectType, _totalDuration);
 		}
 
+		public Data GetEffectData() => new Data(_duration, _extraDuration);
+
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
@@ -78,7 +82,21 @@ namespace ModiBuff.Core.Units
 			_totalDuration = 0;
 		}
 
-		public IEffect ShallowClone() => new StatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect, _id, _genId);
+		public IEffect ShallowClone() =>
+			new StatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect, _id, _genId);
+
 		object IShallowClone.ShallowClone() => ShallowClone();
+
+		public readonly struct Data
+		{
+			public readonly float Duration;
+			public readonly float ExtraDuration;
+
+			public Data(float duration, float extraDuration)
+			{
+				Duration = duration;
+				ExtraDuration = extraDuration;
+			}
+		}
 	}
 }
