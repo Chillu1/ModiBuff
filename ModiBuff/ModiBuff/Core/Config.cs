@@ -4,6 +4,8 @@ namespace ModiBuff.Core
 {
 	public static class Config
 	{
+		public const int DefaultDefaultTag = 0;
+
 		private const int DefaultPoolSize = 64;
 		private const int DefaultMaxPoolSize = 16_384;
 
@@ -19,6 +21,8 @@ namespace ModiBuff.Core
 
 		private const float DefaultDeltaTolerance = 0.001f;
 
+
+		public static int DefaultTag = DefaultDefaultTag;
 
 		public static int PoolSize = DefaultPoolSize;
 		public static int MaxPoolSize = DefaultMaxPoolSize;
@@ -45,13 +49,16 @@ namespace ModiBuff.Core
 			ModifierAllocationsCount = new Dictionary<string, int>();
 		}
 
-		public static void Set(int poolSize = DefaultPoolSize, int maxPoolSize = DefaultMaxPoolSize,
-			int modifierArraySize = DefaultModifierArraySize, int modifierRemoveSize = DefaultModifierRemoveSize,
+		public static void Set(int defaultTag = DefaultDefaultTag, int poolSize = DefaultPoolSize,
+			int maxPoolSize = DefaultMaxPoolSize, int modifierArraySize = DefaultModifierArraySize,
+			int modifierRemoveSize = DefaultModifierRemoveSize,
 			int multiTargetComponentInitialCapacity = DefaultMultiTargetComponentInitialCapacity,
 			int attackApplierSize = DefaultAttackApplierSize, int castApplierSize = DefaultCastApplierSize,
-			int attackCheckApplierSize = DefaultAttackCheckApplierSize, int castCheckApplierSize = DefaultCastCheckApplierSize,
-			float deltaTolerance = DefaultDeltaTolerance)
+			int attackCheckApplierSize = DefaultAttackCheckApplierSize,
+			int castCheckApplierSize = DefaultCastCheckApplierSize, float deltaTolerance = DefaultDeltaTolerance)
 		{
+			DefaultTag = defaultTag;
+
 			PoolSize = poolSize;
 			MaxPoolSize = maxPoolSize;
 
@@ -70,6 +77,8 @@ namespace ModiBuff.Core
 
 		public static void Reset()
 		{
+			DefaultTag = DefaultDefaultTag;
+
 			PoolSize = DefaultPoolSize;
 			MaxPoolSize = DefaultMaxPoolSize;
 

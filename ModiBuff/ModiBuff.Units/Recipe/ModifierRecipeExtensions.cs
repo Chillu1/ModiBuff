@@ -9,6 +9,7 @@ namespace ModiBuff.Core.Units
 
 		public static ModifierRecipe LegalTarget(this ModifierRecipe recipe, LegalTarget target)
 		{
+			recipe.RemoveTag((Core.TagType)TagType.LegalTargetAll);
 			return recipe.Tag(target.ToTagType());
 		}
 

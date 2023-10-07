@@ -54,6 +54,8 @@ namespace ModiBuff.Core
 			_description = description;
 			IdManager = idManager;
 
+			_tag = (TagType)Config.DefaultTag;
+
 			_effectWrappers = new List<EffectWrapper>(3);
 		}
 
@@ -82,6 +84,21 @@ namespace ModiBuff.Core
 		public ModifierRecipe Tag(TagType tag)
 		{
 			_tag |= tag;
+			return this;
+		}
+
+		/// <summary>
+		///		This will set the tag directly, without adding, it might remove other tags.
+		/// </summary>
+		public ModifierRecipe SetTag(TagType tag)
+		{
+			_tag = tag;
+			return this;
+		}
+
+		public ModifierRecipe RemoveTag(TagType tag)
+		{
+			_tag &= ~tag;
 			return this;
 		}
 

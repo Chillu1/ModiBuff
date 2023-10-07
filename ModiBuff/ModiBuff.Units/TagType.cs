@@ -9,6 +9,8 @@ namespace ModiBuff.Core.Units
 	[Flags]
 	public enum TagType : ulong
 	{
+		Default = Core.TagType.Default | LegalTargetAll,
+
 		None = Core.TagType.None,
 		IntervalIgnoresStatusResistance = Core.TagType.IntervalIgnoresStatusResistance,
 		DurationIgnoresStatusResistance = Core.TagType.DurationIgnoresStatusResistance,

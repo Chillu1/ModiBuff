@@ -31,6 +31,7 @@ namespace ModiBuff.Tests
 		public void OneTimeSetup()
 		{
 			Logger.SetLogger<NUnitLogger>();
+			Config.DefaultTag = (int)Core.Units.TagType.Default;
 			Config.PoolSize = 1;
 
 			UnitHealth = AllyHealth = 500;
