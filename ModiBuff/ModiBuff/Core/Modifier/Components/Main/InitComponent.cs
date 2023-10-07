@@ -4,8 +4,6 @@ namespace ModiBuff.Core
 {
 	public struct InitComponent : IStateReset
 	{
-		public bool IsValid => _effects != null && _effects.Length > 0;
-
 		private readonly IEffect[] _effects;
 		private readonly bool _oneTime;
 		private readonly ModifierCheck _modifierCheck;

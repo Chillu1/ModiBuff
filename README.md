@@ -26,8 +26,7 @@
 # What is this?
 
 This zero dependency, engine-agnostic library was made to make a standardized powerful system that allows for
-manipulation of effects on
-entities.
+manipulation of effects on entities.
 
 **It focuses on Feature Set, Performance and Ease of use, in that order.**
 
@@ -218,8 +217,7 @@ Otherwise go to [Custom Units](#custom-units).
 ## Recipe
 
 Modifier Recipes are the high level API for creating modifiers, they use the builder pattern/method chaining/fluent
-interface to create
-modifiers (without the need for calling a Finish/Complete method).
+interface to create modifiers (without the need for calling a Finish/Complete method).
 
 Easiest modifier, that does 5 damage when added, can be created like this:
 
@@ -418,8 +416,7 @@ The common conditions are: cooldown, mana cost, chance, status effect, etc.
 
 This example deals 5 damage on init apply, only if:
 the source unit has at least 5 mana, passes the 50% roll, is not on 1 second cooldown, source is able to act (attack,
-heal), and target is
-silenced.
+heal), and target is silenced.
 
 ```csharp
 Add("InitDamage_CostMana")
@@ -555,8 +552,7 @@ Which are needed for using custom game-based logic.
 
 Effects have to implement `IEffect`.  
 They can also implement `ITargetEffect` for event targeting owner/source, `IEventTrigger` to avoid event
-recursion, `IStackEffect` for
-stacking functionality, `IStateEffect` for resetting runtime state.
+recursion, `IStackEffect` for stacking functionality, `IStateEffect` for resetting runtime state.
 
 For fully featured effect implementation, look at
 [DamageEffect](https://github.com/Chillu1/ModiBuff/blob/master/ModiBuff/ModiBuff.Units/Effects/DamageEffect.cs)
@@ -570,9 +566,8 @@ cast/attack/apply.
 The next important thing is to identify if our effect will have mutable state.
 It will have state if we plan on reverting it, adding more value to it, or changing internal effect state.
 In that case, we need to implement `IStateEffect`, which has a method `void ResetState();` that gets called when the
-modifier is sent
-back to pool, and also a clone `IEffect ShallowClone()` method. For cloning the effect so the state is not shared
-between modifiers.
+modifier is sent back to pool, and also a clone `IEffect ShallowClone()` method. For cloning the effect so the state is
+not shared between modifiers.
 
 If we want to use stack logic, the effect needs to implement `IStackEffect`.
 
@@ -652,8 +647,7 @@ Add("ComplexApplier2_AddDamage")
 ## Modifier
 
 Modifiers are the core backend part of the library, they are the things that are applied to entities with effects on
-certain actions.    
-Ex. Init, Interval, Duration, Stack.  
+certain actions. Ex. Init, Interval, Duration, Stack.  
 You should **NOT** use the Modifier class directly, but instead use the recipe system.
 Recipe system fixes a lot of internal complexity of setting up modifiers for you.
 
@@ -679,8 +673,19 @@ platform for discussion if needed.
 
 Q: It's 100% not possible to make "mechanic from a game" in ModiBuff.  
 A: If the mechanic is lacking internal ModiBuff functionality to work, and isn't an effect implementation problem, make
-an issue about it.
-The goal of ModiBuff is to support as many unique mechanics as possible, that don't rely on game logic.
+an issue about it. The goal of ModiBuff is to support as many unique mechanics as possible,
+that don't rely on game logic.
+
+Q: Why can't effects hold my/some kind of state? How else can I achieve this?  
+A: Feeding mutable (non-stack) state to effects would introduce way too much complexity.
+Instead we achieve this by using meta effects, and post effects on a secondary entity.
+An example of this is a
+[projectile](https://github.com/Chillu1/ModiBuff/blob/d0ba95f8f0696572b9cfb4f3e1374c2fc5f57726/ModiBuff/ModiBuff.Tests/StateTests.cs#L270-L277).
+
+Q: How to handle UI?  
+A: There's two main ways of handling UI. The first general info is Modifier Name and Modifier Description.
+The second part is to get modifier effects state with `GetState<TData>(int)`, this will return a struct of the effect
+state.
 
 Q: My stack effect is not working, what's wrong?  
 A: StackEffectType needs to be set in all: `IEffect` (ex. DamageEffect), `Recipe.Effect.EffectOn.Stack`

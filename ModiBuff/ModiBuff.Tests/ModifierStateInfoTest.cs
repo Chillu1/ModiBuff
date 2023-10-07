@@ -27,7 +27,7 @@ namespace ModiBuff.Tests
 				var damageEffect = new DamageEffect(5);
 				var initComponent = new InitComponent(false, new IEffect[] { damageEffect }, null);
 
-				return new Modifier(id, genId, name, initComponent, null, default(StackComponent), null,
+				return new Modifier(id, genId, name, initComponent, null, null, null,
 					new SingleTargetComponent(), new ModifierStateInfo(damageEffect));
 			}, new ModifierAddData(true, false, false, false));
 			Setup();

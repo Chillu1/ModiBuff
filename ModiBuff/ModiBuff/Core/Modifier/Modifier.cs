@@ -35,19 +35,26 @@ namespace ModiBuff.Core
 		//TODO ideally this would be outside of the modifier, but renting (returning) a tuple/wrapper is kinda meh
 		private readonly ModifierStateInfo _stateInfo;
 
-		public Modifier(int id, int genId, string name, InitComponent initComponent,
-			ITimeComponent[] timeComponents, StackComponent stackComponent, ModifierCheck effectCheck,
+		public Modifier(int id, int genId, string name, InitComponent? initComponent,
+			ITimeComponent[] timeComponents, StackComponent? stackComponent, ModifierCheck effectCheck,
 			ITargetComponent targetComponent, ModifierStateInfo stateInfo)
 		{
 			Id = id;
 			GenId = genId;
 			Name = name;
 
-			_initComponent = initComponent;
-			_hasInit = initComponent.IsValid;
+			if (initComponent != null)
+			{
+				_initComponent = initComponent.Value;
+				_hasInit = true;
+			}
+
 			_timeComponents = timeComponents;
-			_stackComponent = stackComponent;
-			_hasStack = stackComponent.IsValid;
+			if (stackComponent != null)
+			{
+				_stackComponent = stackComponent.Value;
+				_hasStack = true;
+			}
 
 			_effectCheck = effectCheck;
 

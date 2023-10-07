@@ -174,9 +174,9 @@ namespace ModiBuff.Core
 					_noUnitEffectChecks, _unitEffectChecks, _usableEffectChecks, stateChecks);
 			}
 
-			InitComponent initComponent = default;
+			InitComponent? initComponent = null;
 			ITimeComponent[] timeComponents = null;
-			StackComponent stackComponent = default;
+			StackComponent? stackComponent = null;
 			if (_timeComponentCount > 0)
 			{
 				_timeComponentIndex = 0;

@@ -23,7 +23,7 @@ namespace ModiBuff.Tests
 				var registerReactEffect = new ReactCallbackRegisterEffect<ReactType>(
 					new ReactCallback<ReactType>(ReactType.DamageChanged, @event));
 				var initComponent = new InitComponent(false, new IEffect[] { registerReactEffect }, null);
-				return new Modifier(id, genId, name, initComponent, null, default(StackComponent), null,
+				return new Modifier(id, genId, name, initComponent, null, null, null,
 					new SingleTargetComponent(), null);
 			}, new ModifierAddData(true, false, false, false));
 			Setup();
@@ -93,7 +93,7 @@ namespace ModiBuff.Tests
 					{ effect, new RevertActionEffect(() => { totalDamageTaken = 0f; }), registerReactEffect });
 
 				var initComponent = new InitComponent(false, new IEffect[] { effect, registerReactEffect }, null);
-				return new Modifier(id, genId, name, initComponent, null, default(StackComponent), null,
+				return new Modifier(id, genId, name, initComponent, null, null, null,
 					new SingleTargetComponent(), null);
 			}, new ModifierAddData(true, false, false, false));
 			Setup();
@@ -160,7 +160,7 @@ namespace ModiBuff.Tests
 					{ effect, new RevertActionEffect(() => { totalDamageTaken = 0f; }), registerReactEffect });
 
 				var initComponent = new InitComponent(false, new IEffect[] { effect, registerReactEffect }, null);
-				return new Modifier(id, genId, name, initComponent, null, default(StackComponent), null,
+				return new Modifier(id, genId, name, initComponent, null, null, null,
 					new SingleTargetComponent(), null);
 			}, new ModifierAddData(true, false, false, false));
 			Setup();

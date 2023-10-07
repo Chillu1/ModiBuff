@@ -17,7 +17,7 @@ namespace ModiBuff.Tests
 				var registerEffect = new CallbackRegisterDelegateEffect<CallbackType>(CallbackType.StrongHit,
 					(target, source) => removeEffect.Effect(target, source));
 				var initComponent = new InitComponent(false, new IEffect[] { effect, registerEffect }, null);
-				return new Modifier(id, genId, name, initComponent, null, default(StackComponent), null,
+				return new Modifier(id, genId, name, initComponent, null, null, null,
 					new SingleTargetComponent(), null);
 			}, new ModifierAddData(true, false, false, false));
 			Setup();

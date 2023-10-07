@@ -36,7 +36,8 @@ namespace ModiBuff.Core
 
 			_refreshDuration = refreshDuration;
 
-			if (_eventEffectFunc(new IEffect[0], _effectOnEvent) is IRevertEffect revertEffect && revertEffect.IsRevertible)
+			if (_eventEffectFunc(new IEffect[0], _effectOnEvent) is IRevertEffect revertEffect
+			    && revertEffect.IsRevertible)
 				_hasRevertEffects = true;
 		}
 
@@ -55,7 +56,9 @@ namespace ModiBuff.Core
 			{
 				timeComponents = new ITimeComponent[]
 				{
-					new DurationComponent(_removeDuration, _refreshDuration, new[] { _removeEffectWrapper.GetEffect() })
+					//TODO Event status resistance?
+					new DurationComponent(_removeDuration, _refreshDuration,
+						new[] { _removeEffectWrapper.GetEffect() }, false)
 				};
 			}
 
@@ -63,14 +66,16 @@ namespace ModiBuff.Core
 			{
 				//TODO Do we want to be able to revert the effects inside the event as well?
 				if (_hasRevertEffects)
-					((RemoveEffect)_removeEffectWrapper.GetEffect()).SetRevertibleEffects(new[] { (IRevertEffect)eventEffect });
+					((RemoveEffect)_removeEffectWrapper.GetEffect())
+						.SetRevertibleEffects(new[] { (IRevertEffect)eventEffect });
 				_removeEffectWrapper.Reset();
 			}
 
 			for (int i = 0; i < effectsLength; i++)
 				_effects[i].Reset();
 
-			return new Modifier(Id, GenId++, Name, initComponent, timeComponents, default, null, new SingleTargetComponent(), null);
+			return new Modifier(Id, GenId++, Name, initComponent, timeComponents, null, null,
+				new SingleTargetComponent(), null);
 		}
 	}
 }

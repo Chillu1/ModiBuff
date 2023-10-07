@@ -5,8 +5,6 @@ namespace ModiBuff.Core
 {
 	public struct StackComponent : ITarget, IStateReset
 	{
-		public bool IsValid => _effects != null && _effects.Length > 0;
-
 		private readonly WhenStackEffect _whenStackEffect;
 		private readonly int _maxStacks;
 		private readonly int _everyXStacks;
@@ -19,8 +17,8 @@ namespace ModiBuff.Core
 		private int _stacks;
 		private float _value;
 
-		public StackComponent(WhenStackEffect whenStackEffect, float value, int maxStacks, int everyXStacks, IStackEffect[] effects,
-			ModifierCheck check)
+		public StackComponent(WhenStackEffect whenStackEffect, float value, int maxStacks, int everyXStacks,
+			IStackEffect[] effects, ModifierCheck check)
 		{
 			_whenStackEffect = whenStackEffect;
 			_value = value;
@@ -97,11 +95,13 @@ namespace ModiBuff.Core
 				case MultiTargetComponent multiTargetComponent:
 					for (int i = 0; i < length; i++)
 					for (int j = 0; j < multiTargetComponent.Targets.Count; j++)
-						_effects[i].StackEffect(_stacks, _value, multiTargetComponent.Targets[j], multiTargetComponent.Source);
+						_effects[i].StackEffect(_stacks, _value, multiTargetComponent.Targets[j],
+							multiTargetComponent.Source);
 					break;
 				case SingleTargetComponent singleTargetComponent:
 					for (int i = 0; i < length; i++)
-						_effects[i].StackEffect(_stacks, _value, singleTargetComponent.Target, singleTargetComponent.Source);
+						_effects[i].StackEffect(_stacks, _value, singleTargetComponent.Target,
+							singleTargetComponent.Source);
 					break;
 			}
 		}
