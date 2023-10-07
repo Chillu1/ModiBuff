@@ -18,7 +18,7 @@ namespace ModiBuff.Core.Units
 		IHealable<float, float>, IHealer<float, float>, IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>,
 		IPreAttacker, IEventOwner<EffectOnEvent>, IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
 		IStatusEffectModifierOwner<LegalAction, StatusEffectType>, ICallbackRegistrable<CallbackType>,
-		IReactable<ReactType>
+		IReactable<ReactType>, IPosition<Vector2>, IMovable<Vector2>
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -27,6 +27,7 @@ namespace ModiBuff.Core.Units
 		public float Mana { get; private set; }
 		public float MaxMana { get; private set; }
 		public float StatusResistance { get; private set; } = 1f;
+		public Vector2 Position { get; private set; }
 
 		public bool IsDead { get; private set; }
 
@@ -252,6 +253,16 @@ namespace ModiBuff.Core.Units
 		public void UseMana(float value)
 		{
 			Mana -= value;
+		}
+
+		public void Move(Vector2 value) => Move(value.X, value.Y);
+
+		public void Move(float x, float y)
+		{
+			var position = Position;
+			position.X += x;
+			position.Y += y;
+			Position = position;
 		}
 
 		//---StatusResistances---

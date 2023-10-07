@@ -176,7 +176,8 @@ namespace ModiBuff.Tests
 		public void AddDamageOnStack_RevertibleRemove()
 		{
 			AddRecipe("StackAddDamageRevertible")
-				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
+				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add),
+					EffectOn.Stack)
 				.Stack(WhenStackEffect.Always, value: 2)
 				.Remove(5);
 			Setup();
@@ -262,5 +263,40 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
+
+		[Test]
+		public void UnitProjectileSavedState_DamageBasedOnDistanceMoved()
+		{
+			AddRecipe("InitDamageDistanceMultiplier")
+				.Effect(new DamageEffect(5).SetMetaEffects(new DistanceMultiplierMetaEffect(10f, 1f)), EffectOn.Init);
+			Setup();
+
+			Enemy.Move(10, 0);
+			var projectile = new Projectile(Vector2.Zero, Unit, IdManager.GetId("InitDamageDistanceMultiplier"));
+			projectile.Move(10, 0);
+			projectile.Hit(Enemy);
+
+			Assert.AreEqual(EnemyHealth - 5 * 2, Enemy.Health);
+		}
+
+		/*[Test]
+		public void UnitEffectSavedState_DamageBasedOnDistanceMoved()
+		{
+			//It's hard to make having mutable state in effects work
+			//Since we'd need to update that state every time we ex "cast" the modifier
+			//Which leads to a lot of complexity, where effects should be as isolated as possible
+
+			AddRecipe("InitDamageDistanceMultiplier")
+				.Effect(new DamageEffect(5, new SavedStateMultiplier( /*Need to feed InitialPosition here#1#))
+					.SetMetaEffects(new DistanceMultiplierMetaEffect(10f, 1f)), EffectOn.Init);
+			Setup();
+
+			Enemy.Move(10, 0);
+			//This would update the initial position of the mutable state in damage effect
+			//Unit.TryCast(IdManager.GetId("InitDamageDistanceMultiplier"));
+			Enemy.ModifierController.Add(IdManager.GetId("InitDamageDistanceMultiplier"), Enemy, Unit);
+
+			Assert.AreEqual(EnemyHealth - 5 * 2, Enemy.Health);
+		}*/
 	}
 }
