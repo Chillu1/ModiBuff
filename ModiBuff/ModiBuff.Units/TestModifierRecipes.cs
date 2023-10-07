@@ -12,6 +12,8 @@ namespace ModiBuff.Core.Units
 			_modifierRecipes.CreateGenerators();
 		}
 
+		public static TagType GetTag(int id) => (TagType)ModifierRecipes.GetTag(id);
+
 		private void Register(params string[] names) => _modifierRecipes.Register(names);
 		private ModifierRecipe Add(string name) => _modifierRecipes.Add(name);
 		private void Add(in ManualGeneratorData data) => Add(data.Name, in data.CreateFunc, in data.AddData);

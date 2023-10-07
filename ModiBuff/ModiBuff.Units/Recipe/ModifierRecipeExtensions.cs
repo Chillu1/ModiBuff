@@ -7,6 +7,11 @@ namespace ModiBuff.Core.Units
 			return recipe.Tag(tag.ToInternalTag());
 		}
 
+		public static ModifierRecipe LegalTarget(this ModifierRecipe recipe, LegalTarget target)
+		{
+			return recipe.Tag(target.ToTagType());
+		}
+
 		public static ModifierRecipe ApplyCondition(this ModifierRecipe recipe, ConditionType conditionType)
 		{
 			return recipe.ApplyCheck(unit => conditionType.CheckConditionType(unit));

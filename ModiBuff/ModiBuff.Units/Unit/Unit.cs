@@ -17,8 +17,8 @@ namespace ModiBuff.Core.Units
 	public class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float, float, float, float>,
 		IHealable<float, float>, IHealer<float, float>, IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>,
 		IPreAttacker, IEventOwner<EffectOnEvent>, IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
-		IStatusEffectModifierOwner<LegalAction, StatusEffectType>, ICallbackRegistrable<CallbackType>,
-		IReactable<ReactType>, IPosition<Vector2>, IMovable<Vector2>
+		ICallbackRegistrable<CallbackType>, IReactable<ReactType>, IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
+		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>
 	{
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -27,6 +27,7 @@ namespace ModiBuff.Core.Units
 		public float Mana { get; private set; }
 		public float MaxMana { get; private set; }
 		public float StatusResistance { get; private set; } = 1f;
+		public UnitType UnitType { get; }
 		public Vector2 Position { get; private set; }
 
 		public bool IsDead { get; private set; }
@@ -61,7 +62,8 @@ namespace ModiBuff.Core.Units
 
 		private readonly MultiInstanceStatusEffectController _statusEffectController;
 
-		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000)
+		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000,
+			UnitType unitType = UnitType.Good)
 		{
 			Health = health;
 			MaxHealth = health;
@@ -69,6 +71,7 @@ namespace ModiBuff.Core.Units
 			HealValue = healValue;
 			Mana = mana;
 			MaxMana = mana;
+			UnitType = unitType;
 
 			_whenAttackedEffects = new List<IEffect>();
 			_whenCastEffects = new List<IEffect>();
@@ -93,7 +96,8 @@ namespace ModiBuff.Core.Units
 			_statusEffectController = new MultiInstanceStatusEffectController();
 		}
 
-		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences) : this(health, damage)
+		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences, UnitType unitType)
+			: this(health, damage, unitType: unitType)
 		{
 			foreach (var modifierAddReference in modifierAddReferences)
 				ModifierController.TryAdd(modifierAddReference);

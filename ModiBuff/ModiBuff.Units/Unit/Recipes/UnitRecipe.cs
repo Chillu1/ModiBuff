@@ -4,19 +4,21 @@ namespace ModiBuff.Core.Units
 	{
 		public int Id { get; }
 		public string Name { get; }
+		public UnitType UnitType { get; }
 
 		private float _damage;
 		private float _health;
 
 		private ModifierAddReference[] _modifierAddReferences;
 
-		public UnitRecipe(string name)
+		public UnitRecipe(string name, UnitType unitType)
 		{
 			//Id = 
 			Name = name;
+			UnitType = unitType;
 		}
 
-		public Unit Create() => new Unit(_health, _damage, _modifierAddReferences);
+		public Unit Create() => new Unit(_health, _damage, _modifierAddReferences, UnitType);
 
 		public UnitRecipe Health(float health)
 		{

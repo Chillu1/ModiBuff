@@ -73,9 +73,9 @@ namespace ModiBuff.Tests
 			Recipes.CreateGenerators();
 			Pool = new ModifierPool(Recipes.GetGenerators());
 
-			Unit = new Unit(UnitHealth, UnitDamage, UnitHeal, UnitMana);
-			Enemy = new Unit(EnemyHealth, EnemyDamage, EnemyHeal);
-			Ally = new Unit(AllyHealth, AllyDamage, AllyHeal);
+			Unit = new Unit(UnitHealth, UnitDamage, UnitHeal, UnitMana, UnitType.Good);
+			Enemy = new Unit(EnemyHealth, EnemyDamage, EnemyHeal, unitType: UnitType.Bad);
+			Ally = new Unit(AllyHealth, AllyDamage, AllyHeal, unitType: UnitType.Good);
 		}
 
 		[TearDown]

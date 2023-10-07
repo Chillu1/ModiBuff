@@ -110,8 +110,7 @@ namespace ModiBuff.Core
 		}
 
 		public static ref readonly ModifierAddData GetAddData(int id) => ref _instance._modifierAddData[id];
-		public static int GetTag(int id) => (int)_instance._tags[id];
-		//public static TagType GetTag(int id) => _instance._tags[id];
+		public static TagType GetTag(int id) => _instance._tags[id];
 
 		public IModifierGenerator GetGenerator(string name) => _modifierGenerators[name];
 

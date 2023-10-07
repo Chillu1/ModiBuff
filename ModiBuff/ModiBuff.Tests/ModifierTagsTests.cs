@@ -59,5 +59,21 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5f * 2f, Unit.Health);
 			Assert.False(Unit.ContainsModifier("IntervalDamageDurationRemove"));
 		}
+
+		[Test]
+		public void CastInitDamageOnAlly_EnemyOnlyLegalTarget()
+		{
+			AddRecipe("InitDamageEnemyOnly")
+				.LegalTarget(LegalTarget.Enemy)
+				.Effect(new DamageEffect(5f), EffectOn.Init);
+			Setup();
+
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageEnemyOnly"), ApplierType.Cast);
+			Unit.TryCast(IdManager.GetId("InitDamageEnemyOnly"), Enemy);
+			Assert.AreEqual(EnemyHealth - 5f, Enemy.Health);
+
+			Unit.TryCast(IdManager.GetId("InitDamageEnemyOnly"), Ally);
+			Assert.AreEqual(AllyHealth, Ally.Health);
+		}
 	}
 }

@@ -7,14 +7,21 @@ namespace ModiBuff.Core.Units
 	///		User tag type, is combined with internal tags.
 	/// </summary>
 	[Flags]
-	public enum TagType : uint
+	public enum TagType : ulong
 	{
 		None = Core.TagType.None,
 		IntervalIgnoresStatusResistance = Core.TagType.IntervalIgnoresStatusResistance,
 		DurationIgnoresStatusResistance = Core.TagType.DurationIgnoresStatusResistance,
 		LastReserved = Core.TagType.LastReserved,
-		UserTag1 = 1 << 9,
-		UserTag2 = 1 << 10,
+
+		LegalTargetSelf = 1ul << 17,
+		LegalTargetAlly = 1ul << 18,
+		LegalTargetEnemy = 1ul << 19,
+
+		//LegalTargetStructure = 1ul << 20,
+		//LegalTargetUnits = LegalTargetAlly | LegalTargetEnemy,
+		LegalTargetAll = LegalTargetAlly | LegalTargetEnemy, // | LegalTargetStructure,
+		UserTag5 = 1ul << 21
 	}
 
 	public static class TagTypeExtensions
@@ -29,6 +36,23 @@ namespace ModiBuff.Core.Units
 		public static ModiBuff.Core.TagType ToInternalTag(this TagType tagType)
 		{
 			return (ModiBuff.Core.TagType)tagType;
+		}
+
+		public static bool IsLegalTarget(this TagType tag, UnitType target, UnitType source)
+		{
+			if (tag.HasTag(TagType.LegalTargetSelf) && target == source)
+				return true;
+			if (tag.HasTag(TagType.LegalTargetAlly) && target == source)
+				return true;
+			if (tag.HasTag(TagType.LegalTargetEnemy) && target != source)
+				return true;
+			if (tag.HasTag(TagType.LegalTargetAll))
+				return true;
+
+#if DEBUG
+			Logger.LogError($"Tag {tag} is not a legal target for UnitType.{target} from UnitType.{source}");
+#endif
+			return false;
 		}
 	}
 }
