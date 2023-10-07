@@ -77,7 +77,6 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		public ModifierRecipe Tag<TTag>(TTag tag) => Tag((int)(object)tag);
 		public ModifierRecipe Tag(int tag) => Tag((TagType)tag);
 
 		public ModifierRecipe Tag(TagType tag)

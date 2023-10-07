@@ -148,11 +148,10 @@ namespace ModiBuff.Core
 			return recipe;
 		}
 
-		public void Add<TTag>(in ManualGeneratorData<TTag> data) =>
-			Add(data.Name, in data.CreateFunc, in data.AddData, data.Tag);
+		public void Add(in ManualGeneratorData data) => Add(data.Name, in data.CreateFunc, in data.AddData, data.Tag);
 
-		public void Add<TTag>(string name, in ModifierGeneratorFunc createFunc,
-			in ModifierAddData addData, TTag tag = default)
+		public void Add(string name, in ModifierGeneratorFunc createFunc,
+			in ModifierAddData addData, TagType tag = default)
 		{
 			if (_recipes.ContainsKey(name))
 			{
@@ -184,8 +183,7 @@ namespace ModiBuff.Core
 			if (id == -1)
 				id = _idManager.GetFreeId(name);
 
-			var modifierGenerator = new ManualModifierGenerator(id, name, in createFunc, in addData,
-				(TagType)(int)(object)tag);
+			var modifierGenerator = new ManualModifierGenerator(id, name, in createFunc, in addData, tag);
 			_manualGenerators.Add(name, modifierGenerator);
 		}
 

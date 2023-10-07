@@ -2,6 +2,11 @@ namespace ModiBuff.Core.Units
 {
 	public static class ModifierRecipeExtensions
 	{
+		public static ModifierRecipe Tag(this ModifierRecipe recipe, TagType tag)
+		{
+			return recipe.Tag(tag.ToInternalTag());
+		}
+
 		public static ModifierRecipe ApplyCondition(this ModifierRecipe recipe, ConditionType conditionType)
 		{
 			return recipe.ApplyCheck(unit => conditionType.CheckConditionType(unit));
