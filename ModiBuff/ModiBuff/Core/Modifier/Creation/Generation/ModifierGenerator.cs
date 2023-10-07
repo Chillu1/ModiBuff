@@ -15,10 +15,10 @@ namespace ModiBuff.Core
 		private readonly bool _hasEffectChecks;
 
 		private readonly bool _isAura;
+		private readonly TagType _tag;
 		private readonly bool _oneTimeInit;
 
 		private readonly float _interval;
-		private readonly bool _intervalAffectedByStatusResistance;
 		private readonly float _duration;
 
 		private readonly bool _refreshDuration;
@@ -59,9 +59,9 @@ namespace ModiBuff.Core
 			_hasEffectChecks = data.HasEffectChecks;
 
 			_isAura = data.IsAura;
+			_tag = data.Tag;
 			_oneTimeInit = data.OneTimeInit;
 			_interval = data.Interval;
-			_intervalAffectedByStatusResistance = data.IntervalAffectedByStatusResistance;
 			_duration = data.Duration;
 			_refreshDuration = data.RefreshDuration;
 			_refreshInterval = data.RefreshInterval;
@@ -187,13 +187,17 @@ namespace ModiBuff.Core
 
 			if (effects.InitEffects != null)
 				initComponent = new InitComponent(_oneTimeInit, effects.InitEffects, effectCheck);
+
 			if (effects.IntervalEffects != null)
 				timeComponents[_timeComponentIndex++] = new IntervalComponent(_interval,
 					_refreshInterval, effects.IntervalEffects, effectCheck,
-					_intervalAffectedByStatusResistance);
+					!_tag.HasTag(TagType.IntervalIgnoresStatusResistance));
+
 			if (effects.DurationEffects != null)
 				timeComponents[_timeComponentIndex++] = new DurationComponent(_duration,
-					_refreshDuration, effects.DurationEffects, false); //TODO Flag
+					_refreshDuration, effects.DurationEffects,
+					!_tag.HasTag(TagType.DurationIgnoresStatusResistance));
+
 			if (effects.StackEffects != null)
 				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks,
 					_everyXStacks, effects.StackEffects, effectCheck);

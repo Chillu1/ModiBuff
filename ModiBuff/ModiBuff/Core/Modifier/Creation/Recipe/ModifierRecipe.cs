@@ -18,12 +18,12 @@ namespace ModiBuff.Core
 
 		private bool _isInstanceStackable;
 		private bool _isAura;
+		private TagType _tag;
 
 		private bool _oneTimeInit;
 
 		private bool _currentIsInterval;
 		private float _interval;
-		private bool _intervalAffectedByStatusResistance;
 		private float _duration;
 
 		private EffectWrapper _removeEffectWrapper;
@@ -74,6 +74,15 @@ namespace ModiBuff.Core
 		public ModifierRecipe Aura()
 		{
 			_isAura = true;
+			return this;
+		}
+
+		public ModifierRecipe Tag<TTag>(TTag tag) => Tag((int)(object)tag);
+		public ModifierRecipe Tag(int tag) => Tag((TagType)tag);
+
+		public ModifierRecipe Tag(TagType tag)
+		{
+			_tag |= tag;
 			return this;
 		}
 
@@ -136,7 +145,8 @@ namespace ModiBuff.Core
 		public ModifierRecipe Interval(float interval, bool affectedByStatusResistance = false)
 		{
 			_interval = interval;
-			_intervalAffectedByStatusResistance = affectedByStatusResistance;
+			if (!affectedByStatusResistance)
+				_tag |= TagType.IntervalIgnoresStatusResistance;
 			_currentIsInterval = true;
 			return this;
 		}
@@ -144,9 +154,11 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		How many seconds should pass before the duration effects get triggered (usually modifier removal)
 		/// </summary>
-		public ModifierRecipe Duration(float duration)
+		public ModifierRecipe Duration(float duration, bool affectedByStatusResistance = true)
 		{
 			_duration = duration;
+			if (!affectedByStatusResistance)
+				_tag |= TagType.DurationIgnoresStatusResistance;
 			_currentIsInterval = false;
 			return this;
 		}
@@ -340,8 +352,8 @@ namespace ModiBuff.Core
 
 			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _callbackRegisterWrapper,
 				_hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList,
-				_effectFuncCheckList, _isAura, _oneTimeInit, _interval, _intervalAffectedByStatusResistance, _duration,
-				_refreshDuration, _refreshInterval, _whenStackEffect, _stackValue, _maxStacks, _everyXStacks);
+				_effectFuncCheckList, _isAura, _tag, _oneTimeInit, _interval, _duration, _refreshDuration,
+				_refreshInterval, _whenStackEffect, _stackValue, _maxStacks, _everyXStacks);
 			return new ModifierGenerator(in data);
 		}
 
@@ -349,6 +361,8 @@ namespace ModiBuff.Core
 		{
 			return new ModifierInfo(Id, Name, _displayName, _description);
 		}
+
+		public TagType GetTag() => _tag;
 
 		private static void ValidateModifierAction(ModifierAction modifierAction, EffectOn effectOn)
 		{

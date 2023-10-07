@@ -7,25 +7,57 @@ namespace ModiBuff.Tests
 	public sealed class ModifierTagsTests : ModifierTests
 	{
 		[Test]
+		public void StatusResistanceTag_DurationIgnores()
+		{
+			AddRecipe("DurationDamageIgnoresStatusResistance")
+				.Tag(Core.Units.TagType.DurationIgnoresStatusResistance)
+				.Effect(new DamageEffect(5f), EffectOn.Duration)
+				.Duration(1f);
+			Setup();
+
+			Unit.ChangeStatusResistance(0.5f);
+			Unit.AddModifierSelf("DurationDamageIgnoresStatusResistance");
+
+			Unit.Update(0.6f);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
+
+		[Test]
 		public void StatusResistanceTag_Duration()
 		{
-			var tag = TagType.DurationStatusResistance;
-			AddGenerator("DurationDamage", (id, genId, name) =>
-			{
-				var damage = new DamageEffect(5f);
-				var duration = new DurationComponent(1f, false, new IEffect[] { damage },
-					tag.HasTag(TagType.DurationStatusResistance));
-
-				return new Modifier(id, genId, name, null, new ITimeComponent[] { duration },
-					null, null, new SingleTargetComponent(), null);
-			}, new ModifierAddData(false, false, false, false), tag);
+			AddRecipe("DurationDamage")
+				.Effect(new DamageEffect(5f), EffectOn.Duration)
+				.Duration(1f);
 			Setup();
 
 			Unit.ChangeStatusResistance(0.5f);
 			Unit.AddModifierSelf("DurationDamage");
 
-			Unit.Update(0.5f);
+			Unit.Update(0.6f);
 			Assert.AreEqual(UnitHealth - 5f, Unit.Health);
+		}
+
+		[Test]
+		public void StatusResistanceTag_IntervalIgnores_DurationDoesnt()
+		{
+			AddRecipe("IntervalDamageDurationRemove")
+				.Tag(Core.Units.TagType.IntervalIgnoresStatusResistance)
+				.Interval(1f)
+				.Effect(new DamageEffect(5f), EffectOn.Interval)
+				.Remove(5f);
+			Setup();
+
+			Unit.ChangeStatusResistance(0.5f);
+			Unit.AddModifierSelf("IntervalDamageDurationRemove");
+
+			Unit.Update(1f);
+			Assert.AreEqual(UnitHealth - 5f, Unit.Health);
+			Unit.Update(1f);
+			Assert.AreEqual(UnitHealth - 5f * 2f, Unit.Health);
+
+			Unit.Update(0.6f);
+			Assert.AreEqual(UnitHealth - 5f * 2f, Unit.Health);
+			Assert.False(Unit.ContainsModifier("IntervalDamageDurationRemove"));
 		}
 	}
 }

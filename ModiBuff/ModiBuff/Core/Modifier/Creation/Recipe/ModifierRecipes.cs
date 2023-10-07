@@ -22,7 +22,7 @@ namespace ModiBuff.Core
 
 		private ModifierAddData[] _modifierAddData;
 		private ModifierInfo[] _modifierInfos;
-		private int[] _tags;
+		private TagType[] _tags;
 
 		private EventEffectFactory _eventEffectFunc;
 
@@ -52,7 +52,7 @@ namespace ModiBuff.Core
 
 			_modifierAddData = new ModifierAddData[_recipes.Count + _manualGenerators.Count];
 			_modifierInfos = new ModifierInfo[_recipes.Count + _manualGenerators.Count];
-			_tags = new int[_recipes.Count + _manualGenerators.Count];
+			_tags = new TagType[_recipes.Count + _manualGenerators.Count];
 			foreach (var generator in _manualGenerators.Values)
 			{
 				_modifierAddData[generator.Id] = generator.GetAddData();
@@ -67,6 +67,7 @@ namespace ModiBuff.Core
 				_modifierAddData[recipe.Id] = recipe.CreateAddData();
 				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
 				_modifierInfos[recipe.Id] = recipe.CreateModifierInfo();
+				_tags[recipe.Id] = recipe.GetTag();
 			}
 
 			//_modifierInfos = new ModifierInfo[_modifierGenerators.Count];
@@ -109,7 +110,8 @@ namespace ModiBuff.Core
 		}
 
 		public static ref readonly ModifierAddData GetAddData(int id) => ref _instance._modifierAddData[id];
-		public static int GetTag(int id) => _instance._tags[id];
+		public static int GetTag(int id) => (int)_instance._tags[id];
+		//public static TagType GetTag(int id) => _instance._tags[id];
 
 		public IModifierGenerator GetGenerator(string name) => _modifierGenerators[name];
 
@@ -182,7 +184,8 @@ namespace ModiBuff.Core
 			if (id == -1)
 				id = _idManager.GetFreeId(name);
 
-			var modifierGenerator = new ManualModifierGenerator(id, name, in createFunc, in addData, (int)(object)tag);
+			var modifierGenerator = new ManualModifierGenerator(id, name, in createFunc, in addData,
+				(TagType)(int)(object)tag);
 			_manualGenerators.Add(name, modifierGenerator);
 		}
 

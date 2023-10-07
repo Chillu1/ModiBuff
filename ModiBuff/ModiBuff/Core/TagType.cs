@@ -1,14 +1,17 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace ModiBuff.Core.Units
+namespace ModiBuff.Core
 {
+	/// <summary>
+	///		Core internal modifier tags, can be combined with user tags.
+	/// </summary>
 	[Flags]
 	public enum TagType
 	{
 		None = 0,
-		IntervalIgnoresStatusResistance = Core.TagType.IntervalIgnoresStatusResistance,
-		DurationIgnoresStatusResistance = Core.TagType.DurationIgnoresStatusResistance,
+		IntervalIgnoresStatusResistance = 1,
+		DurationIgnoresStatusResistance = 2,
 	}
 
 	public static class TagTypeExtensions

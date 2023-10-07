@@ -8,7 +8,7 @@ namespace ModiBuff.Core
 
 		private ITargetComponent _targetComponent;
 
-		private readonly bool _usesStatusResistance;
+		private readonly bool _affectedByStatusResistance;
 		private bool _statusResistanceImplemented;
 		private IStatusResistance _statusResistanceTarget;
 
@@ -19,24 +19,20 @@ namespace ModiBuff.Core
 		//private int _intervalCount;
 		//private float _totalTime;
 
-		public IntervalComponent(float interval, bool refreshable, IEffect[] effects, ModifierCheck check, bool affectedByStatusResistance)
+		public IntervalComponent(float interval, bool refreshable, IEffect[] effects, ModifierCheck check,
+			bool affectedByStatusResistance)
 		{
 			_interval = interval;
 			_isRefreshable = refreshable;
 			_effects = effects;
 			_modifierCheck = check;
-			_usesStatusResistance = affectedByStatusResistance;
+			_affectedByStatusResistance = affectedByStatusResistance;
 		}
 
 		public void SetupTarget(ITargetComponent targetComponent)
 		{
 			_targetComponent = targetComponent;
-			if (targetComponent is SingleTargetComponent singleTargetComponent &&
-			    singleTargetComponent.Target is IStatusResistance statusResistance)
-			{
-				_statusResistanceImplemented = true;
-				_statusResistanceTarget = statusResistance;
-			}
+			UpdateTargetStatusResistance();
 		}
 
 		public void UpdateTargetStatusResistance()
@@ -52,7 +48,7 @@ namespace ModiBuff.Core
 		public void Update(float deltaTime)
 		{
 			//Special calculation if target has status resistance functionality
-			_timer += _usesStatusResistance && _statusResistanceImplemented
+			_timer += _affectedByStatusResistance && _statusResistanceImplemented
 				? deltaTime / _statusResistanceTarget.StatusResistance
 				: deltaTime;
 
