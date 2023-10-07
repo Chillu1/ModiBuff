@@ -193,7 +193,7 @@ namespace ModiBuff.Core
 					_intervalAffectedByStatusResistance);
 			if (effects.DurationEffects != null)
 				timeComponents[_timeComponentIndex++] = new DurationComponent(_duration,
-					_refreshDuration, effects.DurationEffects);
+					_refreshDuration, effects.DurationEffects, false); //TODO Flag
 			if (effects.StackEffects != null)
 				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks,
 					_everyXStacks, effects.StackEffects, effectCheck);
