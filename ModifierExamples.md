@@ -9,7 +9,7 @@ A list of a lot basic recipe examples.
 
 [//]: # ("Absoultely crazy modifiers": applying appliers on events, X stacks, etc)
 
-> Important: Damage being the default effect is just an example, it makes it easier to understand and test.
+> Important: Damage being the default effect is just an example, it makes it easier to understand.
 
 Delayed damage
 
@@ -197,4 +197,15 @@ Attack self when attacked
 ```csharp
 AddEvent("AttackSelf_OnHit_Event", EffectOnEvent.WhenAttacked)
     .Effect(new SelfAttackActionEffect());
+```
+
+Add damage to all attackers when attacked
+
+```csharp
+AddRecipe("AddDamage")
+	.OneTimeInit()
+	.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+	.Remove(1).Refresh();
+AddEventRecipe("AddDamageToAllAttackers_OnHit_Event", EffectOnEvent.WhenAttacked)
+	.Effect(new ApplierEffect("AddDamage"), Targeting.SourceTarget);
 ```

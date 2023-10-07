@@ -196,5 +196,34 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
+
+		[Test]
+		public void BuffAttackers_WhenHit()
+		{
+			AddRecipe("AddDamage")
+				.OneTimeInit()
+				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				.Remove(1).Refresh();
+			AddEventRecipe("BuffAttackers_WhenHit_Event", EffectOnEvent.WhenAttacked)
+				.Effect(new ApplierEffect("AddDamage"), Targeting.SourceTarget);
+			Setup();
+
+			Enemy.AddModifierSelf("BuffAttackers_WhenHit_Event");
+			Unit.Attack(Enemy);
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+			Assert.AreEqual(EnemyDamage, Enemy.Damage);
+			Unit.Update(0.9f);
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+			Unit.Update(1.1f);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+			Enemy.Update(0);
+			Unit.Attack(Enemy);
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+
+			Assert.AreEqual(AllyDamage, Ally.Damage);
+			Enemy.Update(0);
+			Ally.Attack(Enemy);
+			Assert.AreEqual(AllyDamage + 5, Ally.Damage);
+		}
 	}
 }
