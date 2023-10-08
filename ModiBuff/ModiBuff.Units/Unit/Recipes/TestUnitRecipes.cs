@@ -8,7 +8,7 @@ namespace ModiBuff.Core.Units
 
 		protected override void SetupRecipes()
 		{
-			Add("Player")
+			Add("Player", UnitType.Good)
 				.Health(100)
 				.Damage(10)
 				.Modifiers(
@@ -16,14 +16,14 @@ namespace ModiBuff.Core.Units
 					new ModifierAddReference(ModifierRecipes.GetGenerator("DisarmChance"), ApplierType.Attack)
 				);
 
-			Add("Slime")
+			Add("Slime", UnitType.Bad)
 				.Health(50)
 				.Damage(5)
 				.Modifiers(
 					new ModifierAddReference(ModifierRecipes.GetGenerator("DoT"), ApplierType.Attack)
 				);
 
-			Add("FireSlime")
+			Add("FireSlime", UnitType.Bad)
 				.Health(100)
 				.Damage(5)
 				.Modifiers(

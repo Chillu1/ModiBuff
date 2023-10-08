@@ -17,9 +17,9 @@ namespace ModiBuff.Core
 		public readonly List<Func<IUnit, bool>> ApplyFuncCheckList;
 		public readonly List<Func<IUnit, bool>> EffectFuncCheckList;
 		public readonly bool IsAura;
+		public readonly TagType Tag;
 		public readonly bool OneTimeInit;
 		public readonly float Interval;
-		public readonly bool IntervalAffectedByStatusResistance;
 		public readonly float Duration;
 		public readonly bool RefreshDuration;
 		public readonly bool RefreshInterval;
@@ -28,11 +28,12 @@ namespace ModiBuff.Core
 		public readonly int MaxStacks;
 		public readonly int EveryXStacks;
 
-		public ModifierRecipeData(int id, string name, List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper,
-			EffectWrapper callbackRegisterWrapper, bool hasApplyChecks, List<ICheck> applyCheckList, bool hasEffectChecks,
-			List<ICheck> effectCheckList, List<Func<IUnit, bool>> applyFuncCheckList, List<Func<IUnit, bool>> effectFuncCheckList,
-			bool isAura, bool oneTimeInit, float interval, bool intervalAffectedByStatusResistance, float duration, bool refreshDuration,
-			bool refreshInterval, WhenStackEffect whenStackEffect, float stackValue, int maxStacks, int everyXStacks)
+		public ModifierRecipeData(int id, string name, List<EffectWrapper> effectWrappers,
+			EffectWrapper removeEffectWrapper, EffectWrapper callbackRegisterWrapper, bool hasApplyChecks,
+			List<ICheck> applyCheckList, bool hasEffectChecks, List<ICheck> effectCheckList,
+			List<Func<IUnit, bool>> applyFuncCheckList, List<Func<IUnit, bool>> effectFuncCheckList, bool isAura,
+			TagType tag, bool oneTimeInit, float interval, float duration, bool refreshDuration, bool refreshInterval,
+			WhenStackEffect whenStackEffect, float stackValue, int maxStacks, int everyXStacks)
 		{
 			Id = id;
 			Name = name;
@@ -46,9 +47,9 @@ namespace ModiBuff.Core
 			ApplyFuncCheckList = applyFuncCheckList;
 			EffectFuncCheckList = effectFuncCheckList;
 			IsAura = isAura;
+			Tag = tag;
 			OneTimeInit = oneTimeInit;
 			Interval = interval;
-			IntervalAffectedByStatusResistance = intervalAffectedByStatusResistance;
 			Duration = duration;
 			RefreshDuration = refreshDuration;
 			RefreshInterval = refreshInterval;

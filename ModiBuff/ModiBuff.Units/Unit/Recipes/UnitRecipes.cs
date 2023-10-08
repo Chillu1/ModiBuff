@@ -29,7 +29,7 @@ namespace ModiBuff.Core.Units
 
 		internal UnitRecipe[] GetRecipes() => _recipes.Values.ToArray();
 
-		protected UnitRecipe Add(string name)
+		protected UnitRecipe Add(string name, UnitType unitType)
 		{
 			if (_recipes.TryGetValue(name, out var localRecipe))
 			{
@@ -39,7 +39,7 @@ namespace ModiBuff.Core.Units
 				return localRecipe;
 			}
 
-			var recipe = new UnitRecipe(name);
+			var recipe = new UnitRecipe(name, unitType);
 			_recipes.Add(name, recipe);
 			return recipe;
 		}

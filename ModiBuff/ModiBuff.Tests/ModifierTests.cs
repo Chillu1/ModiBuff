@@ -31,6 +31,7 @@ namespace ModiBuff.Tests
 		public void OneTimeSetup()
 		{
 			Logger.SetLogger<NUnitLogger>();
+			Config.DefaultTag = (int)Core.Units.TagType.Default;
 			Config.PoolSize = 1;
 
 			UnitHealth = AllyHealth = 500;
@@ -57,10 +58,13 @@ namespace ModiBuff.Tests
 			Recipes.AddEvent(name, @event);
 
 		protected void AddGenerator(in ManualGeneratorData data) =>
-			Recipes.Add(data.Name, in data.CreateFunc, in data.AddData);
+			Recipes.Add(data.Name, in data.CreateFunc, in data.AddData, data.Tag);
 
-		protected void AddGenerator(string name, in ModifierGeneratorFunc createFunc, in ModifierAddData addData) =>
-			Recipes.Add(name, in createFunc, in addData);
+		protected void AddGenerator(string name, in ModifierGeneratorFunc createFunc, in ModifierAddData addData,
+			Core.Units.TagType tag = default)
+		{
+			Recipes.Add(name, in createFunc, in addData, tag.ToInternalTag());
+		}
 
 		/// <summary>
 		///		Setup needs to be called manually so we create the units after all recipes have been added
@@ -70,9 +74,9 @@ namespace ModiBuff.Tests
 			Recipes.CreateGenerators();
 			Pool = new ModifierPool(Recipes.GetGenerators());
 
-			Unit = new Unit(UnitHealth, UnitDamage, UnitHeal, UnitMana);
-			Enemy = new Unit(EnemyHealth, EnemyDamage, EnemyHeal);
-			Ally = new Unit(AllyHealth, AllyDamage, AllyHeal);
+			Unit = new Unit(UnitHealth, UnitDamage, UnitHeal, UnitMana, UnitType.Good);
+			Enemy = new Unit(EnemyHealth, EnemyDamage, EnemyHeal, unitType: UnitType.Bad);
+			Ally = new Unit(AllyHealth, AllyDamage, AllyHeal, unitType: UnitType.Good);
 		}
 
 		[TearDown]

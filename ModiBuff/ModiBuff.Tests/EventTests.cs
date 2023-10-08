@@ -85,7 +85,7 @@ namespace ModiBuff.Tests
 				.Effect(new AddDamageEffect(5), Targeting.SourceTarget);
 			Setup();
 
-			var weakEnemy = new Unit(1);
+			var weakEnemy = new Unit(1, unitType: UnitType.Bad);
 			Unit.AddModifierSelf("AddDamage_OnKill_Event");
 
 			Assert.AreEqual(UnitDamage, Unit.Damage);

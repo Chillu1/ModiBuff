@@ -8,5 +8,6 @@ namespace ModiBuff.Core
 		ModifierAddData CreateAddData();
 		IModifierGenerator CreateModifierGenerator();
 		ModifierInfo CreateModifierInfo();
+		TagType GetTag();
 	}
 }

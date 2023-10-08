@@ -17,6 +17,8 @@ namespace ModiBuff.Core
 
 		private readonly List<EffectWrapper> _effects;
 
+		private TagType _tag;
+
 		private float _removeDuration;
 		private EffectWrapper _removeEffectWrapper;
 
@@ -30,6 +32,12 @@ namespace ModiBuff.Core
 			_eventEffectFunc = eventEffectFunc;
 
 			_effects = new List<EffectWrapper>(2);
+		}
+
+		public ModifierEventRecipe Tag(int tag)
+		{
+			_tag = (TagType)tag;
+			return this;
 		}
 
 		//---Actions---
@@ -74,5 +82,7 @@ namespace ModiBuff.Core
 		{
 			return new ModifierInfo(Id, Name, Name, "");
 		}
+
+		public TagType GetTag() => _tag;
 	}
 }

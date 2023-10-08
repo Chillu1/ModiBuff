@@ -11,6 +11,8 @@ namespace ModiBuff.Core.Units
 			CreateGenerators();
 		}
 
+		public new static TagType GetTag(int id) => (TagType)ModifierRecipes.GetTag(id);
+
 		protected override void SetupRecipes()
 		{
 			Add("StunEverySecond")

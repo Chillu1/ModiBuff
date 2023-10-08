@@ -37,7 +37,12 @@ namespace ModiBuff.Core.Units
 		{
 			var modifierOwner = (IModifierOwner)unit;
 			foreach (int modifierId in _modifierIds)
+			{
+				if (!modifierId.IsLegalTarget((IUnitEntity)unit, (IUnitEntity)_source))
+					continue;
+
 				modifierOwner.ModifierController.Add(modifierId, unit, this);
+			}
 
 			//TODO IsDead, clean up/dequeue for next frame
 		}
