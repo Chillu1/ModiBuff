@@ -66,13 +66,12 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		public ModifierAddData CreateAddData()
-		{
-			return new ModifierAddData(true, _refreshDuration, false, false);
-		}
-
 		public IModifierGenerator CreateModifierGenerator()
 		{
+			_tag |= TagType.IsInit;
+			if (_refreshDuration)
+				_tag |= TagType.IsRefresh;
+
 			return new ModifierEventGenerator(Id, Name, _effectOnEvent, _eventEffectFunc, _effects, _removeDuration,
 				_removeEffectWrapper,
 				_refreshDuration);

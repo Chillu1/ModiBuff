@@ -28,7 +28,7 @@ namespace ModiBuff.Core.Units
 					new SingleTargetComponent(), null);
 
 				return modifier;
-			}, new ModifierAddData(true, false, false, false));
+			}, Core.TagType.IsInit);
 
 			//Delayed Silence
 			Add("DelayedSilence")

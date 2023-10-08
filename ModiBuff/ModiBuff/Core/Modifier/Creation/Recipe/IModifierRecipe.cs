@@ -5,7 +5,6 @@ namespace ModiBuff.Core
 		int Id { get; }
 		string Name { get; }
 
-		ModifierAddData CreateAddData();
 		IModifierGenerator CreateModifierGenerator();
 		ModifierInfo CreateModifierInfo();
 		TagType GetTag();

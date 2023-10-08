@@ -12,28 +12,29 @@ namespace ModiBuff.Core
 		Default = IntervalIgnoresStatusResistance,
 
 		None = 0,
-		IntervalIgnoresStatusResistance = 1ul << 0,
-		DurationIgnoresStatusResistance = 1ul << 1,
+		IsInit = 1ul << 0,
+		IsRefresh = 1ul << 1,
+		IsStack = 1ul << 2,
+		IsInstanceStackable = 1ul << 3,
+		IntervalIgnoresStatusResistance = 1ul << 4,
+		DurationIgnoresStatusResistance = 1ul << 5,
 
 		//Most likely need to reserve around 8-16 bits, or split internal and user tagging
 		//Will be decided/fixed on 1.0 release
-		Reserved1 = 1ul << 2,
-		Reserved2 = 1ul << 3,
-		Reserved3 = 1ul << 4,
-		Reserved4 = 1ul << 5,
-		Reserved5 = 1ul << 6,
-		Reserved6 = 1ul << 7,
-		Reserved7 = 1ul << 8,
-		Reserved8 = 1ul << 9,
-		Reserved9 = 1ul << 10,
-		Reserved10 = 1ul << 11,
-		Reserved11 = 1ul << 12,
-		Reserved12 = 1ul << 13,
-		Reserved13 = 1ul << 14,
-		Reserved14 = 1ul << 15,
-		Reserved15 = 1ul << 16,
+		Reserved1 = 1ul << 6,
+		Reserved2 = Reserved1 << 1,
+		Reserved3 = Reserved2 << 1,
+		Reserved4 = Reserved3 << 1,
+		Reserved5 = Reserved4 << 1,
+		Reserved6 = Reserved5 << 1,
+		Reserved7 = Reserved6 << 1,
+		Reserved8 = Reserved7 << 1,
+		Reserved9 = Reserved8 << 1,
+		Reserved10 = Reserved9 << 1,
+		Reserved11 = Reserved10 << 1,
+		Reserved12 = Reserved11 << 1,
 
-		LastReserved = Reserved15
+		LastReserved = Reserved12
 	}
 
 	public static class TagTypeExtensions

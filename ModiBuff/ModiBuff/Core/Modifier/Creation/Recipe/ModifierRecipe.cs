@@ -345,26 +345,25 @@ namespace ModiBuff.Core
 
 		//---Modifier Generation---
 
-		public ModifierAddData CreateAddData()
-		{
-			bool hasInit = false, hasStack = false;
-			for (int i = 0; i < _effectWrappers.Count; i++)
-			{
-				var effectWrapper = _effectWrappers[i];
-				if (effectWrapper.EffectOn.HasFlag(EffectOn.Init))
-					hasInit = true;
-				if (effectWrapper.EffectOn.HasFlag(EffectOn.Stack))
-					hasStack = true;
-			}
-
-			return new ModifierAddData(hasInit, _refreshDuration || _refreshInterval, hasStack, _isInstanceStackable);
-		}
-
 		public IModifierGenerator CreateModifierGenerator()
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			Validate();
 #endif
+			//Update tag based on settings
+			for (int i = 0; i < _effectWrappers.Count; i++)
+			{
+				var effectWrapper = _effectWrappers[i];
+				if (effectWrapper.EffectOn.HasFlag(EffectOn.Init))
+					_tag |= TagType.IsInit;
+				if (effectWrapper.EffectOn.HasFlag(EffectOn.Stack))
+					_tag |= TagType.IsStack;
+			}
+
+			if (_refreshDuration || _refreshInterval)
+				_tag |= TagType.IsRefresh;
+			if (_isInstanceStackable)
+				_tag |= TagType.IsInstanceStackable;
 
 			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _callbackRegisterWrapper,
 				_hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList,

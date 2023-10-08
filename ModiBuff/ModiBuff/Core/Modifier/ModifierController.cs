@@ -174,18 +174,18 @@ namespace ModiBuff.Core
 
 		public void Add(int id, IUnit target, IUnit source)
 		{
-			ref readonly var addData = ref ModifierRecipes.GetAddData(id);
+			ref readonly var tag = ref ModifierRecipes.GetTag(id);
 
-			if (!addData.IsInstanceStackable && _modifierIndexes[id] != -1)
+			if (!tag.HasTag(TagType.IsInstanceStackable) && _modifierIndexes[id] != -1)
 			{
 				var existingModifier = _modifiers[_modifierIndexes[id]];
 				//TODO should we update the modifier targets when init/refreshing/stacking?
 				existingModifier.UpdateSource(source);
-				if (addData.HasInit)
+				if ((tag & TagType.IsInit) != 0)
 					existingModifier.Init();
-				if (addData.HasRefresh)
+				if ((tag & TagType.IsRefresh) != 0)
 					existingModifier.Refresh();
-				if (addData.HasStack)
+				if ((tag & TagType.IsStack) != 0)
 					existingModifier.Stack();
 				return;
 			}
@@ -198,18 +198,18 @@ namespace ModiBuff.Core
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
 			modifier.UpdateSingleTargetSource(target, source);
 
-			if (!addData.IsInstanceStackable)
+			if (!tag.HasTag(TagType.IsInstanceStackable))
 				_modifierIndexes[id] = _modifiersTop;
 			_modifiers[_modifiersTop++] = modifier;
-			if (addData.HasInit)
+			if (tag.HasTag(TagType.IsInit))
 				modifier.Init();
-			if (addData.HasStack)
+			if (tag.HasTag(TagType.IsStack))
 				modifier.Stack();
 		}
 
 		public bool Contains(int id)
 		{
-			if (!ModifierRecipes.GetAddData(id).IsInstanceStackable)
+			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
 				return _modifierIndexes[id] != -1;
 
 			for (int i = 0; i < _modifiersTop; i++)
@@ -232,9 +232,9 @@ namespace ModiBuff.Core
 		public void ModifierAction(int id, int genId, ModifierAction action)
 		{
 			Modifier modifier = null;
-			ref readonly var addData = ref ModifierRecipes.GetAddData(id);
+			ref readonly var tag = ref ModifierRecipes.GetTag(id);
 
-			if (!addData.IsInstanceStackable && _modifierIndexes[id] != -1)
+			if (!tag.HasTag(TagType.IsInstanceStackable) && _modifierIndexes[id] != -1)
 			{
 				modifier = _modifiers[_modifierIndexes[id]];
 			}
@@ -264,7 +264,7 @@ namespace ModiBuff.Core
 			{
 				case Core.ModifierAction.Refresh:
 #if DEBUG && !MODIBUFF_PROFILE
-					if (!addData.HasRefresh)
+					if (!tag.HasTag(TagType.IsRefresh))
 						Logger.LogWarning("ModifierAction: Refresh was called on a modifier that " +
 						                  "doesn't have a refresh flag set");
 #endif
@@ -272,7 +272,7 @@ namespace ModiBuff.Core
 					break;
 				case Core.ModifierAction.ResetStacks:
 #if DEBUG && !MODIBUFF_PROFILE
-					if (!addData.HasStack)
+					if (!tag.HasTag(TagType.IsStack))
 						Logger.LogWarning("ModifierAction: ResetStacks was called on a modifier " +
 						                  "that doesn't have a stack flag set");
 #endif
@@ -285,7 +285,7 @@ namespace ModiBuff.Core
 
 		public void Remove(in ModifierReference modifierReference)
 		{
-			if (!ModifierRecipes.GetAddData(modifierReference.Id).IsInstanceStackable)
+			if (!ModifierRecipes.GetTag(modifierReference.Id).HasTag(TagType.IsInstanceStackable))
 			{
 #if DEBUG && !MODIBUFF_PROFILE
 				if (_modifierIndexes[modifierReference.Id] == -1)

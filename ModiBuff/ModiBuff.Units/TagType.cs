@@ -12,6 +12,9 @@ namespace ModiBuff.Core.Units
 		Default = Core.TagType.Default | LegalTargetAll,
 
 		None = Core.TagType.None,
+		IsInit = Core.TagType.IsInit,
+		IsRefresh = Core.TagType.IsRefresh,
+		IsStack = Core.TagType.IsStack,
 		IntervalIgnoresStatusResistance = Core.TagType.IntervalIgnoresStatusResistance,
 		DurationIgnoresStatusResistance = Core.TagType.DurationIgnoresStatusResistance,
 		LastReserved = Core.TagType.LastReserved,

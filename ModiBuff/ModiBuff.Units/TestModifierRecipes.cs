@@ -16,11 +16,11 @@ namespace ModiBuff.Core.Units
 
 		private void Register(params string[] names) => _modifierRecipes.Register(names);
 		private ModifierRecipe Add(string name) => _modifierRecipes.Add(name);
-		private void Add(in ManualGeneratorData data) => Add(data.Name, in data.CreateFunc, in data.AddData);
+		private void Add(in ManualGeneratorData data) => Add(data.Name, in data.CreateFunc, data.Tag);
 
-		private void Add(string name, in ModifierGeneratorFunc createFunc, in ModifierAddData addData)
+		private void Add(string name, in ModifierGeneratorFunc createFunc, Core.TagType tag = default)
 		{
-			_modifierRecipes.Add(name, in createFunc, in addData);
+			_modifierRecipes.Add(name, in createFunc, tag);
 		}
 
 		private ModifierEventRecipe AddEvent(string name, EffectOnEvent effectOnEvent) =>
@@ -41,7 +41,7 @@ namespace ModiBuff.Core.Units
 					new SingleTargetComponent(), null);
 
 				return modifier;
-			}, new ModifierAddData(true, false, false, false));
+			}, Core.TagType.IsInit);
 
 			//Delayed Silence
 			Add("DelayedSilence")

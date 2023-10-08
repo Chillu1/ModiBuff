@@ -1,5 +1,6 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
+using TagType = ModiBuff.Core.TagType;
 
 namespace ModiBuff.Tests
 {
@@ -26,7 +27,7 @@ namespace ModiBuff.Tests
 					new SingleTargetComponent(), null);
 
 				return modifier;
-			}, new ModifierAddData(true, false, false, false));
+			}, TagType.IsInit);
 
 			Add("DoT")
 				.Interval(1)
