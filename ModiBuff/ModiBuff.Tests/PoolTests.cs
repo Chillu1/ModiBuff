@@ -89,7 +89,7 @@ namespace ModiBuff.Tests
 			var recipes = new EmptyModifierRecipes(idManager);
 			var pool = new ModifierPool(recipes.GetGenerators());
 
-			Config.Reset();
+			Config.PoolSize = Config.DefaultPoolSize;
 		}
 
 		//TODO Pool AddedDamage revertible state reset

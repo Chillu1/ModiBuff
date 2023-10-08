@@ -70,13 +70,6 @@ namespace ModiBuff.Core
 				_tags[recipe.Id] = recipe.GetTag();
 			}
 
-			//_modifierInfos = new ModifierInfo[_modifierGenerators.Count];
-			//foreach (var generator in _modifierGenerators.Values)
-			//{
-			//	//generator.CreateModifierInfo();
-			//	_modifierInfos[generator.Id] = new ModifierInfo(generator.Id, generator.Name);
-			//}
-
 			GeneratorCount = _modifierGenerators.Count;
 #if DEBUG && !MODIBUFF_PROFILE
 			Logger.Log($"[ModiBuff] Loaded {GeneratorCount} modifier generators.");

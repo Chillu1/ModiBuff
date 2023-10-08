@@ -7,6 +7,7 @@ namespace ModiBuff.Core
 			owner.ModifierController.Add(id, owner, source);
 		}
 
+		//TODO Remove
 		public static void TryCast(this IModifierOwner owner, int modifierId, IModifierOwner target)
 		{
 			if (owner.ModifierController.CanCastModifier(modifierId))

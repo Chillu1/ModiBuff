@@ -26,10 +26,12 @@ namespace ModiBuff.Tests
 			Pool.SetMaxPoolSize(20_000);
 
 			_dotUnits = new Unit[UnitCount];
+			int dotId = IdManager.GetId("DoT");
 			for (int i = 0; i < _dotUnits.Length; i++)
 			{
-				_dotUnits[i] = new Unit();
-				_dotUnits[i].AddModifierSelf("DoT");
+				var unit = new Unit();
+				unit.ModifierController.Add(dotId, unit, unit);
+				_dotUnits[i] = unit;
 			}
 
 			_unit = new Unit(int.MaxValue);

@@ -17,8 +17,8 @@ namespace ModiBuff.Tests
 			var generator = Recipes.GetGenerator("InitAddDamageRevertible");
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
-			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
-			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Ally);
+			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(generator.Id, Ally);
 
 			Assert.AreEqual(EnemyDamage + 5, Enemy.Damage);
 			Assert.AreEqual(AllyDamage + 5, Ally.Damage);

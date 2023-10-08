@@ -22,7 +22,7 @@ namespace ModiBuff.Core.Units
 
 		//LegalTargetStructure = 1ul << 20,
 		//LegalTargetUnits = LegalTargetAlly | LegalTargetEnemy,
-		LegalTargetAll = LegalTargetAlly | LegalTargetEnemy, // | LegalTargetStructure,
+		LegalTargetAll = LegalTargetSelf | LegalTargetAlly | LegalTargetEnemy, // | LegalTargetStructure,
 		UserTag5 = 1ul << 21
 	}
 

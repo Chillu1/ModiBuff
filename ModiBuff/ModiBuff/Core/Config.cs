@@ -6,20 +6,20 @@ namespace ModiBuff.Core
 	{
 		public const int DefaultDefaultTag = (int)TagType.Default;
 
-		private const int DefaultPoolSize = 64;
-		private const int DefaultMaxPoolSize = 16_384;
+		public const int DefaultPoolSize = 64;
+		public const int DefaultMaxPoolSize = 16_384;
 
-		private const int DefaultModifierArraySize = 32;
-		private const int DefaultModifierRemoveSize = 4;
+		public const int DefaultModifierArraySize = 32;
+		public const int DefaultModifierRemoveSize = 4;
 
-		private const int DefaultMultiTargetComponentInitialCapacity = 4;
+		public const int DefaultMultiTargetComponentInitialCapacity = 4;
 
-		private const int DefaultAttackApplierSize = 4,
+		public const int DefaultAttackApplierSize = 4,
 			DefaultCastApplierSize = 4,
 			DefaultAttackCheckApplierSize = 4,
 			DefaultCastCheckApplierSize = 4;
 
-		private const float DefaultDeltaTolerance = 0.001f;
+		public const float DefaultDeltaTolerance = 0.001f;
 
 
 		public static int DefaultTag = DefaultDefaultTag;

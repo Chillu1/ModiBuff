@@ -96,7 +96,7 @@ namespace ModiBuff.Tests
 
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
-			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
+			Unit.TryCast(generator.Id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 			Assert.AreEqual(UnitHealth, Unit.Health);

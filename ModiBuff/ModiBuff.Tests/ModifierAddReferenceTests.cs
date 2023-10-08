@@ -74,7 +74,7 @@ namespace ModiBuff.Tests
 
 			Unit.ModifierController.TryAdd(modifierReference);
 
-			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
+			Unit.TryCast(generator.Id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}

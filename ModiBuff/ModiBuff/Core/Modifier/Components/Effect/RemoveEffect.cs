@@ -12,7 +12,11 @@ namespace ModiBuff.Core
 
 		internal RemoveEffect(int id) => _id = id;
 
-		internal RemoveEffect(int id, int genId)
+		/// <summary>
+		///		Constructor used ONLY for manual modifier generation.
+		///		DO NOT feed the id and genId values if you're using recipes
+		/// </summary>
+		public RemoveEffect(int id, int genId)
 		{
 			_id = id;
 			_genId = genId;

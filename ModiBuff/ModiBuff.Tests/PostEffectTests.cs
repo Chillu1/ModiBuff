@@ -19,7 +19,7 @@ namespace ModiBuff.Tests
 
 			Unit.TakeDamage(2.5f, Unit);
 
-			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
+			Unit.TryCast(generator.Id, Enemy);
 
 			Assert.AreEqual(UnitHealth, Unit.Health);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
@@ -38,7 +38,7 @@ namespace ModiBuff.Tests
 
 			Enemy.TakeDamage(EnemyHealth - 5, Unit);
 
-			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
+			Unit.TryCast(generator.Id, Enemy);
 
 			Assert.AreEqual(UnitDamage + 2, Unit.Damage);
 			Assert.AreEqual(0, Enemy.Health);
@@ -57,7 +57,7 @@ namespace ModiBuff.Tests
 
 			Enemy.TakeDamage(5, Enemy);
 
-			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
+			Unit.TryCast(generator.Id, Enemy);
 
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);

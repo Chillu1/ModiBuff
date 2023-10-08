@@ -59,7 +59,7 @@ namespace ModiBuff.Tests
 			var applier = Recipes.GetGenerator("InitDamage");
 			Unit.AddApplierModifier(applier, ApplierType.Cast);
 
-			ModifierOwnerExtensions.TryCast(Unit, applier.Id, Enemy);
+			Unit.TryCast(applier.Id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
@@ -95,7 +95,7 @@ namespace ModiBuff.Tests
 
 			Unit.AddApplierModifier(generator, ApplierType.Cast);
 
-			ModifierOwnerExtensions.TryCast(Unit, generator.Id, Enemy);
+			Unit.TryCast(generator.Id, Enemy);
 
 			Assert.AreEqual(UnitMana - 5, Unit.Mana);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
@@ -105,7 +105,8 @@ namespace ModiBuff.Tests
 		public void NestedStackApplier()
 		{
 			AddRecipe("ComplexApplier_Disarm")
-				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect), EffectOn.Stack)
+				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 5, false, StackEffectType.Effect),
+					EffectOn.Stack)
 				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2)
 				.Remove(10).Refresh();
 			AddRecipe("ComplexApplier_Rupture")
@@ -241,7 +242,7 @@ namespace ModiBuff.Tests
 
 			Assert.True(unit.ContainsModifier("AddModifierApplier_Flag"));
 
-			Config.Reset();
+			Config.ModifierArraySize = Config.DefaultModifierArraySize;
 		}
 	}
 }
