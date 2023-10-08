@@ -81,6 +81,9 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe Tag(int tag) => Tag((TagType)tag);
 
+		/// <summary>
+		///		Ads a tag to the modifier
+		/// </summary>
 		public ModifierRecipe Tag(TagType tag)
 		{
 			_tag |= tag;
@@ -89,6 +92,7 @@ namespace ModiBuff.Core
 
 		/// <summary>
 		///		This will set the tag directly, without adding, it might remove other tags.
+		///		Will remove the default tag, if set.
 		/// </summary>
 		public ModifierRecipe SetTag(TagType tag)
 		{
@@ -158,11 +162,9 @@ namespace ModiBuff.Core
 		///		How many seconds should pass between the interval effects get applied.
 		/// </summary>
 		/// <param name="affectedByStatusResistance">Should the interval be affected by status resistance</param>
-		public ModifierRecipe Interval(float interval, bool affectedByStatusResistance = false)
+		public ModifierRecipe Interval(float interval)
 		{
 			_interval = interval;
-			if (!affectedByStatusResistance)
-				_tag |= TagType.IntervalIgnoresStatusResistance;
 			_currentIsInterval = true;
 			return this;
 		}
@@ -170,11 +172,9 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		How many seconds should pass before the duration effects get triggered (usually modifier removal)
 		/// </summary>
-		public ModifierRecipe Duration(float duration, bool affectedByStatusResistance = true)
+		public ModifierRecipe Duration(float duration)
 		{
 			_duration = duration;
-			if (!affectedByStatusResistance)
-				_tag |= TagType.DurationIgnoresStatusResistance;
 			_currentIsInterval = false;
 			return this;
 		}

@@ -4,7 +4,7 @@ namespace ModiBuff.Core
 {
 	public static class Config
 	{
-		public const int DefaultDefaultTag = 0;
+		public const int DefaultDefaultTag = (int)TagType.Default;
 
 		private const int DefaultPoolSize = 64;
 		private const int DefaultMaxPoolSize = 16_384;

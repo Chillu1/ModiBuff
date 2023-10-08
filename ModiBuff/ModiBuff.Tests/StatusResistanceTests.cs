@@ -1,6 +1,7 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
+using TagType = ModiBuff.Core.TagType;
 
 namespace ModiBuff.Tests
 {
@@ -10,7 +11,8 @@ namespace ModiBuff.Tests
 		public void Dot_NoResistance()
 		{
 			AddRecipe("DoTRemoveStatusResistance")
-				.Interval(1, true)
+				.RemoveTag(TagType.IntervalIgnoresStatusResistance)
+				.Interval(1)
 				.Effect(new DamageEffect(5), EffectOn.Interval)
 				.Remove(5);
 			Setup();
@@ -30,7 +32,8 @@ namespace ModiBuff.Tests
 		public void Dot_XResistance(float resistance)
 		{
 			AddRecipe("DoTRemoveStatusResistance")
-				.Interval(1, true)
+				.RemoveTag(TagType.IntervalIgnoresStatusResistance)
+				.Interval(1)
 				.Effect(new DamageEffect(5), EffectOn.Interval)
 				.Remove(5);
 			Setup();
@@ -71,7 +74,8 @@ namespace ModiBuff.Tests
 		public void DurationXResistance(float resistance)
 		{
 			AddRecipe("DurationRemoveStatusResistance")
-				.Interval(1, true)
+				.RemoveTag(TagType.IntervalIgnoresStatusResistance)
+				.Interval(1)
 				.Effect(new DamageEffect(0), EffectOn.Interval)
 				.Effect(new DamageEffect(5), EffectOn.Duration)
 				.Remove(5);
