@@ -75,5 +75,23 @@ namespace ModiBuff.Tests
 			Unit.TryCast(IdManager.GetId("InitDamageEnemyOnly"), Ally);
 			Assert.AreEqual(AllyHealth, Ally.Health);
 		}
+
+		[Test]
+		public void CastInitAddDamageOnSelf_SelfOnlyLegalTarget()
+		{
+			AddRecipe("InitAddDamageSelfOnly")
+				.LegalTarget(LegalTarget.Self)
+				.Effect(new AddDamageEffect(5f), EffectOn.Init);
+			Setup();
+
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitAddDamageSelfOnly"), ApplierType.Cast);
+			Unit.TryCast(IdManager.GetId("InitAddDamageSelfOnly"), Ally);
+			Assert.AreEqual(AllyDamage, Ally.Damage);
+			Unit.TryCast(IdManager.GetId("InitAddDamageSelfOnly"), Enemy);
+			Assert.AreEqual(EnemyDamage, Enemy.Damage);
+
+			Unit.TryCast(IdManager.GetId("InitAddDamageSelfOnly"), Unit);
+			Assert.AreEqual(UnitDamage + 5f, Unit.Damage);
+		}
 	}
 }

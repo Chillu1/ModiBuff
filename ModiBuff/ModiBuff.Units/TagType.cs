@@ -42,8 +42,6 @@ namespace ModiBuff.Core.Units
 
 		public static bool IsLegalTarget(this TagType tag, UnitType target, UnitType source)
 		{
-			if (tag.HasTag(TagType.LegalTargetSelf) && target == source)
-				return true;
 			if (tag.HasTag(TagType.LegalTargetAlly) && target == source)
 				return true;
 			if (tag.HasTag(TagType.LegalTargetEnemy) && target != source)
@@ -52,7 +50,7 @@ namespace ModiBuff.Core.Units
 				return true;
 
 #if DEBUG
-			Logger.LogError($"Tag {tag} is not a legal target for UnitType.{target} from UnitType.{source}");
+			Logger.Log($"Tag {tag} is not a legal target for UnitType.{target} from UnitType.{source}");
 #endif
 			return false;
 		}

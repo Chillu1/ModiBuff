@@ -38,7 +38,7 @@ namespace ModiBuff.Core.Units
 			var modifierOwner = (IModifierOwner)unit;
 			foreach (int modifierId in _modifierIds)
 			{
-				if (!modifierId.IsLegalTarget(((IUnitEntity)unit).UnitType, ((IUnitEntity)_source).UnitType))
+				if (!modifierId.IsLegalTarget((IUnitEntity)unit, (IUnitEntity)_source))
 					continue;
 
 				modifierOwner.ModifierController.Add(modifierId, unit, this);

@@ -5,7 +5,7 @@ namespace ModiBuff.Core.Units
 		public static bool TryCast(this IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType> owner,
 			int modifierId, IModifierOwner target)
 		{
-			if (!modifierId.IsLegalTarget(((IUnitEntity)target).UnitType, owner.UnitType))
+			if (!modifierId.IsLegalTarget((IUnitEntity)target, owner))
 				return false;
 
 			if (!owner.StatusEffectController.HasLegalAction(LegalAction.Cast))
@@ -25,7 +25,7 @@ namespace ModiBuff.Core.Units
 			this IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType> owner, int modifierId,
 			IModifierOwner target)
 		{
-			if (!modifierId.IsLegalTarget(((IUnitEntity)target).UnitType, owner.UnitType))
+			if (!modifierId.IsLegalTarget((IUnitEntity)target, owner))
 				return false;
 
 			if (!owner.StatusEffectController.HasLegalAction(LegalAction.Cast))
