@@ -74,49 +74,33 @@ namespace ModiBuff.Core
 		public IReadOnlyList<int> GetApplierAttackModifierIds() => _modifierAttackAppliers;
 		public IReadOnlyList<int> GetApplierCastModifierIds() => _modifierCastAppliers;
 
+		/// <summary>
+		///		Gets timer reference, used to update UI/UX
+		/// </summary>
+		/// <param name="timeComponentNumber">Which timer should be returned, first = 0</param>
 		public ITimeReference GetTimer<TTimeComponent>(int id, int genId = 0, int timeComponentNumber = 0)
 			where TTimeComponent : ITimeComponent
 		{
-			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
-			{
-				int modifierIndex = _modifierIndexes[id];
-				if (modifierIndex != -1)
-					return _modifiers[modifierIndex].GetTimer<TTimeComponent>(timeComponentNumber);
-
-				return null;
-			}
-
-			for (int i = 0; i < _modifiersTop; i++)
-			{
-				var modifier = _modifiers[i];
-				if (modifier.Id == id && modifier.GenId == genId)
-					return modifier.GetTimer<TTimeComponent>(timeComponentNumber);
-			}
-
-			return null;
+			return GetModifier(id, genId)?.GetTimer<TTimeComponent>(timeComponentNumber);
 		}
 
 		/// <summary>
-		///		Gets state from effect
+		///		Get stack reference, used to update UI/UX
+		/// </summary>
+		public IStackReference GetStackReference(int id, int genId = 0)
+		{
+			return GetModifier(id, genId)?.GetStackReference();
+		}
+
+		/// <summary>
+		///		Gets state from effect, used to display values in UI
 		/// </summary>
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
 		public TData GetState<TData>(int id, int genId = 0, int stateNumber = 0) where TData : struct
 		{
-			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
-			{
-				int modifierIndex = _modifierIndexes[id];
-				if (modifierIndex != -1)
-					return _modifiers[modifierIndex].GetState<TData>(stateNumber);
-			}
-			else
-			{
-				for (int i = 0; i < _modifiersTop; i++)
-				{
-					var modifier = _modifiers[i];
-					if (modifier.Id == id && modifier.GenId == genId)
-						return modifier.GetState<TData>(stateNumber);
-				}
-			}
+			var modifier = GetModifier(id, genId);
+			if (modifier != null)
+				return modifier.GetState<TData>(stateNumber);
 
 			Logger.LogWarning($"Couldn't find state info, {typeof(TData)} at number {stateNumber}, " +
 			                  $"id: {id}, genId: {genId}");
@@ -280,33 +264,16 @@ namespace ModiBuff.Core
 
 		public void ModifierAction(int id, int genId, ModifierAction action)
 		{
-			Modifier modifier = null;
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);
+			var modifier = GetModifier(id, genId);
 
-			if (!tag.HasTag(TagType.IsInstanceStackable) && _modifierIndexes[id] != -1)
+			if (modifier == null)
 			{
-				modifier = _modifiers[_modifierIndexes[id]];
-			}
-			else
-			{
-				for (int i = 0; i < _modifiersTop; i++)
-				{
-					var localModifier = _modifiers[i];
-					if (localModifier.Id == id && localModifier.GenId == genId)
-					{
-						modifier = localModifier;
-						break;
-					}
-				}
-
-				if (modifier == null)
-				{
 #if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError($"Tried to call modifier action {action} on a modifier that " +
-					                $"doesn't exist, id: {id}, genId: {genId}");
+				Logger.LogError($"Tried to call modifier action {action} on a modifier that " +
+				                $"doesn't exist, id: {id}, genId: {genId}");
 #endif
-					return;
-				}
+				return;
 			}
 
 			switch (action)
@@ -393,6 +360,24 @@ namespace ModiBuff.Core
 			_modifierCastChecksAppliers.Clear();
 			_modifierAttackChecksAppliers.Clear();
 			_modifiersToRemove.Clear();
+		}
+
+		private Modifier GetModifier(int id, int genId)
+		{
+			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
+			{
+				int modifierIndex = _modifierIndexes[id];
+				return modifierIndex != -1 ? _modifiers[modifierIndex] : null;
+			}
+
+			for (int i = 0; i < _modifiersTop; i++)
+			{
+				var modifier = _modifiers[i];
+				if (modifier.Id == id && modifier.GenId == genId)
+					return modifier;
+			}
+
+			return null;
 		}
 	}
 }

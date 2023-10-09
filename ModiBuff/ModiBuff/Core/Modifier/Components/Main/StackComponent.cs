@@ -3,9 +3,13 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
-	public struct StackComponent : ITarget, IStateReset
+	public sealed class StackComponent : ITarget, IStateReset, IStackReference
 	{
+		public int Stacks => _stacks;
+		public int MaxStacks => _maxStacks;
+
 		private readonly WhenStackEffect _whenStackEffect;
+		private readonly float _value;
 		private readonly int _maxStacks;
 		private readonly int _everyXStacks;
 		private readonly IStackEffect[] _effects;
@@ -15,7 +19,6 @@ namespace ModiBuff.Core
 		private ITargetComponent _targetComponent;
 
 		private int _stacks;
-		private float _value;
 
 		public StackComponent(WhenStackEffect whenStackEffect, float value, int maxStacks, int everyXStacks,
 			IStackEffect[] effects, ModifierCheck check)

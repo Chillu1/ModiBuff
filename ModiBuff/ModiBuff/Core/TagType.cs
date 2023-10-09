@@ -55,7 +55,9 @@ namespace ModiBuff.Core
 	{
 		private static readonly FieldInfo[] modifierFields = typeof(Modifier).GetRuntimeFields().ToArray();
 		private static readonly FieldInfo hasInitField = modifierFields.First(field => field.Name == "_hasInit");
-		private static readonly FieldInfo hasStackField = modifierFields.First(field => field.Name == "_hasStack");
+
+		private static readonly FieldInfo hasStackComponentField =
+			modifierFields.First(field => field.Name == "_stackComponent");
 
 		private static readonly FieldInfo timeComponentsField =
 			modifierFields.First(field => field.Name == "_timeComponents");
@@ -70,7 +72,7 @@ namespace ModiBuff.Core
 		{
 			if ((bool)hasInitField.GetValue(modifier))
 				tag |= TagType.IsInit;
-			if ((bool)hasStackField.GetValue(modifier))
+			if (hasStackComponentField.GetValue(modifier) != null)
 				tag |= TagType.IsStack;
 
 			var timeComponents = (ITimeComponent[])timeComponentsField.GetValue(modifier);

@@ -65,7 +65,7 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-		public void IntervalTimerState()
+		public void IntervalDurationTimerReferences()
 		{
 			AddRecipe("IntervalDurationDamage")
 				.Interval(1)
@@ -88,6 +88,25 @@ namespace ModiBuff.Tests
 			Unit.Update(0.5f);
 			Assert.AreEqual(0f, intervalReference.Timer);
 			Assert.AreEqual(1f, durationReference.Timer);
+		}
+
+		[Test]
+		public void StackReference()
+		{
+			AddRecipe("StackDamage")
+				.Effect(new DamageEffect(5), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, maxStacks: 5);
+			Setup();
+
+			int id = IdManager.GetId("StackDamage");
+			Unit.AddModifierSelf("StackDamage");
+
+			var stackReference = Unit.ModifierController.GetStackReference(id);
+			Assert.AreEqual(1, stackReference.Stacks);
+
+			Unit.AddModifierSelf("StackDamage");
+			Assert.AreEqual(2, stackReference.Stacks);
+			Assert.AreEqual(5, stackReference.MaxStacks);
 		}
 	}
 }

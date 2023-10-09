@@ -176,7 +176,7 @@ namespace ModiBuff.Core
 
 			InitComponent? initComponent = null;
 			ITimeComponent[] timeComponents = null;
-			StackComponent? stackComponent = null;
+			StackComponent stackComponent = null;
 			if (_timeComponentCount > 0)
 			{
 				_timeComponentIndex = 0;

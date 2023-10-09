@@ -22,9 +22,7 @@ namespace ModiBuff.Core
 		private InitComponent _initComponent;
 
 		private readonly ITimeComponent[] _timeComponents;
-
-		private readonly bool _hasStack;
-		private StackComponent _stackComponent;
+		private readonly StackComponent _stackComponent;
 
 		private readonly ModifierCheck _effectCheck;
 
@@ -36,7 +34,7 @@ namespace ModiBuff.Core
 		private readonly ModifierStateInfo _stateInfo;
 
 		public Modifier(int id, int genId, string name, InitComponent? initComponent,
-			ITimeComponent[] timeComponents, StackComponent? stackComponent, ModifierCheck effectCheck,
+			ITimeComponent[] timeComponents, StackComponent stackComponent, ModifierCheck effectCheck,
 			ITargetComponent targetComponent, ModifierStateInfo stateInfo)
 		{
 			Id = id;
@@ -50,12 +48,7 @@ namespace ModiBuff.Core
 			}
 
 			_timeComponents = timeComponents;
-			if (stackComponent != null)
-			{
-				_stackComponent = stackComponent.Value;
-				_hasStack = true;
-			}
-
+			_stackComponent = stackComponent;
 			_effectCheck = effectCheck;
 
 			_targetComponent = targetComponent;
@@ -84,8 +77,7 @@ namespace ModiBuff.Core
 					for (int i = 0; i < _timeComponents.Length; i++)
 						_timeComponents[i].SetupTarget(_targetComponent);
 
-				if (_hasStack)
-					_stackComponent.SetupTarget(_targetComponent);
+				_stackComponent?.SetupTarget(_targetComponent);
 			}
 
 			_targetComponent.Source = source;
@@ -116,8 +108,7 @@ namespace ModiBuff.Core
 					for (int i = 0; i < _timeComponents.Length; i++)
 						_timeComponents[i].SetupTarget(_targetComponent);
 
-				if (_hasStack)
-					_stackComponent.SetupTarget(_targetComponent);
+				_stackComponent?.SetupTarget(_targetComponent);
 			}
 
 			_targetComponent.Source = source;
@@ -204,6 +195,17 @@ namespace ModiBuff.Core
 			return null;
 		}
 
+		public IStackReference GetStackReference()
+		{
+			if (_stackComponent == null)
+			{
+				Logger.LogError("Trying to get stack reference from a modifier that doesn't have any.");
+				return null;
+			}
+
+			return _stackComponent;
+		}
+
 		/// <summary>
 		///		Gets state from effect
 		/// </summary>
@@ -226,8 +228,7 @@ namespace ModiBuff.Core
 			if (_timeComponents != null)
 				for (int i = 0; i < _timeComponents.Length; i++)
 					_timeComponents[i].ResetState();
-			if (_hasStack)
-				_stackComponent.ResetState();
+			_stackComponent?.ResetState();
 			_effectCheck?.ResetState();
 			_targetComponent.ResetState();
 		}
