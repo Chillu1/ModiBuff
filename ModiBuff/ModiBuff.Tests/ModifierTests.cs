@@ -58,14 +58,9 @@ namespace ModiBuff.Tests
 		protected ModifierEventRecipe AddEventRecipe(string name, EffectOnEvent @event) =>
 			Recipes.AddEvent(name, @event);
 
-		protected void AddGenerator(in ManualGeneratorData data)
-		{
-			Recipes.Add(data.Name, in data.CreateFunc, data.Tag);
-		}
-
 		protected void AddGenerator(string name, in ModifierGeneratorFunc createFunc, TagType tag = TagType.Default)
 		{
-			Recipes.Add(name, in createFunc, tag.ToInternalTag());
+			Recipes.Add(name, name, "", in createFunc, tag.ToInternalTag());
 		}
 
 		/// <summary>

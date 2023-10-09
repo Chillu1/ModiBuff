@@ -4,15 +4,20 @@ namespace ModiBuff.Core
 	{
 		public int Id { get; }
 		public string Name { get; }
+		public string DisplayName { get; }
+		public string Description { get; }
 		public TagType Tag { get; }
 		private readonly ModifierGeneratorFunc _createFunc;
 
 		private int _genId;
 
-		public ManualModifierGenerator(int id, string name, in ModifierGeneratorFunc createFunc, TagType tag)
+		public ManualModifierGenerator(int id, string name, string displayName, string description,
+			in ModifierGeneratorFunc createFunc, TagType tag)
 		{
 			Id = id;
 			Name = name;
+			DisplayName = displayName;
+			Description = description;
 			_createFunc = createFunc;
 
 			//Updates tags based on modifier state

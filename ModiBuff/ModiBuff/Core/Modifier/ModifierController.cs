@@ -205,7 +205,7 @@ namespace ModiBuff.Core
 					Add(check.Id, target, source);
 		}
 
-		public void Add(int id, IUnit target, IUnit source)
+		public int Add(int id, IUnit target, IUnit source)
 		{
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);
 
@@ -220,7 +220,8 @@ namespace ModiBuff.Core
 					existingModifier.Refresh();
 				if ((tag & TagType.IsStack) != 0)
 					existingModifier.Stack();
-				return;
+
+				return existingModifier.GenId;
 			}
 
 			if (_modifiersTop == _modifiers.Length)
@@ -238,6 +239,8 @@ namespace ModiBuff.Core
 				modifier.Init();
 			if (tag.HasTag(TagType.IsStack))
 				modifier.Stack();
+
+			return modifier.GenId;
 		}
 
 		public bool Contains(int id)

@@ -16,11 +16,10 @@ namespace ModiBuff.Core.Units
 
 		private void Register(params string[] names) => _modifierRecipes.Register(names);
 		private ModifierRecipe Add(string name) => _modifierRecipes.Add(name);
-		private void Add(in ManualGeneratorData data) => Add(data.Name, in data.CreateFunc, data.Tag);
 
 		private void Add(string name, in ModifierGeneratorFunc createFunc, Core.TagType tag = default)
 		{
-			_modifierRecipes.Add(name, in createFunc, tag);
+			_modifierRecipes.Add(name, name, "", in createFunc, tag);
 		}
 
 		private ModifierEventRecipe AddEvent(string name, EffectOnEvent effectOnEvent) =>
