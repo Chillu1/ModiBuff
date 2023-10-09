@@ -10,8 +10,6 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamage_CorrectBaseDamage_Recipe()
 		{
-			AddRecipe("InitDamage")
-				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
 			var modifier = Pool.Rent(IdManager.GetId("InitDamage"));
@@ -23,17 +21,17 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamage_CorrectBaseDamage_Manual()
 		{
-			AddGenerator("InitDamage", (id, genId, name) =>
+			AddGenerator("InitDamageManual", (id, genId, name) =>
 			{
 				var damageEffect = new DamageEffect(5);
 				var initComponent = new InitComponent(false, new IEffect[] { damageEffect }, null);
 
 				return new Modifier(id, genId, name, initComponent, null, null, null,
 					new SingleTargetComponent(), new ModifierStateInfo(damageEffect));
-			}, TagType.IsInit);
+			});
 			Setup();
 
-			var modifier = Pool.Rent(IdManager.GetId("InitDamage"));
+			var modifier = Pool.Rent(IdManager.GetId("InitDamageManual"));
 			var state = modifier.GetState<DamageEffect.Data>();
 			Assert.AreEqual(5, state.BaseDamage);
 			Assert.AreEqual(0, state.ExtraDamage);

@@ -137,7 +137,7 @@ namespace ModiBuff.Core
 
 		public void Add(in ManualGeneratorData data) => Add(data.Name, in data.CreateFunc, data.Tag);
 
-		public void Add(string name, in ModifierGeneratorFunc createFunc, TagType tag = default)
+		public void Add(string name, in ModifierGeneratorFunc createFunc, TagType tag = TagType.Default)
 		{
 			if (_recipes.ContainsKey(name))
 			{

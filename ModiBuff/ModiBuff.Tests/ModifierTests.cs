@@ -1,6 +1,7 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
+using TagType = ModiBuff.Core.Units.TagType;
 
 namespace ModiBuff.Tests
 {
@@ -62,7 +63,7 @@ namespace ModiBuff.Tests
 			Recipes.Add(data.Name, in data.CreateFunc, data.Tag);
 		}
 
-		protected void AddGenerator(string name, in ModifierGeneratorFunc createFunc, Core.Units.TagType tag = default)
+		protected void AddGenerator(string name, in ModifierGeneratorFunc createFunc, TagType tag = TagType.Default)
 		{
 			Recipes.Add(name, in createFunc, tag.ToInternalTag());
 		}

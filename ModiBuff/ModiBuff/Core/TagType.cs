@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
@@ -43,6 +45,56 @@ namespace ModiBuff.Core
 		public static bool HasTag(this TagType tagType, TagType tag)
 		{
 			return (tagType & tag) == tag;
+		}
+
+		public static void UpdateTagBasedOnModifierComponents(this ref TagType tag, Modifier modifier) =>
+			TagTypeUtils.UpdateTagBasedOnModifierComponents(ref tag, modifier);
+	}
+
+	public static class TagTypeUtils
+	{
+		private static readonly FieldInfo[] modifierFields = typeof(Modifier).GetRuntimeFields().ToArray();
+		private static readonly FieldInfo hasInitField = modifierFields.First(field => field.Name == "_hasInit");
+		private static readonly FieldInfo hasStackField = modifierFields.First(field => field.Name == "_hasStack");
+
+		private static readonly FieldInfo timeComponentsField =
+			modifierFields.First(field => field.Name == "_timeComponents");
+
+		private static readonly FieldInfo isRefreshableIntervalField =
+			typeof(IntervalComponent).GetRuntimeFields().First(field => field.Name == "_isRefreshable");
+
+		private static readonly FieldInfo isRefreshableDurationField =
+			typeof(DurationComponent).GetRuntimeFields().First(field => field.Name == "_isRefreshable");
+
+		public static void UpdateTagBasedOnModifierComponents(ref TagType tag, Modifier modifier)
+		{
+			if ((bool)hasInitField.GetValue(modifier))
+				tag |= TagType.IsInit;
+			if ((bool)hasStackField.GetValue(modifier))
+				tag |= TagType.IsStack;
+
+			var timeComponents = (ITimeComponent[])timeComponentsField.GetValue(modifier);
+			if (timeComponents != null)
+			{
+				foreach (var component in timeComponents)
+				{
+					switch (component)
+					{
+						case IntervalComponent intervalComponent:
+						{
+							if ((bool)isRefreshableIntervalField.GetValue(intervalComponent))
+								tag |= TagType.IsRefresh;
+							break;
+						}
+						case DurationComponent durationComponent:
+						{
+							if ((bool)isRefreshableDurationField.GetValue(durationComponent))
+								tag |= TagType.IsRefresh;
+							break;
+						}
+					}
+				}
+			}
 		}
 	}
 }

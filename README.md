@@ -652,7 +652,7 @@ You should **NOT** use the Modifier class directly, but instead use the recipe s
 Recipe system fixes a lot of internal complexity of setting up modifiers for you.
 
 It's possible to make modifier directly now by using `ManualModifierGenerator` class,
-specifically `Add(string, ModifierGeneratorFunc, ModifierAddData)`.
+specifically `Add(string, ModifierGeneratorFunc, Tag)`.
 But only do so if you really know what you're doing, and need that extra functionality like multiple interval/duration
 components.
 

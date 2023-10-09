@@ -14,6 +14,10 @@ namespace ModiBuff.Core
 			Id = id;
 			Name = name;
 			_createFunc = createFunc;
+
+			//Updates tags based on modifier state
+			//Generates a dummy modifier, to check for state
+			tag.UpdateTagBasedOnModifierComponents(createFunc(Id, _genId, Name));
 			Tag = tag;
 		}
 

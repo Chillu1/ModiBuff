@@ -1,7 +1,6 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
-using TagType = ModiBuff.Core.Units.TagType;
 
 namespace ModiBuff.Tests
 {
@@ -26,7 +25,7 @@ namespace ModiBuff.Tests
 				var initComponent = new InitComponent(false, new IEffect[] { registerReactEffect }, null);
 				return new Modifier(id, genId, name, initComponent, null, null, null,
 					new SingleTargetComponent(), null);
-			}, TagType.IsInit);
+			});
 			Setup();
 
 			Unit.AddModifierSelf("AddDamageAbove5RemoveDamageBelow5React"); //Starts with 10 baseDmg, adds 5 from effect
@@ -96,7 +95,7 @@ namespace ModiBuff.Tests
 				var initComponent = new InitComponent(false, new IEffect[] { effect, registerReactEffect }, null);
 				return new Modifier(id, genId, name, initComponent, null, null, null,
 					new SingleTargetComponent(), null);
-			}, TagType.IsInit);
+			});
 			Setup();
 
 			//Starts with 10 baseDmg, adds 5 from effect
@@ -163,7 +162,7 @@ namespace ModiBuff.Tests
 				var initComponent = new InitComponent(false, new IEffect[] { effect, registerReactEffect }, null);
 				return new Modifier(id, genId, name, initComponent, null, null, null,
 					new SingleTargetComponent(), null);
-			}, TagType.IsInit);
+			});
 			Setup();
 
 			Pool.Clear();
