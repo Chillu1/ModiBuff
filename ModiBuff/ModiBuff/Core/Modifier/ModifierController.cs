@@ -74,6 +74,55 @@ namespace ModiBuff.Core
 		public IReadOnlyList<int> GetApplierAttackModifierIds() => _modifierAttackAppliers;
 		public IReadOnlyList<int> GetApplierCastModifierIds() => _modifierCastAppliers;
 
+		public ITimeReference GetTimer<TTimeComponent>(int id, int genId = 0, int timeComponentNumber = 0)
+			where TTimeComponent : ITimeComponent
+		{
+			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
+			{
+				int modifierIndex = _modifierIndexes[id];
+				if (modifierIndex != -1)
+					return _modifiers[modifierIndex].GetTimer<TTimeComponent>(timeComponentNumber);
+
+				return null;
+			}
+
+			for (int i = 0; i < _modifiersTop; i++)
+			{
+				var modifier = _modifiers[i];
+				if (modifier.Id == id && modifier.GenId == genId)
+					return modifier.GetTimer<TTimeComponent>(timeComponentNumber);
+			}
+
+			return null;
+		}
+
+		/// <summary>
+		///		Gets state from effect
+		/// </summary>
+		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
+		public TData GetState<TData>(int id, int genId = 0, int stateNumber = 0) where TData : struct
+		{
+			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
+			{
+				int modifierIndex = _modifierIndexes[id];
+				if (modifierIndex != -1)
+					return _modifiers[modifierIndex].GetState<TData>(stateNumber);
+			}
+			else
+			{
+				for (int i = 0; i < _modifiersTop; i++)
+				{
+					var modifier = _modifiers[i];
+					if (modifier.Id == id && modifier.GenId == genId)
+						return modifier.GetState<TData>(stateNumber);
+				}
+			}
+
+			Logger.LogWarning($"Couldn't find state info, {typeof(TData)} at number {stateNumber}, " +
+			                  $"id: {id}, genId: {genId}");
+			return default;
+		}
+
 		public bool TryAdd(ModifierAddReference addReference) => TryAdd(addReference, _owner);
 
 		public bool TryAdd(ModifierAddReference addReference, IUnit target)

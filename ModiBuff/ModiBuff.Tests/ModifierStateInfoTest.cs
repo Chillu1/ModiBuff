@@ -1,7 +1,6 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
-using TagType = ModiBuff.Core.Units.TagType;
 
 namespace ModiBuff.Tests
 {
@@ -12,8 +11,8 @@ namespace ModiBuff.Tests
 		{
 			Setup();
 
-			var modifier = Pool.Rent(IdManager.GetId("InitDamage"));
-			var state = modifier.GetState<DamageEffect.Data>();
+			Unit.AddModifierSelf("InitDamage");
+			var state = Unit.ModifierController.GetState<DamageEffect.Data>(IdManager.GetId("InitDamage"));
 			Assert.AreEqual(5, state.BaseDamage);
 			Assert.AreEqual(0, state.ExtraDamage);
 		}
@@ -31,8 +30,9 @@ namespace ModiBuff.Tests
 			});
 			Setup();
 
-			var modifier = Pool.Rent(IdManager.GetId("InitDamageManual"));
-			var state = modifier.GetState<DamageEffect.Data>();
+			Unit.AddModifierSelf("InitDamageManual");
+
+			var state = Unit.ModifierController.GetState<DamageEffect.Data>(IdManager.GetId("InitDamageManual"));
 			Assert.AreEqual(5, state.BaseDamage);
 			Assert.AreEqual(0, state.ExtraDamage);
 		}
@@ -47,20 +47,47 @@ namespace ModiBuff.Tests
 				.Stack(WhenStackEffect.Always, value: 2);
 			Setup();
 
-			var modifier = Pool.Rent(IdManager.GetId("DoubleStackDamage"));
-			var firstDamageState = modifier.GetState<DamageEffect.Data>();
+			int id = IdManager.GetId("DoubleStackDamage");
+			Unit.AddModifierSelf("DoubleStackDamage");
+
+			var firstDamageState = Unit.ModifierController.GetState<DamageEffect.Data>(id);
 			Assert.AreEqual(5, firstDamageState.BaseDamage);
 			Assert.AreEqual(0, firstDamageState.ExtraDamage);
-			var secondDamageState = modifier.GetState<DamageEffect.Data>(1);
-			Assert.AreEqual(10, secondDamageState.BaseDamage);
-			Assert.AreEqual(0, secondDamageState.ExtraDamage);
-
-			modifier.UpdateSingleTargetSource(Unit, Unit);
-			modifier.Stack();
-
-			secondDamageState = modifier.GetState<DamageEffect.Data>(1);
+			var secondDamageState = Unit.ModifierController.GetState<DamageEffect.Data>(id, stateNumber: 1);
 			Assert.AreEqual(10, secondDamageState.BaseDamage);
 			Assert.AreEqual(2, secondDamageState.ExtraDamage);
+
+			Unit.AddModifierSelf("DoubleStackDamage");
+
+			var secondUpdatedDamageState = Unit.ModifierController.GetState<DamageEffect.Data>(id, stateNumber: 1);
+			Assert.AreEqual(10, secondUpdatedDamageState.BaseDamage);
+			Assert.AreEqual(4, secondUpdatedDamageState.ExtraDamage);
+		}
+
+		[Test]
+		public void IntervalTimerState()
+		{
+			AddRecipe("IntervalDurationDamage")
+				.Interval(1)
+				.Duration(5)
+				.Effect(new DamageEffect(5), EffectOn.Interval | EffectOn.Duration);
+			Setup();
+
+			Unit.AddModifierSelf("IntervalDurationDamage");
+			int id = IdManager.GetId("IntervalDurationDamage");
+
+			var intervalReference = Unit.ModifierController.GetTimer<IntervalComponent>(id);
+			var durationReference = Unit.ModifierController.GetTimer<DurationComponent>(id);
+			Assert.AreEqual(intervalReference.Time, 1);
+			Assert.AreEqual(durationReference.Time, 5);
+			Assert.AreEqual(0, intervalReference.Timer);
+			Assert.AreEqual(0, durationReference.Timer);
+			Unit.Update(0.5f);
+			Assert.AreEqual(0.5f, intervalReference.Timer);
+			Assert.AreEqual(0.5f, durationReference.Timer);
+			Unit.Update(0.5f);
+			Assert.AreEqual(0f, intervalReference.Timer);
+			Assert.AreEqual(1f, durationReference.Timer);
 		}
 	}
 }

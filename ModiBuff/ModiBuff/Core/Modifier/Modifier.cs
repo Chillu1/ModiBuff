@@ -165,6 +165,46 @@ namespace ModiBuff.Core
 		public void ResetStacks() => _stackComponent.ResetStacks();
 
 		/// <summary>
+		///		Gets a timer reference, used to update UI/UX
+		/// </summary>
+		/// <param name="timeComponentNumber">Which timer should be returned, first = 0</param>'
+		//TODO Any way to make sure that references get invalidated when the modifier is pooled?
+		public ITimeReference GetTimer<TTimeComponent>(int timeComponentNumber = 0)
+			where TTimeComponent : ITimeComponent
+		{
+			if (_timeComponents == null)
+			{
+				Logger.LogError("Trying to get timer from a modifier that doesn't have any.");
+				return null;
+			}
+#if DEBUG && !MODIBUFF_PROFILE
+			if (timeComponentNumber < 0 || timeComponentNumber >= _timeComponents.Length)
+			{
+				Logger.LogError("Time component number can't be lower than 0 or higher than time components length");
+				return null;
+			}
+#endif
+
+			int currentNumber = timeComponentNumber;
+			for (int i = 0; i < _timeComponents.Length; i++)
+			{
+				if (!(_timeComponents[i] is TTimeComponent))
+					continue;
+
+				if (currentNumber > 0)
+				{
+					currentNumber--;
+					continue;
+				}
+
+				return _timeComponents[i];
+			}
+
+			Logger.LogError($"Couldn't find {typeof(TTimeComponent)} at number {timeComponentNumber}");
+			return null;
+		}
+
+		/// <summary>
 		///		Gets state from effect
 		/// </summary>
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>

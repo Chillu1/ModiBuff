@@ -2,6 +2,9 @@ namespace ModiBuff.Core
 {
 	public sealed class IntervalComponent : ITimeComponent
 	{
+		public float Timer => _timer;
+		public float Time => _interval;
+
 		private readonly float _interval;
 		private readonly bool _isRefreshable;
 		private float _timer;

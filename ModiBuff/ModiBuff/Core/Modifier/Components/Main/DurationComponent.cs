@@ -2,6 +2,9 @@ namespace ModiBuff.Core
 {
 	public sealed class DurationComponent : ITimeComponent
 	{
+		public float Timer => _timer;
+		public float Time => _duration;
+
 		private readonly float _duration;
 		private readonly bool _isRefreshable;
 		private readonly IEffect[] _effects;
