@@ -20,6 +20,15 @@ namespace ModiBuff.Core.Units
 		{
 		}
 
+		/// <summary>
+		///		ONLY use this constructor for manual modifier generation.
+		/// </summary>
+		public StatusEffectEffect(int id, int genId, StatusEffectType statusEffectType, float duration,
+			bool revertible = false, StackEffectType stackEffect = StackEffectType.Effect) :
+			this(statusEffectType, duration, revertible, stackEffect, id, genId)
+		{
+		}
+
 		private StatusEffectEffect(StatusEffectType statusEffectType, float duration, bool revertible,
 			StackEffectType stackEffect, int id, int genId)
 		{

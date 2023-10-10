@@ -20,7 +20,7 @@ namespace ModiBuff.Core.Units
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 0.2f), EffectOn.Init | EffectOn.Interval)
 				.Remove(5).Refresh();
 
-			Add("InitDamageManual", "Weak Punch", "Deals damage to the target", (id, genId, name) =>
+			Add("InitDamageManual", "Weak Punch", "Deals damage to the target", (id, genId, name, tag) =>
 			{
 				var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
 

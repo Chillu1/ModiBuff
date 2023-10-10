@@ -19,7 +19,7 @@ namespace ModiBuff.Tests
 			Add("InitDamage")
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
-			Add("InitDamageManual", "", "", (id, genId, name) =>
+			Add("InitDamageManual", "", "", (id, genId, name, tag) =>
 			{
 				var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
 

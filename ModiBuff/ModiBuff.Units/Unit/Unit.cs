@@ -53,6 +53,7 @@ namespace ModiBuff.Core.Units
 		private readonly List<IEffect> _strongHitCallbacks;
 		private UnitCallback _strongHitDelegateCallbacks;
 
+		private readonly List<DispelEvent> _dispelEvents;
 		private readonly List<HealthChangedEvent> _healthChangedEvent;
 		private readonly List<DamageChangedEvent> _damageChangedEvent;
 		private int _healthChangedCount = -1, _damageChangedCount;
@@ -85,6 +86,7 @@ namespace ModiBuff.Core.Units
 
 			_strongHitCallbacks = new List<IEffect>();
 
+			_dispelEvents = new List<DispelEvent>();
 			_healthChangedEvent = new List<HealthChangedEvent>();
 			_damageChangedEvent = new List<DamageChangedEvent>();
 
@@ -285,6 +287,12 @@ namespace ModiBuff.Core.Units
 
 		//---Modifier based---
 
+		public void Dispel(TagType tag, IUnit source)
+		{
+			for (int i = 0; i < _dispelEvents.Count; i++)
+				_dispelEvents[i](this, source, tag);
+		}
+
 		public void AddEffectEvent(IEffect effect, EffectOnEvent @event)
 		{
 			switch (@event)
@@ -435,6 +443,17 @@ namespace ModiBuff.Core.Units
 				ref readonly var callback = ref reactCallbacks[i];
 				switch (callback.ReactType)
 				{
+					case ReactType.Dispel:
+						if (!(callback.Action is DispelEvent dispelEvent))
+						{
+							Logger.LogError(
+								"objectDelegate is not of type DispelEvent, use named delegates instead.");
+							break;
+						}
+
+						//dispelEvent.DynamicInvoke(this, this, TagType.None);
+						_dispelEvents.Add(dispelEvent);
+						break;
 					case ReactType.CurrentHealthChanged:
 						if (!(callback.Action is HealthChangedEvent healthEvent))
 						{
@@ -470,6 +489,12 @@ namespace ModiBuff.Core.Units
 				ref readonly var callback = ref reactCallbacks[i];
 				switch (callback.ReactType)
 				{
+					case ReactType.Dispel:
+						//TODO Always revert internal effect?
+						var dispelEvent = (DispelEvent)callback.Action;
+						_dispelEvents.Remove(dispelEvent);
+						//dispelEvent.DynamicInvoke(this, this, TagType.None);
+						break;
 					case ReactType.CurrentHealthChanged:
 						//TODO Always revert internal effect?
 						var healthChangedEvent = (HealthChangedEvent)callback.Action;

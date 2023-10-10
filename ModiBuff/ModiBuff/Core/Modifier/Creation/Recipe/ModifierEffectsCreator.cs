@@ -53,7 +53,7 @@ namespace ModiBuff.Core
 					_callbackEffectsIndex++;
 			}
 
-			if (_callbackRegisterWrapper?.GetEffect() is IRevertEffect callbackRevert && callbackRevert.IsRevertible)
+			if (callbackRegisterWrapper?.GetEffect() is IRevertEffect callbackRevert && callbackRevert.IsRevertible)
 				_revertEffectsCount++;
 
 			for (int i = 0; i < _effectWrappers.Length; i++)

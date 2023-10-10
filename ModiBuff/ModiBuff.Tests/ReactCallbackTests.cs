@@ -1,6 +1,7 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
+using TagType = ModiBuff.Core.Units.TagType;
 
 namespace ModiBuff.Tests
 {
@@ -9,7 +10,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddDamageAbove5RemoveDamageBelow5React_Manual()
 		{
-			AddGenerator("AddDamageAbove5RemoveDamageBelow5React", (id, genId, name) =>
+			AddGenerator("AddDamageAbove5RemoveDamageBelow5React", (id, genId, name, tag) =>
 			{
 				var effect = new AddDamageEffect(5, true, true);
 				var @event = new DamageChangedEvent((unit, newDamage, deltaDamage) =>
@@ -72,7 +73,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitStatusEffectSleep_RemoveOnTenDamageTaken_Manual()
 		{
-			AddGenerator("InitStatusEffectSleep_RemoveOnTenDamageTaken", (id, genId, name) =>
+			AddGenerator("InitStatusEffectSleep_RemoveOnTenDamageTaken", (id, genId, name, tag) =>
 			{
 				var effect = new StatusEffectEffect(StatusEffectType.Sleep, 5f, true);
 				effect.SetModifierId(id);
@@ -139,7 +140,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitStatusEffectSleep_RemoveOnTenDamageTaken_Manual_StateReset()
 		{
-			AddGenerator("InitStatusEffectSleep_RemoveOnTenDamageTaken", (id, genId, name) =>
+			AddGenerator("InitStatusEffectSleep_RemoveOnTenDamageTaken", (id, genId, name, tag) =>
 			{
 				var effect = new StatusEffectEffect(StatusEffectType.Sleep, 5f, true);
 				effect.SetModifierId(id);
@@ -181,6 +182,37 @@ namespace ModiBuff.Tests
 			Unit.TakeDamage(9, Unit);
 			Unit.Update(0);
 			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
+		}
+
+		[Test]
+		public void DispelAddDamageReact()
+		{
+			AddGenerator("InitStatusEffectSleep_RemoveOnDispel", (id, genId, name, tag) =>
+			{
+				var effect = new StatusEffectEffect(id, genId, StatusEffectType.Sleep, 5f, true);
+				var removeEffect = new RemoveEffect(id, genId);
+
+				var @event = new DispelEvent((target, source, eventTag) =>
+				{
+					if ((tag & eventTag.ToInternalTag()) != 0)
+						removeEffect.Effect(target, source);
+				});
+				var registerReactEffect = new ReactCallbackRegisterEffect<ReactType>(
+					new ReactCallback<ReactType>(ReactType.Dispel, @event));
+
+				removeEffect.SetRevertibleEffects(new IRevertEffect[] { effect, registerReactEffect });
+
+				var initComponent = new InitComponent(false, new IEffect[] { effect, registerReactEffect }, null);
+				return new Modifier(id, genId, name, initComponent, null, null, null,
+					new SingleTargetComponent(), null);
+			});
+			Setup();
+
+			Unit.AddModifierSelf("InitStatusEffectSleep_RemoveOnDispel");
+			Unit.Dispel(TagType.IsStack | TagType.IsRefresh, Unit);
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
+			Unit.Dispel(TagType.IsInit, Unit);
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
 		}
 	}
 }

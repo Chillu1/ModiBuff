@@ -20,7 +20,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void InitDamage_CorrectBaseDamage_Manual()
 		{
-			AddGenerator("InitDamageManual", (id, genId, name) =>
+			AddGenerator("InitDamageManual", (id, genId, name, tag) =>
 			{
 				var damageEffect = new DamageEffect(5);
 				var initComponent = new InitComponent(false, new IEffect[] { damageEffect }, null);

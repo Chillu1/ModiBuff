@@ -9,7 +9,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Init_AddDamage_HalfHealth_TriggerCallback_RemoveAndRevert()
 		{
-			AddGenerator("InitAddDamageRevertibleHalfHealthCallback", (id, genId, name) =>
+			AddGenerator("InitAddDamageRevertibleHalfHealthCallback", (id, genId, name, tag) =>
 			{
 				var effect = new AddDamageEffect(5, true);
 				var removeEffect = new RemoveEffect(id, genId);

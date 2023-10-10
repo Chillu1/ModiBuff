@@ -2,7 +2,8 @@ namespace ModiBuff.Core.Units
 {
 	public enum ReactType
 	{
-		CurrentHealthChanged = 1,
-		DamageChanged = 2
+		Dispel = 1,
+		CurrentHealthChanged = 2,
+		DamageChanged = 3
 	}
 }
