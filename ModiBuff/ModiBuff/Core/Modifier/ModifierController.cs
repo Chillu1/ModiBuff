@@ -74,6 +74,20 @@ namespace ModiBuff.Core
 		public IReadOnlyList<int> GetApplierAttackModifierIds() => _modifierAttackAppliers;
 		public IReadOnlyList<int> GetApplierCastModifierIds() => _modifierCastAppliers;
 
+		public ModifierReference[] GetModifierReferences()
+		{
+			var modifierReferences = new ModifierReference[_modifiersTop];
+			for (int i = 0; i < _modifiersTop; i++)
+				modifierReferences[i] = new ModifierReference(_modifiers[i].Id, _modifiers[i].GenId);
+
+			return modifierReferences;
+		}
+
+		public IModifierDataReference GetModifierDataReference(int id, int genId)
+		{
+			return GetModifier(id, genId);
+		}
+
 		/// <summary>
 		///		Gets timer reference, used to update UI/UX
 		/// </summary>
@@ -96,11 +110,11 @@ namespace ModiBuff.Core
 		///		Gets state from effect, used to display values in UI
 		/// </summary>
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
-		public TData GetState<TData>(int id, int genId = 0, int stateNumber = 0) where TData : struct
+		public TData GetEffectState<TData>(int id, int genId = 0, int stateNumber = 0) where TData : struct
 		{
 			var modifier = GetModifier(id, genId);
 			if (modifier != null)
-				return modifier.GetState<TData>(stateNumber);
+				return modifier.GetEffectState<TData>(stateNumber);
 
 			Logger.LogWarning($"Couldn't find state info, {typeof(TData)} at number {stateNumber}, " +
 			                  $"id: {id}, genId: {genId}");
@@ -154,7 +168,10 @@ namespace ModiBuff.Core
 				case ApplierType.Cast when hasApplyChecks:
 				{
 					if (_modifierCastChecksAppliers.ContainsKey(id))
+					{
+						Logger.LogWarning("Tried to add a duplicate cast check applier, id: " + id);
 						return false;
+					}
 
 					_modifierCastChecksAppliers.Add(id, ModifierPool.Instance.RentModifierCheck(id));
 					return true;
@@ -162,7 +179,10 @@ namespace ModiBuff.Core
 				case ApplierType.Cast:
 				{
 					if (_modifierCastAppliers.Contains(id))
+					{
+						Logger.LogWarning("Tried to add a duplicate cast applier, id: " + id);
 						return false;
+					}
 
 					_modifierCastAppliers.Add(id);
 					return true;
@@ -170,7 +190,10 @@ namespace ModiBuff.Core
 				case ApplierType.Attack when hasApplyChecks:
 				{
 					if (_modifierAttackChecksAppliers.ContainsKey(id))
+					{
+						Logger.LogWarning("Tried to add a duplicate attack check applier, id: " + id);
 						return false;
+					}
 
 					_modifierAttackChecksAppliers.Add(id, ModifierPool.Instance.RentModifierCheck(id));
 					return true;
@@ -178,7 +201,10 @@ namespace ModiBuff.Core
 				case ApplierType.Attack:
 				{
 					if (_modifierAttackAppliers.Contains(id))
+					{
+						Logger.LogWarning("Tried to add a duplicate attack applier, id: " + id);
 						return false;
+					}
 
 					_modifierAttackAppliers.Add(id);
 					return true;

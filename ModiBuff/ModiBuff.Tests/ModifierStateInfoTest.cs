@@ -12,7 +12,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Unit.AddModifierSelf("InitDamage");
-			var state = Unit.ModifierController.GetState<DamageEffect.Data>(IdManager.GetId("InitDamage"));
+			var state = Unit.ModifierController.GetEffectState<DamageEffect.Data>(IdManager.GetId("InitDamage"));
 			Assert.AreEqual(5, state.BaseDamage);
 			Assert.AreEqual(0, state.ExtraDamage);
 		}
@@ -32,7 +32,7 @@ namespace ModiBuff.Tests
 
 			Unit.AddModifierSelf("InitDamageManual");
 
-			var state = Unit.ModifierController.GetState<DamageEffect.Data>(IdManager.GetId("InitDamageManual"));
+			var state = Unit.ModifierController.GetEffectState<DamageEffect.Data>(IdManager.GetId("InitDamageManual"));
 			Assert.AreEqual(5, state.BaseDamage);
 			Assert.AreEqual(0, state.ExtraDamage);
 		}
@@ -50,16 +50,17 @@ namespace ModiBuff.Tests
 			int id = IdManager.GetId("DoubleStackDamage");
 			Unit.AddModifierSelf("DoubleStackDamage");
 
-			var firstDamageState = Unit.ModifierController.GetState<DamageEffect.Data>(id);
+			var firstDamageState = Unit.ModifierController.GetEffectState<DamageEffect.Data>(id);
 			Assert.AreEqual(5, firstDamageState.BaseDamage);
 			Assert.AreEqual(0, firstDamageState.ExtraDamage);
-			var secondDamageState = Unit.ModifierController.GetState<DamageEffect.Data>(id, stateNumber: 1);
+			var secondDamageState = Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, stateNumber: 1);
 			Assert.AreEqual(10, secondDamageState.BaseDamage);
 			Assert.AreEqual(2, secondDamageState.ExtraDamage);
 
 			Unit.AddModifierSelf("DoubleStackDamage");
 
-			var secondUpdatedDamageState = Unit.ModifierController.GetState<DamageEffect.Data>(id, stateNumber: 1);
+			var secondUpdatedDamageState =
+				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, stateNumber: 1);
 			Assert.AreEqual(10, secondUpdatedDamageState.BaseDamage);
 			Assert.AreEqual(4, secondUpdatedDamageState.ExtraDamage);
 		}

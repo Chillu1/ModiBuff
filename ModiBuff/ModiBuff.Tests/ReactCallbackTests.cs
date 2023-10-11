@@ -75,9 +75,7 @@ namespace ModiBuff.Tests
 		{
 			AddGenerator("InitStatusEffectSleep_RemoveOnTenDamageTaken", (id, genId, name, tag) =>
 			{
-				var effect = new StatusEffectEffect(StatusEffectType.Sleep, 5f, true);
-				effect.SetModifierId(id);
-				effect.SetGenId(genId);
+				var effect = new StatusEffectEffect(id, genId, StatusEffectType.Sleep, 5f, true);
 				var removeEffect = new RemoveEffect(id, genId);
 				float totalDamageTaken = 0f;
 				var @event = new HealthChangedEvent((target, source, health, deltaHealth) =>
@@ -142,9 +140,7 @@ namespace ModiBuff.Tests
 		{
 			AddGenerator("InitStatusEffectSleep_RemoveOnTenDamageTaken", (id, genId, name, tag) =>
 			{
-				var effect = new StatusEffectEffect(StatusEffectType.Sleep, 5f, true);
-				effect.SetModifierId(id);
-				effect.SetGenId(genId);
+				var effect = new StatusEffectEffect(id, genId, StatusEffectType.Sleep, 5f, true);
 				var removeEffect = new RemoveEffect(id, genId);
 				float totalDamageTaken = 0f;
 				var @event = new HealthChangedEvent((target, source, health, deltaHealth) =>

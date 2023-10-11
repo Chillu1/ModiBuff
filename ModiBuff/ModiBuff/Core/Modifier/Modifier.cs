@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
-	public sealed class Modifier : IModifier, IEquatable<Modifier>, IComparable<Modifier>
+	public sealed class Modifier : IModifier, IModifierDataReference, IEquatable<Modifier>, IComparable<Modifier>
 	{
 		public int Id { get; }
 		public int GenId { get; }
@@ -31,11 +31,11 @@ namespace ModiBuff.Core
 		private bool _multiTarget;
 
 		//TODO ideally this would be outside of the modifier, but renting (returning) a tuple/wrapper is kinda meh
-		private readonly ModifierStateInfo _stateInfo;
+		private readonly ModifierStateInfo _effectStateInfo;
 
 		public Modifier(int id, int genId, string name, InitComponent? initComponent,
 			ITimeComponent[] timeComponents, StackComponent stackComponent, ModifierCheck effectCheck,
-			ITargetComponent targetComponent, ModifierStateInfo stateInfo)
+			ITargetComponent targetComponent, ModifierStateInfo effectStateInfo)
 		{
 			Id = id;
 			GenId = genId;
@@ -55,7 +55,7 @@ namespace ModiBuff.Core
 			if (targetComponent is MultiTargetComponent)
 				_multiTarget = true;
 
-			_stateInfo = stateInfo;
+			_effectStateInfo = effectStateInfo;
 		}
 
 		public void UpdateTargets(List<IUnit> targetsInRange, IUnit source)
@@ -155,6 +155,8 @@ namespace ModiBuff.Core
 		public void Stack() => _stackComponent.Stack();
 		public void ResetStacks() => _stackComponent.ResetStacks();
 
+		public ITimeComponent[] GetTimers() => _timeComponents;
+
 		/// <summary>
 		///		Gets a timer reference, used to update UI/UX
 		/// </summary>
@@ -210,15 +212,15 @@ namespace ModiBuff.Core
 		///		Gets state from effect
 		/// </summary>
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
-		public TData GetState<TData>(int stateNumber = 0) where TData : struct
+		public TData GetEffectState<TData>(int stateNumber = 0) where TData : struct
 		{
-			if (_stateInfo == null)
+			if (_effectStateInfo == null)
 			{
 				Logger.LogWarning("Trying to get state info from a modifier that doesn't have any.");
 				return default;
 			}
 
-			return _stateInfo.GetState<TData>(stateNumber);
+			return _effectStateInfo.GetEffectState<TData>(stateNumber);
 		}
 
 		public void ResetState()

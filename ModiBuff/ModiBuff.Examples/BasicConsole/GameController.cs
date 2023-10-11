@@ -45,6 +45,7 @@ namespace ModiBuff.Examples.BasicConsole
 			//it will be applied to a unit that the player attacks
 			_player.ModifierController.TryAddApplier(_idManager.GetId("DoT"), false, ApplierType.Attack);
 			_player.ModifierController.TryAddApplier(_idManager.GetId("InitHeal"), false, ApplierType.Cast);
+			//_player.ModifierController.TryAddApplier(_idManager.GetId("DisarmChance"), false, ApplierType.Cast);
 		}
 
 		public bool Update()
@@ -67,7 +68,7 @@ namespace ModiBuff.Examples.BasicConsole
 			bool validAction = false;
 			while (validAction == false)
 			{
-				Console.GameMessage("Actions: Attack - 1, Cast - 2, Quit - q");
+				Console.GameMessage("Actions: Attack - 1, Cast - 2, Info - 3, Quit - q");
 				string action = System.Console.ReadLine();
 				switch (action)
 				{
@@ -77,6 +78,9 @@ namespace ModiBuff.Examples.BasicConsole
 						break;
 					case "2":
 						validAction = PlayerCastAction();
+						break;
+					case "3":
+						InfoAction();
 						break;
 					case "q":
 						return false;
@@ -121,6 +125,29 @@ namespace ModiBuff.Examples.BasicConsole
 			}
 
 			return true;
+		}
+
+		private void InfoAction()
+		{
+			while (true)
+			{
+				Console.GameMessage("Which unit to inspect? Player - 1, Enemy - 2, Back - b");
+				string infoAction = System.Console.ReadLine();
+				switch (infoAction)
+				{
+					case "1":
+						_player.PrintStateAndModifiers(_recipes);
+						return;
+					case "2":
+
+						return;
+					case "b":
+						return;
+					default:
+						Console.GameMessage("Invalid action");
+						break;
+				}
+			}
 		}
 	}
 }

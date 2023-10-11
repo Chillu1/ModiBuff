@@ -16,7 +16,7 @@ namespace ModiBuff.Core
 		///		Gets state from effect
 		/// </summary>
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
-		public TData GetState<TData>(int stateNumber = 0) where TData : struct
+		public TData GetEffectState<TData>(int stateNumber = 0) where TData : struct
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (stateNumber < 0 || stateNumber >= _effects.Length)
