@@ -21,7 +21,7 @@ namespace ModiBuff.Core
 #if DEBUG && !MODIBUFF_PROFILE
 			if (stateNumber < 0 || stateNumber >= _effects.Length)
 			{
-				Logger.LogError("State number can't be lower than 0 or higher than effects length");
+				Logger.LogError("[ModiBuff] State number can't be lower than 0 or higher than effects length");
 				return default;
 			}
 #endif
@@ -41,7 +41,7 @@ namespace ModiBuff.Core
 				return stateInfo.GetEffectData();
 			}
 
-			Logger.LogError($"Couldn't find {typeof(TData)} at number {stateNumber}");
+			Logger.LogError($"[ModiBuff] Couldn't find {typeof(TData)} at number {stateNumber}");
 			return default;
 		}
 	}

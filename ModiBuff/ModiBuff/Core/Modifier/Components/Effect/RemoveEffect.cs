@@ -38,7 +38,7 @@ namespace ModiBuff.Core
 
 #if DEBUG && !MODIBUFF_PROFILE
 			if (_genId == -1) //This probably wont matter for not instance stackable modifiers
-				Logger.LogWarning("RemoveEffect.Effect: genId wasn't set");
+				Logger.LogWarning("[ModiBuff] RemoveEffect.Effect: genId wasn't set");
 #endif
 
 			//TODO From which collection? Applier support?

@@ -167,13 +167,14 @@ namespace ModiBuff.Core
 		{
 			if (_timeComponents == null)
 			{
-				Logger.LogError("Trying to get timer from a modifier that doesn't have any.");
+				Logger.LogError("[ModiBuff] Trying to get timer from a modifier that doesn't have any.");
 				return null;
 			}
 #if DEBUG && !MODIBUFF_PROFILE
 			if (timeComponentNumber < 0 || timeComponentNumber >= _timeComponents.Length)
 			{
-				Logger.LogError("Time component number can't be lower than 0 or higher than time components length");
+				Logger.LogError("[ModiBuff] Time component number can't be lower than 0 or higher " +
+				                "than time components length");
 				return null;
 			}
 #endif
@@ -193,7 +194,7 @@ namespace ModiBuff.Core
 				return _timeComponents[i];
 			}
 
-			Logger.LogError($"Couldn't find {typeof(TTimeComponent)} at number {timeComponentNumber}");
+			Logger.LogError($"[ModiBuff] Couldn't find {typeof(TTimeComponent)} at number {timeComponentNumber}");
 			return null;
 		}
 
@@ -201,7 +202,7 @@ namespace ModiBuff.Core
 		{
 			if (_stackComponent == null)
 			{
-				Logger.LogError("Trying to get stack reference from a modifier that doesn't have any.");
+				Logger.LogError("[ModiBuff] Trying to get stack reference from a modifier that doesn't have any.");
 				return null;
 			}
 
@@ -216,7 +217,7 @@ namespace ModiBuff.Core
 		{
 			if (_effectStateInfo == null)
 			{
-				Logger.LogWarning("Trying to get state info from a modifier that doesn't have any.");
+				Logger.LogWarning("[ModiBuff] Trying to get state info from a modifier that doesn't have any.");
 				return default;
 			}
 

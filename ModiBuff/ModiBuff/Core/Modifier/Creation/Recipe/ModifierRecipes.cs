@@ -76,7 +76,7 @@ namespace ModiBuff.Core
 		{
 			if (id < 0 || id >= _modifierInfos.Length)
 			{
-				Logger.LogError($"Modifier with id {id} does not exist.");
+				Logger.LogError($"[ModiBuff] Modifier with id {id} does not exist.");
 				return null;
 			}
 
@@ -91,7 +91,7 @@ namespace ModiBuff.Core
 #if DEBUG && !MODIBUFF_PROFILE
 			if (eventEffectFunc(new IEffect[0], default(TEvent)) is IRevertEffect revertEffect &&
 			    revertEffect.IsRevertible)
-				Logger.LogError("Event effect func does not return an effect that implements " +
+				Logger.LogError("[ModiBuff] Event effect func does not return an effect that implements " +
 				                "IRevertEffect, or is not revertible.");
 #endif
 
@@ -109,7 +109,7 @@ namespace ModiBuff.Core
 			if (_recipes.TryGetValue(name, out var localRecipe))
 			{
 #if DEBUG && !MODIBUFF_PROFILE
-				Logger.LogError($"Modifier recipe with name {name} already exists");
+				Logger.LogError($"[ModiBuff] Modifier recipe with name {name} already exists");
 #endif
 				return (ModifierRecipe)localRecipe;
 			}
@@ -141,7 +141,7 @@ namespace ModiBuff.Core
 			if (_recipes.ContainsKey(name))
 			{
 #if DEBUG && !MODIBUFF_PROFILE
-				Logger.LogError($"Modifier recipe with name {name} already exists");
+				Logger.LogError($"[ModiBuff] Modifier recipe with name {name} already exists");
 #endif
 				return;
 			}
@@ -149,7 +149,7 @@ namespace ModiBuff.Core
 			if (_manualGenerators.ContainsKey(name))
 			{
 #if DEBUG && !MODIBUFF_PROFILE
-				Logger.LogError($"Modifier generator with name {name} already exists");
+				Logger.LogError($"[ModiBuff] Modifier generator with name {name} already exists");
 #endif
 				return;
 			}
@@ -179,13 +179,14 @@ namespace ModiBuff.Core
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (_eventEffectFunc == null)
-				Logger.LogError("Event effect func is not set up. But you are trying to create an event recipe.");
+				Logger.LogError("[ModiBuff] Event effect func is not set up. " +
+				                "But you are trying to create an event recipe.");
 #endif
 
 			if (_recipes.TryGetValue(name, out var localRecipe))
 			{
 #if DEBUG && !MODIBUFF_PROFILE
-				Logger.LogError($"Modifier with id {name} already exists");
+				Logger.LogError($"[ModiBuff] Modifier with id {name} already exists");
 #endif
 				return (ModifierEventRecipe)localRecipe;
 			}
@@ -220,7 +221,7 @@ namespace ModiBuff.Core
 				if (_registeredNames.Any(tuple => tuple.Name == name))
 				{
 #if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError($"Modifier with id {name} already exists");
+					Logger.LogError($"[ModiBuff] Modifier with id {name} already exists");
 #endif
 					continue;
 				}

@@ -116,7 +116,7 @@ namespace ModiBuff.Core
 			if (modifier != null)
 				return modifier.GetEffectState<TData>(stateNumber);
 
-			Logger.LogWarning($"Couldn't find state info, {typeof(TData)} at number {stateNumber}, " +
+			Logger.LogWarning($"[ModiBuff] Couldn't find state info, {typeof(TData)} at number {stateNumber}, " +
 			                  $"id: {id}, genId: {genId}");
 			return default;
 		}
@@ -169,7 +169,7 @@ namespace ModiBuff.Core
 				{
 					if (_modifierCastChecksAppliers.ContainsKey(id))
 					{
-						Logger.LogWarning("Tried to add a duplicate cast check applier, id: " + id);
+						Logger.LogWarning("[ModiBuff] Tried to add a duplicate cast check applier, id: " + id);
 						return false;
 					}
 
@@ -180,7 +180,7 @@ namespace ModiBuff.Core
 				{
 					if (_modifierCastAppliers.Contains(id))
 					{
-						Logger.LogWarning("Tried to add a duplicate cast applier, id: " + id);
+						Logger.LogWarning("[ModiBuff] Tried to add a duplicate cast applier, id: " + id);
 						return false;
 					}
 
@@ -191,7 +191,7 @@ namespace ModiBuff.Core
 				{
 					if (_modifierAttackChecksAppliers.ContainsKey(id))
 					{
-						Logger.LogWarning("Tried to add a duplicate attack check applier, id: " + id);
+						Logger.LogWarning("[ModiBuff] Tried to add a duplicate attack check applier, id: " + id);
 						return false;
 					}
 
@@ -202,7 +202,7 @@ namespace ModiBuff.Core
 				{
 					if (_modifierAttackAppliers.Contains(id))
 					{
-						Logger.LogWarning("Tried to add a duplicate attack applier, id: " + id);
+						Logger.LogWarning("[ModiBuff] Tried to add a duplicate attack applier, id: " + id);
 						return false;
 					}
 
@@ -211,7 +211,7 @@ namespace ModiBuff.Core
 				}
 				default:
 #if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError("Unknown applier type: " + applierType);
+					Logger.LogError("[ModiBuff] Unknown applier type: " + applierType);
 #endif
 					return false;
 			}
@@ -299,7 +299,7 @@ namespace ModiBuff.Core
 			if (modifier == null)
 			{
 #if DEBUG && !MODIBUFF_PROFILE
-				Logger.LogError($"Tried to call modifier action {action} on a modifier that " +
+				Logger.LogError($"[ModiBuff] Tried to call modifier action {action} on a modifier that " +
 				                $"doesn't exist, id: {id}, genId: {genId}");
 #endif
 				return;
@@ -310,16 +310,16 @@ namespace ModiBuff.Core
 				case Core.ModifierAction.Refresh:
 #if DEBUG && !MODIBUFF_PROFILE
 					if (!tag.HasTag(TagType.IsRefresh))
-						Logger.LogWarning("ModifierAction: Refresh was called on a modifier that " +
-						                  "doesn't have a refresh flag set");
+						Logger.LogWarning("[ModiBuff] ModifierAction: Refresh was called on a " +
+						                  "modifier that doesn't have a refresh flag set");
 #endif
 					modifier.Refresh();
 					break;
 				case Core.ModifierAction.ResetStacks:
 #if DEBUG && !MODIBUFF_PROFILE
 					if (!tag.HasTag(TagType.IsStack))
-						Logger.LogWarning("ModifierAction: ResetStacks was called on a modifier " +
-						                  "that doesn't have a stack flag set");
+						Logger.LogWarning("[ModiBuff] ModifierAction: ResetStacks was called on a " +
+						                  "modifier that doesn't have a stack flag set");
 #endif
 					modifier.ResetStacks();
 					break;
@@ -335,7 +335,7 @@ namespace ModiBuff.Core
 #if DEBUG && !MODIBUFF_PROFILE
 				if (_modifierIndexes[modifierReference.Id] == -1)
 				{
-					Logger.LogError("Tried to remove a modifier that doesn't exist on entity, id: " +
+					Logger.LogError("[ModiBuff] Tried to remove a modifier that doesn't exist on entity, id: " +
 					                $"{modifierReference.Id}, genId: {modifierReference.GenId}");
 					return;
 				}

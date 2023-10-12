@@ -1,6 +1,7 @@
 namespace ModiBuff.Core
 {
-	public sealed class ModifierActionEffect : IModifierGenIdOwner, IModifierIdOwner, IEffect, IShallowClone<ModifierActionEffect>
+	public sealed class ModifierActionEffect : IModifierGenIdOwner, IModifierIdOwner, IEffect,
+		IShallowClone<ModifierActionEffect>
 	{
 		private readonly ModifierAction _modifierAction;
 
@@ -25,9 +26,9 @@ namespace ModiBuff.Core
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (_id == -1)
-				Logger.LogError("ModifierActionEffect.Effect: id wasn't set");
+				Logger.LogError("[ModiBuff] ModifierActionEffect.Effect: id wasn't set");
 			if (_genId == -1) //This probably wont matter for not instance stackable modifiers
-				Logger.LogWarning("ModifierActionEffect.Effect: genId wasn't set");
+				Logger.LogWarning("[ModiBuff] ModifierActionEffect.Effect: genId wasn't set");
 #endif
 
 			((IModifierOwner)target).ModifierController.ModifierAction(_id, _genId, _modifierAction);

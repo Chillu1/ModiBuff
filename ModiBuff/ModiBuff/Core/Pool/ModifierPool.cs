@@ -43,7 +43,8 @@ namespace ModiBuff.Core
 			_maxModifiersCreated = new int[generators.Length];
 
 			if (generators.Length == 0)
-				Logger.LogError("No modifier generators found, did you forget to call ModifierRecipes.CreateGenerators()?");
+				Logger.LogError("[ModiBuff] No modifier generators found, did you forget to call " +
+				                "ModifierRecipes.CreateGenerators()?");
 #endif
 
 			foreach (var generator in generators)
@@ -88,7 +89,8 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _poolTops.Length; i++)
 			{
 				if (_poolTops[i] > size)
-					throw new ArgumentOutOfRangeException(nameof(size), "Max pool size cannot be smaller than the current stack capacity.");
+					throw new ArgumentOutOfRangeException(nameof(size),
+						"Max pool size cannot be smaller than the current stack capacity.");
 			}
 
 			MaxPoolSize = size;
@@ -171,7 +173,8 @@ namespace ModiBuff.Core
 					_checkPools[id][_checkPoolTops[id]++] = recipe.CreateApplyCheck();
 
 			if (_checkPoolTops[id] > MaxPoolSize)
-				throw new Exception($"Modifier check pool for {recipe.Name} is over the max pool size of {MaxPoolSize}.");
+				throw new Exception(
+					$"Modifier check pool for {recipe.Name} is over the max pool size of {MaxPoolSize}.");
 		}
 
 		public Modifier Rent(int id)
@@ -220,7 +223,7 @@ namespace ModiBuff.Core
 			Array.Copy(_maxModifiersCreated, maxModifiersCreated, _generators.Length);
 			Array.Sort(maxModifiersCreated, (x, y) => y.CompareTo(x));
 			for (int i = 0; i < maxModifiersCreated.Length; i++)
-				Logger.Log($"{_generators[i].Name}: {maxModifiersCreated[i]}");
+				Logger.Log($"[ModiBuff] {_generators[i].Name}: {maxModifiersCreated[i]}");
 		}
 #endif
 

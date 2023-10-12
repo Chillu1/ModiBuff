@@ -21,7 +21,7 @@ namespace ModiBuff.Core
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (_callbacks == null)
-				Logger.LogError("Callback wasn't set");
+				Logger.LogError("[ModiBuff] Callback wasn't set");
 #endif
 
 			((ICallbackRegistrable<TCallback>)target).RegisterCallbacks(_callbackType, _callbacks);

@@ -208,7 +208,8 @@ namespace ModiBuff.Core
 			if (_interval <= 0 && _duration <= 0)
 			{
 #if DEBUG && !MODIBUFF_PROFILE
-				Logger.LogWarning("Refresh() called without a duration or interval set, defaulting to duration");
+				Logger.LogWarning("[ModiBuff] Refresh() called without a duration or interval set, " +
+				                  "defaulting to duration");
 #endif
 				Refresh(RefreshType.Duration);
 				return this;
@@ -240,7 +241,7 @@ namespace ModiBuff.Core
 					break;
 				default:
 #if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError($"Unknown refresh type: {type}");
+					Logger.LogError($"[ModiBuff] Unknown refresh type: {type}");
 #endif
 					return this;
 			}
@@ -278,7 +279,7 @@ namespace ModiBuff.Core
 		{
 			if (ManualOnlyEffects.IsManualOnlyEffect(effect))
 			{
-				Logger.LogError($"Effect: {effect} isn't supported in ModifierRecipes yet, " +
+				Logger.LogError($"[ModiBuff] Effect: {effect} isn't supported in ModifierRecipes yet, " +
 				                "use manual modifier generation if the effect is needed");
 				return this;
 			}
@@ -289,7 +290,7 @@ namespace ModiBuff.Core
 			if (effect is RemoveEffect)
 			{
 #if DEBUG && !MODIBUFF_PROFILE
-				Logger.LogWarning("Adding a remove effect through Effect() is not recommended, " +
+				Logger.LogWarning("[ModiBuff] Adding a remove effect through Effect() is not recommended, " +
 				                  "use Remove(RemoveEffectOn) or Remove(float) instead");
 #endif
 				_removeEffectWrapper = new EffectWrapper(effect, effectOn);
@@ -381,7 +382,7 @@ namespace ModiBuff.Core
 
 		private static void ValidateModifierAction(ModifierAction modifierAction, EffectOn effectOn)
 		{
-			string initialMessage = $"ModifierAction set to {modifierAction}, and effectOn to {effectOn}. ";
+			string initialMessage = $"[ModiBuff] ModifierAction set to {modifierAction}, and effectOn to {effectOn}. ";
 
 			if (modifierAction == Core.ModifierAction.Refresh && effectOn == EffectOn.Init)
 				Logger.LogError(initialMessage +
@@ -399,14 +400,14 @@ namespace ModiBuff.Core
 			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Interval)) && _interval == 0)
 			{
 				validRecipe = false;
-				Logger.LogError("Interval not set, but we have interval effects, for modifier: " +
+				Logger.LogError("[ModiBuff] Interval not set, but we have interval effects, for modifier: " +
 				                "" + Name + " id: " + Id);
 			}
 
 			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Duration)) && _duration == 0)
 			{
 				validRecipe = false;
-				Logger.LogError("Duration not set, but we have duration effects, for modifier: " +
+				Logger.LogError("[ModiBuff] Duration not set, but we have duration effects, for modifier: " +
 				                "" + Name + " id: " + Id);
 			}
 
@@ -414,26 +415,28 @@ namespace ModiBuff.Core
 			    _whenStackEffect == WhenStackEffect.None)
 			{
 				validRecipe = false;
-				Logger.LogError("Stack effects set, but no stack effect type set, for modifier: " +
+				Logger.LogError("[ModiBuff] Stack effects set, but no stack effect type set, for modifier: " +
 				                "" + Name + " id: " + Id);
 			}
 
 			if (_refreshInterval && _interval == 0)
 			{
 				validRecipe = false;
-				Logger.LogError("Refresh interval set, but interval is 0, for modifier: " + Name + " id: " + Id);
+				Logger.LogError("[ModiBuff] Refresh interval set, but interval is 0, for modifier: " +
+				                "" + Name + " id: " + Id);
 			}
 
 			if (_refreshDuration && _duration == 0)
 			{
 				validRecipe = false;
-				Logger.LogError("Refresh duration set, but duration is 0, for modifier: " + Name + " id: " + Id);
+				Logger.LogError("[ModiBuff] Refresh duration set, but duration is 0, for modifier: " +
+				                "" + Name + " id: " + Id);
 			}
 
 			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Callback)) && _callbackRegisterWrapper == null)
 			{
 				validRecipe = false;
-				Logger.LogError("Effects on callback set, but no callback registration type set, " +
+				Logger.LogError("[ModiBuff] Effects on callback set, but no callback registration type set, " +
 				                "for modifier: " + Name + " id: " + Id);
 			}
 
@@ -441,12 +444,13 @@ namespace ModiBuff.Core
 			    _removeEffectWrapper?.EffectOn != EffectOn.Callback)
 			{
 				validRecipe = false;
-				Logger.LogError("Callback registration type set, but no effects on callback set, " +
+				Logger.LogError("[ModiBuff] Callback registration type set, but no effects on callback set, " +
 				                "for modifier: " + Name + " id: " + Id);
 			}
 
 			if (!validRecipe)
-				Logger.LogError($"Recipe validation failed for {Name}, with Id: {Id}, see above for more info.");
+				Logger.LogError($"[ModiBuff] Recipe validation failed for {Name}, with Id: {Id}, " +
+				                $"see above for more info.");
 		}
 
 		public int CompareTo(ModifierRecipe other) => Id.CompareTo(other.Id);
