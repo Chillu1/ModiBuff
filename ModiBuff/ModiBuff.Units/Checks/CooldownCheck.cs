@@ -1,6 +1,6 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class CooldownCheck : IUpdatableCheck, IStateCheck<CooldownCheck>
+	public sealed class CooldownCheck : IUpdatableCheck, INoUnitCheck, IStateCheck<CooldownCheck>
 	{
 		private readonly float _cooldown;
 		private float _timer;

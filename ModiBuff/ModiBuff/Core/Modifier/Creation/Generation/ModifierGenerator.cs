@@ -34,21 +34,27 @@ namespace ModiBuff.Core
 
 		private readonly ModifierEffectsCreator _modifierEffectsCreator;
 
-		private Func<IUnit, bool>[] _applyFuncChecks;
-		private IUpdatableCheck[] _updatableApplyChecks;
-		private INoUnitCheck[] _noUnitApplyChecks;
-		private IUnitCheck[] _unitApplyChecks;
-		private IUsableCheck[] _usableApplyChecks;
-		private IStateCheck[] _stateApplyChecks;
-		private bool _hasStateApplyChecks;
+		private readonly Func<IUnit, bool>[] _applyFuncChecks;
+		private readonly List<IUpdatableCheck> _updatableApplyChecksList;
+		private readonly List<INoUnitCheck> _noUnitApplyChecksList;
+		private readonly List<IUnitCheck> _unitApplyChecksList;
+		private readonly List<IUsableCheck> _usableApplyChecksList;
+		private readonly IUpdatableCheck[] _updatableApplyChecks;
+		private readonly INoUnitCheck[] _noUnitApplyChecks;
+		private readonly IUnitCheck[] _unitApplyChecks;
+		private readonly IUsableCheck[] _usableApplyChecks;
+		private readonly IStateCheck[] _stateApplyChecks;
 
-		private Func<IUnit, bool>[] _effectFuncChecks;
-		private IUpdatableCheck[] _updatableEffectChecks;
-		private INoUnitCheck[] _noUnitEffectChecks;
-		private IUnitCheck[] _unitEffectChecks;
-		private IUsableCheck[] _usableEffectChecks;
-		private IStateCheck[] _stateEffectChecks;
-		private bool _hasStateEffectChecks;
+		private readonly Func<IUnit, bool>[] _effectFuncChecks;
+		private readonly List<IUpdatableCheck> _updatableEffectChecksList;
+		private readonly List<INoUnitCheck> _noUnitEffectChecksList;
+		private readonly List<IUnitCheck> _unitEffectChecksList;
+		private readonly List<IUsableCheck> _usableEffectChecksList;
+		private readonly IUpdatableCheck[] _updatableEffectChecks;
+		private readonly INoUnitCheck[] _noUnitEffectChecks;
+		private readonly IUnitCheck[] _unitEffectChecks;
+		private readonly IUsableCheck[] _usableEffectChecks;
+		private readonly IStateCheck[] _stateEffectChecks;
 
 		public ModifierGenerator(in ModifierRecipeData data)
 		{
@@ -79,79 +85,59 @@ namespace ModiBuff.Core
 				data.RemoveEffectWrapper, data.CallbackRegisterWrapper);
 
 			if (HasApplyChecks)
-				SetupApplyChecks(in data);
+			{
+				_applyFuncChecks = data.ApplyFuncCheckList?.ToArray();
+				SetupChecks(data.ApplyCheckList, out _updatableApplyChecksList, out _noUnitApplyChecksList,
+					out _unitApplyChecksList, out _usableApplyChecksList, out _updatableApplyChecks,
+					out _noUnitApplyChecks, out _unitApplyChecks, out _usableApplyChecks, out _stateApplyChecks);
+			}
 
 			if (_hasEffectChecks)
-				SetupEffectChecks(in data);
+			{
+				_effectFuncChecks = data.EffectFuncCheckList?.ToArray();
+				SetupChecks(data.EffectCheckList, out _updatableEffectChecksList, out _noUnitEffectChecksList,
+					out _unitEffectChecksList, out _usableEffectChecksList, out _updatableEffectChecks,
+					out _noUnitEffectChecks, out _unitEffectChecks, out _usableEffectChecks, out _stateEffectChecks);
+			}
 
 			return;
 
-			void SetupApplyChecks(in ModifierRecipeData localData)
+			void SetupChecks(in List<ICheck> checksList, out List<IUpdatableCheck> updatableChecksList,
+				out List<INoUnitCheck> noUnitChecksList, out List<IUnitCheck> unitChecksList,
+				out List<IUsableCheck> usableChecksList, out IUpdatableCheck[] updatableChecks,
+				out INoUnitCheck[] noUnitChecks, out IUnitCheck[] unitChecks, out IUsableCheck[] usableChecks,
+				out IStateCheck[] stateChecks)
 			{
-				var updatableChecks = new List<IUpdatableCheck>();
-				var noUnitChecks = new List<INoUnitCheck>();
-				var unitChecks = new List<IUnitCheck>();
-				var usableChecks = new List<IUsableCheck>();
-				var stateChecks = new List<IStateCheck>();
-				if (localData.ApplyCheckList != null)
-					foreach (var check in localData.ApplyCheckList)
+				updatableChecksList = new List<IUpdatableCheck>();
+				noUnitChecksList = new List<INoUnitCheck>();
+				unitChecksList = new List<IUnitCheck>();
+				usableChecksList = new List<IUsableCheck>();
+				var stateChecksList = new List<IStateCheck>();
+				if (checksList != null)
+					foreach (var check in checksList)
 					{
 						if (check is IStateCheck stateCheck)
-							stateChecks.Add(stateCheck);
-						else if (check is IUsableCheck usableCheck)
-							usableChecks.Add(usableCheck);
-						else if (check is IUnitCheck unitCheck)
-							unitChecks.Add(unitCheck);
-						else if (check is IUpdatableCheck updatableCheck)
-							updatableChecks.Add(updatableCheck);
-						else if (check is INoUnitCheck noUnitCheck)
-							noUnitChecks.Add(noUnitCheck);
-						else
-							Logger.LogError("Unknown check type: " + check.GetType());
+						{
+							stateChecksList.Add(stateCheck);
+							//Special case, we need to clone state checks (because of the state)
+							continue;
+						}
+
+						if (check is IUpdatableCheck updatableCheck)
+							updatableChecksList.Add(updatableCheck);
+						if (check is INoUnitCheck noUnitCheck)
+							noUnitChecksList.Add(noUnitCheck);
+						if (check is IUnitCheck unitCheck)
+							unitChecksList.Add(unitCheck);
+						if (check is IUsableCheck usableCheck)
+							usableChecksList.Add(usableCheck);
 					}
 
-				_updatableApplyChecks = updatableChecks.ToArray();
-				_noUnitApplyChecks = noUnitChecks.ToArray();
-				_unitApplyChecks = unitChecks.ToArray();
-				_usableApplyChecks = usableChecks.ToArray();
-				_stateApplyChecks = stateChecks.ToArray();
-				_hasStateApplyChecks = _stateApplyChecks.Length > 0;
-
-				_applyFuncChecks = localData.ApplyFuncCheckList?.ToArray();
-			}
-
-			void SetupEffectChecks(in ModifierRecipeData localData)
-			{
-				var updatableChecks = new List<IUpdatableCheck>();
-				var noUnitChecks = new List<INoUnitCheck>();
-				var unitChecks = new List<IUnitCheck>();
-				var usableChecks = new List<IUsableCheck>();
-				var stateChecks = new List<IStateCheck>();
-				if (localData.EffectCheckList != null)
-					foreach (var check in localData.EffectCheckList)
-					{
-						if (check is IStateCheck stateCheck)
-							stateChecks.Add(stateCheck);
-						else if (check is IUsableCheck usableCheck)
-							usableChecks.Add(usableCheck);
-						else if (check is IUnitCheck unitCheck)
-							unitChecks.Add(unitCheck);
-						else if (check is IUpdatableCheck updatableCheck)
-							updatableChecks.Add(updatableCheck);
-						else if (check is INoUnitCheck noUnitCheck)
-							noUnitChecks.Add(noUnitCheck);
-						else
-							Logger.LogError("Unknown check type: " + check.GetType());
-					}
-
-				_updatableEffectChecks = updatableChecks.ToArray();
-				_noUnitEffectChecks = noUnitChecks.ToArray();
-				_unitEffectChecks = unitChecks.ToArray();
-				_usableEffectChecks = usableChecks.ToArray();
-				_stateEffectChecks = stateChecks.ToArray();
-				_hasStateEffectChecks = _stateEffectChecks.Length > 0;
-
-				_effectFuncChecks = localData.EffectFuncCheckList?.ToArray();
+				updatableChecks = updatableChecksList.ToArray();
+				noUnitChecks = noUnitChecksList.ToArray();
+				unitChecks = unitChecksList.ToArray();
+				usableChecks = usableChecksList.ToArray();
+				stateChecks = stateChecksList.ToArray();
 			}
 		}
 
@@ -162,16 +148,9 @@ namespace ModiBuff.Core
 			ModifierCheck effectCheck = null;
 			if (_hasEffectChecks)
 			{
-				IStateCheck[] stateChecks = null;
-				if (_hasStateEffectChecks)
-				{
-					stateChecks = new IStateCheck[_stateEffectChecks.Length];
-					for (int i = 0; i < _stateEffectChecks.Length; i++)
-						stateChecks[i] = (IStateCheck)_stateEffectChecks[i].ShallowClone();
-				}
-
-				effectCheck = new ModifierCheck(Id, _effectFuncChecks, _updatableEffectChecks,
-					_noUnitEffectChecks, _unitEffectChecks, _usableEffectChecks, stateChecks);
+				effectCheck = CreateCheck(_stateEffectChecks, _effectFuncChecks, _updatableEffectChecks,
+					_noUnitEffectChecks, _unitEffectChecks, _usableEffectChecks, _updatableEffectChecksList,
+					_noUnitEffectChecksList, _unitEffectChecksList, _usableEffectChecksList);
 			}
 
 			InitComponent? initComponent = null;
@@ -214,26 +193,98 @@ namespace ModiBuff.Core
 
 		ModifierCheck IModifierApplyCheckGenerator.CreateApplyCheck()
 		{
-			IStateCheck[] stateChecks = null;
-			if (_hasStateApplyChecks)
+			return CreateCheck(_stateApplyChecks, _applyFuncChecks, _updatableApplyChecks,
+				_noUnitApplyChecks, _unitApplyChecks, _usableApplyChecks, _updatableApplyChecksList,
+				_noUnitApplyChecksList, _unitApplyChecksList, _usableApplyChecksList);
+		}
+
+		private ModifierCheck CreateCheck(IStateCheck[] stateChecks, Func<IUnit, bool>[] funcChecks,
+			IUpdatableCheck[] updatableChecks, INoUnitCheck[] noUnitChecks, IUnitCheck[] unitChecks,
+			IUsableCheck[] usableChecks, List<IUpdatableCheck> updatableChecksList, List<INoUnitCheck> noUnitChecksList,
+			List<IUnitCheck> unitChecksList, List<IUsableCheck> usableChecksList)
+		{
+			//If has state checks, need to make a clone of arrays where state checks will be added
+			int stateUpdatableChecksCount = 0,
+				stateNoUnitChecksCount = 0,
+				stateUnitChecksCount = 0,
+				stateUsableChecksCount = 0;
+			IStateCheck[] clonedStateChecks = null;
+			if (stateChecks != null && stateChecks.Length > 0)
 			{
-				stateChecks = new IStateCheck[_stateApplyChecks.Length];
-				for (int i = 0; i < _stateApplyChecks.Length; i++)
+				clonedStateChecks = new IStateCheck[stateChecks.Length];
+				for (int i = 0; i < stateChecks.Length; i++)
 				{
-					stateChecks[i] = (IStateCheck)_stateApplyChecks[i].ShallowClone();
-					// if (stateCheck is IUsableCheck usableCheck)
-					// 	usableChecks.Add(usableCheck);
-					// if (stateCheck is IUnitCheck unitCheck)
-					// 	unitChecks.Add(unitCheck);
-					// if (stateCheck is IUpdatableCheck updatableCheck)
-					// 	updatableChecks.Add(updatableCheck);
-					// if (stateCheck is INoUnitCheck noUnitCheck)
-					// 	noUnitChecks.Add(noUnitCheck);
+					var stateCheckClone = (IStateCheck)stateChecks[i].ShallowClone();
+					if (stateCheckClone is IUpdatableCheck updatableCheck)
+					{
+						stateUpdatableChecksCount++;
+						updatableChecksList.Add(updatableCheck);
+					}
+
+					if (stateCheckClone is INoUnitCheck noUnitCheck)
+					{
+						stateNoUnitChecksCount++;
+						noUnitChecksList.Add(noUnitCheck);
+					}
+
+					if (stateCheckClone is IUnitCheck unitCheck)
+					{
+						stateUnitChecksCount++;
+						unitChecksList.Add(unitCheck);
+					}
+
+					if (stateCheckClone is IUsableCheck usableCheck)
+					{
+						stateUsableChecksCount++;
+						usableChecksList.Add(usableCheck);
+					}
+
+					clonedStateChecks[i] = stateCheckClone;
 				}
 			}
 
-			return new ModifierCheck(Id, _applyFuncChecks, _updatableApplyChecks, _noUnitApplyChecks, _unitApplyChecks,
-				_usableApplyChecks, stateChecks);
+			IUpdatableCheck[] updatableChecksArray;
+			if (stateUpdatableChecksCount > 0)
+			{
+				updatableChecksArray = updatableChecksList.ToArray();
+				updatableChecksList.RemoveRange(updatableChecksList.Count - stateUpdatableChecksCount,
+					stateUpdatableChecksCount);
+			}
+			else
+				updatableChecksArray = updatableChecks;
+
+			INoUnitCheck[] noUnitChecksArray;
+			if (stateNoUnitChecksCount > 0)
+			{
+				noUnitChecksArray = noUnitChecksList.ToArray();
+				noUnitChecksList.RemoveRange(noUnitChecksList.Count - stateNoUnitChecksCount,
+					stateNoUnitChecksCount);
+			}
+			else
+				noUnitChecksArray = noUnitChecks;
+
+			IUnitCheck[] unitChecksArray;
+			if (stateUnitChecksCount > 0)
+			{
+				unitChecksArray = unitChecksList.ToArray();
+				unitChecksList.RemoveRange(unitChecksList.Count - stateUnitChecksCount,
+					stateUnitChecksCount);
+			}
+			else
+				unitChecksArray = unitChecks;
+
+			IUsableCheck[] usableChecksArray;
+			if (stateUsableChecksCount > 0)
+			{
+				usableChecksArray = usableChecksList.ToArray();
+				usableChecksList.RemoveRange(usableChecksList.Count - stateUsableChecksCount,
+					stateUsableChecksCount);
+			}
+			else
+				usableChecksArray = usableChecks;
+
+			return new ModifierCheck(Id, funcChecks, updatableChecksArray, noUnitChecksArray,
+				unitChecksArray, usableChecksArray, clonedStateChecks);
 		}
 	}
 }
