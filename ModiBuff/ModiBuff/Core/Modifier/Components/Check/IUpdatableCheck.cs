@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public interface IUpdatableCheck : IUpdatable
+	public interface IUpdatableCheck : IUpdatable, ICheck
 	{
 	}
 }

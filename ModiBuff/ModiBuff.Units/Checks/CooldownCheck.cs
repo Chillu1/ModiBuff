@@ -1,6 +1,8 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class CooldownCheck : IUpdatableCheck, INoUnitCheck, IStateCheck<CooldownCheck>
+	//The only check where data state is mutable
+	public sealed class CooldownCheck : IUpdatableCheck, INoUnitCheck,
+		IStateCheck<CooldownCheck>, IDataCheck<CooldownCheck.Data>
 	{
 		private readonly float _cooldown;
 		private float _timer;
@@ -15,13 +17,15 @@ namespace ModiBuff.Core.Units
 
 		public void Update(float deltaTime)
 		{
-			if (_timer > _cooldown)
+			if (_timer >= _cooldown)
 				return;
 
 			_timer += deltaTime;
 		}
 
 		public bool Check() => _timer >= _cooldown;
+
+		public Data GetData() => new Data(_cooldown, _timer);
 
 		/// <summary>
 		///		Resets the timer to 0, so the check is not ready.
@@ -35,5 +39,17 @@ namespace ModiBuff.Core.Units
 
 		public CooldownCheck ShallowClone() => new CooldownCheck(_cooldown);
 		object IShallowClone.ShallowClone() => ShallowClone();
+
+		public readonly struct Data
+		{
+			public readonly float Cooldown;
+			public readonly float Timer;
+
+			public Data(float cooldown, float timer)
+			{
+				Cooldown = cooldown;
+				Timer = timer;
+			}
+		}
 	}
 }

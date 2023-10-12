@@ -1,6 +1,6 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class CostCheck : IUsableCheck
+	public sealed class CostCheck : IUsableCheck, IDataCheck<CostCheck.Data>
 	{
 		private readonly CostType _costType;
 		private readonly float _cost;
@@ -31,6 +31,8 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
+		public Data GetData() => new Data(_costType, _cost);
+
 		public void Use(IUnit unit)
 		{
 			switch (_costType)
@@ -46,6 +48,18 @@ namespace ModiBuff.Core.Units
 					Logger.LogError("Unknown cost type: " + _costType);
 #endif
 					return;
+			}
+		}
+
+		public readonly struct Data
+		{
+			public readonly CostType CostType;
+			public readonly float Cost;
+
+			public Data(CostType costType, float cost)
+			{
+				CostType = costType;
+				Cost = cost;
 			}
 		}
 	}

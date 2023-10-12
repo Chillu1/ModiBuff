@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
@@ -14,6 +15,8 @@ namespace ModiBuff.Core
 		private readonly IUsableCheck[] _usableChecks;
 		private readonly IStateCheck[] _stateResetChecks;
 
+		private readonly ICheck[] _checks; //TODO Probably rethink this
+
 		public ModifierCheck(int id, Func<IUnit, bool>[] funcChecks, IUpdatableCheck[] updatableChecks,
 			INoUnitCheck[] noUnitChecks, IUnitCheck[] unitChecks, IUsableCheck[] usableChecks,
 			IStateCheck[] stateResetChecks)
@@ -27,7 +30,29 @@ namespace ModiBuff.Core
 			_unitChecks = unitChecks;
 			_usableChecks = usableChecks;
 			_stateResetChecks = stateResetChecks;
+
+			//Check for duplicates, don't include them
+			var checkList = new List<ICheck>();
+			AddChecks(_updatableChecks);
+			AddChecks(_noUnitChecks);
+			AddChecks(_unitChecks);
+			AddChecks(_usableChecks);
+			AddChecks(_stateResetChecks);
+			_checks = checkList.ToArray();
+
+			void AddChecks(ICheck[] checks)
+			{
+				for (int i = 0; i < checks?.Length; i++)
+				{
+					if (checkList.Contains(checks[i]))
+						continue;
+
+					checkList.Add(checks[i]);
+				}
+			}
 		}
+
+		public ICheck[] GetChecks() => _checks;
 
 		public void Update(float delta)
 		{

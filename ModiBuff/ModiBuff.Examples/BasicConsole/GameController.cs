@@ -45,7 +45,7 @@ namespace ModiBuff.Examples.BasicConsole
 			//it will be applied to a unit that the player attacks
 			_player.ModifierController.TryAddApplier(_idManager.GetId("DoT"), false, ApplierType.Attack);
 			_player.ModifierController.TryAddApplier(_idManager.GetId("InitHeal"), false, ApplierType.Cast);
-			//_player.ModifierController.TryAddApplier(_idManager.GetId("DisarmChance"), false, ApplierType.Cast);
+			//_player.ModifierController.TryAddApplier(_idManager.GetId("DisarmChance"), true, ApplierType.Cast);
 		}
 
 		public bool Update()
