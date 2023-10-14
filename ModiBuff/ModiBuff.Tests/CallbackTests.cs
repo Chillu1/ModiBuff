@@ -12,7 +12,7 @@ namespace ModiBuff.Tests
 			AddGenerator("InitAddDamageRevertibleHalfHealthCallback", (id, genId, name, tag) =>
 			{
 				var effect = new AddDamageEffect(5, true);
-				var removeEffect = new RemoveEffect(id, genId);
+				var removeEffect = RemoveEffect.Create(id, genId);
 				removeEffect.SetRevertibleEffects(new IRevertEffect[] { effect });
 				var registerEffect = new CallbackRegisterDelegateEffect<CallbackType>(CallbackType.StrongHit,
 					(target, source) => removeEffect.Effect(target, source));

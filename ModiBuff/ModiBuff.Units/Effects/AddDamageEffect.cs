@@ -20,6 +20,13 @@ namespace ModiBuff.Core.Units
 		{
 		}
 
+		/// <summary>
+		///		Manual modifier generation constructor
+		/// </summary>
+		public static AddDamageEffect Create(float damage, bool revertible = false, bool togglable = false,
+			StackEffectType stackEffect = StackEffectType.Effect, Targeting targeting = Targeting.TargetSource) =>
+			new AddDamageEffect(damage, revertible, togglable, stackEffect, targeting);
+
 		private AddDamageEffect(float damage, bool revertible, bool togglable, StackEffectType stackEffect,
 			Targeting targeting)
 		{

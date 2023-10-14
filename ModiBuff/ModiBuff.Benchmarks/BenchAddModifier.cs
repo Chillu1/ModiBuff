@@ -34,7 +34,7 @@ namespace ModiBuff.Tests
 			_initStackDamageModifierId = IdManager.GetId("InitStackDamage");
 		}
 
-		//[Benchmark]
+		[Benchmark]
 		public void BenchAddNoOpEffectBench()
 		{
 			_unit.ModifierController.Add(_noOpModifierId, _unit, _unit);
@@ -61,13 +61,13 @@ namespace ModiBuff.Tests
 			}
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void BenchAddInitDamageModifierLessPrototypeBench()
 		{
 			_modifierLessEffects[_modifierLessInitDamageEffectId].Effect(_unit, _unit);
 		}
 
-		//[Benchmark]
+		[Benchmark]
 		public void BenchAddInitStackDamage()
 		{
 			_unit.ModifierController.Add(_initStackDamageModifierId, _unit, _unit);

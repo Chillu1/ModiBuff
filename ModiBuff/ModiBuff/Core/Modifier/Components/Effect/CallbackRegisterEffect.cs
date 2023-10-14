@@ -18,6 +18,12 @@ namespace ModiBuff.Core
 			_callbackType = callbackType;
 		}
 
+		/// <summary>
+		///		Manual modifier generation constructor
+		/// </summary>
+		public static CallbackRegisterEffect<TCallback> Create(TCallback callbackType, params IEffect[] callbacks) =>
+			new CallbackRegisterEffect<TCallback>(callbackType, callbacks);
+
 		private CallbackRegisterEffect(TCallback callbackType, IEffect[] callbacks)
 		{
 			_callbackType = callbackType;
@@ -41,7 +47,9 @@ namespace ModiBuff.Core
 			((ICallbackRegistrable<TCallback>)target).UnRegisterCallbacks(_callbackType, _callbacks);
 		}
 
-		public CallbackRegisterEffect<TCallback> ShallowClone() => new CallbackRegisterEffect<TCallback>(_callbackType, _callbacks);
+		public CallbackRegisterEffect<TCallback> ShallowClone() =>
+			new CallbackRegisterEffect<TCallback>(_callbackType, _callbacks);
+
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

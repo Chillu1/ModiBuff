@@ -24,6 +24,18 @@ namespace ModiBuff.Core
 			}
 		}
 
+		/// <summary>
+		///		Manual modifier generation constructor
+		/// </summary>
+		public static ApplierEffect Create(int modifierId, Targeting targeting = Targeting.TargetSource) =>
+			new ApplierEffect(modifierId, targeting);
+
+		private ApplierEffect(int modifierId, Targeting targeting)
+		{
+			_modifierId = modifierId;
+			_targeting = targeting;
+		}
+
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 
 		public void Effect(IUnit target, IUnit source)

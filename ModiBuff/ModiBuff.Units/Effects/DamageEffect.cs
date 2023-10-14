@@ -26,6 +26,14 @@ namespace ModiBuff.Core.Units
 		{
 		}
 
+		/// <summary>
+		///		Manual modifier generation constructor
+		/// </summary>
+		public static DamageEffect Create(float damage, StackEffectType stackEffect = StackEffectType.Effect,
+			Targeting targeting = Targeting.TargetSource, IMetaEffect<float, float>[] metaEffects = null,
+			IPostEffect<float>[] postEffects = null) =>
+			new DamageEffect(damage, stackEffect, targeting, metaEffects, postEffects);
+
 		private DamageEffect(float damage, StackEffectType stackEffect, Targeting targeting,
 			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
 		{

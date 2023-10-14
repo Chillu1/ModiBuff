@@ -24,6 +24,14 @@ namespace ModiBuff.Core.Units
 		{
 		}
 
+		/// <summary>
+		///		Manual modifier generation constructor
+		/// </summary>
+		public static HealEffect Create(float heal, bool revertible = false,
+			StackEffectType stack = StackEffectType.Effect, Targeting targeting = Targeting.TargetSource,
+			IMetaEffect<float, float>[] metaEffects = null, IPostEffect<float>[] postEffects = null) =>
+			new HealEffect(heal, revertible, stack, targeting, metaEffects, postEffects);
+
 		private HealEffect(float heal, bool revertible, StackEffectType stack, Targeting targeting,
 			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
 		{

@@ -13,10 +13,23 @@ namespace ModiBuff.Core
 			_modifierAction = modifierAction;
 		}
 
+		/// <summary>
+		///		Manual modifier generation constructor
+		/// </summary>
+		public static ModifierActionEffect Create(int id, int genId, ModifierAction modifierAction) =>
+			new ModifierActionEffect(modifierAction, id, genId);
+
 		public ModifierActionEffect(ModifierAction modifierAction, int id)
 		{
 			_modifierAction = modifierAction;
 			_id = id;
+		}
+
+		private ModifierActionEffect(ModifierAction modifierAction, int id, int genId)
+		{
+			_modifierAction = modifierAction;
+			_id = id;
+			_genId = genId;
 		}
 
 		public void SetModifierId(int id) => _id = id;
