@@ -187,6 +187,7 @@ namespace ModiBuff.Core
 		{
 			Duration(duration);
 			_removeEffectWrapper = new EffectWrapper(new RemoveEffect(Id), EffectOn.Duration);
+			_effectWrappers.Add(_removeEffectWrapper);
 			return this;
 		}
 
@@ -196,6 +197,7 @@ namespace ModiBuff.Core
 		public ModifierRecipe Remove(RemoveEffectOn removeEffectOn = RemoveEffectOn.Callback)
 		{
 			_removeEffectWrapper = new EffectWrapper(new RemoveEffect(Id), removeEffectOn.ToEffectOn());
+			_effectWrappers.Add(_removeEffectWrapper);
 			return this;
 		}
 
@@ -293,8 +295,14 @@ namespace ModiBuff.Core
 #if DEBUG && !MODIBUFF_PROFILE
 				Logger.LogWarning("[ModiBuff] Adding a remove effect through Effect() is not recommended, " +
 				                  "use Remove(RemoveEffectOn) or Remove(float) instead");
+				if (effectOn.HasFlag(EffectOn.Stack))
+				{
+					Logger.LogError("[ModiBuff] Adding a remove effect through stack is not currently supported");
+					effectOn &= ~EffectOn.Stack;
+				}
 #endif
 				_removeEffectWrapper = new EffectWrapper(effect, effectOn);
+				_effectWrappers.Add(_removeEffectWrapper);
 				return this;
 			}
 

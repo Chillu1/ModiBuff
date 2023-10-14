@@ -38,21 +38,6 @@ namespace ModiBuff.Core
 			_eventRegisterWrapper = eventRegisterWrapper;
 			_callbackRegisterWrapper = callbackRegisterWrapper;
 
-			if (_removeEffectWrapper != null)
-			{
-				//Probably never a thing, but added just in case
-				if ((_removeEffectWrapper.EffectOn & EffectOn.Init) != 0)
-					_initEffectsIndex++;
-				if ((_removeEffectWrapper.EffectOn & EffectOn.Interval) != 0)
-					_intervalEffectsIndex++;
-				if ((_removeEffectWrapper.EffectOn & EffectOn.Duration) != 0)
-					_durationEffectsIndex++;
-				if ((_removeEffectWrapper.EffectOn & EffectOn.Callback) != 0)
-					_callbackEffectsIndex++;
-				if ((_removeEffectWrapper.EffectOn & EffectOn.Event) != 0)
-					_eventEffectsIndex++;
-			}
-
 			for (int i = 0; i < _effectWrappers.Length; i++)
 			{
 				var effectWrapper = _effectWrappers[i];
@@ -125,24 +110,6 @@ namespace ModiBuff.Core
 				_revertEffectsIndex = 0;
 			}
 
-			//We want full control over the remove effect, since it's special
-			if (_removeEffectWrapper != null)
-			{
-				_removeEffectWrapper.UpdateGenId(genId);
-
-				//Remove probably never called on init, but added just in case
-				if ((_removeEffectWrapper.EffectOn & EffectOn.Init) != 0)
-					_initEffects[_initEffectsIndex++] = _removeEffectWrapper.GetEffect();
-				if ((_removeEffectWrapper.EffectOn & EffectOn.Interval) != 0)
-					_intervalEffects[_intervalEffectsIndex++] = _removeEffectWrapper.GetEffect();
-				if ((_removeEffectWrapper.EffectOn & EffectOn.Duration) != 0)
-					_durationEffects[_durationEffectsIndex++] = _removeEffectWrapper.GetEffect();
-				if ((_removeEffectWrapper.EffectOn & EffectOn.Callback) != 0)
-					_callbacks[_callbackEffectsIndex++] = _removeEffectWrapper.GetEffect();
-				if ((_removeEffectWrapper.EffectOn & EffectOn.Event) != 0)
-					_eventEffects[_eventEffectsIndex++] = _removeEffectWrapper.GetEffect();
-			}
-
 			//Go over all of the effects, and put them into the correct arrays
 			//Here we're also responsible for cloning, and feeding them the correct genId
 			for (int i = 0; i < _effectWrappers.Length; i++)
@@ -184,14 +151,12 @@ namespace ModiBuff.Core
 			{
 				((IRecipeFeedEffects)_eventRegisterWrapper.GetEffect()).SetEffects(_eventEffects);
 				_eventRegisterWrapper.Reset();
-				_eventEffects = null;
 			}
 
 			if (_callbackRegisterWrapper != null)
 			{
 				((IRecipeFeedEffects)_callbackRegisterWrapper.GetEffect()).SetEffects(_callbacks);
 				_callbackRegisterWrapper.Reset();
-				_callbacks = null;
 			}
 
 			if (_removeEffectWrapper != null)
