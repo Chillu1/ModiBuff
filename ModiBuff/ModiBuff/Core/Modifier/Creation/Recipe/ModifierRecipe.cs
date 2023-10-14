@@ -27,6 +27,7 @@ namespace ModiBuff.Core
 		private float _duration;
 
 		private EffectWrapper _removeEffectWrapper;
+		private EffectWrapper _eventRegisterWrapper;
 		private EffectWrapper _callbackRegisterWrapper;
 
 		private readonly List<EffectWrapper> _effectWrappers;
@@ -316,6 +317,13 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		public ModifierRecipe Event<TEvent>(TEvent @event)
+		{
+			_eventRegisterWrapper = new EffectWrapper(new EventEffect<TEvent>(@event), EffectOn.Init);
+			_effectWrappers.Add(_eventRegisterWrapper);
+			return this;
+		}
+
 		/// <summary>
 		///		Registers a callback register effect to a unit, will trigger all <see cref="EffectOn.Callback"/>
 		///		effects when <see cref="callbackType"/> is triggered.
@@ -367,9 +375,9 @@ namespace ModiBuff.Core
 				_tag |= TagType.IsInstanceStackable;
 
 			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _callbackRegisterWrapper,
-				_hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList,
-				_effectFuncCheckList, _isAura, _tag, _oneTimeInit, _interval, _duration, _refreshDuration,
-				_refreshInterval, _whenStackEffect, _stackValue, _maxStacks, _everyXStacks);
+				_eventRegisterWrapper, _hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList,
+				_applyFuncCheckList, _effectFuncCheckList, _isAura, _tag, _oneTimeInit, _interval, _duration,
+				_refreshDuration, _refreshInterval, _whenStackEffect, _stackValue, _maxStacks, _everyXStacks);
 			return new ModifierGenerator(in data);
 		}
 

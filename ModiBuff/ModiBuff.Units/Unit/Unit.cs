@@ -405,7 +405,14 @@ namespace ModiBuff.Core.Units
 			{
 				case CallbackType.StrongHit:
 					for (int i = 0; i < callbacks.Length; i++)
-						_strongHitCallbacks.Remove(callbacks[i]);
+					{
+						bool removed = _strongHitCallbacks.Remove(callbacks[i]);
+#if DEBUG && !MODIBUFF_PROFILE
+						if (!removed)
+							Logger.LogError("Could not remove callback: " + callbacks[i]);
+#endif
+					}
+
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);

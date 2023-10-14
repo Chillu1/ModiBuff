@@ -118,5 +118,10 @@ namespace ModiBuff.Core.Units
 		{
 			return recipe.Callback(callbackType);
 		}
+
+		public static ModifierRecipe Event(this ModifierRecipe recipe, EffectOnEvent @event)
+		{
+			return recipe.Event(@event);
+		}
 	}
 }

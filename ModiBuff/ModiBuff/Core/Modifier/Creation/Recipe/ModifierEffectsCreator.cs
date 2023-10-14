@@ -11,12 +11,15 @@ namespace ModiBuff.Core
 		private readonly EffectWrapper[] _effectsWithModifierInfoWrappers;
 		private readonly EffectWrapper _removeEffectWrapper;
 		private readonly EffectWrapper _callbackRegisterWrapper;
+		private readonly EffectWrapper _eventRegisterWrapper;
 
 		private readonly int _revertEffectsCount,
 			_initEffectsCount,
 			_intervalEffectsCount,
 			_durationEffectsCount,
-			_stackEffectsCount;
+			_stackEffectsCount,
+			_callbackEffectsCount,
+			_eventEffectsCount;
 
 		private IRevertEffect[] _revertEffects;
 		private IEffect[] _initEffects;
@@ -24,21 +27,24 @@ namespace ModiBuff.Core
 		private IEffect[] _durationEffects;
 		private IStackEffect[] _stackEffects;
 		private IEffect[] _callbacks;
+		private IEffect[] _eventEffects;
 
 		private int _revertEffectsIndex,
 			_initEffectsIndex,
 			_intervalEffectsIndex,
 			_durationEffectsIndex,
 			_stackEffectsIndex,
-			_callbackEffectsIndex;
+			_callbackEffectsIndex,
+			_eventEffectsIndex;
 
 		public ModifierEffectsCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper,
-			EffectWrapper callbackRegisterWrapper)
+			EffectWrapper callbackRegisterWrapper, EffectWrapper eventRegisterWrapper)
 		{
 			var effectsWithModifierInfoWrappers = new List<EffectWrapper>();
 			_effectWrappers = effectWrappers.ToArray();
 			_removeEffectWrapper = removeEffectWrapper;
 			_callbackRegisterWrapper = callbackRegisterWrapper;
+			_eventRegisterWrapper = eventRegisterWrapper;
 
 			if (_removeEffectWrapper != null)
 			{
@@ -50,7 +56,9 @@ namespace ModiBuff.Core
 				if ((_removeEffectWrapper.EffectOn & EffectOn.Duration) != 0)
 					_durationEffectsCount++;
 				if ((_removeEffectWrapper.EffectOn & EffectOn.Callback) != 0)
-					_callbackEffectsIndex++;
+					_callbackEffectsCount++;
+				if ((_removeEffectWrapper.EffectOn & EffectOn.Event) != 0)
+					_eventEffectsCount++;
 			}
 
 			if (callbackRegisterWrapper?.GetEffect() is IRevertEffect callbackRevert && callbackRevert.IsRevertible)
@@ -75,7 +83,9 @@ namespace ModiBuff.Core
 				if ((effectWrapper.EffectOn & EffectOn.Stack) != 0)
 					_stackEffectsCount++;
 				if ((effectWrapper.EffectOn & EffectOn.Callback) != 0)
-					_callbackEffectsIndex++;
+					_callbackEffectsCount++;
+				if ((effectWrapper.EffectOn & EffectOn.Event) != 0)
+					_eventEffectsCount++;
 			}
 
 			_effectsWithModifierInfoWrappers = effectsWithModifierInfoWrappers.ToArray();
@@ -107,10 +117,16 @@ namespace ModiBuff.Core
 				_stackEffects = new IStackEffect[_stackEffectsCount];
 			}
 
-			if (_callbackEffectsIndex > 0)
+			if (_callbackEffectsCount > 0)
 			{
-				_callbacks = new IEffect[_callbackEffectsIndex];
+				_callbacks = new IEffect[_callbackEffectsCount];
 				_callbackEffectsIndex = 0;
+			}
+
+			if (_eventEffectsCount > 0)
+			{
+				_eventEffects = new IEffect[_eventEffectsCount];
+				_eventEffectsIndex = 0;
 			}
 
 			if (_revertEffectsCount > 0)
@@ -153,6 +169,8 @@ namespace ModiBuff.Core
 					_stackEffects[_stackEffectsIndex++] = (IStackEffect)effect;
 				if ((effectOn & EffectOn.Callback) != 0)
 					_callbacks[_callbackEffectsIndex++] = effect;
+				if ((effectOn & EffectOn.Event) != 0)
+					_eventEffects[_eventEffectsIndex++] = effect;
 			}
 
 			ModifierStateInfo modifierStateInfo = null;
@@ -172,9 +190,18 @@ namespace ModiBuff.Core
 					_callbacks[_callbackEffectsIndex++] = _removeEffectWrapper.GetEffect();
 				if (_callbackRegisterWrapper.GetEffect() is IRevertEffect revertEffect && revertEffect.IsRevertible)
 					_revertEffects[_revertEffectsIndex++] = revertEffect;
-				((ICallbackEffect)_callbackRegisterWrapper.GetEffect()).SetCallback(_callbacks);
+				((IRecipeFeedEffects)_callbackRegisterWrapper.GetEffect()).SetEffects(_callbacks);
 				_callbackRegisterWrapper.Reset();
 				_callbacks = null;
+			}
+
+			if (_eventRegisterWrapper != null)
+			{
+				if (_removeEffectWrapper != null && _removeEffectWrapper.EffectOn.HasFlag(EffectOn.Event))
+					_eventEffects[_eventEffectsIndex++] = _removeEffectWrapper.GetEffect();
+				((IRecipeFeedEffects)_eventRegisterWrapper.GetEffect()).SetEffects(_eventEffects);
+				_eventRegisterWrapper.Reset();
+				_eventEffects = null;
 			}
 
 			if (_removeEffectWrapper != null)
