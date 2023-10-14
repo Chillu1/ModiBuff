@@ -15,6 +15,7 @@ namespace ModiBuff.Core
 		//A dict with multikey can be used, but we run into problems with modifiers that don't use instance stacking
 		private Modifier[] _modifiers;
 		private readonly int[] _modifierIndexes;
+		private readonly Dictionary<int, int> _modifierIndexesDict;
 		private int _modifiersTop;
 
 		private readonly List<int> _modifierAttackAppliers;
@@ -32,9 +33,14 @@ namespace ModiBuff.Core
 			_owner = owner;
 
 			_modifiers = new Modifier[Config.ModifierArraySize];
-			_modifierIndexes = new int[ModifierRecipes.GeneratorCount];
-			for (int i = 0; i < _modifierIndexes.Length; i++)
-				_modifierIndexes[i] = -1;
+			if (Config.UseDictionaryIndexes)
+				_modifierIndexesDict = new Dictionary<int, int>(Config.ModifierIndexDictionarySize);
+			else
+			{
+				_modifierIndexes = new int[ModifierRecipes.GeneratorCount];
+				for (int i = 0; i < _modifierIndexes.Length; i++)
+					_modifierIndexes[i] = -1;
+			}
 
 			_modifierAttackAppliers = new List<int>(Config.AttackApplierSize);
 			_modifierCastAppliers = new List<int>(Config.CastApplierSize);
@@ -235,19 +241,32 @@ namespace ModiBuff.Core
 		{
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);
 
-			if (!tag.HasTag(TagType.IsInstanceStackable) && _modifierIndexes[id] != -1)
+			if (!tag.HasTag(TagType.IsInstanceStackable))
 			{
-				var existingModifier = _modifiers[_modifierIndexes[id]];
-				//TODO should we update the modifier targets when init/refreshing/stacking?
-				existingModifier.UpdateSource(source);
-				if ((tag & TagType.IsInit) != 0)
-					existingModifier.Init();
-				if ((tag & TagType.IsRefresh) != 0)
-					existingModifier.Refresh();
-				if ((tag & TagType.IsStack) != 0)
-					existingModifier.Stack();
+				bool exists;
+				int index;
+				if (Config.UseDictionaryIndexes)
+					exists = _modifierIndexesDict.TryGetValue(id, out index);
+				else
+				{
+					index = _modifierIndexes[id];
+					exists = index != -1;
+				}
 
-				return existingModifier.GenId;
+				if (exists)
+				{
+					var existingModifier = _modifiers[index];
+					//TODO should we update the modifier targets when init/refreshing/stacking?
+					existingModifier.UpdateSource(source);
+					if ((tag & TagType.IsInit) != 0)
+						existingModifier.Init();
+					if ((tag & TagType.IsRefresh) != 0)
+						existingModifier.Refresh();
+					if ((tag & TagType.IsStack) != 0)
+						existingModifier.Stack();
+
+					return existingModifier.GenId;
+				}
 			}
 
 			if (_modifiersTop == _modifiers.Length)
@@ -259,7 +278,13 @@ namespace ModiBuff.Core
 			modifier.UpdateSingleTargetSource(target, source);
 
 			if (!tag.HasTag(TagType.IsInstanceStackable))
-				_modifierIndexes[id] = _modifiersTop;
+			{
+				if (Config.UseDictionaryIndexes)
+					_modifierIndexesDict.Add(id, _modifiersTop);
+				else
+					_modifierIndexes[id] = _modifiersTop;
+			}
+
 			_modifiers[_modifiersTop++] = modifier;
 			if (tag.HasTag(TagType.IsInit))
 				modifier.Init();
@@ -272,7 +297,9 @@ namespace ModiBuff.Core
 		public bool Contains(int id)
 		{
 			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
-				return _modifierIndexes[id] != -1;
+			{
+				return Config.UseDictionaryIndexes ? _modifierIndexesDict.ContainsKey(id) : _modifierIndexes[id] != -1;
+			}
 
 			for (int i = 0; i < _modifiersTop; i++)
 				if (_modifiers[i].Id == id)
@@ -333,16 +360,32 @@ namespace ModiBuff.Core
 			if (!ModifierRecipes.GetTag(modifierReference.Id).HasTag(TagType.IsInstanceStackable))
 			{
 #if DEBUG && !MODIBUFF_PROFILE
-				if (_modifierIndexes[modifierReference.Id] == -1)
+				bool modifierExists = Config.UseDictionaryIndexes
+					? _modifierIndexesDict.ContainsKey(modifierReference.Id)
+					: _modifierIndexes[modifierReference.Id] != -1;
+
+				if (!modifierExists)
 				{
 					Logger.LogError("[ModiBuff] Tried to remove a modifier that doesn't exist on entity, id: " +
 					                $"{modifierReference.Id}, genId: {modifierReference.GenId}");
 					return;
 				}
 #endif
-				var modifier = _modifiers[_modifierIndexes[modifierReference.Id]];
-				ModifierPool.Instance.Return(modifier);
-				_modifiers[_modifierIndexes[modifierReference.Id]] = _modifiers[--_modifiersTop];
+
+				int modifierIndex;
+				if (Config.UseDictionaryIndexes)
+				{
+					modifierIndex = _modifierIndexesDict[modifierReference.Id];
+					ModifierPool.Instance.Return(_modifiers[modifierIndex]);
+					_modifiers[modifierIndex] = _modifiers[--_modifiersTop];
+					_modifiers[_modifiersTop] = null;
+					_modifierIndexesDict.Remove(modifierReference.Id);
+					return;
+				}
+
+				modifierIndex = _modifierIndexes[modifierReference.Id];
+				ModifierPool.Instance.Return(_modifiers[modifierIndex]);
+				_modifiers[modifierIndex] = _modifiers[--_modifiersTop];
 				_modifiers[_modifiersTop] = null;
 				_modifierIndexes[modifierReference.Id] = -1;
 				return;
@@ -372,8 +415,11 @@ namespace ModiBuff.Core
 				_modifiers[i] = null;
 			}
 
-			for (int i = 0; i < _modifierIndexes.Length; i++)
-				_modifierIndexes[i] = -1;
+			if (Config.UseDictionaryIndexes)
+				_modifierIndexesDict.Clear();
+			else
+				for (int i = 0; i < _modifierIndexes.Length; i++)
+					_modifierIndexes[i] = -1;
 
 			_modifiersTop = 0;
 
@@ -395,8 +441,14 @@ namespace ModiBuff.Core
 		{
 			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
 			{
-				int modifierIndex = _modifierIndexes[id];
-				return modifierIndex != -1 ? _modifiers[modifierIndex] : null;
+				if (Config.UseDictionaryIndexes)
+				{
+					return _modifierIndexesDict.TryGetValue(id, out int modifierIndex)
+						? _modifiers[modifierIndex]
+						: null;
+				}
+
+				return _modifierIndexes[id] != -1 ? _modifiers[_modifierIndexes[id]] : null;
 			}
 
 			for (int i = 0; i < _modifiersTop; i++)
