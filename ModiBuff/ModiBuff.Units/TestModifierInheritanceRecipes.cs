@@ -5,8 +5,7 @@ namespace ModiBuff.Core.Units
 	/// </summary>
 	public sealed class TestModifierInheritanceRecipes : ModifierRecipes
 	{
-		public TestModifierInheritanceRecipes(ModifierIdManager idManager, EventEffectFactory eventEffectFunc = null) :
-			base(idManager, eventEffectFunc)
+		public TestModifierInheritanceRecipes(ModifierIdManager idManager) : base(idManager)
 		{
 			CreateGenerators();
 		}
@@ -47,8 +46,9 @@ namespace ModiBuff.Core.Units
 					.Remove(5).Refresh();
 			}
 
-			AddEvent("ThornsOnHitEvent", EffectOnEvent.WhenAttacked)
-				.Effect(new DamageEffect(5), Targeting.SourceTarget);
+			Add("ThornsOnHitEvent")
+				.Effect(new DamageEffect(5), EffectOn.Event, Targeting.SourceTarget)
+				.Event(EffectOnEvent.WhenAttacked);
 		}
 	}
 }

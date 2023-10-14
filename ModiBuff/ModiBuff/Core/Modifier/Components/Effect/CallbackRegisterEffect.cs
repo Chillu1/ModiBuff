@@ -48,7 +48,7 @@ namespace ModiBuff.Core
 		}
 
 		public CallbackRegisterEffect<TCallback> ShallowClone() =>
-			new CallbackRegisterEffect<TCallback>(_callbackType, _callbacks);
+			new CallbackRegisterEffect<TCallback>(_callbackType);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}

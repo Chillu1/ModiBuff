@@ -9,6 +9,11 @@ namespace ModiBuff.Tests
 
 		public void LogWarning(string message) => TestContext.WriteLine(message);
 
-		public void LogError(string message) => TestContext.WriteLine(message);
+		public void LogError(string message)
+		{
+			TestContext.Error.WriteLine(message);
+			Assert.Fail(message);
+			//TestContext.WriteLine(message);
+		}
 	}
 }

@@ -82,7 +82,7 @@ namespace ModiBuff.Core
 				_timeComponentCount++;
 
 			_modifierEffectsCreator = new ModifierEffectsCreator(data.EffectWrappers,
-				data.RemoveEffectWrapper, data.CallbackRegisterWrapper, data.EventRegisterWrapper);
+				data.RemoveEffectWrapper, data.EventRegisterWrapper, data.CallbackRegisterWrapper);
 
 			if (HasApplyChecks)
 			{

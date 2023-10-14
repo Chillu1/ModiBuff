@@ -319,7 +319,7 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe Event<TEvent>(TEvent @event)
 		{
-			_eventRegisterWrapper = new EffectWrapper(new EventEffect<TEvent>(@event), EffectOn.Init);
+			_eventRegisterWrapper = new EffectWrapper(new EventRegisterEffect<TEvent>(@event), EffectOn.Init);
 			_effectWrappers.Add(_eventRegisterWrapper);
 			return this;
 		}
@@ -374,8 +374,8 @@ namespace ModiBuff.Core
 			if (_isInstanceStackable)
 				_tag |= TagType.IsInstanceStackable;
 
-			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _callbackRegisterWrapper,
-				_eventRegisterWrapper, _hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList,
+			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _eventRegisterWrapper,
+				_callbackRegisterWrapper, _hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList,
 				_applyFuncCheckList, _effectFuncCheckList, _isAura, _tag, _oneTimeInit, _interval, _duration,
 				_refreshDuration, _refreshInterval, _whenStackEffect, _stackValue, _maxStacks, _everyXStacks);
 			return new ModifierGenerator(in data);
@@ -439,6 +439,21 @@ namespace ModiBuff.Core
 				validRecipe = false;
 				Logger.LogError("[ModiBuff] Refresh duration set, but duration is 0, for modifier: " +
 				                "" + Name + " id: " + Id);
+			}
+
+			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Event)) && _eventRegisterWrapper == null)
+			{
+				validRecipe = false;
+				Logger.LogError("[ModiBuff] Effects on event set, but no event registration type set, " +
+				                "for modifier: " + Name + " id: " + Id);
+			}
+
+			if (_eventRegisterWrapper != null && !_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Event)) &&
+			    _removeEffectWrapper?.EffectOn != EffectOn.Event)
+			{
+				validRecipe = false;
+				Logger.LogError("[ModiBuff] Event registration type set, but no effects on event set, " +
+				                "for modifier: " + Name + " id: " + Id);
 			}
 
 			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Callback)) && _callbackRegisterWrapper == null)

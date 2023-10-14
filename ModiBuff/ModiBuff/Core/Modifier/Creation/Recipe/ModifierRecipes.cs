@@ -6,8 +6,6 @@ namespace ModiBuff.Core
 {
 	public delegate ModifierRecipe RecipeAddFunc(Func<string, ModifierRecipe> addFunc);
 
-	public delegate ModifierEventRecipe EventRecipeAddFunc(Func<string, object, ModifierEventRecipe> addFunc);
-
 	public class ModifierRecipes
 	{
 		public static int GeneratorCount { get; private set; }
@@ -15,7 +13,7 @@ namespace ModiBuff.Core
 		private static ModifierRecipes _instance; //TODO TEMP
 
 		private readonly ModifierIdManager _idManager;
-		private readonly IDictionary<string, IModifierRecipe> _recipes;
+		private readonly IDictionary<string, ModifierRecipe> _recipes;
 		private readonly IDictionary<string, ManualModifierGenerator> _manualGenerators;
 		private readonly IDictionary<string, IModifierGenerator> _modifierGenerators;
 		private readonly List<RegisterData> _registeredNames;
@@ -23,19 +21,15 @@ namespace ModiBuff.Core
 		private ModifierInfo[] _modifierInfos;
 		private TagType[] _tags;
 
-		private EventEffectFactory _eventEffectFunc;
-
-		public ModifierRecipes(ModifierIdManager idManager, EventEffectFactory eventEffectFunc = null)
+		public ModifierRecipes(ModifierIdManager idManager)
 		{
 			_instance = this;
 
 			_idManager = idManager;
-			_recipes = new Dictionary<string, IModifierRecipe>(64);
+			_recipes = new Dictionary<string, ModifierRecipe>(64);
 			_manualGenerators = new Dictionary<string, ManualModifierGenerator>(64);
 			_modifierGenerators = new Dictionary<string, IModifierGenerator>(64);
 			_registeredNames = new List<RegisterData>(16);
-
-			_eventEffectFunc = eventEffectFunc;
 		}
 
 		protected virtual void SetupRecipes()
@@ -81,21 +75,6 @@ namespace ModiBuff.Core
 			}
 
 			return _modifierInfos[id];
-		}
-
-		/// <summary>
-		///		Call this, and feed an event effect func factory to use the event recipes.
-		/// </summary>
-		public void SetupEventEffect<TEvent>(EventEffectFactory eventEffectFunc)
-		{
-#if DEBUG && !MODIBUFF_PROFILE
-			if (eventEffectFunc(new IEffect[0], default(TEvent)) is IRevertEffect revertEffect &&
-			    revertEffect.IsRevertible)
-				Logger.LogError("[ModiBuff] Event effect func does not return an effect that implements " +
-				                "IRevertEffect, or is not revertible.");
-#endif
-
-			_eventEffectFunc = eventEffectFunc;
 		}
 
 		public static ref readonly TagType GetTag(int id) => ref _instance._tags[id];
@@ -171,43 +150,6 @@ namespace ModiBuff.Core
 			var modifierGenerator = new ManualModifierGenerator(id, name, displayName, description,
 				in createFunc, tag);
 			_manualGenerators.Add(name, modifierGenerator);
-		}
-
-		public ModifierEventRecipe AddEvent<T>(string name, T effectOnEvent) => AddEvent(name, (object)effectOnEvent);
-
-		public ModifierEventRecipe AddEvent(string name, object effectOnEvent)
-		{
-#if DEBUG && !MODIBUFF_PROFILE
-			if (_eventEffectFunc == null)
-				Logger.LogError("[ModiBuff] Event effect func is not set up. " +
-				                "But you are trying to create an event recipe.");
-#endif
-
-			if (_recipes.TryGetValue(name, out var localRecipe))
-			{
-#if DEBUG && !MODIBUFF_PROFILE
-				Logger.LogError($"[ModiBuff] Modifier with id {name} already exists");
-#endif
-				return (ModifierEventRecipe)localRecipe;
-			}
-
-			int id = -1;
-
-			foreach (var registerData in _registeredNames)
-			{
-				if (registerData.Name == name)
-				{
-					id = registerData.Id;
-					break;
-				}
-			}
-
-			if (id == -1)
-				id = _idManager.GetFreeId(name);
-
-			var recipe = new ModifierEventRecipe(id, name, effectOnEvent, _eventEffectFunc);
-			_recipes.Add(name, recipe);
-			return recipe;
 		}
 
 		/// <summary>

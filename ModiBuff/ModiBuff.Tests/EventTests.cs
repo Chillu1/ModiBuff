@@ -7,38 +7,6 @@ namespace ModiBuff.Tests
 	public sealed class EventTests : ModifierTests
 	{
 		[Test]
-		public void ThornsEffect_OnHit()
-		{
-			Setup();
-
-			var effect = new DamageEffect(5);
-			effect.SetTargeting(Targeting.SourceTarget);
-			Unit.AddEffectEvent(effect, EffectOnEvent.WhenAttacked);
-
-			Enemy.Attack(Unit);
-
-			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
-		}
-
-		[Test]
-		public void ThornsEffect_OnHit_Remove()
-		{
-			Setup();
-
-			var effect = new DamageEffect(5);
-			effect.SetTargeting(Targeting.SourceTarget);
-			Unit.AddEffectEvent(effect, EffectOnEvent.WhenAttacked);
-
-			Enemy.Attack(Unit);
-
-			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
-
-			Unit.RemoveEffectEvent(effect, EffectOnEvent.WhenAttacked);
-			Enemy.Attack(Unit);
-			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
-		}
-
-		[Test]
 		public void Thorns_OnHit()
 		{
 			AddRecipe("ThornsOnHitEvent")

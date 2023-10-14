@@ -44,9 +44,6 @@ namespace ModiBuff.Extensions.Godot
 			{
 				switch (recipeResource)
 				{
-					case ModifierEventRecipeResource modifierEventRecipeResource:
-						AddEventResource(modifierEventRecipeResource);
-						break;
 					case ModifierRecipeResource modifierRecipeResource:
 						AddResource(modifierRecipeResource);
 						break;
@@ -77,7 +74,8 @@ namespace ModiBuff.Extensions.Godot
 				recipe.ApplyCondition(recipeResource.ApplyCondition);
 
 			if (recipeResource.StatApplyCondition != null)
-				recipe.ApplyCondition(recipeResource.StatApplyCondition.StatType, recipeResource.StatApplyCondition.Value,
+				recipe.ApplyCondition(recipeResource.StatApplyCondition.StatType,
+					recipeResource.StatApplyCondition.Value,
 					recipeResource.StatApplyCondition.ComparisonType);
 
 			if (recipeResource.StatusEffectApplyCondition != StatusEffectType.None)
@@ -101,7 +99,8 @@ namespace ModiBuff.Extensions.Godot
 				recipe.EffectCondition(recipeResource.EffectCondition);
 
 			if (recipeResource.StatEffectCondition != null)
-				recipe.EffectCondition(recipeResource.StatEffectCondition.StatType, recipeResource.StatEffectCondition.Value,
+				recipe.EffectCondition(recipeResource.StatEffectCondition.StatType,
+					recipeResource.StatEffectCondition.Value,
 					recipeResource.StatEffectCondition.ComparisonType);
 
 			if (recipeResource.StatusEffectEffectCondition != StatusEffectType.None)
@@ -146,34 +145,6 @@ namespace ModiBuff.Extensions.Godot
 				recipe.Effect(effectResource.GetEffect(), effectResource.EffectOn, effectResource.Targeting);
 
 			recipeResource.Reset();
-
-			//GD.Print($"Loaded recipe {recipeResource.Name}");
-		}
-
-		private void AddEventResource(ModifierEventRecipeResource recipeResource)
-		{
-			if (!recipeResource.Validate())
-			{
-				GD.PushError($"Event recipe {recipeResource.Name} is invalid, skipping...");
-				return;
-			}
-
-			var recipe = AddEvent(recipeResource.Name, recipeResource.EffectOnEvent);
-			Save(recipe, recipeResource);
-
-			//---Actions---
-
-			if (recipeResource.RemoveDuration > 0)
-				recipe.Remove(recipeResource.RemoveDuration);
-
-			if (recipeResource.Refresh)
-				recipe.Refresh();
-
-			//---Effects---
-
-			foreach (var effectResource in recipeResource.EffectResources)
-				recipe.Effect(effectResource.GetEffect());
-
 
 			//GD.Print($"Loaded recipe {recipeResource.Name}");
 		}
@@ -224,11 +195,12 @@ namespace ModiBuff.Extensions.Godot
 				//---Effects---
 
 				foreach (var effectResource in auraEffectModifierRecipeResource.EffectResources)
-					auraEffectRecipe.Effect(effectResource.GetEffect(), effectResource.EffectOn, effectResource.Targeting);
+					auraEffectRecipe.Effect(effectResource.GetEffect(), effectResource.EffectOn,
+						effectResource.Targeting);
 			}
 		}
 
-		private static void Save<T>(IModifierRecipe recipe, T recipeResource) where T : BaseModifierRecipeResource
+		private static void Save<T>(ModifierRecipe recipe, T recipeResource) where T : BaseModifierRecipeResource
 		{
 			recipeResource.SetId(recipe.Id);
 			if (recipeResource.NeedsSaving)

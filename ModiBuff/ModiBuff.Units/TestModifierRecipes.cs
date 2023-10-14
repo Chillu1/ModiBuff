@@ -6,8 +6,7 @@ namespace ModiBuff.Core.Units
 
 		public TestModifierRecipes(ModifierIdManager idManager)
 		{
-			_modifierRecipes = new ModifierRecipes(idManager,
-				(effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
+			_modifierRecipes = new ModifierRecipes(idManager);
 			SetupRecipes();
 			_modifierRecipes.CreateGenerators();
 		}
@@ -21,9 +20,6 @@ namespace ModiBuff.Core.Units
 		{
 			_modifierRecipes.Add(name, name, "", in createFunc, tag);
 		}
-
-		private ModifierEventRecipe AddEvent(string name, EffectOnEvent effectOnEvent) =>
-			_modifierRecipes.AddEvent(name, effectOnEvent);
 
 		private void SetupRecipes()
 		{
@@ -59,8 +55,9 @@ namespace ModiBuff.Core.Units
 					.Remove(5).Refresh();
 			}
 
-			AddEvent("ThornsOnHitEvent", EffectOnEvent.WhenAttacked)
-				.Effect(new DamageEffect(5), Targeting.SourceTarget);
+			Add("ThornsOnHitEvent")
+				.Effect(new DamageEffect(5), EffectOn.Event, Targeting.SourceTarget)
+				.Event(EffectOnEvent.WhenAttacked);
 		}
 	}
 }

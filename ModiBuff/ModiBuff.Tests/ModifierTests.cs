@@ -48,15 +48,11 @@ namespace ModiBuff.Tests
 		public void IterationSetup()
 		{
 			IdManager = new ModifierIdManager();
-			Recipes = new ModifierRecipes(IdManager,
-				(effects, @event) => new EventEffect<EffectOnEvent>(effects, (EffectOnEvent)@event));
+			Recipes = new ModifierRecipes(IdManager);
 			Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
 		}
 
 		protected ModifierRecipe AddRecipe(string name) => Recipes.Add(name, "", "");
-
-		protected ModifierEventRecipe AddEventRecipe(string name, EffectOnEvent @event) =>
-			Recipes.AddEvent(name, @event);
 
 		protected void AddGenerator(string name, in ModifierGeneratorFunc createFunc, TagType tag = TagType.Default)
 		{
