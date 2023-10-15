@@ -13,7 +13,7 @@ namespace ModiBuff.Core
 		private static ModifierRecipes _instance; //TODO TEMP
 
 		private readonly ModifierIdManager _idManager;
-		private readonly IDictionary<string, ModifierRecipe> _recipes;
+		private readonly IDictionary<string, IModifierRecipe> _recipes;
 		private readonly IDictionary<string, ManualModifierGenerator> _manualGenerators;
 		private readonly IDictionary<string, IModifierGenerator> _modifierGenerators;
 		private readonly List<RegisterData> _registeredNames;
@@ -26,7 +26,7 @@ namespace ModiBuff.Core
 			_instance = this;
 
 			_idManager = idManager;
-			_recipes = new Dictionary<string, ModifierRecipe>(64);
+			_recipes = new Dictionary<string, IModifierRecipe>(64);
 			_manualGenerators = new Dictionary<string, ManualModifierGenerator>(64);
 			_modifierGenerators = new Dictionary<string, IModifierGenerator>(64);
 			_registeredNames = new List<RegisterData>(16);
