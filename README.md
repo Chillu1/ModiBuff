@@ -62,17 +62,27 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Interval
 	* Duration
 	* Stack
+	* Event (ex. When Attacked/Cast/Killed/Healed, On Attack/Cast/Kill/Heal)
 	* Callback (any user logic)
+	* React Callback (manual generation only for now)
 * Effect implementation examples
 	* Damage (& self damage)
 	* Heal
 	* Status effects (stun, silence, disarm, etc.)
+	* [Multi instance Status effects](https://github.com/Chillu1/ModiBuff/blob/d56ab4d1748e483a638b9ef7169a07413dbe3957/ModiBuff/ModiBuff.Units/Effects/StatusEffectEffect.cs)
+	  [impl](https://github.com/Chillu1/ModiBuff/blob/d56ab4d1748e483a638b9ef7169a07413dbe3957/ModiBuff/ModiBuff.Units/StatusEffect/MultiInstanceStatusEffectController.cs)
+	  (2 same stuns, 2 different sources, unique timers)
 	* Add stat (Damage, Heal)
 	* Actions (Attack, Heal, etc.)
 	* [Special Applier (another Modifier)](#applier-effect)
 	* And more, see [the rest](ModiBuff/ModiBuff.Units/Effects)
+* Internal Effects
+	* Applier (another Modifier)
+	* Modifier Action (refresh, reset stacks)
+	* Remove (remove modifier)
+	* Revert Action
 * Meta & Post effect manipulation (ex. lifesteal)
-* Conditions (checks)
+* Condition implementations (checks)
 	* Chance 0-100%
 	* Cooldown
 	* Health/Mana cost
@@ -85,19 +95,16 @@ This library solves that, but also allows for more complex and deeper modifiers 
 * Applier Modifiers
 	* OnAttack
 	* Cast
-* [Event based Effects](#event-recipe)
-	* When Attacked/Cast/Killed/Healed
-	* On Attack/Cast/Kill/Heal
 * Fully revertible effects
+* Manual modifier generation (for full control)
 
 # RoadMap
 
-| V0.1.3                     | V0.2.0                                           | V0.3.0                            | V1.0.0                                                         |
-|----------------------------|--------------------------------------------------|-----------------------------------|----------------------------------------------------------------|
-| Modifier Callbacks         | Proper game examples<br/>(Godot and maybe Unity) | GenId based<br/>modifier stacking | Fully released open<br/>source game using ModiBuff at its core |
-| Manual modifier generation | Appliers refactor                                | Tags?                             | Saving state?                                                  |
-|                            | Improved event recursion solution                | Dispel(s)?                        | ...                                                            |
-|                            | Modifier-less init Effects?                      |                                   |                                                                |
+| V0.3.0                            | V0.4.0-V0.?.0                                   | V1.0.0                                                         |
+|-----------------------------------|-------------------------------------------------|----------------------------------------------------------------|
+| Improved Appliers API             | GenId based<br/>modifier stacking               | Fully released open source<br/>game using ModiBuff at its core |
+| Improved event recursion solution | Proper game samples<br/>(Godot and maybe Unity) | 98% of game mechanics<br/>implementable                        |
+| Modifier-less init Effects?       | Saving & loading<br/>state (runtime)            | ...                                                            |
 
 # Benchmarks
 
@@ -177,11 +184,11 @@ soon.
 
 1. Download the latest DLL from [Releases](https://github.com/Chillu1/ModiBuff/releases) or ModiBuff source code.
 2. Add the DLL to your project.
-3. Make your own `ModifierRecipes` class that inherits from `ModiBuffModifierRecipes` and fill it with your modifier
-   recipes.  
-   3.1. If you're planning to use event modifiers, call `SetupEventEffect<T>(EventEffectFactory)` and the beginning
-   in `ModifierRecipes`
-   to register your event effect type, usually an enum.
+3. Make your own `ModifierRecipes` class that either
+   [inherits](https://github.com/Chillu1/ModiBuff/blob/d56ab4d1748e483a638b9ef7169a07413dbe3957/ModiBuff/ModiBuff.Units/TestModifierInheritanceRecipes.cs)
+   from `ModiBuff.ModifierRecipes`or
+   [encapsulates](https://github.com/Chillu1/ModiBuff/blob/d56ab4d1748e483a638b9ef7169a07413dbe3957/ModiBuff/ModiBuff.Units/TestModifierRecipes.cs)
+   it and fill it with your modifier recipes.
 4. Make your own logger implementation, by inheriting `ILogger`, or use one of the built-in ones.
 5. Call ModiBuff setup systems in the initialization of your game.    
    5.1. You can change the internal config values inside `Config`
@@ -191,7 +198,7 @@ Logger.SetLogger<MyLogger>();
 //Config.MaxPoolSize = 10000;
 
 var idManager = new ModifierIdManager();
-_recipes = new ModifierRecipes(idManager);
+_recipes = new ModifierRecipes(idManager); //Your version of ModifierRecipes
 _pool = new ModifierPool(_recipes);
 ```
 
@@ -257,8 +264,6 @@ Add("InitStun")
     .Remove(2);
 ```
 
-[//]: # (TODO ## EventRecipe)
-
 ## In-depth Recipe Creation
 
 Every modifier needs a unique name.
@@ -273,7 +278,7 @@ Recipes have a methods that determine the functionality of the made modifier.
 
 ### Effect
 
-The only method to setup effects is `Effect(IEffect, EffectOn, Targeting)`.  
+The main method to setup effects is `Effect(IEffect, EffectOn, Targeting)`.  
 `IEffect` is the effect that will be applied to the unit, it can be anything, as long as it implements IEffect
 interface.  
 `EffectOn` is the action that will trigger the effect: Init, Interval, Duration, Stack.
@@ -378,14 +383,32 @@ Add("InitAddDamageBuff_Interval")
     .Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval);
 ```
 
+### InstanceStackable
+
+`InstanceStackable()` makes the modifier instance stackable,meaning that we can have
+multiple instances of the same modifier on the same unit.
+
+This will impose a slight performance penalty, and will require to use unique `genId` for each instance.
+
+This example deals 5 damage every 1 second, the remove timer can't be refreshed by normal means.
+And each new call to add the modifier will add a new instance of the modifier.
+
+```csharp
+AddRecipe("InstanceStackableDoT")
+    .InstanceStackable()
+    .Interval(1)
+    .Effect(new DamageEffect(5), EffectOn.Interval)
+    .Remove(5);
+```
+
 ### Meta-Effect
 
 Effects can store meta effects, that will manipulate the effect values with optional conditions.
-Meta effects, just like normal effects, are user-generated. Note that meta-effect can't have mutable state.
-Any mutable state should be stored in the effect itself. Effects support many meta effects after each other.
-Allowing for very complex interactions.
+Meta effects, just like normal effects, are user-generated. Note that meta-effect can't have **mutable** state.
+Any mutable state should be stored in the effect itself or on the unit.
+Effects support many meta effects after each other. Allowing for very complex interactions.
 
-This example scales our 5 damage value based on the source unit's health * some multiplier.
+This example scales our 5 damage value based on the source unit's health times some multiplier.
 
 ```csharp
 Add("InitDamageValueBasedOnHealthMeta")
@@ -394,6 +417,8 @@ Add("InitDamageValueBasedOnHealthMeta")
 ```
 
 ### Post-Effect
+
+Post-effects can be chained with meta-effects.
 
 Post effects are effects that are applied after the main effect. And use the main effect as a source for their values.
 Most common example of this is lifesteal, where we deal damage, and then heal for a percentage of the damage dealt.
@@ -428,7 +453,24 @@ Add("InitDamage_CostMana")
     .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
+### Event
+
+Events are a way to call effects on certain unit events.
+Examples of this are: When Attacked, When Killed, On Attack, On Kill, On Cast, etc.
+
+Some common examples of this are: thorns, restore health on cast, add damage on kill.
+
+In this example we deal 5 damage to a unit that attacks us.
+
+```csharp
+Add("ThornsOnHitEvent")
+    .Effect(new DamageEffect(5), EffectOn.Event, Targeting.SourceTarget)
+    .Event(EffectOnEvent.WhenAttacked);
+```
+
 ### Callback
+
+Callbacks work like events, but have extra functionality, like being able to remove the modifier on callback.
 
 Callbacks are a way to add logic that can be triggered on any user/game-based action.
 This is particularly useful for removing modifiers on certain non-standard cases.
@@ -468,7 +510,125 @@ Add("InitHealToFullHalfHealthCallback")
     });
 ```
 
-Note that no effect or state can be defined here, being mostly a downside.
+> Note that no effect or state can be defined or saved here, being mostly a downside.
+
+### Modifier Actions
+
+Sometimes we need extra control of what happens inside the modifier, with game logic.
+This can be achieved with modifier actions, currently there's two: Refresh and ResetStacks.
+
+Here we have a delayed add damage, that triggers after 2 seconds.
+But if a unit takes a "StrongHit", it will reset the timer.
+
+```csharp
+Add("DurationAddDamageStrongHitRefresh")
+    .Effect(new AddDamageEffect(5), EffectOn.Duration)
+    .ModifierAction(ModifierAction.Refresh, EffectOn.Callback)
+    .Callback(CallbackType.StrongHit)
+    .Duration(2).Refresh();
+```
+
+Here we add damage every 5 stacks of the modifier.
+But if a unit takes a "StrongHit", it will reset the stacks count to 0.
+
+```csharp
+Add("StackAddDamageStrongHitResetStacks")
+    .Effect(new AddDamageEffect(5), EffectOn.Stack)
+    .ModifierAction(ModifierAction.ResetStacks, EffectOn.Callback)
+    .Callback(CallbackType.StrongHit)
+    .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5);
+```
+
+### Tags
+
+Tags are a way to mark modifiers, there are a few internal tags that tell the `ModifierController` how the modifiers
+should be handled. Tags are stored inside `ModifierRecipes` and can only be set on modifier generator creation.
+
+Then there's a few other internal tags that are there for the user:
+IsInstanceStackable, IntervalIgnoresStatusResistance and DurationIgnoresStatusResistance.
+
+There's also a `TagType.Default` which we can use in the beginning to define our default tags in the config.
+`Config.DefaultTag = /*Your*/TagType.Default;`
+
+But tagging also supports user-defined tags, that can be used for any purpose.
+
+`ModiBuff.Units` uses it to implement legal targeting for modifiers.
+We need to respect the last reserved tag in `ModiBuff.Core.TagType`.
+
+```csharp
+[Flags]
+public enum TagType : ulong
+{
+    Default = Core.TagType.Default | LegalTargetAll,
+
+    LastReserved = Core.TagType.LastReserved,
+
+    LegalTargetSelf = 1ul << 17,
+    LegalTargetAlly = 1ul << 18,
+    LegalTargetEnemy = 1ul << 19,
+
+    LegalTargetAll = LegalTargetSelf | LegalTargetAlly | LegalTargetEnemy,
+    //UserTag5 = 1ul << 21
+}
+```
+
+Then we can define some helper extension methods for checking if a unit is a legal target of the modifier.
+
+```csharp
+public static bool IsLegalTarget(this int modifierId, IUnitEntity target, IUnitEntity source)
+{
+    var tag = (TagType)ModifierRecipes.GetTag(modifierId);
+    if (tag.HasTag(TagType.LegalTargetSelf) && target == source)
+    	return true;
+
+    return tag.IsLegalTarget(target.UnitType, source.UnitType);
+}
+```
+
+```csharp
+public static bool IsLegalTarget(this TagType tag, UnitType target, UnitType source)
+{
+    if (tag.HasTag(TagType.LegalTargetAlly) && target == source)
+        return true;
+    if (tag.HasTag(TagType.LegalTargetEnemy) && target != source)
+        return true;
+    if (tag.HasTag(TagType.LegalTargetAll))
+        return true;
+
+#if DEBUG
+    Logger.Log($"Tag {tag} is not a legal target for UnitType.{target} from UnitType.{source}");
+#endif
+    return false;
+}
+```
+
+So we can finally setup our own tag for modifiers.
+
+> Note that we're also using a default tag that sets all modifiers to be legal to target all units.
+> So we need to remove that tag first.
+
+```csharp
+Add("InitDamageEnemyOnly")
+    .RemoveTag((Core.TagType)LegalTarget.All)
+    .Tag((Core.TagType)TagType.LegalTargetEnemy)
+    .Effect(new DamageEffect(5f), EffectOn.Init);
+```
+
+Then we can make a extension method for our logic, so we don't use the previous verbose `Tag` approach.
+
+```csharp
+public static ModifierRecipe LegalTarget(this ModifierRecipe recipe, LegalTarget target)
+{
+    recipe.RemoveTag((Core.TagType)TagType.LegalTargetAll);
+    return recipe.Tag(target.ToTagType());
+}
+```
+
+```csharp
+Add("InitDamageEnemyOnly")
+	.LegalTarget(LegalTarget.Enemy)
+	.Effect(new DamageEffect(5f), EffectOn.Init);
+```
 
 ### Order
 
@@ -496,27 +656,6 @@ Add("Full")
 ```
 
 Each modifier should have at least one effect, unless it's used as a flag.
-
-## Event Recipe
-
-Event recipes are special recipes for creating event modifiers.
-Event modifiers use a `EventEffect`, that registers an event on a unit (this code needs to be implemented in the unit
-class).
-
-It uses the same builder pattern as the normal recipes, but with a few less methods.
-
-The `Effect(IEffect, Targeting)` method is very similar to the normal recipe, but we can't set the `EffectOn` action.
-Since it will always trigger on event.
-
-When adding an effect, we need to specify when the effect should trigger. In this example we deal 5 damage to a unit
-that attacks us.
-
-```csharp
-Add("ThornsOnHitEvent", EffectOnEvent.WhenAttacked)
-    .Effect(new DamageEffect(5), Targeting.SourceTarget);
-```
-
-Event recipe also has `Remove(float)` and `Refresh()` and they both work exactly the same way as in normal recipes.
 
 ## Recipe Limitations
 
@@ -551,8 +690,8 @@ The library allows for easy creation of new effects.
 Which are needed for using custom game-based logic.
 
 Effects have to implement `IEffect`.  
-They can also implement `ITargetEffect` for event targeting owner/source, `IEventTrigger` to avoid event
-recursion, `IStackEffect` for stacking functionality, `IStateEffect` for resetting runtime state.
+They can also implement `ITargetEffect` for event targeting owner/source,
+`IStackEffect` for stacking functionality, `IStateEffect` for resetting runtime state.
 
 For fully featured effect implementation, look at
 [DamageEffect](https://github.com/Chillu1/ModiBuff/blob/master/ModiBuff/ModiBuff.Units/Effects/DamageEffect.cs)
@@ -571,10 +710,11 @@ not shared between modifiers.
 
 If we want to use stack logic, the effect needs to implement `IStackEffect`.
 
-If the effect can be used in events, it needs to implement `IEventTrigger`.
-That's because currently the event infinite loop is fixed by not having event effects trigger other events.
-
 If the effect should support non-standard targeting, it should implement `ITargetEffect`.
+
+The effects hould have two constructors, the first main one should be used for recipes,
+and only expose the non-recipe setting variables.
+The other constructor should be in a factory pattern style, and expose all the variables.
 
 ### Applier Effect
 
@@ -584,8 +724,9 @@ This can create some very sophisticated modifiers:
 
 ```csharp
 //WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^ rupture modifier
-AddEvent("ComplexApplier_OnHit_Event", EffectOnEvent.WhenAttacked)
-    .Effect(new ActerApplierEffect("ComplexApplier_Rupture"));
+AddRecipe("ComplexApplier_OnHit_Event")
+    .Effect(new ApplierEffect("ComplexApplier_Rupture"), EffectOn.Event, Targeting.SourceTarget)
+    .Event(EffectOnEvent.WhenAttacked);
 
 //rupture modifier, that does DoT. When this gets to 5 stacks, apply the disarm effect.
 Add("ComplexApplier_Rupture")
@@ -613,34 +754,37 @@ To clarify:
 
 ```csharp            
 //Apply the modifier to source (healer) WhenHealed                                   
-AddEvent("ComplexApplier2_WhenHealed_Event", EffectOnEvent.WhenHealed)               
-    .Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), Targeting.SourceTarget);
+Add("ComplexApplier2_WhenHealed_Event")               
+    .Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), EffectOn.Event, Targeting.SourceTarget)
+    .Event(EffectOnEvent.WhenHealed);
 
-//On 5 stacks, apply the modifier to self.                                           
+//On 5 stacks, apply the modifier to self.
 Add("ComplexApplier2_WhenHealed")                                                    
     .Effect(new ApplierEffect("ComplexApplier2_OnAttack_Event"), EffectOn.Stack)     
-    .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5)  
-    .Remove(5).Refresh();   
+    .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5)
+    .Remove(5).Refresh();
 
-//Long main buff. Apply the modifier OnAttack.                                       
-AddEvent("ComplexApplier2_OnAttack_Event", EffectOnEvent.OnAttack)                   
-    .Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"))                 
-    .Remove(60).Refresh();  
+//Long main buff. Apply the modifier OnAttack.
+Add("ComplexApplier2_OnAttack_Event")
+    .Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"), EffectOn.Event)
+    .Event(EffectOnEvent.OnAttack)
+    .Remove(60).Refresh();
 
-AddEvent("ComplexApplier2_WhenAttacked_Event", EffectOnEvent.WhenAttacked)           
-    .Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), Targeting.SourceTarget
-    .Remove(5).Refresh();   
+Add("ComplexApplier2_WhenAttacked_Event")
+    .Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), EffectOn.Event, Targeting.SourceTarget)
+    .Event(EffectOnEvent.WhenAttacked)
+    .Remove(5).Refresh();
 
 //On 4 stacks, Add Damage to Unit source (attacker).
-Add("ComplexApplier2_AddDamageAdd")                                                  
-    .Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)                                 
-    .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)  
-    .Remove(5).Refresh();      
+Add("ComplexApplier2_AddDamageAdd")
+    .Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)
+    .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
+    .Remove(5).Refresh();
 
-//AddDamage 5, one time init, remove in 10 seconds, refreshable.                     
-Add("ComplexApplier2_AddDamage")                                                     
-    .OneTimeInit()                                                                   
-    .Effect(new AddDamageEffect(5, true), EffectOn.Init)                             
+//AddDamage 5, one time init, remove in 10 seconds, refreshable.
+Add("ComplexApplier2_AddDamage")
+    .OneTimeInit()
+    .Effect(new AddDamageEffect(5, true), EffectOn.Init)
     .Remove(10).Refresh();
 ```
 
@@ -648,17 +792,114 @@ Add("ComplexApplier2_AddDamage")
 
 Modifiers are the core backend part of the library, they are the things that are applied to entities with effects on
 certain actions. Ex. Init, Interval, Duration, Stack.  
-You should **NOT** use the Modifier class directly, but instead use the recipe system.
+You **CAN'T** use the Modifier class directly, use the recipe system.
 Recipe system fixes a lot of internal complexity of setting up modifiers for you.
 
-It's possible to make modifier directly now by using `ManualModifierGenerator` class,
-specifically `Add(string, ModifierGeneratorFunc, Tag)`.
+It's possible to make modifier directly by using `ManualModifierGenerator` class,
+specifically `ModifierRecipes.Add(string, string, string, ModifierGeneratorFunc, Tag)` method.
 But only do so if you really know what you're doing, and need that extra functionality like multiple interval/duration
-components.
+components, react callbacks, etc.
 
-> Important: Some modifier component and effect functionality is set indirectly by checking for interfaces,
-> like `IModifierIdOwner`
-> so manual modifier creation needs extra care to use properly (this will be refactored to make it easier later on).
+### Manual Modifier Generation
+
+Manual modifier generation is not a "first-class citizen" in the library,
+but it does support all the bleeding edge features that aren't supported in recipes yet.
+
+Here's a basic implementation of the classic 5 damage on init modifier. First as recipe, then as manual modifier.
+
+```csharp
+Add("InitDamage")
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+We need to always supply a `TargetComponent`, and id, genId and name need to fed to the modifier.
+
+```csharp
+Add("InitDamageManual", "", "", (id, genId, name, tag) =>
+{
+    var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
+
+    return new Modifier(id, genId, name, initComponent, null, null, null,
+    	new SingleTargetComponent(), null);
+}/*>Supply possible tags here<*/);
+```
+
+As we can see there's a lot of manual setup, but this gives us more control over the modifier.
+We can have multiple interval and duration components, with different unique effects.
+
+We don't need to tag if our effect is init, stack or refresh.
+Since it's done automatically by the library through reflection.
+
+Some effects have special constructors for manual modifier generation,
+where you can supply the needed parameters directly.
+For example effects that hold instance info.
+
+```csharp
+var effect = StatusEffectEffect.Create(id, genId, StatusEffectType.Sleep, 5f, true);
+```
+
+#### React Callbacks
+
+One reason to use manual modifier generation right now is to use react callbacks (not supported yet in recipes).
+
+This example applies a sleep effect for 5 seconds, but if the unit takes 10 damage,
+it reverts the sleep effect and the modifier.
+
+We're using factory pattern constructors here for the effects,
+since they need the id and genId to work with modifier instances.
+
+```csharp
+Add("InitStatusEffectSleep_RemoveOnTenDamageTaken", (id, genId, name, tag) =>
+{
+    var effect = StatusEffectEffect.Create(id, genId, StatusEffectType.Sleep, 5f, true);
+    var removeEffect = RemoveEffect.Create(id, genId);
+
+    float totalDamageTaken = 0f;
+    var @event = new HealthChangedEvent((target, source, health, deltaHealth) =>
+    {
+    	totalDamageTaken += deltaHealth;
+    	if (totalDamageTaken >= 10)
+    		removeEffect.Effect(target, source);
+    });
+    var registerReactEffect = new ReactCallbackRegisterEffect<ReactType>(
+    	new ReactCallback<ReactType>(ReactType.CurrentHealthChanged, @event));
+
+    //Order of reverts matters here, if we revert the captured variable after
+    //it will trigger a recursive effect, because the captured variable will never be reset
+    removeEffect.SetRevertibleEffects(new IRevertEffect[]
+    	{ effect, new RevertActionEffect(() => { totalDamageTaken = 0f; }), registerReactEffect });
+
+    var initComponent = new InitComponent(false, new IEffect[] { effect, registerReactEffect }, null);
+    return new Modifier(id, genId, name, initComponent, null, null, null,
+    	new SingleTargetComponent(), null);
+});
+```
+
+A basic dispel mechanic can also be implemented with react callbacks.
+
+```csharp
+Add("InitStatusEffectSleep_RemoveOnDispel", (id, genId, name, tag) =>
+{
+    var effect = StatusEffectEffect.Create(id, genId, StatusEffectType.Sleep, 5f, true);
+    var removeEffect = RemoveEffect.Create(id, genId);
+
+    var @event = new DispelEvent((target, source, eventTag) =>
+    {
+    	if ((tag & eventTag.ToInternalTag()) != 0)
+    		removeEffect.Effect(target, source);
+    });
+    var registerReactEffect = new ReactCallbackRegisterEffect<ReactType>(
+    	new ReactCallback<ReactType>(ReactType.Dispel, @event));
+
+    removeEffect.SetRevertibleEffects(new IRevertEffect[] { effect, registerReactEffect });
+
+    var initComponent = new InitComponent(false, new IEffect[] { effect, registerReactEffect }, null);
+    return new Modifier(id, genId, name, initComponent, null, null, null,
+    	new SingleTargetComponent(), null);
+}, TagType.BasicDispel);
+```
+
+Then we can dispel this modifier with `Unit.Dispel(TagType.BasicDispel, Unit);`.
 
 # FAQ
 
@@ -683,9 +924,15 @@ An example of this is a
 [projectile](https://github.com/Chillu1/ModiBuff/blob/d0ba95f8f0696572b9cfb4f3e1374c2fc5f57726/ModiBuff/ModiBuff.Tests/StateTests.cs#L270-L277).
 
 Q: How to handle UI?  
-A: There's two main ways of handling UI. The first general info is Modifier Name and Modifier Description.
-The second part is to get modifier effects state with `GetState<TData>(int)`, this will return a struct of the effect
-state.
+A: There's two main ways of handling UI. The first general info is Modifier Name and Modifier Description,
+through `ModifierRecipes.GetModifierInfo()`. There's also `ModifierController.GetApplier*()` methods for appliers info.
+And `ModifierController.GetModifierReferences()` for normal modifiers. Basic usage is shown in the
+[BasicConsole sample](https://github.com/Chillu1/ModiBuff/blob/d56ab4d1748e483a638b9ef7169a07413dbe3957/ModiBuff/ModiBuff.Examples/BasicConsole/UIExtensions.cs).
+
+Q: I have a lot of modifiers, and care about memory usage (ex. mobile). What can I do?  
+A: With huge amounts of modifier generators 500+ (recipes), and 10000+ units,
+the memory usage of `ModifierController`s will be around 20MB. It can be lowered to 1MB±
+by using `Config.UseDictionaryIndexes`, at a small performance cost.
 
 Q: My stack effect is not working, what's wrong?  
 A: StackEffectType needs to be set in all: `IEffect` (ex. DamageEffect), `Recipe.Effect.EffectOn.Stack`
@@ -759,4 +1006,3 @@ ModiBuff has:
 
 * Missing features:
 	* Two status effects: taunt, confuse
-	* Tags
