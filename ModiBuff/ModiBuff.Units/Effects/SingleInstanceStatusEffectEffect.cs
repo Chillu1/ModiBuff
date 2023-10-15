@@ -61,7 +61,7 @@ namespace ModiBuff.Core.Units
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 
-		public readonly struct Data
+		public struct Data
 		{
 			public readonly float BaseDuration;
 			public readonly float ExtraDuration;

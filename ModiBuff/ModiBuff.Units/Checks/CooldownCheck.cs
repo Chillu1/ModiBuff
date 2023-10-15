@@ -40,7 +40,7 @@ namespace ModiBuff.Core.Units
 		public CooldownCheck ShallowClone() => new CooldownCheck(_cooldown);
 		object IShallowClone.ShallowClone() => ShallowClone();
 
-		public readonly struct Data
+		public struct Data
 		{
 			public readonly float Cooldown;
 			public readonly float Timer;

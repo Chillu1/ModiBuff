@@ -22,7 +22,7 @@ namespace ModiBuff.Core
 			if (stateNumber < 0 || stateNumber >= _effects.Length)
 			{
 				Logger.LogError("[ModiBuff] State number can't be lower than 0 or higher than effects length");
-				return default;
+				return default(TData);
 			}
 #endif
 
@@ -42,7 +42,7 @@ namespace ModiBuff.Core
 			}
 
 			Logger.LogError($"[ModiBuff] Couldn't find {typeof(TData)} at number {stateNumber}");
-			return default;
+			return default(TData);
 		}
 	}
 }

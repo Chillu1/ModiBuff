@@ -447,7 +447,7 @@ namespace ModiBuff.Core.Units
 		{
 			for (int i = 0; i < reactCallbacks.Length; i++)
 			{
-				ref readonly var callback = ref reactCallbacks[i];
+				ref var callback = ref reactCallbacks[i];
 				switch (callback.ReactType)
 				{
 					case ReactType.Dispel:
@@ -493,7 +493,7 @@ namespace ModiBuff.Core.Units
 		{
 			for (int i = 0; i < reactCallbacks.Length; i++)
 			{
-				ref readonly var callback = ref reactCallbacks[i];
+				ref var callback = ref reactCallbacks[i];
 				switch (callback.ReactType)
 				{
 					case ReactType.Dispel:

@@ -132,7 +132,7 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		private readonly struct StatusEffectInstance : IEquatable<StatusEffectInstance>
+		private struct StatusEffectInstance : IEquatable<StatusEffectInstance>
 		{
 			private readonly int _id;
 			private readonly int _genId;

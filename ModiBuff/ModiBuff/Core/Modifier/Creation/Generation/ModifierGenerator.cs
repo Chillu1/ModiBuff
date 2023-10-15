@@ -56,7 +56,7 @@ namespace ModiBuff.Core
 		private readonly IUsableCheck[] _usableEffectChecks;
 		private readonly IStateCheck[] _stateEffectChecks;
 
-		public ModifierGenerator(in ModifierRecipeData data)
+		public ModifierGenerator(ref ModifierRecipeData data)
 		{
 			Id = data.Id;
 			Name = data.Name;
@@ -102,7 +102,7 @@ namespace ModiBuff.Core
 
 			return;
 
-			void SetupChecks(in List<ICheck> checksList, out List<IUpdatableCheck> updatableChecksList,
+			void SetupChecks(List<ICheck> checksList, out List<IUpdatableCheck> updatableChecksList,
 				out List<INoUnitCheck> noUnitChecksList, out List<IUnitCheck> unitChecksList,
 				out List<IUsableCheck> usableChecksList, out IUpdatableCheck[] updatableChecks,
 				out INoUnitCheck[] noUnitChecks, out IUnitCheck[] unitChecks, out IUsableCheck[] usableChecks,

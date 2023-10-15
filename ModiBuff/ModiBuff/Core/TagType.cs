@@ -47,8 +47,8 @@ namespace ModiBuff.Core
 			return (tagType & tag) == tag;
 		}
 
-		public static void UpdateTagBasedOnModifierComponents(this ref TagType tag, Modifier modifier) =>
-			TagTypeUtils.UpdateTagBasedOnModifierComponents(ref tag, modifier);
+		public static TagType UpdateTagBasedOnModifierComponents(this TagType tag, Modifier modifier) =>
+			TagTypeUtils.UpdateTagBasedOnModifierComponents(tag, modifier);
 	}
 
 	public static class TagTypeUtils
@@ -68,7 +68,7 @@ namespace ModiBuff.Core
 		private static readonly FieldInfo isRefreshableDurationField =
 			typeof(DurationComponent).GetRuntimeFields().First(field => field.Name == "_isRefreshable");
 
-		public static void UpdateTagBasedOnModifierComponents(ref TagType tag, Modifier modifier)
+		public static TagType UpdateTagBasedOnModifierComponents(TagType tag, Modifier modifier)
 		{
 			if ((bool)hasInitField.GetValue(modifier))
 				tag |= TagType.IsInit;
@@ -97,6 +97,8 @@ namespace ModiBuff.Core
 					}
 				}
 			}
+			
+			return tag;
 		}
 	}
 }

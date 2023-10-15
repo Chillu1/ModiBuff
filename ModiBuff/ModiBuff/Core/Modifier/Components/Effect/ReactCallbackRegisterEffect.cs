@@ -38,7 +38,7 @@ namespace ModiBuff.Core
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 
-	public readonly struct ReactCallback<TReact>
+	public struct ReactCallback<TReact>
 	{
 		public readonly TReact ReactType;
 		public readonly object Action;

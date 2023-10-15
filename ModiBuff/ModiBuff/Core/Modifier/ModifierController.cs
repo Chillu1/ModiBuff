@@ -124,7 +124,7 @@ namespace ModiBuff.Core
 
 			Logger.LogWarning($"[ModiBuff] Couldn't find state info, {typeof(TData)} at number {stateNumber}, " +
 			                  $"id: {id}, genId: {genId}");
-			return default;
+			return default(TData);
 		}
 
 		public bool TryAdd(ModifierAddReference addReference) => TryAdd(addReference, _owner);
@@ -239,7 +239,7 @@ namespace ModiBuff.Core
 
 		public int Add(int id, IUnit target, IUnit source)
 		{
-			ref readonly var tag = ref ModifierRecipes.GetTag(id);
+			ref var tag = ref ModifierRecipes.GetTag(id);
 
 			if (!tag.HasTag(TagType.IsInstanceStackable))
 			{
@@ -320,7 +320,7 @@ namespace ModiBuff.Core
 
 		public void ModifierAction(int id, int genId, ModifierAction action)
 		{
-			ref readonly var tag = ref ModifierRecipes.GetTag(id);
+			ref var tag = ref ModifierRecipes.GetTag(id);
 			var modifier = GetModifier(id, genId);
 
 			if (modifier == null)
@@ -355,7 +355,7 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public void Remove(in ModifierReference modifierReference)
+		public void Remove(ModifierReference modifierReference)
 		{
 			if (!ModifierRecipes.GetTag(modifierReference.Id).HasTag(TagType.IsInstanceStackable))
 			{

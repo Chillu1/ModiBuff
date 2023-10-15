@@ -56,7 +56,7 @@ namespace ModiBuff.Tests
 
 		protected void AddGenerator(string name, in ModifierGeneratorFunc createFunc, TagType tag = TagType.Default)
 		{
-			Recipes.Add(name, name, "", in createFunc, tag.ToInternalTag());
+			Recipes.Add(name, name, "", createFunc, tag.ToInternalTag());
 		}
 
 		/// <summary>

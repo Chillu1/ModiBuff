@@ -51,7 +51,7 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public readonly struct Data
+		public struct Data
 		{
 			public readonly CostType CostType;
 			public readonly float Cost;

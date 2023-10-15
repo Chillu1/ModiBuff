@@ -16,9 +16,9 @@ namespace ModiBuff.Core.Units
 		private void Register(params string[] names) => _modifierRecipes.Register(names);
 		private ModifierRecipe Add(string name) => _modifierRecipes.Add(name);
 
-		private void Add(string name, in ModifierGeneratorFunc createFunc, Core.TagType tag = default)
+		private void Add(string name, ModifierGeneratorFunc createFunc, Core.TagType tag = default(Core.TagType))
 		{
-			_modifierRecipes.Add(name, name, "", in createFunc, tag);
+			_modifierRecipes.Add(name, name, "", createFunc, tag);
 		}
 
 		private void SetupRecipes()

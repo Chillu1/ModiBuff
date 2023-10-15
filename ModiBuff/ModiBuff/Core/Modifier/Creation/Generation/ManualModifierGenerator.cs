@@ -12,7 +12,7 @@ namespace ModiBuff.Core
 		private int _genId;
 
 		public ManualModifierGenerator(int id, string name, string displayName, string description,
-			in ModifierGeneratorFunc createFunc, TagType tag)
+			ModifierGeneratorFunc createFunc, TagType tag)
 		{
 			Id = id;
 			Name = name;
@@ -22,7 +22,7 @@ namespace ModiBuff.Core
 
 			//Updates tags based on modifier state
 			//Generates a dummy modifier, to check for state
-			tag.UpdateTagBasedOnModifierComponents(createFunc(Id, _genId, Name, tag));
+			tag = tag.UpdateTagBasedOnModifierComponents(createFunc(Id, _genId, Name, tag));
 			Tag = tag;
 		}
 

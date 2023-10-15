@@ -77,7 +77,7 @@ namespace ModiBuff.Core
 			return _modifierInfos[id];
 		}
 
-		public static ref readonly TagType GetTag(int id) => ref _instance._tags[id];
+		public static ref TagType GetTag(int id) => ref _instance._tags[id];
 
 		public IModifierGenerator GetGenerator(string name) => _modifierGenerators[name];
 
@@ -115,7 +115,7 @@ namespace ModiBuff.Core
 		}
 
 		public void Add(string name, string displayName, string description,
-			in ModifierGeneratorFunc createFunc, TagType tag = TagType.Default)
+			ModifierGeneratorFunc createFunc, TagType tag = TagType.Default)
 		{
 			if (_recipes.ContainsKey(name))
 			{
@@ -148,7 +148,7 @@ namespace ModiBuff.Core
 				id = _idManager.GetFreeId(name);
 
 			var modifierGenerator = new ManualModifierGenerator(id, name, displayName, description,
-				in createFunc, tag);
+				createFunc, tag);
 			_manualGenerators.Add(name, modifierGenerator);
 		}
 
@@ -181,7 +181,7 @@ namespace ModiBuff.Core
 			_registeredNames.Clear();
 		}
 
-		private readonly struct RegisterData
+		private struct RegisterData
 		{
 			public readonly string Name;
 			public readonly int Id;

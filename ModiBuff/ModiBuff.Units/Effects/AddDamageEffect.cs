@@ -91,7 +91,7 @@ namespace ModiBuff.Core.Units
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 
-		public readonly struct Data
+		public struct Data
 		{
 			public readonly float BaseDamage;
 			public readonly float ExtraDamage;

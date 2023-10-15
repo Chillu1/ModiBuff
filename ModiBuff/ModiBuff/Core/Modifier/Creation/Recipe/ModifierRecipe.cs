@@ -386,7 +386,7 @@ namespace ModiBuff.Core
 				_callbackRegisterWrapper, _hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList,
 				_applyFuncCheckList, _effectFuncCheckList, _isAura, _tag, _oneTimeInit, _interval, _duration,
 				_refreshDuration, _refreshInterval, _whenStackEffect, _stackValue, _maxStacks, _everyXStacks);
-			return new ModifierGenerator(in data);
+			return new ModifierGenerator(ref data);
 		}
 
 		public ModifierInfo CreateModifierInfo()

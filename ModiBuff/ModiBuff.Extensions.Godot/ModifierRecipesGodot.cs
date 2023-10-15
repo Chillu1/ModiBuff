@@ -87,7 +87,7 @@ namespace ModiBuff.Extensions.Godot
 			if (recipeResource.ApplyCooldown > 0)
 				recipe.ApplyCooldown(recipeResource.ApplyCooldown);
 
-			if (recipeResource.ApplyCost is { CostType: not CostType.None })
+			if (recipeResource.ApplyCost != null && recipeResource.ApplyCost.CostType != CostType.None)
 				recipe.ApplyCost(recipeResource.ApplyCost.CostType, recipeResource.ApplyCost.Amount);
 
 			if (recipeResource.ApplyChance > 0)
@@ -112,7 +112,7 @@ namespace ModiBuff.Extensions.Godot
 			if (recipeResource.EffectCooldown > 0)
 				recipe.EffectCooldown(recipeResource.EffectCooldown);
 
-			if (recipeResource.EffectCost is { CostType: not CostType.None })
+			if (recipeResource.EffectCost != null && recipeResource.EffectCost.CostType != CostType.None)
 				recipe.EffectCost(recipeResource.EffectCost.CostType, recipeResource.EffectCost.Amount);
 
 			if (recipeResource.EffectChance > 0)

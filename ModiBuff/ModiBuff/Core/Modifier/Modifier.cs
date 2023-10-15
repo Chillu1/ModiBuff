@@ -218,7 +218,7 @@ namespace ModiBuff.Core
 			if (_effectStateInfo == null)
 			{
 				Logger.LogWarning("[ModiBuff] Trying to get state info from a modifier that doesn't have any.");
-				return default;
+				return default(TData);
 			}
 
 			return _effectStateInfo.GetEffectState<TData>(stateNumber);
