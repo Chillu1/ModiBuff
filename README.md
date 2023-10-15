@@ -122,15 +122,15 @@ Delta: 0.0167 * N
 
 Pre-allocated Pools
 
-| Library                                               | NoOp* <br/>(1 unit) | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Apply Multi<br/>instance DoT |
-|-------------------------------------------------------|---------------------|--------------------------------|-------------------------------------|------------------------------|
-| ModiBuff (this)                                       | 0.16ms, 0 B         | 0.25ms, 0 B                    | 0.43ms, 0 B                         | 0.88ms, 0 B                  |
-| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | ?                   | 1.02ms, 0 GC                   | ?                                   | X                            |
-| [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                   | 21.4ms, 24 GC                  | ?                                   | X                            |
+| Library                                               | NoOp*<br/>(1 unit) | Apply<br/>InitDmg<br/>(1 unit) | Apply<br/>InitStackDmg<br/>(1 unit) | Apply Multi<br/>instance DoT |
+|-------------------------------------------------------|--------------------|--------------------------------|-------------------------------------|------------------------------|
+| ModiBuff (this)                                       | 0.18ms, 0 B        | 0.26ms, 0 B                    | 0.44ms, 0 B                         | 1.01ms, 0 B                  |
+| [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | ?                  | 1.02ms, 0 GC                   | ?                                   | X                            |
+| [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                  | 21.4ms, 24 GC                  | ?                                   | X                            |
 
 | Library                                               | Update DoT**<br/>(10_000 units, N:1) | Update Instance<br/>Stackable DoT |
 |-------------------------------------------------------|--------------------------------------|-----------------------------------|
-| ModiBuff (this)                                       | 1.61ms, 0 B                          | 0.13ms, 0 B                       |
+| ModiBuff (this)                                       | 1.96ms, 0 B                          | 0.13ms, 0 B                       |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | 0.44ms, 0 B                          | X                                 |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | ?                                    | X                                 |
 
@@ -149,7 +149,7 @@ Pre-allocated Pools
 
 | Library                                               | New<br/>InitDmg<br/>Manual | New<br/>InitDmg<br/>Recipe | New<br/>DoT*<br/>Recipe |
 |-------------------------------------------------------|----------------------------|----------------------------|-------------------------|
-| ModiBuff (this)                                       | 0.76ms, 2.7 MB             | 1.56ms, 3.3 MB             | 3.42ms, 6.5 MB          |
+| ModiBuff (this)                                       | 0.54ms, 2.2 MB             | 1.44ms, 2.8 MB             | 2.99ms, 6.0 MB          |
 | [ModiBuffEcs](https://github.com/Chillu1/ModiBuffEcs) | X                          | 10.4ms,   2 GC             | 16.7ms,   2 GC          |
 | [Old](https://github.com/Chillu1/ModifierLibrary)     | 92.0ms,  90 GC             | X                          | 140 ms, 126 GC          |
 
@@ -157,7 +157,7 @@ Setting up all recipes, with 64 pool allocation per recipe takes 60ns, and 104KB
 
 Pre-allocating 1_000 modifiers of each recipe (currently 100±) takes 67ms, and 35MB.
 
-Pooling in ModiBuff is 700X faster than original old version (because of pool rent & return)  
+Pooling in ModiBuff is 500X faster than original old version (because of pool rent & return)  
 But it's also much faster in cases of doing init/stack/refresh on an existing modifier (we don't create a new modifier
 anymore)  
 ModiBuffEcs is a bit on the slow side for now, because of how pooling works, with enabling and disabling entities.
