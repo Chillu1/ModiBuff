@@ -13,4 +13,11 @@ namespace ModiBuff.Core.Units
 		//MultiplyStacksBased = 16,
 		//SetMultiplierStacksBased = 32, //Multiply all damages?
 	}
+
+	public static class StackEffectTypeExtensions
+	{
+		public static bool UsesMutableState(this StackEffectType stackEffectType) =>
+			(stackEffectType & StackEffectType.Add) == StackEffectType.Add ||
+			(stackEffectType & StackEffectType.AddStacksBased) == StackEffectType.AddStacksBased;
+	}
 }

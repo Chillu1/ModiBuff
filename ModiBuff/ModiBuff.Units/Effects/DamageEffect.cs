@@ -11,6 +11,8 @@ namespace ModiBuff.Core.Units
 		IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
 		IModifierStateInfo<DamageEffect.Data>
 	{
+		public bool UsesMutableState { get; }
+
 		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;
 		private Targeting _targeting;
@@ -22,7 +24,7 @@ namespace ModiBuff.Core.Units
 		private float _extraDamage;
 
 		public DamageEffect(float damage, StackEffectType stackEffect = StackEffectType.Effect)
-			: this(damage, stackEffect, Targeting.TargetSource, null, null)
+			: this(damage, stackEffect, Targeting.TargetSource, null, null, stackEffect.UsesMutableState())
 		{
 		}
 
@@ -32,10 +34,10 @@ namespace ModiBuff.Core.Units
 		public static DamageEffect Create(float damage, StackEffectType stackEffect = StackEffectType.Effect,
 			Targeting targeting = Targeting.TargetSource, IMetaEffect<float, float>[] metaEffects = null,
 			IPostEffect<float>[] postEffects = null) =>
-			new DamageEffect(damage, stackEffect, targeting, metaEffects, postEffects);
+			new DamageEffect(damage, stackEffect, targeting, metaEffects, postEffects, stackEffect.UsesMutableState());
 
 		private DamageEffect(float damage, StackEffectType stackEffect, Targeting targeting,
-			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
+			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects, bool usesMutableState)
 		{
 			_baseDamage = damage;
 			_stackEffect = stackEffect;
@@ -44,6 +46,7 @@ namespace ModiBuff.Core.Units
 			_hasMetaEffects = metaEffects != null;
 			_postEffects = postEffects;
 			_hasPostEffects = postEffects != null;
+			UsesMutableState = usesMutableState;
 		}
 
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
@@ -108,7 +111,7 @@ namespace ModiBuff.Core.Units
 		public void ResetState() => _extraDamage = 0;
 
 		public IEffect ShallowClone() =>
-			new DamageEffect(_baseDamage, _stackEffect, _targeting, _metaEffects, _postEffects);
+			new DamageEffect(_baseDamage, _stackEffect, _targeting, _metaEffects, _postEffects, UsesMutableState);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 

@@ -4,6 +4,7 @@ namespace ModiBuff.Core.Units
 		IEffect, IModifierStateInfo<AddDamageEffect.Data>
 	{
 		public bool IsRevertible { get; }
+		public bool UsesMutableState { get; }
 
 		private readonly float _damage;
 		private readonly StackEffectType _stackEffect;
@@ -15,8 +16,9 @@ namespace ModiBuff.Core.Units
 		private float _totalAddedDamage;
 
 		public AddDamageEffect(float damage, bool revertible = false, bool togglable = false,
-			StackEffectType stackEffect = StackEffectType.Effect) : this(damage, revertible, togglable, stackEffect,
-			Targeting.TargetSource)
+			StackEffectType stackEffect = StackEffectType.Effect) :
+			this(damage, revertible, togglable, stackEffect, Targeting.TargetSource,
+				revertible || togglable || stackEffect.UsesMutableState())
 		{
 		}
 
@@ -25,16 +27,18 @@ namespace ModiBuff.Core.Units
 		/// </summary>
 		public static AddDamageEffect Create(float damage, bool revertible = false, bool togglable = false,
 			StackEffectType stackEffect = StackEffectType.Effect, Targeting targeting = Targeting.TargetSource) =>
-			new AddDamageEffect(damage, revertible, togglable, stackEffect, targeting);
+			new AddDamageEffect(damage, revertible, togglable, stackEffect, targeting,
+				revertible || togglable || stackEffect.UsesMutableState());
 
 		private AddDamageEffect(float damage, bool revertible, bool togglable, StackEffectType stackEffect,
-			Targeting targeting)
+			Targeting targeting, bool usesMutableState)
 		{
 			_damage = damage;
 			IsRevertible = revertible;
 			_isTogglable = togglable;
 			_stackEffect = stackEffect;
 			_targeting = targeting;
+			UsesMutableState = usesMutableState;
 		}
 
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
@@ -87,7 +91,7 @@ namespace ModiBuff.Core.Units
 		}
 
 		public IEffect ShallowClone() =>
-			new AddDamageEffect(_damage, IsRevertible, _isTogglable, _stackEffect, _targeting);
+			new AddDamageEffect(_damage, IsRevertible, _isTogglable, _stackEffect, _targeting, UsesMutableState);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 

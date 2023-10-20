@@ -5,7 +5,7 @@ namespace ModiBuff.Core
 		private readonly IEffect _effect;
 		public readonly EffectOn EffectOn;
 
-		private readonly bool _effectIsCloneable;
+		private readonly bool _effectUsesMutableState;
 		private readonly IShallowClone<IEffect> _effectShallowClone;
 
 		private IEffect _effectClone;
@@ -17,28 +17,23 @@ namespace ModiBuff.Core
 
 			if (_effect is IShallowClone<IEffect> shallowClone)
 			{
-				_effectIsCloneable = true;
+				if (_effect is IMutableStateEffect mutableStateEffect && !mutableStateEffect.UsesMutableState)
+					return;
+
+				_effectUsesMutableState = true;
 				_effectShallowClone = shallowClone;
 			}
 		}
 
 		public IEffect GetEffect()
 		{
-			if (!_effectIsCloneable)
+			if (!_effectUsesMutableState)
 				return _effect;
 
 			if (_effectClone == null)
 				_effectClone = _effectShallowClone.ShallowClone();
 
 			return _effectClone;
-		}
-
-		/// <summary>
-		///		Only called in remove effect wrapper
-		/// </summary>
-		public void UpdateGenId(int genId)
-		{
-			((IModifierGenIdOwner)GetEffect()).SetGenId(genId);
 		}
 
 		public void Reset()

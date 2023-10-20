@@ -4,6 +4,7 @@ namespace ModiBuff.Core.Units
 		IModifierIdOwner, IModifierGenIdOwner, IModifierStateInfo<StatusEffectEffect.Data>
 	{
 		public bool IsRevertible { get; }
+		public bool UsesMutableState { get; }
 
 		private readonly StatusEffectType _statusEffectType;
 		private readonly float _duration;
@@ -16,7 +17,8 @@ namespace ModiBuff.Core.Units
 
 		public StatusEffectEffect(StatusEffectType statusEffectType, float duration, bool revertible = false,
 			StackEffectType stackEffect = StackEffectType.Effect) :
-			this(statusEffectType, duration, revertible, stackEffect, -1, -1)
+			this(statusEffectType, duration, revertible, stackEffect,
+				revertible || stackEffect.UsesMutableState(), -1, -1)
 		{
 		}
 
@@ -25,15 +27,17 @@ namespace ModiBuff.Core.Units
 		/// </summary>
 		public static StatusEffectEffect Create(int id, int genId, StatusEffectType statusEffectType, float duration,
 			bool revertible = false, StackEffectType stackEffect = StackEffectType.Effect) =>
-			new StatusEffectEffect(statusEffectType, duration, revertible, stackEffect, id, genId);
+			new StatusEffectEffect(statusEffectType, duration, revertible, stackEffect,
+				revertible || stackEffect.UsesMutableState(), id, genId);
 
 		private StatusEffectEffect(StatusEffectType statusEffectType, float duration, bool revertible,
-			StackEffectType stackEffect, int id, int genId)
+			StackEffectType stackEffect, bool usesMutableState, int id, int genId)
 		{
 			_statusEffectType = statusEffectType;
 			_duration = duration;
 			IsRevertible = revertible;
 			_stackEffect = stackEffect;
+			UsesMutableState = usesMutableState;
 			_id = id;
 			_genId = genId;
 		}
@@ -89,8 +93,8 @@ namespace ModiBuff.Core.Units
 			_totalDuration = 0;
 		}
 
-		public IEffect ShallowClone() =>
-			new StatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect, _id, _genId);
+		public IEffect ShallowClone() => new StatusEffectEffect(_statusEffectType, _duration, IsRevertible,
+			_stackEffect, UsesMutableState, _id, _genId);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 

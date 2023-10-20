@@ -7,6 +7,7 @@ namespace ModiBuff.Core.Units
 		IModifierStateInfo<HealEffect.Data>
 	{
 		public bool IsRevertible { get; }
+		public bool UsesMutableState { get; }
 
 		private readonly float _heal;
 		private readonly StackEffectType _stackEffect;
@@ -20,7 +21,7 @@ namespace ModiBuff.Core.Units
 		private float _totalHeal;
 
 		public HealEffect(float heal, bool revertible = false, StackEffectType stack = StackEffectType.Effect) :
-			this(heal, revertible, stack, Targeting.TargetSource, null, null)
+			this(heal, revertible, stack, Targeting.TargetSource, null, null, revertible || stack.UsesMutableState())
 		{
 		}
 
@@ -30,10 +31,11 @@ namespace ModiBuff.Core.Units
 		public static HealEffect Create(float heal, bool revertible = false,
 			StackEffectType stack = StackEffectType.Effect, Targeting targeting = Targeting.TargetSource,
 			IMetaEffect<float, float>[] metaEffects = null, IPostEffect<float>[] postEffects = null) =>
-			new HealEffect(heal, revertible, stack, targeting, metaEffects, postEffects);
+			new HealEffect(heal, revertible, stack, targeting, metaEffects, postEffects,
+				revertible || stack.UsesMutableState());
 
 		private HealEffect(float heal, bool revertible, StackEffectType stack, Targeting targeting,
-			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
+			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects, bool usesMutableState)
 		{
 			_heal = heal;
 			IsRevertible = revertible;
@@ -43,6 +45,7 @@ namespace ModiBuff.Core.Units
 			_hasMetaEffects = metaEffects != null;
 			_postEffects = postEffects;
 			_hasPostEffects = postEffects != null;
+			UsesMutableState = usesMutableState;
 		}
 
 		public void SetTargeting(Targeting targeting) => _targeting = targeting;
@@ -114,7 +117,7 @@ namespace ModiBuff.Core.Units
 		}
 
 		public IEffect ShallowClone() =>
-			new HealEffect(_heal, IsRevertible, _stackEffect, _targeting, _metaEffects, _postEffects);
+			new HealEffect(_heal, IsRevertible, _stackEffect, _targeting, _metaEffects, _postEffects, UsesMutableState);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 

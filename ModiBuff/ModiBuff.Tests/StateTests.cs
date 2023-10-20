@@ -205,6 +205,35 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+		public void AddDamageOnStack_NoMutableState()
+		{
+			AddRecipe("StackAddDamage")
+				.Effect(new AddDamageEffect(5, stackEffect: StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always)
+				.Remove(5);
+			Setup();
+
+			Unit.AddModifierSelf("StackAddDamage");
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+			Unit.AddModifierSelf("StackAddDamage");
+			Assert.AreEqual(UnitDamage + 5 * 2, Unit.Damage);
+
+			Enemy.AddModifierSelf("StackAddDamage");
+			Assert.AreEqual(EnemyDamage + 5, Enemy.Damage);
+
+			Unit.AddModifierSelf("StackAddDamage");
+			Assert.AreEqual(UnitDamage + 5 * 3, Unit.Damage);
+
+			Unit.Update(5); //Removed
+			Assert.AreEqual(UnitDamage + 5 * 3, Unit.Damage);
+			Enemy.Update(5); //Removed
+			Assert.AreEqual(EnemyDamage + 5, Enemy.Damage);
+
+			Unit.AddModifierSelf("StackAddDamage");
+			Assert.AreEqual(UnitDamage + 5 * 4, Unit.Damage);
+		}
+
+		[Test]
 		public void OneTimeInit_ResetState()
 		{
 			//InitDamageOneTime With1Seconds linger, to not work again (global effect cooldown)
