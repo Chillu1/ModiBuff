@@ -4,7 +4,7 @@ namespace ModiBuff.Core.Units
 		IEffect, IModifierStateInfo<SingleInstanceStatusEffectEffect.Data>
 	{
 		public bool IsRevertible { get; }
-		public bool UsesMutableState { get; }
+		public bool UsesMutableState => IsRevertible || _stackEffect.UsesMutableState();
 
 		private readonly StatusEffectType _statusEffectType;
 		private readonly float _duration;
@@ -15,18 +15,11 @@ namespace ModiBuff.Core.Units
 
 		public SingleInstanceStatusEffectEffect(StatusEffectType statusEffectType, float duration,
 			bool revertible = false, StackEffectType stackEffect = StackEffectType.Effect)
-			: this(statusEffectType, duration, revertible, stackEffect, revertible || stackEffect.UsesMutableState())
-		{
-		}
-
-		private SingleInstanceStatusEffectEffect(StatusEffectType statusEffectType, float duration,
-			bool revertible, StackEffectType stackEffect, bool usesMutableState)
 		{
 			_statusEffectType = statusEffectType;
 			_duration = duration;
 			IsRevertible = revertible;
 			_stackEffect = stackEffect;
-			UsesMutableState = usesMutableState;
 		}
 
 		public void Effect(IUnit target, IUnit source)
@@ -65,8 +58,7 @@ namespace ModiBuff.Core.Units
 		}
 
 		public IEffect ShallowClone() =>
-			new SingleInstanceStatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect,
-				UsesMutableState);
+			new SingleInstanceStatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 
