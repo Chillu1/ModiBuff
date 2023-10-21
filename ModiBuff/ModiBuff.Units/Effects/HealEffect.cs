@@ -13,9 +13,7 @@ namespace ModiBuff.Core.Units
 		private readonly StackEffectType _stackEffect;
 		private Targeting _targeting;
 		private IMetaEffect<float, float>[] _metaEffects;
-		private bool _hasMetaEffects;
 		private IPostEffect<float>[] _postEffects;
-		private bool _hasPostEffects;
 
 		private float _extraHeal;
 		private float _totalHeal;
@@ -42,9 +40,7 @@ namespace ModiBuff.Core.Units
 			_stackEffect = stack;
 			_targeting = targeting;
 			_metaEffects = metaEffects;
-			_hasMetaEffects = metaEffects != null;
 			_postEffects = postEffects;
-			_hasPostEffects = postEffects != null;
 			UsesMutableState = usesMutableState;
 		}
 
@@ -53,14 +49,12 @@ namespace ModiBuff.Core.Units
 		public HealEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
 		{
 			_metaEffects = metaEffects;
-			_hasMetaEffects = true;
 			return this;
 		}
 
 		public HealEffect SetPostEffects(params IPostEffect<float>[] postEffects)
 		{
 			_postEffects = postEffects;
-			_hasPostEffects = true;
 			return this;
 		}
 
@@ -71,7 +65,7 @@ namespace ModiBuff.Core.Units
 
 			float heal = _heal;
 
-			if (_hasMetaEffects)
+			if (_metaEffects != null)
 				foreach (var metaEffect in _metaEffects)
 					heal = metaEffect.Effect(heal, target, source);
 
@@ -79,7 +73,7 @@ namespace ModiBuff.Core.Units
 
 			float returnHeal = Effect(heal, target, source);
 
-			if (_hasPostEffects)
+			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)
 					postEffect.Effect(returnHeal, target, source);
 		}

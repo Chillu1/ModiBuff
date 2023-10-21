@@ -17,9 +17,7 @@ namespace ModiBuff.Core.Units
 		private readonly StackEffectType _stackEffect;
 		private Targeting _targeting;
 		private IMetaEffect<float, float>[] _metaEffects;
-		private bool _hasMetaEffects;
 		private IPostEffect<float>[] _postEffects;
-		private bool _hasPostEffects;
 
 		private float _extraDamage;
 
@@ -43,9 +41,7 @@ namespace ModiBuff.Core.Units
 			_stackEffect = stackEffect;
 			_targeting = targeting;
 			_metaEffects = metaEffects;
-			_hasMetaEffects = metaEffects != null;
 			_postEffects = postEffects;
-			_hasPostEffects = postEffects != null;
 			UsesMutableState = usesMutableState;
 		}
 
@@ -54,14 +50,12 @@ namespace ModiBuff.Core.Units
 		public DamageEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
 		{
 			_metaEffects = metaEffects;
-			_hasMetaEffects = true;
 			return this;
 		}
 
 		public DamageEffect SetPostEffects(params IPostEffect<float>[] postEffects)
 		{
 			_postEffects = postEffects;
-			_hasPostEffects = true;
 			return this;
 		}
 
@@ -75,7 +69,7 @@ namespace ModiBuff.Core.Units
 
 			float damage = _baseDamage;
 
-			if (_hasMetaEffects)
+			if (_metaEffects != null)
 				foreach (var metaEffect in _metaEffects)
 					damage = metaEffect.Effect(damage, target, source);
 
@@ -87,11 +81,9 @@ namespace ModiBuff.Core.Units
 #else
 				((IDamagable<float, float, float, float>)target).TakeDamage(damage, source);
 #endif
-			if (!_hasPostEffects)
-				return;
-
-			foreach (var postEffect in _postEffects)
-				postEffect.Effect(returnDamageInfo, target, source);
+			if (_postEffects != null)
+				foreach (var postEffect in _postEffects)
+					postEffect.Effect(returnDamageInfo, target, source);
 		}
 
 		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
