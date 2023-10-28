@@ -15,7 +15,12 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Manual modifier generation constructor
 		/// </summary>
-		public static RemoveEffect Create(int id, int genId) => new RemoveEffect(id, genId);
+		public static RemoveEffect Create(int id, int genId, params IRevertEffect[] revertibleEffects)
+		{
+			var effect = new RemoveEffect(id, genId);
+			effect.SetRevertibleEffects(revertibleEffects);
+			return effect;
+		}
 
 		private RemoveEffect(int id, int genId)
 		{

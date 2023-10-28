@@ -92,6 +92,42 @@ namespace ModiBuff.Tests
 			Config.PoolSize = Config.DefaultPoolSize;
 		}
 
+		[Test]
+		public void StackTimerAddValueEffect_Pool_Revert()
+		{
+			AddGenerator("AddDamageStackTimer", (id, genId, name, tag) =>
+			{
+				var addDamageEffect =
+					new AddDamageEffect(5, true, stackEffect: StackEffectType.Effect | StackEffectType.Add);
+				var stackComponent = new StackTimerComponent(WhenStackEffect.Always, 6, 2, -1, -1,
+					new IStackEffect[] { addDamageEffect }, null);
+
+				var durationComponent = new DurationComponent(5, false,
+					new IEffect[] { RemoveEffect.Create(id, genId, addDamageEffect) }, false);
+
+				return new Modifier(id, genId, null, null, new ITimeComponent[] { durationComponent }, stackComponent,
+					null, new SingleTargetComponent(), null);
+			});
+			Setup();
+			Pool.Clear();
+			Pool.Allocate(IdManager.GetId("AddDamageStackTimer"), 1);
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2 + 5 + 2 + 2, Unit.Damage);
+
+			Unit.Update(5); //Remove modifier => revert state
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+			Unit.Update(2);
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2 + 5 + 2 + 2, Unit.Damage);
+		}
+
 		//TODO Pool AddedDamage revertible state reset
 	}
 }

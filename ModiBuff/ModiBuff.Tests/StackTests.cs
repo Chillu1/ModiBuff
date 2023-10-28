@@ -88,7 +88,8 @@ namespace ModiBuff.Tests
 		public void StackAddDamageRevertible()
 		{
 			AddRecipe("StackAddDamageRevertible")
-				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
+				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add),
+					EffectOn.Stack)
 				.Stack(WhenStackEffect.Always, value: 2)
 				.Remove(5);
 			Setup();
@@ -142,6 +143,64 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 			Unit.AddModifierSelf("DamageOnMaxStacks");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void StackTimerRevert()
+		{
+			AddGenerator("AddDamageStackTimer", (id, genId, name, tag) =>
+			{
+				var stackComponent = new StackTimerComponent(WhenStackEffect.Always, 5, -1, -1, -1,
+					new IStackEffect[] { new AddDamageEffect(5, true) }, null);
+
+				return new Modifier(id, genId, null, null, null, stackComponent, null, new SingleTargetComponent(),
+					null);
+			});
+			Setup();
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+			Unit.Update(5); //Stack timer expired, remove that stack
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Unit.Update(1);
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 5, Unit.Damage);
+			Unit.Update(4);
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+			Unit.Update(1);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+		}
+
+		[Test]
+		public void StackTimerAddValueEffectRevert()
+		{
+			AddGenerator("AddDamageStackTimer", (id, genId, name, tag) =>
+			{
+				var stackComponent = new StackTimerComponent(WhenStackEffect.Always, 5, 2, -1, -1,
+					new IStackEffect[]
+						{ new AddDamageEffect(5, true, stackEffect: StackEffectType.Effect | StackEffectType.Add) },
+					null);
+
+				return new Modifier(id, genId, null, null, null, stackComponent, null, new SingleTargetComponent(),
+					null);
+			});
+			Setup();
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+			Unit.Update(5);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Unit.Update(1);
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2 + 5 + 2 + 2, Unit.Damage);
+			Unit.Update(4);
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+			Unit.Update(1);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
 		}
 	}
 }

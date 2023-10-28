@@ -22,7 +22,8 @@ namespace ModiBuff.Core
 		private InitComponent _initComponent;
 
 		private readonly ITimeComponent[] _timeComponents;
-		private readonly StackComponent _stackComponent;
+		private readonly IStackComponent _stackComponent;
+		private readonly IStackTimerComponent _stackTimerComponent;
 
 		private readonly ModifierCheck _effectCheck;
 
@@ -34,7 +35,7 @@ namespace ModiBuff.Core
 		private readonly ModifierStateInfo _effectStateInfo;
 
 		public Modifier(int id, int genId, string name, InitComponent? initComponent,
-			ITimeComponent[] timeComponents, StackComponent stackComponent, ModifierCheck effectCheck,
+			ITimeComponent[] timeComponents, IStackComponent stackComponent, ModifierCheck effectCheck,
 			ITargetComponent targetComponent, ModifierStateInfo effectStateInfo)
 		{
 			Id = id;
@@ -49,6 +50,8 @@ namespace ModiBuff.Core
 
 			_timeComponents = timeComponents;
 			_stackComponent = stackComponent;
+			if (stackComponent is IStackTimerComponent stackTimerComponent)
+				_stackTimerComponent = stackTimerComponent;
 			_effectCheck = effectCheck;
 
 			_targetComponent = targetComponent;
@@ -136,6 +139,7 @@ namespace ModiBuff.Core
 		public void Update(float deltaTime)
 		{
 			_effectCheck?.Update(deltaTime);
+			_stackTimerComponent?.Update(deltaTime);
 
 			if (_timeComponents == null)
 				return;
