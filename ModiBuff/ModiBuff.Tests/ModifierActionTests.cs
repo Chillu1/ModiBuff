@@ -48,5 +48,24 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("StackAddDamageStrongHitResetStacks");
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 		}
+
+		[Test]
+		public void AddDamageStackTimers_ResetStacks_RevertEffects()
+		{
+			AddRecipe("AddDamageStackTimerResetStacks")
+				.Effect(new AddDamageEffect(5, true), EffectOn.Stack)
+				.ModifierAction(ModifierAction.ResetStacks, EffectOn.Callback)
+				.Callback(CallbackType.StrongHit)
+				.Stack(WhenStackEffect.Always, independentStackTime: 5);
+			Setup();
+
+			Unit.AddModifierSelf("AddDamageStackTimerResetStacks");
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+			Unit.AddModifierSelf("AddDamageStackTimerResetStacks");
+			Assert.AreEqual(UnitDamage + 5 + 5, Unit.Damage);
+
+			Unit.TakeDamage(UnitHealth * 0.6f, Unit); //Reset stacks
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+		}
 	}
 }

@@ -1,5 +1,7 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
 using ModiBuff.Core;
@@ -7,6 +9,7 @@ using ModiBuff.Core.Units;
 
 namespace ModiBuff.Tests
 {
+	[MemoryDiagnoser]
 	public class BenchTempTests : ModifierBenches
 	{
 		private const int Iterations = (int)1e5;
@@ -40,6 +43,8 @@ namespace ModiBuff.Tests
 		private int _id = 100;
 		private int _genId = 5000;
 		private int StatusEffectTypeInt = 128;
+
+		private IStackEffect[] _stackEffects;
 
 		public override void GlobalSetup()
 		{
@@ -94,7 +99,12 @@ namespace ModiBuff.Tests
 			_callbackTarget = new Unit();
 			_callbackSource = new Unit();
 			_callbackRegisterEffect = new CallbackRegisterEffect<CallbackType>(CallbackType.StrongHit);
-			_callbackNoOpEffect = new NoOpEffect();*/
+			_callbackNoOpEffect = new NoOpEffect();
+
+			_stackEffects = new IStackEffect[]
+			{
+				new AddDamageEffect(5), new AddDamageEffect(5, true)
+			};*/
 		}
 
 		//[Benchmark(Baseline = true)]
@@ -353,6 +363,42 @@ namespace ModiBuff.Tests
 			{
 				string test = "Life steal: " + lifeStealPercent * 100f + "%";
 			}
+		}
+
+		//[Benchmark]
+		public void LinqWhere()
+		{
+			var revertEffects = _stackEffects
+				.Where(x => x is IStackRevertEffect stackRevertEffect && stackRevertEffect.IsRevertible)
+				.Cast<IStackRevertEffect>().ToArray();
+		}
+
+		//[Benchmark]
+		public void TempList()
+		{
+			var revertEffectsList = new List<IStackRevertEffect>();
+			for (int i = 0; i < _stackEffects.Length; i++)
+			{
+				if (_stackEffects[i] is IStackRevertEffect stackRevertEffect && stackRevertEffect.IsRevertible)
+					revertEffectsList.Add(stackRevertEffect);
+			}
+
+			var revertEffects = revertEffectsList.ToArray();
+		}
+
+		//[Benchmark]
+		public void ArrayPool()
+		{
+			var revertEffectsTemp = ArrayPool<IStackRevertEffect>.Shared.Rent(_stackEffects.Length);
+			int revertEffectIndex = 0;
+			for (int i = 0; i < _stackEffects.Length; i++)
+			{
+				if (_stackEffects[i] is IStackRevertEffect stackRevertEffect && stackRevertEffect.IsRevertible)
+					revertEffectsTemp[revertEffectIndex++] = stackRevertEffect;
+			}
+
+			var revertEffects = revertEffectsTemp.AsSpan(0, revertEffectIndex).ToArray();
+			ArrayPool<IStackRevertEffect>.Shared.Return(revertEffectsTemp);
 		}
 	}
 }

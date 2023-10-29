@@ -1,7 +1,7 @@
 namespace ModiBuff.Core.Units
 {
 	public sealed class AddDamageEffect : ITargetEffect, IStackEffect, IStateEffect, IRevertEffect,
-		IEffect, IModifierStateInfo<AddDamageEffect.Data>
+		IStackRevertEffect, IEffect, IModifierStateInfo<AddDamageEffect.Data>
 	{
 		public bool IsRevertible { get; }
 		public bool UsesMutableState => IsRevertible || _isTogglable || _stackEffect.UsesMutableState();
@@ -76,6 +76,23 @@ namespace ModiBuff.Core.Units
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
+		}
+
+		public void RevertStack(int stacks, float value, IUnit target, IUnit source)
+		{
+			if ((_stackEffect & StackEffectType.Effect) != 0)
+			{
+				_totalAddedDamage -= _damage + _extraDamage;
+
+				_targeting.UpdateTarget(ref target, source);
+				((IAddDamage<float>)target).AddDamage(-_damage - _extraDamage);
+			}
+
+			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
+				_extraDamage -= value * stacks;
+
+			if ((_stackEffect & StackEffectType.Add) != 0)
+				_extraDamage -= value;
 		}
 
 		public Data GetEffectData() => new Data(_damage, _extraDamage);

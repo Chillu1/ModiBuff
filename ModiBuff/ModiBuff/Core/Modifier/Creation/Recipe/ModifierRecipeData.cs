@@ -28,6 +28,7 @@ namespace ModiBuff.Core
 		public readonly float StackValue;
 		public readonly int MaxStacks;
 		public readonly int EveryXStacks;
+		public readonly float IndependentStackTime;
 
 		public ModifierRecipeData(int id, string name, List<EffectWrapper> effectWrappers,
 			EffectWrapper removeEffectWrapper, EffectWrapper eventRegisterWrapper,
@@ -35,7 +36,7 @@ namespace ModiBuff.Core
 			bool hasEffectChecks, List<ICheck> effectCheckList, List<Func<IUnit, bool>> applyFuncCheckList,
 			List<Func<IUnit, bool>> effectFuncCheckList, bool isAura, TagType tag, bool oneTimeInit, float interval,
 			float duration, bool refreshDuration, bool refreshInterval, WhenStackEffect whenStackEffect,
-			float stackValue, int maxStacks, int everyXStacks)
+			float stackValue, int maxStacks, int everyXStacks, float independentStackTime)
 		{
 			Id = id;
 			Name = name;
@@ -60,6 +61,7 @@ namespace ModiBuff.Core
 			StackValue = stackValue;
 			MaxStacks = maxStacks;
 			EveryXStacks = everyXStacks;
+			IndependentStackTime = independentStackTime;
 		}
 	}
 }

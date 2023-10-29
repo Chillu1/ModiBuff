@@ -50,7 +50,8 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health); //2 stacks = +4 damage == 4
 
-			Unit.ModifierController.Remove(new ModifierReference(IdManager.GetId("StackBasedDamage"), 0)); //Return to pool
+			Unit.ModifierController.Remove(new ModifierReference(IdManager.GetId("StackBasedDamage"),
+				0)); //Return to pool
 
 			Enemy.AddModifierSelf("StackBasedDamage"); //State should be reset
 			Assert.AreEqual(EnemyHealth - 5 - 2, Enemy.Health);
@@ -90,6 +91,34 @@ namespace ModiBuff.Tests
 			var pool = new ModifierPool(recipes.GetGenerators());
 
 			Config.PoolSize = Config.DefaultPoolSize;
+		}
+
+		[Test]
+		public void StackTimerAddValueEffect_Pool_Revert()
+		{
+			AddRecipe("AddDamageStackTimer")
+				.Effect(new AddDamageEffect(5, true, stackEffect: StackEffectType.Effect | StackEffectType.Add),
+					EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, value: 2, independentStackTime: 6)
+				.Remove(5);
+			Setup();
+			Pool.Clear();
+			Pool.Allocate(IdManager.GetId("AddDamageStackTimer"), 1);
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2 + 5 + 2 + 2, Unit.Damage);
+
+			Unit.Update(5); //Remove modifier => revert state
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+			Unit.Update(2);
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2 + 5 + 2 + 2, Unit.Damage);
 		}
 
 		//TODO Pool AddedDamage revertible state reset

@@ -88,7 +88,8 @@ namespace ModiBuff.Tests
 		public void StackAddDamageRevertible()
 		{
 			AddRecipe("StackAddDamageRevertible")
-				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
+				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add),
+					EffectOn.Stack)
 				.Stack(WhenStackEffect.Always, value: 2)
 				.Remove(5);
 			Setup();
@@ -142,6 +143,53 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 			Unit.AddModifierSelf("DamageOnMaxStacks");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void StackTimerRevert()
+		{
+			AddRecipe("AddDamageStackTimer")
+				.Effect(new AddDamageEffect(5, true), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, independentStackTime: 5);
+			Setup();
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+			Unit.Update(5); //Stack timer expired, remove that stack
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Unit.Update(1);
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 5, Unit.Damage);
+			Unit.Update(4);
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+			Unit.Update(1);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+		}
+
+		[Test]
+		public void StackTimerAddValueEffectRevert()
+		{
+			AddRecipe("AddDamageStackTimer")
+				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add),
+					EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, value: 2, independentStackTime: 5);
+			Setup();
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+			Unit.Update(5);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Unit.Update(1);
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2 + 5 + 2 + 2, Unit.Damage);
+			Unit.Update(4);
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+			Unit.Update(1);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
 		}
 	}
 }
