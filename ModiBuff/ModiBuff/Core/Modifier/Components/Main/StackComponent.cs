@@ -25,7 +25,7 @@ namespace ModiBuff.Core
 		private int _stacks;
 
 		public StackComponent(WhenStackEffect whenStackEffect, float value, int maxStacks,
-			int everyXStacks, IStackEffect[] effects, ModifierCheck check, float independentStackTime = -1)
+			int everyXStacks, float independentStackTime, IStackEffect[] effects, ModifierCheck check)
 		{
 			_whenStackEffect = whenStackEffect;
 			_independentStackTime = independentStackTime;
@@ -83,6 +83,7 @@ namespace ModiBuff.Core
 				}
 
 				_stackTimers.RemoveAt(i);
+				_stacks--;
 			}
 		}
 

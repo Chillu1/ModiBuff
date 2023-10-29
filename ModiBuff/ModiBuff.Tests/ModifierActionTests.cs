@@ -52,21 +52,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddDamageStackTimers_ResetStacks_RevertEffects()
 		{
-			AddGenerator("AddDamageStackTimerResetStacks", (id, genId, name, tag) =>
-			{
-				var initComponent = new InitComponent(true,
-					new IEffect[]
-					{
-						CallbackRegisterEffect<CallbackType>.Create(CallbackType.StrongHit,
-							ModifierActionEffect.Create(id, genId, ModifierAction.ResetStacks))
-					}, null);
-				var stackComponent = new StackComponent(WhenStackEffect.Always, -1, -1, -1,
-					new IStackEffect[] { new AddDamageEffect(5, true, stackEffect: StackEffectType.Effect) }, null,
-					independentStackTime: 5);
-
-				return new Modifier(id, genId, null, initComponent, null, stackComponent, null,
-					new SingleTargetComponent(), null);
-			});
+			AddRecipe("AddDamageStackTimerResetStacks")
+				.Effect(new AddDamageEffect(5, true), EffectOn.Stack)
+				.ModifierAction(ModifierAction.ResetStacks, EffectOn.Callback)
+				.Callback(CallbackType.StrongHit)
+				.Stack(WhenStackEffect.Always, independentStackTime: 5);
 			Setup();
 
 			Unit.AddModifierSelf("AddDamageStackTimerResetStacks");

@@ -96,19 +96,11 @@ namespace ModiBuff.Tests
 		[Test]
 		public void StackTimerAddValueEffect_Pool_Revert()
 		{
-			AddGenerator("AddDamageStackTimer", (id, genId, name, tag) =>
-			{
-				var addDamageEffect =
-					new AddDamageEffect(5, true, stackEffect: StackEffectType.Effect | StackEffectType.Add);
-				var stackComponent = new StackComponent(WhenStackEffect.Always, 2, -1, -1,
-					new IStackEffect[] { addDamageEffect }, null, independentStackTime: 6);
-
-				var durationComponent = new DurationComponent(5, false,
-					new IEffect[] { RemoveEffect.Create(id, genId, addDamageEffect) }, false);
-
-				return new Modifier(id, genId, null, null, new ITimeComponent[] { durationComponent }, stackComponent,
-					null, new SingleTargetComponent(), null);
-			});
+			AddRecipe("AddDamageStackTimer")
+				.Effect(new AddDamageEffect(5, true, stackEffect: StackEffectType.Effect | StackEffectType.Add),
+					EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, value: 2, independentStackTime: 6)
+				.Remove(5);
 			Setup();
 			Pool.Clear();
 			Pool.Allocate(IdManager.GetId("AddDamageStackTimer"), 1);

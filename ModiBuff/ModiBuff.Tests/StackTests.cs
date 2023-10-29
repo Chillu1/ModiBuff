@@ -148,14 +148,9 @@ namespace ModiBuff.Tests
 		[Test]
 		public void StackTimerRevert()
 		{
-			AddGenerator("AddDamageStackTimer", (id, genId, name, tag) =>
-			{
-				var stackComponent = new StackComponent(WhenStackEffect.Always, -1, -1, -1,
-					new IStackEffect[] { new AddDamageEffect(5, true) }, null, independentStackTime: 5);
-
-				return new Modifier(id, genId, null, null, null, stackComponent, null, new SingleTargetComponent(),
-					null);
-			});
+			AddRecipe("AddDamageStackTimer")
+				.Effect(new AddDamageEffect(5, true), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, independentStackTime: 5);
 			Setup();
 
 			Unit.AddModifierSelf("AddDamageStackTimer");
@@ -176,16 +171,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void StackTimerAddValueEffectRevert()
 		{
-			AddGenerator("AddDamageStackTimer", (id, genId, name, tag) =>
-			{
-				var stackComponent = new StackComponent(WhenStackEffect.Always, 2, -1, -1,
-					new IStackEffect[]
-						{ new AddDamageEffect(5, true, stackEffect: StackEffectType.Effect | StackEffectType.Add) },
-					null, independentStackTime: 5);
-
-				return new Modifier(id, genId, null, null, null, stackComponent, null, new SingleTargetComponent(),
-					null);
-			});
+			AddRecipe("AddDamageStackTimer")
+				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add),
+					EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, value: 2, independentStackTime: 5);
 			Setup();
 
 			Unit.AddModifierSelf("AddDamageStackTimer");
