@@ -150,8 +150,8 @@ namespace ModiBuff.Tests
 		{
 			AddGenerator("AddDamageStackTimer", (id, genId, name, tag) =>
 			{
-				var stackComponent = new StackTimerComponent(WhenStackEffect.Always, 5, -1, -1, -1,
-					new IStackEffect[] { new AddDamageEffect(5, true) }, null);
+				var stackComponent = new StackComponent(WhenStackEffect.Always, -1, -1, -1,
+					new IStackEffect[] { new AddDamageEffect(5, true) }, null, independentStackTime: 5);
 
 				return new Modifier(id, genId, null, null, null, stackComponent, null, new SingleTargetComponent(),
 					null);
@@ -178,10 +178,10 @@ namespace ModiBuff.Tests
 		{
 			AddGenerator("AddDamageStackTimer", (id, genId, name, tag) =>
 			{
-				var stackComponent = new StackTimerComponent(WhenStackEffect.Always, 5, 2, -1, -1,
+				var stackComponent = new StackComponent(WhenStackEffect.Always, 2, -1, -1,
 					new IStackEffect[]
 						{ new AddDamageEffect(5, true, stackEffect: StackEffectType.Effect | StackEffectType.Add) },
-					null);
+					null, independentStackTime: 5);
 
 				return new Modifier(id, genId, null, null, null, stackComponent, null, new SingleTargetComponent(),
 					null);

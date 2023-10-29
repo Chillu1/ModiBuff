@@ -5,8 +5,4 @@ namespace ModiBuff.Core
 		void Stack();
 		void ResetStacks();
 	}
-
-	public interface IStackTimerComponent : IStackComponent, IUpdatable
-	{
-	}
 }

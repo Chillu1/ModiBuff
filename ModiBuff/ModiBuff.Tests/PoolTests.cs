@@ -50,7 +50,8 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health); //2 stacks = +4 damage == 4
 
-			Unit.ModifierController.Remove(new ModifierReference(IdManager.GetId("StackBasedDamage"), 0)); //Return to pool
+			Unit.ModifierController.Remove(new ModifierReference(IdManager.GetId("StackBasedDamage"),
+				0)); //Return to pool
 
 			Enemy.AddModifierSelf("StackBasedDamage"); //State should be reset
 			Assert.AreEqual(EnemyHealth - 5 - 2, Enemy.Health);
@@ -99,8 +100,8 @@ namespace ModiBuff.Tests
 			{
 				var addDamageEffect =
 					new AddDamageEffect(5, true, stackEffect: StackEffectType.Effect | StackEffectType.Add);
-				var stackComponent = new StackTimerComponent(WhenStackEffect.Always, 6, 2, -1, -1,
-					new IStackEffect[] { addDamageEffect }, null);
+				var stackComponent = new StackComponent(WhenStackEffect.Always, 2, -1, -1,
+					new IStackEffect[] { addDamageEffect }, null, independentStackTime: 6);
 
 				var durationComponent = new DurationComponent(5, false,
 					new IEffect[] { RemoveEffect.Create(id, genId, addDamageEffect) }, false);

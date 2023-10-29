@@ -60,8 +60,9 @@ namespace ModiBuff.Tests
 						CallbackRegisterEffect<CallbackType>.Create(CallbackType.StrongHit,
 							ModifierActionEffect.Create(id, genId, ModifierAction.ResetStacks))
 					}, null);
-				var stackComponent = new StackTimerComponent(WhenStackEffect.Always, 5, -1, -1, -1,
-					new IStackEffect[] { new AddDamageEffect(5, true, stackEffect: StackEffectType.Effect) }, null);
+				var stackComponent = new StackComponent(WhenStackEffect.Always, -1, -1, -1,
+					new IStackEffect[] { new AddDamageEffect(5, true, stackEffect: StackEffectType.Effect) }, null,
+					independentStackTime: 5);
 
 				return new Modifier(id, genId, null, initComponent, null, stackComponent, null,
 					new SingleTargetComponent(), null);
