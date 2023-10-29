@@ -63,9 +63,9 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5), EffectOn.Interval);
 
 			Add("IntervalDamage_StackAddDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Interval | EffectOn.Stack)
+				.Effect(new DamageEffect(5, StackEffectType.Add, 2), EffectOn.Interval | EffectOn.Stack)
 				.Interval(1)
-				.Stack(WhenStackEffect.Always, value: 2);
+				.Stack(WhenStackEffect.Always);
 
 			Add("InitDamage_CostMana")
 				.ApplyCost(CostType.Mana, 5)

@@ -8,6 +8,7 @@ namespace ModiBuff.Core.Units
 
 		private readonly float _damage;
 		private readonly StackEffectType _stackEffect;
+		private readonly float _stackValue;
 		private readonly bool _isTogglable; //TODO Needs to be revertible to be togglable
 		private Targeting _targeting;
 
@@ -16,8 +17,8 @@ namespace ModiBuff.Core.Units
 		private float _totalAddedDamage;
 
 		public AddDamageEffect(float damage, bool revertible = false, bool togglable = false,
-			StackEffectType stackEffect = StackEffectType.Effect) :
-			this(damage, revertible, togglable, stackEffect, Targeting.TargetSource)
+			StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1) :
+			this(damage, revertible, togglable, stackEffect, stackValue, Targeting.TargetSource)
 		{
 		}
 
@@ -25,16 +26,18 @@ namespace ModiBuff.Core.Units
 		///		Manual modifier generation constructor
 		/// </summary>
 		public static AddDamageEffect Create(float damage, bool revertible = false, bool togglable = false,
-			StackEffectType stackEffect = StackEffectType.Effect, Targeting targeting = Targeting.TargetSource) =>
-			new AddDamageEffect(damage, revertible, togglable, stackEffect, targeting);
+			StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
+			Targeting targeting = Targeting.TargetSource) =>
+			new AddDamageEffect(damage, revertible, togglable, stackEffect, stackValue, targeting);
 
 		private AddDamageEffect(float damage, bool revertible, bool togglable, StackEffectType stackEffect,
-			Targeting targeting)
+			float stackValue, Targeting targeting)
 		{
 			_damage = damage;
 			IsRevertible = revertible;
 			_isTogglable = togglable;
 			_stackEffect = stackEffect;
+			_stackValue = stackValue;
 			_targeting = targeting;
 		}
 
@@ -66,19 +69,19 @@ namespace ModiBuff.Core.Units
 			((IAddDamage<float>)target).AddDamage(-_totalAddedDamage);
 		}
 
-		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
+		public void StackEffect(int stacks, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraDamage += value;
+				_extraDamage += _stackValue;
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_extraDamage += value * stacks;
+				_extraDamage += _stackValue * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
 		}
 
-		public void RevertStack(int stacks, float value, IUnit target, IUnit source)
+		public void RevertStack(int stacks, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 			{
@@ -89,10 +92,10 @@ namespace ModiBuff.Core.Units
 			}
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_extraDamage -= value * stacks;
+				_extraDamage -= _stackValue * stacks;
 
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraDamage -= value;
+				_extraDamage -= _stackValue;
 		}
 
 		public Data GetEffectData() => new Data(_damage, _extraDamage);
@@ -105,7 +108,7 @@ namespace ModiBuff.Core.Units
 		}
 
 		public IEffect ShallowClone() =>
-			new AddDamageEffect(_damage, IsRevertible, _isTogglable, _stackEffect, _targeting);
+			new AddDamageEffect(_damage, IsRevertible, _isTogglable, _stackEffect, _stackValue, _targeting);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 

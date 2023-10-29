@@ -42,8 +42,8 @@ namespace ModiBuff.Tests
 		public void DamageOnMaxStacks()
 		{
 			AddRecipe("DamageOnMaxStacks")
-				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
-				.Stack(WhenStackEffect.OnMaxStacks, value: -1, maxStacks: 2);
+				.Effect(new DamageEffect(5), EffectOn.Stack)
+				.Stack(WhenStackEffect.OnMaxStacks, maxStacks: 2);
 			Setup();
 
 			Unit.AddModifierSelf("DamageOnMaxStacks");
@@ -56,8 +56,8 @@ namespace ModiBuff.Tests
 		public void DamageEveryTwoStacks()
 		{
 			AddRecipe("DamageEveryTwoStacks")
-				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
-				.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2);
+				.Effect(new DamageEffect(5), EffectOn.Stack)
+				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2);
 			Setup();
 
 			Unit.AddModifierSelf("DamageEveryTwoStacks");
@@ -74,8 +74,8 @@ namespace ModiBuff.Tests
 		public void Stack_DamageStackBased()
 		{
 			AddRecipe("StackBasedDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
-				.Stack(WhenStackEffect.Always, value: 2);
+				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always);
 			Setup();
 
 			Unit.AddModifierSelf("StackBasedDamage");
@@ -88,9 +88,9 @@ namespace ModiBuff.Tests
 		public void StackAddDamageRevertible()
 		{
 			AddRecipe("StackAddDamageRevertible")
-				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add),
+				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add, 2),
 					EffectOn.Stack)
-				.Stack(WhenStackEffect.Always, value: 2)
+				.Stack(WhenStackEffect.Always)
 				.Remove(5);
 			Setup();
 
@@ -131,8 +131,8 @@ namespace ModiBuff.Tests
 		public void DamageOnMaxStacks_Limit()
 		{
 			AddRecipe("DamageOnMaxStacks")
-				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
-				.Stack(WhenStackEffect.OnMaxStacks, value: -1, maxStacks: 2);
+				.Effect(new DamageEffect(5), EffectOn.Stack)
+				.Stack(WhenStackEffect.OnMaxStacks, maxStacks: 2);
 			Setup();
 
 			Unit.AddModifierSelf("DamageOnMaxStacks");
@@ -172,9 +172,9 @@ namespace ModiBuff.Tests
 		public void StackTimerAddValueEffectRevert()
 		{
 			AddRecipe("AddDamageStackTimer")
-				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add),
+				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add, 2),
 					EffectOn.Stack)
-				.Stack(WhenStackEffect.Always, value: 2, independentStackTime: 5);
+				.Stack(WhenStackEffect.Always, independentStackTime: 5);
 			Setup();
 
 			Unit.AddModifierSelf("AddDamageStackTimer");

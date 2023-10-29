@@ -37,8 +37,8 @@ namespace ModiBuff.Tests
 		public void StackStateReset()
 		{
 			AddRecipe("StackBasedDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
-				.Stack(WhenStackEffect.Always, value: 2);
+				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always);
 			Setup();
 
 			Pool.Clear();
@@ -97,9 +97,9 @@ namespace ModiBuff.Tests
 		public void StackTimerAddValueEffect_Pool_Revert()
 		{
 			AddRecipe("AddDamageStackTimer")
-				.Effect(new AddDamageEffect(5, true, stackEffect: StackEffectType.Effect | StackEffectType.Add),
+				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add, 2),
 					EffectOn.Stack)
-				.Stack(WhenStackEffect.Always, value: 2, independentStackTime: 6)
+				.Stack(WhenStackEffect.Always, independentStackTime: 6)
 				.Remove(5);
 			Setup();
 			Pool.Clear();

@@ -104,8 +104,8 @@ namespace ModiBuff.Tests
 		public void DamageEveryTwoStacks_Twice()
 		{
 			AddRecipe("DamageEveryTwoStacks")
-				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
-				.Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2);
+				.Effect(new DamageEffect(5), EffectOn.Stack)
+				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2);
 			Setup();
 
 			DoAndAssert(UnitHealth, Unit);
@@ -134,8 +134,8 @@ namespace ModiBuff.Tests
 		public void Stack_DamageStackBased()
 		{
 			AddRecipe("StackBasedDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
-				.Stack(WhenStackEffect.Always, value: 2);
+				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always);
 			Setup();
 
 			Unit.AddModifierSelf("StackBasedDamage");
@@ -154,9 +154,9 @@ namespace ModiBuff.Tests
 		public void IntervalDamage_AddDamageOnStack()
 		{
 			AddRecipe("IntervalDamage_StackAddDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Interval | EffectOn.Stack)
+				.Effect(new DamageEffect(5, StackEffectType.Add, 2), EffectOn.Interval | EffectOn.Stack)
 				.Interval(1)
-				.Stack(WhenStackEffect.Always, value: 2);
+				.Stack(WhenStackEffect.Always);
 			Setup();
 
 			Unit.AddModifierSelf("IntervalDamage_StackAddDamage");
@@ -176,9 +176,9 @@ namespace ModiBuff.Tests
 		public void AddDamageOnStack_RevertibleRemove()
 		{
 			AddRecipe("StackAddDamageRevertible")
-				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add),
+				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add, 2),
 					EffectOn.Stack)
-				.Stack(WhenStackEffect.Always, value: 2)
+				.Stack(WhenStackEffect.Always)
 				.Remove(5);
 			Setup();
 

@@ -15,14 +15,15 @@ namespace ModiBuff.Core.Units
 
 		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;
+		private readonly float _stackValue;
 		private Targeting _targeting;
 		private IMetaEffect<float, float>[] _metaEffects;
 		private IPostEffect<float>[] _postEffects;
 
 		private float _extraDamage;
 
-		public DamageEffect(float damage, StackEffectType stackEffect = StackEffectType.Effect)
-			: this(damage, stackEffect, Targeting.TargetSource, null, null)
+		public DamageEffect(float damage, StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1)
+			: this(damage, stackEffect, stackValue, Targeting.TargetSource, null, null)
 		{
 		}
 
@@ -30,15 +31,16 @@ namespace ModiBuff.Core.Units
 		///		Manual modifier generation constructor
 		/// </summary>
 		public static DamageEffect Create(float damage, StackEffectType stackEffect = StackEffectType.Effect,
-			Targeting targeting = Targeting.TargetSource, IMetaEffect<float, float>[] metaEffects = null,
-			IPostEffect<float>[] postEffects = null) =>
-			new DamageEffect(damage, stackEffect, targeting, metaEffects, postEffects);
+			float stackValue = -1, Targeting targeting = Targeting.TargetSource,
+			IMetaEffect<float, float>[] metaEffects = null, IPostEffect<float>[] postEffects = null) =>
+			new DamageEffect(damage, stackEffect, stackValue, targeting, metaEffects, postEffects);
 
-		private DamageEffect(float damage, StackEffectType stackEffect, Targeting targeting,
+		private DamageEffect(float damage, StackEffectType stackEffect, float stackValue, Targeting targeting,
 			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
 		{
 			_baseDamage = damage;
 			_stackEffect = stackEffect;
+			_stackValue = stackValue;
 			_targeting = targeting;
 			_metaEffects = metaEffects;
 			_postEffects = postEffects;
@@ -85,13 +87,13 @@ namespace ModiBuff.Core.Units
 					postEffect.Effect(returnDamageInfo, target, source);
 		}
 
-		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
+		public void StackEffect(int stacks, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraDamage += value;
+				_extraDamage += _stackValue;
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_extraDamage += value * stacks;
+				_extraDamage += _stackValue * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
@@ -102,7 +104,7 @@ namespace ModiBuff.Core.Units
 		public void ResetState() => _extraDamage = 0;
 
 		public IEffect ShallowClone() =>
-			new DamageEffect(_baseDamage, _stackEffect, _targeting, _metaEffects, _postEffects);
+			new DamageEffect(_baseDamage, _stackEffect, _stackValue, _targeting, _metaEffects, _postEffects);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 

@@ -25,7 +25,6 @@ namespace ModiBuff.Core
 		private readonly bool _refreshInterval;
 
 		private readonly WhenStackEffect _whenStackEffect;
-		private readonly float _stackValue;
 		private readonly int _maxStacks;
 		private readonly int _everyXStacks;
 		private readonly float _independentStackTime;
@@ -73,7 +72,6 @@ namespace ModiBuff.Core
 			_refreshDuration = data.RefreshDuration;
 			_refreshInterval = data.RefreshInterval;
 			_whenStackEffect = data.WhenStackEffect;
-			_stackValue = data.StackValue;
 			_maxStacks = data.MaxStacks;
 			_everyXStacks = data.EveryXStacks;
 			_independentStackTime = data.IndependentStackTime;
@@ -180,7 +178,7 @@ namespace ModiBuff.Core
 					!_tag.HasTag(TagType.DurationIgnoresStatusResistance));
 
 			if (effects.StackEffects != null)
-				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks,
+				stackComponent = new StackComponent(_whenStackEffect, _maxStacks,
 					_everyXStacks, _independentStackTime, effects.StackEffects, effectCheck);
 
 			ITargetComponent targetComponent;

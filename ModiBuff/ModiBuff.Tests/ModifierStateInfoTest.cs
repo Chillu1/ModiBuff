@@ -43,8 +43,8 @@ namespace ModiBuff.Tests
 			AddRecipe("DoubleStackDamage")
 				.Interval(1)
 				.Effect(new DamageEffect(5), EffectOn.Init | EffectOn.Interval)
-				.Effect(new DamageEffect(10, StackEffectType.Add), EffectOn.Stack)
-				.Stack(WhenStackEffect.Always, value: 2);
+				.Effect(new DamageEffect(10, StackEffectType.Add, 2), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always);
 			Setup();
 
 			int id = IdManager.GetId("DoubleStackDamage");

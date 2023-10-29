@@ -44,7 +44,7 @@ namespace ModiBuff.Core
 			((IModifierOwner)target).ModifierController.Add(_modifierId, target, source);
 		}
 
-		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
+		public void StackEffect(int stacks, IUnit target, IUnit source)
 		{
 			//Applier effect can't have different ways of using stacks/value
 			Effect(target, source);

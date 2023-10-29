@@ -41,8 +41,8 @@ namespace ModiBuff.Core.Units
 					.Effect(new ApplierEffect("StackingDamage"), EffectOn.Init);
 
 				Add("StackingDamage")
-					.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
-					.Stack(WhenStackEffect.Always, value: 2, maxStacks: -1)
+					.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
+					.Stack(WhenStackEffect.Always)
 					.Remove(5).Refresh();
 			}
 

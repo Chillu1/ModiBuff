@@ -11,6 +11,7 @@ namespace ModiBuff.Core.Units
 
 		private readonly float _heal;
 		private readonly StackEffectType _stackEffect;
+		private readonly float _stackValue;
 		private Targeting _targeting;
 		private IMetaEffect<float, float>[] _metaEffects;
 		private IPostEffect<float>[] _postEffects;
@@ -18,8 +19,8 @@ namespace ModiBuff.Core.Units
 		private float _extraHeal;
 		private float _totalHeal;
 
-		public HealEffect(float heal, bool revertible = false, StackEffectType stack = StackEffectType.Effect) :
-			this(heal, revertible, stack, Targeting.TargetSource, null, null)
+		public HealEffect(float heal, bool revertible = false, StackEffectType stack = StackEffectType.Effect,
+			float stackValue = -1) : this(heal, revertible, stack, stackValue, Targeting.TargetSource, null, null)
 		{
 		}
 
@@ -27,16 +28,18 @@ namespace ModiBuff.Core.Units
 		///		Manual modifier generation constructor
 		/// </summary>
 		public static HealEffect Create(float heal, bool revertible = false,
-			StackEffectType stack = StackEffectType.Effect, Targeting targeting = Targeting.TargetSource,
-			IMetaEffect<float, float>[] metaEffects = null, IPostEffect<float>[] postEffects = null) =>
-			new HealEffect(heal, revertible, stack, targeting, metaEffects, postEffects);
+			StackEffectType stack = StackEffectType.Effect, float stackValue = -1,
+			Targeting targeting = Targeting.TargetSource, IMetaEffect<float, float>[] metaEffects = null,
+			IPostEffect<float>[] postEffects = null) =>
+			new HealEffect(heal, revertible, stack, stackValue, targeting, metaEffects, postEffects);
 
-		private HealEffect(float heal, bool revertible, StackEffectType stack, Targeting targeting,
+		private HealEffect(float heal, bool revertible, StackEffectType stack, float stackValue, Targeting targeting,
 			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
 		{
 			_heal = heal;
 			IsRevertible = revertible;
 			_stackEffect = stack;
+			_stackValue = stackValue;
 			_targeting = targeting;
 			_metaEffects = metaEffects;
 			_postEffects = postEffects;
@@ -88,13 +91,13 @@ namespace ModiBuff.Core.Units
 			return ((IHealable<float, float>)target).Heal(value, source);
 		}
 
-		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
+		public void StackEffect(int stacks, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_totalHeal += value;
+				_totalHeal += _stackValue;
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_totalHeal += value * stacks;
+				_totalHeal += _stackValue * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
@@ -109,7 +112,7 @@ namespace ModiBuff.Core.Units
 		}
 
 		public IEffect ShallowClone() =>
-			new HealEffect(_heal, IsRevertible, _stackEffect, _targeting, _metaEffects, _postEffects);
+			new HealEffect(_heal, IsRevertible, _stackEffect, _stackValue, _targeting, _metaEffects, _postEffects);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 

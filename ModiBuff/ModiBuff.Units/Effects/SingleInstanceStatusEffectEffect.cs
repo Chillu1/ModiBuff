@@ -9,17 +9,19 @@ namespace ModiBuff.Core.Units
 		private readonly StatusEffectType _statusEffectType;
 		private readonly float _duration;
 		private readonly StackEffectType _stackEffect;
+		private readonly float _stackValue;
 
 		private float _extraDuration;
 		private float _totalDuration;
 
 		public SingleInstanceStatusEffectEffect(StatusEffectType statusEffectType, float duration,
-			bool revertible = false, StackEffectType stackEffect = StackEffectType.Effect)
+			bool revertible = false, StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1)
 		{
 			_statusEffectType = statusEffectType;
 			_duration = duration;
 			IsRevertible = revertible;
 			_stackEffect = stackEffect;
+			_stackValue = stackValue;
 		}
 
 		public void Effect(IUnit target, IUnit source)
@@ -37,13 +39,13 @@ namespace ModiBuff.Core.Units
 				.DecreaseStatusEffect(_statusEffectType, _totalDuration);
 		}
 
-		public void StackEffect(int stacks, float value, IUnit target, IUnit source)
+		public void StackEffect(int stacks, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraDuration += value;
+				_extraDuration += _stackValue;
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_extraDuration += value * stacks;
+				_extraDuration += _stackValue * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
@@ -58,7 +60,7 @@ namespace ModiBuff.Core.Units
 		}
 
 		public IEffect ShallowClone() =>
-			new SingleInstanceStatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect);
+			new SingleInstanceStatusEffectEffect(_statusEffectType, _duration, IsRevertible, _stackEffect, _stackValue);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 

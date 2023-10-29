@@ -136,8 +136,8 @@ namespace ModiBuff.Extensions.Godot
 				recipe.Refresh(recipeResource.RefreshType.GetModiBuffRefreshType());
 
 			if (recipeResource.StackResource != null)
-				recipe.Stack(recipeResource.StackResource.WhenStackEffect, recipeResource.StackResource.Value,
-					recipeResource.StackResource.MaxStacks, recipeResource.StackResource.EveryXStacks);
+				recipe.Stack(recipeResource.StackResource.WhenStackEffect, recipeResource.StackResource.MaxStacks,
+					recipeResource.StackResource.EveryXStacks);
 
 			//---Effects---
 

@@ -13,12 +13,6 @@ namespace ModiBuff.Extensions.Godot
 		public WhenStackEffect WhenStackEffect { get; set; }
 
 		/// <summary>
-		///		Values that can be used by the stack effects.
-		/// </summary>
-		[Export]
-		public float Value { get; set; } = -1;
-
-		/// <summary>
 		///		Max amount of stacks that can be applied.
 		/// </summary>
 		[Export]

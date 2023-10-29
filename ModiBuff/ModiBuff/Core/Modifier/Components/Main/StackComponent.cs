@@ -11,7 +11,6 @@ namespace ModiBuff.Core
 
 		private readonly WhenStackEffect _whenStackEffect;
 		private readonly float _independentStackTime;
-		private readonly float _value;
 		private readonly int _maxStacks;
 		private readonly int _everyXStacks;
 		private readonly IStackEffect[] _effects;
@@ -24,14 +23,13 @@ namespace ModiBuff.Core
 
 		private int _stacks;
 
-		public StackComponent(WhenStackEffect whenStackEffect, float value, int maxStacks,
-			int everyXStacks, float independentStackTime, IStackEffect[] effects, ModifierCheck check)
+		public StackComponent(WhenStackEffect whenStackEffect, int maxStacks, int everyXStacks,
+			float independentStackTime, IStackEffect[] effects, ModifierCheck check)
 		{
 			_whenStackEffect = whenStackEffect;
 			_independentStackTime = independentStackTime;
 			if (_independentStackTime > 0)
 				_stackTimers = new List<float>();
-			_value = value;
 			_maxStacks = maxStacks;
 			_everyXStacks = everyXStacks;
 
@@ -71,13 +69,13 @@ namespace ModiBuff.Core
 				{
 					case SingleTargetComponent singleTargetComponent:
 						for (int j = 0; j < _revertEffects.Length; j++)
-							_revertEffects[j].RevertStack(_stacks, _value, singleTargetComponent.Target,
+							_revertEffects[j].RevertStack(_stacks, singleTargetComponent.Target,
 								singleTargetComponent.Source);
 						break;
 					case MultiTargetComponent multiTargetComponent:
 						for (int j = 0; j < _revertEffects.Length; j++)
 						for (int k = 0; k < multiTargetComponent.Targets.Count; k++)
-							_revertEffects[j].RevertStack(_stacks, _value, multiTargetComponent.Targets[k],
+							_revertEffects[j].RevertStack(_stacks, multiTargetComponent.Targets[k],
 								multiTargetComponent.Source);
 						break;
 				}
@@ -143,17 +141,26 @@ namespace ModiBuff.Core
 				switch (_targetComponent)
 				{
 					case SingleTargetComponent singleTargetComponent:
-						for (int i = 0; i < _revertEffects.Length; i++)
-						for (int j = 0; j < stackCount; j++)
-							_revertEffects[i].RevertStack(_stacks, _value, singleTargetComponent.Target,
-								singleTargetComponent.Source);
+						for (int i = 0; i < stackCount; i++)
+						{
+							for (int j = 0; j < _revertEffects.Length; j++)
+								_revertEffects[j].RevertStack(_stacks, singleTargetComponent.Target,
+									singleTargetComponent.Source);
+							_stacks--;
+						}
+
 						break;
 					case MultiTargetComponent multiTargetComponent:
-						for (int i = 0; i < _revertEffects.Length; i++)
-						for (int j = 0; j < multiTargetComponent.Targets.Count; j++)
-						for (int k = 0; k < stackCount; k++)
-							_revertEffects[i].RevertStack(_stacks, _value, multiTargetComponent.Targets[j],
-								multiTargetComponent.Source);
+						for (int i = 0; i < stackCount; i++)
+						{
+							for (int j = 0; j < _revertEffects.Length; j++)
+							for (int k = 0; k < multiTargetComponent.Targets.Count; k++)
+								_revertEffects[j].RevertStack(_stacks, multiTargetComponent.Targets[k],
+									multiTargetComponent.Source);
+
+							_stacks--;
+						}
+
 						break;
 				}
 			}
@@ -176,13 +183,11 @@ namespace ModiBuff.Core
 				case MultiTargetComponent multiTargetComponent:
 					for (int i = 0; i < length; i++)
 					for (int j = 0; j < multiTargetComponent.Targets.Count; j++)
-						_effects[i].StackEffect(_stacks, _value, multiTargetComponent.Targets[j],
-							multiTargetComponent.Source);
+						_effects[i].StackEffect(_stacks, multiTargetComponent.Targets[j], multiTargetComponent.Source);
 					break;
 				case SingleTargetComponent singleTargetComponent:
 					for (int i = 0; i < length; i++)
-						_effects[i].StackEffect(_stacks, _value, singleTargetComponent.Target,
-							singleTargetComponent.Source);
+						_effects[i].StackEffect(_stacks, singleTargetComponent.Target, singleTargetComponent.Source);
 					break;
 			}
 		}

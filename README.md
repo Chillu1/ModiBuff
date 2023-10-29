@@ -345,7 +345,7 @@ Add("DamageOverTimeRefreshableDuration")
 
 ### Stack
 
-Then there's `Stack(WhenStackEffect whenStackEffect, float value, int maxStacks, int everyXStacks)`.
+Then there's `Stack(WhenStackEffect whenStackEffect, int maxStacks, int everyXStacks)`.
 It's used for tracking how many times the modifier has been re-added to the unit, or other stacking logic.
 
 `WhenStackEffect` tells the modifier when the stack action should be triggered: Always, OnMaxStacks, EveryXStacks,
@@ -359,8 +359,8 @@ Resulting in 7 damage every 1 second with 1 stack. 9 with 2 stacks, etc.
 ```csharp
 Add("StackableDamage_DamageOverTime")
     .Interval(1)
-    .Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Interval)
-    .Stack(WhenStackEffect.Always, value: 2);
+    .Effect(new DamageEffect(5, StackEffectType.Add, 2), EffectOn.Interval)
+    .Stack(WhenStackEffect.Always);
 ```
 
 ### OneTimeInit & Aura
