@@ -56,13 +56,11 @@ namespace ModiBuff.Core
 			for (int i = 0; i < modifiersTop; i++)
 				_modifiers[i].Update(delta);
 
-			if (_modifierCastChecksAppliers.Count > 0)
-				foreach (var check in _modifierCastChecksAppliers.Values)
-					check.Update(delta);
+			foreach (var check in _modifierCastChecksAppliers.Values)
+				check.Update(delta);
 
-			if (_modifierAttackChecksAppliers.Count > 0)
-				foreach (var check in _modifierAttackChecksAppliers.Values)
-					check.Update(delta);
+			foreach (var check in _modifierAttackChecksAppliers.Values)
+				check.Update(delta);
 
 			int removeCount = _modifiersToRemove.Count;
 			if (removeCount == 0)
