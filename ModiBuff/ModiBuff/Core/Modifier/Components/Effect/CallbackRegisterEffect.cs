@@ -4,7 +4,7 @@ namespace ModiBuff.Core
 	///		Registers a callback of effects to the target, for non-IEffect version see <see cref="CallbackRegisterDelegateEffect{TCallback}"/>
 	/// </summary>
 	public sealed class CallbackRegisterEffect<TCallback> : IRecipeFeedEffects, IRevertEffect, IEffect,
-		IShallowClone<CallbackRegisterEffect<TCallback>>
+		IShallowClone<CallbackRegisterEffect<TCallback>>, IStateReset
 	{
 		//Callback register should always be revertible, since we're using IEffect instances that will be pooled back 
 		public bool IsRevertible => true;
@@ -12,6 +12,8 @@ namespace ModiBuff.Core
 		private readonly TCallback _callbackType;
 
 		private IEffect[] _callbacks;
+
+		private bool _isRegistered;
 
 		public CallbackRegisterEffect(TCallback callbackType)
 		{
@@ -39,12 +41,22 @@ namespace ModiBuff.Core
 				Logger.LogError("[ModiBuff] Callback wasn't set");
 #endif
 
+			if (_isRegistered)
+				return;
+
 			((ICallbackRegistrable<TCallback>)target).RegisterCallbacks(_callbackType, _callbacks);
+			_isRegistered = true;
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
 			((ICallbackRegistrable<TCallback>)target).UnRegisterCallbacks(_callbackType, _callbacks);
+			_isRegistered = false;
+		}
+
+		public void ResetState()
+		{
+			_isRegistered = false;
 		}
 
 		public CallbackRegisterEffect<TCallback> ShallowClone() =>

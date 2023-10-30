@@ -13,6 +13,9 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(float value, IUnit target, IUnit source)
 		{
+			if (!((IUnitEntity)target).UnitTag.HasTag(UnitTag.Lifestealable))
+				return;
+
 			_targeting.UpdateTargetSource(ref target, ref source);
 
 			((IHealable<float, float>)target).Heal(value * _lifeStealPercent, source);

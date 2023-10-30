@@ -62,6 +62,8 @@ namespace ModiBuff.Tests
 			Assert.That(averageDamage, Is.InRange(1f, 4f));
 		}
 
+		//DurationComp should not have modifier checks, cuz remove comp might be there, and that should always be called.
+		//Fix this somehow (through recipes)
 		//[Test]
 		public void Random_DurationDamage_Effect()
 		{

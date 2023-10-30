@@ -196,5 +196,57 @@ namespace ModiBuff.Tests
 			Unit.TakeDamage(UnitHealth * 0.6f, Unit);
 			Assert.AreEqual(UnitHealth * 0.4f, Unit.Health);
 		}
+
+		[Test]
+		public void Init_AddDamage_HalfHealth_TriggerCallback_RemoveAndRevertRecipe_Twice()
+		{
+			AddRecipe("InitAddDamageRevertibleHalfHealthCallback")
+				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				.Remove(RemoveEffectOn.Callback)
+				.Callback(CallbackType.StrongHit);
+			Setup();
+
+			Unit.AddModifierSelf("InitAddDamageRevertibleHalfHealthCallback");
+			Unit.AddModifierSelf("InitAddDamageRevertibleHalfHealthCallback");
+			Assert.AreEqual(UnitDamage + 5 + 5, Unit.Damage);
+
+			//Take enough damage to trigger the callback
+			Unit.TakeDamage(UnitHealth * 0.6f, Unit);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+
+			Unit.TakeDamage(UnitHealth * 0.6f, Unit);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+		}
+
+		[Test]
+		public void Init_RegisterCallbackHealToFullWhenTakingStrongHitRevert_Twice()
+		{
+			AddRecipe("InitHealToFullHalfHealthCallback")
+				.Callback(CallbackType.StrongHit, (target, source) =>
+				{
+					var damageable = (IDamagable<float, float>)target;
+					((IHealable<float, float>)target).Heal(damageable.MaxHealth - damageable.Health, source);
+				})
+				.Remove(1);
+			Setup();
+
+			Unit.AddModifierSelf("InitHealToFullHalfHealthCallback");
+			Unit.AddModifierSelf("InitHealToFullHalfHealthCallback");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			//Take enough damage to trigger the callback
+			Unit.TakeDamage(UnitHealth * 0.6f, Unit); //Takes 60% of max hp damage, triggers callback, heals to full
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.Update(1);
+			Unit.TakeDamage(UnitHealth * 0.6f, Unit);
+			Assert.AreEqual(UnitHealth * 0.4f, Unit.Health);
+
+			Unit.Heal(UnitHealth, Unit);
+
+			Unit.Update(1);
+			Unit.TakeDamage(UnitHealth * 0.6f, Unit);
+			Assert.AreEqual(UnitHealth * 0.4f, Unit.Health);
+		}
 	}
 }

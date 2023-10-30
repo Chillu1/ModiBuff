@@ -20,6 +20,7 @@ namespace ModiBuff.Core.Units
 		ICallbackRegistrable<CallbackType>, IReactable<ReactType>, IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>
 	{
+		public UnitTag UnitTag { get; private set; }
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
 		public float Damage { get; private set; }
@@ -64,8 +65,10 @@ namespace ModiBuff.Core.Units
 		private readonly MultiInstanceStatusEffectController _statusEffectController;
 
 		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000,
-			UnitType unitType = UnitType.Good)
+			UnitType unitType = UnitType.Good, UnitTag unitTag = UnitTag.Default)
 		{
+			UnitTag = unitTag;
+
 			Health = health;
 			MaxHealth = health;
 			Damage = damage;
@@ -98,8 +101,9 @@ namespace ModiBuff.Core.Units
 			_statusEffectController = new MultiInstanceStatusEffectController();
 		}
 
-		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences, UnitType unitType)
-			: this(health, damage, unitType: unitType)
+		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences,
+			UnitType unitType, UnitTag unitTag)
+			: this(health, damage, unitType: unitType, unitTag: unitTag)
 		{
 			foreach (var modifierAddReference in modifierAddReferences)
 				ModifierController.TryAdd(modifierAddReference);

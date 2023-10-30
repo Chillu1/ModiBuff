@@ -18,7 +18,7 @@ namespace ModiBuff.Core.Units
 			UnitType = unitType;
 		}
 
-		public Unit Create() => new Unit(_health, _damage, _modifierAddReferences, UnitType);
+		//public Unit Create() => new Unit(_health, _damage, _modifierAddReferences, UnitType);
 
 		public UnitRecipe Health(float health)
 		{
