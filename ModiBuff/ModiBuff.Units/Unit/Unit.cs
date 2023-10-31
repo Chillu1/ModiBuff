@@ -40,7 +40,11 @@ namespace ModiBuff.Core.Units
 
 		//Note: These event lists should only be used for classic effects.
 		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
-		private readonly List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
+		private readonly List<IEffect> _whenAttackedEffects,
+			_afterAttackedEffects,
+			_whenCastEffects,
+			_whenDeathEffects,
+			_whenHealedEffects;
 
 		private readonly List<IEffect> _beforeAttackEffects,
 			_onAttackEffects,
@@ -48,7 +52,7 @@ namespace ModiBuff.Core.Units
 			_onKillEffects,
 			_onHealEffects;
 
-		private int _whenAttackedCount, _whenCastCount, _whenDeathCount, _whenHealedCount;
+		private int _whenAttackedCount, _afterAttackedCount, _whenCastCount, _whenDeathCount, _whenHealedCount;
 		private int _beforeAttackCount, _onAttackCount, _onCastCount, _onKillCount, _onHealCount;
 
 		private readonly List<IEffect> _strongHitCallbacks;
@@ -78,6 +82,7 @@ namespace ModiBuff.Core.Units
 			UnitType = unitType;
 
 			_whenAttackedEffects = new List<IEffect>();
+			_afterAttackedEffects = new List<IEffect>();
 			_whenCastEffects = new List<IEffect>();
 			_whenDeathEffects = new List<IEffect>();
 			_whenHealedEffects = new List<IEffect>();
@@ -111,7 +116,7 @@ namespace ModiBuff.Core.Units
 
 		public void Update(float deltaTime)
 		{
-			_whenAttackedCount = _whenCastCount = _whenDeathCount = _whenHealedCount = 0;
+			_whenAttackedCount = _afterAttackedCount = _whenCastCount = _whenDeathCount = _whenHealedCount = 0;
 			_beforeAttackCount = _onAttackCount = _onCastCount = _onKillCount = _onHealCount = 0;
 			_healthChangedCount = -1;
 			_damageChangedCount = 0;
@@ -181,6 +186,13 @@ namespace ModiBuff.Core.Units
 			float oldHealth = Health;
 			Health -= damage;
 			float dealtDamage = oldHealth - Health;
+
+			if (_afterAttackedCount == 0)
+			{
+				_afterAttackedCount++;
+				for (int i = 0; i < _afterAttackedEffects.Count; i++)
+					_afterAttackedEffects[i].Effect(this, source);
+			}
 
 			//TODO This counting becomes a problem, since we'll miss on damage after the first damage instance this frame
 			//One solution could be to sum all the changes this frame, and then trigger the event once at the end of the frame.
@@ -304,6 +316,9 @@ namespace ModiBuff.Core.Units
 				case EffectOnEvent.WhenAttacked:
 					_whenAttackedEffects.Add(effect);
 					break;
+				case EffectOnEvent.AfterAttacked:
+					_afterAttackedEffects.Add(effect);
+					break;
 				case EffectOnEvent.WhenCast:
 					_whenCastEffects.Add(effect);
 					break;
@@ -342,6 +357,9 @@ namespace ModiBuff.Core.Units
 			{
 				case EffectOnEvent.WhenAttacked:
 					Remove(_whenAttackedEffects, effect);
+					break;
+				case EffectOnEvent.AfterAttacked:
+					Remove(_afterAttackedEffects, effect);
 					break;
 				case EffectOnEvent.WhenCast:
 					Remove(_whenCastEffects, effect);

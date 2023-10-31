@@ -41,5 +41,21 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth, Unit.Health);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
+
+		[Test]
+		public void ThornsDamage_PostEffectHealTarget()
+		{
+			AddRecipe("ThornsDamage_PostEffectHealTarget")
+				.Effect(new DamageEffect(5, targeting: Targeting.SourceTarget)
+					.SetPostEffects(new LifeStealPostEffect(1f)), EffectOn.Event)
+				.Event(EffectOnEvent.AfterAttacked);
+			Setup();
+
+			Unit.AddModifierSelf("ThornsDamage_PostEffectHealTarget");
+
+			Enemy.Attack(Unit);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+			Assert.AreEqual(UnitHealth - EnemyDamage + 5, Unit.Health);
+		}
 	}
 }
