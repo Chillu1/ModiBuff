@@ -38,8 +38,7 @@ namespace ModiBuff.Core.Units
 		public IMultiInstanceStatusEffectController<LegalAction, StatusEffectType> StatusEffectController =>
 			_statusEffectController;
 
-		private const int MaxRecursionEventCount = 1;
-		private readonly Dictionary<int, int> _eventGenDict;
+		public const int MaxRecursionEventCount = 1;
 
 		private int _preAttackCounter,
 			_onAttackCounter,
@@ -88,8 +87,6 @@ namespace ModiBuff.Core.Units
 			MaxMana = mana;
 			UnitType = unitType;
 
-			_eventGenDict = new Dictionary<int, int>();
-
 			_whenAttackedEffects = new List<IEffect>();
 			_afterAttackedEffects = new List<IEffect>();
 			_whenCastEffects = new List<IEffect>();
@@ -125,9 +122,6 @@ namespace ModiBuff.Core.Units
 
 		public void Update(float deltaTime)
 		{
-			//_preAttackCounter = _onAttackCounter = _takeDamageCounter =
-			//	_onKillCounter = _healCounter = _healTargetCounter = _addDamageCounter = 0;
-
 			_statusEffectController.Update(deltaTime);
 			ModifierController.Update(deltaTime);
 			for (int i = 0; i < _auraModifiers.Count; i++)
@@ -324,15 +318,7 @@ namespace ModiBuff.Core.Units
 				_dispelEvents[i](this, source, tag);
 		}
 
-		public void ApplyEffectGenId(int effectGenId)
-		{
-			if (_eventGenDict.ContainsKey(effectGenId))
-				_eventGenDict[effectGenId]++;
-			else
-				_eventGenDict.Add(effectGenId, 1);
-		}
-
-		public void ResetEventGenId()
+		public void ResetEventCounters()
 		{
 			_preAttackCounter = _onAttackCounter = _takeDamageCounter =
 				_onKillCounter = _healCounter = _healTargetCounter = _addDamageCounter = 0;

@@ -19,8 +19,8 @@ namespace ModiBuff.Core.Units
 			if (source is IDamagable<float, float> damagable && damagable.Health <= 0)
 			{
 				((IAddDamage<float>)target).AddDamage(_damage);
-				((IEventOwner)source).ResetEventGenId();
-				((IEventOwner)target).ResetEventGenId();
+				((IEventOwner)source).ResetEventCounters();
+				((IEventOwner)target).ResetEventCounters();
 			}
 		}
 	}

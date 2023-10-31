@@ -2,8 +2,7 @@ namespace ModiBuff.Core
 {
 	public interface IEventOwner
 	{
-		void ApplyEffectGenId(int effectGenId);
-		void ResetEventGenId();
+		void ResetEventCounters();
 	}
 
 	public interface IEventOwner<in TEvent> : IEventOwner

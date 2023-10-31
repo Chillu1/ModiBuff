@@ -5,8 +5,8 @@ namespace ModiBuff.Core.Units
 		public void Effect(IUnit target, IUnit source)
 		{
 			((IAttacker<float, float>)target).Attack(target);
-			((IEventOwner)source).ResetEventGenId();
-			((IEventOwner)target).ResetEventGenId();
+			((IEventOwner)source).ResetEventCounters();
+			((IEventOwner)target).ResetEventCounters();
 		}
 	}
 }

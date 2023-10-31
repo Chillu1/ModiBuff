@@ -92,17 +92,14 @@ namespace ModiBuff.Core.Units
 				throw new ArgumentException("Target must implement IDamagable");
 #endif
 
-			var eventOwner = (IEventOwner)target;
-			//eventOwner.ApplyEffectGenId(_effectGenId);
-
 			float returnDamage =
 #if !DEBUG && UNSAFE
 				Unsafe.As<IDamagable<float, float, float, float>>(target).TakeDamage(damage, source);
 #else
 				((IDamagable<float, float, float, float>)target).TakeDamage(damage, source);
 #endif
-			eventOwner.ResetEventGenId();
-			((IEventOwner)source).ResetEventGenId();
+			(target as IEventOwner)?.ResetEventCounters();
+			(source as IEventOwner)?.ResetEventCounters();
 
 			return returnDamage;
 		}

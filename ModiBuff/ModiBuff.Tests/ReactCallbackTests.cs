@@ -13,12 +13,21 @@ namespace ModiBuff.Tests
 			AddGenerator("AddDamageAbove5RemoveDamageBelow5React", (id, genId, name, tag) =>
 			{
 				var effect = new AddDamageEffect(5, true, true);
+				bool effectActive = false;
 				var @event = new DamageChangedEvent((unit, newDamage, deltaDamage) =>
 				{
 					if (newDamage > 9)
+					{
+						if (effectActive)
+							return;
+						effectActive = true;
 						effect.Effect(unit, unit);
-					else
+					}
+					else if (effectActive)
+					{
+						effectActive = false;
 						effect.RevertEffect(unit, unit);
+					}
 				});
 
 				var registerReactEffect = new ReactCallbackRegisterEffect<ReactType>(
@@ -31,13 +40,12 @@ namespace ModiBuff.Tests
 
 			Unit.AddModifierSelf("AddDamageAbove5RemoveDamageBelow5React"); //Starts with 10 baseDmg, adds 5 from effect
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
-			Unit.Update(0);
 
 			//Remove 6 damage, should remove the effect, making it 15 - 6 - 5 = 4
 			Unit.AddDamage(-6); //Revert
 			Assert.AreEqual(UnitDamage - 6, Unit.Damage);
 
-			Unit.Update(0);
+			//Unit.ResetEventCounters();
 			Unit.AddDamage(6);
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 		}
@@ -103,6 +111,7 @@ namespace ModiBuff.Tests
 			Unit.Update(4); //Still has sleep
 
 			Unit.TakeDamage(9, Unit); //Still has sleep
+			Unit.ResetEventCounters();
 			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
 
 			Unit.TakeDamage(2, Unit); //Removes and reverts sleep
@@ -170,13 +179,12 @@ namespace ModiBuff.Tests
 			Unit.Update(4);
 
 			Unit.TakeDamage(12, Unit);
-			Unit.Update(0);
+			Unit.Update(0); //Remove modifier
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
 			Assert.False(Unit.ContainsModifier("InitStatusEffectSleep_RemoveOnTenDamageTaken"));
 
 			Unit.AddModifierSelf("InitStatusEffectSleep_RemoveOnTenDamageTaken");
 			Unit.TakeDamage(9, Unit);
-			Unit.Update(0);
 			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
 		}
 

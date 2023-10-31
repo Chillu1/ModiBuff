@@ -89,8 +89,8 @@ namespace ModiBuff.Core.Units
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
 			float returnHeal = ((IHealable<float, float>)target).Heal(value, source);
-			((IEventOwner)source).ResetEventGenId();
-			((IEventOwner)target).ResetEventGenId();
+			((IEventOwner)source).ResetEventCounters();
+			((IEventOwner)target).ResetEventCounters();
 			return returnHeal;
 		}
 

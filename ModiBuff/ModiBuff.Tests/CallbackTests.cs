@@ -55,8 +55,8 @@ namespace ModiBuff.Tests
 				{
 					var damageable = (IDamagable<float, float>)target;
 					((IHealable<float, float>)target).Heal(damageable.MaxHealth - damageable.Health, source);
-					((IEventOwner)source).ResetEventGenId();
-					((IEventOwner)target).ResetEventGenId();
+					((IEventOwner)source).ResetEventCounters();
+					((IEventOwner)target).ResetEventCounters();
 				});
 			Setup();
 
@@ -183,8 +183,8 @@ namespace ModiBuff.Tests
 				{
 					var damageable = (IDamagable<float, float>)target;
 					((IHealable<float, float>)target).Heal(damageable.MaxHealth - damageable.Health, source);
-					((IEventOwner)source).ResetEventGenId();
-					((IEventOwner)target).ResetEventGenId();
+					((IEventOwner)source).ResetEventCounters();
+					((IEventOwner)target).ResetEventCounters();
 				})
 				.Remove(1);
 			Setup();
@@ -230,8 +230,8 @@ namespace ModiBuff.Tests
 				{
 					var damageable = (IDamagable<float, float>)target;
 					((IHealable<float, float>)target).Heal(damageable.MaxHealth - damageable.Health, source);
-					((IEventOwner)source).ResetEventGenId();
-					((IEventOwner)target).ResetEventGenId();
+					((IEventOwner)source).ResetEventCounters();
+					((IEventOwner)target).ResetEventCounters();
 				})
 				.Remove(1);
 			Setup();

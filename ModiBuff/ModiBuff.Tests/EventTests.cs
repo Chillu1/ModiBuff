@@ -111,7 +111,7 @@ namespace ModiBuff.Tests
 
 			Enemy.Attack(Unit);
 
-			Assert.AreEqual(UnitHealth - EnemyDamage - UnitDamage, Unit.Health);
+			Assert.AreEqual(UnitHealth - EnemyDamage - UnitDamage * Unit.MaxRecursionEventCount, Unit.Health);
 		}
 
 		[Test]
@@ -149,11 +149,11 @@ namespace ModiBuff.Tests
 			Enemy.AddModifierSelf("ThornsWhenAttackedEvent");
 
 			Enemy.Attack(Unit); //Enemy gets thorned, and recursively thorns Unit
-			Assert.AreEqual(EnemyHealth - thornsDamage, Enemy.Health);
-			Assert.AreEqual(UnitHealth - EnemyDamage - thornsDamage, Unit.Health);
+			Assert.AreEqual(EnemyHealth - thornsDamage * Unit.MaxRecursionEventCount, Enemy.Health);
+			Assert.AreEqual(UnitHealth - EnemyDamage - thornsDamage * Unit.MaxRecursionEventCount, Unit.Health);
 
 			Unit.Attack(Enemy);
-			Assert.AreEqual(UnitHealth - EnemyDamage - thornsDamage - thornsDamage, Unit.Health);
+			Assert.AreEqual(UnitHealth - EnemyDamage - thornsDamage * 2 * Unit.MaxRecursionEventCount, Unit.Health);
 		}
 
 		[Test]
@@ -191,12 +191,10 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 			Unit.Update(1.1f);
 			Assert.AreEqual(UnitDamage, Unit.Damage);
-			Enemy.Update(0);
 			Unit.Attack(Enemy);
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 
 			Assert.AreEqual(AllyDamage, Ally.Damage);
-			Enemy.Update(0);
 			Ally.Attack(Enemy);
 			Assert.AreEqual(AllyDamage + 5, Ally.Damage);
 		}
@@ -228,6 +226,22 @@ namespace ModiBuff.Tests
 
 			Enemy.Attack(Unit);
 			Assert.AreEqual(EnemyHealth - 5 - 5, Enemy.Health);
+		}
+
+		[Test]
+		public void HealSelfWhenHealed_Recursion()
+		{
+			const float damage = 50;
+			AddRecipe("HealSelfWhenHealed_Recursion")
+				.Effect(new HealEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
+				.Event(EffectOnEvent.WhenHealed);
+			Setup();
+
+			Unit.TakeDamage(damage, Enemy);
+
+			Unit.AddModifierSelf("HealSelfWhenHealed_Recursion");
+			Unit.Heal(5, Unit);
+			Assert.AreEqual(UnitHealth - damage + 5 + 5 * Unit.MaxRecursionEventCount, Unit.Health);
 		}
 	}
 }
