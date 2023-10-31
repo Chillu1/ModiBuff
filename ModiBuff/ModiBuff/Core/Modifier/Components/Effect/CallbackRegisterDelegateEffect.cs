@@ -3,8 +3,7 @@ namespace ModiBuff.Core
 	/// <summary>
 	///		Delegate version of callback registering, can only use manual self defined behaviour
 	/// </summary>
-	public sealed class CallbackRegisterDelegateEffect<TCallback> : IRevertEffect, IEffect,
-		IShallowClone<CallbackRegisterDelegateEffect<TCallback>>, IStateReset
+	public sealed class CallbackRegisterDelegateEffect<TCallback> : IRevertEffect, IEffect, IStateEffect
 	{
 		public bool IsRevertible { get; }
 
@@ -45,7 +44,7 @@ namespace ModiBuff.Core
 			_isRegistered = false;
 		}
 
-		public CallbackRegisterDelegateEffect<TCallback> ShallowClone() =>
+		public IEffect ShallowClone() =>
 			new CallbackRegisterDelegateEffect<TCallback>(_callbackType, _callbacks, IsRevertible);
 
 		object IShallowClone.ShallowClone() => ShallowClone();

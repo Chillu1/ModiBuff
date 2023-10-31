@@ -1,6 +1,9 @@
 namespace ModiBuff.Core
 {
-	public interface IMutableStateEffect
+	/// <summary>
+	///		If the effect doesn't always use mutable state functionality
+	/// </summary>
+	public interface IMutableStateEffect : IStateEffect
 	{
 		bool UsesMutableState { get; }
 	}

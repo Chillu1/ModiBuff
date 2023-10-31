@@ -1,10 +1,10 @@
 namespace ModiBuff.Core
 {
 	/// <summary>
-	///		Stateful effect, need to clone and
+	///		Stateful effect, can be cloned, and needs it's state reset
+	///		If the state doesn't need to be reset (it's overriden), then only clone is needed
 	/// </summary>
-	//TODO Refactor/sort these interfaces
-	public interface IStateEffect : IMutableStateEffect, IStateReset, IShallowClone<IEffect>
+	public interface IStateEffect : IStateReset, IShallowClone<IEffect>
 	{
 	}
 }

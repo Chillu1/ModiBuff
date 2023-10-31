@@ -1,7 +1,7 @@
 namespace ModiBuff.Core
 {
 	public sealed class ModifierActionEffect : IModifierGenIdOwner, IModifierIdOwner, IEffect,
-		IShallowClone<ModifierActionEffect>
+		IShallowClone<IEffect>
 	{
 		private readonly ModifierAction _modifierAction;
 
@@ -47,7 +47,7 @@ namespace ModiBuff.Core
 			((IModifierOwner)target).ModifierController.ModifierAction(_id, _genId, _modifierAction);
 		}
 
-		public ModifierActionEffect ShallowClone() => new ModifierActionEffect(_modifierAction, _id);
+		public IEffect ShallowClone() => new ModifierActionEffect(_modifierAction, _id);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

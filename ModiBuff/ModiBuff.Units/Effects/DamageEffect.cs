@@ -7,7 +7,7 @@ using System;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class DamageEffect : IStackEffect, IStateEffect, IEffect,
+	public sealed class DamageEffect : IStackEffect, IMutableStateEffect, IEffect,
 		IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
 		IModifierStateInfo<DamageEffect.Data>
 	{

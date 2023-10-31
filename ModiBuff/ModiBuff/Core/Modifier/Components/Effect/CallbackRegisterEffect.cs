@@ -3,8 +3,7 @@ namespace ModiBuff.Core
 	/// <summary>
 	///		Registers a callback of effects to the target, for non-IEffect version see <see cref="CallbackRegisterDelegateEffect{TCallback}"/>
 	/// </summary>
-	public sealed class CallbackRegisterEffect<TCallback> : IRecipeFeedEffects, IRevertEffect, IEffect,
-		IShallowClone<CallbackRegisterEffect<TCallback>>, IStateReset
+	public sealed class CallbackRegisterEffect<TCallback> : IRecipeFeedEffects, IRevertEffect, IEffect, IStateEffect
 	{
 		//Callback register should always be revertible, since we're using IEffect instances that will be pooled back 
 		public bool IsRevertible => true;
@@ -59,9 +58,7 @@ namespace ModiBuff.Core
 			_isRegistered = false;
 		}
 
-		public CallbackRegisterEffect<TCallback> ShallowClone() =>
-			new CallbackRegisterEffect<TCallback>(_callbackType);
-
+		public IEffect ShallowClone() => new CallbackRegisterEffect<TCallback>(_callbackType);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

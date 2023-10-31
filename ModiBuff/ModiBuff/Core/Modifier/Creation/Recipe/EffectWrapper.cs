@@ -17,7 +17,7 @@ namespace ModiBuff.Core
 
 			if (_effect is IShallowClone<IEffect> shallowClone)
 			{
-				if (_effect is IMutableStateEffect mutableStateEffect && !mutableStateEffect.UsesMutableState)
+				if (_effect is IMutableStateEffect stateEffect && !stateEffect.UsesMutableState)
 					return;
 
 				_effectUsesMutableState = true;

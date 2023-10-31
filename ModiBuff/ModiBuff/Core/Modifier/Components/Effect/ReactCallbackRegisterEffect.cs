@@ -1,12 +1,11 @@
 #if NETSTANDARD2_0_OR_GREATER || NETCOREAPP1_0_OR_GREATER || NET47_OR_GREATER
 #define VALUE_TUPLE
-#endif
-
 using System;
+#endif
 
 namespace ModiBuff.Core
 {
-	public sealed class ReactCallbackRegisterEffect<TReact> : IRevertEffect, IEffect, IShallowClone<ReactCallbackRegisterEffect<TReact>>
+	public sealed class ReactCallbackRegisterEffect<TReact> : IRevertEffect, IEffect, IShallowClone<IEffect>
 	{
 		public bool IsRevertible => true;
 
@@ -34,7 +33,7 @@ namespace ModiBuff.Core
 			((IReactable<TReact>)target).UnRegisterReact(_reactCallbacks);
 		}
 
-		public ReactCallbackRegisterEffect<TReact> ShallowClone() => new ReactCallbackRegisterEffect<TReact>(_reactCallbacks);
+		public IEffect ShallowClone() => new ReactCallbackRegisterEffect<TReact>(_reactCallbacks);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 

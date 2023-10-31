@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public sealed class RemoveEffect : IModifierGenIdOwner, IEffect, IModifierIdOwner, IShallowClone<RemoveEffect>
+	public sealed class RemoveEffect : IModifierGenIdOwner, IEffect, IModifierIdOwner, IShallowClone<IEffect>
 	{
 		private IRevertEffect[] _revertibleEffects;
 		private int _id = -1;
@@ -51,7 +51,7 @@ namespace ModiBuff.Core
 			((IModifierOwner)target).ModifierController.PrepareRemove(_id, _genId);
 		}
 
-		public RemoveEffect ShallowClone() => new RemoveEffect(_id, _genId);
+		public IEffect ShallowClone() => new RemoveEffect(_id, _genId);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

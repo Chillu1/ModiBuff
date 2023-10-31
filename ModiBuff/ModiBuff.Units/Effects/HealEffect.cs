@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class HealEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect,
+	public sealed class HealEffect : IMutableStateEffect, IStackEffect, IRevertEffect, IEffect,
 		IMetaEffectOwner<HealEffect, float, float>, IPostEffectOwner<HealEffect, float>,
 		IModifierStateInfo<HealEffect.Data>
 	{

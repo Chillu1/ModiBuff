@@ -1,6 +1,6 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class StatusEffectEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect,
+	public sealed class StatusEffectEffect : IMutableStateEffect, IStackEffect, IRevertEffect, IEffect,
 		IModifierIdOwner, IModifierGenIdOwner, IModifierStateInfo<StatusEffectEffect.Data>
 	{
 		public bool IsRevertible { get; }
@@ -70,7 +70,7 @@ namespace ModiBuff.Core.Units
 
 			((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
 				.DecreaseStatusEffect(_id, _genId, _statusEffectType, _totalDuration);
-			
+
 			_totalDuration = 0;
 		}
 
