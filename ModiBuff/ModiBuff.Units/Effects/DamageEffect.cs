@@ -86,12 +86,14 @@ namespace ModiBuff.Core.Units
 				throw new ArgumentException("Target must implement IDamagable");
 #endif
 
-			return
+			float returnDamage =
 #if !DEBUG && UNSAFE
 				Unsafe.As<IDamagable<float, float, float, float>>(target).TakeDamage(damage, source);
 #else
 				((IDamagable<float, float, float, float>)target).TakeDamage(damage, source);
 #endif
+
+			return returnDamage;
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)
