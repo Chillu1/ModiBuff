@@ -287,5 +287,32 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - damage - 1 * Unit.MaxRecursionEventCount, Unit.Health);
 			Assert.AreEqual(EnemyHealth - damage + UnitHeal + 2 * Unit.MaxRecursionEventCount, Enemy.Health);
 		}
+
+		[Test]
+		public void ThornsSelfWhenAndAfterAttacked_Double_Recursion()
+		{
+			AddRecipe("ThornsSourceWhenAttacked_Recursion")
+				.Effect(new DamageEffect(2, targeting: Targeting.SourceTarget), EffectOn.Event)
+				.Event(EffectOnEvent.WhenAttacked);
+			AddRecipe("ThornsSourceAfterAttacked_Recursion")
+				.Effect(new DamageEffect(2, targeting: Targeting.SourceTarget), EffectOn.Event)
+				.Event(EffectOnEvent.AfterAttacked);
+			Setup();
+
+			Unit.AddModifierSelf("ThornsSourceWhenAttacked_Recursion");
+			Unit.AddModifierSelf("ThornsSourceAfterAttacked_Recursion");
+
+			Unit.Attack(Unit);
+			Assert.AreEqual(
+				UnitHealth - UnitDamage - 2 * Unit.MaxRecursionEventCount - 2 * Unit.MaxRecursionEventCount,
+				Unit.Health);
+
+			Unit.Heal(UnitHealth, Unit);
+
+			Unit.Attack(Unit);
+			Assert.AreEqual(
+				UnitHealth - UnitDamage - 2 * Unit.MaxRecursionEventCount - 2 * Unit.MaxRecursionEventCount,
+				Unit.Health);
+		}
 	}
 }

@@ -45,7 +45,7 @@ namespace ModiBuff.Tests
 			Unit.AddDamage(-6); //Revert
 			Assert.AreEqual(UnitDamage - 6, Unit.Damage);
 
-			//Unit.ResetEventCounters();
+			Unit.ResetEventCounters();
 			Unit.AddDamage(6);
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 		}

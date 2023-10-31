@@ -42,7 +42,9 @@ namespace ModiBuff.Core.Units
 
 		private int _preAttackCounter,
 			_onAttackCounter,
-			_takeDamageCounter,
+			_whenAttackedCounter,
+			_afterAttackedCounter,
+			_healthChangedCounter,
 			_onKillCounter,
 			_healCounter,
 			_healTargetCounter,
@@ -176,18 +178,20 @@ namespace ModiBuff.Core.Units
 						_onKillEffects[i].Effect(target, this);
 			}
 
-			target.ResetEventCounters();
-			ResetEventCounters();
+			if (_onAttackCounter <= MaxRecursionEventCount &&
+			    _onKillCounter <= MaxRecursionEventCount)
+			{
+				target.ResetEventCounters();
+				ResetEventCounters();
+			}
 
 			return dealtDamage;
 		}
 
 		public float TakeDamage(float damage, IUnit source)
 		{
-			_takeDamageCounter++;
-			bool triggerCallbacks = _takeDamageCounter <= MaxRecursionEventCount;
-
-			if (triggerCallbacks)
+			_whenAttackedCounter++;
+			if (_whenAttackedCounter <= MaxRecursionEventCount)
 			{
 				for (int i = 0; i < _whenAttackedEffects.Count; i++)
 					_whenAttackedEffects[i].Effect(this, source);
@@ -197,13 +201,15 @@ namespace ModiBuff.Core.Units
 			Health -= damage;
 			float dealtDamage = oldHealth - Health;
 
-			if (triggerCallbacks)
+			_afterAttackedCounter++;
+			if (_afterAttackedCounter <= MaxRecursionEventCount)
 			{
 				for (int i = 0; i < _afterAttackedEffects.Count; i++)
 					_afterAttackedEffects[i].Effect(this, source);
 			}
 
-			if (triggerCallbacks)
+			_healthChangedCounter++;
+			if (_healthChangedCounter <= MaxRecursionEventCount)
 			{
 				for (int i = 0; i < _healthChangedEvent.Count; i++)
 					_healthChangedEvent[i](this, source, Health, dealtDamage);
@@ -219,11 +225,8 @@ namespace ModiBuff.Core.Units
 
 			if (Health <= 0 && !IsDead)
 			{
-				//if (triggerCallbacks)
-				{
-					for (int i = 0; i < _whenDeathEffects.Count; i++)
-						_whenDeathEffects[i].Effect(this, source);
-				}
+				for (int i = 0; i < _whenDeathEffects.Count; i++)
+					_whenDeathEffects[i].Effect(this, source);
 
 				//Unit Death TODO Destroy/pool unit
 				ModifierController.Clear();
@@ -231,8 +234,13 @@ namespace ModiBuff.Core.Units
 				IsDead = true;
 			}
 
-			ResetEventCounters();
-			(source as IEventOwner)?.ResetEventCounters();
+			if (_whenAttackedCounter <= MaxRecursionEventCount &&
+			    _afterAttackedCounter <= MaxRecursionEventCount &&
+			    _healthChangedCounter <= MaxRecursionEventCount)
+			{
+				ResetEventCounters();
+				(source as IEventOwner)?.ResetEventCounters();
+			}
 
 			return dealtDamage;
 		}
@@ -248,8 +256,11 @@ namespace ModiBuff.Core.Units
 					_whenHealedEffects[i].Effect(this, source);
 			}
 
-			ResetEventCounters();
-			(source as IEventOwner)?.ResetEventCounters();
+			if (_healCounter <= MaxRecursionEventCount)
+			{
+				ResetEventCounters();
+				(source as IEventOwner)?.ResetEventCounters();
+			}
 
 			Health += heal;
 			if (Health > MaxHealth)
@@ -272,8 +283,11 @@ namespace ModiBuff.Core.Units
 
 			float valueHealed = target.Heal(HealValue, this);
 
-			(target as IEventOwner)?.ResetEventCounters();
-			ResetEventCounters();
+			if (_healTargetCounter <= MaxRecursionEventCount)
+			{
+				(target as IEventOwner)?.ResetEventCounters();
+				ResetEventCounters();
+			}
 
 			return valueHealed;
 		}
@@ -289,7 +303,8 @@ namespace ModiBuff.Core.Units
 					_damageChangedEvent[i](this, Damage, damage);
 			}
 
-			ResetEventCounters();
+			if (_addDamageCounter <= MaxRecursionEventCount)
+				ResetEventCounters();
 		}
 
 		public void UseHealth(float value)
@@ -334,10 +349,14 @@ namespace ModiBuff.Core.Units
 				_dispelEvents[i](this, source, tag);
 		}
 
+		/// <summary>
+		///		Resets all event/callback counters, so we can trigger them again
+		/// </summary>
+		/// <remarks>We always reset all counters because event effects might trigger other callbacks as well</remarks>
 		public void ResetEventCounters()
 		{
-			_preAttackCounter = _onAttackCounter = _takeDamageCounter =
-				_onKillCounter = _healCounter = _healTargetCounter = _addDamageCounter = 0;
+			_preAttackCounter = _onAttackCounter = _whenAttackedCounter = _afterAttackedCounter =
+				_healthChangedCounter = _onKillCounter = _healCounter = _healTargetCounter = _addDamageCounter = 0;
 		}
 
 		public void AddEffectEvent(IEffect effect, EffectOnEvent @event)

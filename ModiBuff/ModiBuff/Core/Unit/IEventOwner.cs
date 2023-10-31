@@ -2,6 +2,10 @@ namespace ModiBuff.Core
 {
 	public interface IEventOwner
 	{
+		/// <summary>
+		///		Resets all event/callback counters, so we can trigger them again
+		/// </summary>
+		/// <remarks>We always reset all counters because event effects might trigger other callbacks as well</remarks>
 		void ResetEventCounters();
 	}
 
