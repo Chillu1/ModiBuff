@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public interface IEventOwner
+	public interface IEventOwner //TODO make more generic (to fit callback naming as well)
 	{
 		/// <summary>
 		///		Resets all event/callback counters, so we can trigger them again
