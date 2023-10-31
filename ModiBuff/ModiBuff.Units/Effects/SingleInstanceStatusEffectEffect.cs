@@ -37,6 +37,8 @@ namespace ModiBuff.Core.Units
 		{
 			((ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
 				.DecreaseStatusEffect(_statusEffectType, _totalDuration);
+
+			_totalDuration = 0;
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)

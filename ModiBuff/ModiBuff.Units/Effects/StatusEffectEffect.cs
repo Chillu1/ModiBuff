@@ -70,6 +70,8 @@ namespace ModiBuff.Core.Units
 
 			((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
 				.DecreaseStatusEffect(_id, _genId, _statusEffectType, _totalDuration);
+			
+			_totalDuration = 0;
 		}
 
 		public Data GetEffectData() => new Data(_duration, _extraDuration);

@@ -82,6 +82,7 @@ namespace ModiBuff.Core.Units
 		public void RevertEffect(IUnit target, IUnit source)
 		{
 			Effect(-_totalHeal, target, source);
+			_totalHeal = 0;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

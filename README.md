@@ -276,7 +276,7 @@ Add("ModifierName")
 
 Recipes have a methods that determine the functionality of the made modifier.
 
-### Effect
+### Recipe Effect
 
 The main method to setup effects is `Effect(IEffect, EffectOn, Targeting)`.  
 `IEffect` is the effect that will be applied to the unit, it can be anything, as long as it implements IEffect
@@ -684,6 +684,8 @@ Through `IEventOwner.AddEffectEvent(IEffect, EffectOnEvent)`.
 
 ## Effect
 
+[Skip effect creation](#applier-effect)
+
 ### Making New Effects
 
 The library allows for easy creation of new effects.
@@ -715,6 +717,248 @@ If the effect should support non-standard targeting, it should implement `ITarge
 The effects hould have two constructors, the first main one should be used for recipes,
 and only expose the non-recipe setting variables.
 The other constructor should be in a factory pattern style, and expose all the variables.
+
+Improved version:
+
+Let's design a damage effect from scratch. It first needs to implement `IEffect`.
+
+```csharp
+public class DamageEffect : IEffect
+{
+    private readonly float _damage;
+
+    public DamageEffect(float damage)
+    {
+        _damage = damage;
+    }
+
+    public void Effect(IUnit target, IUnit source)
+    {
+        ((IDamagable)target).TakeDamage(_damage, source);
+    }
+}
+```
+
+The changed parts are the only ones showed in new implementations.
+
+Okay, but what if we want to be able to use the damage effect as thorns? As in the source should be the one damaged.
+Not the target. We can do this by implementing `ITargetEffect`.
+
+```csharp
+public class DamageEffect : IEffect, ITargetEffect
+{
+    private Targeting _targeting;
+
+    public DamageEffect(float damage, Targeting targeting = Targeting.TargetSource)
+    {
+        _damage = damage;
+        _targeting = targeting;
+    }
+    
+    public void SetTargeting(Targeting targeting) => _targeting = targeting;
+
+    public void Effect(IUnit target, IUnit source)
+    {
+        _targeting.UpdateTargetSource(ref target, ref source);
+        ...
+    }
+}
+```
+
+`_targeting.UpdateTargetSource(ref target, ref source);` just changes around who's the target and who's the source,
+
+This way we can tell the effect who's the target (of the effect), and who's the source.
+The original source can be both the target and source if desired (`Targeting.SourceSource`).
+
+Okay, but what about adding state to the effect? Ex. extra damage on stack.
+Before we implement this, we need to understand that stateful effects need special handling.
+
+All stateful effects need to implement `IStateEffect`. `IStateEffect` needs three methods:  
+`void ResetState();` resets the mutable state of the effect to it's default values.  
+`IEffect ShallowClone();` clones the effect, so the state is not shared between modifiers.  
+`object IShallowClone.ShallowClone();` is a object wrapper for the `ShallowClone()` method.
+
+```csharp
+public class DamageEffect : IEffect, ITargetEffect, IStateEffect
+{
+    private float _extraDamage;
+
+    ...
+        
+    public void Effect(IUnit target, IUnit source)
+    {
+        ...
+        ((IDamagable)target).TakeDamage(_damage + _extraDamage, source);
+    }
+    
+    public void ResetState() => _extraDamage = 0;
+
+    public IEffect ShallowClone() => new DamageEffect(_damage, _targeting);
+    object IShallowClone.ShallowClone() => ShallowClone();
+}
+```
+
+Now that we have modifier state, we can add stack logic to the effect.
+This can be added through `IStackEffect`.
+
+```csharp
+public class DamageEffect : IEffect, ITargetEffect, IStateEffect, IStackEffect
+{
+    private readonly StackEffectType _stackEffect;
+    private readonly float _stackValue;
+
+    public DamageEffect(float damage, StackEffectType stackEffect, float stackValue, Targeting targeting)
+    {
+        _damage = damage;
+        _stackEffect = stackEffect;
+        _stackValue = stackValue;
+        _targeting = targeting;
+    }
+
+    ...
+
+    public void StackEffect(int stacks, IUnit target, IUnit source)
+    {
+        if ((_stackEffect & StackEffectType.Add) != 0)
+            _extraDamage += _stackValue;
+
+        if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
+            _extraDamage += _stackValue * stacks;
+
+        if ((_stackEffect & StackEffectType.Effect) != 0)
+            Effect(target, source);
+    }
+
+    ...
+}
+```
+
+`StackEffectType` is a generic flag enum, that works with most stack logic, but not all, so feel free to make your own.
+
+All right, but what about reverting the effect? We need to introducea new variable to store how much the total value
+changed.
+We also need to implement `IRevertEffect`.
+
+```csharp
+public class DamageEffect : IEffect, ITargetEffect, IStateEffect, IStackEffect, IRevertEffect
+{
+    public bool IsRevertible { get; }
+
+    private float _totalDamage;
+
+    public DamageEffect(float damage, StackEffectType stackEffect,
+        float stackValue, bool revertible, Targeting targeting)
+    {
+        _damage = damage;
+        _stackEffect = stackEffect;
+        _stackValue = stackValue;
+        IsRevertible = revertible;
+        _targeting = targeting;
+    }
+
+    public void Effect(IUnit target, IUnit source)
+    {
+        if (IsRevertible)
+            _totalDamage += _damage + _extraDamage;
+        
+        ...
+    }
+
+    ...
+
+    public void RevertEffect(IUnit target, IUnit source)
+    {
+        //Might be smart to have it's own RevertDamage method here, so we don't trigger damage based callbacks.
+        //Or heal callbacks
+        ((IDamagable)target).RevertDamage(_totalDamage, source);
+        //((IDamagable)target).TakeDamage(-_totalDamage, source);
+        _totalDamage = 0;
+    }
+
+    public void ResetState() 
+    {
+        _extraDamage = 0;
+        _totalDamage = 0;
+    }
+
+    ...
+}
+```
+
+Now let's look at post and meta effects.
+`IMetaEffectOwner<TEffect, TInValue, TOutValue>` is a helper interface for adding meta effects to effects.
+`IPostEffectOwner<TEffect, TInValue>` is a helper interface for adding post effects to effects.
+
+```csharp
+public class DamageEffect : IEffect, ITargetEffect, IStateEffect, IStackEffect, IRevertEffect,
+    IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>
+{
+    private IMetaEffect<float, float>[] _metaEffects;
+    private IPostEffect<float>[] _postEffects;
+
+    ...
+
+    private DamageEffect(... , IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
+    {
+        ...
+        _metaEffects = metaEffects;
+        _postEffects = postEffects;
+    }
+
+    public DamageEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
+    {
+        _metaEffects = metaEffects;
+        return this;
+    }
+
+    public DamageEffect SetPostEffects(params IPostEffect<float>[] postEffects)
+    {
+        _postEffects = postEffects;
+        return this;
+    }
+
+    public void Effect(IUnit target, IUnit source)
+    {
+        _targeting.UpdateTargetSource(ref target, ref source);
+
+        float damage = _damage;
+
+        if (_metaEffects != null)
+            foreach (var metaEffect in _metaEffects)
+                damage = metaEffect.Effect(damage, target, source);
+
+        damage += _extraDamage;
+
+        ...
+
+        float returnDamageInfo = ((IDamagable)target).TakeDamage(damage, source);
+
+        if (_postEffects != null)
+            foreach (var postEffect in _postEffects)
+                postEffect.Effect(returnDamageInfo, target, source);
+    }
+
+    ...
+
+    public IEffect ShallowClone() =>
+            new DamageEffect(_baseDamage, _stackEffect, _stackValue, _targeting, _metaEffects, _postEffects);
+
+    ...
+```
+
+With the current newest master (not V0.2.0) we can clone only when needed (when using mutable state).
+`IMutableStateEffect` needs to be implemented, and it's property `UsesMutableState` needs to say if the effect is using
+mutable state. `IMutableStateEffect` is already part of `IStateEffect`.
+
+```csharp
+public class DamageEffect : IEffect, ITargetEffect, IStateEffect, IStackEffect, IRevertEffect,
+    IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>, IMutableStateEffect
+{
+    public bool UsesMutableState => IsRevertible || _stackEffect.UsesMutableState();
+
+    ...
+}
+```
 
 ### Applier Effect
 

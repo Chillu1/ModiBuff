@@ -67,6 +67,7 @@ namespace ModiBuff.Core.Units
 
 			_targeting.UpdateTarget(ref target, source);
 			((IAddDamage<float>)target).AddDamage(-_totalAddedDamage);
+			_totalAddedDamage = 0;
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)
