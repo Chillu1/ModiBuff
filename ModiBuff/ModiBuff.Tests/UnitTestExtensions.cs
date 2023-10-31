@@ -32,6 +32,11 @@ namespace ModiBuff.Tests
 				((IModifierApplyCheckGenerator)generator).HasApplyChecks, applierType);
 		}
 
+		internal static void TryCast(this IModifierOwner unit, string name, IModifierOwner target)
+		{
+			unit.TryCast(ModifierIdManager.GetIdOld(name), target);
+		}
+
 		internal static float AttackN(this IAttacker<float, float> unit, IUnit target, int n)
 		{
 			var updatableUnit = unit as IUpdatable;

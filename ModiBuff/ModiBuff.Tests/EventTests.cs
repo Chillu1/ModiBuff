@@ -203,5 +203,34 @@ namespace ModiBuff.Tests
 			Ally.Attack(Enemy);
 			Assert.AreEqual(AllyDamage + 5, Ally.Damage);
 		}
+
+		[Test]
+		public void Thorns_OnHit_DurationRemove_Twice()
+		{
+			AddRecipe("ThornsOnHitEvent_Remove")
+				.Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
+				.Event(EffectOnEvent.WhenAttacked)
+				.Remove(5);
+			Setup();
+
+			Unit.AddModifierSelf("ThornsOnHitEvent_Remove");
+
+			Enemy.Attack(Unit);
+
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+
+			Unit.Update(3);
+
+			Unit.AddModifierSelf("ThornsOnHitEvent_Remove");
+
+			Enemy.Attack(Unit);
+
+			Assert.AreEqual(EnemyHealth - 5 - 5, Enemy.Health);
+
+			Unit.Update(2);
+
+			Enemy.Attack(Unit);
+			Assert.AreEqual(EnemyHealth - 5 - 5, Enemy.Health);
+		}
 	}
 }

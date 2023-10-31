@@ -1173,6 +1173,10 @@ A: With huge amounts of modifier generators 500+ (recipes), and 10000+ units,
 the memory usage of `ModifierController`s will be around 20MB. It can be lowered to 1MB±
 by using `Config.UseDictionaryIndexes`, at a small performance cost.
 
+Q: There's too much code duplication in `ModiBuff.Units` Effects, why not use inheritance or something else?  
+A: Not all effects use stack or targeting logic, and post/meta effects can have different signatures.
+So it's better to have a bit of code duplication that force every effect into the same basket.
+
 Q: My stack effect is not working, what's wrong?  
 A: StackEffectType needs to be set in all: `IEffect` (ex. DamageEffect), `Recipe.Effect.EffectOn.Stack`
 and `Recipe.Stack()`  
@@ -1180,7 +1184,7 @@ Ex:
 
 ```csharp
 Add("StackDamage")
-    .Effect(new DamageEffect(5, StackEffectType.Effect/*<<THIS*/), EffectOn.Stack)
+    .Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
     .Stack(WhenStackEffect.Always);
 ```
 

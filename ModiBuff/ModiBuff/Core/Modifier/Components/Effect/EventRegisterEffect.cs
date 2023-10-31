@@ -1,7 +1,7 @@
 namespace ModiBuff.Core
 {
 	public sealed class EventRegisterEffect<TEvent> : IRevertEffect, IRecipeFeedEffects, IEffect,
-		IShallowClone<EventRegisterEffect<TEvent>>
+		IStateReset, IShallowClone<EventRegisterEffect<TEvent>>
 	{
 		//Always revert event effect?
 		public bool IsRevertible => true;
@@ -9,7 +9,11 @@ namespace ModiBuff.Core
 		private readonly TEvent _effectOnEvent;
 		private IEffect[] _effects;
 
-		public EventRegisterEffect(TEvent effectOnEvent) => _effectOnEvent = effectOnEvent;
+		private bool _isRegistered;
+
+		public EventRegisterEffect(TEvent effectOnEvent) : this(effectOnEvent, null)
+		{
+		}
 
 		/// <summary>
 		///		Manual modifier generation constructor
@@ -27,9 +31,13 @@ namespace ModiBuff.Core
 
 		public void Effect(IUnit target, IUnit source)
 		{
+			if (_isRegistered)
+				return;
+
 			var eventOwner = (IEventOwner<TEvent>)target;
 			for (int i = 0; i < _effects.Length; i++)
 				eventOwner.AddEffectEvent(_effects[i], _effectOnEvent);
+			_isRegistered = true;
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
@@ -37,9 +45,13 @@ namespace ModiBuff.Core
 			var eventOwner = (IEventOwner<TEvent>)target;
 			for (int i = 0; i < _effects.Length; i++)
 				eventOwner.RemoveEffectEvent(_effects[i], _effectOnEvent);
+			_isRegistered = false;
 		}
 
+		public void ResetState() => _isRegistered = false;
+
 		public EventRegisterEffect<TEvent> ShallowClone() => new EventRegisterEffect<TEvent>(_effectOnEvent);
+
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }
