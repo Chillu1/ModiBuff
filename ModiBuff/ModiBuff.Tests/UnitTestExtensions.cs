@@ -41,12 +41,16 @@ namespace ModiBuff.Tests
 		{
 			var updatableUnit = unit as IUpdatable;
 			var updatableTarget = target as IUpdatable;
+			var eventOwnerUnit = unit as IEventOwner;
+			var eventOwnerTarget = target as IEventOwner;
 			float totalDamage = 0;
 			for (int i = 0; i < n; i++)
 			{
 				updatableUnit?.Update(0);
 				updatableTarget?.Update(0);
 				totalDamage += unit.Attack(target);
+				eventOwnerUnit?.ResetEventGenId();
+				eventOwnerTarget?.ResetEventGenId();
 			}
 
 			return totalDamage;
@@ -56,12 +60,16 @@ namespace ModiBuff.Tests
 		{
 			var updatableUnit = unit as IUpdatable;
 			var updatableTarget = target as IUpdatable;
+			var eventOwnerUnit = unit as IEventOwner;
+			var eventOwnerTarget = target as IEventOwner;
 			float totalHeal = 0;
 			for (int i = 0; i < n; i++)
 			{
 				updatableUnit?.Update(0);
 				updatableTarget?.Update(0);
 				totalHeal += unit.Heal(target);
+				eventOwnerUnit?.ResetEventGenId();
+				eventOwnerTarget?.ResetEventGenId();
 			}
 
 			return totalHeal;

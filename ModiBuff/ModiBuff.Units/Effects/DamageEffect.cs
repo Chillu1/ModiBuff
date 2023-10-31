@@ -20,11 +20,14 @@ namespace ModiBuff.Core.Units
 		private IMetaEffect<float, float>[] _metaEffects;
 		private IPostEffect<float>[] _postEffects;
 
+		private static int _effectGenIdCounter;
+		private readonly int _effectGenId;
+
 		private float _extraDamage;
 
 		public DamageEffect(float damage, StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
 			Targeting targeting = Targeting.TargetSource)
-			: this(damage, stackEffect, stackValue, targeting, null, null)
+			: this(damage, stackEffect, stackValue, targeting, null, null, 0)
 		{
 		}
 
@@ -33,11 +36,12 @@ namespace ModiBuff.Core.Units
 		/// </summary>
 		public static DamageEffect Create(float damage, StackEffectType stackEffect = StackEffectType.Effect,
 			float stackValue = -1, Targeting targeting = Targeting.TargetSource,
-			IMetaEffect<float, float>[] metaEffects = null, IPostEffect<float>[] postEffects = null) =>
-			new DamageEffect(damage, stackEffect, stackValue, targeting, metaEffects, postEffects);
+			IMetaEffect<float, float>[] metaEffects = null, IPostEffect<float>[] postEffects = null,
+			int genEffectId = 0) =>
+			new DamageEffect(damage, stackEffect, stackValue, targeting, metaEffects, postEffects, genEffectId);
 
 		private DamageEffect(float damage, StackEffectType stackEffect, float stackValue, Targeting targeting,
-			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
+			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects, int effectGenId)
 		{
 			_baseDamage = damage;
 			_stackEffect = stackEffect;
@@ -45,6 +49,8 @@ namespace ModiBuff.Core.Units
 			_targeting = targeting;
 			_metaEffects = metaEffects;
 			_postEffects = postEffects;
+
+			_effectGenId = effectGenId;
 		}
 
 		public DamageEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
@@ -86,12 +92,19 @@ namespace ModiBuff.Core.Units
 				throw new ArgumentException("Target must implement IDamagable");
 #endif
 
-			return
+			var eventOwner = (IEventOwner)target;
+			//eventOwner.ApplyEffectGenId(_effectGenId);
+
+			float returnDamage =
 #if !DEBUG && UNSAFE
 				Unsafe.As<IDamagable<float, float, float, float>>(target).TakeDamage(damage, source);
 #else
 				((IDamagable<float, float, float, float>)target).TakeDamage(damage, source);
 #endif
+			eventOwner.ResetEventGenId();
+			((IEventOwner)source).ResetEventGenId();
+
+			return returnDamage;
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)
@@ -110,8 +123,8 @@ namespace ModiBuff.Core.Units
 
 		public void ResetState() => _extraDamage = 0;
 
-		public IEffect ShallowClone() =>
-			new DamageEffect(_baseDamage, _stackEffect, _stackValue, _targeting, _metaEffects, _postEffects);
+		public IEffect ShallowClone() => new DamageEffect(_baseDamage, _stackEffect, _stackValue, _targeting,
+			_metaEffects, _postEffects, _effectGenIdCounter++);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 

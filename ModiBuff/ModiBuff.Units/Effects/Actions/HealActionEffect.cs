@@ -5,6 +5,8 @@ namespace ModiBuff.Core.Units
 		public void Effect(IUnit target, IUnit source)
 		{
 			((IHealer<float, float>)source).Heal((IHealable<float, float>)target);
+			((IEventOwner)source).ResetEventGenId();
+			((IEventOwner)target).ResetEventGenId();
 		}
 	}
 }

@@ -51,6 +51,8 @@ namespace ModiBuff.Core.Units
 
 			_targeting.UpdateTarget(ref target, source);
 			((IAddDamage<float>)target).AddDamage(_damage + _extraDamage);
+			((IEventOwner)source).ResetEventGenId();
+			((IEventOwner)target).ResetEventGenId();
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
@@ -60,6 +62,8 @@ namespace ModiBuff.Core.Units
 
 			_targeting.UpdateTarget(ref target, source);
 			((IAddDamage<float>)target).AddDamage(-_totalAddedDamage);
+			((IEventOwner)source).ResetEventGenId();
+			((IEventOwner)target).ResetEventGenId();
 			_totalAddedDamage = 0;
 		}
 
@@ -83,6 +87,8 @@ namespace ModiBuff.Core.Units
 
 				_targeting.UpdateTarget(ref target, source);
 				((IAddDamage<float>)target).AddDamage(-_damage - _extraDamage);
+				((IEventOwner)source).ResetEventGenId();
+				((IEventOwner)target).ResetEventGenId();
 			}
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)

@@ -1,6 +1,7 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
+using TagType = ModiBuff.Core.TagType;
 
 namespace ModiBuff.Tests
 {
@@ -92,6 +93,38 @@ namespace ModiBuff.Tests
 
 			Unit.TryCast(IdManager.GetId("InitAddDamageSelfOnly"), Unit);
 			Assert.AreEqual(UnitDamage + 5f, Unit.Damage);
+		}
+
+		[Test]
+		public void AutomaticTimeComponentTagging()
+		{
+			AddGenerator("IntervalRefreshDamage", (id, genId, name, tag) =>
+			{
+				var timeComponents = new ITimeComponent[]
+				{
+					new IntervalComponent(1f, true, new IEffect[] { new NoOpEffect() }, null, false)
+				};
+
+				return new Modifier(id, genId, name, null, timeComponents, null, null, new SingleTargetComponent(),
+					null);
+			});
+			AddGenerator("DurationRefreshDamage", (id, genId, name, tag) =>
+			{
+				var timeComponents = new ITimeComponent[]
+				{
+					new DurationComponent(1f, true, new IEffect[] { new NoOpEffect() }, false)
+				};
+
+				return new Modifier(id, genId, name, null, timeComponents, null, null, new SingleTargetComponent(),
+					null);
+			});
+			Setup();
+
+			var intervalGenerator = Recipes.GetGenerator("IntervalRefreshDamage");
+			Assert.True(ModifierRecipes.GetTag(intervalGenerator.Id).HasTag(TagType.IsRefresh));
+
+			var durationGenerator = Recipes.GetGenerator("DurationRefreshDamage");
+			Assert.True(ModifierRecipes.GetTag(durationGenerator.Id).HasTag(TagType.IsRefresh));
 		}
 	}
 }

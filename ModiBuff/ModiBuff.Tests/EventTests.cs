@@ -152,9 +152,6 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - thornsDamage, Enemy.Health);
 			Assert.AreEqual(UnitHealth - EnemyDamage - thornsDamage, Unit.Health);
 
-			Enemy.Update(0); //Refresh event count
-			Unit.Update(0);
-
 			Unit.Attack(Enemy);
 			Assert.AreEqual(UnitHealth - EnemyDamage - thornsDamage - thornsDamage, Unit.Health);
 		}

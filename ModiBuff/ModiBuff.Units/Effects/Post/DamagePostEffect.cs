@@ -14,6 +14,8 @@ namespace ModiBuff.Core.Units
 			_targeting.UpdateTargetSource(ref target, ref source);
 
 			((IDamagable<float, float, float, float>)target).TakeDamage(value, source);
+			((IEventOwner)source).ResetEventGenId();
+			((IEventOwner)target).ResetEventGenId();
 		}
 	}
 }

@@ -38,6 +38,17 @@ namespace ModiBuff.Core.Units
 		public IMultiInstanceStatusEffectController<LegalAction, StatusEffectType> StatusEffectController =>
 			_statusEffectController;
 
+		private const int MaxRecursionEventCount = 1;
+		private readonly Dictionary<int, int> _eventGenDict;
+
+		private int _preAttackCounter,
+			_onAttackCounter,
+			_takeDamageCounter,
+			_onKillCounter,
+			_healCounter,
+			_healTargetCounter,
+			_addDamageCounter;
+
 		//Note: These event lists should only be used for classic effects.
 		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
 		private readonly List<IEffect> _whenAttackedEffects,
@@ -52,16 +63,12 @@ namespace ModiBuff.Core.Units
 			_onKillEffects,
 			_onHealEffects;
 
-		private int _whenAttackedCount, _afterAttackedCount, _whenCastCount, _whenDeathCount, _whenHealedCount;
-		private int _beforeAttackCount, _onAttackCount, _onCastCount, _onKillCount, _onHealCount;
-
 		private readonly List<IEffect> _strongHitCallbacks;
 		private UnitCallback _strongHitDelegateCallbacks;
 
 		private readonly List<DispelEvent> _dispelEvents;
 		private readonly List<HealthChangedEvent> _healthChangedEvent;
 		private readonly List<DamageChangedEvent> _damageChangedEvent;
-		private int _healthChangedCount = -1, _damageChangedCount;
 
 		private readonly List<IUnit> _targetsInRange;
 		private readonly List<Modifier> _auraModifiers;
@@ -80,6 +87,8 @@ namespace ModiBuff.Core.Units
 			Mana = mana;
 			MaxMana = mana;
 			UnitType = unitType;
+
+			_eventGenDict = new Dictionary<int, int>();
 
 			_whenAttackedEffects = new List<IEffect>();
 			_afterAttackedEffects = new List<IEffect>();
@@ -116,10 +125,8 @@ namespace ModiBuff.Core.Units
 
 		public void Update(float deltaTime)
 		{
-			_whenAttackedCount = _afterAttackedCount = _whenCastCount = _whenDeathCount = _whenHealedCount = 0;
-			_beforeAttackCount = _onAttackCount = _onCastCount = _onKillCount = _onHealCount = 0;
-			_healthChangedCount = -1;
-			_damageChangedCount = 0;
+			//_preAttackCounter = _onAttackCounter = _takeDamageCounter =
+			//	_onKillCounter = _healCounter = _healTargetCounter = _addDamageCounter = 0;
 
 			_statusEffectController.Update(deltaTime);
 			ModifierController.Update(deltaTime);
@@ -135,9 +142,10 @@ namespace ModiBuff.Core.Units
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
 				return;
 
-			if (_beforeAttackCount == 0)
+			_preAttackCounter++;
+
+			if (_preAttackCounter <= MaxRecursionEventCount)
 			{
-				_beforeAttackCount++;
 				for (int i = 0; i < _beforeAttackEffects.Count; i++)
 					_beforeAttackEffects[i].Effect(target, this);
 			}
@@ -153,22 +161,25 @@ namespace ModiBuff.Core.Units
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
+			_onAttackCounter++;
+
 			this.ApplyAllAttackModifier(target);
 
-			if (_onAttackCount == 0)
+			if (_onAttackCounter <= MaxRecursionEventCount)
 			{
-				_onAttackCount++;
 				for (int i = 0; i < _onAttackEffects.Count; i++)
 					_onAttackEffects[i].Effect(target, this);
 			}
 
 			float dealtDamage = target.TakeDamage(Damage, this);
 
-			if (target.Health <= 0 && _onKillCount == 0)
+			if (target.Health <= 0)
 			{
-				_onKillCount++;
-				for (int i = 0; i < _onKillEffects.Count; i++)
-					_onKillEffects[i].Effect(target, this);
+				_onKillCounter++;
+
+				if (_onKillCounter <= MaxRecursionEventCount)
+					for (int i = 0; i < _onKillEffects.Count; i++)
+						_onKillEffects[i].Effect(target, this);
 			}
 
 			return dealtDamage;
@@ -176,9 +187,11 @@ namespace ModiBuff.Core.Units
 
 		public float TakeDamage(float damage, IUnit source)
 		{
-			if (_whenAttackedCount == 0)
+			_takeDamageCounter++;
+			bool triggerCallbacks = _takeDamageCounter <= MaxRecursionEventCount;
+
+			if (triggerCallbacks)
 			{
-				_whenAttackedCount++;
 				for (int i = 0; i < _whenAttackedEffects.Count; i++)
 					_whenAttackedEffects[i].Effect(this, source);
 			}
@@ -187,18 +200,14 @@ namespace ModiBuff.Core.Units
 			Health -= damage;
 			float dealtDamage = oldHealth - Health;
 
-			if (_afterAttackedCount == 0)
+			if (triggerCallbacks)
 			{
-				_afterAttackedCount++;
 				for (int i = 0; i < _afterAttackedEffects.Count; i++)
 					_afterAttackedEffects[i].Effect(this, source);
 			}
 
-			//TODO This counting becomes a problem, since we'll miss on damage after the first damage instance this frame
-			//One solution could be to sum all the changes this frame, and then trigger the event once at the end of the frame.
-			if (_healthChangedCount <= 0)
+			if (triggerCallbacks)
 			{
-				_healthChangedCount++;
 				for (int i = 0; i < _healthChangedEvent.Count; i++)
 					_healthChangedEvent[i](this, source, Health, dealtDamage);
 			}
@@ -211,11 +220,14 @@ namespace ModiBuff.Core.Units
 				_strongHitDelegateCallbacks?.Invoke(this, source);
 			}
 
-			if (_whenDeathCount == 0 && Health <= 0 && !IsDead)
+			if (Health <= 0 && !IsDead)
 			{
-				_whenDeathCount++;
-				for (int i = 0; i < _whenDeathEffects.Count; i++)
-					_whenDeathEffects[i].Effect(this, source);
+				//if (triggerCallbacks)
+				{
+					for (int i = 0; i < _whenDeathEffects.Count; i++)
+						_whenDeathEffects[i].Effect(this, source);
+				}
+
 				//Unit Death TODO Destroy/pool unit
 				ModifierController.Clear();
 
@@ -227,10 +239,11 @@ namespace ModiBuff.Core.Units
 
 		public float Heal(float heal, IUnit source)
 		{
+			_healCounter++;
+
 			float oldHealth = Health;
-			if (_whenHealedCount == 0)
+			if (_healCounter <= MaxRecursionEventCount)
 			{
-				_whenHealedCount++;
 				for (int i = 0; i < _whenHealedEffects.Count; i++)
 					_whenHealedEffects[i].Effect(this, source);
 			}
@@ -246,9 +259,10 @@ namespace ModiBuff.Core.Units
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
-			if (_onHealCount == 0)
+			_healTargetCounter++;
+
+			if (_healTargetCounter <= MaxRecursionEventCount)
 			{
-				_onHealCount++;
 				for (int i = 0; i < _onHealEffects.Count; i++)
 					_onHealEffects[i].Effect(target, this);
 			}
@@ -258,10 +272,11 @@ namespace ModiBuff.Core.Units
 
 		public void AddDamage(float damage)
 		{
+			_addDamageCounter++;
+
 			Damage += damage;
-			if (_damageChangedCount == 0)
+			if (_addDamageCounter <= MaxRecursionEventCount)
 			{
-				_damageChangedCount++;
 				for (int i = 0; i < _damageChangedEvent.Count; i++)
 					_damageChangedEvent[i](this, Damage, damage);
 			}
@@ -307,6 +322,20 @@ namespace ModiBuff.Core.Units
 		{
 			for (int i = 0; i < _dispelEvents.Count; i++)
 				_dispelEvents[i](this, source, tag);
+		}
+
+		public void ApplyEffectGenId(int effectGenId)
+		{
+			if (_eventGenDict.ContainsKey(effectGenId))
+				_eventGenDict[effectGenId]++;
+			else
+				_eventGenDict.Add(effectGenId, 1);
+		}
+
+		public void ResetEventGenId()
+		{
+			_preAttackCounter = _onAttackCounter = _takeDamageCounter =
+				_onKillCounter = _healCounter = _healTargetCounter = _addDamageCounter = 0;
 		}
 
 		public void AddEffectEvent(IEffect effect, EffectOnEvent @event)
