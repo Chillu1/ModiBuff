@@ -17,11 +17,7 @@ namespace ModiBuff.Core.Units
 			_targeting.UpdateTargetSource(ref target, ref source);
 
 			if (source is IDamagable<float, float> damagable && damagable.Health <= 0)
-			{
 				((IAddDamage<float>)target).AddDamage(_damage);
-				((IEventOwner)source).ResetEventCounters();
-				((IEventOwner)target).ResetEventCounters();
-			}
 		}
 	}
 }

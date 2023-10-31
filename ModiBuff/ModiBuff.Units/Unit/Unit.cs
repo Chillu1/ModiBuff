@@ -176,6 +176,9 @@ namespace ModiBuff.Core.Units
 						_onKillEffects[i].Effect(target, this);
 			}
 
+			target.ResetEventCounters();
+			ResetEventCounters();
+
 			return dealtDamage;
 		}
 
@@ -228,6 +231,9 @@ namespace ModiBuff.Core.Units
 				IsDead = true;
 			}
 
+			ResetEventCounters();
+			(source as IEventOwner)?.ResetEventCounters();
+
 			return dealtDamage;
 		}
 
@@ -241,6 +247,9 @@ namespace ModiBuff.Core.Units
 				for (int i = 0; i < _whenHealedEffects.Count; i++)
 					_whenHealedEffects[i].Effect(this, source);
 			}
+
+			ResetEventCounters();
+			(source as IEventOwner)?.ResetEventCounters();
 
 			Health += heal;
 			if (Health > MaxHealth)
@@ -261,7 +270,12 @@ namespace ModiBuff.Core.Units
 					_onHealEffects[i].Effect(target, this);
 			}
 
-			return target.Heal(HealValue, this);
+			float valueHealed = target.Heal(HealValue, this);
+
+			(target as IEventOwner)?.ResetEventCounters();
+			ResetEventCounters();
+
+			return valueHealed;
 		}
 
 		public void AddDamage(float damage)
@@ -274,6 +288,8 @@ namespace ModiBuff.Core.Units
 				for (int i = 0; i < _damageChangedEvent.Count; i++)
 					_damageChangedEvent[i](this, Damage, damage);
 			}
+
+			ResetEventCounters();
 		}
 
 		public void UseHealth(float value)

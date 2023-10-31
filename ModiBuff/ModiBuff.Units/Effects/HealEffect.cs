@@ -88,10 +88,7 @@ namespace ModiBuff.Core.Units
 		private float Effect(float value, IUnit target, IUnit source)
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
-			float returnHeal = ((IHealable<float, float>)target).Heal(value, source);
-			((IEventOwner)source).ResetEventCounters();
-			((IEventOwner)target).ResetEventCounters();
-			return returnHeal;
+			return ((IHealable<float, float>)target).Heal(value, source);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)

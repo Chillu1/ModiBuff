@@ -19,8 +19,6 @@ namespace ModiBuff.Core.Units
 				return;
 
 			((IHealable<float, float>)target).Heal(value * _lifeStealPercent, source);
-			((IEventOwner)source).ResetEventCounters();
-			((IEventOwner)target).ResetEventCounters();
 		}
 	}
 }

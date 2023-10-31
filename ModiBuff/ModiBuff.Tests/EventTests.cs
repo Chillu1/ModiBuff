@@ -243,5 +243,49 @@ namespace ModiBuff.Tests
 			Unit.Heal(5, Unit);
 			Assert.AreEqual(UnitHealth - damage + 5 + 5 * Unit.MaxRecursionEventCount, Unit.Health);
 		}
+
+		[Test]
+		public void ThornsSelfHeal_Double_Recursion()
+		{
+			const float damage = 50;
+			AddRecipe("HealSourceWhenAttacked_Recursion")
+				.Effect(new HealEffect(2, targeting: Targeting.SourceTarget), EffectOn.Event)
+				.Event(EffectOnEvent.WhenAttacked);
+			AddRecipe("ThornsSourceWhenHealed_Recursion")
+				.Effect(new DamageEffect(1, targeting: Targeting.SourceTarget), EffectOn.Event)
+				.Event(EffectOnEvent.WhenHealed);
+			Setup();
+
+			Unit.TakeDamage(damage, Unit);
+			Unit.AddModifierSelf("HealSourceWhenAttacked_Recursion");
+			Unit.AddModifierSelf("ThornsSourceWhenHealed_Recursion");
+
+			Unit.Heal(Unit);
+			Assert.AreEqual(
+				UnitHealth - damage + UnitHeal + 2 * Unit.MaxRecursionEventCount - 1 * Unit.MaxRecursionEventCount,
+				Unit.Health);
+		}
+
+		[Test]
+		public void ThornsSelfHeal_Double_Recursion_Enemy()
+		{
+			const float damage = 50;
+			AddRecipe("HealSourceWhenAttacked_Recursion")
+				.Effect(new HealEffect(2, targeting: Targeting.SourceTarget), EffectOn.Event)
+				.Event(EffectOnEvent.WhenAttacked);
+			AddRecipe("ThornsSourceWhenHealed_Recursion")
+				.Effect(new DamageEffect(1, targeting: Targeting.SourceTarget), EffectOn.Event)
+				.Event(EffectOnEvent.WhenHealed);
+			Setup();
+
+			Unit.TakeDamage(damage, Unit);
+			Enemy.TakeDamage(damage, Enemy);
+			Unit.AddModifierSelf("HealSourceWhenAttacked_Recursion");
+			Enemy.AddModifierSelf("ThornsSourceWhenHealed_Recursion");
+
+			Unit.Heal(Enemy);
+			Assert.AreEqual(UnitHealth - damage - 1 * Unit.MaxRecursionEventCount, Unit.Health);
+			Assert.AreEqual(EnemyHealth - damage + UnitHeal + 2 * Unit.MaxRecursionEventCount, Enemy.Health);
+		}
 	}
 }

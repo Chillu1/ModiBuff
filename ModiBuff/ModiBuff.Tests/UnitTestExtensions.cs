@@ -39,30 +39,18 @@ namespace ModiBuff.Tests
 
 		internal static float AttackN(this IAttacker<float, float> unit, IUnit target, int n)
 		{
-			var eventOwnerUnit = unit as IEventOwner;
-			var eventOwnerTarget = target as IEventOwner;
 			float totalDamage = 0;
 			for (int i = 0; i < n; i++)
-			{
 				totalDamage += unit.Attack(target);
-				eventOwnerUnit?.ResetEventCounters();
-				eventOwnerTarget?.ResetEventCounters();
-			}
 
 			return totalDamage;
 		}
 
 		internal static float HealN(this IHealer<float, float> unit, IHealable<float, float> target, int n)
 		{
-			var eventOwnerUnit = unit as IEventOwner;
-			var eventOwnerTarget = target as IEventOwner;
 			float totalHeal = 0;
 			for (int i = 0; i < n; i++)
-			{
 				totalHeal += unit.Heal(target);
-				eventOwnerUnit?.ResetEventCounters();
-				eventOwnerTarget?.ResetEventCounters();
-			}
 
 			return totalHeal;
 		}
