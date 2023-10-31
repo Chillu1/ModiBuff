@@ -10,7 +10,7 @@ namespace ModiBuff.Tests
 		public void Thorns_OnHit()
 		{
 			AddRecipe("ThornsOnHitEvent")
-				.Effect(new DamageEffect(5), EffectOn.Event, Targeting.SourceTarget)
+				.Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.WhenAttacked);
 			Setup();
 
@@ -25,7 +25,7 @@ namespace ModiBuff.Tests
 		public void Thorns_OnHit_DurationRemove()
 		{
 			AddRecipe("ThornsOnHitEvent_Remove")
-				.Effect(new DamageEffect(5), EffectOn.Event, Targeting.SourceTarget)
+				.Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.WhenAttacked)
 				.Remove(5);
 			Setup();
@@ -52,7 +52,7 @@ namespace ModiBuff.Tests
 		public void AddDamage_OnKill()
 		{
 			AddRecipe("AddDamage_OnKill_Event")
-				.Effect(new AddDamageEffect(5), EffectOn.Event, Targeting.SourceTarget)
+				.Effect(new AddDamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.OnKill);
 			Setup();
 
@@ -70,7 +70,7 @@ namespace ModiBuff.Tests
 		public void Damage_OnDeath()
 		{
 			AddRecipe("Damage_OnDeath_Event")
-				.Effect(new DamageEffect(5), EffectOn.Event, Targeting.SourceTarget)
+				.Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.WhenKilled);
 			Setup();
 
@@ -86,7 +86,7 @@ namespace ModiBuff.Tests
 		public void Heal_OnHeal()
 		{
 			AddRecipe("Heal_OnHeal_Event")
-				.Effect(new HealEffect(5), EffectOn.Event, Targeting.SourceTarget)
+				.Effect(new HealEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.OnHeal);
 			Setup();
 
@@ -121,7 +121,7 @@ namespace ModiBuff.Tests
 				.Interval(1)
 				.Effect(new DamageEffect(5), EffectOn.Interval);
 			AddRecipe("PoisonDoT_OnHit_Event")
-				.Effect(new ApplierEffect("PoisonDoT"), EffectOn.Event, Targeting.SourceTarget)
+				.Effect(new ApplierEffect("PoisonDoT", Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.WhenAttacked);
 			Setup();
 
@@ -141,7 +141,7 @@ namespace ModiBuff.Tests
 		{
 			float thornsDamage = 5;
 			AddRecipe("ThornsWhenAttackedEvent")
-				.Effect(new DamageEffect(thornsDamage), EffectOn.Event, Targeting.SourceTarget)
+				.Effect(new DamageEffect(thornsDamage, targeting: Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.WhenAttacked);
 			Setup();
 
@@ -163,7 +163,7 @@ namespace ModiBuff.Tests
 		public void SelfDamage_PreAttack()
 		{
 			AddRecipe("InitDamageSelf_BeforeAttack_Event")
-				.Effect(new DamageEffect(5), EffectOn.Event, Targeting.SourceSource)
+				.Effect(new DamageEffect(5, targeting: Targeting.SourceSource), EffectOn.Event)
 				.Event(EffectOnEvent.BeforeAttack);
 			Setup();
 
@@ -182,7 +182,7 @@ namespace ModiBuff.Tests
 				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
 				.Remove(1).Refresh();
 			AddRecipe("BuffAttackers_WhenHit_Event")
-				.Effect(new ApplierEffect("AddDamage"), EffectOn.Event, Targeting.SourceTarget)
+				.Effect(new ApplierEffect("AddDamage", Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.WhenAttacked);
 			Setup();
 

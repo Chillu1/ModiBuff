@@ -278,7 +278,7 @@ Recipes have a methods that determine the functionality of the made modifier.
 
 ### Recipe Effect
 
-The main method to setup effects is `Effect(IEffect, EffectOn, Targeting)`.  
+The main method to setup effects is `Effect(IEffect, EffectOn)`.  
 `IEffect` is the effect that will be applied to the unit, it can be anything, as long as it implements IEffect
 interface.  
 `EffectOn` is the action that will trigger the effect: Init, Interval, Duration, Stack.
@@ -464,7 +464,7 @@ In this example we deal 5 damage to a unit that attacks us.
 
 ```csharp
 Add("ThornsOnHitEvent")
-    .Effect(new DamageEffect(5), EffectOn.Event, Targeting.SourceTarget)
+    .Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
     .Event(EffectOnEvent.WhenAttacked);
 ```
 
@@ -692,8 +692,7 @@ The library allows for easy creation of new effects.
 Which are needed for using custom game-based logic.
 
 Effects have to implement `IEffect`.  
-They can also implement `ITargetEffect` for event targeting owner/source,
-`IStackEffect` for stacking functionality, `IStateEffect` for resetting runtime state.
+They can also implement `IStackEffect` for stacking functionality, `IStateEffect` for resetting runtime state.
 
 For fully featured effect implementation, look at
 [DamageEffect](https://github.com/Chillu1/ModiBuff/blob/master/ModiBuff/ModiBuff.Units/Effects/DamageEffect.cs)
@@ -712,13 +711,11 @@ not shared between modifiers.
 
 If we want to use stack logic, the effect needs to implement `IStackEffect`.
 
-If the effect should support non-standard targeting, it should implement `ITargetEffect`.
-
 The effects hould have two constructors, the first main one should be used for recipes,
 and only expose the non-recipe setting variables.
 The other constructor should be in a factory pattern style, and expose all the variables.
 
-Improved version:
+##### Designing an Effect from scratch
 
 Let's design a damage effect from scratch. It first needs to implement `IEffect`.
 
@@ -742,10 +739,10 @@ public class DamageEffect : IEffect
 The changed parts are the only ones showed in new implementations.
 
 Okay, but what if we want to be able to use the damage effect as thorns? As in the source should be the one damaged.
-Not the target. We can do this by implementing `ITargetEffect`.
+Not the target. We can do this by using `Targeting`.
 
 ```csharp
-public class DamageEffect : IEffect, ITargetEffect
+public class DamageEffect : IEffect
 {
     private Targeting _targeting;
 
@@ -754,8 +751,6 @@ public class DamageEffect : IEffect, ITargetEffect
         _damage = damage;
         _targeting = targeting;
     }
-    
-    public void SetTargeting(Targeting targeting) => _targeting = targeting;
 
     public void Effect(IUnit target, IUnit source)
     {
@@ -779,7 +774,7 @@ All stateful effects need to implement `IStateEffect`. `IStateEffect` needs thre
 `object IShallowClone.ShallowClone();` is a object wrapper for the `ShallowClone()` method.
 
 ```csharp
-public class DamageEffect : IEffect, ITargetEffect, IStateEffect
+public class DamageEffect : IEffect, IStateEffect
 {
     private float _extraDamage;
 
@@ -802,7 +797,7 @@ Now that we have modifier state, we can add stack logic to the effect.
 This can be added through `IStackEffect`.
 
 ```csharp
-public class DamageEffect : IEffect, ITargetEffect, IStateEffect, IStackEffect
+public class DamageEffect : IEffect, IStateEffect, IStackEffect
 {
     private readonly StackEffectType _stackEffect;
     private readonly float _stackValue;
@@ -840,7 +835,7 @@ changed.
 We also need to implement `IRevertEffect`.
 
 ```csharp
-public class DamageEffect : IEffect, ITargetEffect, IStateEffect, IStackEffect, IRevertEffect
+public class DamageEffect : IEffect, IStateEffect, IStackEffect, IRevertEffect
 {
     public bool IsRevertible { get; }
 
@@ -890,7 +885,7 @@ Now let's look at post and meta effects.
 `IPostEffectOwner<TEffect, TInValue>` is a helper interface for adding post effects to effects.
 
 ```csharp
-public class DamageEffect : IEffect, ITargetEffect, IStateEffect, IStackEffect, IRevertEffect,
+public class DamageEffect : IEffect, IStateEffect, IStackEffect, IRevertEffect,
     IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>
 {
     private IMetaEffect<float, float>[] _metaEffects;
@@ -951,7 +946,7 @@ With the current newest master (not V0.2.0) we can clone only when needed (when 
 mutable state. `IMutableStateEffect` is already part of `IStateEffect`.
 
 ```csharp
-public class DamageEffect : IEffect, ITargetEffect, IStateEffect, IStackEffect, IRevertEffect,
+public class DamageEffect : IEffect, IStateEffect, IStackEffect, IRevertEffect,
     IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>, IMutableStateEffect
 {
     public bool UsesMutableState => IsRevertible || _stackEffect.UsesMutableState();
@@ -969,7 +964,7 @@ This can create some very sophisticated modifiers:
 ```csharp
 //WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^ rupture modifier
 AddRecipe("ComplexApplier_OnHit_Event")
-    .Effect(new ApplierEffect("ComplexApplier_Rupture"), EffectOn.Event, Targeting.SourceTarget)
+    .Effect(new ApplierEffect("ComplexApplier_Rupture", Targeting.SourceTarget), EffectOn.Event)
     .Event(EffectOnEvent.WhenAttacked);
 
 //rupture modifier, that does DoT. When this gets to 5 stacks, apply the disarm effect.
@@ -999,7 +994,7 @@ To clarify:
 ```csharp            
 //Apply the modifier to source (healer) WhenHealed                                   
 Add("ComplexApplier2_WhenHealed_Event")               
-    .Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), EffectOn.Event, Targeting.SourceTarget)
+    .Effect(new ApplierEffect("ComplexApplier2_WhenHealed", Targeting.SourceTarget), EffectOn.Event)
     .Event(EffectOnEvent.WhenHealed);
 
 //On 5 stacks, apply the modifier to self.
@@ -1015,7 +1010,7 @@ Add("ComplexApplier2_OnAttack_Event")
     .Remove(60).Refresh();
 
 Add("ComplexApplier2_WhenAttacked_Event")
-    .Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), EffectOn.Event, Targeting.SourceTarget)
+    .Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd", Targeting.SourceTarget), EffectOn.Event)
     .Event(EffectOnEvent.WhenAttacked)
     .Remove(5).Refresh();
 

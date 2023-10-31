@@ -30,7 +30,7 @@ namespace ModiBuff.Tests
 		public void InitSelfHeal_DamageTarget()
 		{
 			AddRecipe("InitSelfHeal_DamageTarget")
-				.Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceTarget)
+				.Effect(new HealEffect(5, targeting: Targeting.SourceTarget), EffectOn.Init)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 

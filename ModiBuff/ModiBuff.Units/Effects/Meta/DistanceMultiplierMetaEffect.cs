@@ -16,7 +16,7 @@ namespace ModiBuff.Core.Units
 
 		public float Effect(float value, IUnit target, IUnit source)
 		{
-			_targeting.UpdateTarget(ref target, source);
+			_targeting.UpdateTargetSource(ref target, ref source);
 
 			var targetPosition = ((IPosition<Vector2>)target).Position;
 			var sourceInitialPosition = ((IInitialPosition<Vector2>)source).InitialPosition;

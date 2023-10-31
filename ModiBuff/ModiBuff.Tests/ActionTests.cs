@@ -49,7 +49,7 @@ namespace ModiBuff.Tests
 		public void AttackSelfTarget_Action()
 		{
 			AddRecipe("InitAttackAction_Self")
-				.Effect(new AttackActionEffect(), EffectOn.Init, Targeting.TargetTarget);
+				.Effect(new AttackActionEffect(), EffectOn.Init);
 			Setup();
 
 			Unit.AddModifierSelf("InitAttackAction_Self");

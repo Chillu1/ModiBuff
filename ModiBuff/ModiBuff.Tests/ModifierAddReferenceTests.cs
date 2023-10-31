@@ -51,7 +51,7 @@ namespace ModiBuff.Tests
 		public void AddSelfApplyAttackModifier()
 		{
 			AddRecipe("InitDamageSelf")
-				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.SourceTarget);
+				.Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Init);
 			Setup();
 
 			var generator = Recipes.GetGenerator("InitDamageSelf");

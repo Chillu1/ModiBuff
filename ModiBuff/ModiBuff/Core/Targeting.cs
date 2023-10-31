@@ -59,6 +59,9 @@ namespace ModiBuff.Core
 			source = finalSource;
 		}
 
+		/// <summary>
+		///		Use if source is not being used in the effect
+		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void UpdateTarget(this Targeting targeting, ref IUnit target, IUnit source)
 		{

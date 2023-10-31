@@ -89,7 +89,7 @@ namespace ModiBuff.Tests
 			AddRecipe("InitDamage_CostHealth_HealSelf")
 				.ApplyCost(CostType.Health, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init)
-				.Effect(new HealEffect(5), EffectOn.Init, Targeting.SourceSource);
+				.Effect(new HealEffect(5, targeting: Targeting.SourceSource), EffectOn.Init);
 			Setup();
 
 			var generator = Recipes.GetGenerator("InitDamage_CostHealth_HealSelf");

@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class HealEffect : ITargetEffect, IStateEffect, IStackEffect, IRevertEffect, IEffect,
+	public sealed class HealEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect,
 		IMetaEffectOwner<HealEffect, float, float>, IPostEffectOwner<HealEffect, float>,
 		IModifierStateInfo<HealEffect.Data>
 	{
@@ -12,7 +12,7 @@ namespace ModiBuff.Core.Units
 		private readonly float _heal;
 		private readonly StackEffectType _stackEffect;
 		private readonly float _stackValue;
-		private Targeting _targeting;
+		private readonly Targeting _targeting;
 		private IMetaEffect<float, float>[] _metaEffects;
 		private IPostEffect<float>[] _postEffects;
 
@@ -20,7 +20,8 @@ namespace ModiBuff.Core.Units
 		private float _totalHeal;
 
 		public HealEffect(float heal, bool revertible = false, StackEffectType stack = StackEffectType.Effect,
-			float stackValue = -1) : this(heal, revertible, stack, stackValue, Targeting.TargetSource, null, null)
+			float stackValue = -1, Targeting targeting = Targeting.TargetSource)
+			: this(heal, revertible, stack, stackValue, targeting, null, null)
 		{
 		}
 
@@ -44,8 +45,6 @@ namespace ModiBuff.Core.Units
 			_metaEffects = metaEffects;
 			_postEffects = postEffects;
 		}
-
-		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 
 		public HealEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
 		{

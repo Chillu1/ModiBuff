@@ -1,6 +1,6 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class AddDamageEffect : ITargetEffect, IStackEffect, IStateEffect, IRevertEffect,
+	public sealed class AddDamageEffect : IStackEffect, IStateEffect, IRevertEffect,
 		IStackRevertEffect, IEffect, IModifierStateInfo<AddDamageEffect.Data>
 	{
 		public bool IsRevertible { get; }
@@ -10,28 +10,15 @@ namespace ModiBuff.Core.Units
 		private readonly StackEffectType _stackEffect;
 		private readonly float _stackValue;
 		private readonly bool _isTogglable; //TODO Needs to be revertible to be togglable
-		private Targeting _targeting;
+		private readonly Targeting _targeting;
 
 		private bool _isEnabled;
 		private float _extraDamage;
 		private float _totalAddedDamage;
 
 		public AddDamageEffect(float damage, bool revertible = false, bool togglable = false,
-			StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1) :
-			this(damage, revertible, togglable, stackEffect, stackValue, Targeting.TargetSource)
-		{
-		}
-
-		/// <summary>
-		///		Manual modifier generation constructor
-		/// </summary>
-		public static AddDamageEffect Create(float damage, bool revertible = false, bool togglable = false,
 			StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
-			Targeting targeting = Targeting.TargetSource) =>
-			new AddDamageEffect(damage, revertible, togglable, stackEffect, stackValue, targeting);
-
-		private AddDamageEffect(float damage, bool revertible, bool togglable, StackEffectType stackEffect,
-			float stackValue, Targeting targeting)
+			Targeting targeting = Targeting.TargetSource)
 		{
 			_damage = damage;
 			IsRevertible = revertible;
@@ -41,7 +28,13 @@ namespace ModiBuff.Core.Units
 			_targeting = targeting;
 		}
 
-		public void SetTargeting(Targeting targeting) => _targeting = targeting;
+		/// <summary>
+		///		Manual modifier generation constructor
+		/// </summary>
+		public static AddDamageEffect Create(float damage, bool revertible = false, bool togglable = false,
+			StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
+			Targeting targeting = Targeting.TargetSource) =>
+			new AddDamageEffect(damage, revertible, togglable, stackEffect, stackValue, targeting);
 
 		public void Effect(IUnit target, IUnit source)
 		{

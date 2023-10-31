@@ -40,7 +40,7 @@ namespace ModiBuff.Tests
 		public void DamageSelfApplier_Attack_DamageSelf()
 		{
 			AddRecipe("InitDamageSelf")
-				.Effect(new DamageEffect(5), EffectOn.Init, Targeting.SourceTarget);
+				.Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Init);
 			Setup();
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageSelf"), ApplierType.Attack);
@@ -115,7 +115,7 @@ namespace ModiBuff.Tests
 				.Effect(new ApplierEffect("ComplexApplier_Disarm"), EffectOn.Stack)
 				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5);
 			AddRecipe("ComplexApplier_OnHit_Event")
-				.Effect(new ApplierEffect("ComplexApplier_Rupture"), EffectOn.Event, Targeting.SourceTarget)
+				.Effect(new ApplierEffect("ComplexApplier_Rupture", targeting: Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.WhenAttacked);
 			Setup();
 
@@ -155,7 +155,7 @@ namespace ModiBuff.Tests
 				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
 				.Remove(5).Refresh();
 			AddRecipe("ComplexApplier2_WhenAttacked_Event")
-				.Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd"), EffectOn.Event, Targeting.SourceTarget)
+				.Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd", Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.WhenAttacked)
 				.Remove(5).Refresh();
 			AddRecipe("ComplexApplier2_OnAttack_Event")
@@ -167,7 +167,7 @@ namespace ModiBuff.Tests
 				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5)
 				.Remove(5).Refresh();
 			AddRecipe("ComplexApplier2_WhenHealed_Event")
-				.Effect(new ApplierEffect("ComplexApplier2_WhenHealed"), EffectOn.Event, Targeting.SourceTarget)
+				.Effect(new ApplierEffect("ComplexApplier2_WhenHealed", Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.WhenHealed);
 			Setup();
 

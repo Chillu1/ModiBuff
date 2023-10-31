@@ -7,7 +7,7 @@ using System;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class DamageEffect : ITargetEffect, IStackEffect, IStateEffect, IEffect,
+	public sealed class DamageEffect : IStackEffect, IStateEffect, IEffect,
 		IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
 		IModifierStateInfo<DamageEffect.Data>
 	{
@@ -16,14 +16,15 @@ namespace ModiBuff.Core.Units
 		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;
 		private readonly float _stackValue;
-		private Targeting _targeting;
+		private readonly Targeting _targeting;
 		private IMetaEffect<float, float>[] _metaEffects;
 		private IPostEffect<float>[] _postEffects;
 
 		private float _extraDamage;
 
-		public DamageEffect(float damage, StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1)
-			: this(damage, stackEffect, stackValue, Targeting.TargetSource, null, null)
+		public DamageEffect(float damage, StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
+			Targeting targeting = Targeting.TargetSource)
+			: this(damage, stackEffect, stackValue, targeting, null, null)
 		{
 		}
 
@@ -45,8 +46,6 @@ namespace ModiBuff.Core.Units
 			_metaEffects = metaEffects;
 			_postEffects = postEffects;
 		}
-
-		public void SetTargeting(Targeting targeting) => _targeting = targeting;
 
 		public DamageEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
 		{
