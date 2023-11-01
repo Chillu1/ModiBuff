@@ -121,7 +121,7 @@ namespace ModiBuff.Tests
 				.Interval(1)
 				.Effect(new DamageEffect(5), EffectOn.Interval);
 			AddRecipe("PoisonDoT_OnHit_Event")
-				.Effect(new ApplierEffect("PoisonDoT", Targeting.SourceTarget), EffectOn.Event)
+				.Effect(new ApplierEffect("PoisonDoT", targeting: Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.WhenAttacked);
 			Setup();
 
@@ -179,7 +179,7 @@ namespace ModiBuff.Tests
 				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
 				.Remove(1).Refresh();
 			AddRecipe("BuffAttackers_WhenHit_Event")
-				.Effect(new ApplierEffect("AddDamage", Targeting.SourceTarget), EffectOn.Event)
+				.Effect(new ApplierEffect("AddDamage", targeting: Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.WhenAttacked);
 			Setup();
 

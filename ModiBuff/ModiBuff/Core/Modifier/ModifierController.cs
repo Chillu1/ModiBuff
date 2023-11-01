@@ -316,6 +316,25 @@ namespace ModiBuff.Core
 			_modifiersToRemove.Add(new ModifierReference(id, genId));
 		}
 
+		public void RemoveApplier(int id, int genId, ApplierType applierType, bool hasApplyChecks)
+		{
+			switch (applierType)
+			{
+				case ApplierType.Cast when hasApplyChecks:
+					_modifierCastChecksAppliers.Remove(id);
+					return;
+				case ApplierType.Cast:
+					_modifierCastAppliers.Remove(id);
+					return;
+				case ApplierType.Attack when hasApplyChecks:
+					_modifierAttackChecksAppliers.Remove(id);
+					return;
+				case ApplierType.Attack:
+					_modifierAttackAppliers.Remove(id);
+					return;
+			}
+		}
+
 		public void ModifierAction(int id, int genId, ModifierAction action)
 		{
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);

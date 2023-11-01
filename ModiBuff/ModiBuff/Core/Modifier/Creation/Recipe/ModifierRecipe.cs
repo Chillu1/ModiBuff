@@ -183,10 +183,12 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		How many seconds should pass before the modifier gets removed.
 		/// </summary>
-		public ModifierRecipe Remove(float duration)
+		public ModifierRecipe Remove(float duration, ApplierType applierType = ApplierType.None,
+			bool hasApplyChecks = false)
 		{
 			Duration(duration);
-			_removeEffectWrapper = new EffectWrapper(new RemoveEffect(Id), EffectOn.Duration);
+			_removeEffectWrapper =
+				new EffectWrapper(new RemoveEffect(Id, applierType, hasApplyChecks), EffectOn.Duration);
 			_effectWrappers.Add(_removeEffectWrapper);
 			return this;
 		}
