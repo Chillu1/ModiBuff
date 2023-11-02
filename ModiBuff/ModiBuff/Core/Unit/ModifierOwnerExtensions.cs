@@ -12,6 +12,10 @@ namespace ModiBuff.Core
 		{
 			if (owner.ModifierController.CanCastModifier(modifierId))
 				target.ModifierController.Add(modifierId, target, owner);
+#if DEBUG
+			else
+				Logger.Log($"Can't cast {modifierId} from {owner} to {target}");
+#endif
 		}
 
 		public static void ApplyAllAttackModifier(this IModifierOwner owner, IModifierOwner target)

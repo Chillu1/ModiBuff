@@ -419,10 +419,24 @@ namespace ModiBuff.Core
 				                "" + Name + " id: " + Id);
 			}
 
+			if (_effectWrappers.All(w => !w.EffectOn.HasFlag(EffectOn.Interval)) && _interval != 0)
+			{
+				validRecipe = false;
+				Logger.LogError("[ModiBuff] Interval set, but no interval effects set, for modifier: " +
+				                "" + Name + " id: " + Id);
+			}
+
 			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Duration)) && _duration == 0)
 			{
 				validRecipe = false;
 				Logger.LogError("[ModiBuff] Duration not set, but we have duration effects, for modifier: " +
+				                "" + Name + " id: " + Id);
+			}
+
+			if (_effectWrappers.All(w => !w.EffectOn.HasFlag(EffectOn.Duration)) && _duration != 0)
+			{
+				validRecipe = false;
+				Logger.LogError("[ModiBuff] Duration set, but no duration effects set, for modifier: " +
 				                "" + Name + " id: " + Id);
 			}
 
@@ -431,6 +445,14 @@ namespace ModiBuff.Core
 			{
 				validRecipe = false;
 				Logger.LogError("[ModiBuff] Stack effects set, but no stack effect type set, for modifier: " +
+				                "" + Name + " id: " + Id);
+			}
+
+			if (_effectWrappers.All(w => !w.EffectOn.HasFlag(EffectOn.Stack)) &&
+			    _whenStackEffect != WhenStackEffect.None)
+			{
+				validRecipe = false;
+				Logger.LogError("[ModiBuff] Stack effect type set, but no stack effects set, for modifier: " +
 				                "" + Name + " id: " + Id);
 			}
 

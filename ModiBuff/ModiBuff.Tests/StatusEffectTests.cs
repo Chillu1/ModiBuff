@@ -12,7 +12,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun()
 		{
-			_initStun(AddRecipe);
+			AddRecipe(_initStun);
 			Setup();
 
 			Unit.AddModifierSelf("InitStun");
@@ -23,7 +23,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun_CantAttack()
 		{
-			_initStun(AddRecipe);
+			AddRecipe(_initStun);
 			Setup();
 
 			Unit.AddModifierSelf("InitStun");
@@ -83,7 +83,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun_DurationOver()
 		{
-			_initStun(AddRecipe);
+			AddRecipe(_initStun);
 			Setup();
 
 			Unit.AddModifierSelf("InitStun");
@@ -100,7 +100,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun_OverwriteDuration()
 		{
-			_initStun(AddRecipe);
+			AddRecipe(_initStun);
 			Setup();
 
 			Unit.AddModifierSelf("InitStun");
@@ -117,7 +117,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun_OverwriteDuration_DifferentStatus()
 		{
-			_initStun(AddRecipe);
+			AddRecipe(_initStun);
 			AddRecipe("InitDisarm")
 				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 2), EffectOn.Init);
 			Setup();
@@ -137,7 +137,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Stun_DontOverwriteDuration()
 		{
-			_initStun(AddRecipe);
+			AddRecipe(_initStun);
 			AddRecipe("InitShortStun")
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 1), EffectOn.Init);
 			Setup();
@@ -222,7 +222,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void StunTwice_RevertLonger_StillStunned()
 		{
-			_initStun(AddRecipe);
+			AddRecipe(_initStun);
 			AddRecipe("InitStunLong_Revertible")
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 3, true), EffectOn.Init)
 				.Remove(1);

@@ -23,7 +23,7 @@ namespace ModiBuff.Tests
 		public void AuraInterval()
 		{
 			for (int i = 0; i < _defaultAuraRecipeAddFuncs.Length; i++)
-				_defaultAuraRecipeAddFuncs[i](AddRecipe);
+				AddRecipe(_defaultAuraRecipeAddFuncs[i]);
 			Setup();
 
 			Unit.AddCloseTargets(Ally);
@@ -42,7 +42,7 @@ namespace ModiBuff.Tests
 		public void Aura_AddDamage_Timeout()
 		{
 			for (int i = 0; i < _defaultAuraRecipeAddFuncs.Length; i++)
-				_defaultAuraRecipeAddFuncs[i](AddRecipe);
+				AddRecipe(_defaultAuraRecipeAddFuncs[i]);
 			Setup();
 
 			Unit.AddCloseTargets(Ally);
@@ -62,7 +62,7 @@ namespace ModiBuff.Tests
 		public void AuraAddedDamageRefresh()
 		{
 			for (int i = 0; i < _defaultAuraRecipeAddFuncs.Length; i++)
-				_defaultAuraRecipeAddFuncs[i](AddRecipe);
+				AddRecipe(_defaultAuraRecipeAddFuncs[i]);
 			Setup();
 
 			Unit.AddCloseTargets(Ally);
@@ -83,7 +83,7 @@ namespace ModiBuff.Tests
 		public void Aura_AddDamage_Timeout_AddAgain()
 		{
 			for (int i = 0; i < _defaultAuraRecipeAddFuncs.Length; i++)
-				_defaultAuraRecipeAddFuncs[i](AddRecipe);
+				AddRecipe(_defaultAuraRecipeAddFuncs[i]);
 			Setup();
 
 			Unit.AddCloseTargets(Ally);
