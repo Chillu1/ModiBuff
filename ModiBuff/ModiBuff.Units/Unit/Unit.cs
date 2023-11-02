@@ -18,7 +18,8 @@ namespace ModiBuff.Core.Units
 		IHealable<float, float>, IHealer<float, float>, IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>,
 		IPreAttacker, IEventOwner<EffectOnEvent>, IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
 		ICallbackRegistrable<CallbackType>, IReactable<ReactType>, IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
-		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>
+		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
+		ICustomCallbackRegistrable<CustomCallbackType>
 	{
 		public UnitTag UnitTag { get; private set; }
 		public float Health { get; private set; }
@@ -50,6 +51,8 @@ namespace ModiBuff.Core.Units
 			_healTargetCounter,
 			_addDamageCounter;
 
+		private int _poisonDamageCounter;
+
 		//Note: These event lists should only be used for classic effects.
 		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
 		private readonly List<IEffect> _whenAttackedEffects,
@@ -66,6 +69,8 @@ namespace ModiBuff.Core.Units
 
 		private readonly List<IEffect> _strongHitCallbacks;
 		private UnitCallback _strongHitDelegateCallbacks;
+
+		private readonly List<PoisonEvent> _poisonEvents;
 
 		private readonly List<DispelEvent> _dispelEvents;
 		private readonly List<HealthChangedEvent> _healthChangedEvent;
@@ -101,6 +106,8 @@ namespace ModiBuff.Core.Units
 			_onHealEffects = new List<IEffect>();
 
 			_strongHitCallbacks = new List<IEffect>();
+
+			_poisonEvents = new List<PoisonEvent>();
 
 			_dispelEvents = new List<DispelEvent>();
 			_healthChangedEvent = new List<HealthChangedEvent>();
@@ -327,6 +334,28 @@ namespace ModiBuff.Core.Units
 			Position = position;
 		}
 
+		public float TakeDamagePoison(float damage, int stacks, IUnit source)
+		{
+			float dealtDamage = TakeDamage(damage, source);
+
+			float oldHealth = Health;
+
+			_poisonDamageCounter++;
+			if (_poisonDamageCounter <= MaxRecursionEventCount)
+			{
+				for (int i = 0; i < _poisonEvents.Count; i++)
+					_poisonEvents[i](this, source, stacks, dealtDamage);
+			}
+
+			if (_poisonDamageCounter <= MaxRecursionEventCount)
+			{
+				ResetEventCounters();
+				(source as IEventOwner)?.ResetEventCounters();
+			}
+
+			return dealtDamage + oldHealth - Health;
+		}
+
 		//---StatusResistances---
 
 		public void ChangeStatusResistance(float value)
@@ -356,7 +385,8 @@ namespace ModiBuff.Core.Units
 		public void ResetEventCounters()
 		{
 			_preAttackCounter = _onAttackCounter = _whenAttackedCounter = _afterAttackedCounter =
-				_healthChangedCounter = _onKillCounter = _healCounter = _healTargetCounter = _addDamageCounter = 0;
+				_healthChangedCounter = _onKillCounter = _healCounter = _healTargetCounter =
+					_addDamageCounter = _poisonDamageCounter = 0;
 		}
 
 		public void AddEffectEvent(IEffect effect, EffectOnEvent @event)
@@ -596,6 +626,29 @@ namespace ModiBuff.Core.Units
 						break;
 					default:
 						throw new ArgumentOutOfRangeException(nameof(reactCallbacks), callback.ReactType, null);
+				}
+			}
+		}
+
+		public void RegisterCallbacks(CustomCallback<CustomCallbackType>[] callbacks)
+		{
+			for (int i = 0; i < callbacks.Length; i++)
+			{
+				ref readonly var callback = ref callbacks[i];
+				switch (callback.CallbackType)
+				{
+					case CustomCallbackType.PoisonDamage:
+						if (!(callback.Action is PoisonEvent poisonEvent))
+						{
+							Logger.LogError(
+								"objectDelegate is not of type HealthChangedEvent, use named delegates instead.");
+							break;
+						}
+
+						_poisonEvents.Add(poisonEvent);
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(nameof(callbacks), callback.CallbackType, null);
 				}
 			}
 		}

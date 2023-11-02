@@ -60,9 +60,6 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			if (IsRevertible)
-				_totalHeal = _heal + _extraHeal;
-
 			float heal = _heal;
 
 			if (_metaEffects != null)
@@ -72,6 +69,9 @@ namespace ModiBuff.Core.Units
 			heal += _extraHeal;
 
 			float returnHeal = Effect(heal, target, source);
+
+			if (IsRevertible)
+				_totalHeal += returnHeal; //_heal + _extraHeal;
 
 			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)
@@ -93,11 +93,17 @@ namespace ModiBuff.Core.Units
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)
 		{
+			if ((_stackEffect & StackEffectType.Set) != 0)
+				_extraHeal = _stackValue;
+
+			if ((_stackEffect & StackEffectType.SetStacksBased) != 0)
+				_extraHeal = _stackValue * stacks;
+
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_totalHeal += _stackValue;
+				_extraHeal += _stackValue;
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_totalHeal += _stackValue * stacks;
+				_extraHeal += _stackValue * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);

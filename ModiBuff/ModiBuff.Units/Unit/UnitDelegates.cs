@@ -5,6 +5,8 @@ namespace ModiBuff.Core.Units
 
 	public delegate void DispelEvent(IUnit target, IUnit source, TagType tag);
 
+	public delegate void PoisonEvent(IUnit target, IUnit source, int poisonStacks, float dealtDamage);
+
 	//Rarely updated delegates
 	public delegate void DamageChangedEvent(IUnit unit, float newDamage, float deltaDamage);
 }

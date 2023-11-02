@@ -7,11 +7,10 @@ namespace ModiBuff.Core.Units
 	{
 		None = 0,
 		Effect = 1,
-		Add = 2, //Add to all damages?
+		Add = 2,
 		AddStacksBased = 4,
-		//Multiply = 8, //Multiply all damages?
-		//MultiplyStacksBased = 16,
-		//SetMultiplierStacksBased = 32, //Multiply all damages?
+		Set = 8,
+		SetStacksBased = 16,
 	}
 
 	public static class StackEffectTypeExtensions
