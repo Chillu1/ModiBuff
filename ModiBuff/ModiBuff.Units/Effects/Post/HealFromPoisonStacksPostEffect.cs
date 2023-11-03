@@ -1,6 +1,6 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class HealFromPoisonStacksMetaEffect : IPostEffect<float, int>
+	public sealed class HealFromPoisonStacksMetaEffect : IMetaEffect<float, float>
 	{
 		private readonly float _multiplier;
 		private readonly Targeting _targeting;
@@ -11,10 +11,10 @@ namespace ModiBuff.Core.Units
 			_targeting = targeting;
 		}
 
-		public void Effect(float damage, int poisonStacks, IUnit target, IUnit source)
+		public float Effect(float value, IUnit target, IUnit source)
 		{
-			_targeting.UpdateTargetSource(ref target, ref source);
-			((IHealable<float, float>)target).Heal(poisonStacks * _multiplier, source);
+			_targeting.UpdateTarget(ref target, source);
+			return value + ((IPoisonable)target).PoisonStacks * _multiplier;
 		}
 	}
 }

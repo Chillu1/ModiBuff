@@ -64,24 +64,40 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - 5 + 1 - 5 * 2 + 1 * 2, Enemy.Health);
 		}
 
-		//Heal based on current poison stacks applied
-		//[Test]
+		[Test]
 		public void HealBasedOnPoisonStacks()
 		{
 			//This becomes a problem, because we have to use one unified effect for poison for all of them to stack
 			//Maybe we should have a bare bones poison effect, that each poison damage effect uses for stacks? Somehow
 			//We also could obvs store the stacks on the unit instead
 			//We could make a "channel" that gets the effect stacks from the unified poison effect, but might be bad design
-			AddRecipe("PoisonHeal")
-				.Stack(WhenStackEffect.Always)
-				.Effect(new PoisonDamageEffect(0, StackEffectType.Add, 5)
-					.SetPostEffects(new HealFromPoisonStacksMetaEffect(1f)), EffectOn.Interval | EffectOn.Stack)
-				.Interval(1)
-				.Remove(5).Refresh();
+			// AddRecipe("PoisonHeal")
+			// 	.Stack(WhenStackEffect.Always)
+			// 	.Effect(new PoisonDamageEffect(0, StackEffectType.Add, 5)
+			// 		.SetPostEffects(new HealFromPoisonStacksFedPostEffect(1f)), EffectOn.Interval | EffectOn.Stack)
+			// 	.Interval(1)
+			// 	.Remove(5).Refresh();
 			//AddRecipe("PoisonHeal")
 			//	.Effect(new ApplierEffect("Poison")
 			//		.SetPostEffects(new HealFromPoisonStacksMetaEffect(1f)), EffectOn.Init); //Is this possible somehow?
+			AddRecipe(_poisonRecipe);
+			AddRecipe("PoisonHealHeal")
+				.Stack(WhenStackEffect.Always)
+				.Effect(new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1)
+					.SetMetaEffects(new HealFromPoisonStacksMetaEffect(1f)), EffectOn.Stack);
+			AddRecipe("PoisonHeal")
+				.Effect(new ApplierEffect("Poison"), EffectOn.Init)
+				.Effect(new ApplierEffect("PoisonHealHeal", Targeting.SourceTarget), EffectOn.Init);
 			Setup();
+
+			Unit.TakeDamage(UnitHealth / 2f, Unit);
+			Unit.AddApplierModifier(Recipes.GetGenerator("PoisonHeal"), ApplierType.Cast);
+
+			Unit.TryCast("PoisonHeal", Enemy);
+			Assert.AreEqual(UnitHealth / 2f + 1, Unit.Health);
+
+			Unit.TryCast("PoisonHeal", Enemy);
+			Assert.AreEqual(UnitHealth / 2f + 1 + 1 * 2, Unit.Health);
 		}
 
 		/*
