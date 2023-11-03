@@ -8,7 +8,7 @@ namespace ModiBuff.Tests
 	{
 		private readonly RecipeAddFunc _poisonRecipe = add => add("Poison")
 			.Stack(WhenStackEffect.Always)
-			.Effect(new PoisonDamageEffect(0, StackEffectType.Add, 5), EffectOn.Interval | EffectOn.Stack)
+			.Effect(new PoisonDamageEffect(StackEffectType.None, 5), EffectOn.Interval | EffectOn.Stack)
 			.Interval(1)
 			.Remove(5).Refresh();
 
@@ -71,15 +71,6 @@ namespace ModiBuff.Tests
 			//Maybe we should have a bare bones poison effect, that each poison damage effect uses for stacks? Somehow
 			//We also could obvs store the stacks on the unit instead
 			//We could make a "channel" that gets the effect stacks from the unified poison effect, but might be bad design
-			// AddRecipe("PoisonHeal")
-			// 	.Stack(WhenStackEffect.Always)
-			// 	.Effect(new PoisonDamageEffect(0, StackEffectType.Add, 5)
-			// 		.SetPostEffects(new HealFromPoisonStacksFedPostEffect(1f)), EffectOn.Interval | EffectOn.Stack)
-			// 	.Interval(1)
-			// 	.Remove(5).Refresh();
-			//AddRecipe("PoisonHeal")
-			//	.Effect(new ApplierEffect("Poison")
-			//		.SetPostEffects(new HealFromPoisonStacksMetaEffect(1f)), EffectOn.Init); //Is this possible somehow?
 			AddRecipe(_poisonRecipe);
 			AddRecipe("PoisonHealHeal")
 				.Stack(WhenStackEffect.Always)
@@ -100,9 +91,49 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth / 2f + 1 + 1 * 2, Unit.Health);
 		}
 
+		[Test]
+		public void PoisonDamageThornsEvent()
+		{
+			AddRecipe(_poisonRecipe);
+			AddGenerator("PoisonThorns", (id, genId, name, tag) =>
+			{
+				var @event = new PoisonEvent((target, source, stacks, damage) =>
+				{
+					((IDamagable<float, float, float, float>)source).TakeDamage(damage, target);
+				});
+				var callback = new CustomCallbackRegisterEffect<CustomCallbackType>(
+					new CustomCallback<CustomCallbackType>(CustomCallbackType.PoisonDamage, @event));
+
+				var initComponent = new InitComponent(false, new IEffect[] { callback }, null);
+
+				return new Modifier(id, genId, name, initComponent, null, null, null,
+					new SingleTargetComponent(), null);
+			});
+			Setup();
+
+			Enemy.AddModifierSelf("PoisonThorns");
+			Unit.AddApplierModifier(Recipes.GetGenerator("Poison"), ApplierType.Cast);
+
+			Unit.TryCast("Poison", Enemy);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Enemy.Update(1);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.TryCast("Poison", Enemy);
+			Enemy.Update(1);
+			Assert.AreEqual(UnitHealth - 5 - 5 * 2, Unit.Health);
+
+			Ally.AddApplierModifier(Recipes.GetGenerator("Poison"), ApplierType.Cast);
+			Ally.TryCast("Poison", Enemy);
+
+			Enemy.Update(1);
+			Assert.AreEqual(UnitHealth - 5 - 5 * 2 - 5 * 2, Unit.Health);
+			Assert.AreEqual(AllyHealth - 5, Ally.Health);
+		}
+
 		/*
 		 Deal more damage when bleeding (Meta effect)
-		   Each time poison stack is inflicted, heal for X poison stacks.
 		   Return poison damage back to appliers (each interval, would need to store appliers & their count)
 		 */
 	}

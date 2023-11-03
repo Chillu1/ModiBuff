@@ -1,13 +1,13 @@
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class PoisonDamageEffect : IStackEffect, IMutableStateEffect, IEffect,
+	public sealed class PoisonDamageEffect : IStackEffect, IEffect, IStateEffect,
 		IMetaEffectOwner<PoisonDamageEffect, float, int, float>, IPostEffectOwner<PoisonDamageEffect, float, int>
 	{
-		public bool UsesMutableState => _stackEffect.UsesMutableState();
+		private const float PoisonDamage = 5f;
 
-		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;
 		private readonly float _stackValue;
 		private readonly Targeting _targeting;
@@ -15,32 +15,31 @@ namespace ModiBuff.Core.Units
 		private IPostEffect<float, int>[] _postEffects;
 
 		private float _extraDamage;
-		private int _poisonStacks;
+		private readonly Dictionary<IUnit, int> _poisonStacksPerUnit;
 
-		public PoisonDamageEffect(float damage, StackEffectType stackEffect = StackEffectType.Effect,
-			float stackValue = -1,
-			Targeting targeting = Targeting.TargetSource)
-			: this(damage, stackEffect, stackValue, targeting, null, null)
+		public PoisonDamageEffect(StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
+			Targeting targeting = Targeting.TargetSource) : this(stackEffect, stackValue, targeting, null, null)
 		{
 		}
 
 		/// <summary>
 		///		Manual modifier generation constructor
 		/// </summary>
-		public static PoisonDamageEffect Create(float damage, StackEffectType stackEffect = StackEffectType.Effect,
+		public static PoisonDamageEffect Create(StackEffectType stackEffect = StackEffectType.Effect,
 			float stackValue = -1, Targeting targeting = Targeting.TargetSource,
 			IMetaEffect<float, int, float>[] metaEffects = null, IPostEffect<float, int>[] postEffects = null) =>
-			new PoisonDamageEffect(damage, stackEffect, stackValue, targeting, metaEffects, postEffects);
+			new PoisonDamageEffect(stackEffect, stackValue, targeting, metaEffects, postEffects);
 
-		private PoisonDamageEffect(float damage, StackEffectType stackEffect, float stackValue, Targeting targeting,
+		private PoisonDamageEffect(StackEffectType stackEffect, float stackValue, Targeting targeting,
 			IMetaEffect<float, int, float>[] metaEffects, IPostEffect<float, int>[] postEffects)
 		{
-			_baseDamage = damage;
 			_stackEffect = stackEffect;
 			_stackValue = stackValue;
 			_targeting = targeting;
 			_metaEffects = metaEffects;
 			_postEffects = postEffects;
+
+			_poisonStacksPerUnit = new Dictionary<IUnit, int>();
 		}
 
 		public PoisonDamageEffect SetMetaEffects(params IMetaEffect<float, int, float>[] metaEffects)
@@ -57,31 +56,41 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			float damage = _baseDamage;
+			foreach (var kvp in _poisonStacksPerUnit)
+			{
+				//Check if the source is still alive, if not, handle it
 
-			if (_metaEffects != null)
-				foreach (var metaEffect in _metaEffects)
-					damage = metaEffect.Effect(damage, _poisonStacks, target, source);
+				var stackSource = kvp.Key;
+				int stacks = kvp.Value;
+				float damage = stacks * PoisonDamage;
 
-			damage += _extraDamage;
+				if (_metaEffects != null)
+					foreach (var metaEffect in _metaEffects)
+						damage = metaEffect.Effect(damage, stacks, target, stackSource);
 
-			float returnDamageInfo = Effect(damage, target, source);
+				damage += _extraDamage;
 
-			if (_postEffects != null)
-				foreach (var postEffect in _postEffects)
-					postEffect.Effect(returnDamageInfo, _poisonStacks, target, source);
+				float returnDamageInfo = Effect(damage, stacks, target, stackSource);
+
+				if (_postEffects != null)
+					foreach (var postEffect in _postEffects)
+						postEffect.Effect(returnDamageInfo, stacks, target, stackSource);
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private float Effect(float damage, IUnit target, IUnit source)
+		private float Effect(float damage, int stacks, IUnit target, IUnit source)
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
-			return ((IPoisonable)target).TakeDamagePoison(damage, _poisonStacks, source);
+			return ((IPoisonable)target).TakeDamagePoison(damage, stacks, source);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)
 		{
-			_poisonStacks++;
+			if (_poisonStacksPerUnit.ContainsKey(source))
+				_poisonStacksPerUnit[source]++;
+			else
+				_poisonStacksPerUnit.Add(source, 1);
 
 			if ((_stackEffect & StackEffectType.Add) != 0)
 				_extraDamage += _stackValue;
@@ -96,11 +105,11 @@ namespace ModiBuff.Core.Units
 		public void ResetState()
 		{
 			_extraDamage = 0;
-			_poisonStacks = 0;
+			_poisonStacksPerUnit.Clear();
 		}
 
 		public IEffect ShallowClone() =>
-			new PoisonDamageEffect(_baseDamage, _stackEffect, _stackValue, _targeting, _metaEffects, _postEffects);
+			new PoisonDamageEffect(_stackEffect, _stackValue, _targeting, _metaEffects, _postEffects);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
