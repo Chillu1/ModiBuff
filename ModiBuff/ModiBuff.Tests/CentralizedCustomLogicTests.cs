@@ -67,7 +67,6 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealBasedOnPoisonStacks()
 		{
-			//This becomes a problem, because we have to use one unified effect for poison for all of them to stack
 			//Maybe we should have a bare bones poison effect, that each poison damage effect uses for stacks? Somehow
 			//We also could obvs store the stacks on the unit instead
 			//We could make a "channel" that gets the effect stacks from the unified poison effect, but might be bad design
@@ -131,10 +130,5 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 - 5 * 2 - 5 * 2, Unit.Health);
 			Assert.AreEqual(AllyHealth - 5, Ally.Health);
 		}
-
-		/*
-		 Deal more damage when bleeding (Meta effect)
-		   Return poison damage back to appliers (each interval, would need to store appliers & their count)
-		 */
 	}
 }
