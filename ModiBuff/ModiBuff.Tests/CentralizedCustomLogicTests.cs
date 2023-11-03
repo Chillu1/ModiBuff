@@ -1,3 +1,4 @@
+using System.Reflection;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
@@ -31,18 +32,26 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealBasedOnPoisonStacksEvent()
 		{
+			MethodInfo methodInfo = typeof(HealEffect).GetMethod("StackEffect");
 			AddRecipe(_poisonRecipe);
 			AddGenerator("HealPerPoisonStack", (id, genId, name, tag) =>
 			{
 				var healEffect = new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1);
 
-				var @event = new PoisonEvent((target, source, stacks, totalStacks, damage) =>
+				void PoisonEventDelegate(IUnit target, IUnit source, int stacks, int totalStacks, float damage)
 				{
-					//Kind of a stacks hack rn
-					healEffect.StackEffect(stacks, target, source);
-				});
+					//Kind of a stacks hack rn, by using stack effect in callbacks
+					methodInfo.Invoke(healEffect, new object[] { stacks, target, source });
+				}
+
+				//var @event = new PoisonEvent((target, source, stacks, totalStacks, damage) =>
+				//{
+				//	//Kind of a stacks hack rn
+				//	healEffect.StackEffect(stacks, target, source);
+				//});
 				var callback = new CustomCallbackRegisterEffect<CustomCallbackType>(
-					new CustomCallback<CustomCallbackType>(CustomCallbackType.PoisonDamage, @event));
+					new CustomCallback<CustomCallbackType>(CustomCallbackType.PoisonDamage,
+						(PoisonEvent)PoisonEventDelegate));
 
 				var initComponent = new InitComponent(false, new IEffect[] { callback }, null);
 				//var stackComponent = new StackComponent(WhenStackEffect.Always, -1, -1, -1,

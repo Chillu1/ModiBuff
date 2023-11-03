@@ -644,7 +644,7 @@ namespace ModiBuff.Core.Units
 						if (!(callback.Action is PoisonEvent poisonEvent))
 						{
 							Logger.LogError(
-								"objectDelegate is not of type HealthChangedEvent, use named delegates instead.");
+								$"objectDelegate is not of type {nameof(PoisonEvent)}, use named delegates instead.");
 							break;
 						}
 
