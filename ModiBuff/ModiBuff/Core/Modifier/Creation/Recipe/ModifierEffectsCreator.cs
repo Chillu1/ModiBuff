@@ -12,6 +12,7 @@ namespace ModiBuff.Core
 		private readonly EffectWrapper _removeEffectWrapper;
 		private readonly EffectWrapper _eventRegisterWrapper;
 		private readonly EffectWrapper _callbackRegisterWrapper;
+		private readonly EffectWrapper _customCallbackRegisterWrapper;
 
 		private IRevertEffect[] _revertEffects;
 		private IEffect[] _initEffects;
@@ -30,13 +31,15 @@ namespace ModiBuff.Core
 			_eventEffectsIndex;
 
 		public ModifierEffectsCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper,
-			EffectWrapper eventRegisterWrapper, EffectWrapper callbackRegisterWrapper)
+			EffectWrapper eventRegisterWrapper, EffectWrapper callbackRegisterWrapper,
+			EffectWrapper customCallbackRegisterWrapper)
 		{
 			var effectsWithModifierInfoWrappers = new List<EffectWrapper>();
 			_effectWrappers = effectWrappers.ToArray();
 			_removeEffectWrapper = removeEffectWrapper;
 			_eventRegisterWrapper = eventRegisterWrapper;
 			_callbackRegisterWrapper = callbackRegisterWrapper;
+			_customCallbackRegisterWrapper = customCallbackRegisterWrapper;
 
 			for (int i = 0; i < _effectWrappers.Length; i++)
 			{

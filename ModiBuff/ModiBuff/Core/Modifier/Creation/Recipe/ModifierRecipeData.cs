@@ -11,6 +11,7 @@ namespace ModiBuff.Core
 		public readonly EffectWrapper RemoveEffectWrapper;
 		public readonly EffectWrapper EventRegisterWrapper;
 		public readonly EffectWrapper CallbackRegisterWrapper;
+		public readonly EffectWrapper CustomCallbackRegisterWrapper;
 		public readonly bool HasApplyChecks;
 		public readonly List<ICheck> ApplyCheckList;
 		public readonly bool HasEffectChecks;
@@ -31,11 +32,11 @@ namespace ModiBuff.Core
 
 		public ModifierRecipeData(int id, string name, List<EffectWrapper> effectWrappers,
 			EffectWrapper removeEffectWrapper, EffectWrapper eventRegisterWrapper,
-			EffectWrapper callbackRegisterWrapper, bool hasApplyChecks, List<ICheck> applyCheckList,
-			bool hasEffectChecks, List<ICheck> effectCheckList, List<Func<IUnit, bool>> applyFuncCheckList,
-			List<Func<IUnit, bool>> effectFuncCheckList, bool isAura, TagType tag, bool oneTimeInit, float interval,
-			float duration, bool refreshDuration, bool refreshInterval, WhenStackEffect whenStackEffect,
-			int maxStacks, int everyXStacks, float independentStackTime)
+			EffectWrapper callbackRegisterWrapper, EffectWrapper customCallbackRegisterWrapper, bool hasApplyChecks,
+			List<ICheck> applyCheckList, bool hasEffectChecks, List<ICheck> effectCheckList,
+			List<Func<IUnit, bool>> applyFuncCheckList, List<Func<IUnit, bool>> effectFuncCheckList, bool isAura,
+			TagType tag, bool oneTimeInit, float interval, float duration, bool refreshDuration, bool refreshInterval,
+			WhenStackEffect whenStackEffect, int maxStacks, int everyXStacks, float independentStackTime)
 		{
 			Id = id;
 			Name = name;
@@ -43,6 +44,7 @@ namespace ModiBuff.Core
 			RemoveEffectWrapper = removeEffectWrapper;
 			EventRegisterWrapper = eventRegisterWrapper;
 			CallbackRegisterWrapper = callbackRegisterWrapper;
+			CustomCallbackRegisterWrapper = customCallbackRegisterWrapper;
 			HasApplyChecks = hasApplyChecks;
 			ApplyCheckList = applyCheckList;
 			HasEffectChecks = hasEffectChecks;

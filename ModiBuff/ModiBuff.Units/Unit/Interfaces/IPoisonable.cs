@@ -4,6 +4,6 @@ namespace ModiBuff.Core.Units
 	{
 		int PoisonStacks { get; }
 
-		float TakeDamagePoison(float damage, int stacks, IUnit source);
+		float TakeDamagePoison(float damage, int stacks, int totalStacks, IUnit source);
 	}
 }

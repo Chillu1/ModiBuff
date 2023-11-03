@@ -15,6 +15,7 @@ namespace ModiBuff.Core.Units
 		private IPostEffect<float, int>[] _postEffects;
 
 		private float _extraDamage;
+		private int _totalStacks;
 		private readonly Dictionary<IUnit, int> _poisonStacksPerUnit;
 
 		public PoisonDamageEffect(StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
@@ -82,11 +83,12 @@ namespace ModiBuff.Core.Units
 		private float Effect(float damage, int stacks, IUnit target, IUnit source)
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
-			return ((IPoisonable)target).TakeDamagePoison(damage, stacks, source);
+			return ((IPoisonable)target).TakeDamagePoison(damage, stacks, _totalStacks, source);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)
 		{
+			_totalStacks++;
 			if (_poisonStacksPerUnit.ContainsKey(source))
 				_poisonStacksPerUnit[source]++;
 			else
@@ -105,6 +107,7 @@ namespace ModiBuff.Core.Units
 		public void ResetState()
 		{
 			_extraDamage = 0;
+			_totalStacks = 0;
 			_poisonStacksPerUnit.Clear();
 		}
 

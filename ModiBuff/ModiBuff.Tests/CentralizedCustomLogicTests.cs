@@ -36,7 +36,7 @@ namespace ModiBuff.Tests
 			{
 				var healEffect = new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1);
 
-				var @event = new PoisonEvent((target, source, stacks, damage) =>
+				var @event = new PoisonEvent((target, source, stacks, totalStacks, damage) =>
 				{
 					//Kind of a stacks hack rn
 					healEffect.StackEffect(stacks, target, source);
@@ -94,20 +94,12 @@ namespace ModiBuff.Tests
 		public void PoisonDamageThornsEvent()
 		{
 			AddRecipe(_poisonRecipe);
-			AddGenerator("PoisonThorns", (id, genId, name, tag) =>
-			{
-				var @event = new PoisonEvent((target, source, stacks, damage) =>
-				{
-					((IDamagable<float, float, float, float>)source).TakeDamage(damage, target);
-				});
-				var callback = new CustomCallbackRegisterEffect<CustomCallbackType>(
-					new CustomCallback<CustomCallbackType>(CustomCallbackType.PoisonDamage, @event));
-
-				var initComponent = new InitComponent(false, new IEffect[] { callback }, null);
-
-				return new Modifier(id, genId, name, initComponent, null, null, null,
-					new SingleTargetComponent(), null);
-			});
+			AddRecipe("PoisonThorns")
+				.CustomCallback(new CustomCallback<CustomCallbackType>(CustomCallbackType.PoisonDamage,
+					new PoisonEvent((target, source, stacks, totalStacks, damage) =>
+					{
+						((IDamagable<float, float, float, float>)source).TakeDamage(damage, target);
+					})));
 			Setup();
 
 			Enemy.AddModifierSelf("PoisonThorns");

@@ -335,9 +335,9 @@ namespace ModiBuff.Core.Units
 			Position = position;
 		}
 
-		public float TakeDamagePoison(float damage, int stacks, IUnit source)
+		public float TakeDamagePoison(float damage, int stacks, int totalStacks, IUnit source)
 		{
-			PoisonStacks = stacks;
+			PoisonStacks = totalStacks;
 
 			float dealtDamage = TakeDamage(damage, source);
 
@@ -347,7 +347,7 @@ namespace ModiBuff.Core.Units
 			if (_poisonDamageCounter <= MaxRecursionEventCount)
 			{
 				for (int i = 0; i < _poisonEvents.Count; i++)
-					_poisonEvents[i](this, source, stacks, dealtDamage);
+					_poisonEvents[i](this, source, stacks, totalStacks, dealtDamage);
 			}
 
 			if (_poisonDamageCounter <= MaxRecursionEventCount)

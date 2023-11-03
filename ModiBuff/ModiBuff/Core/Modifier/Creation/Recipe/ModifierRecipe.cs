@@ -29,6 +29,7 @@ namespace ModiBuff.Core
 		private EffectWrapper _removeEffectWrapper;
 		private EffectWrapper _eventRegisterWrapper;
 		private EffectWrapper _callbackRegisterWrapper;
+		private EffectWrapper _customCallbackRegisterWrapper;
 
 		private readonly List<EffectWrapper> _effectWrappers;
 
@@ -343,6 +344,14 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		public ModifierRecipe CustomCallback<TCustomCallback>(params CustomCallback<TCustomCallback>[] callbacks)
+		{
+			var effect = new CustomCallbackRegisterEffect<TCustomCallback>(callbacks);
+			_customCallbackRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
+			_effectWrappers.Add(_customCallbackRegisterWrapper);
+			return this;
+		}
+
 		/// <summary>
 		///		Registers a callback effect to a unit, will trigger the callback when <see cref="callbackType"/> is triggered.
 		///		It will NOT trigger any EffectOn.<see cref="EffectOn.Callback"/> effects, only the supplied callback.
@@ -382,9 +391,10 @@ namespace ModiBuff.Core
 				_tag |= TagType.IsInstanceStackable;
 
 			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _eventRegisterWrapper,
-				_callbackRegisterWrapper, _hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList,
-				_applyFuncCheckList, _effectFuncCheckList, _isAura, _tag, _oneTimeInit, _interval, _duration,
-				_refreshDuration, _refreshInterval, _whenStackEffect, _maxStacks, _everyXStacks, _independentStackTime);
+				_callbackRegisterWrapper, _customCallbackRegisterWrapper, _hasApplyChecks, _applyCheckList,
+				_hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura, _tag,
+				_oneTimeInit, _interval, _duration, _refreshDuration, _refreshInterval, _whenStackEffect, _maxStacks,
+				_everyXStacks, _independentStackTime);
 			return new ModifierGenerator(in data);
 		}
 
