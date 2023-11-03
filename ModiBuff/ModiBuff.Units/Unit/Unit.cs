@@ -31,6 +31,7 @@ namespace ModiBuff.Core.Units
 		public float StatusResistance { get; private set; } = 1f;
 		public UnitType UnitType { get; }
 		public Vector2 Position { get; private set; }
+		public int PoisonStacks { get; private set; }
 
 		public bool IsDead { get; private set; }
 
@@ -336,6 +337,8 @@ namespace ModiBuff.Core.Units
 
 		public float TakeDamagePoison(float damage, int stacks, IUnit source)
 		{
+			PoisonStacks = stacks;
+
 			float dealtDamage = TakeDamage(damage, source);
 
 			float oldHealth = Health;

@@ -53,7 +53,7 @@ namespace ModiBuff.Tests
 		}
 
 		protected ModifierRecipe AddRecipe(string name) => Recipes.Add(name, "", "");
-		protected void AddRecipe(RecipeAddFunc addFunc) => addFunc(AddRecipe);
+		protected ModifierRecipe AddRecipe(RecipeAddFunc addFunc) => addFunc(AddRecipe);
 
 		protected void AddGenerator(string name, in ModifierGeneratorFunc createFunc, TagType tag = TagType.Default)
 		{
