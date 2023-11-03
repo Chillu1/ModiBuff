@@ -10,6 +10,11 @@ namespace ModiBuff.Tests
 			unit.ModifierController.Add(ModifierIdManager.GetIdOld(name), unit, unit);
 		}
 
+		internal static void ApplyEffectSelf(this IModifierOwner unit, string name)
+		{
+			unit.ApplyEffect(EffectIdManager.GetIdOld(name), unit);
+		}
+
 		internal static void AddModifierTarget(this IModifierOwner unit, string name, IUnit target)
 		{
 			unit.ModifierController.Add(ModifierIdManager.GetIdOld(name), target, unit);

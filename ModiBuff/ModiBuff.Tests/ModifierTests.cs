@@ -8,8 +8,10 @@ namespace ModiBuff.Tests
 	public abstract class ModifierTests
 	{
 		protected ModifierIdManager IdManager { get; private set; }
+		protected EffectIdManager EffectIdManager { get; private set; }
 		protected ModifierRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
+		protected ModifierLessEffects Effects { get; private set; }
 
 		protected Unit Unit { get; private set; }
 		protected float UnitHealth { get; private set; }
@@ -48,12 +50,16 @@ namespace ModiBuff.Tests
 		public void IterationSetup()
 		{
 			IdManager = new ModifierIdManager();
+			EffectIdManager = new EffectIdManager();
 			Recipes = new ModifierRecipes(IdManager);
 			Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
+			Effects = new ModifierLessEffects(EffectIdManager);
 		}
 
 		protected ModifierRecipe AddRecipe(string name) => Recipes.Add(name, "", "");
 		protected ModifierRecipe AddRecipe(RecipeAddFunc addFunc) => addFunc(AddRecipe);
+
+		protected void AddEffect(string name, params IEffect[] effects) => Effects.Add(name, effects);
 
 		protected void AddGenerator(string name, in ModifierGeneratorFunc createFunc, TagType tag = TagType.Default)
 		{
@@ -66,6 +72,7 @@ namespace ModiBuff.Tests
 		public void Setup()
 		{
 			Recipes.CreateGenerators();
+			Effects.Finish();
 			Pool = new ModifierPool(Recipes.GetGenerators());
 
 			Unit = new Unit(UnitHealth, UnitDamage, UnitHeal, UnitMana, UnitType.Good);
@@ -77,22 +84,30 @@ namespace ModiBuff.Tests
 		public void TearDown()
 		{
 			Pool.Reset();
+			Effects.Reset();
 			IdManager.Reset();
+			EffectIdManager.Reset();
 
 			IdManager = null;
+			EffectIdManager = null;
 			Recipes = null;
 			Pool = null;
+			Effects = null;
 		}
 
 		[OneTimeTearDown]
 		public void OneTimeTearDown()
 		{
 			Pool?.Reset();
+			Effects?.Reset();
 			IdManager?.Reset();
+			EffectIdManager?.Reset();
 
 			IdManager = null;
+			EffectIdManager = null;
 			Recipes = null;
 			Pool = null;
+			Effects = null;
 		}
 	}
 }
