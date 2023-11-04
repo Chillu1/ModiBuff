@@ -11,9 +11,19 @@ namespace ModiBuff.Tests
 		{
 			Setup();
 
-			Unit.AddModifierSelf("InitDamage"); //Init
+			Unit.AddModifierSelf("InitDamage");
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void SelfEffect_Damage()
+		{
+			AddEffect("5Damage", new DamageEffect(5f));
+			Setup();
+
+			Unit.ApplyEffectSelf("5Damage");
+			Assert.AreEqual(UnitHealth - 5f, Unit.Health);
 		}
 
 		[Test]
@@ -21,9 +31,18 @@ namespace ModiBuff.Tests
 		{
 			Setup();
 
-			Enemy.AddModifierTarget("InitDamage", Unit); //Init
-
+			Enemy.AddModifierTarget("InitDamage", Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void TargetEffect_Damage()
+		{
+			AddEffect("5Damage", new DamageEffect(5f));
+			Setup();
+
+			Enemy.ApplyEffectTarget("5Damage", Unit);
+			Assert.AreEqual(UnitHealth - 5f, Unit.Health);
 		}
 
 		[Test]

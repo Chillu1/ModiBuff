@@ -19,7 +19,7 @@ namespace ModiBuff.Core.Units
 		IPreAttacker, IEventOwner<EffectOnEvent>, IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
 		ICallbackRegistrable<CallbackType>, IReactable<ReactType>, IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
-		ICustomCallbackRegistrable<CustomCallbackType>
+		ICustomCallbackRegistrable<CustomCallbackType>, ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>
 	{
 		public UnitTag UnitTag { get; private set; }
 		public float Health { get; private set; }
@@ -37,8 +37,13 @@ namespace ModiBuff.Core.Units
 
 		public ModifierController ModifierController { get; }
 
+		//Note: use one of these, not both
 		public IMultiInstanceStatusEffectController<LegalAction, StatusEffectType> StatusEffectController =>
 			_statusEffectController;
+
+		ISingleInstanceStatusEffectController<LegalAction, StatusEffectType>
+			ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>.StatusEffectController =>
+			_singleInstanceStatusEffectController;
 
 		public const int MaxRecursionEventCount = 1;
 
@@ -81,6 +86,7 @@ namespace ModiBuff.Core.Units
 		private readonly List<Modifier> _auraModifiers;
 
 		private readonly MultiInstanceStatusEffectController _statusEffectController;
+		private readonly StatusEffectController _singleInstanceStatusEffectController;
 
 		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000,
 			UnitType unitType = UnitType.Good, UnitTag unitTag = UnitTag.Default)
@@ -120,6 +126,7 @@ namespace ModiBuff.Core.Units
 
 			ModifierController = new ModifierController(this);
 			_statusEffectController = new MultiInstanceStatusEffectController();
+			_singleInstanceStatusEffectController = new StatusEffectController();
 		}
 
 		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences,
@@ -133,6 +140,7 @@ namespace ModiBuff.Core.Units
 		public void Update(float deltaTime)
 		{
 			_statusEffectController.Update(deltaTime);
+			_singleInstanceStatusEffectController.Update(deltaTime);
 			ModifierController.Update(deltaTime);
 			for (int i = 0; i < _auraModifiers.Count; i++)
 				_auraModifiers[i].Update(deltaTime);
@@ -143,7 +151,8 @@ namespace ModiBuff.Core.Units
 		/// </summary>
 		public void PreAttack(IUnit target)
 		{
-			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
+			if (!_statusEffectController.HasLegalAction(LegalAction.Act) ||
+			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act))
 				return;
 
 			_preAttackCounter++;
@@ -162,7 +171,8 @@ namespace ModiBuff.Core.Units
 
 		public float Attack(Unit target)
 		{
-			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
+			if (!_statusEffectController.HasLegalAction(LegalAction.Act) ||
+			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
 			_onAttackCounter++;
@@ -278,7 +288,8 @@ namespace ModiBuff.Core.Units
 
 		public float Heal(IHealable<float, float> target)
 		{
-			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
+			if (!_statusEffectController.HasLegalAction(LegalAction.Act) ||
+			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
 			_healTargetCounter++;

@@ -18,5 +18,38 @@ namespace ModiBuff.Tests
 			Unit.ApplyEffectSelf("10Damage");
 			Assert.AreEqual(UnitHealth - 5f - 10f, Unit.Health);
 		}
+
+		[Test]
+		public void StunSilenceModifierLess()
+		{
+			AddEffect("StunSilence", new SingleInstanceStatusEffectEffect(StatusEffectType.Stun, 1f),
+				new SingleInstanceStatusEffectEffect(StatusEffectType.Silence, 2f));
+			Setup();
+
+			Unit.ApplyEffectSelf("StunSilence");
+			Assert.True(Unit.HasStatusEffectSingle(StatusEffectType.Stun));
+			Assert.True(Unit.HasStatusEffectSingle(StatusEffectType.Silence));
+
+			Unit.Update(1f);
+			Assert.False(Unit.HasStatusEffectSingle(StatusEffectType.Stun));
+			Assert.True(Unit.HasStatusEffectSingle(StatusEffectType.Silence));
+		}
+
+		[Test]
+		public void RevertibleModifierlessEffect_Invalid()
+		{
+			Assert.Throws<AssertionException>(() => AddEffect("Revertible", new AddDamageEffect(5, true)));
+			Setup();
+		}
+
+		[Test]
+		public void UsesMutableStateModifierlessEffect_Invalid()
+		{
+			Assert.Throws<AssertionException>(() =>
+			{
+				AddEffect("Revertible", new AddDamageEffect(5, stackEffect: StackEffectType.Add, stackValue: 1));
+			});
+			Setup();
+		}
 	}
 }

@@ -25,16 +25,33 @@ namespace ModiBuff.Core
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (id >= _effects.Length)
-				Logger.LogError($"ModifierLessEffects: Effect with id {id} does not exist");
+				Logger.LogError($"[ModiBuff] ModifierLessEffects: Effect with id {id} does not exist");
 #endif
 
 			_effects[id].Apply(target, source);
 		}
 
-		public void Add(string name, params IEffect[] effects)
+		public bool Add(string name, params IEffect[] effects)
 		{
+			bool valid = true;
+			foreach (var effect in effects)
+			{
+				if (!Validate(effect))
+					valid = false;
+			}
+
+			if (_idManager.IsIdTaken(name))
+			{
+				valid = false;
+				Logger.LogError($"[ModiBuff] ModifierLessEffects: Effect with name {name} already exists");
+			}
+
+			if (!valid)
+				return false;
+
 			int id = _idManager.GetFreeId(name);
 			_effectList.Add(new ModifierLessEffect(effects));
+			return true;
 		}
 
 		public void Finish()
@@ -46,6 +63,26 @@ namespace ModiBuff.Core
 		{
 			_effectList.Clear();
 			Instance = null;
+		}
+
+		private static bool Validate(IEffect effect)
+		{
+			bool valid = true;
+			if (effect is IRevertEffect revertEffect && revertEffect.IsRevertible)
+			{
+				valid = false;
+				Logger.LogError(
+					$"[ModiBuff] ModifierLessEffects effects cannot be revertible. Effect {effect.GetType().Name} is revertible");
+			}
+
+			if (effect is IMutableStateEffect mutableStateEffect && mutableStateEffect.UsesMutableState)
+			{
+				valid = false;
+				Logger.LogError(
+					$"[ModiBuff] ModifierLessEffects effects cannot use mutable state. Effect {effect.GetType().Name} uses mutable state");
+			}
+
+			return valid;
 		}
 	}
 }

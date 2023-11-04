@@ -20,6 +20,11 @@ namespace ModiBuff.Tests
 			unit.ModifierController.Add(ModifierIdManager.GetIdOld(name), target, unit);
 		}
 
+		internal static void ApplyEffectTarget(this IModifierOwner unit, string name, IUnit target)
+		{
+			target.ApplyEffect(EffectIdManager.GetIdOld(name), unit);
+		}
+
 		internal static bool ContainsModifier(this IModifierOwner unit, string name)
 		{
 			return unit.ModifierController.Contains(ModifierIdManager.GetIdOld(name));
@@ -37,9 +42,19 @@ namespace ModiBuff.Tests
 				((IModifierApplyCheckGenerator)generator).HasApplyChecks, applierType);
 		}
 
+		internal static bool AddEffectApplier(this IModifierOwner unit, string name)
+		{
+			return unit.ModifierController.TryAddEffectApplier(EffectIdManager.GetIdOld(name));
+		}
+
 		internal static void TryCast(this IModifierOwner unit, string name, IModifierOwner target)
 		{
 			unit.TryCast(ModifierIdManager.GetIdOld(name), target);
+		}
+
+		internal static void TryCastEffect(this IModifierOwner unit, string name, IModifierOwner target)
+		{
+			unit.TryCastEffect(EffectIdManager.GetIdOld(name), target);
 		}
 
 		internal static float AttackN(this IAttacker<float, float> unit, IUnit target, int n)

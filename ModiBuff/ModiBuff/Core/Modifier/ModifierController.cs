@@ -26,6 +26,8 @@ namespace ModiBuff.Core
 		private readonly Dictionary<int, ModifierCheck> _modifierCastChecksAppliers;
 		private readonly Dictionary<int, ModifierCheck> _modifierAttackChecksAppliers;
 
+		private readonly List<int> _effectCasts;
+
 		private readonly List<ModifierReference> _modifiersToRemove;
 
 		public ModifierController(IUnit owner)
@@ -46,6 +48,8 @@ namespace ModiBuff.Core
 			_modifierCastAppliers = new List<int>(Config.CastApplierSize);
 			_modifierCastChecksAppliers = new Dictionary<int, ModifierCheck>(Config.CastCheckApplierSize);
 			_modifierAttackChecksAppliers = new Dictionary<int, ModifierCheck>(Config.AttackCheckApplierSize);
+
+			_effectCasts = new List<int>(Config.EffectCastsSize);
 
 			_modifiersToRemove = new List<ModifierReference>(Config.ModifierRemoveSize);
 		}
@@ -157,6 +161,8 @@ namespace ModiBuff.Core
 			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.Check(_owner);
 		}
 
+		public bool CanCastEffect(int id) => _effectCasts.Contains(id);
+
 		public bool CanUseAttackModifier(int id)
 		{
 			if (_modifierAttackAppliers.Contains(id))
@@ -219,6 +225,18 @@ namespace ModiBuff.Core
 #endif
 					return false;
 			}
+		}
+
+		public bool TryAddEffectApplier(int id)
+		{
+			if (_effectCasts.Contains(id))
+			{
+				Logger.LogWarning("[ModiBuff] Tried to add a duplicate effect applier, id: " + id);
+				return false;
+			}
+
+			_effectCasts.Add(id);
+			return true;
 		}
 
 		public void TryApplyAttackNonCheckModifiers(IEnumerable<int> modifierIds, IUnit target, IModifierOwner source)
@@ -430,6 +448,7 @@ namespace ModiBuff.Core
 			_modifierCastAppliers.Clear();
 			_modifierCastChecksAppliers.Clear();
 			_modifierAttackChecksAppliers.Clear();
+			_effectCasts.Clear();
 			_modifiersToRemove.Clear();
 		}
 

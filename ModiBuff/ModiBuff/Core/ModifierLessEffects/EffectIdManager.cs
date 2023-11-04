@@ -33,6 +33,8 @@ namespace ModiBuff.Core
 		/// </summary>
 		internal static int GetIdOld(string name) => _instance._idMap[name];
 
+		public bool IsIdTaken(string name) => _idMap.ContainsKey(name);
+
 		public int GetId(string name) => _idMap[name];
 
 		public void Clear()

@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
+	/// <summary>
+	///		Damage effect with no mutable state, example of a modifier-less effect implementation, don't use with modifiers
+	/// </summary>
 	public sealed class DamageEffectNoState : IEffect, IMetaEffectOwner<DamageEffectNoState, float, float>,
 		IPostEffectOwner<DamageEffectNoState, float>
 	{

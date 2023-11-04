@@ -84,18 +84,18 @@ namespace ModiBuff.Tests
 				.Stack(WhenStackEffect.Always)
 				.Effect(new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1)
 					.SetMetaEffects(new HealFromPoisonStacksMetaEffect(1f)), EffectOn.Stack);
-			AddRecipe("PoisonHeal")
-				.Effect(new ApplierEffect("Poison"), EffectOn.Init)
-				.Effect(new ApplierEffect("PoisonHealHeal", Targeting.SourceTarget), EffectOn.Init);
+			AddEffect("PoisonHeal",
+				new ApplierEffect("Poison"),
+				new ApplierEffect("PoisonHealHeal", Targeting.SourceTarget));
 			Setup();
 
 			Unit.TakeDamage(UnitHealth / 2f, Unit);
-			Unit.AddApplierModifier(Recipes.GetGenerator("PoisonHeal"), ApplierType.Cast);
+			Unit.AddEffectApplier("PoisonHeal");
 
-			Unit.TryCast("PoisonHeal", Enemy);
+			Unit.TryCastEffect("PoisonHeal", Enemy);
 			Assert.AreEqual(UnitHealth / 2f + 1, Unit.Health);
 
-			Unit.TryCast("PoisonHeal", Enemy);
+			Unit.TryCastEffect("PoisonHeal", Enemy);
 			Assert.AreEqual(UnitHealth / 2f + 1 + 1 * 2, Unit.Health);
 		}
 

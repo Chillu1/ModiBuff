@@ -37,5 +37,12 @@ namespace ModiBuff.Core.Units
 			target.ModifierController.Add(modifierId, target, owner);
 			return true;
 		}
+
+		public static bool HasStatusEffectSingle(
+			this ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType> owner,
+			StatusEffectType statusEffectType)
+		{
+			return owner.StatusEffectController.HasStatusEffect(statusEffectType);
+		}
 	}
 }

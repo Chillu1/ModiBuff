@@ -21,6 +21,8 @@ namespace ModiBuff.Core
 			DefaultAttackCheckApplierSize = 4,
 			DefaultCastCheckApplierSize = 4;
 
+		public const int DefaultEffectCastsSize = 4;
+
 		public const float DefaultDeltaTolerance = 0.001f;
 
 
@@ -47,6 +49,8 @@ namespace ModiBuff.Core
 		public static int CastApplierSize = DefaultCastApplierSize;
 		public static int AttackCheckApplierSize = DefaultAttackCheckApplierSize;
 		public static int CastCheckApplierSize = DefaultCastCheckApplierSize;
+
+		public static int EffectCastsSize = DefaultEffectCastsSize;
 
 		public static float DeltaTolerance = DefaultDeltaTolerance;
 
@@ -78,6 +82,8 @@ namespace ModiBuff.Core
 			CastApplierSize = DefaultCastApplierSize;
 			AttackCheckApplierSize = DefaultAttackCheckApplierSize;
 			CastCheckApplierSize = DefaultCastCheckApplierSize;
+
+			EffectCastsSize = DefaultEffectCastsSize;
 
 			DeltaTolerance = DefaultDeltaTolerance;
 		}

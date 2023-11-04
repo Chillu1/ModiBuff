@@ -18,6 +18,17 @@ namespace ModiBuff.Core
 #endif
 		}
 
+		//TODO Remove?
+		public static void TryCastEffect(this IModifierOwner owner, int effectId, IModifierOwner target)
+		{
+			if (owner.ModifierController.CanCastEffect(effectId))
+				target.ApplyEffect(effectId, owner);
+#if DEBUG
+			else
+				Logger.Log($"Can't cast {effectId} from {owner} to {target}");
+#endif
+		}
+
 		public static void ApplyAllAttackModifier(this IModifierOwner owner, IModifierOwner target)
 		{
 			target.ModifierController.TryApplyAttackNonCheckModifiers(
