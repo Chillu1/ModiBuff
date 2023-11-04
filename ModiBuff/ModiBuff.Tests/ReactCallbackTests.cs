@@ -12,7 +12,7 @@ namespace ModiBuff.Tests
 		{
 			AddGenerator("AddDamageAbove5RemoveDamageBelow5React", (id, genId, name, tag) =>
 			{
-				var effect = new AddDamageEffect(5, true, true);
+				var effect = new AddDamageEffect(5, EffectState.IsRevertibleAndTogglable);
 				bool effectActive = false;
 				var @event = new DamageChangedEvent((unit, newDamage, deltaDamage) =>
 				{

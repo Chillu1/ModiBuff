@@ -148,7 +148,7 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("ComplexApplier2_AddDamage")
 				.OneTimeInit()
-				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
 				.Remove(10).Refresh();
 			AddRecipe("ComplexApplier2_AddDamageAdd")
 				.Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)
@@ -189,24 +189,6 @@ namespace ModiBuff.Tests
 			Assert.Catch<KeyNotFoundException>(() => Recipes.GetGenerator("NonExistentApplier"));
 		}
 
-		private sealed class TestLogger : ILogger
-		{
-			public bool ErrorLogged;
-
-			public void Log(string message)
-			{
-			}
-
-			public void LogWarning(string message)
-			{
-			}
-
-			public void LogError(string message)
-			{
-				ErrorLogged = true;
-			}
-		}
-
 		[Test]
 		public void ApplierDoesntExist()
 		{
@@ -216,13 +198,7 @@ namespace ModiBuff.Tests
 #endif
 			Setup();
 
-			var testLogger = new TestLogger();
-			Logger.SetLogger(testLogger);
-
-			var applier = new ApplierEffect("NonExistentApplier");
-			Assert.True(testLogger.ErrorLogged);
-
-			Logger.SetLogger<NUnitLogger>();
+			Assert.Throws<AssertionException>(() => _ = new ApplierEffect("NonExistentApplier"));
 		}
 
 		[Test]

@@ -53,7 +53,7 @@ namespace ModiBuff.Tests
 		public void AddDamageStackTimers_ResetStacks_RevertEffects()
 		{
 			AddRecipe("AddDamageStackTimerResetStacks")
-				.Effect(new AddDamageEffect(5, true), EffectOn.Stack)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Stack)
 				.ModifierAction(ModifierAction.ResetStacks, EffectOn.Callback)
 				.Callback(CallbackType.StrongHit)
 				.Stack(WhenStackEffect.Always, independentStackTime: 5);

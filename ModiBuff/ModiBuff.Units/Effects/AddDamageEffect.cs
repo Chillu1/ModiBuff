@@ -3,26 +3,25 @@ namespace ModiBuff.Core.Units
 	public sealed class AddDamageEffect : IStackEffect, IMutableStateEffect, IRevertEffect,
 		IStackRevertEffect, IEffect, IModifierStateInfo<AddDamageEffect.Data>
 	{
-		public bool IsRevertible { get; }
-		public bool UsesMutableState => IsRevertible || _isTogglable || _stackEffect.UsesMutableState();
+		public bool IsRevertible => _effectState.IsRevertible();
+		public bool UsesMutableState => _effectState.IsRevertibleOrTogglable() || _stackEffect.UsesMutableState();
 
 		private readonly float _damage;
+		private readonly EffectState _effectState;
 		private readonly StackEffectType _stackEffect;
 		private readonly float _stackValue;
-		private readonly bool _isTogglable; //TODO Needs to be revertible to be togglable
 		private readonly Targeting _targeting;
 
 		private bool _isEnabled;
 		private float _extraDamage;
 		private float _totalAddedDamage;
 
-		public AddDamageEffect(float damage, bool revertible = false, bool togglable = false,
+		public AddDamageEffect(float damage, EffectState effectState = EffectState.None,
 			StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
 			Targeting targeting = Targeting.TargetSource)
 		{
 			_damage = damage;
-			IsRevertible = revertible;
-			_isTogglable = togglable;
+			_effectState = effectState;
 			_stackEffect = stackEffect;
 			_stackValue = stackValue;
 			_targeting = targeting;
@@ -31,14 +30,14 @@ namespace ModiBuff.Core.Units
 		/// <summary>
 		///		Manual modifier generation constructor
 		/// </summary>
-		public static AddDamageEffect Create(float damage, bool revertible = false, bool togglable = false,
+		public static AddDamageEffect Create(float damage, EffectState effectState = EffectState.None,
 			StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
 			Targeting targeting = Targeting.TargetSource) =>
-			new AddDamageEffect(damage, revertible, togglable, stackEffect, stackValue, targeting);
+			new AddDamageEffect(damage, effectState, stackEffect, stackValue, targeting);
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			if (_isTogglable)
+			if (_effectState.IsTogglable())
 			{
 				if (_isEnabled)
 					return;
@@ -55,7 +54,7 @@ namespace ModiBuff.Core.Units
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			if (_isTogglable)
+			if (_effectState.IsTogglable())
 				_isEnabled = false;
 
 			_targeting.UpdateTarget(ref target, source);
@@ -102,7 +101,7 @@ namespace ModiBuff.Core.Units
 		}
 
 		public IEffect ShallowClone() =>
-			new AddDamageEffect(_damage, IsRevertible, _isTogglable, _stackEffect, _stackValue, _targeting);
+			new AddDamageEffect(_damage, _effectState, _stackEffect, _stackValue, _targeting);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 

@@ -176,7 +176,7 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("AddDamage")
 				.OneTimeInit()
-				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
 				.Remove(1).Refresh();
 			AddRecipe("BuffAttackers_WhenHit_Event")
 				.Effect(new ApplierEffect("AddDamage", Targeting.SourceTarget), EffectOn.Event)

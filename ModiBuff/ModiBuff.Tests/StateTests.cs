@@ -176,7 +176,8 @@ namespace ModiBuff.Tests
 		public void AddDamageOnStack_RevertibleRemove()
 		{
 			AddRecipe("StackAddDamageRevertible")
-				.Effect(new AddDamageEffect(5, true, false, StackEffectType.Effect | StackEffectType.Add, 2),
+				.Effect(
+					new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Effect | StackEffectType.Add, 2),
 					EffectOn.Stack)
 				.Stack(WhenStackEffect.Always)
 				.Remove(5);

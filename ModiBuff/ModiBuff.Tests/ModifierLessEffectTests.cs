@@ -1,3 +1,4 @@
+using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
 
@@ -38,7 +39,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void RevertibleModifierlessEffect_Invalid()
 		{
-			Assert.Throws<AssertionException>(() => AddEffect("Revertible", new AddDamageEffect(5, true)));
+			Assert.Throws<AssertionException>(() =>
+			{
+				AddEffect("Revertible", new AddDamageEffect(5, EffectState.IsRevertible));
+			});
 			Setup();
 		}
 

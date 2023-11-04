@@ -10,7 +10,7 @@ namespace ModiBuff.Tests
 		{
 			add => add("InitAddDamageBuff")
 				.OneTimeInit()
-				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
 				//TODO standardized aura time & aura effects should always be refreshable
 				.Remove(1.05f).Refresh(),
 			add => add("InitAddDamageBuff_Interval")

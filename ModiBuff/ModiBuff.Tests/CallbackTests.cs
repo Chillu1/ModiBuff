@@ -11,7 +11,7 @@ namespace ModiBuff.Tests
 		{
 			AddGenerator("InitAddDamageRevertibleHalfHealthCallback", (id, genId, name, tag) =>
 			{
-				var effect = new AddDamageEffect(5, true);
+				var effect = new AddDamageEffect(5, EffectState.IsRevertible);
 				var removeEffect = RemoveEffect.Create(id, genId);
 				removeEffect.SetRevertibleEffects(new IRevertEffect[] { effect });
 				var registerEffect = new CallbackRegisterDelegateEffect<CallbackType>(CallbackType.StrongHit,
@@ -34,7 +34,7 @@ namespace ModiBuff.Tests
 		public void Init_AddDamage_HalfHealth_TriggerCallback_RemoveAndRevertRecipe()
 		{
 			AddRecipe("InitAddDamageRevertibleHalfHealthCallback")
-				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
 				.Remove(RemoveEffectOn.Callback)
 				.Callback(CallbackType.StrongHit);
 			Setup();
@@ -201,7 +201,7 @@ namespace ModiBuff.Tests
 		public void Init_AddDamage_HalfHealth_TriggerCallback_RemoveAndRevertRecipe_Twice()
 		{
 			AddRecipe("InitAddDamageRevertibleHalfHealthCallback")
-				.Effect(new AddDamageEffect(5, true), EffectOn.Init)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
 				.Remove(RemoveEffectOn.Callback)
 				.Callback(CallbackType.StrongHit);
 			Setup();
