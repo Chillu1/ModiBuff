@@ -26,7 +26,8 @@ namespace ModiBuff.Core.Units
 		//LegalTargetStructure = 1ul << 20,
 		//LegalTargetUnits = LegalTargetAlly | LegalTargetEnemy,
 		LegalTargetAll = LegalTargetSelf | LegalTargetAlly | LegalTargetEnemy, // | LegalTargetStructure,
-		UserTag5 = 1ul << 21
+		BasicDispel = 1ul << 21,
+		UserTag6 = 1ul << 22,
 	}
 
 	public static class TagTypeExtensions

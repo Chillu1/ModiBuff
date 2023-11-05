@@ -17,7 +17,7 @@ namespace ModiBuff.Core.Units
 	public class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float, float, float, float>,
 		IHealable<float, float>, IHealer<float, float>, IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>,
 		IPreAttacker, IEventOwner<EffectOnEvent>, IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
-		ICallbackRegistrable<CallbackType>, IReactable<ReactType>, IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
+		ICallbackRegistrable<CallbackType>, IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
 		ICustomCallbackRegistrable<CustomCallbackType>, ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>
 	{
@@ -559,91 +559,6 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public void RegisterReact(ReactCallback<ReactType>[] reactCallbacks)
-		{
-			for (int i = 0; i < reactCallbacks.Length; i++)
-			{
-				ref readonly var callback = ref reactCallbacks[i];
-				switch (callback.ReactType)
-				{
-					case ReactType.Dispel:
-						if (!(callback.Action is DispelEvent dispelEvent))
-						{
-							Logger.LogError(
-								"objectDelegate is not of type DispelEvent, use named delegates instead.");
-							break;
-						}
-
-						//dispelEvent.DynamicInvoke(this, this, TagType.None);
-						_dispelEvents.Add(dispelEvent);
-						break;
-					case ReactType.CurrentHealthChanged:
-						if (!(callback.Action is HealthChangedEvent healthEvent))
-						{
-							Logger.LogError(
-								"objectDelegate is not of type HealthChangedEvent, use named delegates instead.");
-							break;
-						}
-
-						healthEvent.Invoke(this, this, Health, 0f);
-						_healthChangedEvent.Add(healthEvent);
-						break;
-					case ReactType.DamageChanged:
-						if (!(callback.Action is DamageChangedEvent damageEvent))
-						{
-							Logger.LogError(
-								"objectDelegate is not of type DamagedChangedEvent, use named delegates instead.");
-							break;
-						}
-
-						damageEvent.Invoke(this, Damage, 0f);
-						_damageChangedEvent.Add(damageEvent);
-						break;
-					default:
-						throw new ArgumentOutOfRangeException(nameof(reactCallbacks), callback.ReactType, null);
-				}
-			}
-		}
-
-		public void UnRegisterReact(ReactCallback<ReactType>[] reactCallbacks)
-		{
-			for (int i = 0; i < reactCallbacks.Length; i++)
-			{
-				ref readonly var callback = ref reactCallbacks[i];
-				switch (callback.ReactType)
-				{
-					case ReactType.Dispel:
-						//TODO Always revert internal effect?
-						var dispelEvent = (DispelEvent)callback.Action;
-						_dispelEvents.Remove(dispelEvent);
-						//dispelEvent.DynamicInvoke(this, this, TagType.None);
-						break;
-					case ReactType.CurrentHealthChanged:
-						//TODO Always revert internal effect?
-						var healthChangedEvent = (HealthChangedEvent)callback.Action;
-						if (_healthChangedEvent.Remove(healthChangedEvent))
-							healthChangedEvent.Invoke(this, this, Health, 0f);
-#if DEBUG && !MODIBUFF_PROFILE
-						else
-							Logger.LogError("Could not remove healthChangedEvent: " + healthChangedEvent);
-#endif
-						break;
-					case ReactType.DamageChanged:
-						//TODO Always revert internal effect?
-						var damageChangedEvent = (DamageChangedEvent)callback.Action;
-						if (_damageChangedEvent.Remove(damageChangedEvent))
-							damageChangedEvent.Invoke(this, Damage, 0f);
-#if DEBUG && !MODIBUFF_PROFILE
-						else
-							Logger.LogError("Could not remove damageChangedEvent: " + damageChangedEvent);
-#endif
-						break;
-					default:
-						throw new ArgumentOutOfRangeException(nameof(reactCallbacks), callback.ReactType, null);
-				}
-			}
-		}
-
 		public void RegisterCallbacks(CustomCallback<CustomCallbackType>[] callbacks)
 		{
 			for (int i = 0; i < callbacks.Length; i++)
@@ -651,6 +566,16 @@ namespace ModiBuff.Core.Units
 				ref readonly var callback = ref callbacks[i];
 				switch (callback.CallbackType)
 				{
+					case CustomCallbackType.Dispel:
+						if (!(callback.Action is DispelEvent dispelEvent))
+						{
+							Logger.LogError(
+								$"objectDelegate is not of type {nameof(DispelEvent)}, use named delegates instead.");
+							break;
+						}
+
+						_dispelEvents.Add(dispelEvent);
+						break;
 					case CustomCallbackType.PoisonDamage:
 						if (!(callback.Action is PoisonEvent poisonEvent))
 						{
@@ -696,6 +621,9 @@ namespace ModiBuff.Core.Units
 				ref readonly var callback = ref callbacks[i];
 				switch (callback.CallbackType)
 				{
+					case CustomCallbackType.Dispel:
+						_dispelEvents.Remove((DispelEvent)callback.Action);
+						break;
 					case CustomCallbackType.PoisonDamage:
 						_poisonEvents.Remove((PoisonEvent)callback.Action);
 						break;
@@ -721,6 +649,16 @@ namespace ModiBuff.Core.Units
 
 				switch (callbackType)
 				{
+					case CustomCallbackType.Dispel:
+						if (!(callback is DispelEvent dispelEvent))
+						{
+							Logger.LogError(
+								$"objectDelegate is not of type {nameof(DispelEvent)}, use named delegates instead.");
+							break;
+						}
+
+						_dispelEvents.Add(dispelEvent);
+						break;
 					case CustomCallbackType.PoisonDamage:
 						if (!(callback is PoisonEvent poisonEvent))
 						{
@@ -767,6 +705,9 @@ namespace ModiBuff.Core.Units
 
 				switch (callbackType)
 				{
+					case CustomCallbackType.Dispel:
+						_dispelEvents.Remove((DispelEvent)callback);
+						break;
 					case CustomCallbackType.PoisonDamage:
 						_poisonEvents.Remove((PoisonEvent)callback);
 						break;

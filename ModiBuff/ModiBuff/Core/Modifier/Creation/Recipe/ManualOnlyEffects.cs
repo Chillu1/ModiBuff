@@ -16,7 +16,6 @@ namespace ModiBuff.Core
 		{
 			effectTypes = new HashSet<Type>(new TypeEqualityComparer())
 			{
-				typeof(ReactCallbackRegisterEffect<>),
 			};
 		}
 

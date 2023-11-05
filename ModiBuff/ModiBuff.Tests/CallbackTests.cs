@@ -1,6 +1,7 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
+using TagType = ModiBuff.Core.Units.TagType;
 
 namespace ModiBuff.Tests
 {
@@ -247,6 +248,111 @@ namespace ModiBuff.Tests
 			Unit.Update(1);
 			Unit.TakeDamage(UnitHealth * 0.6f, Unit);
 			Assert.AreEqual(UnitHealth * 0.4f, Unit.Health);
+		}
+		
+		[Test]
+		public void AddDamageAbove5RemoveDamageBelow5React()
+		{
+			AddRecipe("AddDamageAbove5RemoveDamageBelow5React")
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertibleAndTogglable), EffectOn.CustomCallback)
+				.CustomCallback(CustomCallbackType.DamageChanged, effect =>
+					new DamageChangedEvent((unit, damage, deltaDamage) =>
+					{
+						if (damage > 9)
+							effect.Effect(unit, unit);
+						else
+							((IRevertEffect)effect).RevertEffect(unit, unit);
+					}));
+			Setup();
+
+			Unit.AddModifierSelf("AddDamageAbove5RemoveDamageBelow5React"); //Starts with 10 baseDmg, adds 5 from effect
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+
+			//Remove 6 damage, should remove the effect, making it 15 - 6 - 5 = 4
+			Unit.AddDamage(-6); //Revert
+			Assert.AreEqual(UnitDamage - 6, Unit.Damage);
+
+			Unit.ResetEventCounters();
+			Unit.AddDamage(-2); //Make sure that we don't revert twice
+			Assert.AreEqual(UnitDamage - 6 - 2, Unit.Damage);
+			Unit.ResetEventCounters();
+			Unit.AddDamage(2);
+
+			Unit.ResetEventCounters();
+			Unit.AddDamage(6);
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+		}
+
+		[Test]
+		public void InitStatusEffectSleep_RemoveOnTenDamageTaken_StateReset()
+		{
+			AddRecipe("InitStatusEffectSleep_RemoveOnTenDamageTaken")
+				.Effect(new StatusEffectEffect(StatusEffectType.Sleep, 5f, true), EffectOn.Init)
+				.Remove(RemoveEffectOn.CustomCallback)
+				.CustomCallback(CustomCallbackType.CurrentHealthChanged, removeEffect =>
+				{
+					float totalDamageTaken = 0f;
+					return new HealthChangedEvent((target, source, health, deltaHealth) =>
+					{
+						//Don't count "negative damage/healing damage"
+						if (deltaHealth > 0)
+							totalDamageTaken += deltaHealth;
+						if (totalDamageTaken >= 10)
+						{
+							totalDamageTaken = 0f;
+							removeEffect.Effect(target, source);
+						}
+					});
+				});
+			Setup();
+
+			Pool.Clear();
+			Pool.Allocate(IdManager.GetId("InitStatusEffectSleep_RemoveOnTenDamageTaken"), 1);
+
+			//Starts with 10 baseDmg, adds 5 from effect
+			Unit.AddModifierSelf("InitStatusEffectSleep_RemoveOnTenDamageTaken");
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
+			Unit.Update(4); //Still has sleep
+
+			Unit.TakeDamage(9, Unit); //Still has sleep
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
+
+			Unit.TakeDamage(2, Unit); //Removes and reverts sleep
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
+			Unit.Update(0); //Remove modifier, back to pool
+
+			//Check if state is reset
+			Enemy.AddModifierSelf("InitStatusEffectSleep_RemoveOnTenDamageTaken");
+			Enemy.TakeDamage(9, Enemy);
+			Assert.True(Enemy.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
+
+			Enemy.TakeDamage(2, Enemy);
+			Assert.False(Enemy.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
+		}
+
+		[Test]
+		public void DispelAddDamageReact()
+		{
+			AddRecipe("InitStatusEffectSleep_RemoveOnDispel")
+				.Tag(TagType.BasicDispel)
+				.Effect(new StatusEffectEffect(StatusEffectType.Sleep, 5f, true), EffectOn.Init)
+				.Remove(RemoveEffectOn.CustomCallback)
+				.CustomCallback(CustomCallbackType.Dispel, removeEffect =>
+					new DispelEvent((target, source, eventTag) =>
+					{
+						//TODO We might need to get the modifiers actual tag here?
+						//Could feed it through DispelEvent, but that's meh
+						if ((TagType.BasicDispel & eventTag) != 0)
+							removeEffect.Effect(target, source);
+					}));
+
+			Setup();
+
+			Unit.AddModifierSelf("InitStatusEffectSleep_RemoveOnDispel");
+			Unit.Dispel(TagType.IsStack | TagType.IsRefresh, Unit);
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
+			Unit.Dispel(TagType.BasicDispel, Unit);
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
 		}
 	}
 }
