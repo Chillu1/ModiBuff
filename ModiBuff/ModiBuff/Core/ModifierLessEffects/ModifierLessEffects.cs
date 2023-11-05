@@ -40,7 +40,7 @@ namespace ModiBuff.Core
 					valid = false;
 			}
 
-			if (_idManager.IsIdTaken(name))
+			if (_idManager.HasId(name))
 			{
 				valid = false;
 				Logger.LogError($"[ModiBuff] ModifierLessEffects: Effect with name {name} already exists");

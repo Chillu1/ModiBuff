@@ -221,6 +221,10 @@ Otherwise go to [Custom Units](#custom-units).
 
 # Usage
 
+> Important: this readme is updated often, and is usually on par with the master branch code.
+> If you're not using master branch code, go to [V0.2.0](https://github.com/Chillu1/ModiBuff/tree/0.2.0#usage)
+> or [V0.1.2](https://github.com/Chillu1/ModiBuff/tree/0.1.2#usage) readme versions for the most accurate usage.
+
 ## Recipe
 
 Modifier Recipes are the high level API for creating modifiers, they use the builder pattern/method chaining/fluent

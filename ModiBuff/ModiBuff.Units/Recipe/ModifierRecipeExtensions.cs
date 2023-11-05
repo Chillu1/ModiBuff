@@ -116,7 +116,7 @@ namespace ModiBuff.Core.Units
 
 		public static ModifierRecipe Callback(this ModifierRecipe recipe, CallbackType callbackType)
 		{
-			return recipe.Callback(callbackType);
+			return recipe.CallbackEffect(callbackType);
 		}
 
 		public static ModifierRecipe Event(this ModifierRecipe recipe, EffectOnEvent @event)

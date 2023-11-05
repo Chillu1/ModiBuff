@@ -142,7 +142,7 @@ namespace ModiBuff.Extensions.Godot
 			//---Effects---
 
 			foreach (var effectResource in recipeResource.EffectResources)
-				recipe.Effect(effectResource.GetEffect(), effectResource.EffectOn, effectResource.Targeting);
+				recipe.Effect(effectResource.GetEffect(), effectResource.EffectOn);
 
 			recipeResource.Reset();
 
@@ -195,8 +195,7 @@ namespace ModiBuff.Extensions.Godot
 				//---Effects---
 
 				foreach (var effectResource in auraEffectModifierRecipeResource.EffectResources)
-					auraEffectRecipe.Effect(effectResource.GetEffect(), effectResource.EffectOn,
-						effectResource.Targeting);
+					auraEffectRecipe.Effect(effectResource.GetEffect(), effectResource.EffectOn);
 			}
 		}
 

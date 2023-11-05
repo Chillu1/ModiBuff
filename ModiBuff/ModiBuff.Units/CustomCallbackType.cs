@@ -6,5 +6,6 @@ namespace ModiBuff.Core.Units
 		PoisonDamage,
 		CurrentHealthChanged,
 		DamageChanged,
+		StrongHit,
 	}
 }

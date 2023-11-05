@@ -280,7 +280,7 @@ namespace ModiBuff.Core
 		/// <param name="effect">Effects that get applied on specific actions (init, stack, interval, duration). </param>
 		/// <param name="effectOn">When the effect should trigger (init, stack, interval, duration). Can be multiple.</param>
 		/// <param name="targeting">Who should be the target and owner of the applied modifier. For further information, see <see cref="ModiBuff.Core.Targeting"/></param>
-		public ModifierRecipe Effect(IEffect effect, EffectOn effectOn, Targeting targeting = Targeting.TargetSource)
+		public ModifierRecipe Effect(IEffect effect, EffectOn effectOn)
 		{
 			if (ManualOnlyEffects.IsManualOnlyEffect(effect))
 			{
@@ -336,7 +336,7 @@ namespace ModiBuff.Core
 		///		Registers a callback register effect to a unit, will trigger all <see cref="EffectOn.Callback"/>
 		///		effects when <see cref="callbackType"/> is triggered.
 		/// </summary>
-		public ModifierRecipe Callback<TCallback>(TCallback callbackType)
+		public ModifierRecipe CallbackEffect<TCallback>(TCallback callbackType)
 		{
 			var effect = new CallbackRegisterEffect<TCallback>(callbackType);
 			_callbackRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
@@ -344,30 +344,27 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		public ModifierRecipe CustomCallback<TCustomCallback>(params CustomCallback<TCustomCallback>[] callbacks)
+		/// <summary>
+		///		Registers a callback effect to a unit, will trigger the callback when <see cref="callbackType"/> is triggered.
+		///		It will NOT trigger any EffectOn.<see cref="EffectOn.Callback"/> effects, only the supplied callback.
+		/// </summary>
+		public ModifierRecipe Callback<TCustomCallback>(TCustomCallback callbackType, UnitCallback callback)
 		{
-			var effect = new CustomCallbackNewRegisterEffect<TCustomCallback>(callbacks);
-			_effectWrappers.Add(new EffectWrapper(effect, EffectOn.Init));
-			return this;
+			return Effect(new CustomCallbackNewRegisterEffect<TCustomCallback>(
+				new CustomCallback<TCustomCallback>(callbackType, callback)), EffectOn.Init);
 		}
 
-		public ModifierRecipe CustomCallback<TCustomCallback>(TCustomCallback callbackType,
+		public ModifierRecipe Callback<TCustomCallback>(params CustomCallback<TCustomCallback>[] callbacks)
+		{
+			return Effect(new CustomCallbackNewRegisterEffect<TCustomCallback>(callbacks), EffectOn.Init);
+		}
+
+		public ModifierRecipe Callback<TCustomCallback>(TCustomCallback callbackType,
 			Func<IEffect, object> @event)
 		{
 			var effect = new CustomCallbackRegisterEffect<TCustomCallback>(callbackType, @event);
 			_customCallbackRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
 			_effectWrappers.Add(_customCallbackRegisterWrapper);
-			return this;
-		}
-
-		/// <summary>
-		///		Registers a callback effect to a unit, will trigger the callback when <see cref="callbackType"/> is triggered.
-		///		It will NOT trigger any EffectOn.<see cref="EffectOn.Callback"/> effects, only the supplied callback.
-		/// </summary>
-		public ModifierRecipe Callback<TCallback>(TCallback callbackType, UnitCallback callback,
-			bool isRevertible = true)
-		{
-			Effect(new CallbackRegisterDelegateEffect<TCallback>(callbackType, callback, isRevertible), EffectOn.Init);
 			return this;
 		}
 
