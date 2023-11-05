@@ -14,7 +14,7 @@ namespace ModiBuff.Core
 				target.ModifierController.Add(modifierId, target, owner);
 #if DEBUG
 			else
-				Logger.Log($"Can't cast {modifierId} from {owner} to {target}");
+				Logger.Log($"Can't cast modifier id {modifierId} from {owner} to {target}");
 #endif
 		}
 
@@ -25,7 +25,7 @@ namespace ModiBuff.Core
 				target.ApplyEffect(effectId, owner);
 #if DEBUG
 			else
-				Logger.Log($"Can't cast {effectId} from {owner} to {target}");
+				Logger.Log($"Can't cast effect id {effectId} from {owner} to {target}");
 #endif
 		}
 

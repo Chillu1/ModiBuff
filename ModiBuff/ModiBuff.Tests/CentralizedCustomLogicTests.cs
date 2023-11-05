@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
@@ -33,25 +34,20 @@ namespace ModiBuff.Tests
 		public void HealBasedOnPoisonStacksEvent()
 		{
 			MethodInfo methodInfo = typeof(HealEffect).GetMethod("StackEffect");
+			Func<IEffect, PoisonEvent> poisonEvent = (effect) => (target, source, stacks, totalStacks, damage) =>
+			{
+				//Kind of a stacks hack rn, by using stack effect in callbacks
+				methodInfo.Invoke(effect, new object[] { stacks, target, source });
+			};
+			var poisonEventObject = (Func<IEffect, object>)poisonEvent;
 			AddRecipe(_poisonRecipe);
 			AddGenerator("HealPerPoisonStack", (id, genId, name, tag) =>
 			{
 				var healEffect = new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1);
 
-				void PoisonEventDelegate(IUnit target, IUnit source, int stacks, int totalStacks, float damage)
-				{
-					//Kind of a stacks hack rn, by using stack effect in callbacks
-					methodInfo.Invoke(healEffect, new object[] { stacks, target, source });
-				}
-
-				//var @event = new PoisonEvent((target, source, stacks, totalStacks, damage) =>
-				//{
-				//	//Kind of a stacks hack rn
-				//	healEffect.StackEffect(stacks, target, source);
-				//});
-				var callback = new CustomCallbackRegisterEffect<CustomCallbackType>(
+				var callback = new CustomCallbackNewRegisterEffect<CustomCallbackType>(
 					new CustomCallback<CustomCallbackType>(CustomCallbackType.PoisonDamage,
-						(PoisonEvent)PoisonEventDelegate));
+						poisonEventObject(healEffect)));
 
 				var initComponent = new InitComponent(false, new IEffect[] { callback }, null);
 				//var stackComponent = new StackComponent(WhenStackEffect.Always, -1, -1, -1,
@@ -60,6 +56,35 @@ namespace ModiBuff.Tests
 				return new Modifier(id, genId, name, initComponent, null, null, null,
 					new SingleTargetComponent(), null);
 			});
+			Setup();
+
+			Enemy.AddModifierSelf("HealPerPoisonStack");
+			Unit.AddApplierModifier(Recipes.GetGenerator("Poison"), ApplierType.Cast);
+			Unit.TryCast("Poison", Enemy);
+			Enemy.Update(1);
+			Assert.AreEqual(EnemyHealth - 5 + 1, Enemy.Health);
+
+			Unit.TryCast("Poison", Enemy);
+			Enemy.Update(1);
+			Assert.AreEqual(EnemyHealth - 5 + 1 - 5 * 2 + 1 * 2, Enemy.Health);
+		}
+
+		[Test]
+		public void HealBasedOnPoisonStacksEvent_Recipe()
+		{
+			//TODO Both methodInfo and effectType should be managed in recipe
+			MethodInfo methodInfo = typeof(HealEffect).GetMethod("StackEffect");
+			Func<IEffect, PoisonEvent> poisonEvent = (effect) => (target, source, stacks, totalStacks, damage) =>
+			{
+				//Kind of a stacks hack rn, by using stack effect in callbacks
+				methodInfo.Invoke(effect, new object[] { stacks, target, source });
+			};
+			AddRecipe(_poisonRecipe);
+			AddRecipe("HealPerPoisonStack")
+				.Stack(WhenStackEffect.Always)
+				.Effect(new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1),
+					EffectOn.CustomCallback)
+				.CustomCallback(CustomCallbackType.PoisonDamage, EffectMethod.StackEffect, poisonEvent);
 			Setup();
 
 			Enemy.AddModifierSelf("HealPerPoisonStack");

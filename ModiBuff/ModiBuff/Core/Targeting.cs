@@ -26,6 +26,16 @@ namespace ModiBuff.Core
 		SourceSource,
 	}
 
+	//Possible alternative to targeting (harder to work with?), also simplifies targeting code
+	/*
+	   TargetIsTarget = 1,
+	   TargetIsSource = 2,
+	   SourceIsSource = 4,
+	   SourceIsTarget = 8,
+
+	   Default = TargetIsTarget | SourceIsSource,
+	 */
+
 	public static class TargetingExtensions
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

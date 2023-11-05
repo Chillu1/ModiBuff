@@ -12,5 +12,6 @@ namespace ModiBuff.Core
 		Stack = 8,
 		Event = 16,
 		Callback = 32,
+		CustomCallback = 64,
 	}
 }

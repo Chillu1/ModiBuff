@@ -346,7 +346,15 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe CustomCallback<TCustomCallback>(params CustomCallback<TCustomCallback>[] callbacks)
 		{
-			var effect = new CustomCallbackRegisterEffect<TCustomCallback>(callbacks);
+			var effect = new CustomCallbackNewRegisterEffect<TCustomCallback>(callbacks);
+			_effectWrappers.Add(new EffectWrapper(effect, EffectOn.Init));
+			return this;
+		}
+
+		public ModifierRecipe CustomCallback<TCustomCallback>(TCustomCallback callbackType, EffectMethod effectMethod,
+			Func<IEffect, object> @event)
+		{
+			var effect = new CustomCallbackRegisterEffect<TCustomCallback>(callbackType, effectMethod, @event);
 			_customCallbackRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
 			_effectWrappers.Add(_customCallbackRegisterWrapper);
 			return this;
@@ -461,9 +469,10 @@ namespace ModiBuff.Core
 			if (_effectWrappers.All(w => !w.EffectOn.HasFlag(EffectOn.Stack)) &&
 			    _whenStackEffect != WhenStackEffect.None)
 			{
-				validRecipe = false;
-				Logger.LogError("[ModiBuff] Stack effect type set, but no stack effects set, for modifier: " +
-				                "" + Name + " id: " + Id);
+				//validRecipe = false;
+				Logger.LogWarning("[ModiBuff] Stack effect type set, but no stack effects set, for modifier: " + Name +
+				                  " id: " + Id +
+				                  ". This is most likely unintended, unless you're using stack effects in callbacks");
 			}
 
 			if (_refreshInterval && _interval == 0)

@@ -667,6 +667,25 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
+		public void RegisterCallback(CustomCallbackType callbackType, object callback)
+		{
+			switch (callbackType)
+			{
+				case CustomCallbackType.PoisonDamage:
+					if (!(callback is PoisonEvent poisonEvent))
+					{
+						Logger.LogError(
+							$"objectDelegate is not of type {nameof(PoisonEvent)}, use named delegates instead.");
+						break;
+					}
+
+					_poisonEvents.Add(poisonEvent);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+			}
+		}
+
 		//---Aura---
 
 		public void AddCloseTargets(params Unit[] targets)
