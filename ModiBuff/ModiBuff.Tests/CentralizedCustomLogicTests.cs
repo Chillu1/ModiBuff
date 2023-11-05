@@ -43,7 +43,7 @@ namespace ModiBuff.Tests
 			{
 				var healEffect = new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1);
 
-				var callback = new CustomCallbackNewRegisterEffect<CustomCallbackType>(
+				var callback = new CustomCallbackRegisterEffect<CustomCallbackType>(
 					new CustomCallback<CustomCallbackType>(CustomCallbackType.PoisonDamage, poisonEvent(healEffect)));
 
 				var initComponent = new InitComponent(false, new IEffect[] { callback }, null);
@@ -70,8 +70,8 @@ namespace ModiBuff.Tests
 			AddRecipe(_poisonRecipe);
 			AddRecipe("HealPerPoisonStack")
 				.Effect(new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1),
-					EffectOn.CustomCallback)
-				.Callback(CustomCallbackType.PoisonDamage, effect =>
+					EffectOn.Callback)
+				.CallbackEffect(CustomCallbackType.PoisonDamage, effect =>
 					new PoisonEvent((target, source, stacks, totalStacks, damage) =>
 					{
 						//Kind of a stacks hack rn, by using stack effect in callbacks

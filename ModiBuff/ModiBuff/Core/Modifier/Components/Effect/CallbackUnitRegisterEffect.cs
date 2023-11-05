@@ -3,18 +3,19 @@ namespace ModiBuff.Core
 	/// <summary>
 	///		Registers a callback of effects to the target, for non-IEffect version see <see cref="CallbackRegisterDelegateEffect{TCallback}"/>
 	/// </summary>
-	public sealed class CallbackRegisterEffect<TCallback> : IRecipeFeedEffects, IRevertEffect, IEffect, IStateEffect
+	public sealed class CallbackUnitRegisterEffect<TCallbackUnit> : IRecipeFeedEffects, IRevertEffect, IEffect,
+		IStateEffect
 	{
 		//Callback register should always be revertible, since we're using IEffect instances that will be pooled back 
 		public bool IsRevertible => true;
 
-		private readonly TCallback _callbackType;
+		private readonly TCallbackUnit _callbackType;
 
 		private IEffect[] _callbacks;
 
 		private bool _isRegistered;
 
-		public CallbackRegisterEffect(TCallback callbackType)
+		public CallbackUnitRegisterEffect(TCallbackUnit callbackType)
 		{
 			_callbackType = callbackType;
 		}
@@ -22,10 +23,11 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Manual modifier generation constructor
 		/// </summary>
-		public static CallbackRegisterEffect<TCallback> Create(TCallback callbackType, params IEffect[] callbacks) =>
-			new CallbackRegisterEffect<TCallback>(callbackType, callbacks);
+		public static CallbackUnitRegisterEffect<TCallbackUnit> Create(TCallbackUnit callbackType,
+			params IEffect[] callbacks) =>
+			new CallbackUnitRegisterEffect<TCallbackUnit>(callbackType, callbacks);
 
-		private CallbackRegisterEffect(TCallback callbackType, IEffect[] callbacks)
+		private CallbackUnitRegisterEffect(TCallbackUnit callbackType, IEffect[] callbacks)
 		{
 			_callbackType = callbackType;
 			_callbacks = callbacks;
@@ -43,13 +45,13 @@ namespace ModiBuff.Core
 			if (_isRegistered)
 				return;
 
-			((ICallbackRegistrable<TCallback>)target).RegisterCallbacks(_callbackType, _callbacks);
+			((ICallbackUnitRegistrable<TCallbackUnit>)target).RegisterCallbacks(_callbackType, _callbacks);
 			_isRegistered = true;
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			((ICallbackRegistrable<TCallback>)target).UnRegisterCallbacks(_callbackType, _callbacks);
+			((ICallbackUnitRegistrable<TCallbackUnit>)target).UnRegisterCallbacks(_callbackType, _callbacks);
 			_isRegistered = false;
 		}
 
@@ -58,7 +60,7 @@ namespace ModiBuff.Core
 			_isRegistered = false;
 		}
 
-		public IEffect ShallowClone() => new CallbackRegisterEffect<TCallback>(_callbackType);
+		public IEffect ShallowClone() => new CallbackUnitRegisterEffect<TCallbackUnit>(_callbackType);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

@@ -1,30 +1,16 @@
-using System;
-
 namespace ModiBuff.Core
 {
-	public sealed class CustomCallbackRegisterEffect<TCallback> : IRevertEffect, IEffect, IStateEffect,
-		IRecipeFeedEffects
+	public sealed class CustomCallbackRegisterEffect<TCallback> : IRevertEffect, IEffect, IStateEffect
 	{
 		public bool IsRevertible => true;
 
-		private readonly TCallback _callbackType;
-		private readonly Func<IEffect, object> _event;
-
-		private object[] _callbacks;
+		private readonly CustomCallback<TCallback>[] _callbacks;
 
 		private bool _isRegistered;
 
-		public CustomCallbackRegisterEffect(TCallback callbackType, Func<IEffect, object> @event)
+		public CustomCallbackRegisterEffect(params CustomCallback<TCallback>[] callbacks)
 		{
-			_callbackType = callbackType;
-			_event = @event;
-		}
-
-		public void SetEffects(IEffect[] effects)
-		{
-			_callbacks = new object[effects.Length];
-			for (int i = 0; i < effects.Length; i++)
-				_callbacks[i] = _event(effects[i]);
+			_callbacks = callbacks;
 		}
 
 		public void Effect(IUnit target, IUnit source)
@@ -33,12 +19,12 @@ namespace ModiBuff.Core
 				return;
 
 			_isRegistered = true;
-			((ICustomCallbackRegistrable<TCallback>)target).RegisterCallbacks(_callbackType, _callbacks);
+			((ICustomCallbackRegistrable<TCallback>)target).RegisterCallbacks(_callbacks);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			((ICustomCallbackRegistrable<TCallback>)target).UnRegisterCallbacks(_callbackType, _callbacks);
+			((ICustomCallbackRegistrable<TCallback>)target).UnRegisterCallbacks(_callbacks);
 			_isRegistered = false;
 		}
 
@@ -47,8 +33,20 @@ namespace ModiBuff.Core
 			_isRegistered = false;
 		}
 
-		public IEffect ShallowClone() => new CustomCallbackRegisterEffect<TCallback>(_callbackType, _event);
+		public IEffect ShallowClone() => new CustomCallbackRegisterEffect<TCallback>(_callbacks);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
+	}
+
+	public readonly struct CustomCallback<TCallback>
+	{
+		public readonly TCallback CallbackType;
+		public readonly object Action;
+
+		public CustomCallback(TCallback callbackType, object action)
+		{
+			CallbackType = callbackType;
+			Action = action;
+		}
 	}
 }

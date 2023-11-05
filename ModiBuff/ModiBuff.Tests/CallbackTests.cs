@@ -13,7 +13,7 @@ namespace ModiBuff.Tests
 			AddRecipe("InitAddDamageRevertibleHalfHealthCallback")
 				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
 				.Remove(RemoveEffectOn.Callback)
-				.CallbackEffect(CallbackType.StrongHit);
+				.CallbackUnit(CallbackType.StrongHit);
 			Setup();
 
 			Unit.AddModifierSelf("InitAddDamageRevertibleHalfHealthCallback");
@@ -49,8 +49,8 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("InitHealToFullHalfHealthCallback")
 				.Effect(new HealEffect(0).SetMetaEffects(new AddValueBasedOnStatDiffMetaEffect(StatType.MaxHealth)),
-					EffectOn.Callback)
-				.CallbackEffect(CallbackType.StrongHit);
+					EffectOn.CallbackEffect)
+				.CallbackUnit(CallbackType.StrongHit);
 			Setup();
 
 			Unit.AddModifierSelf("InitHealToFullHalfHealthCallback");
@@ -66,8 +66,8 @@ namespace ModiBuff.Tests
 		public void Init_RegisterCallbackHeal10WhenTakingStrongHit_RecipeEffect()
 		{
 			AddRecipe("InitHealToFullHalfHealthCallback")
-				.Effect(new HealEffect(10), EffectOn.Callback)
-				.CallbackEffect(CallbackType.StrongHit);
+				.Effect(new HealEffect(10), EffectOn.CallbackEffect)
+				.CallbackUnit(CallbackType.StrongHit);
 			Setup();
 
 			Unit.AddModifierSelf("InitHealToFullHalfHealthCallback");
@@ -84,9 +84,9 @@ namespace ModiBuff.Tests
 		public void Init_RegisterCallbackHealTenWhenTakingStrongHit_ThenTakeFiveDamage_RecipeEffect()
 		{
 			AddRecipe("InitHealDamageWhenStrongHitCallback")
-				.Effect(new HealEffect(10), EffectOn.Callback)
-				.Effect(new DamageEffect(5), EffectOn.Callback)
-				.CallbackEffect(CallbackType.StrongHit);
+				.Effect(new HealEffect(10), EffectOn.CallbackEffect)
+				.Effect(new DamageEffect(5), EffectOn.CallbackEffect)
+				.CallbackUnit(CallbackType.StrongHit);
 			Setup();
 
 			Unit.AddModifierSelf("InitHealDamageWhenStrongHitCallback");
@@ -103,9 +103,9 @@ namespace ModiBuff.Tests
 		public void Init_InstanceCheck_RecipeEffect()
 		{
 			AddRecipe("InitHealDamageWhenStrongHitCallback")
-				.Effect(new HealEffect(10), EffectOn.Callback)
-				.Effect(new DamageEffect(5), EffectOn.Callback)
-				.CallbackEffect(CallbackType.StrongHit);
+				.Effect(new HealEffect(10), EffectOn.CallbackEffect)
+				.Effect(new DamageEffect(5), EffectOn.CallbackEffect)
+				.CallbackUnit(CallbackType.StrongHit);
 			Setup();
 
 			Unit.AddModifierSelf("InitHealDamageWhenStrongHitCallback");
@@ -128,8 +128,8 @@ namespace ModiBuff.Tests
 		public void Init_RegisterCallbackHeal10WhenTakingStrongHitRevert()
 		{
 			AddRecipe("InitHealToFullHalfHealthCallback")
-				.Effect(new HealEffect(10), EffectOn.Callback)
-				.CallbackEffect(CallbackType.StrongHit)
+				.Effect(new HealEffect(10), EffectOn.CallbackEffect)
+				.CallbackUnit(CallbackType.StrongHit)
 				.Remove(1);
 			Setup();
 
@@ -180,7 +180,7 @@ namespace ModiBuff.Tests
 			AddRecipe("InitAddDamageRevertibleHalfHealthCallback")
 				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
 				.Remove(RemoveEffectOn.Callback)
-				.CallbackEffect(CallbackType.StrongHit);
+				.CallbackUnit(CallbackType.StrongHit);
 			Setup();
 
 			Unit.AddModifierSelf("InitAddDamageRevertibleHalfHealthCallback");
@@ -230,8 +230,8 @@ namespace ModiBuff.Tests
 		public void AddDamageAbove5RemoveDamageBelow5React()
 		{
 			AddRecipe("AddDamageAbove5RemoveDamageBelow5React")
-				.Effect(new AddDamageEffect(5, EffectState.IsRevertibleAndTogglable), EffectOn.CustomCallback)
-				.Callback(CustomCallbackType.DamageChanged, effect =>
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertibleAndTogglable), EffectOn.Callback)
+				.CallbackEffect(CustomCallbackType.DamageChanged, effect =>
 					new DamageChangedEvent((unit, damage, deltaDamage) =>
 					{
 						if (damage > 9)
@@ -265,7 +265,7 @@ namespace ModiBuff.Tests
 			AddRecipe("InitStatusEffectSleep_RemoveOnTenDamageTaken")
 				.Effect(new StatusEffectEffect(StatusEffectType.Sleep, 5f, true), EffectOn.Init)
 				.Remove(RemoveEffectOn.CustomCallback)
-				.Callback(CustomCallbackType.CurrentHealthChanged, removeEffect =>
+				.CallbackEffect(CustomCallbackType.CurrentHealthChanged, removeEffect =>
 				{
 					float totalDamageTaken = 0f;
 					return new HealthChangedEvent((target, source, health, deltaHealth) =>
@@ -313,7 +313,7 @@ namespace ModiBuff.Tests
 				.Tag(TagType.BasicDispel)
 				.Effect(new StatusEffectEffect(StatusEffectType.Sleep, 5f, true), EffectOn.Init)
 				.Remove(RemoveEffectOn.CustomCallback)
-				.Callback(CustomCallbackType.Dispel, removeEffect =>
+				.CallbackEffect(CustomCallbackType.Dispel, removeEffect =>
 					new DispelEvent((target, source, eventTag) =>
 					{
 						//TODO We might need to get the modifiers actual tag here?

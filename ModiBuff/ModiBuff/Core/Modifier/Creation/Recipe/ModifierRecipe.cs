@@ -28,8 +28,8 @@ namespace ModiBuff.Core
 
 		private EffectWrapper _removeEffectWrapper;
 		private EffectWrapper _eventRegisterWrapper;
-		private EffectWrapper _callbackRegisterWrapper;
-		private EffectWrapper _customCallbackRegisterWrapper;
+		private EffectWrapper _callbackUnitRegisterWrapper;
+		private EffectWrapper _callbackEffectRegisterWrapper;
 
 		private readonly List<EffectWrapper> _effectWrappers;
 
@@ -333,14 +333,14 @@ namespace ModiBuff.Core
 		}
 
 		/// <summary>
-		///		Registers a callback register effect to a unit, will trigger all <see cref="EffectOn.Callback"/>
+		///		Registers a callback register effect to a unit, will trigger all <see cref="EffectOn.CallbackEffect"/>
 		///		effects when <see cref="callbackType"/> is triggered.
 		/// </summary>
-		public ModifierRecipe CallbackEffect<TCallback>(TCallback callbackType)
+		public ModifierRecipe CallbackUnit<TCallbackUnit>(TCallbackUnit callbackType)
 		{
-			var effect = new CallbackRegisterEffect<TCallback>(callbackType);
-			_callbackRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
-			_effectWrappers.Add(_callbackRegisterWrapper);
+			var effect = new CallbackUnitRegisterEffect<TCallbackUnit>(callbackType);
+			_callbackUnitRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
+			_effectWrappers.Add(_callbackUnitRegisterWrapper);
 			return this;
 		}
 
@@ -348,23 +348,32 @@ namespace ModiBuff.Core
 		///		Registers a callback effect to a unit, will trigger the callback when <see cref="callbackType"/> is triggered.
 		///		It will NOT trigger any EffectOn.<see cref="EffectOn.Callback"/> effects, only the supplied callback.
 		/// </summary>
-		public ModifierRecipe Callback<TCustomCallback>(TCustomCallback callbackType, UnitCallback callback)
+		public ModifierRecipe Callback<TCallback>(TCallback callbackType, UnitCallback callback)
 		{
-			return Effect(new CustomCallbackNewRegisterEffect<TCustomCallback>(
-				new CustomCallback<TCustomCallback>(callbackType, callback)), EffectOn.Init);
+			return Effect(new CustomCallbackRegisterEffect<TCallback>(
+				new CustomCallback<TCallback>(callbackType, callback)), EffectOn.Init);
 		}
 
-		public ModifierRecipe Callback<TCustomCallback>(params CustomCallback<TCustomCallback>[] callbacks)
+		/// <summary>
+		///		Registers callbacks to a unit, this callback supports custom callback signatures.
+		///		It will NOT trigger any EffectOn.<see cref="EffectOn.CallbackEffect"/> or <see cref="EffectOn.Callback"/> effects, only the supplied callbacks.
+		///		Can be used with other signatures than <see cref="UnitCallback"/>.
+		/// </summary>
+		public ModifierRecipe Callback<TCallback>(params CustomCallback<TCallback>[] callbacks)
 		{
-			return Effect(new CustomCallbackNewRegisterEffect<TCustomCallback>(callbacks), EffectOn.Init);
+			return Effect(new CustomCallbackRegisterEffect<TCallback>(callbacks), EffectOn.Init);
 		}
 
-		public ModifierRecipe Callback<TCustomCallback>(TCustomCallback callbackType,
+		/// <summary>
+		///		Registers callbacks to a unit, this callback supports custom callback signatures.
+		///		It will trigger any EffectOn.<see cref="EffectOn.Callback"/> effects.
+		/// </summary>
+		public ModifierRecipe CallbackEffect<TCallbackEffect>(TCallbackEffect callbackType,
 			Func<IEffect, object> @event)
 		{
-			var effect = new CustomCallbackRegisterEffect<TCustomCallback>(callbackType, @event);
-			_customCallbackRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
-			_effectWrappers.Add(_customCallbackRegisterWrapper);
+			var effect = new CallbackEffectRegisterEffect<TCallbackEffect>(callbackType, @event);
+			_callbackEffectRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
+			_effectWrappers.Add(_callbackEffectRegisterWrapper);
 			return this;
 		}
 
@@ -391,7 +400,7 @@ namespace ModiBuff.Core
 				_tag |= TagType.IsInstanceStackable;
 
 			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _eventRegisterWrapper,
-				_callbackRegisterWrapper, _customCallbackRegisterWrapper, _hasApplyChecks, _applyCheckList,
+				_callbackUnitRegisterWrapper, _callbackEffectRegisterWrapper, _hasApplyChecks, _applyCheckList,
 				_hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura, _tag,
 				_oneTimeInit, _interval, _duration, _refreshDuration, _refreshInterval, _whenStackEffect, _maxStacks,
 				_everyXStacks, _independentStackTime);
@@ -495,15 +504,17 @@ namespace ModiBuff.Core
 				                "for modifier: " + Name + " id: " + Id);
 			}
 
-			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Callback)) && _callbackRegisterWrapper == null)
+			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.CallbackEffect)) &&
+			    _callbackUnitRegisterWrapper == null)
 			{
 				validRecipe = false;
 				Logger.LogError("[ModiBuff] Effects on callback set, but no callback registration type set, " +
 				                "for modifier: " + Name + " id: " + Id);
 			}
 
-			if (_callbackRegisterWrapper != null && !_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.Callback)) &&
-			    _removeEffectWrapper?.EffectOn != EffectOn.Callback)
+			if (_callbackUnitRegisterWrapper != null &&
+			    !_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.CallbackEffect)) &&
+			    _removeEffectWrapper?.EffectOn != EffectOn.CallbackEffect)
 			{
 				validRecipe = false;
 				Logger.LogError("[ModiBuff] Callback registration type set, but no effects on callback set, " +

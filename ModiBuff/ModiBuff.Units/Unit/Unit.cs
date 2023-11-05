@@ -17,7 +17,7 @@ namespace ModiBuff.Core.Units
 	public partial class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>,
 		IDamagable<float, float, float, float>, IHealable<float, float>, IHealer<float, float>,
 		IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker, IEventOwner<EffectOnEvent>,
-		IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance, ICallbackRegistrable<CallbackType>,
+		IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance, ICallbackUnitRegistrable<CallbackType>,
 		IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
 		ICustomCallbackRegistrable<CustomCallbackType>, ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>

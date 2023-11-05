@@ -36,7 +36,7 @@ namespace ModiBuff.Tests
 		private IEffect _noOpEffect;
 
 		private Unit _callbackTarget, _callbackSource;
-		private CallbackRegisterEffect<CallbackType> _callbackRegisterEffect;
+		private CallbackUnitRegisterEffect<CallbackType> _callbackUnitRegisterEffect;
 		private IEffect _callbackNoOpEffect;
 		private UnitCallback _unitCallbacks;
 
@@ -285,7 +285,7 @@ namespace ModiBuff.Tests
 			_unitCallbacks += (target, source) => _callbackNoOpEffect.Effect(target, source);
 			_unitCallbacks += (target, source) => _callbackNoOpEffect.Effect(target, source);
 			//_callbackRegisterEffect.SetCallback(_unitCallbacks);
-			_callbackRegisterEffect.Effect(_callbackTarget, _callbackSource);
+			_callbackUnitRegisterEffect.Effect(_callbackTarget, _callbackSource);
 
 			//_callbackTarget.Test();
 
@@ -298,7 +298,7 @@ namespace ModiBuff.Tests
 			UnitCallback unitCallbacks = (target, source) => _callbackNoOpEffect.Effect(target, source);
 			unitCallbacks += (target, source) => _callbackNoOpEffect.Effect(target, source);
 			//_callbackRegisterEffect.SetCallback(unitCallbacks);
-			_callbackRegisterEffect.Effect(_callbackTarget, _callbackSource);
+			_callbackUnitRegisterEffect.Effect(_callbackTarget, _callbackSource);
 
 			//_callbackTarget.Test();
 		}

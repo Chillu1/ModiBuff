@@ -10,8 +10,8 @@ namespace ModiBuff.Core
 		public readonly List<EffectWrapper> EffectWrappers;
 		public readonly EffectWrapper RemoveEffectWrapper;
 		public readonly EffectWrapper EventRegisterWrapper;
-		public readonly EffectWrapper CallbackRegisterWrapper;
-		public readonly EffectWrapper CustomCallbackRegisterWrapper;
+		public readonly EffectWrapper CallbackUnitRegisterWrapper;
+		public readonly EffectWrapper CallbackEffectRegisterWrapper;
 		public readonly bool HasApplyChecks;
 		public readonly List<ICheck> ApplyCheckList;
 		public readonly bool HasEffectChecks;
@@ -32,7 +32,7 @@ namespace ModiBuff.Core
 
 		public ModifierRecipeData(int id, string name, List<EffectWrapper> effectWrappers,
 			EffectWrapper removeEffectWrapper, EffectWrapper eventRegisterWrapper,
-			EffectWrapper callbackRegisterWrapper, EffectWrapper customCallbackRegisterWrapper, bool hasApplyChecks,
+			EffectWrapper callbackUnitRegisterWrapper, EffectWrapper callbackEffectRegisterWrapper, bool hasApplyChecks,
 			List<ICheck> applyCheckList, bool hasEffectChecks, List<ICheck> effectCheckList,
 			List<Func<IUnit, bool>> applyFuncCheckList, List<Func<IUnit, bool>> effectFuncCheckList, bool isAura,
 			TagType tag, bool oneTimeInit, float interval, float duration, bool refreshDuration, bool refreshInterval,
@@ -43,8 +43,8 @@ namespace ModiBuff.Core
 			EffectWrappers = effectWrappers;
 			RemoveEffectWrapper = removeEffectWrapper;
 			EventRegisterWrapper = eventRegisterWrapper;
-			CallbackRegisterWrapper = callbackRegisterWrapper;
-			CustomCallbackRegisterWrapper = customCallbackRegisterWrapper;
+			CallbackUnitRegisterWrapper = callbackUnitRegisterWrapper;
+			CallbackEffectRegisterWrapper = callbackEffectRegisterWrapper;
 			HasApplyChecks = hasApplyChecks;
 			ApplyCheckList = applyCheckList;
 			HasEffectChecks = hasEffectChecks;

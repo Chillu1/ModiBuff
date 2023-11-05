@@ -1,10 +1,10 @@
 namespace ModiBuff.Core
 {
-	public interface ICustomCallbackRegistrable<TCustomCallbackType>
+	public interface ICustomCallbackRegistrable<TCallback>
 	{
-		void RegisterCallbacks(CustomCallback<TCustomCallbackType>[] callbacks);
-		void UnRegisterCallbacks(CustomCallback<TCustomCallbackType>[] callbacks);
-		void RegisterCallbacks(TCustomCallbackType callbackType, object[] callbacks);
-		void UnRegisterCallbacks(TCustomCallbackType callbackType, object[] callbacks);
+		void RegisterCallbacks(CustomCallback<TCallback>[] callbacks);
+		void UnRegisterCallbacks(CustomCallback<TCallback>[] callbacks);
+		void RegisterCallbacks(TCallback callbackType, object[] callbacks);
+		void UnRegisterCallbacks(TCallback callbackType, object[] callbacks);
 	}
 }
