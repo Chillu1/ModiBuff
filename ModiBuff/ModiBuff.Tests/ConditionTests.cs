@@ -76,21 +76,6 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-		public void HealthIsFullCondition_OnApply_InitDamage()
-		{
-			AddRecipe("InitDamage_EffectCondition_HealthFull")
-				.EffectCondition(ConditionType.HealthIsFull)
-				.Effect(new DamageEffect(5), EffectOn.Init);
-			Setup();
-
-			Unit.AddModifierSelf("InitDamage_EffectCondition_HealthFull");
-			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-
-			Unit.AddModifierSelf("InitDamage_EffectCondition_HealthFull");
-			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-		}
-
-		[Test]
 		public void ManaIsFullCondition_OnEffect_InitDamage()
 		{
 			AddRecipe("InitDamage_EffectCondition_ManaFull")

@@ -57,9 +57,6 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealBasedOnPoisonStacks()
 		{
-			//Maybe we should have a bare bones poison effect, that each poison damage effect uses for stacks? Somehow
-			//We also could obvs store the stacks on the unit instead
-			//We could make a "channel" that gets the effect stacks from the unified poison effect, but might be bad design
 			AddRecipe(_poisonRecipe);
 			AddRecipe("PoisonHealHeal")
 				.Stack(WhenStackEffect.Always)

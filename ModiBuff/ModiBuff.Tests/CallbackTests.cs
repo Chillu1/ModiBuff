@@ -65,12 +65,12 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Init_RegisterCallbackHeal10WhenTakingStrongHit_Effect()
 		{
-			AddRecipe("InitHealToFullHalfHealthCallback")
+			AddRecipe("InitHeal10HalfHealthCallback")
 				.Effect(new HealEffect(10), EffectOn.CallbackUnit)
 				.CallbackUnit(CallbackUnitType.StrongHit);
 			Setup();
 
-			Unit.AddModifierSelf("InitHealToFullHalfHealthCallback");
+			Unit.AddModifierSelf("InitHeal10HalfHealthCallback");
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			//Take enough damage to trigger the callback
@@ -321,7 +321,6 @@ namespace ModiBuff.Tests
 						if ((TagType.BasicDispel & eventTag) != 0)
 							removeEffect.Effect(target, source);
 					}));
-
 			Setup();
 
 			Unit.AddModifierSelf("InitStatusEffectSleep_RemoveOnDispel");
