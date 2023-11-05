@@ -33,12 +33,12 @@ namespace ModiBuff.Core
 				return;
 
 			_isRegistered = true;
-			((ICustomCallbackRegistrable<TCallback>)target).RegisterCallbacks(_callbackType, _callbacks);
+			((ICallbackEffectRegistrable<TCallback>)target).RegisterCallbacks(_callbackType, _callbacks);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			((ICustomCallbackRegistrable<TCallback>)target).UnRegisterCallbacks(_callbackType, _callbacks);
+			((ICallbackEffectRegistrable<TCallback>)target).UnRegisterCallbacks(_callbackType, _callbacks);
 			_isRegistered = false;
 		}
 

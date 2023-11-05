@@ -36,7 +36,7 @@ namespace ModiBuff.Tests
 		private IEffect _noOpEffect;
 
 		private Unit _callbackTarget, _callbackSource;
-		private CallbackUnitRegisterEffect<CallbackType> _callbackUnitRegisterEffect;
+		private CallbackUnitRegisterEffect<CallbackUnitType> _callbackUnitRegisterEffect;
 		private IEffect _callbackNoOpEffect;
 		private UnitCallback _unitCallbacks;
 

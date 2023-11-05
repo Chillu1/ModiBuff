@@ -1,5 +1,3 @@
-using System;
-using System.Reflection;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
@@ -34,44 +32,10 @@ namespace ModiBuff.Tests
 		public void HealBasedOnPoisonStacksEvent()
 		{
 			AddRecipe(_poisonRecipe);
-			Func<IEffect, PoisonEvent> poisonEvent = (effect) => (target, source, stacks, totalStacks, damage) =>
-			{
-				//Kind of a stacks hack rn, by using stack effect in callbacks
-				((IStackEffect)effect).StackEffect(stacks, target, source);
-			};
-			AddGenerator("HealPerPoisonStack", (id, genId, name, tag) =>
-			{
-				var healEffect = new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1);
-
-				var callback = new CustomCallbackRegisterEffect<CustomCallbackType>(
-					new CustomCallback<CustomCallbackType>(CustomCallbackType.PoisonDamage, poisonEvent(healEffect)));
-
-				var initComponent = new InitComponent(false, new IEffect[] { callback }, null);
-
-				return new Modifier(id, genId, name, initComponent, null, null, null,
-					new SingleTargetComponent(), null);
-			});
-			Setup();
-
-			Enemy.AddModifierSelf("HealPerPoisonStack");
-			Unit.AddApplierModifier(Recipes.GetGenerator("Poison"), ApplierType.Cast);
-			Unit.TryCast("Poison", Enemy);
-			Enemy.Update(1);
-			Assert.AreEqual(EnemyHealth - 5 + 1, Enemy.Health);
-
-			Unit.TryCast("Poison", Enemy);
-			Enemy.Update(1);
-			Assert.AreEqual(EnemyHealth - 5 + 1 - 5 * 2 + 1 * 2, Enemy.Health);
-		}
-
-		[Test]
-		public void HealBasedOnPoisonStacksEvent_Recipe()
-		{
-			AddRecipe(_poisonRecipe);
 			AddRecipe("HealPerPoisonStack")
 				.Effect(new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1),
-					EffectOn.Callback)
-				.CallbackEffect(CustomCallbackType.PoisonDamage, effect =>
+					EffectOn.CallbackEffect)
+				.CallbackEffect(CallbackType.PoisonDamage, effect =>
 					new PoisonEvent((target, source, stacks, totalStacks, damage) =>
 					{
 						//Kind of a stacks hack rn, by using stack effect in callbacks
@@ -121,7 +85,7 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe(_poisonRecipe);
 			AddRecipe("PoisonThorns")
-				.Callback(new CustomCallback<CustomCallbackType>(CustomCallbackType.PoisonDamage,
+				.Callback(new Callback<CallbackType>(CallbackType.PoisonDamage,
 					new PoisonEvent((target, source, stacks, totalStacks, damage) =>
 					{
 						((IDamagable<float, float, float, float>)source).TakeDamage(damage, target);

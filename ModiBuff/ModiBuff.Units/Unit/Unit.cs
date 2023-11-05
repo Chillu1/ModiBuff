@@ -17,10 +17,12 @@ namespace ModiBuff.Core.Units
 	public partial class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>,
 		IDamagable<float, float, float, float>, IHealable<float, float>, IHealer<float, float>,
 		IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker, IEventOwner<EffectOnEvent>,
-		IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance, ICallbackUnitRegistrable<CallbackType>,
+		IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
+		ICallbackUnitRegistrable<CallbackUnitType>,
 		IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
-		ICustomCallbackRegistrable<CustomCallbackType>, ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>
+		ICallbackRegistrable<CallbackType>, ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>,
+		ICallbackEffectRegistrable<CallbackType>
 	{
 		public UnitTag UnitTag { get; private set; }
 		public float Health { get; private set; }
@@ -205,7 +207,6 @@ namespace ModiBuff.Core.Units
 					_strongHitCallbacks[i].Effect(this, source);
 				for (int i = 0; i < _strongHitUnitCallbacks.Count; i++)
 					_strongHitUnitCallbacks[i](this, source);
-				_strongHitDelegateCallbacks?.Invoke(this, source);
 			}
 
 			if (Health <= 0 && !IsDead)

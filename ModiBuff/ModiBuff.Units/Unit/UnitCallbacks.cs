@@ -45,7 +45,6 @@ namespace ModiBuff.Core.Units
 
 		private readonly List<IEffect> _strongHitCallbacks;
 		private readonly List<UnitCallback> _strongHitUnitCallbacks;
-		private UnitCallback _strongHitDelegateCallbacks;
 
 		private readonly List<PoisonEvent> _poisonEvents;
 
@@ -164,11 +163,11 @@ namespace ModiBuff.Core.Units
 		//single delegates are 76% faster than arrays of IEffects with 1 subscriber/item
 		//But arrays are much faster when there are multiple subscribers/items, 58% faster with 2 items, 150% faster with 5 items.
 		//It's recommended to use the array version generally. But in cases where most modifiers have single callbacks, use delegates.
-		public void RegisterCallbacks(CallbackType callbackType, IEffect[] callbacks)
+		public void RegisterCallbacks(CallbackUnitType callbackType, IEffect[] callbacks)
 		{
 			switch (callbackType)
 			{
-				case CallbackType.StrongHit:
+				case CallbackUnitType.StrongHit:
 					_strongHitCallbacks.AddRange(callbacks);
 					break;
 				default:
@@ -176,11 +175,11 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public void UnRegisterCallbacks(CallbackType callbackType, IEffect[] callbacks)
+		public void UnRegisterCallbacks(CallbackUnitType callbackType, IEffect[] callbacks)
 		{
 			switch (callbackType)
 			{
-				case CallbackType.StrongHit:
+				case CallbackUnitType.StrongHit:
 					for (int i = 0; i < callbacks.Length; i++)
 					{
 						bool removed = _strongHitCallbacks.Remove(callbacks[i]);
@@ -196,38 +195,14 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public void RegisterCallbacks(CallbackType callbackType, UnitCallback callbacks)
-		{
-			switch (callbackType)
-			{
-				case CallbackType.StrongHit:
-					_strongHitDelegateCallbacks += callbacks;
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
-			}
-		}
-
-		public void UnRegisterCallbacks(CallbackType callbackType, UnitCallback callbacks)
-		{
-			switch (callbackType)
-			{
-				case CallbackType.StrongHit:
-					_strongHitDelegateCallbacks -= callbacks;
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
-			}
-		}
-
-		public void RegisterCallbacks(CustomCallback<CustomCallbackType>[] callbacks)
+		public void RegisterCallbacks(Callback<CallbackType>[] callbacks)
 		{
 			for (int i = 0; i < callbacks.Length; i++)
 			{
 				ref readonly var callback = ref callbacks[i];
 				switch (callback.CallbackType)
 				{
-					case CustomCallbackType.Dispel:
+					case CallbackType.Dispel:
 						if (!(callback.Action is DispelEvent dispelEvent))
 						{
 							Logger.LogError(
@@ -237,7 +212,7 @@ namespace ModiBuff.Core.Units
 
 						_dispelEvents.Add(dispelEvent);
 						break;
-					case CustomCallbackType.PoisonDamage:
+					case CallbackType.PoisonDamage:
 						if (!(callback.Action is PoisonEvent poisonEvent))
 						{
 							Logger.LogError(
@@ -247,7 +222,7 @@ namespace ModiBuff.Core.Units
 
 						_poisonEvents.Add(poisonEvent);
 						break;
-					case CustomCallbackType.CurrentHealthChanged:
+					case CallbackType.CurrentHealthChanged:
 						if (!(callback.Action is HealthChangedEvent healthEvent))
 						{
 							Logger.LogError(
@@ -258,7 +233,7 @@ namespace ModiBuff.Core.Units
 						healthEvent.Invoke(this, this, Health, 0f);
 						_healthChangedEvent.Add(healthEvent);
 						break;
-					case CustomCallbackType.DamageChanged:
+					case CallbackType.DamageChanged:
 						if (!(callback.Action is DamageChangedEvent damageEvent))
 						{
 							Logger.LogError(
@@ -269,7 +244,7 @@ namespace ModiBuff.Core.Units
 						damageEvent.Invoke(this, Damage, 0f);
 						_damageChangedEvent.Add(damageEvent);
 						break;
-					case CustomCallbackType.StrongHit:
+					case CallbackType.StrongHit:
 						if (!(callback.Action is UnitCallback unitCallback))
 						{
 							Logger.LogError(
@@ -285,28 +260,28 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public void UnRegisterCallbacks(CustomCallback<CustomCallbackType>[] callbacks)
+		public void UnRegisterCallbacks(Callback<CallbackType>[] callbacks)
 		{
 			for (int i = 0; i < callbacks.Length; i++)
 			{
 				ref readonly var callback = ref callbacks[i];
 				switch (callback.CallbackType)
 				{
-					case CustomCallbackType.Dispel:
+					case CallbackType.Dispel:
 						_dispelEvents.Remove((DispelEvent)callback.Action);
 						break;
-					case CustomCallbackType.PoisonDamage:
+					case CallbackType.PoisonDamage:
 						_poisonEvents.Remove((PoisonEvent)callback.Action);
 						break;
-					case CustomCallbackType.CurrentHealthChanged:
+					case CallbackType.CurrentHealthChanged:
 						if (_healthChangedEvent.Remove((HealthChangedEvent)callback.Action))
 							((HealthChangedEvent)callback.Action).Invoke(this, this, Health, 0f);
 						break;
-					case CustomCallbackType.DamageChanged:
+					case CallbackType.DamageChanged:
 						if (_damageChangedEvent.Remove((DamageChangedEvent)callback.Action))
 							((DamageChangedEvent)callback.Action).Invoke(this, Damage, 0f);
 						break;
-					case CustomCallbackType.StrongHit:
+					case CallbackType.StrongHit:
 						_strongHitUnitCallbacks.Remove((UnitCallback)callback.Action);
 						break;
 					default:
@@ -315,7 +290,7 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public void RegisterCallbacks(CustomCallbackType callbackType, object[] callbacks)
+		public void RegisterCallbacks(CallbackType callbackType, object[] callbacks)
 		{
 			for (int i = 0; i < callbacks.Length; i++)
 			{
@@ -323,7 +298,7 @@ namespace ModiBuff.Core.Units
 
 				switch (callbackType)
 				{
-					case CustomCallbackType.Dispel:
+					case CallbackType.Dispel:
 						if (!(callback is DispelEvent dispelEvent))
 						{
 							Logger.LogError(
@@ -333,7 +308,7 @@ namespace ModiBuff.Core.Units
 
 						_dispelEvents.Add(dispelEvent);
 						break;
-					case CustomCallbackType.PoisonDamage:
+					case CallbackType.PoisonDamage:
 						if (!(callback is PoisonEvent poisonEvent))
 						{
 							Logger.LogError(
@@ -343,7 +318,7 @@ namespace ModiBuff.Core.Units
 
 						_poisonEvents.Add(poisonEvent);
 						break;
-					case CustomCallbackType.CurrentHealthChanged:
+					case CallbackType.CurrentHealthChanged:
 						if (!(callback is HealthChangedEvent healthEvent))
 						{
 							Logger.LogError(
@@ -354,7 +329,7 @@ namespace ModiBuff.Core.Units
 						healthEvent.Invoke(this, this, Health, 0f);
 						_healthChangedEvent.Add(healthEvent);
 						break;
-					case CustomCallbackType.DamageChanged:
+					case CallbackType.DamageChanged:
 						if (!(callback is DamageChangedEvent damageEvent))
 						{
 							Logger.LogError(
@@ -371,7 +346,7 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public void UnRegisterCallbacks(CustomCallbackType callbackType, object[] callbacks)
+		public void UnRegisterCallbacks(CallbackType callbackType, object[] callbacks)
 		{
 			for (int i = 0; i < callbacks.Length; i++)
 			{
@@ -379,17 +354,17 @@ namespace ModiBuff.Core.Units
 
 				switch (callbackType)
 				{
-					case CustomCallbackType.Dispel:
+					case CallbackType.Dispel:
 						_dispelEvents.Remove((DispelEvent)callback);
 						break;
-					case CustomCallbackType.PoisonDamage:
+					case CallbackType.PoisonDamage:
 						_poisonEvents.Remove((PoisonEvent)callback);
 						break;
-					case CustomCallbackType.CurrentHealthChanged:
+					case CallbackType.CurrentHealthChanged:
 						if (_healthChangedEvent.Remove((HealthChangedEvent)callback))
 							((HealthChangedEvent)callback).Invoke(this, this, Health, 0f);
 						break;
-					case CustomCallbackType.DamageChanged:
+					case CallbackType.DamageChanged:
 						if (_damageChangedEvent.Remove((DamageChangedEvent)callback))
 							((DamageChangedEvent)callback).Invoke(this, Damage, 0f);
 						break;

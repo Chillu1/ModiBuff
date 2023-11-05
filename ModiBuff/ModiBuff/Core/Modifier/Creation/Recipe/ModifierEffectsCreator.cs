@@ -63,9 +63,9 @@ namespace ModiBuff.Core
 					_stackEffectsIndex++;
 				if ((effectWrapper.EffectOn & EffectOn.Event) != 0)
 					_eventEffectsIndex++;
-				if ((effectWrapper.EffectOn & EffectOn.CallbackEffect) != 0)
+				if ((effectWrapper.EffectOn & EffectOn.CallbackUnit) != 0)
 					_callbackUnitEffectsIndex++;
-				if ((effectWrapper.EffectOn & EffectOn.Callback) != 0)
+				if ((effectWrapper.EffectOn & EffectOn.CallbackEffect) != 0)
 					_callbackEffectEffectsIndex++;
 			}
 
@@ -146,9 +146,9 @@ namespace ModiBuff.Core
 					_stackEffects[_stackEffectsIndex++] = (IStackEffect)effect;
 				if ((effectOn & EffectOn.Event) != 0)
 					_eventEffects[_eventEffectsIndex++] = effect;
-				if ((effectOn & EffectOn.CallbackEffect) != 0)
+				if ((effectOn & EffectOn.CallbackUnit) != 0)
 					_callbackUnitEffects[_callbackUnitEffectsIndex++] = effect;
-				if ((effectOn & EffectOn.Callback) != 0)
+				if ((effectOn & EffectOn.CallbackEffect) != 0)
 					_callbackEffectEffects[_callbackEffectEffectsIndex++] = effect;
 			}
 

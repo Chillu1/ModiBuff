@@ -7,7 +7,5 @@ namespace ModiBuff.Core
 	{
 		void RegisterCallbacks(TCallbackUnit callbackType, IEffect[] callbacks);
 		void UnRegisterCallbacks(TCallbackUnit callbackType, IEffect[] callbacks);
-		void RegisterCallbacks(TCallbackUnit callbackType, UnitCallback callback);
-		void UnRegisterCallbacks(TCallbackUnit callbackType, UnitCallback callback);
 	}
 }

@@ -11,8 +11,8 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("DurationAddDamageStrongHitRefresh")
 				.Effect(new AddDamageEffect(5), EffectOn.Duration)
-				.ModifierAction(ModifierAction.Refresh, EffectOn.CallbackEffect)
-				.CallbackUnit(CallbackType.StrongHit)
+				.ModifierAction(ModifierAction.Refresh, EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.StrongHit)
 				.Duration(2).Refresh();
 			Setup();
 
@@ -33,8 +33,8 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("StackAddDamageStrongHitResetStacks")
 				.Effect(new AddDamageEffect(5), EffectOn.Stack)
-				.ModifierAction(ModifierAction.ResetStacks, EffectOn.CallbackEffect)
-				.CallbackUnit(CallbackType.StrongHit)
+				.ModifierAction(ModifierAction.ResetStacks, EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.StrongHit)
 				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2);
 			Setup();
 
@@ -54,8 +54,8 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("AddDamageStackTimerResetStacks")
 				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Stack)
-				.ModifierAction(ModifierAction.ResetStacks, EffectOn.CallbackEffect)
-				.CallbackUnit(CallbackType.StrongHit)
+				.ModifierAction(ModifierAction.ResetStacks, EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.StrongHit)
 				.Stack(WhenStackEffect.Always, independentStackTime: 5);
 			Setup();
 
