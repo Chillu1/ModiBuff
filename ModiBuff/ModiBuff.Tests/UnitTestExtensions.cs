@@ -5,23 +5,33 @@ namespace ModiBuff.Tests
 {
 	internal static class UnitTestExtensions
 	{
+		private static void CheckForSetup(IUnit unit)
+		{
+			if (unit == null)
+				Logger.LogError("Unit is null, you most likely forgot to call Setup() in your test");
+		}
+
 		internal static void AddModifierSelf(this IModifierOwner unit, string name)
 		{
+			CheckForSetup(unit);
 			unit.ModifierController.Add(ModifierIdManager.GetIdOld(name), unit, unit);
 		}
 
 		internal static void ApplyEffectSelf(this IModifierOwner unit, string name)
 		{
+			CheckForSetup(unit);
 			unit.ApplyEffect(EffectIdManager.GetIdOld(name), unit);
 		}
 
 		internal static void AddModifierTarget(this IModifierOwner unit, string name, IUnit target)
 		{
+			CheckForSetup(unit);
 			unit.ModifierController.Add(ModifierIdManager.GetIdOld(name), target, unit);
 		}
 
 		internal static void ApplyEffectTarget(this IModifierOwner unit, string name, IUnit target)
 		{
+			CheckForSetup(unit);
 			target.ApplyEffect(EffectIdManager.GetIdOld(name), unit);
 		}
 
@@ -38,12 +48,14 @@ namespace ModiBuff.Tests
 		internal static bool AddApplierModifier(this IModifierOwner unit, IModifierGenerator generator,
 			ApplierType applierType)
 		{
+			CheckForSetup(unit);
 			return unit.ModifierController.TryAddApplier(generator.Id,
 				((IModifierApplyCheckGenerator)generator).HasApplyChecks, applierType);
 		}
 
 		internal static bool AddEffectApplier(this IModifierOwner unit, string name)
 		{
+			CheckForSetup(unit);
 			return unit.ModifierController.TryAddEffectApplier(EffectIdManager.GetIdOld(name));
 		}
 

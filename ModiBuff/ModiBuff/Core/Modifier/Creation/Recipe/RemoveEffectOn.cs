@@ -8,6 +8,7 @@ namespace ModiBuff.Core
 		None = 0,
 		Stack = EffectOn.Stack,
 		Callback = EffectOn.Callback,
+		CustomCallback = EffectOn.CustomCallback,
 	}
 
 	public static class RemoveEffectOnExtensions

@@ -585,7 +585,7 @@ namespace ModiBuff.Core.Units
 							break;
 						}
 
-						healthEvent.DynamicInvoke(this, this, Health, 0f);
+						healthEvent.Invoke(this, this, Health, 0f);
 						_healthChangedEvent.Add(healthEvent);
 						break;
 					case ReactType.DamageChanged:
@@ -596,7 +596,7 @@ namespace ModiBuff.Core.Units
 							break;
 						}
 
-						damageEvent.DynamicInvoke(this, Damage, 0f);
+						damageEvent.Invoke(this, Damage, 0f);
 						_damageChangedEvent.Add(damageEvent);
 						break;
 					default:
@@ -622,7 +622,7 @@ namespace ModiBuff.Core.Units
 						//TODO Always revert internal effect?
 						var healthChangedEvent = (HealthChangedEvent)callback.Action;
 						if (_healthChangedEvent.Remove(healthChangedEvent))
-							healthChangedEvent.DynamicInvoke(this, this, Health, 0f);
+							healthChangedEvent.Invoke(this, this, Health, 0f);
 #if DEBUG && !MODIBUFF_PROFILE
 						else
 							Logger.LogError("Could not remove healthChangedEvent: " + healthChangedEvent);
@@ -632,7 +632,7 @@ namespace ModiBuff.Core.Units
 						//TODO Always revert internal effect?
 						var damageChangedEvent = (DamageChangedEvent)callback.Action;
 						if (_damageChangedEvent.Remove(damageChangedEvent))
-							damageChangedEvent.DynamicInvoke(this, Damage, 0f);
+							damageChangedEvent.Invoke(this, Damage, 0f);
 #if DEBUG && !MODIBUFF_PROFILE
 						else
 							Logger.LogError("Could not remove damageChangedEvent: " + damageChangedEvent);
@@ -661,6 +661,28 @@ namespace ModiBuff.Core.Units
 
 						_poisonEvents.Add(poisonEvent);
 						break;
+					case CustomCallbackType.CurrentHealthChanged:
+						if (!(callback.Action is HealthChangedEvent healthEvent))
+						{
+							Logger.LogError(
+								$"objectDelegate is not of type {nameof(HealthChangedEvent)}, use named delegates instead.");
+							break;
+						}
+
+						healthEvent.Invoke(this, this, Health, 0f);
+						_healthChangedEvent.Add(healthEvent);
+						break;
+					case CustomCallbackType.DamageChanged:
+						if (!(callback.Action is DamageChangedEvent damageEvent))
+						{
+							Logger.LogError(
+								$"objectDelegate is not of type {nameof(DamageChangedEvent)}, use named delegates instead.");
+							break;
+						}
+
+						damageEvent.Invoke(this, Damage, 0f);
+						_damageChangedEvent.Add(damageEvent);
+						break;
 					default:
 						throw new ArgumentOutOfRangeException(nameof(callbacks), callback.CallbackType, null);
 				}
@@ -676,6 +698,14 @@ namespace ModiBuff.Core.Units
 				{
 					case CustomCallbackType.PoisonDamage:
 						_poisonEvents.Remove((PoisonEvent)callback.Action);
+						break;
+					case CustomCallbackType.CurrentHealthChanged:
+						if (_healthChangedEvent.Remove((HealthChangedEvent)callback.Action))
+							((HealthChangedEvent)callback.Action).Invoke(this, this, Health, 0f);
+						break;
+					case CustomCallbackType.DamageChanged:
+						if (_damageChangedEvent.Remove((DamageChangedEvent)callback.Action))
+							((DamageChangedEvent)callback.Action).Invoke(this, Damage, 0f);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();
@@ -701,6 +731,28 @@ namespace ModiBuff.Core.Units
 
 						_poisonEvents.Add(poisonEvent);
 						break;
+					case CustomCallbackType.CurrentHealthChanged:
+						if (!(callback is HealthChangedEvent healthEvent))
+						{
+							Logger.LogError(
+								$"objectDelegate is not of type {nameof(HealthChangedEvent)}, use named delegates instead.");
+							break;
+						}
+
+						healthEvent.Invoke(this, this, Health, 0f);
+						_healthChangedEvent.Add(healthEvent);
+						break;
+					case CustomCallbackType.DamageChanged:
+						if (!(callback is DamageChangedEvent damageEvent))
+						{
+							Logger.LogError(
+								$"objectDelegate is not of type {nameof(DamageChangedEvent)}, use named delegates instead.");
+							break;
+						}
+
+						damageEvent.Invoke(this, Damage, 0f);
+						_damageChangedEvent.Add(damageEvent);
+						break;
 					default:
 						throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
 				}
@@ -717,6 +769,14 @@ namespace ModiBuff.Core.Units
 				{
 					case CustomCallbackType.PoisonDamage:
 						_poisonEvents.Remove((PoisonEvent)callback);
+						break;
+					case CustomCallbackType.CurrentHealthChanged:
+						if (_healthChangedEvent.Remove((HealthChangedEvent)callback))
+							((HealthChangedEvent)callback).Invoke(this, this, Health, 0f);
+						break;
+					case CustomCallbackType.DamageChanged:
+						if (_damageChangedEvent.Remove((DamageChangedEvent)callback))
+							((DamageChangedEvent)callback).Invoke(this, Damage, 0f);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);

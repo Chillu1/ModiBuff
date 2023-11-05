@@ -50,33 +50,32 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 		}
 
-		//TODO Finish recipe react callbacks
-		/*[Test]
+		[Test]
 		public void AddDamageAbove5RemoveDamageBelow5React()
 		{
 			AddRecipe("AddDamageAbove5RemoveDamageBelow5React")
-				.Effect(new AddDamageEffect(5, true, true), EffectOn.ReactCallback)
-				.ReactCallback(ReactType.DamageChanged, (IRevertEffect effectReference) => new DamageChangedEvent((unit, newDamage, deltaDamage) =>
-				{
-					if (newDamage > 9)
-						effectReference.Effect(unit, unit);
-					else
-						effectReference.RevertEffect(unit, unit);
-				}));
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertibleAndTogglable), EffectOn.CustomCallback)
+				.CustomCallback(CustomCallbackType.DamageChanged, effect =>
+					new DamageChangedEvent((unit, damage, deltaDamage) =>
+					{
+						if (damage > 9)
+							effect.Effect(unit, unit);
+						else
+							((IRevertEffect)effect).RevertEffect(unit, unit);
+					}));
 			Setup();
 
 			Unit.AddModifierSelf("AddDamageAbove5RemoveDamageBelow5React"); //Starts with 10 baseDmg, adds 5 from effect
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
-			Unit.Update(0);
 
 			//Remove 6 damage, should remove the effect, making it 15 - 6 - 5 = 4
 			Unit.AddDamage(-6); //Revert
 			Assert.AreEqual(UnitDamage - 6, Unit.Damage);
 
-			Unit.Update(0);
+			Unit.ResetEventCounters();
 			Unit.AddDamage(6);
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
-		}*/
+		}
 
 		[Test]
 		public void InitStatusEffectSleep_RemoveOnTenDamageTaken_Manual()
@@ -118,19 +117,28 @@ namespace ModiBuff.Tests
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
 		}
 
-		/*[Test]
+		[Test]
 		public void InitStatusEffectSleep_RemoveOnTenDamageTaken_Recipe()
 		{
 			AddRecipe("InitStatusEffectSleep_RemoveOnTenDamageTaken")
 				.Effect(new StatusEffectEffect(StatusEffectType.Sleep, 5f, true), EffectOn.Init)
-				.Effect(new RemoveEffect(), EffectOn.React)
-				.ReactCallback(ReactType.CurrentHealthChanged, (reactState, effectReference) =>
-					new HealthChangedEvent((unit, health, deltaHealth) =>
+				.Remove(RemoveEffectOn.CustomCallback)
+				.CustomCallback(CustomCallbackType.CurrentHealthChanged, removeEffect =>
+				{
+					float totalDamageTaken = 0f;
+					return new HealthChangedEvent((target, source, health, deltaHealth) =>
 					{
-						reactState.Value += deltaHealth;
-						if (reactState.Value >= 10)
-							effectReference.Effect(unit, unit);
-					}));
+						//Don't count "negative damage/healing damage"
+						if (deltaHealth > 0)
+							totalDamageTaken += deltaHealth;
+						if (totalDamageTaken >= 10)
+						{
+							totalDamageTaken = 0f;
+							removeEffect.Effect(target, source);
+						}
+					});
+				});
+			Setup();
 
 			//Starts with 10 baseDmg, adds 5 from effect
 			Unit.AddModifierSelf("InitStatusEffectSleep_RemoveOnTenDamageTaken");
@@ -142,7 +150,15 @@ namespace ModiBuff.Tests
 
 			Unit.TakeDamage(2, Unit); //Removes and reverts sleep
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
-		}*/
+
+			//Check if state is reset
+			Enemy.AddModifierSelf("InitStatusEffectSleep_RemoveOnTenDamageTaken");
+			Enemy.TakeDamage(9, Enemy);
+			Assert.True(Enemy.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
+
+			Enemy.TakeDamage(2, Enemy);
+			Assert.False(Enemy.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
+		}
 
 		[Test]
 		public void InitStatusEffectSleep_RemoveOnTenDamageTaken_Manual_StateReset()
