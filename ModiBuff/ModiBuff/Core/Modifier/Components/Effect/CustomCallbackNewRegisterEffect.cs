@@ -24,7 +24,7 @@ namespace ModiBuff.Core
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			//((ICustomCallbackRegistrable<TCallback>)target).UnRegisterCallback(_callbacks);
+			((ICustomCallbackRegistrable<TCallback>)target).UnRegisterCallbacks(_callbacks);
 			_isRegistered = false;
 		}
 

@@ -667,22 +667,60 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public void RegisterCallback(CustomCallbackType callbackType, object callback)
+		public void UnRegisterCallbacks(CustomCallback<CustomCallbackType>[] callbacks)
 		{
-			switch (callbackType)
+			for (int i = 0; i < callbacks.Length; i++)
 			{
-				case CustomCallbackType.PoisonDamage:
-					if (!(callback is PoisonEvent poisonEvent))
-					{
-						Logger.LogError(
-							$"objectDelegate is not of type {nameof(PoisonEvent)}, use named delegates instead.");
+				ref readonly var callback = ref callbacks[i];
+				switch (callback.CallbackType)
+				{
+					case CustomCallbackType.PoisonDamage:
+						_poisonEvents.Remove((PoisonEvent)callback.Action);
 						break;
-					}
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+			}
+		}
 
-					_poisonEvents.Add(poisonEvent);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+		public void RegisterCallbacks(CustomCallbackType callbackType, object[] callbacks)
+		{
+			for (int i = 0; i < callbacks.Length; i++)
+			{
+				object callback = callbacks[i];
+
+				switch (callbackType)
+				{
+					case CustomCallbackType.PoisonDamage:
+						if (!(callback is PoisonEvent poisonEvent))
+						{
+							Logger.LogError(
+								$"objectDelegate is not of type {nameof(PoisonEvent)}, use named delegates instead.");
+							break;
+						}
+
+						_poisonEvents.Add(poisonEvent);
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+				}
+			}
+		}
+
+		public void UnRegisterCallbacks(CustomCallbackType callbackType, object[] callbacks)
+		{
+			for (int i = 0; i < callbacks.Length; i++)
+			{
+				object callback = callbacks[i];
+
+				switch (callbackType)
+				{
+					case CustomCallbackType.PoisonDamage:
+						_poisonEvents.Remove((PoisonEvent)callback);
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+				}
 			}
 		}
 

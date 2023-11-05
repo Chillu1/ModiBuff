@@ -8,24 +8,23 @@ namespace ModiBuff.Core
 		public bool IsRevertible => true;
 
 		private readonly TCallback _callbackType;
-		private readonly EffectMethod _effectMethod;
 		private readonly Func<IEffect, object> _event;
 
-		private object _callback;
+		private object[] _callbacks;
 
 		private bool _isRegistered;
 
-		public CustomCallbackRegisterEffect(TCallback callbackType, EffectMethod effectMethod,
-			Func<IEffect, object> @event)
+		public CustomCallbackRegisterEffect(TCallback callbackType, Func<IEffect, object> @event)
 		{
 			_callbackType = callbackType;
-			_effectMethod = effectMethod;
 			_event = @event;
 		}
 
 		public void SetEffects(IEffect[] effects)
 		{
-			_callback = _event(effects[0]);
+			_callbacks = new object[effects.Length];
+			for (int i = 0; i < effects.Length; i++)
+				_callbacks[i] = _event(effects[i]);
 		}
 
 		public void Effect(IUnit target, IUnit source)
@@ -34,12 +33,12 @@ namespace ModiBuff.Core
 				return;
 
 			_isRegistered = true;
-			((ICustomCallbackRegistrable<TCallback>)target).RegisterCallback(_callbackType, _callback);
+			((ICustomCallbackRegistrable<TCallback>)target).RegisterCallbacks(_callbackType, _callbacks);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			//((ICustomCallbackRegistrable<TCallback>)target).UnRegisterCallback(_callbacks);
+			((ICustomCallbackRegistrable<TCallback>)target).UnRegisterCallbacks(_callbackType, _callbacks);
 			_isRegistered = false;
 		}
 
@@ -48,8 +47,7 @@ namespace ModiBuff.Core
 			_isRegistered = false;
 		}
 
-		public IEffect ShallowClone() =>
-			new CustomCallbackRegisterEffect<TCallback>(_callbackType, _effectMethod, _event);
+		public IEffect ShallowClone() => new CustomCallbackRegisterEffect<TCallback>(_callbackType, _event);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}

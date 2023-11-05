@@ -1,11 +1,11 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class HealFromPoisonStacksMetaEffect : IMetaEffect<float, float>
+	public sealed class AddValueBasedOnPoisonStacksMetaEffect : IMetaEffect<float, float>
 	{
 		private readonly float _multiplier;
 		private readonly Targeting _targeting;
 
-		public HealFromPoisonStacksMetaEffect(float multiplier, Targeting targeting = Targeting.TargetSource)
+		public AddValueBasedOnPoisonStacksMetaEffect(float multiplier, Targeting targeting = Targeting.TargetSource)
 		{
 			_multiplier = multiplier;
 			_targeting = targeting;

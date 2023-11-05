@@ -72,19 +72,16 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealBasedOnPoisonStacksEvent_Recipe()
 		{
-			//TODO Both methodInfo and effectType should be managed in recipe
-			MethodInfo methodInfo = typeof(HealEffect).GetMethod("StackEffect");
-			Func<IEffect, PoisonEvent> poisonEvent = (effect) => (target, source, stacks, totalStacks, damage) =>
-			{
-				//Kind of a stacks hack rn, by using stack effect in callbacks
-				methodInfo.Invoke(effect, new object[] { stacks, target, source });
-			};
 			AddRecipe(_poisonRecipe);
 			AddRecipe("HealPerPoisonStack")
-				.Stack(WhenStackEffect.Always)
 				.Effect(new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1),
 					EffectOn.CustomCallback)
-				.CustomCallback(CustomCallbackType.PoisonDamage, EffectMethod.StackEffect, poisonEvent);
+				.CustomCallback(CustomCallbackType.PoisonDamage, effect =>
+					new PoisonEvent((target, source, stacks, totalStacks, damage) =>
+					{
+						//Kind of a stacks hack rn, by using stack effect in callbacks
+						CallbackHelper.StackEffect(effect, stacks, target, source);
+					}));
 			Setup();
 
 			Enemy.AddModifierSelf("HealPerPoisonStack");
@@ -108,7 +105,7 @@ namespace ModiBuff.Tests
 			AddRecipe("PoisonHealHeal")
 				.Stack(WhenStackEffect.Always)
 				.Effect(new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1)
-					.SetMetaEffects(new HealFromPoisonStacksMetaEffect(1f)), EffectOn.Stack);
+					.SetMetaEffects(new AddValueBasedOnPoisonStacksMetaEffect(1f)), EffectOn.Stack);
 			AddEffect("PoisonHeal",
 				new ApplierEffect("Poison"),
 				new ApplierEffect("PoisonHealHeal", Targeting.SourceTarget));
