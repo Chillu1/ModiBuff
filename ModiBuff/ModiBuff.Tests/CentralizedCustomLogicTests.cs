@@ -33,7 +33,9 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe(_poisonRecipe);
 			AddRecipe("HealPerPoisonStack")
-				.Effect(new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1),
+				.Effect(
+					new HealEffect(0, HealEffect.EffectState.None,
+						StackEffectType.Effect | StackEffectType.SetStacksBased, 1),
 					EffectOn.CallbackEffect)
 				.CallbackEffect(CallbackType.PoisonDamage, effect =>
 					new PoisonEvent((target, source, stacks, totalStacks, damage) =>
@@ -60,7 +62,8 @@ namespace ModiBuff.Tests
 			AddRecipe(_poisonRecipe);
 			AddRecipe("PoisonHealHeal")
 				.Stack(WhenStackEffect.Always)
-				.Effect(new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1)
+				.Effect(new HealEffect(0, HealEffect.EffectState.None,
+						StackEffectType.Effect | StackEffectType.SetStacksBased, 1)
 					.SetMetaEffects(new AddValueBasedOnPoisonStacksMetaEffect(1f)), EffectOn.Stack);
 			AddEffect("PoisonHeal",
 				new ApplierEffect("Poison"),

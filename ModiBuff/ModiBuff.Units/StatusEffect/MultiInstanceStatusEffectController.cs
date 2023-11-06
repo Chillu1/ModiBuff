@@ -9,8 +9,13 @@ namespace ModiBuff.Core.Units
 	///		Note that this approach is much slower than having a simple timer for each legal action.
 	///		But allows for infinite unique status effect instances.
 	/// </summary>
-	public sealed class MultiInstanceStatusEffectController : IMultiInstanceStatusEffectController<LegalAction, StatusEffectType>
+	public sealed class MultiInstanceStatusEffectController :
+		IMultiInstanceStatusEffectController<LegalAction, StatusEffectType>
 	{
+		private readonly IUnit _owner;
+		private readonly List<StatusEffectEvent> _statusEffectAddedEvents;
+		private readonly List<StatusEffectEvent> _statusEffectRemovedEvents;
+
 		//TODO Instead of dict we could preload all the possible status effect instances, and have an array instead
 		//But then we'll have a problem with genIds, but then we can have arrays of arrays
 		//TODO Check if performance is terrible, we could hack it by doing the hash check manually, and having key be an int
@@ -18,13 +23,19 @@ namespace ModiBuff.Core.Units
 		private readonly Dictionary<StatusEffectInstance, float> _legalActionsTimers;
 		private readonly List<StatusEffectInstance> _stackEffectInstancesForRemoval;
 
+
 		//Reference counting of how many timers are active for each legal action type
 		private readonly int[] _legalActionTypeCounters;
 
 		private LegalAction _legalActions;
 
-		public MultiInstanceStatusEffectController()
+		public MultiInstanceStatusEffectController(IUnit owner, List<StatusEffectEvent> statusEffectAddedEvents,
+			List<StatusEffectEvent> statusEffectRemovedEvents)
 		{
+			_owner = owner;
+			_statusEffectAddedEvents = statusEffectAddedEvents;
+			_statusEffectRemovedEvents = statusEffectRemovedEvents;
+
 			_legalActionsTimers = new Dictionary<StatusEffectInstance, float>();
 			_stackEffectInstancesForRemoval = new List<StatusEffectInstance>();
 			_legalActionTypeCounters = new int[LegalActionHelper.BaseCount];
@@ -34,6 +45,7 @@ namespace ModiBuff.Core.Units
 
 		public void Update(float delta)
 		{
+			var oldLegalActions = _legalActions;
 			foreach (var kvp in _legalActionsTimers)
 			{
 				float timer = kvp.Value - delta;
@@ -60,7 +72,11 @@ namespace ModiBuff.Core.Units
 				return;
 
 			for (int i = 0; i < count; i++)
-				_legalActionsTimers.Remove(_stackEffectInstancesForRemoval[i]);
+			{
+				var statusEffectInstance = _stackEffectInstancesForRemoval[i];
+				_legalActionsTimers.Remove(statusEffectInstance);
+				CallRemoveEvents((StatusEffectType)statusEffectInstance.StatusEffectTypeInt, oldLegalActions, _owner);
+			}
 
 			_stackEffectInstancesForRemoval.Clear();
 		}
@@ -84,7 +100,8 @@ namespace ModiBuff.Core.Units
 			return true;
 		}
 
-		public void ChangeStatusEffect(int id, int genId, StatusEffectType statusEffectType, float duration)
+		public void ChangeStatusEffect(int id, int genId, StatusEffectType statusEffectType, float duration,
+			IUnit source)
 		{
 			var statusEffectInstance = new StatusEffectInstance(id, genId, statusEffectType);
 			//If an instance with same id and status effect type exists, refresh it
@@ -92,9 +109,11 @@ namespace ModiBuff.Core.Units
 			{
 				if (currentDuration < duration)
 					_legalActionsTimers[statusEffectInstance] = duration;
+				CallAddEvents(statusEffectType, _legalActions, source);
 				return;
 			}
 
+			var oldLegalAction = _legalActions;
 			//add a new instance
 			_legalActionsTimers.Add(statusEffectInstance, duration);
 			var legalActions = StatusEffectTypeHelper.LegalActions[(int)statusEffectType];
@@ -105,9 +124,12 @@ namespace ModiBuff.Core.Units
 				_legalActionTypeCounters[legalActionIndex]++;
 				_legalActions &= ~legalAction;
 			}
+
+			CallAddEvents(statusEffectType, oldLegalAction, source);
 		}
 
-		public void DecreaseStatusEffect(int id, int genId, StatusEffectType statusEffectType, float duration)
+		public void DecreaseStatusEffect(int id, int genId, StatusEffectType statusEffectType, float duration,
+			IUnit source)
 		{
 			var statusEffectInstance = new StatusEffectInstance(id, genId, statusEffectType);
 			if (!_legalActionsTimers.TryGetValue(statusEffectInstance, out float currentDuration))
@@ -120,6 +142,7 @@ namespace ModiBuff.Core.Units
 				return;
 			}
 
+			var oldLegalAction = _legalActions;
 			_legalActionsTimers.Remove(statusEffectInstance);
 			var legalActions = StatusEffectTypeHelper.LegalActions[(int)statusEffectType];
 			for (int i = 0; i < legalActions.Length; i++)
@@ -130,6 +153,23 @@ namespace ModiBuff.Core.Units
 				if (counter <= 0)
 					_legalActions |= legalAction; //No more references, set the legal action to true
 			}
+
+			CallRemoveEvents(statusEffectType, oldLegalAction, source);
+		}
+
+		public void TriggerAddEvent(StatusEffectEvent @event) =>
+			@event.Invoke(_owner, _owner, StatusEffectType.None, _legalActions, _legalActions);
+
+		private void CallAddEvents(StatusEffectType statusEffectType, LegalAction oldLegalAction, IUnit source)
+		{
+			for (int i = 0; i < _statusEffectAddedEvents.Count; i++)
+				_statusEffectAddedEvents[i].Invoke(_owner, source, statusEffectType, oldLegalAction, _legalActions);
+		}
+
+		private void CallRemoveEvents(StatusEffectType statusEffectType, LegalAction oldLegalAction, IUnit source)
+		{
+			for (int i = 0; i < _statusEffectRemovedEvents.Count; i++)
+				_statusEffectRemovedEvents[i].Invoke(_owner, source, statusEffectType, oldLegalAction, _legalActions);
 		}
 
 		private readonly struct StatusEffectInstance : IEquatable<StatusEffectInstance>

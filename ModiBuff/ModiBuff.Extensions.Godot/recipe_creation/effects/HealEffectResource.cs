@@ -13,7 +13,7 @@ namespace ModiBuff.Extensions.Godot
 		///		Can the heal effect be reverted?
 		/// </summary>
 		[Export]
-		public bool IsRevertible { get; set; }
+		public HealEffect.EffectState EffectState { get; set; }
 
 		/// <summary>
 		///		What should be done when the modifier gets stacked (ex. trigger effect, increase X value, etc). 
@@ -21,6 +21,6 @@ namespace ModiBuff.Extensions.Godot
 		[Export]
 		public StackEffectType StackEffect { get; set; }
 
-		public override IEffect GetEffect() => new HealEffect(Heal, IsRevertible, StackEffect);
+		public override IEffect GetEffect() => new HealEffect(Heal, EffectState, StackEffect);
 	}
 }

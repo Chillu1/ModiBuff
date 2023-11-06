@@ -28,4 +28,10 @@ namespace ModiBuff.Core.Units
 
 		Last = Sleep
 	}
+
+	public static class StatusEffectExtensions
+	{
+		public static bool HasStatusEffect(this StatusEffectType initial, StatusEffectType check) =>
+			(initial & check) != 0;
+	}
 }

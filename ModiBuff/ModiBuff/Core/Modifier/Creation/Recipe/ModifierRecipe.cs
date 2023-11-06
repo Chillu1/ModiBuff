@@ -522,6 +522,23 @@ namespace ModiBuff.Core
 				                "for modifier: " + Name + " id: " + Id);
 			}
 
+			if (_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.CallbackEffect)) &&
+			    _callbackEffectRegisterWrapper == null)
+			{
+				validRecipe = false;
+				Logger.LogError("[ModiBuff] Effects on callback set, but no callback registration type set, " +
+				                "for modifier: " + Name + " id: " + Id);
+			}
+
+			if (_callbackEffectRegisterWrapper != null &&
+			    !_effectWrappers.Any(w => w.EffectOn.HasFlag(EffectOn.CallbackEffect)) &&
+			    _removeEffectWrapper?.EffectOn != EffectOn.CallbackEffect)
+			{
+				validRecipe = false;
+				Logger.LogError("[ModiBuff] Callback registration type set, but no effects on callback set, " +
+				                "for modifier: " + Name + " id: " + Id);
+			}
+
 			if (!validRecipe)
 				Logger.LogError($"[ModiBuff] Recipe validation failed for {Name}, with Id: {Id}, " +
 				                $"see above for more info.");

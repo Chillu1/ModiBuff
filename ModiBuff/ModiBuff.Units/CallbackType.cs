@@ -7,5 +7,6 @@ namespace ModiBuff.Core.Units
 		CurrentHealthChanged,
 		DamageChanged,
 		StrongHit,
+		StatusEffectAdded,
 	}
 }

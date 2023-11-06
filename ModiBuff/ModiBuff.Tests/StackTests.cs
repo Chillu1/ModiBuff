@@ -25,7 +25,7 @@ namespace ModiBuff.Tests
 		public void Stack_Heal()
 		{
 			AddRecipe("StackHeal")
-				.Effect(new HealEffect(5, false, StackEffectType.Effect), EffectOn.Stack)
+				.Effect(new HealEffect(5, HealEffect.EffectState.None, StackEffectType.Effect), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 			Setup();
 

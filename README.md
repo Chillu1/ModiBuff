@@ -63,8 +63,11 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Duration
 	* Stack
 	* Event (ex. When Attacked/Cast/Killed/Healed, On Attack/Cast/Kill/Heal)
-	* Callback (any user logic)
-	* React Callback (manual generation only for now)
+	* Callbacks (any user logic)
+		* Unit callbacks
+		* Effect callbacks
+		* Custom signature callbacks
+		* React + State callbacks
 * Effect implementation examples
 	* Damage (& self damage)
 	* Heal
@@ -1041,7 +1044,7 @@ Recipe system fixes a lot of internal complexity of setting up modifiers for you
 It's possible to make modifier directly by using `ManualModifierGenerator` class,
 specifically `ModifierRecipes.Add(string, string, string, ModifierGeneratorFunc, Tag)` method.
 But only do so if you really know what you're doing, and need that extra functionality like multiple interval/duration
-components, react callbacks, etc.
+components, separate condition checks, etc.
 
 ### Manual Modifier Generation
 

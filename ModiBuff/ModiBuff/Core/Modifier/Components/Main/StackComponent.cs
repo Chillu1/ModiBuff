@@ -138,6 +138,14 @@ namespace ModiBuff.Core
 
 			void RevertStacks(int stackCount)
 			{
+				if (_revertEffects.Length == 0)
+				{
+#if DEBUG && !MODIBUFF_PROFILE
+					Logger.LogWarning("[ModiBuff] Resetting stacks without reverting any effects. Intended?");
+#endif
+					return;
+				}
+
 				switch (_targetComponent)
 				{
 					case SingleTargetComponent singleTargetComponent:

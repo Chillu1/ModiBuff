@@ -10,6 +10,9 @@ namespace ModiBuff.Core.Units
 
 	public delegate void PoisonEvent(IUnit target, IUnit source, int poisonStacks, int totalStacks, float dealtDamage);
 
+	public delegate void StatusEffectEvent(IUnit target, IUnit source, StatusEffectType statusEffect,
+		LegalAction oldLegalAction, LegalAction newLegalAction);
+
 	//Rarely updated delegates
 	public delegate void DamageChangedEvent(IUnit unit, float newDamage, float deltaDamage);
 
@@ -49,8 +52,10 @@ namespace ModiBuff.Core.Units
 		private readonly List<PoisonEvent> _poisonEvents;
 
 		private readonly List<DispelEvent> _dispelEvents;
-		private readonly List<HealthChangedEvent> _healthChangedEvent;
-		private readonly List<DamageChangedEvent> _damageChangedEvent;
+		private readonly List<HealthChangedEvent> _healthChangedEvents;
+		private readonly List<DamageChangedEvent> _damageChangedEvents;
+		private readonly List<StatusEffectEvent> _statusEffectAddedEvents;
+		private readonly List<StatusEffectEvent> _statusEffectRemovedEvents;
 
 		/// <summary>
 		///		Resets all event/callback counters, so we can trigger them again
@@ -203,56 +208,40 @@ namespace ModiBuff.Core.Units
 				switch (callback.CallbackType)
 				{
 					case CallbackType.Dispel:
-						if (!(callback.Action is DispelEvent dispelEvent))
-						{
-							Logger.LogError(
-								$"objectDelegate is not of type {nameof(DispelEvent)}, use named delegates instead.");
-							break;
-						}
-
-						_dispelEvents.Add(dispelEvent);
+						if (CheckCallback(callback.Action, out DispelEvent dispelEvent))
+							_dispelEvents.Add(dispelEvent);
 						break;
 					case CallbackType.PoisonDamage:
-						if (!(callback.Action is PoisonEvent poisonEvent))
-						{
-							Logger.LogError(
-								$"objectDelegate is not of type {nameof(PoisonEvent)}, use named delegates instead.");
-							break;
-						}
-
-						_poisonEvents.Add(poisonEvent);
+						if (CheckCallback(callback.Action, out PoisonEvent poisonEvent))
+							_poisonEvents.Add(poisonEvent);
 						break;
 					case CallbackType.CurrentHealthChanged:
-						if (!(callback.Action is HealthChangedEvent healthEvent))
+						if (CheckCallback(callback.Action, out HealthChangedEvent healthEvent))
 						{
-							Logger.LogError(
-								$"objectDelegate is not of type {nameof(HealthChangedEvent)}, use named delegates instead.");
-							break;
+							healthEvent.Invoke(this, this, Health, 0f);
+							_healthChangedEvents.Add(healthEvent);
 						}
 
-						healthEvent.Invoke(this, this, Health, 0f);
-						_healthChangedEvent.Add(healthEvent);
 						break;
 					case CallbackType.DamageChanged:
-						if (!(callback.Action is DamageChangedEvent damageEvent))
+						if (CheckCallback(callback.Action, out DamageChangedEvent damageEvent))
 						{
-							Logger.LogError(
-								$"objectDelegate is not of type {nameof(DamageChangedEvent)}, use named delegates instead.");
-							break;
+							damageEvent.Invoke(this, Damage, 0f);
+							_damageChangedEvents.Add(damageEvent);
 						}
 
-						damageEvent.Invoke(this, Damage, 0f);
-						_damageChangedEvent.Add(damageEvent);
 						break;
 					case CallbackType.StrongHit:
-						if (!(callback.Action is UnitCallback unitCallback))
+						if (CheckCallback(callback.Action, out UnitCallback unitCallback))
+							_strongHitUnitCallbacks.Add(unitCallback);
+						break;
+					case CallbackType.StatusEffectAdded:
+						if (CheckCallback(callback.Action, out StatusEffectEvent statusEffectEvent))
 						{
-							Logger.LogError(
-								$"objectDelegate is not of type {nameof(UnitCallback)}, use named delegates instead.");
-							break;
+							StatusEffectController.TriggerAddEvent(statusEffectEvent);
+							_statusEffectAddedEvents.Add(statusEffectEvent);
 						}
 
-						_strongHitUnitCallbacks.Add(unitCallback);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException(nameof(callbacks), callback.CallbackType, null);
@@ -274,15 +263,19 @@ namespace ModiBuff.Core.Units
 						_poisonEvents.Remove((PoisonEvent)callback.Action);
 						break;
 					case CallbackType.CurrentHealthChanged:
-						if (_healthChangedEvent.Remove((HealthChangedEvent)callback.Action))
+						if (_healthChangedEvents.Remove((HealthChangedEvent)callback.Action))
 							((HealthChangedEvent)callback.Action).Invoke(this, this, Health, 0f);
 						break;
 					case CallbackType.DamageChanged:
-						if (_damageChangedEvent.Remove((DamageChangedEvent)callback.Action))
+						if (_damageChangedEvents.Remove((DamageChangedEvent)callback.Action))
 							((DamageChangedEvent)callback.Action).Invoke(this, Damage, 0f);
 						break;
 					case CallbackType.StrongHit:
 						_strongHitUnitCallbacks.Remove((UnitCallback)callback.Action);
+						break;
+					case CallbackType.StatusEffectAdded:
+						//TODO Need to trigger default event?
+						_statusEffectAddedEvents.Remove((StatusEffectEvent)callback.Action);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();
@@ -299,46 +292,36 @@ namespace ModiBuff.Core.Units
 				switch (callbackType)
 				{
 					case CallbackType.Dispel:
-						if (!(callback is DispelEvent dispelEvent))
-						{
-							Logger.LogError(
-								$"objectDelegate is not of type {nameof(DispelEvent)}, use named delegates instead.");
-							break;
-						}
-
-						_dispelEvents.Add(dispelEvent);
+						if (CheckCallback(callback, out DispelEvent dispelEvent))
+							_dispelEvents.Add(dispelEvent);
 						break;
 					case CallbackType.PoisonDamage:
-						if (!(callback is PoisonEvent poisonEvent))
-						{
-							Logger.LogError(
-								$"objectDelegate is not of type {nameof(PoisonEvent)}, use named delegates instead.");
-							break;
-						}
-
-						_poisonEvents.Add(poisonEvent);
+						if (CheckCallback(callback, out PoisonEvent poisonEvent))
+							_poisonEvents.Add(poisonEvent);
 						break;
 					case CallbackType.CurrentHealthChanged:
-						if (!(callback is HealthChangedEvent healthEvent))
+						if (CheckCallback(callback, out HealthChangedEvent healthEvent))
 						{
-							Logger.LogError(
-								$"objectDelegate is not of type {nameof(HealthChangedEvent)}, use named delegates instead.");
-							break;
+							healthEvent.Invoke(this, this, Health, 0f);
+							_healthChangedEvents.Add(healthEvent);
 						}
 
-						healthEvent.Invoke(this, this, Health, 0f);
-						_healthChangedEvent.Add(healthEvent);
 						break;
 					case CallbackType.DamageChanged:
-						if (!(callback is DamageChangedEvent damageEvent))
+						if (CheckCallback(callback, out DamageChangedEvent damageEvent))
 						{
-							Logger.LogError(
-								$"objectDelegate is not of type {nameof(DamageChangedEvent)}, use named delegates instead.");
-							break;
+							damageEvent.Invoke(this, Damage, 0f);
+							_damageChangedEvents.Add(damageEvent);
 						}
 
-						damageEvent.Invoke(this, Damage, 0f);
-						_damageChangedEvent.Add(damageEvent);
+						break;
+					case CallbackType.StatusEffectAdded:
+						if (CheckCallback(callback, out StatusEffectEvent statusEffectEvent))
+						{
+							StatusEffectController.TriggerAddEvent(statusEffectEvent);
+							_statusEffectAddedEvents.Add(statusEffectEvent);
+						}
+
 						break;
 					default:
 						throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
@@ -361,17 +344,30 @@ namespace ModiBuff.Core.Units
 						_poisonEvents.Remove((PoisonEvent)callback);
 						break;
 					case CallbackType.CurrentHealthChanged:
-						if (_healthChangedEvent.Remove((HealthChangedEvent)callback))
+						if (_healthChangedEvents.Remove((HealthChangedEvent)callback))
 							((HealthChangedEvent)callback).Invoke(this, this, Health, 0f);
 						break;
 					case CallbackType.DamageChanged:
-						if (_damageChangedEvent.Remove((DamageChangedEvent)callback))
+						if (_damageChangedEvents.Remove((DamageChangedEvent)callback))
 							((DamageChangedEvent)callback).Invoke(this, Damage, 0f);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
 				}
 			}
+		}
+
+		private static bool CheckCallback<TCallback>(object callbackObject, out TCallback callbackOut)
+		{
+			if (!(callbackObject is TCallback callback))
+			{
+				Logger.LogError($"objectDelegate is not of type {nameof(TCallback)}, use named delegates instead.");
+				callbackOut = default;
+				return false;
+			}
+
+			callbackOut = callback;
+			return true;
 		}
 	}
 }

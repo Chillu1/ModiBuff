@@ -329,5 +329,54 @@ namespace ModiBuff.Tests
 			Unit.Dispel(TagType.BasicDispel, Unit);
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
 		}
+
+		//[Test]//TODO
+		public void StunStackingHeal_IntervalStackReset_RefreshIntervalOnStun()
+		{
+			AddRecipe("StunHealStackReset")
+				.Stack(WhenStackEffect.OnMaxStacks, 10000) //<Rethink
+				//We want a partial revert here, don't revert the effect (heal), but revert the added damage
+				.Effect(
+					new HealEffect(0, HealEffect.EffectState.ValueIsRevertible,
+						StackEffectType.Effect | StackEffectType.Add, 5),
+					EffectOn.Stack | EffectOn.CallbackEffect)
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+					new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+						{
+							if (effect is HealEffect healEffect)
+								healEffect.StackEffect(1, target, source);
+							if (effect is ModifierActionEffect modifierActionEffect)
+								modifierActionEffect.Effect(target, source);
+						}
+					}))
+				.ModifierAction(ModifierAction.ResetStacks, EffectOn.Interval)
+				.ModifierAction(ModifierAction.Refresh, EffectOn.CallbackEffect)
+				.Interval(10).Refresh();
+			Setup();
+
+			Unit.TakeDamage(UnitHealth / 2f, Unit);
+			Unit.AddModifierSelf("StunHealStackReset");
+
+			Unit.StatusEffectController.ChangeStatusEffect(0, 0, StatusEffectType.Stun, 5f, Unit);
+			Assert.AreEqual(UnitHealth / 2f + 5, Unit.Health);
+
+			Unit.Update(1);
+			Unit.StatusEffectController.ChangeStatusEffect(0, 0, StatusEffectType.Stun, 5f, Unit);
+			Assert.AreEqual(UnitHealth / 2f + 5 + 10, Unit.Health);
+
+			Unit.Update(9); //Doesn't reset stacks
+			Unit.StatusEffectController.ChangeStatusEffect(0, 1, StatusEffectType.Stun, 5f, Unit);
+			Assert.AreEqual(UnitHealth / 2f + 5 + 10 + 15, Unit.Health);
+
+			Unit.Update(10); //Resets stacks
+			//Doesn't fully revert all stacks, because stackComponent only has one stack (we're using the stack effect indirectly)
+			Unit.StatusEffectController.ChangeStatusEffect(0, 2, StatusEffectType.Stun, 5f, Unit);
+			Assert.AreEqual(UnitHealth / 2f + 5 + 10 + 15 + 5, Unit.Health);
+
+			Unit.StatusEffectController.ChangeStatusEffect(0, 2, StatusEffectType.Stun, 5f, Unit);
+			Assert.AreEqual(UnitHealth / 2f + 5 + 10 + 15 + 5 + 10, Unit.Health);
+		}
 	}
 }

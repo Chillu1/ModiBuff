@@ -67,5 +67,36 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("InitDamage_Cooldown_Pool"); // No cooldown
 			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
 		}
+
+		//[Test]
+		public void InitDamage_CooldownLowerWhenStunned()
+		{
+			AddRecipe("InitDamage_Cooldown")
+				.ApplyCooldown(1)
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Callback(new Callback<CallbackType>(CallbackType.StatusEffectAdded,
+					new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (!appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+						{
+							//target.SetCooldownReduction(0.5f);
+						}
+					})));
+			Setup();
+
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_Cooldown"), ApplierType.Attack);
+
+			Unit.Attack(Enemy);
+
+			Assert.AreEqual(EnemyHealth - UnitDamage - 5, Enemy.Health);
+
+			// 1 second cooldown
+			Unit.Attack(Enemy);
+			Assert.AreEqual(EnemyHealth - UnitDamage * 2 - 5, Enemy.Health);
+
+			Unit.Update(1); //Cooldown gone
+			Unit.Attack(Enemy);
+			Assert.AreEqual(EnemyHealth - UnitDamage * 3 - 5 * 2, Enemy.Health);
+		}
 	}
 }

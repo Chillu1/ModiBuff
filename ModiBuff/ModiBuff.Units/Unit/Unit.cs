@@ -84,15 +84,18 @@ namespace ModiBuff.Core.Units
 			_poisonEvents = new List<PoisonEvent>();
 
 			_dispelEvents = new List<DispelEvent>();
-			_healthChangedEvent = new List<HealthChangedEvent>();
-			_damageChangedEvent = new List<DamageChangedEvent>();
+			_healthChangedEvents = new List<HealthChangedEvent>();
+			_damageChangedEvents = new List<DamageChangedEvent>();
+			_statusEffectAddedEvents = new List<StatusEffectEvent>();
+			_statusEffectRemovedEvents = new List<StatusEffectEvent>();
 
 			_targetsInRange = new List<IUnit>();
 			_targetsInRange.Add(this);
 			_auraModifiers = new List<Modifier>();
 
 			ModifierController = new ModifierController(this);
-			_statusEffectController = new MultiInstanceStatusEffectController();
+			_statusEffectController = new MultiInstanceStatusEffectController
+				(this, _statusEffectAddedEvents, _statusEffectRemovedEvents);
 			_singleInstanceStatusEffectController = new StatusEffectController();
 		}
 
@@ -196,8 +199,8 @@ namespace ModiBuff.Core.Units
 			_healthChangedCounter++;
 			if (_healthChangedCounter <= MaxRecursionEventCount)
 			{
-				for (int i = 0; i < _healthChangedEvent.Count; i++)
-					_healthChangedEvent[i](this, source, Health, dealtDamage);
+				for (int i = 0; i < _healthChangedEvents.Count; i++)
+					_healthChangedEvents[i](this, source, Health, dealtDamage);
 			}
 
 			//if damage was bigger than half health, trigger strong attack callbacks
@@ -286,8 +289,8 @@ namespace ModiBuff.Core.Units
 			Damage += damage;
 			if (_addDamageCounter <= MaxRecursionEventCount)
 			{
-				for (int i = 0; i < _damageChangedEvent.Count; i++)
-					_damageChangedEvent[i](this, Damage, damage);
+				for (int i = 0; i < _damageChangedEvents.Count; i++)
+					_damageChangedEvents[i](this, Damage, damage);
 			}
 
 			if (_addDamageCounter <= MaxRecursionEventCount)

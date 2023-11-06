@@ -56,7 +56,7 @@ namespace ModiBuff.Core.Units
 			if (IsRevertible)
 				_totalDuration = _duration + _extraDuration;
 			((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
-				.ChangeStatusEffect(_id, _genId, _statusEffectType, _duration + _extraDuration);
+				.ChangeStatusEffect(_id, _genId, _statusEffectType, _duration + _extraDuration, source);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
@@ -69,7 +69,7 @@ namespace ModiBuff.Core.Units
 #endif
 
 			((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
-				.DecreaseStatusEffect(_id, _genId, _statusEffectType, _totalDuration);
+				.DecreaseStatusEffect(_id, _genId, _statusEffectType, _totalDuration, source);
 
 			_totalDuration = 0;
 		}

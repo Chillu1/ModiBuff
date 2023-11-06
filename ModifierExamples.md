@@ -181,20 +181,20 @@ Add("InitDamage_CostHealth_HealSelf")
 Instance stackable DoT, as in each new applied DoT will be a separate instance.
 
 ```csharp
-AddRecipe("InstanceStackableDoT")
-	.InstanceStackable()
-	.Interval(1)
-	.Effect(new DamageEffect(5), EffectOn.Interval)
-	.Remove(5);
+Add("InstanceStackableDoT")
+    .InstanceStackable()
+    .Interval(1)
+    .Effect(new DamageEffect(5), EffectOn.Interval)
+    .Remove(5);
 ```
 
 Instance stackable add damage, uniquely revertible.
 
 ```csharp
-AddRecipe("InstanceStackableAddDamageRevertible")
-	.InstanceStackable()
-	.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
-	.Remove(5);
+Add("InstanceStackableAddDamageRevertible")
+    .InstanceStackable()
+    .Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
+    .Remove(5);
 ```
 
 ## Conditional Recipes
@@ -202,83 +202,83 @@ AddRecipe("InstanceStackableAddDamageRevertible")
 50% chance to deal damage
 
 ```csharp
-AddRecipe("ChanceInitDamage")
-	.ApplyChance(0.5f)
-	.Effect(new DamageEffect(5), EffectOn.Init);
+Add("ChanceInitDamage")
+    .ApplyChance(0.5f)
+    .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
 50% change to deal damage every 1 second
 
 ```csharp
-AddRecipe("ChanceEffectIntervalDamage")
-	.EffectChance(0.5f)
-	.Interval(1)
-	.Effect(new DamageEffect(5), EffectOn.Interval);
+Add("ChanceEffectIntervalDamage")
+    .EffectChance(0.5f)
+    .Interval(1)
+    .Effect(new DamageEffect(5), EffectOn.Interval);
 ```
 
 Deal damage only when targets mana is below or equal to 100
 
 ```csharp
-AddRecipe("InitDamage_ApplyCondition_ManaBelow100")
-	.ApplyCondition(StatType.Mana, 100, ComparisonType.LessOrEqual)
-	.Effect(new DamageEffect(5), EffectOn.Init);
+Add("InitDamage_ApplyCondition_ManaBelow100")
+    .ApplyCondition(StatType.Mana, 100, ComparisonType.LessOrEqual)
+    .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
 Deal damage only when target has full health
 
 ```csharp
-AddRecipe("InitDamage_EffectCondition_HealthFull")
-	.EffectCondition(ConditionType.HealthIsFull)
-	.Effect(new DamageEffect(5), EffectOn.Init);
+Add("InitDamage_EffectCondition_HealthFull")
+    .EffectCondition(ConditionType.HealthIsFull)
+    .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
 Deal damage only when target has a modifier "Flag"
 
 ```csharp
-AddRecipe("Flag");
-AddRecipe("InitDamage_EffectCondition_ContainsModifier")
-	.EffectCondition("Flag")
-	.Effect(new DamageEffect(5), EffectOn.Init);
+Add("Flag");
+Add("InitDamage_EffectCondition_ContainsModifier")
+    .EffectCondition("Flag")
+    .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
 Deal damage only when target is frozen
 
 ```csharp
-AddRecipe("InitDamage_EffectCondition_FreezeStatusEffect")
-	.EffectCondition(StatusEffectType.Freeze)
-	.Effect(new DamageEffect(5), EffectOn.Init);
+Add("InitDamage_EffectCondition_FreezeStatusEffect")
+    .EffectCondition(StatusEffectType.Freeze)
+    .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
 Deal damage only when target can act (move, attack, cast, etc)
 
 ```csharp
-AddRecipe("InitDamage_EffectCondition_ActLegalAction")
-	.EffectCondition(LegalAction.Act)
-	.Effect(new DamageEffect(5), EffectOn.Init);
+Add("InitDamage_EffectCondition_ActLegalAction")
+    .EffectCondition(LegalAction.Act)
+    .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
 Can deal damage once every 1 second (cooldown)
 
 ```csharp
-AddRecipe("InitDamage_Cooldown")
-	.ApplyCooldown(1)
-	.Effect(new DamageEffect(5), EffectOn.Init);
+Add("InitDamage_Cooldown")
+    .ApplyCooldown(1)
+    .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
 Costs health to deal damage, can't be activated if health is below the cost
 
 ```csharp
-AddRecipe("InitDamage_CostHealth")
-	.ApplyCost(CostType.Health, 5)
-	.Effect(new DamageEffect(5), EffectOn.Init);
+Add("InitDamage_CostHealth")
+    .ApplyCost(CostType.Health, 5)
+    .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
 Same as above, but with mana
 
 ```csharp
-AddRecipe("InitDamage_CostMana")
-	.ApplyCost(CostType.Mana, 5)
-	.Effect(new DamageEffect(5), EffectOn.Init);
+Add("InitDamage_CostMana")
+    .ApplyCost(CostType.Mana, 5)
+    .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
 ## Event Recipes
@@ -294,7 +294,7 @@ Add("ThornsOnHitEvent")
 Add damage on kill
 
 ```csharp
-AddEvent("AddDamage_OnKill_Event")
+Add("AddDamage_OnKill_Event")
     .Effect(new AddDamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
     .Event(EffectOnEvent.OnKill);
 ```
@@ -302,7 +302,7 @@ AddEvent("AddDamage_OnKill_Event")
 Damage attacker on death
 
 ```csharp
-AddEvent("Damage_OnDeath_Event")
+Add("Damage_OnDeath_Event")
     .Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
     .Event(EffectOnEvent.WhenKilled);
 ```
@@ -310,7 +310,7 @@ AddEvent("Damage_OnDeath_Event")
 Attack self when attacked
 
 ```csharp
-AddEvent("AttackSelf_OnHit_Event")
+Add("AttackSelf_OnHit_Event")
     .Effect(new SelfAttackActionEffect(), EffectOn.Event)
     .Event(EffectOnEvent.WhenAttacked);
 ```
@@ -319,11 +319,11 @@ When attacked, add damage to all attackers, for 1 second (refreshes)
 
 ```csharp
 Add("AddDamage")
-	.OneTimeInit()
-	.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
-	.Remove(1).Refresh();
-AddEventRecipe("AddDamageToAllAttackers_OnHit_Event")
-	.Effect(new ApplierEffect("AddDamage", targeting: Targeting.SourceTarget), EffectOn.Event)
+    .OneTimeInit()
+    .Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
+    .Remove(1).Refresh();
+Add("AddDamageToAllAttackers_OnHit_Event")
+    .Effect(new ApplierEffect("AddDamage", targeting: Targeting.SourceTarget), EffectOn.Event)
     .Event(EffectOnEvent.WhenAttacked);
 ```
 
@@ -376,30 +376,30 @@ Add("AddDamageAbove5RemoveDamageBelow5React")
 Apply a sleep status effect, remove and revert it after taking 10 total damage. Reacts to health changes.
 
 ```csharp
-AddRecipe("InitStatusEffectSleep_RemoveOnTenDamageTaken")
-	.Effect(new StatusEffectEffect(StatusEffectType.Sleep, 5f, true), EffectOn.Init)
-	.Remove(RemoveEffectOn.CallbackEffect)
-	.CallbackEffect(CallbackType.CurrentHealthChanged, removeEffect =>
-	{
-		float totalDamageTaken = 0f;
-		return new HealthChangedEvent((target, source, health, deltaHealth) =>
-		{
-			//Don't count "negative damage/healing damage"
-			if (deltaHealth > 0)
-				totalDamageTaken += deltaHealth;
-			if (totalDamageTaken >= 10)
-			{
-				totalDamageTaken = 0f;
-				removeEffect.Effect(target, source);
-			}
-		});
-	});
+Add("InitStatusEffectSleep_RemoveOnTenDamageTaken")
+    .Effect(new StatusEffectEffect(StatusEffectType.Sleep, 5f, true), EffectOn.Init)
+    .Remove(RemoveEffectOn.CallbackEffect)
+    .CallbackEffect(CallbackType.CurrentHealthChanged, removeEffect =>
+    {
+        float totalDamageTaken = 0f;
+        return new HealthChangedEvent((target, source, health, deltaHealth) =>
+        {
+            //Don't count "negative damage/healing damage"
+            if (deltaHealth > 0)
+                totalDamageTaken += deltaHealth;
+            if (totalDamageTaken >= 10)
+            {
+                totalDamageTaken = 0f;
+                removeEffect.Effect(target, source);
+            }
+        });
+    });
 ```
 
 Apply a sleep status effect, remove and revert it on a basic dispel.
 
 ```csharp
-AddRecipe("InitStatusEffectSleep_RemoveOnDispel")
+Add("InitStatusEffectSleep_RemoveOnDispel")
     .Tag(TagType.BasicDispel)
     .Effect(new StatusEffectEffect(StatusEffectType.Sleep, 5f, true), EffectOn.Init)
     .Remove(RemoveEffectOn.CallbackEffect)
@@ -416,31 +416,31 @@ AddRecipe("InitStatusEffectSleep_RemoveOnDispel")
 Add damage, remove after 2 seconds, refresh on strong hit
 
 ```csharp
-AddRecipe("DurationAddDamageStrongHitRefresh")
-	.Effect(new AddDamageEffect(5), EffectOn.Duration)
-	.ModifierAction(ModifierAction.Refresh, EffectOn.CallbackUnit)
-	.CallbackUnit(CallbackUnitType.StrongHit)
-	.Duration(2).Refresh();
+Add("DurationAddDamageStrongHitRefresh")
+    .Effect(new AddDamageEffect(5), EffectOn.Duration)
+    .ModifierAction(ModifierAction.Refresh, EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.StrongHit)
+    .Duration(2).Refresh();
 ```
 
 Add damage every 2 stacks, remove all stacks on strong hit
 
 ```csharp
-AddRecipe("StackAddDamageStrongHitResetStacks")
-	.Effect(new AddDamageEffect(5), EffectOn.Stack)
-	.ModifierAction(ModifierAction.ResetStacks, EffectOn.CallbackUnit)
-	.CallbackUnit(CallbackUnitType.StrongHit)
-	.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2);
+Add("StackAddDamageStrongHitResetStacks")
+    .Effect(new AddDamageEffect(5), EffectOn.Stack)
+    .ModifierAction(ModifierAction.ResetStacks, EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.StrongHit)
+    .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 2);
 ```
 
 Add damage every stack, each stack has a 5 second independent timer, reset all stacks on strong hit
 
 ```csharp
-AddRecipe("AddDamageStackTimerResetStacks")
-	.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Stack)
-	.ModifierAction(ModifierAction.ResetStacks, EffectOn.CallbackUnit)
-	.CallbackUnit(CallbackUnitType.StrongHit)
-	.Stack(WhenStackEffect.Always, independentStackTime: 5);
+Add("AddDamageStackTimerResetStacks")
+    .Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Stack)
+    .ModifierAction(ModifierAction.ResetStacks, EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.StrongHit)
+    .Stack(WhenStackEffect.Always, independentStackTime: 5);
 ```
 
 ## Advanced Recipes
@@ -462,35 +462,35 @@ Add("Poison")
 When poison damage ticks, heal based off the poison stacks
 
 ```csharp
-AddRecipe("HealPerPoisonStack")
-	.Effect(new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1),
-		EffectOn.CallbackEffect)
-	.CallbackEffect(CallbackType.PoisonDamage, effect =>
-		new PoisonEvent((target, source, stacks, totalStacks, damage) =>
-		{
-			((IStackEffect)effect).StackEffect(stacks, target, source);
-		}));
+Add("HealPerPoisonStack")
+    .Effect(new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1),
+        EffectOn.CallbackEffect)
+    .CallbackEffect(CallbackType.PoisonDamage, effect =>
+        new PoisonEvent((target, source, stacks, totalStacks, damage) =>
+        {
+            ((IStackEffect)effect).StackEffect(stacks, target, source);
+        }));
 ```
 
 Apply poison to target, then heal self based on poison stacks
 
 ```csharp
-AddRecipe("PoisonHealHeal")
-	.Stack(WhenStackEffect.Always)
-	.Effect(new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1)
-		.SetMetaEffects(new AddValueBasedOnPoisonStacksMetaEffect(1f)), EffectOn.Stack);
+Add("PoisonHealHeal")
+    .Stack(WhenStackEffect.Always)
+    .Effect(new HealEffect(0, false, StackEffectType.Effect | StackEffectType.SetStacksBased, 1)
+        .SetMetaEffects(new AddValueBasedOnPoisonStacksMetaEffect(1f)), EffectOn.Stack);
 AddEffect("PoisonHeal",
-	new ApplierEffect("Poison"),
-	new ApplierEffect("PoisonHealHeal", Targeting.SourceTarget));
+    new ApplierEffect("Poison"),
+    new ApplierEffect("PoisonHealHeal", Targeting.SourceTarget));
 ```
 
 When poison damage ticks, deal damage to all attackers that applied poison to us
 
 ```csharp
-AddRecipe("PoisonThorns")
-	.Callback(new Callback<CallbackType>(CallbackType.PoisonDamage,
-		new PoisonEvent((target, source, stacks, totalStacks, damage) =>
-		{
-			((IDamagable<float, float, float, float>)source).TakeDamage(damage, target);
-		})));
+Add("PoisonThorns")
+    .Callback(new Callback<CallbackType>(CallbackType.PoisonDamage,
+        new PoisonEvent((target, source, stacks, totalStacks, damage) =>
+        {
+            ((IDamagable<float, float, float, float>)source).TakeDamage(damage, target);
+        })));
 ```
