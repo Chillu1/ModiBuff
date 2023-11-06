@@ -419,13 +419,17 @@ namespace ModiBuff.Core
 		{
 			string initialMessage = $"[ModiBuff] ModifierAction set to {modifierAction}, and effectOn to {effectOn}. ";
 
-			if (modifierAction == Core.ModifierAction.Refresh && effectOn == EffectOn.Init)
+			if (modifierAction.HasFlag(Core.ModifierAction.Refresh) && effectOn == EffectOn.Init)
 				Logger.LogError(initialMessage +
 				                "Time components always get refreshed on init (if refreshable), no need to add a modifier action for it");
 
-			if (modifierAction == Core.ModifierAction.ResetStacks && effectOn == EffectOn.Init)
+			if (modifierAction.HasFlag(Core.ModifierAction.ResetStacks) && effectOn == EffectOn.Init)
 				Logger.LogError(initialMessage +
 				                "Stack component will always reset on init, removing the purpose of it, use init effects instead");
+
+			if (modifierAction.HasFlag(Core.ModifierAction.Stack) && effectOn == EffectOn.Init)
+				Logger.LogError(initialMessage +
+				                "Stack component will always stack on init, unless you want to stack twice");
 		}
 
 		private void Validate()

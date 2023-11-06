@@ -304,7 +304,7 @@ namespace ModiBuff.Core
 			_modifiers[_modifiersTop++] = modifier;
 			if (tag.HasTag(TagType.IsInit))
 				modifier.Init();
-			if (tag.HasTag(TagType.IsStack))
+			if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.ZeroDefaultStacks))
 				modifier.Stack();
 		}
 
@@ -334,7 +334,9 @@ namespace ModiBuff.Core
 
 		public void ModifierAction(int id, int genId, ModifierAction action)
 		{
+#if DEBUG && !MODIBUFF_PROFILE
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);
+#endif
 			var modifier = GetModifier(id, genId);
 
 			if (modifier == null)
@@ -346,26 +348,34 @@ namespace ModiBuff.Core
 				return;
 			}
 
-			switch (action)
+			if ((action & Core.ModifierAction.Refresh) != 0)
 			{
-				case Core.ModifierAction.Refresh:
 #if DEBUG && !MODIBUFF_PROFILE
-					if (!tag.HasTag(TagType.IsRefresh))
-						Logger.LogWarning("[ModiBuff] ModifierAction: Refresh was called on a " +
-						                  "modifier that doesn't have a refresh flag set");
+				if (!tag.HasTag(TagType.IsRefresh))
+					Logger.LogWarning("[ModiBuff] ModifierAction: Refresh was called on a " +
+					                  "modifier that doesn't have a refresh flag set");
 #endif
-					modifier.Refresh();
-					break;
-				case Core.ModifierAction.ResetStacks:
+				modifier.Refresh();
+			}
+
+			if ((action & Core.ModifierAction.ResetStacks) != 0)
+			{
 #if DEBUG && !MODIBUFF_PROFILE
-					if (!tag.HasTag(TagType.IsStack))
-						Logger.LogWarning("[ModiBuff] ModifierAction: ResetStacks was called on a " +
-						                  "modifier that doesn't have a stack flag set");
+				if (!tag.HasTag(TagType.IsStack))
+					Logger.LogWarning("[ModiBuff] ModifierAction: ResetStacks was called on a " +
+					                  "modifier that doesn't have a stack flag set");
 #endif
-					modifier.ResetStacks();
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(action), action, "Invalid modifier action");
+				modifier.ResetStacks();
+			}
+
+			if ((action & Core.ModifierAction.Stack) != 0)
+			{
+#if DEBUG && !MODIBUFF_PROFILE
+				if (!tag.HasTag(TagType.IsStack))
+					Logger.LogWarning("[ModiBuff] ModifierAction: Stack was called on a " +
+					                  "modifier that doesn't have a stack flag set");
+#endif
+				modifier.Stack();
 			}
 		}
 

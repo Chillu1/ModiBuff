@@ -494,3 +494,25 @@ Add("PoisonThorns")
             ((IDamagable<float, float, float, float>)source).TakeDamage(damage, target);
         })));
 ```
+
+### Advanced Callbacks
+
+Every time we're stunned, add value to heal, and trigger heal effect.
+After 10 seconds, reset the heal stacks. If we're stunned in those 10 seconds, refresh the timer.
+
+```csharp
+Add("StunHealStackReset")
+    .Tag(Core.TagType.ZeroDefaultStacks)
+    .Stack(WhenStackEffect.Always)
+    .Effect(new HealEffect(0, HealEffect.EffectState.ValueIsRevertible,
+        StackEffectType.Effect | StackEffectType.Add, 5), EffectOn.Stack)
+    .CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+        new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+        {
+            if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+                effect.Effect(target, source);
+        }))
+    .ModifierAction(ModifierAction.ResetStacks, EffectOn.Interval)
+    .ModifierAction(ModifierAction.Refresh | ModifierAction.Stack, EffectOn.CallbackEffect)
+    .Interval(10).Refresh();
+```

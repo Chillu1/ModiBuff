@@ -330,16 +330,32 @@ namespace ModiBuff.Tests
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
 		}
 
-		//[Test]//TODO
+		[Test]
 		public void StunStackingHeal_IntervalStackReset_RefreshIntervalOnStun()
 		{
+			//TODO If we add the modifier again, it will trigger the stack effect, which we don't want
+			//Stack redirection version
 			AddRecipe("StunHealStackReset")
-				.Stack(WhenStackEffect.OnMaxStacks, 10000) //<Rethink
-				//We want a partial revert here, don't revert the effect (heal), but revert the added damage
+				.Tag(Core.TagType.ZeroDefaultStacks)
+				.Stack(WhenStackEffect.Always)
+				.Effect(new HealEffect(0, HealEffect.EffectState.ValueIsRevertible,
+					StackEffectType.Effect | StackEffectType.Add, 5), EffectOn.Stack)
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+					new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+							effect.Effect(target, source);
+					}))
+				.ModifierAction(ModifierAction.ResetStacks, EffectOn.Interval)
+				.ModifierAction(ModifierAction.Refresh | ModifierAction.Stack, EffectOn.CallbackEffect)
+				.Interval(10).Refresh();
+			//Non-stack version
+			/*AddRecipe("StunHealStackReset")
+				.Tag(Core.TagType.ZeroDefaultStacks)
+				.Stack(WhenStackEffect.OnMaxStacks, 10000)
 				.Effect(
 					new HealEffect(0, HealEffect.EffectState.ValueIsRevertible,
-						StackEffectType.Effect | StackEffectType.Add, 5),
-					EffectOn.Stack | EffectOn.CallbackEffect)
+						StackEffectType.Effect | StackEffectType.Add, 5), EffectOn.Stack | EffectOn.CallbackEffect)
 				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
 					new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
 					{
@@ -352,8 +368,8 @@ namespace ModiBuff.Tests
 						}
 					}))
 				.ModifierAction(ModifierAction.ResetStacks, EffectOn.Interval)
-				.ModifierAction(ModifierAction.Refresh, EffectOn.CallbackEffect)
-				.Interval(10).Refresh();
+				.ModifierAction(ModifierAction.Refresh | ModifierAction.Stack, EffectOn.CallbackEffect)
+				.Interval(10).Refresh();*/
 			Setup();
 
 			Unit.TakeDamage(UnitHealth / 2f, Unit);
@@ -371,7 +387,6 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth / 2f + 5 + 10 + 15, Unit.Health);
 
 			Unit.Update(10); //Resets stacks
-			//Doesn't fully revert all stacks, because stackComponent only has one stack (we're using the stack effect indirectly)
 			Unit.StatusEffectController.ChangeStatusEffect(0, 2, StatusEffectType.Stun, 5f, Unit);
 			Assert.AreEqual(UnitHealth / 2f + 5 + 10 + 15 + 5, Unit.Health);
 

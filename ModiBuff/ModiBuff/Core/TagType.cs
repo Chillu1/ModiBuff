@@ -23,8 +23,12 @@ namespace ModiBuff.Core
 
 		//Most likely need to reserve around 8-16 bits, or split internal and user tagging
 		//Will be decided/fixed on 1.0 release
-		Reserved1 = 1ul << 6,
-		Reserved2 = Reserved1 << 1,
+
+		/// <summary>
+		///		One stack is always added and triggered on init, this tag nullifies that.
+		/// </summary>
+		ZeroDefaultStacks = 1ul << 6,
+		Reserved2 = ZeroDefaultStacks << 1,
 		Reserved3 = Reserved2 << 1,
 		Reserved4 = Reserved3 << 1,
 		Reserved5 = Reserved4 << 1,
