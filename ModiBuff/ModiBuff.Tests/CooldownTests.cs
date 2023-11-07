@@ -68,35 +68,71 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
 		}
 
-		//[Test]
-		public void InitDamage_CooldownLowerWhenStunned()
+		//TODO To recipe, we could hold the state inside ModifierCheck, and feed it to our checks?
+		//This way our checks don't need to hold mutable state, and the state can be managed outside.
+		[Test]
+		public void InitDamage_CooldownLowerWhenStunned_Manual()
 		{
-			AddRecipe("InitDamage_Cooldown")
-				.ApplyCooldown(1)
-				.Effect(new DamageEffect(5), EffectOn.Init)
-				.Callback(new Callback<CallbackType>(CallbackType.StatusEffectAdded,
-					new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
-					{
-						if (!appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+			AddGenerator("InitDamage_Cooldown", (id, genId, name, tag) =>
+			{
+				var cooldownCheck = new CooldownCheck(1);
+				var check = new ModifierCheck(id, null, new IUpdatableCheck[] { cooldownCheck },
+					new INoUnitCheck[] { cooldownCheck }, null, null, new IStateCheck[] { cooldownCheck });
+
+				bool multiplierApplied = false;
+				var callback = new CallbackRegisterEffect<CallbackType>(
+					new Callback<CallbackType>(CallbackType.StatusEffectAdded, new StatusEffectEvent(
+						(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
 						{
-							//target.SetCooldownReduction(0.5f);
-						}
-					})));
+							if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun) && !multiplierApplied)
+							{
+								multiplierApplied = true;
+								cooldownCheck.SetMultiplier(2f);
+							}
+						})),
+					new Callback<CallbackType>(CallbackType.StatusEffectRemoved, new StatusEffectEvent(
+						(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+						{
+							if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun) && multiplierApplied)
+							{
+								multiplierApplied = false;
+								cooldownCheck.SetMultiplier(1f);
+							}
+						})
+					)
+				);
+
+				var damageEffect = new DamageEffect(5);
+				var initComponent = new InitComponent(false, new IEffect[] { callback, damageEffect }, check);
+
+				return new Modifier(id, genId, name, initComponent, null, null, check, new SingleTargetComponent(),
+					null);
+			});
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_Cooldown"), ApplierType.Attack);
-
-			Unit.Attack(Enemy);
-
-			Assert.AreEqual(EnemyHealth - UnitDamage - 5, Enemy.Health);
-
-			// 1 second cooldown
-			Unit.Attack(Enemy);
-			Assert.AreEqual(EnemyHealth - UnitDamage * 2 - 5, Enemy.Health);
+			Unit.AddModifierSelf("InitDamage_Cooldown"); // 1 second cooldown
+			Unit.AddModifierSelf("InitDamage_Cooldown");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
 			Unit.Update(1); //Cooldown gone
-			Unit.Attack(Enemy);
-			Assert.AreEqual(EnemyHealth - UnitDamage * 3 - 5 * 2, Enemy.Health);
+			Unit.AddModifierSelf("InitDamage_Cooldown");
+			Assert.AreEqual(UnitHealth - 5 * 2, Unit.Health);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Stun, 1f, Unit); //Multiplier = 2
+			Unit.Update(0.5f); //Cooldown gone
+
+			Unit.AddModifierSelf("InitDamage_Cooldown");
+			Assert.AreEqual(UnitHealth - 5 * 3, Unit.Health);
+
+			for (int i = 0; i < 11; i++)
+				Unit.Update(0.05f);
+			//Stun gone => Multiplier = 1
+			Unit.AddModifierSelf("InitDamage_Cooldown");
+			Assert.AreEqual(UnitHealth - 5 * 4, Unit.Health);
+
+			Unit.Update(1f);
+			Unit.AddModifierSelf("InitDamage_Cooldown");
+			Assert.AreEqual(UnitHealth - 5 * 5, Unit.Health);
 		}
 	}
 }

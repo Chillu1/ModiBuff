@@ -7,10 +7,12 @@ namespace ModiBuff.Core.Units
 		private readonly float _cooldown;
 
 		private float _timer;
+		private float _multiplier;
 
 		public CooldownCheck(float cooldown)
 		{
 			_cooldown = cooldown;
+			_multiplier = 1;
 		}
 
 		public void Update(float deltaTime)
@@ -18,8 +20,10 @@ namespace ModiBuff.Core.Units
 			if (_timer <= 0)
 				return;
 
-			_timer -= deltaTime;
+			_timer -= deltaTime * _multiplier;
 		}
+
+		public void SetMultiplier(float multiplier) => _multiplier = multiplier;
 
 		public bool Check() => _timer <= 0;
 
@@ -36,6 +40,7 @@ namespace ModiBuff.Core.Units
 		public void ResetState()
 		{
 			_timer = 0;
+			_multiplier = 1;
 		}
 
 		public CooldownCheck ShallowClone() => new CooldownCheck(_cooldown);

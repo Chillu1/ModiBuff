@@ -69,6 +69,12 @@ namespace ModiBuff.Tests
 			unit.TryCastEffect(EffectIdManager.GetIdOld(name), target);
 		}
 
+		internal static void ChangeStatusEffect(this IStatusEffectOwner<LegalAction, StatusEffectType> owner,
+			StatusEffectType statusEffect, float duration, IUnit source)
+		{
+			owner.StatusEffectController.ChangeStatusEffect(1000, 1000, statusEffect, duration, source);
+		}
+
 		internal static float AttackN(this IAttacker<float, float> unit, IUnit target, int n)
 		{
 			float totalDamage = 0;

@@ -101,5 +101,24 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 		}
+
+		[Test]
+		public void CostSixtyPercentHealth_Damage()
+		{
+			AddRecipe("InitDamage_CostSixtyPercentHealth")
+				.ApplyCostPercent(CostType.Health, 0.6f)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
+
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostSixtyPercentHealth"), ApplierType.Cast);
+
+			Unit.TryCast("InitDamage_CostSixtyPercentHealth", Enemy);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+			Assert.AreEqual(UnitHealth - UnitHealth * 0.6f, Unit.Health);
+
+			Unit.TryCast("InitDamage_CostSixtyPercentHealth", Enemy);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+			Assert.AreEqual(UnitHealth - UnitHealth * 0.6f, Unit.Health);
+		}
 	}
 }

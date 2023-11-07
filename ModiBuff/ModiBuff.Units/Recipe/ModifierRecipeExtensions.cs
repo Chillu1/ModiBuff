@@ -68,6 +68,11 @@ namespace ModiBuff.Core.Units
 			return recipe.ApplyCheck(new CostCheck(costType, cost));
 		}
 
+		public static ModifierRecipe ApplyCostPercent(this ModifierRecipe recipe, CostType costType, float costPercent)
+		{
+			return recipe.ApplyCheck(new CostPercentCheck(costType, costPercent));
+		}
+
 		public static ModifierRecipe EffectCondition(this ModifierRecipe recipe, ConditionType conditionType)
 		{
 			return recipe.EffectCheck(unit => conditionType.CheckConditionType(unit));

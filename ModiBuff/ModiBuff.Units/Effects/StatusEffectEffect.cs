@@ -1,10 +1,9 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class StatusEffectEffect : IMutableStateEffect, IStackEffect, IRevertEffect, IEffect,
+	public sealed class StatusEffectEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect,
 		IModifierIdOwner, IModifierGenIdOwner, IModifierStateInfo<StatusEffectEffect.Data>
 	{
 		public bool IsRevertible { get; }
-		public bool UsesMutableState => IsRevertible || _stackEffect.UsesMutableState();
 
 		private readonly StatusEffectType _statusEffectType;
 		private readonly float _duration;

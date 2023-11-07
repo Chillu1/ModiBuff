@@ -23,7 +23,6 @@ namespace ModiBuff.Core.Units
 		private readonly Dictionary<StatusEffectInstance, float> _legalActionsTimers;
 		private readonly List<StatusEffectInstance> _stackEffectInstancesForRemoval;
 
-
 		//Reference counting of how many timers are active for each legal action type
 		private readonly int[] _legalActionTypeCounters;
 
@@ -75,6 +74,7 @@ namespace ModiBuff.Core.Units
 			{
 				var statusEffectInstance = _stackEffectInstancesForRemoval[i];
 				_legalActionsTimers.Remove(statusEffectInstance);
+				//TODO, we might remove a status effect type, but not all, so we shouldn't send that one as if it was removed 
 				CallRemoveEvents((StatusEffectType)statusEffectInstance.StatusEffectTypeInt, oldLegalActions, _owner);
 			}
 
@@ -144,10 +144,8 @@ namespace ModiBuff.Core.Units
 			//Check if all of them are bigger than 0
 			for (int i = 0; i < legalActions.Length; i++)
 			{
-				if ((_legalActions & legalActions[i]) == 0)
-					continue;
-
-				return false;
+				if ((_legalActions & legalActions[i]) != 0)
+					return false;
 			}
 
 			return true;
