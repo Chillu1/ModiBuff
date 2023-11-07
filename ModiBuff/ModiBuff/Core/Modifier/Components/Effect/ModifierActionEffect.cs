@@ -1,7 +1,7 @@
 namespace ModiBuff.Core
 {
 	public sealed class ModifierActionEffect : IModifierGenIdOwner, IModifierIdOwner, IEffect,
-		IStackEffect, IShallowClone<IEffect>
+		IStackEffect, ICallbackEffect, IShallowClone<IEffect>
 	{
 		private readonly ModifierAction _modifierAction;
 
@@ -47,11 +47,8 @@ namespace ModiBuff.Core
 			((IModifierOwner)target).ModifierController.ModifierAction(_id, _genId, _modifierAction);
 		}
 
-		public void StackEffect(int stacks, IUnit target, IUnit source)
-		{
-			//ModifierActionEffect can't have different ways of using stacks/value
-			Effect(target, source);
-		}
+		public void StackEffect(int stacks, IUnit target, IUnit source) => Effect(target, source);
+		public void CallbackEffect(IUnit target, IUnit source) => Effect(target, source);
 
 		public IEffect ShallowClone() => new ModifierActionEffect(_modifierAction, _id);
 		object IShallowClone.ShallowClone() => ShallowClone();

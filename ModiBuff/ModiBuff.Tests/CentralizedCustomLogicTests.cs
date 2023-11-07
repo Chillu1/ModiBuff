@@ -28,33 +28,36 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - 5 - 5 * 2, Enemy.Health);
 		}
 
-		[Test]
-		public void HealBasedOnPoisonStacksEvent()
+		private static readonly RecipeAddFunc[] healBasedOnPoisonStacksEventRecipes =
 		{
-			AddRecipe(_poisonRecipe);
-			AddRecipe("HealPerPoisonStack")
-				.Effect(
-					new HealEffect(0, HealEffect.EffectState.None,
-						StackEffectType.Effect | StackEffectType.SetStacksBased, 1),
-					EffectOn.CallbackEffect)
+			add => add("HealPerPoisonStack")
+				.Effect(new HealEffect(0, HealEffect.EffectState.None,
+					StackEffectType.Effect | StackEffectType.SetStacksBased, 1), EffectOn.CallbackEffect)
 				.CallbackEffect(CallbackType.PoisonDamage, effect =>
 					new PoisonEvent((target, source, stacks, totalStacks, damage) =>
 					{
 						//Kind of a stacks hack rn, by using stack effect in callbacks
 						((IStackEffect)effect).StackEffect(stacks, target, source);
-					}));
+					})),
 			//ModifierAction.Stack version
-			// AddRecipe("HealPerPoisonStack")
-			// 	.Tag(TagType.ZeroDefaultStacks)
-			// 	.Stack(WhenStackEffect.Always)
-			// 	.Effect(new HealEffect(0, HealEffect.EffectState.None,
-			// 		StackEffectType.Effect | StackEffectType.SetStacksBased, 1), EffectOn.Stack)
-			// 	.CallbackEffect(CallbackType.PoisonDamage, effect =>
-			// 		new PoisonEvent((target, source, stacks, totalStacks, damage) =>
-			// 		{
-			// 			effect.Effect(target, source);
-			// 		}))
-			// 	.ModifierAction(ModifierAction.Stack, EffectOn.CallbackEffect);
+			add => add("HealPerPoisonStack")
+				.Tag(Core.TagType.ZeroDefaultStacks)
+				.Stack(WhenStackEffect.Always)
+				.Effect(new HealEffect(0, HealEffect.EffectState.None,
+					StackEffectType.Effect | StackEffectType.SetStacksBased, 1), EffectOn.Stack)
+				.CallbackEffect(CallbackType.PoisonDamage, effect =>
+					new PoisonEvent((target, source, stacks, totalStacks, damage) =>
+					{
+						effect.Effect(target, source);
+					}))
+				.ModifierAction(ModifierAction.Stack, EffectOn.CallbackEffect)
+		};
+
+		[TestCaseSource(nameof(healBasedOnPoisonStacksEventRecipes))]
+		public void HealBasedOnPoisonStacksEvent(RecipeAddFunc recipe)
+		{
+			AddRecipe(_poisonRecipe);
+			AddRecipe(recipe);
 			Setup();
 
 			Enemy.AddModifierSelf("HealPerPoisonStack");

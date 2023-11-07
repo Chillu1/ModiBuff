@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class HealEffect : IMutableStateEffect, IStackEffect, IRevertEffect, IEffect,
+	public sealed class HealEffect : IMutableStateEffect, IStackEffect, IRevertEffect, IEffect, ICallbackEffect,
 		IStackRevertEffect, IMetaEffectOwner<HealEffect, float, float>, IPostEffectOwner<HealEffect, float>,
 		IModifierStateInfo<HealEffect.Data>
 	{
@@ -106,6 +106,18 @@ namespace ModiBuff.Core.Units
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
 				_extraHeal += _stackValue * stacks;
+
+			if ((_stackEffect & StackEffectType.Effect) != 0)
+				Effect(target, source);
+		}
+
+		public void CallbackEffect(IUnit target, IUnit source)
+		{
+			if ((_stackEffect & StackEffectType.Set) != 0)
+				_extraHeal = _stackValue;
+
+			if ((_stackEffect & StackEffectType.Add) != 0)
+				_extraHeal += _stackValue;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
