@@ -43,6 +43,18 @@ namespace ModiBuff.Tests
 						//Kind of a stacks hack rn, by using stack effect in callbacks
 						((IStackEffect)effect).StackEffect(stacks, target, source);
 					}));
+			//ModifierAction.Stack version
+			// AddRecipe("HealPerPoisonStack")
+			// 	.Tag(TagType.ZeroDefaultStacks)
+			// 	.Stack(WhenStackEffect.Always)
+			// 	.Effect(new HealEffect(0, HealEffect.EffectState.None,
+			// 		StackEffectType.Effect | StackEffectType.SetStacksBased, 1), EffectOn.Stack)
+			// 	.CallbackEffect(CallbackType.PoisonDamage, effect =>
+			// 		new PoisonEvent((target, source, stacks, totalStacks, damage) =>
+			// 		{
+			// 			effect.Effect(target, source);
+			// 		}))
+			// 	.ModifierAction(ModifierAction.Stack, EffectOn.CallbackEffect);
 			Setup();
 
 			Enemy.AddModifierSelf("HealPerPoisonStack");

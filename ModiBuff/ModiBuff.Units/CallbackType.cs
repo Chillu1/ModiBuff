@@ -8,5 +8,6 @@ namespace ModiBuff.Core.Units
 		DamageChanged,
 		StrongHit,
 		StatusEffectAdded,
+		StatusEffectRemoved,
 	}
 }

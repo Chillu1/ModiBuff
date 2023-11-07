@@ -393,5 +393,83 @@ namespace ModiBuff.Tests
 			Unit.StatusEffectController.ChangeStatusEffect(0, 2, StatusEffectType.Stun, 5f, Unit);
 			Assert.AreEqual(UnitHealth / 2f + 5 + 10 + 15 + 5 + 10, Unit.Health);
 		}
+
+		[Test]
+		public void SilenceSourceWhenSilenced()
+		{
+			AddRecipe("Silence")
+				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 5), EffectOn.Init);
+			AddRecipe("SilenceSourceWhenSilenced")
+				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2f), EffectOn.CallbackEffect)
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+					new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Silence))
+							effect.Effect(source, target);
+					}));
+			Setup();
+
+			Unit.AddModifierSelf("SilenceSourceWhenSilenced");
+			Enemy.AddApplierModifier(Recipes.GetGenerator("Silence"), ApplierType.Cast);
+			Enemy.TryCast("Silence", Unit);
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Silence));
+			Assert.True(Enemy.StatusEffectController.HasStatusEffect(StatusEffectType.Silence));
+
+			Unit.Update(2);
+			Enemy.Update(2);
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Silence));
+			Assert.False(Enemy.StatusEffectController.HasStatusEffect(StatusEffectType.Silence));
+
+			Unit.Update(3);
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Silence));
+		}
+
+		[Test]
+		public void StunnedFourTimes_DispelAllStatusEffects()
+		{
+			AddRecipe("Freeze")
+				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 5), EffectOn.Init);
+			AddRecipe("StunnedFourTimesDispelAllStatusEffects")
+				.Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.CallbackEffect)
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+				{
+					float totalTimesStunned = 0f;
+					return new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+						{
+							totalTimesStunned++;
+							if (totalTimesStunned >= 4)
+							{
+								totalTimesStunned = 0f;
+								effect.Effect(target, source);
+							}
+						}
+					});
+				});
+			//Stack version
+			// AddRecipe("StunnedFourTimesDispelAllStatusEffects")
+			// 	.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
+			// 	.Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.Stack)
+			// 	.ModifierAction(ModifierAction.Stack, EffectOn.CallbackEffect)
+			// 	.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+			// 		new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
+			// 		{
+			// 			if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+			// 				effect.Effect(target, source);
+			// 		}));
+			Setup();
+
+			Unit.AddModifierSelf("StunnedFourTimesDispelAllStatusEffects");
+			Unit.AddModifierSelf("Freeze"); //Different effect to dispel
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Freeze));
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+
+			for (int i = 0; i < 4; i++)
+				Unit.StatusEffectController.ChangeStatusEffect(0, 0, StatusEffectType.Stun, 5f, Unit);
+
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Freeze));
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+		}
 	}
 }

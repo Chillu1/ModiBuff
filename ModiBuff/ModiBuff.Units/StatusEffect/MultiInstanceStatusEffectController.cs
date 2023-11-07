@@ -81,6 +81,59 @@ namespace ModiBuff.Core.Units
 			_stackEffectInstancesForRemoval.Clear();
 		}
 
+		public void DispelStatusEffect(StatusEffectType statusEffectType, IUnit source)
+		{
+			var oldLegalActions = _legalActions;
+			//Remove all instances of the status effect type
+			foreach (var kvp in _legalActionsTimers)
+			{
+				//Do we want to dispel status effect combinations as well?
+				//if ((kvp.Key.StatusEffectTypeInt & (int)statusEffectType) == 0)
+				if (kvp.Key.StatusEffectTypeInt != (int)statusEffectType)
+					continue;
+
+				_stackEffectInstancesForRemoval.Add(kvp.Key);
+				var legalActions = StatusEffectTypeHelper.LegalActions[kvp.Key.StatusEffectTypeInt];
+				for (int i = 0; i < legalActions.Length; i++)
+				{
+					var legalAction = legalActions[i];
+					int legalActionIndex = StatusEffectTypeHelper.LegalActionToIndex[(int)legalAction];
+					int counter = --_legalActionTypeCounters[legalActionIndex];
+					if (counter <= 0)
+						_legalActions |= legalAction; //No more references, set the legal action to true
+				}
+
+				_legalActionsTimers[kvp.Key] = 0;
+			}
+
+			int count = _stackEffectInstancesForRemoval.Count;
+			if (count <= 0)
+				return;
+
+			for (int i = 0; i < count; i++)
+				_legalActionsTimers.Remove(_stackEffectInstancesForRemoval[i]);
+
+			_stackEffectInstancesForRemoval.Clear();
+			CallRemoveEvents(statusEffectType, oldLegalActions, source);
+		}
+
+		public void DispelAll(IUnit source)
+		{
+			var oldLegalActions = _legalActions;
+			var statusEffectTypesDispelled = StatusEffectType.None;
+			foreach (var kvp in _legalActionsTimers)
+			{
+				statusEffectTypesDispelled |= (StatusEffectType)kvp.Key.StatusEffectTypeInt;
+				_legalActionsTimers[kvp.Key] = 0;
+			}
+
+			for (int i = 0; i < _legalActionTypeCounters.Length; i++)
+				_legalActionTypeCounters[i] = 0;
+
+			_legalActions = LegalAction.All;
+			CallRemoveEvents(statusEffectTypesDispelled, oldLegalActions, source);
+		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool HasLegalAction(LegalAction legalAction) => (_legalActions & legalAction) != 0;
 
@@ -157,7 +210,7 @@ namespace ModiBuff.Core.Units
 			CallRemoveEvents(statusEffectType, oldLegalAction, source);
 		}
 
-		public void TriggerAddEvent(StatusEffectEvent @event) =>
+		public void TriggerEvent(StatusEffectEvent @event) =>
 			@event.Invoke(_owner, _owner, StatusEffectType.None, _legalActions, _legalActions);
 
 		private void CallAddEvents(StatusEffectType statusEffectType, LegalAction oldLegalAction, IUnit source)

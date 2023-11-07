@@ -172,7 +172,7 @@ damage).
 # Requirements
 
 ModiBuff is compatible with .NETStandard 1.1 and .NETStandard 2.0, C# 7.2 (C# 7.0 is also possible, take a look
-at [Godot Branch](https://github.com/Chillu1/ModiBuff/tree/feature/godot-compatible))
+at [Godot Branch](https://github.com/Chillu1/ModiBuff/tree/godot))
 
 For development net 6.0 is required to build and run all tests. The tests depend on NUnit, and benchmarks depend on
 BenchmarkDotNet.

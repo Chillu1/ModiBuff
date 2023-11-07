@@ -238,8 +238,16 @@ namespace ModiBuff.Core.Units
 					case CallbackType.StatusEffectAdded:
 						if (CheckCallback(callback.Action, out StatusEffectEvent statusEffectEvent))
 						{
-							StatusEffectController.TriggerAddEvent(statusEffectEvent);
+							_statusEffectController.TriggerEvent(statusEffectEvent);
 							_statusEffectAddedEvents.Add(statusEffectEvent);
+						}
+
+						break;
+					case CallbackType.StatusEffectRemoved:
+						if (CheckCallback(callback.Action, out StatusEffectEvent statusEffectRemovedEvent))
+						{
+							_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
+							_statusEffectRemovedEvents.Add(statusEffectRemovedEvent);
 						}
 
 						break;
@@ -274,8 +282,12 @@ namespace ModiBuff.Core.Units
 						_strongHitUnitCallbacks.Remove((UnitCallback)callback.Action);
 						break;
 					case CallbackType.StatusEffectAdded:
-						//TODO Need to trigger default event?
-						_statusEffectAddedEvents.Remove((StatusEffectEvent)callback.Action);
+						if (_statusEffectAddedEvents.Remove((StatusEffectEvent)callback.Action))
+							_statusEffectController.TriggerEvent((StatusEffectEvent)callback.Action);
+						break;
+					case CallbackType.StatusEffectRemoved:
+						if (_statusEffectRemovedEvents.Remove((StatusEffectEvent)callback.Action))
+							_statusEffectController.TriggerEvent((StatusEffectEvent)callback.Action);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();
@@ -318,8 +330,16 @@ namespace ModiBuff.Core.Units
 					case CallbackType.StatusEffectAdded:
 						if (CheckCallback(callback, out StatusEffectEvent statusEffectEvent))
 						{
-							StatusEffectController.TriggerAddEvent(statusEffectEvent);
+							_statusEffectController.TriggerEvent(statusEffectEvent);
 							_statusEffectAddedEvents.Add(statusEffectEvent);
+						}
+
+						break;
+					case CallbackType.StatusEffectRemoved:
+						if (CheckCallback(callback, out StatusEffectEvent statusEffectRemovedEvent))
+						{
+							_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
+							_statusEffectRemovedEvents.Add(statusEffectRemovedEvent);
 						}
 
 						break;
@@ -350,6 +370,14 @@ namespace ModiBuff.Core.Units
 					case CallbackType.DamageChanged:
 						if (_damageChangedEvents.Remove((DamageChangedEvent)callback))
 							((DamageChangedEvent)callback).Invoke(this, Damage, 0f);
+						break;
+					case CallbackType.StatusEffectAdded:
+						if (_statusEffectAddedEvents.Remove((StatusEffectEvent)callback))
+							_statusEffectController.TriggerEvent((StatusEffectEvent)callback);
+						break;
+					case CallbackType.StatusEffectRemoved:
+						if (_statusEffectRemovedEvents.Remove((StatusEffectEvent)callback))
+							_statusEffectController.TriggerEvent((StatusEffectEvent)callback);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);

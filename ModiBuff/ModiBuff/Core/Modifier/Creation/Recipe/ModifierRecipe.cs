@@ -335,9 +335,17 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Registers a callback register effect to a unit, will trigger all <see cref="EffectOn.CallbackUnit"/>
 		///		effects when <see cref="callbackType"/> is triggered.
+		///		Only ONE CallbackUnit can be registered per modifier.
 		/// </summary>
 		public ModifierRecipe CallbackUnit<TCallbackUnit>(TCallbackUnit callbackType)
 		{
+			if (_callbackUnitRegisterWrapper != null)
+			{
+				Logger.LogError("[ModiBuff] Multiple CallbackUnit effects registered, " +
+				                "only one is allowed per modifier, ignoring.");
+				return this;
+			}
+
 			var effect = new CallbackUnitRegisterEffect<TCallbackUnit>(callbackType);
 			_callbackUnitRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
 			_effectWrappers.Add(_callbackUnitRegisterWrapper);
@@ -368,10 +376,18 @@ namespace ModiBuff.Core
 		///		Special callbacks, all EffectOn.<see cref="EffectOn.CallbackEffect"/> effects will
 		///		trigger when <see cref="callbackType"/> is triggered.
 		///		Supports custom callback signatures (beside <see cref="UnitCallback"/>.
+		///		Only ONE CallbackEffect can be registered per modifier.
 		/// </summary>
 		public ModifierRecipe CallbackEffect<TCallbackEffect>(TCallbackEffect callbackType,
 			Func<IEffect, object> @event)
 		{
+			if (_callbackEffectRegisterWrapper != null)
+			{
+				Logger.LogError("[ModiBuff] Multiple CallbackEffect effects registered, " +
+				                "only one is allowed per modifier, ignoring.");
+				return this;
+			}
+
 			var effect = new CallbackEffectRegisterEffect<TCallbackEffect>(callbackType, @event);
 			_callbackEffectRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
 			_effectWrappers.Add(_callbackEffectRegisterWrapper);

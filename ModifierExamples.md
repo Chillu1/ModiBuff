@@ -358,6 +358,19 @@ Add("InitHealToFullHalfHealthCallback")
     .CallbackUnit(CallbackUnitType.StrongHit);
 ```
 
+Silence the source back when we're silenced
+
+```csharp
+AddRecipe("SilenceSourceWhenSilence")
+    .Effect(new StatusEffectEffect(StatusEffectType.Silence, 2f), EffectOn.CallbackEffect)
+    .CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+        new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+        {
+            if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Silence))
+                effect.Effect(source, target);
+        }));
+```
+
 Add damage when our game is above 5, remove it when it's below 5. Reacts to damage changes.
 
 ```csharp
@@ -409,6 +422,29 @@ Add("InitStatusEffectSleep_RemoveOnDispel")
             if ((TagType.BasicDispel & eventTag) != 0)
                 removeEffect.Effect(target, source);
         }));
+```
+
+When stunned four times, dispel all status effects
+
+```csharp
+Add("StunnedFourTimesDispelAllStatusEffects")
+    .Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.CallbackEffect)
+    .CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+    {
+        float totalTimesStunned = 0f;
+        return new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
+        {
+            if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+            {
+                totalTimesStunned++;
+                if (totalTimesStunned >= 4)
+                {
+                    totalTimesStunned = 0f;
+                    effect.Effect(target, source);
+                }
+            }
+        });
+    });
 ```
 
 ## Modifier Action Recipes
