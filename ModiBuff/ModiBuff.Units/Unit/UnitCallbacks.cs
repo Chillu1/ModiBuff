@@ -295,94 +295,96 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
+		public void RegisterCallback(CallbackType callbackType, object callback)
+		{
+			switch (callbackType)
+			{
+				case CallbackType.Dispel:
+					if (CheckCallback(callback, out DispelEvent dispelEvent))
+						_dispelEvents.Add(dispelEvent);
+					break;
+				case CallbackType.PoisonDamage:
+					if (CheckCallback(callback, out PoisonEvent poisonEvent))
+						_poisonEvents.Add(poisonEvent);
+					break;
+				case CallbackType.CurrentHealthChanged:
+					if (CheckCallback(callback, out HealthChangedEvent healthEvent))
+					{
+						healthEvent.Invoke(this, this, Health, 0f);
+						_healthChangedEvents.Add(healthEvent);
+					}
+
+					break;
+				case CallbackType.DamageChanged:
+					if (CheckCallback(callback, out DamageChangedEvent damageEvent))
+					{
+						damageEvent.Invoke(this, Damage, 0f);
+						_damageChangedEvents.Add(damageEvent);
+					}
+
+					break;
+				case CallbackType.StatusEffectAdded:
+					if (CheckCallback(callback, out StatusEffectEvent statusEffectEvent))
+					{
+						_statusEffectController.TriggerEvent(statusEffectEvent);
+						_statusEffectAddedEvents.Add(statusEffectEvent);
+					}
+
+					break;
+				case CallbackType.StatusEffectRemoved:
+					if (CheckCallback(callback, out StatusEffectEvent statusEffectRemovedEvent))
+					{
+						_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
+						_statusEffectRemovedEvents.Add(statusEffectRemovedEvent);
+					}
+
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+			}
+		}
+
+		public void UnRegisterCallback(CallbackType callbackType, object callback)
+		{
+			switch (callbackType)
+			{
+				case CallbackType.Dispel:
+					_dispelEvents.Remove((DispelEvent)callback);
+					break;
+				case CallbackType.PoisonDamage:
+					_poisonEvents.Remove((PoisonEvent)callback);
+					break;
+				case CallbackType.CurrentHealthChanged:
+					if (_healthChangedEvents.Remove((HealthChangedEvent)callback))
+						((HealthChangedEvent)callback).Invoke(this, this, Health, 0f);
+					break;
+				case CallbackType.DamageChanged:
+					if (_damageChangedEvents.Remove((DamageChangedEvent)callback))
+						((DamageChangedEvent)callback).Invoke(this, Damage, 0f);
+					break;
+				case CallbackType.StatusEffectAdded:
+					if (_statusEffectAddedEvents.Remove((StatusEffectEvent)callback))
+						_statusEffectController.TriggerEvent((StatusEffectEvent)callback);
+					break;
+				case CallbackType.StatusEffectRemoved:
+					if (_statusEffectRemovedEvents.Remove((StatusEffectEvent)callback))
+						_statusEffectController.TriggerEvent((StatusEffectEvent)callback);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+			}
+		}
+
 		public void RegisterCallbacks(CallbackType callbackType, object[] callbacks)
 		{
 			for (int i = 0; i < callbacks.Length; i++)
-			{
-				object callback = callbacks[i];
-
-				switch (callbackType)
-				{
-					case CallbackType.Dispel:
-						if (CheckCallback(callback, out DispelEvent dispelEvent))
-							_dispelEvents.Add(dispelEvent);
-						break;
-					case CallbackType.PoisonDamage:
-						if (CheckCallback(callback, out PoisonEvent poisonEvent))
-							_poisonEvents.Add(poisonEvent);
-						break;
-					case CallbackType.CurrentHealthChanged:
-						if (CheckCallback(callback, out HealthChangedEvent healthEvent))
-						{
-							healthEvent.Invoke(this, this, Health, 0f);
-							_healthChangedEvents.Add(healthEvent);
-						}
-
-						break;
-					case CallbackType.DamageChanged:
-						if (CheckCallback(callback, out DamageChangedEvent damageEvent))
-						{
-							damageEvent.Invoke(this, Damage, 0f);
-							_damageChangedEvents.Add(damageEvent);
-						}
-
-						break;
-					case CallbackType.StatusEffectAdded:
-						if (CheckCallback(callback, out StatusEffectEvent statusEffectEvent))
-						{
-							_statusEffectController.TriggerEvent(statusEffectEvent);
-							_statusEffectAddedEvents.Add(statusEffectEvent);
-						}
-
-						break;
-					case CallbackType.StatusEffectRemoved:
-						if (CheckCallback(callback, out StatusEffectEvent statusEffectRemovedEvent))
-						{
-							_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
-							_statusEffectRemovedEvents.Add(statusEffectRemovedEvent);
-						}
-
-						break;
-					default:
-						throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
-				}
-			}
+				RegisterCallback(callbackType, callbacks[i]);
 		}
 
 		public void UnRegisterCallbacks(CallbackType callbackType, object[] callbacks)
 		{
 			for (int i = 0; i < callbacks.Length; i++)
-			{
-				object callback = callbacks[i];
-
-				switch (callbackType)
-				{
-					case CallbackType.Dispel:
-						_dispelEvents.Remove((DispelEvent)callback);
-						break;
-					case CallbackType.PoisonDamage:
-						_poisonEvents.Remove((PoisonEvent)callback);
-						break;
-					case CallbackType.CurrentHealthChanged:
-						if (_healthChangedEvents.Remove((HealthChangedEvent)callback))
-							((HealthChangedEvent)callback).Invoke(this, this, Health, 0f);
-						break;
-					case CallbackType.DamageChanged:
-						if (_damageChangedEvents.Remove((DamageChangedEvent)callback))
-							((DamageChangedEvent)callback).Invoke(this, Damage, 0f);
-						break;
-					case CallbackType.StatusEffectAdded:
-						if (_statusEffectAddedEvents.Remove((StatusEffectEvent)callback))
-							_statusEffectController.TriggerEvent((StatusEffectEvent)callback);
-						break;
-					case CallbackType.StatusEffectRemoved:
-						if (_statusEffectRemovedEvents.Remove((StatusEffectEvent)callback))
-							_statusEffectController.TriggerEvent((StatusEffectEvent)callback);
-						break;
-					default:
-						throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
-				}
-			}
+				UnRegisterCallback(callbackType, callbacks[i]);
 		}
 
 		private static bool CheckCallback<TCallback>(object callbackObject, out TCallback callbackOut)

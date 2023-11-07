@@ -424,12 +424,29 @@ namespace ModiBuff.Tests
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Silence));
 		}
 
-		[Test]
-		public void StunnedFourTimes_DispelAllStatusEffects()
+		private static readonly RecipeAddFunc[] stunnedFourTimesDispelAllRecipes =
 		{
-			AddRecipe("Freeze")
-				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 5), EffectOn.Init);
-			AddRecipe("StunnedFourTimesDispelAllStatusEffects")
+			//CallbackState version, preferred version for one-off effects
+			add => add("StunnedFourTimesDispelAllStatusEffects")
+				.CallbackState(CallbackType.StatusEffectAdded, () =>
+				{
+					float totalTimesStunned = 0f;
+					return new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+						{
+							totalTimesStunned++;
+							if (totalTimesStunned >= 4)
+							{
+								totalTimesStunned = 0f;
+								((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
+									.DispelAll(source);
+							}
+						}
+					});
+				}),
+			//CallbackEffect version, preferred version with general effects
+			add => add("StunnedFourTimesDispelAllStatusEffects")
 				.Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.CallbackEffect)
 				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
 				{
@@ -446,18 +463,26 @@ namespace ModiBuff.Tests
 							}
 						}
 					});
-				});
-			//Stack version
-			// AddRecipe("StunnedFourTimesDispelAllStatusEffects")
-			// 	.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
-			// 	.Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.Stack)
-			// 	.ModifierAction(ModifierAction.Stack, EffectOn.CallbackEffect)
-			// 	.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
-			// 		new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
-			// 		{
-			// 			if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
-			// 				effect.Effect(target, source);
-			// 		}));
+				}),
+			//Stack version, worst version, adding the modifier again will trigger the stack logic
+			add => add("StunnedFourTimesDispelAllStatusEffects")
+				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
+				.Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.Stack)
+				.ModifierAction(ModifierAction.Stack, EffectOn.CallbackEffect)
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+					new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+							effect.Effect(target, source);
+					}))
+		};
+
+		[TestCaseSource(nameof(stunnedFourTimesDispelAllRecipes))]
+		public void StunnedFourTimes_DispelAllStatusEffects(RecipeAddFunc addFunc)
+		{
+			AddRecipe("Freeze")
+				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 5), EffectOn.Init);
+			AddRecipe(addFunc);
 			Setup();
 
 			Unit.AddModifierSelf("StunnedFourTimesDispelAllStatusEffects");
