@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using ModiBuff.Core.Units.Interfaces.NonGeneric;
 
 [assembly: InternalsVisibleTo("ModiBuff.Tests")]
 
@@ -22,7 +23,7 @@ namespace ModiBuff.Core.Units
 		IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
 		ICallbackRegistrable<CallbackType>, ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>,
-		ICallbackEffectRegistrable<CallbackType>
+		ICallbackEffectRegistrable<CallbackType>, IAllNonGeneric
 	{
 		public UnitTag UnitTag { get; private set; }
 		public float Health { get; private set; }
@@ -136,18 +137,13 @@ namespace ModiBuff.Core.Units
 
 		public float Attack(IUnit target)
 		{
-			return Attack((Unit)target);
-		}
-
-		public float Attack(Unit target)
-		{
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act) ||
 			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
 			_onAttackCounter++;
 
-			this.ApplyAllAttackModifier(target);
+			this.ApplyAllAttackModifier((IModifierOwner)target);
 
 			if (_onAttackCounter <= MaxRecursionEventCount)
 			{
@@ -155,21 +151,26 @@ namespace ModiBuff.Core.Units
 					_onAttackEffects[i].Effect(target, this);
 			}
 
-			float dealtDamage = target.TakeDamage(Damage, this);
-
-			if (target.Health <= 0)
+			float dealtDamage = 0;
+			if (target is IDamagable<float, float, float, float> damagableTarget)
 			{
-				_onKillCounter++;
+				dealtDamage = damagableTarget.TakeDamage(Damage, this);
 
-				if (_onKillCounter <= MaxRecursionEventCount)
-					for (int i = 0; i < _onKillEffects.Count; i++)
-						_onKillEffects[i].Effect(target, this);
+				if (damagableTarget.Health <= 0)
+				{
+					_onKillCounter++;
+
+					if (_onKillCounter <= MaxRecursionEventCount)
+						for (int i = 0; i < _onKillEffects.Count; i++)
+							_onKillEffects[i].Effect(target, this);
+				}
 			}
 
 			if (_onAttackCounter <= MaxRecursionEventCount &&
 			    _onKillCounter <= MaxRecursionEventCount)
 			{
-				target.ResetEventCounters();
+				if (target is IEventOwner<EffectOnEvent> eventTarget)
+					eventTarget.ResetEventCounters();
 				ResetEventCounters();
 			}
 

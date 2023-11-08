@@ -20,12 +20,12 @@ namespace ModiBuff.Tests
 		protected float UnitHeal { get; private set; }
 		protected float UnitMana { get; private set; }
 
-		protected TUnit Enemy { get; private set; }
+		protected Unit Enemy { get; private set; }
 		protected float EnemyHealth { get; private set; }
 		protected float EnemyDamage { get; private set; }
 		protected float EnemyHeal { get; private set; }
 
-		protected TUnit Ally { get; private set; }
+		protected Unit Ally { get; private set; }
 		protected float AllyHealth { get; private set; }
 		protected float AllyDamage { get; private set; }
 		protected float AllyHeal { get; private set; }
@@ -85,8 +85,8 @@ namespace ModiBuff.Tests
 			Pool = new ModifierPool(Recipes.GetGenerators());
 
 			Unit = UnitFactory(UnitHealth, UnitDamage, UnitHeal, UnitMana, UnitType.Good, UnitTag.Default);
-			Enemy = UnitFactory(EnemyHealth, EnemyDamage, EnemyHeal, 1000, UnitType.Bad, UnitTag.Default);
-			Ally = UnitFactory(AllyHealth, AllyDamage, AllyHeal, 1000, UnitType.Good, UnitTag.Default);
+			Enemy = new Unit(EnemyHealth, EnemyDamage, EnemyHeal, unitType: UnitType.Bad);
+			Ally = new Unit(AllyHealth, AllyDamage, AllyHeal, unitType: UnitType.Good);
 		}
 
 		[TearDown]

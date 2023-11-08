@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using ModiBuff.Core.Units.Interfaces.NonGeneric;
@@ -11,7 +10,7 @@ namespace ModiBuff.Tests
 	public sealed class DamagableUnitTests : PartialUnitModifierTests<DamagableUnitTests.DamagableUnit>
 	{
 		protected override void SetupUnitFactory() =>
-			UnitFactory = (health, damage, heal, mana, type, tag) => new DamagableUnit(health);
+			UnitFactory = (health, damage, heal, mana, type, tag) => new DamagableUnit(health, type);
 
 		public sealed class DamagableUnit : IUnit, IModifierOwner, IDamagable, IEventOwner,
 			ICallbackRegistrable<CallbackType>, IUpdatable, IUnitEntity, IHealthCost
@@ -34,7 +33,7 @@ namespace ModiBuff.Tests
 			{
 				UnitType = unitType;
 				UnitTag = UnitTag.Default;
-				MaxHealth = Health = 500f;
+				MaxHealth = Health = health;
 
 				ModifierController = new ModifierController(this);
 				_healthChangedEvents = new List<HealthChangedEvent>();
@@ -124,7 +123,6 @@ namespace ModiBuff.Tests
 				}
 			}
 
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			public void ResetEventCounters()
 			{
 				_healthChangedCounter = 0;
