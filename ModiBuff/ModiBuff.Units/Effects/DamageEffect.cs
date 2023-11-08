@@ -1,10 +1,3 @@
-#if NET5_0_OR_GREATER || NETSTANDARD2_0_OR_GREATER || NETCOREAPP1_1_OR_GREATER
-#define UNSAFE
-#endif
-
-using System;
-using System.Runtime.CompilerServices;
-
 namespace ModiBuff.Core.Units
 {
 	public sealed class DamageEffect : IStackEffect, IMutableStateEffect, IEffect,
@@ -61,39 +54,25 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			float damage = _baseDamage;
+			_targeting.UpdateTargetSource(target, source, out var effectTarget, out var effectSource);
+			float returnDamageInfo = 0;
 
-			if (_metaEffects != null)
-				foreach (var metaEffect in _metaEffects)
-					damage = metaEffect.Effect(damage, target, source);
+			if (effectTarget is IDamagable<float, float, float, float> damagableTarget)
+			{
+				float damage = _baseDamage;
 
-			damage += _extraDamage;
+				if (_metaEffects != null)
+					foreach (var metaEffect in _metaEffects)
+						damage = metaEffect.Effect(damage, target, source);
 
-			float returnDamageInfo = Effect(damage, target, source);
+				damage += _extraDamage;
+
+				returnDamageInfo = damagableTarget.TakeDamage(damage, effectSource);
+			}
 
 			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)
 					postEffect.Effect(returnDamageInfo, target, source);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private float Effect(float damage, IUnit target, IUnit source)
-		{
-			_targeting.UpdateTargetSource(ref target, ref source);
-
-#if DEBUG && !MODIBUFF_PROFILE
-			if (!(target is IDamagable<float, float, float, float>))
-				throw new ArgumentException("Target must implement IDamagable");
-#endif
-
-			float returnDamage =
-#if !DEBUG && UNSAFE
-				Unsafe.As<IDamagable<float, float, float, float>>(target).TakeDamage(damage, source);
-#else
-				((IDamagable<float, float, float, float>)target).TakeDamage(damage, source);
-#endif
-
-			return returnDamage;
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)

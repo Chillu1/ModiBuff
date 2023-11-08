@@ -26,17 +26,21 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
+			if (!(target is ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget))
+				return;
+
 			if (IsRevertible)
 				_totalDuration = _duration + _extraDuration;
 
-			((ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
-				.ChangeStatusEffect(_statusEffectType, _duration + _extraDuration);
+			statusEffectTarget.StatusEffectController.ChangeStatusEffect(_statusEffectType, _duration + _extraDuration);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			((ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
-				.DecreaseStatusEffect(_statusEffectType, _totalDuration);
+			if (!(target is ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget))
+				return;
+
+			statusEffectTarget.StatusEffectController.DecreaseStatusEffect(_statusEffectType, _totalDuration);
 
 			_totalDuration = 0;
 		}

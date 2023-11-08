@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace ModiBuff.Core.Units
 {
 	public sealed class HealEffect : IMutableStateEffect, IStackEffect, IRevertEffect, IEffect, ICallbackEffect,
@@ -62,18 +60,24 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			float heal = _heal;
+			float returnHeal = 0;
 
-			if (_metaEffects != null)
-				foreach (var metaEffect in _metaEffects)
-					heal = metaEffect.Effect(heal, target, source);
+			_targeting.UpdateTargetSource(target, source, out var effectTarget, out var effectSource);
+			if (effectTarget is IHealable<float, float> healableTarget)
+			{
+				float heal = _heal;
 
-			heal += _extraHeal;
+				if (_metaEffects != null)
+					foreach (var metaEffect in _metaEffects)
+						heal = metaEffect.Effect(heal, target, source);
 
-			float returnHeal = Effect(heal, target, source);
+				heal += _extraHeal;
 
-			if (IsRevertible)
-				_totalHeal += returnHeal; //_heal + _extraHeal;
+				returnHeal = healableTarget.Heal(heal, effectSource);
+
+				if (IsRevertible)
+					_totalHeal += returnHeal;
+			}
 
 			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)
@@ -82,15 +86,12 @@ namespace ModiBuff.Core.Units
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			Effect(-_totalHeal, target, source);
-			_totalHeal = 0;
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private float Effect(float value, IUnit target, IUnit source)
-		{
 			_targeting.UpdateTargetSource(ref target, ref source);
-			return ((IHealable<float, float>)target).Heal(value, source);
+			if (!(target is IHealable<float, float> healableTarget))
+				return;
+
+			healableTarget.Heal(-_totalHeal, source);
+			_totalHeal = 0;
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)
@@ -129,9 +130,10 @@ namespace ModiBuff.Core.Units
 			{
 				_totalHeal -= _heal + _extraHeal;
 
-				_targeting.UpdateTarget(ref target, source);
+				_targeting.UpdateTargetSource(ref target, ref source);
 				//TODO Do we want a custom negative heal method?
-				((IHealable<float, float>)target).Heal(-_heal - _extraHeal, source);
+				if (target is IHealable<float, float> healableTarget)
+					healableTarget.Heal(-_heal - _extraHeal, source);
 			}
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)

@@ -29,16 +29,21 @@ namespace ModiBuff.Core
 
 		public void Effect(IUnit target, IUnit source)
 		{
+			if (!(target is ICallbackEffectRegistrable<TCallback> registrableTarget))
+				return;
 			if (_isRegistered)
 				return;
 
 			_isRegistered = true;
-			((ICallbackEffectRegistrable<TCallback>)target).RegisterCallbacks(_callbackType, _callbacks);
+			registrableTarget.RegisterCallbacks(_callbackType, _callbacks);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			((ICallbackEffectRegistrable<TCallback>)target).UnRegisterCallbacks(_callbackType, _callbacks);
+			if (!(target is ICallbackEffectRegistrable<TCallback> registrableTarget))
+				return;
+
+			registrableTarget.UnRegisterCallbacks(_callbackType, _callbacks);
 			_isRegistered = false;
 		}
 

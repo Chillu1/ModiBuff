@@ -69,6 +69,33 @@ namespace ModiBuff.Core
 			source = finalSource;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UpdateTargetSource(this Targeting targeting, IUnit target, IUnit source,
+			out IUnit effectTarget, out IUnit effectSource)
+		{
+			switch (targeting)
+			{
+				case Targeting.TargetSource:
+					effectTarget = target;
+					effectSource = source;
+					return;
+				case Targeting.SourceTarget:
+					effectTarget = source;
+					effectSource = target;
+					return;
+				case Targeting.TargetTarget:
+					effectTarget = target;
+					effectSource = target;
+					return;
+				case Targeting.SourceSource:
+					effectTarget = source;
+					effectSource = source;
+					return;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
 		/// <summary>
 		///		Use if source is not being used in the effect
 		/// </summary>

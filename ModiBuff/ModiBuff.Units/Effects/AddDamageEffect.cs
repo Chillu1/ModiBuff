@@ -37,6 +37,10 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
+			_targeting.UpdateTarget(ref target, source);
+			if (!(target is IAddDamage<float> addDamage))
+				return;
+
 			if (_effectState.IsTogglable())
 			{
 				if (_isEnabled)
@@ -45,20 +49,24 @@ namespace ModiBuff.Core.Units
 				_isEnabled = true;
 			}
 
-			if (IsRevertible)
-				_totalAddedDamage += _damage + _extraDamage;
+			float damage = _damage + _extraDamage;
 
-			_targeting.UpdateTarget(ref target, source);
-			((IAddDamage<float>)target).AddDamage(_damage + _extraDamage);
+			if (IsRevertible)
+				_totalAddedDamage += damage;
+
+			addDamage.AddDamage(damage);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
+			_targeting.UpdateTarget(ref target, source);
+			if (!(target is IAddDamage<float> addDamage))
+				return;
+
 			if (_effectState.IsTogglable())
 				_isEnabled = false;
 
-			_targeting.UpdateTarget(ref target, source);
-			((IAddDamage<float>)target).AddDamage(-_totalAddedDamage);
+			addDamage.AddDamage(-_totalAddedDamage);
 			_totalAddedDamage = 0;
 		}
 
@@ -81,7 +89,8 @@ namespace ModiBuff.Core.Units
 				_totalAddedDamage -= _damage + _extraDamage;
 
 				_targeting.UpdateTarget(ref target, source);
-				((IAddDamage<float>)target).AddDamage(-_damage - _extraDamage);
+				if (target is IAddDamage<float> addDamageTarget)
+					addDamageTarget.AddDamage(-_damage - _extraDamage);
 			}
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)

@@ -11,14 +11,16 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
+			if (!(target is IStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget))
+				return;
+
 			if (_statusEffect == StatusEffectType.All)
 			{
-				((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController.DispelAll(source);
+				statusEffectTarget.StatusEffectController.DispelAll(source);
 				return;
 			}
 
-			((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
-				.DispelStatusEffect(_statusEffect, source);
+			statusEffectTarget.StatusEffectController.DispelStatusEffect(_statusEffect, source);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)

@@ -30,20 +30,23 @@ namespace ModiBuff.Core
 
 		public void Effect(IUnit target, IUnit source)
 		{
+			if (!(target is IEventOwner<TEvent> eventTarget))
+				return;
 			if (_isRegistered)
 				return;
 
-			var eventOwner = (IEventOwner<TEvent>)target;
 			for (int i = 0; i < _effects.Length; i++)
-				eventOwner.AddEffectEvent(_effects[i], _effectOnEvent);
+				eventTarget.AddEffectEvent(_effects[i], _effectOnEvent);
 			_isRegistered = true;
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			var eventOwner = (IEventOwner<TEvent>)target;
+			if (!(target is IEventOwner<TEvent> eventTarget))
+				return;
+
 			for (int i = 0; i < _effects.Length; i++)
-				eventOwner.RemoveEffectEvent(_effects[i], _effectOnEvent);
+				eventTarget.RemoveEffectEvent(_effects[i], _effectOnEvent);
 			_isRegistered = false;
 		}
 

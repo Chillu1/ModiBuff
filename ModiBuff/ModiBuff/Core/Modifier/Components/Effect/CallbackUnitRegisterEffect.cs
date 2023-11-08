@@ -41,17 +41,21 @@ namespace ModiBuff.Core
 			if (_callbacks == null)
 				Logger.LogError("[ModiBuff] Callback wasn't set");
 #endif
-
+			if (!(target is ICallbackUnitRegistrable<TCallbackUnit> registrableTarget))
+				return;
 			if (_isRegistered)
 				return;
 
-			((ICallbackUnitRegistrable<TCallbackUnit>)target).RegisterCallbacks(_callbackType, _callbacks);
+			registrableTarget.RegisterCallbacks(_callbackType, _callbacks);
 			_isRegistered = true;
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			((ICallbackUnitRegistrable<TCallbackUnit>)target).UnRegisterCallbacks(_callbackType, _callbacks);
+			if (!(target is ICallbackUnitRegistrable<TCallbackUnit> registrableTarget))
+				return;
+
+			registrableTarget.UnRegisterCallbacks(_callbackType, _callbacks);
 			_isRegistered = false;
 		}
 

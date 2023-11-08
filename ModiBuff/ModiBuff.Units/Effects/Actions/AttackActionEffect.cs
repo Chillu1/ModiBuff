@@ -2,6 +2,20 @@ namespace ModiBuff.Core.Units
 {
 	public sealed class AttackActionEffect : IEffect
 	{
-		public void Effect(IUnit target, IUnit source) => ((IAttacker<float, float>)source).Attack(target);
+		private readonly Targeting _targeting;
+
+		public AttackActionEffect(Targeting targeting = Targeting.TargetSource)
+		{
+			_targeting = targeting;
+		}
+
+		public void Effect(IUnit target, IUnit source)
+		{
+			_targeting.UpdateTargetSource(ref target, ref source);
+			if (!(source is IAttacker<float, float> attackerSource))
+				return;
+
+			attackerSource.Attack(target);
+		}
 	}
 }

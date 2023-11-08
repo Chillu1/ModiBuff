@@ -1,6 +1,3 @@
-using System;
-using System.Runtime.CompilerServices;
-
 namespace ModiBuff.Core.Units
 {
 	/// <summary>
@@ -34,37 +31,23 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			float damage = _damage;
+			float returnDamageInfo = 0;
 
-			if (_metaEffects != null)
-				foreach (var metaEffect in _metaEffects)
-					damage = metaEffect.Effect(damage, target, source);
+			_targeting.UpdateTargetSource(target, source, out var effectTarget, out var effectSource);
+			if (effectTarget is IDamagable<float, float, float, float> damagableTarget)
+			{
+				float damage = _damage;
 
-			float returnDamageInfo = Effect(damage, target, source);
+				if (_metaEffects != null)
+					foreach (var metaEffect in _metaEffects)
+						damage = metaEffect.Effect(damage, target, source);
+
+				returnDamageInfo = damagableTarget.TakeDamage(damage, effectSource);
+			}
 
 			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)
 					postEffect.Effect(returnDamageInfo, target, source);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private float Effect(float damage, IUnit target, IUnit source)
-		{
-			_targeting.UpdateTargetSource(ref target, ref source);
-
-#if DEBUG && !MODIBUFF_PROFILE
-			if (!(target is IDamagable<float, float, float, float>))
-				throw new ArgumentException("Target must implement IDamagable");
-#endif
-
-			float returnDamage =
-#if !DEBUG && UNSAFE
-				Unsafe.As<IDamagable<float, float, float, float>>(target).TakeDamage(damage, source);
-#else
-				((IDamagable<float, float, float, float>)target).TakeDamage(damage, source);
-#endif
-
-			return returnDamage;
 		}
 	}
 }

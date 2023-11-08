@@ -17,8 +17,10 @@ namespace ModiBuff.Core.Units
 
 			if (!((IUnitEntity)source).UnitTag.HasTag(UnitTag.Lifestealable))
 				return;
+			if (!(target is IHealable<float, float> healableTarget))
+				return;
 
-			((IHealable<float, float>)target).Heal(value * _lifeStealPercent, source);
+			healableTarget.Heal(value * _lifeStealPercent, source);
 		}
 	}
 }

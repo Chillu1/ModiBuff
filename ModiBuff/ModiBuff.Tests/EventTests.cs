@@ -103,7 +103,7 @@ namespace ModiBuff.Tests
 		public void AttackSelf_OnHit()
 		{
 			AddRecipe("AttackSelf_OnHit_Event")
-				.Effect(new SelfAttackActionEffect(), EffectOn.Event)
+				.Effect(new AttackActionEffect(Targeting.TargetTarget), EffectOn.Event)
 				.Event(EffectOnEvent.WhenAttacked);
 			Setup();
 

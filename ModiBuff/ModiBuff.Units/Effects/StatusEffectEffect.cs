@@ -51,24 +51,22 @@ namespace ModiBuff.Core.Units
 			if (_genId == -1)
 				Logger.LogError("GenId is not set for status effect effect.");
 #endif
+			if (!(target is IStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget))
+				return;
 
 			if (IsRevertible)
 				_totalDuration = _duration + _extraDuration;
-			((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
-				.ChangeStatusEffect(_id, _genId, _statusEffectType, _duration + _extraDuration, source);
+			statusEffectTarget.StatusEffectController.ChangeStatusEffect(_id, _genId, _statusEffectType,
+				_duration + _extraDuration, source);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-#if DEBUG && !MODIBUFF_PROFILE
-			if (_id == -1)
-				Logger.LogError("ModifierId is not set for status effect effect.");
-			if (_genId == -1)
-				Logger.LogError("GenId is not set for status effect effect.");
-#endif
+			if (!(target is IStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget))
+				return;
 
-			((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
-				.DecreaseStatusEffect(_id, _genId, _statusEffectType, _totalDuration, source);
+			statusEffectTarget.StatusEffectController.DecreaseStatusEffect(_id, _genId, _statusEffectType,
+				_totalDuration, source);
 
 			_totalDuration = 0;
 		}
