@@ -18,7 +18,7 @@ namespace ModiBuff.Core.Units
 				case CostType.Health:
 					if (!(unit is IDamagable<float, float> damagable) || !(unit is IHealthCost<float>))
 						return false;
-					return damagable.Health >= damagable.MaxHealth * _costPercent;
+					return damagable.Health > damagable.MaxHealth * _costPercent;
 				case CostType.Mana:
 					if (!(unit is IManaOwner<float, float> manaOwner))
 						return false;

@@ -17,7 +17,7 @@ namespace ModiBuff.Core.Units
 	public partial class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>,
 		IDamagable<float, float, float, float>, IHealable<float, float>, IHealer<float, float>,
 		IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker, IEventOwner<EffectOnEvent>,
-		IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
+		IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance, IKillable,
 		ICallbackUnitRegistrable<CallbackUnitType>,
 		IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
@@ -196,11 +196,14 @@ namespace ModiBuff.Core.Units
 					_afterAttackedEffects[i].Effect(this, source);
 			}
 
-			_healthChangedCounter++;
-			if (_healthChangedCounter <= MaxRecursionEventCount)
+			if (dealtDamage > 0)
 			{
-				for (int i = 0; i < _healthChangedEvents.Count; i++)
-					_healthChangedEvents[i](this, source, Health, dealtDamage);
+				_healthChangedCounter++;
+				if (_healthChangedCounter <= MaxRecursionEventCount)
+				{
+					for (int i = 0; i < _healthChangedEvents.Count; i++)
+						_healthChangedEvents[i](this, source, Health, dealtDamage);
+				}
 			}
 
 			//if damage was bigger than half health, trigger strong attack callbacks

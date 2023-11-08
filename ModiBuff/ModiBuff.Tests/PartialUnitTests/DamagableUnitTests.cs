@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using ModiBuff.Core.Units.Interfaces.NonGeneric;
@@ -7,19 +8,13 @@ using IEventOwner = ModiBuff.Core.IEventOwner;
 
 namespace ModiBuff.Tests
 {
-	//Unit logic to test for:
-	//No attack (can't attack, can't add damage)
-	//Can't be status effected
-	//No health (can't be healed, can't be damaged)
-	//No mana (can't use mana, can't be mana checked (both full mana, and mana cost))
-	//	What about effects where they cost mana/health to activate, they'll just never be activated?
-	//No callbacks for X, Y, Z
-	//Logic checks in post effects
-
-	public sealed class DamagableUnitTests : ModifierTests
+	public sealed class DamagableUnitTests : PartialUnitModifierTests<DamagableUnitTests.DamagableUnit>
 	{
-		private sealed class DamagableUnit : IUnit, IModifierOwner, IDamagable, IEventOwner,
-			ICallbackRegistrable<CallbackType>, IUpdatable, IUnitEntity
+		protected override void SetupUnitFactory() =>
+			UnitFactory = (health, damage, heal, mana, type, tag) => new DamagableUnit(health);
+
+		public sealed class DamagableUnit : IUnit, IModifierOwner, IDamagable, IEventOwner,
+			ICallbackRegistrable<CallbackType>, IUpdatable, IUnitEntity, IHealthCost
 		{
 			public UnitTag UnitTag { get; }
 			public UnitType UnitType { get; }
@@ -35,7 +30,7 @@ namespace ModiBuff.Tests
 			private readonly List<HealthChangedEvent> _healthChangedEvents;
 			private int _healthChangedCounter;
 
-			public DamagableUnit(UnitType unitType = UnitType.Good)
+			public DamagableUnit(float health, UnitType unitType = UnitType.Good)
 			{
 				UnitType = unitType;
 				UnitTag = UnitTag.Default;
@@ -57,11 +52,14 @@ namespace ModiBuff.Tests
 
 				float dealtDamage = oldHealth - Health;
 
-				_healthChangedCounter++;
-				if (_healthChangedCounter <= MaxRecursionEventCount)
+				if (dealtDamage > 0)
 				{
-					for (int i = 0; i < _healthChangedEvents.Count; i++)
-						_healthChangedEvents[i](this, source, Health, dealtDamage);
+					_healthChangedCounter++;
+					if (_healthChangedCounter <= MaxRecursionEventCount)
+					{
+						for (int i = 0; i < _healthChangedEvents.Count; i++)
+							_healthChangedEvents[i](this, source, Health, dealtDamage);
+					}
 				}
 
 				if (Health <= 0 && !IsDead)
@@ -77,6 +75,11 @@ namespace ModiBuff.Tests
 				}
 
 				return dealtDamage;
+			}
+
+			public void UseHealth(float value)
+			{
+				Health -= value;
 			}
 
 			public void RegisterCallbacks(Callback<CallbackType>[] callbacks)
@@ -121,6 +124,7 @@ namespace ModiBuff.Tests
 				}
 			}
 
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			public void ResetEventCounters()
 			{
 				_healthChangedCounter = 0;
@@ -149,11 +153,10 @@ namespace ModiBuff.Tests
 				.Remove(1);
 			Setup();
 
-			var unit = new DamagableUnit();
-			unit.AddModifierSelf("InitDamageHeal");
-			Assert.AreEqual(UnitHealth - 5, unit.Health);
-			unit.Update(1);
-			Assert.AreEqual(UnitHealth - 5, unit.Health);
+			Unit.AddModifierSelf("InitDamageHeal");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
 		[Test]
@@ -164,9 +167,8 @@ namespace ModiBuff.Tests
 				.Remove(1);
 			Setup();
 
-			var unit = new DamagableUnit();
-			unit.AddModifierSelf("InitAddDamage"); //Try add damage, can't
-			unit.Update(1); //Try revert, can't
+			Unit.AddModifierSelf("InitAddDamage"); //Try add damage, can't
+			Unit.Update(1); //Try revert, can't
 		}
 
 		[Test]
@@ -177,10 +179,9 @@ namespace ModiBuff.Tests
 				.Remove(1);
 			Setup();
 
-			var unit = new DamagableUnit();
-			unit.AddModifierSelf("InitStun");
-			unit.Update(1);
-			Assert.False(unit.ContainsModifier("InitStun"));
+			Unit.AddModifierSelf("InitStun");
+			Unit.Update(1);
+			Assert.False(Unit.ContainsModifier("InitStun"));
 		}
 
 		[Test]
@@ -190,13 +191,74 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5).SetPostEffects(new LifeStealPostEffect(1f)), EffectOn.Init);
 			Setup();
 
-			var unit = new DamagableUnit();
-			unit.AddModifierSelf("InitDamagePostHeal");
-			Assert.AreEqual(UnitHealth - 5, unit.Health);
+			Unit.AddModifierSelf("InitDamagePostHeal");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
-		//TODO Making the same code over and over will be redundant, better to make an array of scenarios with:
-		//Recipe setup, then all actions & checks
-		//Might be hard/not smart, since we need all the info in there to be static, which can be fixed, but maybe not worth
+		[Test]
+		public void InitDamageApplyCosts_UnitWithoutMana()
+		{
+			AddRecipe("InitDamageManaCost")
+				.ApplyCost(CostType.Mana, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			AddRecipe("InitDamageHealthCost")
+				.ApplyCost(CostType.Health, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
+
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageManaCost"), ApplierType.Cast);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageHealthCost"), ApplierType.Cast);
+
+			Unit.TryCast("InitDamageManaCost", Unit);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.TryCast("InitDamageHealthCost", Unit);
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+		}
+
+		[Test]
+		public void InitDamageEffectCosts_UnitWithoutMana()
+		{
+			AddRecipe("InitDamageManaCost")
+				.EffectCost(CostType.Mana, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			AddRecipe("InitDamageHealthCost")
+				.EffectCost(CostType.Health, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
+
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageManaCost"), ApplierType.Cast);
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageHealthCost"), ApplierType.Cast);
+
+			Unit.TryCast("InitDamageManaCost", Unit);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.TryCast("InitDamageHealthCost", Unit);
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+		}
+
+		[Test]
+		public void InitDamageEventCallback_UnitWithoutEvents()
+		{
+			AddRecipe("InitDamageWhenAttacked")
+				.Effect(new DamageEffect(5), EffectOn.Event)
+				.Event(EffectOnEvent.WhenAttacked);
+			Setup();
+
+			Unit.AddModifierSelf("InitDamageWhenAttacked");
+			Unit.TakeDamage(0f, Unit);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
+
+		[Test]
+		public void AttackAction_UnitWithoutAttack()
+		{
+			AddRecipe("AttackAction")
+				.Effect(new AttackActionEffect(), EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("AttackAction");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
 	}
 }
