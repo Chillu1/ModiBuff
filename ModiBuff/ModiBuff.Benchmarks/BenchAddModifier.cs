@@ -9,11 +9,12 @@ namespace ModiBuff.Tests
 	/// </summary>
 	public class BenchAddModifier : ModifierBenches
 	{
-		private ModifierLessInitEffect[] _modifierLessEffects; //Simulated lookup by id
 		private Unit _unit;
+		private BenchmarkUnit _benchmarkUnit;
 
 		private int _noOpModifierId;
 		private int _initDamageModifierId;
+		private int _initDamageBenchmarkModifierId;
 		private int _modifierLessInitDamageEffectId;
 		private int _initStackDamageModifierId;
 
@@ -21,16 +22,13 @@ namespace ModiBuff.Tests
 		{
 			base.GlobalSetup();
 
-			_modifierLessEffects = new ModifierLessInitEffect[16];
-			_modifierLessEffects[0] = new ModifierLessInitEffect(2);
-			_modifierLessEffects[1] = new ModifierLessInitEffect(5);
-			_modifierLessEffects[2] = new ModifierLessInitEffect(7);
-
 			_unit = new Unit(1_000_000_000, 5);
+			_benchmarkUnit = new BenchmarkUnit(1_000_000_000);
 
 			_noOpModifierId = IdManager.GetId("NoOpEffect");
 			_initDamageModifierId = IdManager.GetId("InitDamage");
-			_modifierLessInitDamageEffectId = 1;
+			_initDamageBenchmarkModifierId = IdManager.GetId("BenchmarkInitDamage");
+			_modifierLessInitDamageEffectId = EffectIdManager.GetId("InitDamage");
 			_initStackDamageModifierId = IdManager.GetId("InitStackDamage");
 		}
 
@@ -46,25 +44,16 @@ namespace ModiBuff.Tests
 			_unit.ModifierController.Add(_initDamageModifierId, _unit, _unit);
 		}
 
-		private sealed class ModifierLessInitEffect
+		[Benchmark]
+		public void BenchAddInitDamageEffectBench()
 		{
-			private readonly float _damage;
-
-			public ModifierLessInitEffect(float damage)
-			{
-				_damage = damage;
-			}
-
-			public void Effect(IUnit target, IUnit source)
-			{
-				((IDamagable<float, float, float, float>)target).TakeDamage(_damage, source);
-			}
+			_unit.ApplyEffect(_modifierLessInitDamageEffectId, _unit);
 		}
 
-		//[Benchmark]
-		public void BenchAddInitDamageModifierLessPrototypeBench()
+		[Benchmark]
+		public void BenchAddInitDamageBenchmarkUnitBench()
 		{
-			_modifierLessEffects[_modifierLessInitDamageEffectId].Effect(_unit, _unit);
+			_benchmarkUnit.ModifierController.Add(_initDamageBenchmarkModifierId, _unit, _unit);
 		}
 
 		[Benchmark]

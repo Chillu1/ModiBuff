@@ -28,6 +28,9 @@ namespace ModiBuff.Tests
 				return modifier;
 			});
 
+			Add("BenchmarkInitDamage")
+				.Effect(new BenchmarkDamageEffect(5), EffectOn.Init);
+
 			Add("DoT")
 				.Interval(1)
 				.Effect(new DamageEffect(2), EffectOn.Interval)

@@ -121,6 +121,8 @@ namespace ModiBuff.Core.Units
 		/// </summary>
 		public void PreAttack(IUnit target)
 		{
+			if (target is IUnitEntity entity && !UnitType.IsLegalTarget(entity.UnitType))
+				return;
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act) ||
 			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act))
 				return;
@@ -132,8 +134,28 @@ namespace ModiBuff.Core.Units
 				for (int i = 0; i < _beforeAttackEffects.Count; i++)
 					_beforeAttackEffects[i].Effect(target, this);
 			}
+
+			if (_preAttackCounter <= MaxRecursionEventCount)
+			{
+				ResetEventCounters();
+				(target as IEventOwner)?.ResetEventCounters();
+			}
 		}
 
+		/// <summary>
+		///		Would be an attack command in ex. a moba. So we can't always attack our allies our ourselves at will.
+		/// </summary>
+		public float TryAttackCommand(IUnit target)
+		{
+			if (target is IUnitEntity entity && !UnitType.IsLegalTarget(entity.UnitType))
+				return 0;
+
+			return Attack(target);
+		}
+
+		/// <summary>
+		///		Performs an attack if possible (not disarmed, not stunned)
+		/// </summary>
 		public float Attack(IUnit target)
 		{
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act) ||
@@ -169,9 +191,8 @@ namespace ModiBuff.Core.Units
 			if (_onAttackCounter <= MaxRecursionEventCount &&
 			    _onKillCounter <= MaxRecursionEventCount)
 			{
-				if (target is IEventOwner<EffectOnEvent> eventTarget)
-					eventTarget.ResetEventCounters();
 				ResetEventCounters();
+				(target as IEventOwner)?.ResetEventCounters();
 			}
 
 			return dealtDamage;
@@ -187,8 +208,9 @@ namespace ModiBuff.Core.Units
 			}
 
 			float oldHealth = Health;
-			Health -= damage;
-			float dealtDamage = oldHealth - Health;
+			float newHealth = oldHealth - damage;
+			float dealtDamage = oldHealth - newHealth;
+			Health = newHealth;
 
 			_afterAttackedCounter++;
 			if (_afterAttackedCounter <= MaxRecursionEventCount)
@@ -279,8 +301,8 @@ namespace ModiBuff.Core.Units
 
 			if (_healTargetCounter <= MaxRecursionEventCount)
 			{
-				(target as IEventOwner)?.ResetEventCounters();
 				ResetEventCounters();
+				(target as IEventOwner)?.ResetEventCounters();
 			}
 
 			return valueHealed;
@@ -306,9 +328,8 @@ namespace ModiBuff.Core.Units
 
 			if (_onCastCounter <= MaxRecursionEventCount)
 			{
-				if (target is IEventOwner<EffectOnEvent> eventTarget)
-					eventTarget.ResetEventCounters();
 				ResetEventCounters();
+				(target as IEventOwner)?.ResetEventCounters();
 			}
 		}
 

@@ -46,6 +46,11 @@ namespace ModiBuff.Tests
 
 		private IStackEffect[] _stackEffects;
 
+		private Unit _eventUnit;
+		private EmptyUnit _emptyUnit;
+
+		private bool _condition, _conditionTwo;
+
 		public override void GlobalSetup()
 		{
 			base.GlobalSetup();
@@ -104,7 +109,13 @@ namespace ModiBuff.Tests
 			_stackEffects = new IStackEffect[]
 			{
 				new AddDamageEffect(5), new AddDamageEffect(5, true)
-			};*/
+			};
+
+			_eventUnit = new Unit();
+			_emptyUnit = new EmptyUnit();*/
+
+			_condition = false;
+			_conditionTwo = true;
 		}
 
 		//[Benchmark(Baseline = true)]
@@ -399,6 +410,71 @@ namespace ModiBuff.Tests
 
 			var revertEffects = revertEffectsTemp.AsSpan(0, revertEffectIndex).ToArray();
 			ArrayPool<IStackRevertEffect>.Shared.Return(revertEffectsTemp);
+		}
+
+		//[Benchmark]
+		public void NullCheckAsCast()
+		{
+			IUnit inUnit = _eventUnit;
+			(inUnit as IEventOwner<EffectOnEvent>)?.ResetEventCounters();
+		}
+
+		//[Benchmark]
+		public void NullCheckIfIsCast()
+		{
+			IUnit inUnit = _eventUnit;
+			if (inUnit is IEventOwner<EffectOnEvent> eventTarget)
+				eventTarget.ResetEventCounters();
+		}
+
+		//[Benchmark]
+		public void NullCheckAsCastEmptyUnit()
+		{
+			IUnit inUnit = _emptyUnit;
+			(inUnit as IEventOwner<EffectOnEvent>)?.ResetEventCounters();
+		}
+
+		//[Benchmark]
+		public void NullCheckIfIsCastEmptyUnit()
+		{
+			IUnit inUnit = _emptyUnit;
+			if (inUnit is IEventOwner<EffectOnEvent> eventTarget)
+				eventTarget.ResetEventCounters();
+		}
+
+		[Benchmark]
+		public void IfElse()
+		{
+			bool exists;
+			int index;
+			if (_condition)
+			{
+				index = _conditionTwo ? 1 : -1;
+				exists = index != -1;
+			}
+			else
+			{
+				index = _conditionTwo ? 2 : -1;
+				exists = index != -1;
+			}
+
+			if (exists)
+			{
+				return;
+			}
+		}
+
+		[Benchmark]
+		public void OverWriteIf()
+		{
+			int index;
+			if (_condition)
+				index = _conditionTwo ? 1 : -1;
+			else
+				index = _conditionTwo ? 2 : -1;
+
+			if (index != -1)
+				return;
 		}
 	}
 }

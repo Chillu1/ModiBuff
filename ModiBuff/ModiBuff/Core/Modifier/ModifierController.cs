@@ -256,12 +256,14 @@ namespace ModiBuff.Core
 		public void Add(int id, IUnit target, IUnit source)
 		{
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);
+			bool instanceStackable = tag.HasTag(TagType.IsInstanceStackable);
+			bool useDictionaryIndexes = Config.UseDictionaryIndexes;
 
-			if (!tag.HasTag(TagType.IsInstanceStackable))
+			if (!instanceStackable)
 			{
 				bool exists;
 				int index;
-				if (Config.UseDictionaryIndexes)
+				if (useDictionaryIndexes)
 					exists = _modifierIndexesDict.TryGetValue(id, out index);
 				else
 				{
@@ -293,9 +295,9 @@ namespace ModiBuff.Core
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
 			modifier.UpdateSingleTargetSource(target, source);
 
-			if (!tag.HasTag(TagType.IsInstanceStackable))
+			if (!instanceStackable)
 			{
-				if (Config.UseDictionaryIndexes)
+				if (useDictionaryIndexes)
 					_modifierIndexesDict.Add(id, _modifiersTop);
 				else
 					_modifierIndexes[id] = _modifiersTop;

@@ -71,15 +71,21 @@ namespace ModiBuff.Core
 			if (effect is IRevertEffect revertEffect && revertEffect.IsRevertible)
 			{
 				valid = false;
-				Logger.LogError(
-					$"[ModiBuff] ModifierLessEffects effects cannot be revertible. Effect {effect.GetType().Name} is revertible");
+				Logger.LogError("[ModiBuff] ModifierLessEffects effects cannot be revertible. " +
+				                $"Effect {effect.GetType().Name} is revertible");
 			}
 
 			if (effect is IMutableStateEffect mutableStateEffect && mutableStateEffect.UsesMutableState)
 			{
 				valid = false;
-				Logger.LogError(
-					$"[ModiBuff] ModifierLessEffects effects cannot use mutable state. Effect {effect.GetType().Name} uses mutable state");
+				Logger.LogError("[ModiBuff] ModifierLessEffects effects cannot use mutable state. " +
+				                $"Effect {effect.GetType().Name} uses mutable state");
+			}
+
+			if (effect is IShallowClone && !(effect is IMutableStateEffect))
+			{
+				Logger.LogWarning("[ModiBuff] ModifierLessEffects effects shouldn't be clone-only, " +
+				                  $"implement IMutableStateEffect if it's not. Effect {effect.GetType().Name}");
 			}
 
 			return valid;
