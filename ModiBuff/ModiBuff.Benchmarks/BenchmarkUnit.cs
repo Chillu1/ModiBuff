@@ -1,6 +1,5 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
-using ModiBuff.Core.Units.Interfaces.NonGeneric;
 
 namespace ModiBuff.Tests
 {

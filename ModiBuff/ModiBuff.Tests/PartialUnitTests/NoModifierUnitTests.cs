@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
-using ModiBuff.Core.Units.Interfaces.NonGeneric;
 using NUnit.Framework;
 using IEventOwner = ModiBuff.Core.IEventOwner;
 
@@ -12,8 +11,8 @@ namespace ModiBuff.Tests
 		protected override void SetupUnitFactory() =>
 			UnitFactory = (health, damage, heal, mana, type, tag) => new NoModifierUnit(health, type);
 
-		public sealed class NoModifierUnit : IUnit, IDamagable, IEventOwner,
-			ICallbackRegistrable<CallbackType>, IUnitEntity, IHealthCost
+		public sealed class NoModifierUnit : IUnit, IDamagable, IEventOwner, IUnitEntity,
+			ICallbackRegistrable<CallbackType>, IKillable
 		{
 			public UnitTag UnitTag { get; }
 			public UnitType UnitType { get; }
@@ -63,11 +62,6 @@ namespace ModiBuff.Tests
 				}
 
 				return dealtDamage;
-			}
-
-			public void UseHealth(float value)
-			{
-				Health -= value;
 			}
 
 			public void RegisterCallbacks(Callback<CallbackType>[] callbacks)

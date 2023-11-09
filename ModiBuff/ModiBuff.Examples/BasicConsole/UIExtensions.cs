@@ -1,6 +1,7 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using ModiBuff.Core.Units.Interfaces.NonGeneric;
+using IDamagable = ModiBuff.Core.Units.Interfaces.NonGeneric.IDamagable;
 
 namespace ModiBuff.Examples.BasicConsole
 {

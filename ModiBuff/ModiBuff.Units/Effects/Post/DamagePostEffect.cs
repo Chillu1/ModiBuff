@@ -12,8 +12,10 @@ namespace ModiBuff.Core.Units
 		public void Effect(float value, IUnit target, IUnit source)
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
+			if (!(target is IAttackable<float, float> attackableTarget))
+				return;
 
-			((IDamagable<float, float, float, float>)target).TakeDamage(value, source);
+			attackableTarget.TakeDamage(value, source);
 		}
 	}
 }

@@ -1,12 +1,16 @@
 namespace ModiBuff.Core.Units
 {
-	public interface IDamagable<out THealth, out TMaxHealth>
+	public interface IDamagable
+	{
+	}
+
+	public interface IDamagable<out THealth, out TMaxHealth> : IDamagable
 	{
 		THealth Health { get; }
 		TMaxHealth MaxHealth { get; }
 	}
 
-	public interface IAttackable<in TDamage, out TReturnDamageInfo>
+	public interface IAttackable<in TDamage, out TReturnDamageInfo> : IDamagable
 	{
 		TReturnDamageInfo TakeDamage(TDamage damage, IUnit source);
 	}

@@ -4,6 +4,7 @@ using ModiBuff.Core.Units;
 using ModiBuff.Core.Units.Interfaces.NonGeneric;
 using NUnit.Framework;
 using IEventOwner = ModiBuff.Core.IEventOwner;
+using IDamagable = ModiBuff.Core.Units.Interfaces.NonGeneric.IDamagable;
 
 namespace ModiBuff.Tests
 {
@@ -12,8 +13,8 @@ namespace ModiBuff.Tests
 		protected override void SetupUnitFactory() =>
 			UnitFactory = (health, damage, heal, mana, type, tag) => new DamagableUnit(health, type);
 
-		public sealed class DamagableUnit : IUnit, IModifierOwner, IDamagable, IEventOwner,
-			ICallbackRegistrable<CallbackType>, IUpdatable, IUnitEntity, IHealthCost, IModifierApplierOwner
+		public sealed class DamagableUnit : IUnit, IModifierOwner, IDamagable, IEventOwner, IUpdatable,
+			IUnitEntity, ICallbackRegistrable<CallbackType>, IHealthCost, IModifierApplierOwner, IKillable
 		{
 			public UnitTag UnitTag { get; }
 			public UnitType UnitType { get; }

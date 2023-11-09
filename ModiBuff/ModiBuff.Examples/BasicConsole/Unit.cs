@@ -1,6 +1,7 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using ModiBuff.Core.Units.Interfaces.NonGeneric;
+using IDamagable = ModiBuff.Core.Units.Interfaces.NonGeneric.IDamagable;
 
 namespace ModiBuff.Examples.BasicConsole
 {
@@ -11,7 +12,7 @@ namespace ModiBuff.Examples.BasicConsole
 	///		we inherit from ModiBuff.Units interfaces, to use one effect from there
 	/// </summary>
 	public sealed class Unit : IModifierOwner, IUpdatable, IDamagable, IAttacker, IHealable,
-		ISingleStatusEffectOwner, IModifierApplierOwner
+		ISingleStatusEffectOwner, IModifierApplierOwner, IKillable
 	{
 		//Every unit that can have modifiers needs to inherit IModifierOwner
 		//By inheriting it we need to implement the ModifierController property

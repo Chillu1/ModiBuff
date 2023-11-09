@@ -103,7 +103,7 @@ namespace ModiBuff.Tests
 				.Callback(new Callback<CallbackType>(CallbackType.PoisonDamage,
 					new PoisonEvent((target, source, stacks, totalStacks, damage) =>
 					{
-						((IDamagable<float, float, float, float>)source).TakeDamage(damage, target);
+						((IAttackable<float, float>)source).TakeDamage(damage, target);
 					})));
 			Setup();
 
