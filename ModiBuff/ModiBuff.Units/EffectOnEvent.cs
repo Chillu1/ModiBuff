@@ -11,7 +11,6 @@ namespace ModiBuff.Core.Units
 		//WhenEvaded,
 		//WhenHit, //When attack connects
 		//WhenDamaged, //When attack deals damage
-		WhenCast,
 		WhenKilled,
 		WhenHealed,
 

@@ -89,7 +89,7 @@ namespace ModiBuff.Tests
 					switch (callback.CallbackType)
 					{
 						case CallbackType.CurrentHealthChanged:
-							if (CheckCallback(callback.Action, out HealthChangedEvent healthEvent))
+							if (callback.CheckCallback(out HealthChangedEvent healthEvent))
 							{
 								healthEvent.Invoke(this, this, Health, 0f);
 								_healthChangedEvents.Add(healthEvent);
@@ -112,8 +112,9 @@ namespace ModiBuff.Tests
 					switch (callback.CallbackType)
 					{
 						case CallbackType.CurrentHealthChanged:
-							if (_healthChangedEvents.Remove((HealthChangedEvent)callback.Action))
-								((HealthChangedEvent)callback.Action).Invoke(this, this, Health, 0f);
+							var @event = (HealthChangedEvent)callback.Action;
+							if (_healthChangedEvents.Remove(@event))
+								@event.Invoke(this, this, Health, 0f);
 							break;
 						default:
 							Logger.Log(
@@ -126,19 +127,6 @@ namespace ModiBuff.Tests
 			public void ResetEventCounters()
 			{
 				_healthChangedCounter = 0;
-			}
-
-			private static bool CheckCallback<TCallback>(object callbackObject, out TCallback callbackOut)
-			{
-				if (!(callbackObject is TCallback callback))
-				{
-					Logger.LogError($"objectDelegate is not of type {nameof(TCallback)}, use named delegates instead.");
-					callbackOut = default;
-					return false;
-				}
-
-				callbackOut = callback;
-				return true;
 			}
 		}
 

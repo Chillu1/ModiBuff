@@ -34,6 +34,8 @@ namespace ModiBuff.Tests
 
 			public float Attack(IUnit target)
 			{
+				this.ApplyAllAttackModifier((IModifierOwner)target);
+
 				return ((IDamagable)target).TakeDamage(Damage, this);
 			}
 		}

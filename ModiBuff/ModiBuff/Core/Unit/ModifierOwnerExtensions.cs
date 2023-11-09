@@ -19,7 +19,7 @@ namespace ModiBuff.Core
 		}
 
 		//TODO Remove?
-		public static void TryCastEffect(this IModifierOwner owner, int effectId, IModifierOwner target)
+		public static void TryCastEffect(this IModifierOwner owner, int effectId, IUnit target)
 		{
 			if (owner.ModifierController.CanCastEffect(effectId))
 				target.ApplyEffect(effectId, owner);

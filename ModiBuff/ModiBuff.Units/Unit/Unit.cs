@@ -70,7 +70,6 @@ namespace ModiBuff.Core.Units
 
 			_whenAttackedEffects = new List<IEffect>();
 			_afterAttackedEffects = new List<IEffect>();
-			_whenCastEffects = new List<IEffect>();
 			_whenDeathEffects = new List<IEffect>();
 			_whenHealedEffects = new List<IEffect>();
 			_beforeAttackEffects = new List<IEffect>();
@@ -143,7 +142,8 @@ namespace ModiBuff.Core.Units
 
 			_onAttackCounter++;
 
-			this.ApplyAllAttackModifier((IModifierOwner)target);
+			if (target is IModifierOwner modifierOwner)
+				this.ApplyAllAttackModifier(modifierOwner);
 
 			if (_onAttackCounter <= MaxRecursionEventCount)
 			{
@@ -284,6 +284,32 @@ namespace ModiBuff.Core.Units
 			}
 
 			return valueHealed;
+		}
+
+		public void TryCast(int modifierId, IUnit target)
+		{
+			if (!(target is IModifierOwner modifierTarget))
+				return;
+			if (!modifierId.IsLegalTarget((IUnitEntity)target, this))
+				return;
+			if (!StatusEffectController.HasLegalAction(LegalAction.Cast))
+				return;
+			if (!ModifierController.CanCastModifier(modifierId))
+				return;
+
+			_onCastCounter++;
+			if (_onCastCounter <= MaxRecursionEventCount)
+				for (int i = 0; i < _onCastEffects.Count; i++)
+					_onCastEffects[i].Effect(target, this);
+
+			modifierTarget.ModifierController.Add(modifierId, modifierTarget, this);
+
+			if (_onCastCounter <= MaxRecursionEventCount)
+			{
+				if (target is IEventOwner<EffectOnEvent> eventTarget)
+					eventTarget.ResetEventCounters();
+				ResetEventCounters();
+			}
 		}
 
 		public void AddDamage(float damage)

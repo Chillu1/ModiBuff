@@ -29,7 +29,7 @@ namespace ModiBuff.Tests
 			unit.ModifierController.Add(ModifierIdManager.GetIdOld(name), target, unit);
 		}
 
-		internal static void ApplyEffectTarget(this IModifierOwner unit, string name, IUnit target)
+		internal static void ApplyEffectTarget(this IUnit unit, string name, IUnit target)
 		{
 			CheckForSetup(unit);
 			target.ApplyEffect(EffectIdManager.GetIdOld(name), unit);
@@ -59,12 +59,17 @@ namespace ModiBuff.Tests
 			return unit.ModifierController.TryAddEffectApplier(EffectIdManager.GetIdOld(name));
 		}
 
+		internal static void TryCast(this Unit unit, string name, IModifierOwner target)
+		{
+			unit.TryCast(ModifierIdManager.GetIdOld(name), target);
+		}
+
 		internal static void TryCast(this IModifierOwner unit, string name, IModifierOwner target)
 		{
 			unit.TryCast(ModifierIdManager.GetIdOld(name), target);
 		}
 
-		internal static void TryCastEffect(this IModifierOwner unit, string name, IModifierOwner target)
+		internal static void TryCastEffect(this IModifierOwner unit, string name, IUnit target)
 		{
 			unit.TryCastEffect(EffectIdManager.GetIdOld(name), target);
 		}

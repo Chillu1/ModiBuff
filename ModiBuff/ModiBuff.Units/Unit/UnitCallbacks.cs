@@ -25,6 +25,7 @@ namespace ModiBuff.Core.Units
 			_whenAttackedCounter,
 			_afterAttackedCounter,
 			_healthChangedCounter,
+			_onCastCounter,
 			_onKillCounter,
 			_healCounter,
 			_healTargetCounter,
@@ -36,7 +37,6 @@ namespace ModiBuff.Core.Units
 		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
 		private readonly List<IEffect> _whenAttackedEffects,
 			_afterAttackedEffects,
-			_whenCastEffects,
 			_whenDeathEffects,
 			_whenHealedEffects;
 
@@ -64,8 +64,8 @@ namespace ModiBuff.Core.Units
 		public void ResetEventCounters()
 		{
 			_preAttackCounter = _onAttackCounter = _whenAttackedCounter = _afterAttackedCounter =
-				_healthChangedCounter = _onKillCounter = _healCounter = _healTargetCounter =
-					_addDamageCounter = _poisonDamageCounter = 0;
+				_healthChangedCounter = _onCastCounter = _onKillCounter = _healCounter =
+					_healTargetCounter = _addDamageCounter = _poisonDamageCounter = 0;
 		}
 
 		public void AddEffectEvent(IEffect effect, EffectOnEvent @event)
@@ -77,9 +77,6 @@ namespace ModiBuff.Core.Units
 					break;
 				case EffectOnEvent.AfterAttacked:
 					_afterAttackedEffects.Add(effect);
-					break;
-				case EffectOnEvent.WhenCast:
-					_whenCastEffects.Add(effect);
 					break;
 				case EffectOnEvent.WhenKilled:
 					_whenDeathEffects.Add(effect);
@@ -119,9 +116,6 @@ namespace ModiBuff.Core.Units
 					break;
 				case EffectOnEvent.AfterAttacked:
 					Remove(_afterAttackedEffects, effect);
-					break;
-				case EffectOnEvent.WhenCast:
-					Remove(_whenCastEffects, effect);
 					break;
 				case EffectOnEvent.WhenKilled:
 					Remove(_whenDeathEffects, effect);
@@ -208,15 +202,15 @@ namespace ModiBuff.Core.Units
 				switch (callback.CallbackType)
 				{
 					case CallbackType.Dispel:
-						if (CheckCallback(callback.Action, out DispelEvent dispelEvent))
+						if (callback.CheckCallback(out DispelEvent dispelEvent))
 							_dispelEvents.Add(dispelEvent);
 						break;
 					case CallbackType.PoisonDamage:
-						if (CheckCallback(callback.Action, out PoisonEvent poisonEvent))
+						if (callback.CheckCallback(out PoisonEvent poisonEvent))
 							_poisonEvents.Add(poisonEvent);
 						break;
 					case CallbackType.CurrentHealthChanged:
-						if (CheckCallback(callback.Action, out HealthChangedEvent healthEvent))
+						if (callback.CheckCallback(out HealthChangedEvent healthEvent))
 						{
 							healthEvent.Invoke(this, this, Health, 0f);
 							_healthChangedEvents.Add(healthEvent);
@@ -224,7 +218,7 @@ namespace ModiBuff.Core.Units
 
 						break;
 					case CallbackType.DamageChanged:
-						if (CheckCallback(callback.Action, out DamageChangedEvent damageEvent))
+						if (callback.CheckCallback(out DamageChangedEvent damageEvent))
 						{
 							damageEvent.Invoke(this, Damage, 0f);
 							_damageChangedEvents.Add(damageEvent);
@@ -232,11 +226,11 @@ namespace ModiBuff.Core.Units
 
 						break;
 					case CallbackType.StrongHit:
-						if (CheckCallback(callback.Action, out UnitCallback unitCallback))
+						if (callback.CheckCallback(out UnitCallback unitCallback))
 							_strongHitUnitCallbacks.Add(unitCallback);
 						break;
 					case CallbackType.StatusEffectAdded:
-						if (CheckCallback(callback.Action, out StatusEffectEvent statusEffectEvent))
+						if (callback.CheckCallback(out StatusEffectEvent statusEffectEvent))
 						{
 							_statusEffectController.TriggerEvent(statusEffectEvent);
 							_statusEffectAddedEvents.Add(statusEffectEvent);
@@ -244,7 +238,7 @@ namespace ModiBuff.Core.Units
 
 						break;
 					case CallbackType.StatusEffectRemoved:
-						if (CheckCallback(callback.Action, out StatusEffectEvent statusEffectRemovedEvent))
+						if (callback.CheckCallback(out StatusEffectEvent statusEffectRemovedEvent))
 						{
 							_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
 							_statusEffectRemovedEvents.Add(statusEffectRemovedEvent);
@@ -271,23 +265,27 @@ namespace ModiBuff.Core.Units
 						_poisonEvents.Remove((PoisonEvent)callback.Action);
 						break;
 					case CallbackType.CurrentHealthChanged:
-						if (_healthChangedEvents.Remove((HealthChangedEvent)callback.Action))
-							((HealthChangedEvent)callback.Action).Invoke(this, this, Health, 0f);
+						var healthChangedEvent = (HealthChangedEvent)callback.Action;
+						if (_healthChangedEvents.Remove(healthChangedEvent))
+							healthChangedEvent.Invoke(this, this, Health, 0f);
 						break;
 					case CallbackType.DamageChanged:
-						if (_damageChangedEvents.Remove((DamageChangedEvent)callback.Action))
-							((DamageChangedEvent)callback.Action).Invoke(this, Damage, 0f);
+						var damageChangedEvent = (DamageChangedEvent)callback.Action;
+						if (_damageChangedEvents.Remove(damageChangedEvent))
+							damageChangedEvent.Invoke(this, Damage, 0f);
 						break;
 					case CallbackType.StrongHit:
 						_strongHitUnitCallbacks.Remove((UnitCallback)callback.Action);
 						break;
 					case CallbackType.StatusEffectAdded:
-						if (_statusEffectAddedEvents.Remove((StatusEffectEvent)callback.Action))
-							_statusEffectController.TriggerEvent((StatusEffectEvent)callback.Action);
+						var statusEffectEvent = (StatusEffectEvent)callback.Action;
+						if (_statusEffectAddedEvents.Remove(statusEffectEvent))
+							_statusEffectController.TriggerEvent(statusEffectEvent);
 						break;
 					case CallbackType.StatusEffectRemoved:
-						if (_statusEffectRemovedEvents.Remove((StatusEffectEvent)callback.Action))
-							_statusEffectController.TriggerEvent((StatusEffectEvent)callback.Action);
+						var statusEffectRemovedEvent = (StatusEffectEvent)callback.Action;
+						if (_statusEffectRemovedEvents.Remove(statusEffectRemovedEvent))
+							_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();
@@ -300,15 +298,15 @@ namespace ModiBuff.Core.Units
 			switch (callbackType)
 			{
 				case CallbackType.Dispel:
-					if (CheckCallback(callback, out DispelEvent dispelEvent))
+					if (callback.CheckCallback(out DispelEvent dispelEvent))
 						_dispelEvents.Add(dispelEvent);
 					break;
 				case CallbackType.PoisonDamage:
-					if (CheckCallback(callback, out PoisonEvent poisonEvent))
+					if (callback.CheckCallback(out PoisonEvent poisonEvent))
 						_poisonEvents.Add(poisonEvent);
 					break;
 				case CallbackType.CurrentHealthChanged:
-					if (CheckCallback(callback, out HealthChangedEvent healthEvent))
+					if (callback.CheckCallback(out HealthChangedEvent healthEvent))
 					{
 						healthEvent.Invoke(this, this, Health, 0f);
 						_healthChangedEvents.Add(healthEvent);
@@ -316,7 +314,7 @@ namespace ModiBuff.Core.Units
 
 					break;
 				case CallbackType.DamageChanged:
-					if (CheckCallback(callback, out DamageChangedEvent damageEvent))
+					if (callback.CheckCallback(out DamageChangedEvent damageEvent))
 					{
 						damageEvent.Invoke(this, Damage, 0f);
 						_damageChangedEvents.Add(damageEvent);
@@ -324,7 +322,7 @@ namespace ModiBuff.Core.Units
 
 					break;
 				case CallbackType.StatusEffectAdded:
-					if (CheckCallback(callback, out StatusEffectEvent statusEffectEvent))
+					if (callback.CheckCallback(out StatusEffectEvent statusEffectEvent))
 					{
 						_statusEffectController.TriggerEvent(statusEffectEvent);
 						_statusEffectAddedEvents.Add(statusEffectEvent);
@@ -332,7 +330,7 @@ namespace ModiBuff.Core.Units
 
 					break;
 				case CallbackType.StatusEffectRemoved:
-					if (CheckCallback(callback, out StatusEffectEvent statusEffectRemovedEvent))
+					if (callback.CheckCallback(out StatusEffectEvent statusEffectRemovedEvent))
 					{
 						_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
 						_statusEffectRemovedEvents.Add(statusEffectRemovedEvent);
@@ -355,20 +353,24 @@ namespace ModiBuff.Core.Units
 					_poisonEvents.Remove((PoisonEvent)callback);
 					break;
 				case CallbackType.CurrentHealthChanged:
-					if (_healthChangedEvents.Remove((HealthChangedEvent)callback))
-						((HealthChangedEvent)callback).Invoke(this, this, Health, 0f);
+					var healthChangedEvent = (HealthChangedEvent)callback;
+					if (_healthChangedEvents.Remove(healthChangedEvent))
+						healthChangedEvent.Invoke(this, this, Health, 0f);
 					break;
 				case CallbackType.DamageChanged:
-					if (_damageChangedEvents.Remove((DamageChangedEvent)callback))
-						((DamageChangedEvent)callback).Invoke(this, Damage, 0f);
+					var damageChangedEvent = (DamageChangedEvent)callback;
+					if (_damageChangedEvents.Remove(damageChangedEvent))
+						damageChangedEvent.Invoke(this, Damage, 0f);
 					break;
 				case CallbackType.StatusEffectAdded:
-					if (_statusEffectAddedEvents.Remove((StatusEffectEvent)callback))
-						_statusEffectController.TriggerEvent((StatusEffectEvent)callback);
+					var statusEffectEvent = (StatusEffectEvent)callback;
+					if (_statusEffectAddedEvents.Remove(statusEffectEvent))
+						_statusEffectController.TriggerEvent(statusEffectEvent);
 					break;
 				case CallbackType.StatusEffectRemoved:
-					if (_statusEffectRemovedEvents.Remove((StatusEffectEvent)callback))
-						_statusEffectController.TriggerEvent((StatusEffectEvent)callback);
+					var statusEffectRemovedEvent = (StatusEffectEvent)callback;
+					if (_statusEffectRemovedEvents.Remove(statusEffectRemovedEvent))
+						_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
@@ -385,19 +387,6 @@ namespace ModiBuff.Core.Units
 		{
 			for (int i = 0; i < callbacks.Length; i++)
 				UnRegisterCallback(callbackType, callbacks[i]);
-		}
-
-		private static bool CheckCallback<TCallback>(object callbackObject, out TCallback callbackOut)
-		{
-			if (!(callbackObject is TCallback callback))
-			{
-				Logger.LogError($"objectDelegate is not of type {nameof(TCallback)}, use named delegates instead.");
-				callbackOut = default;
-				return false;
-			}
-
-			callbackOut = callback;
-			return true;
 		}
 	}
 }
