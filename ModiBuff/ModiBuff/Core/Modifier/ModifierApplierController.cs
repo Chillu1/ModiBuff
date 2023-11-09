@@ -4,8 +4,6 @@ namespace ModiBuff.Core
 {
 	public sealed class ModifierApplierController
 	{
-		private readonly IUnit _owner;
-
 		private readonly List<int> _modifierAttackAppliers;
 
 		//TODO Will there be cast modifier without any appliers?
@@ -16,10 +14,8 @@ namespace ModiBuff.Core
 
 		private readonly List<int> _effectCasts;
 
-		public ModifierApplierController(IUnit owner)
+		public ModifierApplierController()
 		{
-			_owner = owner;
-
 			_modifierAttackAppliers = new List<int>(Config.AttackApplierSize);
 			_modifierCastAppliers = new List<int>(Config.CastApplierSize);
 			_modifierCastChecksAppliers = new Dictionary<int, ModifierCheck>(Config.CastCheckApplierSize);
@@ -46,30 +42,30 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Only triggers the check, does not trigger the modifiers effect. Used when modifiers 
 		/// </summary>
-		public bool TryCastCheck(int id)
+		internal bool TryCastCheck(int id, IModifierApplierOwner owner)
 		{
-			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.Check(_owner);
+			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.Check(owner);
 		}
 
 		/// <summary>
 		///		Checks if we can cast the modifier, triggers the check if it exists
 		/// </summary>
-		public bool CanCastModifier(int id)
+		internal bool CanCastModifier(int id, IModifierApplierOwner owner)
 		{
 			if (_modifierCastAppliers.Contains(id))
 				return true;
 
-			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.Check(_owner);
+			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.Check(owner);
 		}
 
 		public bool CanCastEffect(int id) => _effectCasts.Contains(id);
 
-		public bool CanUseAttackModifier(int id)
+		internal bool CanUseAttackModifier(int id, IModifierApplierOwner owner)
 		{
 			if (_modifierAttackAppliers.Contains(id))
 				return true;
 
-			return _modifierAttackChecksAppliers.TryGetValue(id, out var check) && check.Check(_owner);
+			return _modifierAttackChecksAppliers.TryGetValue(id, out var check) && check.Check(owner);
 		}
 
 		public bool TryAddApplier(int id, bool hasApplyChecks, ApplierType applierType)

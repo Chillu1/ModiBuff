@@ -145,5 +145,14 @@ namespace ModiBuff.Tests
 			Enemy.TryCastEffect("InitDamage", Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
+
+		[Test]
+		public void TryApplyApplierEffect_NoModifiersUnit()
+		{
+			AddEffect("InitDamageApplier", new ApplierEffect("InitDamage"));
+			Setup();
+
+			Unit.ApplyEffectSelf("InitDamageApplier");
+		}
 	}
 }

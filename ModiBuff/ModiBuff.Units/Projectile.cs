@@ -23,15 +23,8 @@ namespace ModiBuff.Core.Units
 			//Position += velocity * deltaTime;
 		}
 
-		public void Move(Vector2 value) => Move(value.X, value.Y);
-
-		public void Move(float x, float y)
-		{
-			var position = Position;
-			position.X += x;
-			position.Y += y;
-			Position = position;
-		}
+		public void Move(float x, float y) => Move(new Vector2(x, y));
+		public void Move(Vector2 value) => Position += value;
 
 		public void Hit(IUnit unit)
 		{

@@ -47,7 +47,7 @@ namespace ModiBuff.Examples.BasicConsole
 			//Remember to create the modifier controller in the constructor
 			//and feed it the owner (this)
 			ModifierController = new ModifierController();
-			ModifierApplierController = new ModifierApplierController(this);
+			ModifierApplierController = new ModifierApplierController();
 			StatusEffectController = new StatusEffectController();
 			_targetingSystem = new TargetingSystem();
 		}

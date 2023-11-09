@@ -37,7 +37,7 @@ namespace ModiBuff.Tests
 				MaxHealth = Health = health;
 
 				ModifierController = new ModifierController();
-				ModifierApplierController = new ModifierApplierController(this);
+				ModifierApplierController = new ModifierApplierController();
 				_healthChangedEvents = new List<HealthChangedEvent>();
 			}
 

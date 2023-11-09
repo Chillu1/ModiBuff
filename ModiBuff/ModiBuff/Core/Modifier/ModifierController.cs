@@ -96,20 +96,6 @@ namespace ModiBuff.Core
 			return default;
 		}
 
-		public void TryApplyAttackNonCheckModifiers(IEnumerable<int> modifierIds, IUnit target, IUnit source)
-		{
-			foreach (int id in modifierIds)
-				Add(id, target, source);
-		}
-
-		public void TryApplyAttackCheckModifiers(IEnumerable<ModifierCheck> modifierChecks, IUnit target,
-			IUnit source)
-		{
-			foreach (var check in modifierChecks)
-				if (check.Check(source))
-					Add(check.Id, target, source);
-		}
-
 		public void Add(int id, IUnit target, IUnit source)
 		{
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);
@@ -170,9 +156,7 @@ namespace ModiBuff.Core
 		public bool Contains(int id)
 		{
 			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
-			{
 				return Config.UseDictionaryIndexes ? _modifierIndexesDict.ContainsKey(id) : _modifierIndexes[id] != -1;
-			}
 
 			for (int i = 0; i < _modifiersTop; i++)
 				if (_modifiers[i].Id == id)

@@ -95,7 +95,7 @@ namespace ModiBuff.Core.Units
 			_auraModifiers = new List<Modifier>();
 
 			ModifierController = new ModifierController();
-			ModifierApplierController = new ModifierApplierController(this);
+			ModifierApplierController = new ModifierApplierController();
 			_statusEffectController = new MultiInstanceStatusEffectController
 				(this, _statusEffectAddedEvents, _statusEffectRemovedEvents);
 			_singleInstanceStatusEffectController = new StatusEffectController();
@@ -106,7 +106,7 @@ namespace ModiBuff.Core.Units
 			: this(health, damage, unitType: unitType, unitTag: unitTag)
 		{
 			foreach (var modifierAddReference in modifierAddReferences)
-				this.TryAddModifier(modifierAddReference);
+				this.TryAddModifierReference(modifierAddReference);
 		}
 
 		public void Update(float deltaTime)
@@ -165,6 +165,9 @@ namespace ModiBuff.Core.Units
 			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
+			var killableTarget = target as IKillable;
+			bool wasDead = killableTarget != null && killableTarget.IsDead;
+
 			_onAttackCounter++;
 
 			if (target is IModifierOwner modifierOwner)
@@ -177,11 +180,11 @@ namespace ModiBuff.Core.Units
 			}
 
 			float dealtDamage = 0;
-			if (target is IDamagable<float, float, float, float> damagableTarget)
+			if (target is IAttackable<float, float> damagableTarget)
 			{
 				dealtDamage = damagableTarget.TakeDamage(Damage, this);
 
-				if (damagableTarget.Health <= 0)
+				if (killableTarget != null && killableTarget.IsDead && !wasDead)
 				{
 					_onKillCounter++;
 
@@ -320,7 +323,7 @@ namespace ModiBuff.Core.Units
 				return;
 			if (!StatusEffectController.HasLegalAction(LegalAction.Cast))
 				return;
-			if (!ModifierApplierController.CanCastModifier(modifierId))
+			if (!this.CanCastModifier(modifierId))
 				return;
 
 			_onCastCounter++;
@@ -362,15 +365,8 @@ namespace ModiBuff.Core.Units
 			Mana -= value;
 		}
 
-		public void Move(Vector2 value) => Move(value.X, value.Y);
-
-		public void Move(float x, float y)
-		{
-			var position = Position;
-			position.X += x;
-			position.Y += y;
-			Position = position;
-		}
+		public void Move(float x, float y) => Move(new Vector2(x, y));
+		public void Move(Vector2 value) => Position += value;
 
 		public float TakeDamagePoison(float damage, int stacks, int totalStacks, IUnit source)
 		{

@@ -57,7 +57,7 @@ namespace ModiBuff.Core.Units
 			_targeting.UpdateTargetSource(target, source, out var effectTarget, out var effectSource);
 			float returnDamageInfo = 0;
 
-			if (effectTarget is IDamagable<float, float, float, float> damagableTarget)
+			if (effectTarget is IAttackable<float, float> damagableTarget)
 			{
 				float damage = _baseDamage;
 

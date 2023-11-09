@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace ModiBuff.Core
@@ -41,7 +40,10 @@ namespace ModiBuff.Core
 		public void Effect(IUnit target, IUnit source)
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
-			((IModifierOwner)target).ModifierController.Add(_modifierId, target, source);
+			if (!(target is IModifierOwner modifierOwnerTarget))
+				return;
+
+			modifierOwnerTarget.ModifierController.Add(_modifierId, target, source);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)

@@ -11,7 +11,7 @@ namespace ModiBuff.Core.Units
 			if (!owner.StatusEffectController.HasLegalAction(LegalAction.Cast))
 				return false;
 
-			if (!owner.ModifierApplierController.CanCastModifier(modifierId))
+			if (!owner.CanCastModifier(modifierId))
 				return false;
 
 			target.ModifierController.Add(modifierId, target, owner);
