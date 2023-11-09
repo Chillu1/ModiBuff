@@ -276,7 +276,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			int id = IdManager.GetId("InitStunInstanceStackable_Revertible");
-			Ally.ModifierController.TryAddApplier(id, false, ApplierType.Cast);
+			Ally.ModifierApplierController.TryAddApplier(id, false, ApplierType.Cast);
 
 			Unit.AddModifierSelf("InitStunInstanceStackable_Revertible"); //3s
 			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));

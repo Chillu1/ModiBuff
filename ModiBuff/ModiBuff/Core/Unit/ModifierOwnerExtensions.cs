@@ -7,10 +7,34 @@ namespace ModiBuff.Core
 			owner.ModifierController.Add(id, owner, source);
 		}
 
-		//TODO Remove
-		public static void TryCast(this IModifierOwner owner, int modifierId, IModifierOwner target)
+		public static void TryAddModifier(this IUnit owner, ModifierAddReference reference)
 		{
-			if (owner.ModifierController.CanCastModifier(modifierId))
+			TryAddModifier(owner, reference, owner);
+		}
+
+		public static void TryAddModifier(this IUnit owner, ModifierAddReference reference, IUnit target)
+		{
+			if (reference.IsApplierType)
+			{
+				if (owner is IModifierApplierOwner modifierApplierOwner)
+					modifierApplierOwner.ModifierApplierController.TryAddApplier(reference.Id,
+						reference.HasApplyChecks, reference.ApplierType);
+				else
+					Logger.LogError("[ModiBuff] Tried to add an applier to a unit that is not IModifierApplierOwner");
+			}
+			else
+			{
+				if (owner is IModifierOwner modifierOwner)
+					modifierOwner.ModifierController.Add(reference.Id, target, owner);
+				else
+					Logger.LogError("[ModiBuff] Tried to add a modifier to a unit that is not IModifierOwner");
+			}
+		}
+
+		//TODO Remove
+		public static void TryCast(this IModifierApplierOwner owner, int modifierId, IModifierOwner target)
+		{
+			if (owner.ModifierApplierController.CanCastModifier(modifierId))
 				target.ModifierController.Add(modifierId, target, owner);
 #if DEBUG
 			else
@@ -19,9 +43,9 @@ namespace ModiBuff.Core
 		}
 
 		//TODO Remove?
-		public static void TryCastEffect(this IModifierOwner owner, int effectId, IUnit target)
+		public static void TryCastEffect(this IModifierApplierOwner owner, int effectId, IUnit target)
 		{
-			if (owner.ModifierController.CanCastEffect(effectId))
+			if (owner.ModifierApplierController.CanCastEffect(effectId))
 				target.ApplyEffect(effectId, owner);
 #if DEBUG
 			else
@@ -29,12 +53,12 @@ namespace ModiBuff.Core
 #endif
 		}
 
-		public static void ApplyAllAttackModifier(this IModifierOwner owner, IModifierOwner target)
+		public static void ApplyAllAttackModifier(this IModifierApplierOwner owner, IModifierOwner target)
 		{
 			target.ModifierController.TryApplyAttackNonCheckModifiers(
-				owner.ModifierController.GetApplierAttackModifierIds(), target, owner);
+				owner.ModifierApplierController.GetApplierAttackModifierIds(), target, owner);
 			target.ModifierController.TryApplyAttackCheckModifiers(
-				owner.ModifierController.GetApplierAttackCheckModifiers(), target, owner);
+				owner.ModifierApplierController.GetApplierAttackCheckModifiers(), target, owner);
 		}
 	}
 }

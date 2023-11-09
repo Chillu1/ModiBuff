@@ -13,7 +13,7 @@ namespace ModiBuff.Tests
 			UnitFactory = (health, damage, heal, mana, type, tag) => new DamagableUnit(health, type);
 
 		public sealed class DamagableUnit : IUnit, IModifierOwner, IDamagable, IEventOwner,
-			ICallbackRegistrable<CallbackType>, IUpdatable, IUnitEntity, IHealthCost
+			ICallbackRegistrable<CallbackType>, IUpdatable, IUnitEntity, IHealthCost, IModifierApplierOwner
 		{
 			public UnitTag UnitTag { get; }
 			public UnitType UnitType { get; }
@@ -23,6 +23,7 @@ namespace ModiBuff.Tests
 			public bool IsDead { get; private set; }
 
 			public ModifierController ModifierController { get; }
+			public ModifierApplierController ModifierApplierController { get; }
 
 			private const int MaxRecursionEventCount = 1;
 
@@ -35,13 +36,15 @@ namespace ModiBuff.Tests
 				UnitTag = UnitTag.Default;
 				MaxHealth = Health = health;
 
-				ModifierController = new ModifierController(this);
+				ModifierController = new ModifierController();
+				ModifierApplierController = new ModifierApplierController(this);
 				_healthChangedEvents = new List<HealthChangedEvent>();
 			}
 
 			public void Update(float delta)
 			{
 				ModifierController.Update(delta);
+				ModifierApplierController.Update(delta);
 			}
 
 			public float TakeDamage(float damage, IUnit source)

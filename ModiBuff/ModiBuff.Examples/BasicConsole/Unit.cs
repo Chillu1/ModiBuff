@@ -11,13 +11,16 @@ namespace ModiBuff.Examples.BasicConsole
 	///		we inherit from ModiBuff.Units interfaces, to use one effect from there
 	/// </summary>
 	public sealed class Unit : IModifierOwner, IUpdatable, IDamagable, IAttacker, IHealable,
-		ISingleStatusEffectOwner
+		ISingleStatusEffectOwner, IModifierApplierOwner
 	{
 		//Every unit that can have modifiers needs to inherit IModifierOwner
 		//By inheriting it we need to implement the ModifierController property
 		//The modifier controller is the only class for units that manages modifiers
 		//We simply add modifier ids to it, and it will handle the rest
 		public ModifierController ModifierController { get; }
+
+		//TODO Explain
+		public ModifierApplierController ModifierApplierController { get; }
 
 		//Basic implementation of status effects, unit can't attack when it's disarmed
 		//Move when it's rooted/frozen/stunned, etc.
@@ -43,7 +46,8 @@ namespace ModiBuff.Examples.BasicConsole
 
 			//Remember to create the modifier controller in the constructor
 			//and feed it the owner (this)
-			ModifierController = new ModifierController(this);
+			ModifierController = new ModifierController();
+			ModifierApplierController = new ModifierApplierController(this);
 			StatusEffectController = new StatusEffectController();
 			_targetingSystem = new TargetingSystem();
 		}
@@ -56,6 +60,7 @@ namespace ModiBuff.Examples.BasicConsole
 			//We need to update the modifier controller each frame/tick
 			//To update the modifier timers (interval, duration)
 			ModifierController.Update(deltaTime);
+			ModifierApplierController.Update(deltaTime);
 			StatusEffectController.Update(deltaTime);
 		}
 

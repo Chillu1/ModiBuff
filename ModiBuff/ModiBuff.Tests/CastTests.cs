@@ -84,7 +84,7 @@ namespace ModiBuff.Tests
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageFullHealth"), ApplierType.Cast);
 
-			Assert.True(Unit.ModifierController.TryCastCheck(id));
+			Assert.True(Unit.ModifierApplierController.TryCastCheck(id));
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
 
 			Assert.True(Unit.TryCastNoChecks(id, Enemy));

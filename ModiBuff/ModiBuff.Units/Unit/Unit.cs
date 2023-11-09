@@ -15,7 +15,7 @@ namespace ModiBuff.Core.Units
 	//IDamagable, IHealable, IAttacker, IHealer, IManaOwner, IHealthCost, IAddDamage, IEventOwner, IStatusEffectOwner
 
 	//Or the manual generic one:
-	public partial class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>,
+	public partial class Unit : IUpdatable, IModifierOwner, IModifierApplierOwner, IAttacker<float, float>,
 		IDamagable<float, float, float, float>, IHealable<float, float>, IHealer<float, float>,
 		IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker, IEventOwner<EffectOnEvent>,
 		IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance, IKillable,
@@ -40,6 +40,7 @@ namespace ModiBuff.Core.Units
 		public bool IsDead { get; private set; }
 
 		public ModifierController ModifierController { get; }
+		public ModifierApplierController ModifierApplierController { get; }
 
 		//Note: use one of these, not both
 		public IMultiInstanceStatusEffectController<LegalAction, StatusEffectType> StatusEffectController =>
@@ -93,7 +94,8 @@ namespace ModiBuff.Core.Units
 			_targetsInRange.Add(this);
 			_auraModifiers = new List<Modifier>();
 
-			ModifierController = new ModifierController(this);
+			ModifierController = new ModifierController();
+			ModifierApplierController = new ModifierApplierController(this);
 			_statusEffectController = new MultiInstanceStatusEffectController
 				(this, _statusEffectAddedEvents, _statusEffectRemovedEvents);
 			_singleInstanceStatusEffectController = new StatusEffectController();
@@ -104,7 +106,7 @@ namespace ModiBuff.Core.Units
 			: this(health, damage, unitType: unitType, unitTag: unitTag)
 		{
 			foreach (var modifierAddReference in modifierAddReferences)
-				ModifierController.TryAdd(modifierAddReference);
+				this.TryAddModifier(modifierAddReference);
 		}
 
 		public void Update(float deltaTime)
@@ -112,6 +114,7 @@ namespace ModiBuff.Core.Units
 			_statusEffectController.Update(deltaTime);
 			_singleInstanceStatusEffectController.Update(deltaTime);
 			ModifierController.Update(deltaTime);
+			ModifierApplierController.Update(deltaTime);
 			for (int i = 0; i < _auraModifiers.Count; i++)
 				_auraModifiers[i].Update(deltaTime);
 		}
@@ -245,6 +248,7 @@ namespace ModiBuff.Core.Units
 
 				//Unit Death TODO Destroy/pool unit
 				ModifierController.Clear();
+				ModifierApplierController.Clear();
 
 				IsDead = true;
 			}
@@ -316,7 +320,7 @@ namespace ModiBuff.Core.Units
 				return;
 			if (!StatusEffectController.HasLegalAction(LegalAction.Cast))
 				return;
-			if (!ModifierController.CanCastModifier(modifierId))
+			if (!ModifierApplierController.CanCastModifier(modifierId))
 				return;
 
 			_onCastCounter++;

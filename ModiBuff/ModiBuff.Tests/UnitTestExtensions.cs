@@ -40,23 +40,23 @@ namespace ModiBuff.Tests
 			return unit.ModifierController.Contains(ModifierIdManager.GetIdOld(name));
 		}
 
-		internal static bool ContainsApplier(this IModifierOwner unit, string name)
+		internal static bool ContainsApplier(this IModifierApplierOwner unit, string name)
 		{
-			return unit.ModifierController.ContainsApplier(ModifierIdManager.GetIdOld(name));
+			return unit.ModifierApplierController.ContainsApplier(ModifierIdManager.GetIdOld(name));
 		}
 
-		internal static bool AddApplierModifier(this IModifierOwner unit, IModifierGenerator generator,
+		internal static bool AddApplierModifier(this IModifierApplierOwner unit, IModifierGenerator generator,
 			ApplierType applierType)
 		{
 			CheckForSetup(unit);
-			return unit.ModifierController.TryAddApplier(generator.Id,
+			return unit.ModifierApplierController.TryAddApplier(generator.Id,
 				((IModifierApplyCheckGenerator)generator).HasApplyChecks, applierType);
 		}
 
-		internal static bool AddEffectApplier(this IModifierOwner unit, string name)
+		internal static bool AddEffectApplier(this IModifierApplierOwner unit, string name)
 		{
 			CheckForSetup(unit);
-			return unit.ModifierController.TryAddEffectApplier(EffectIdManager.GetIdOld(name));
+			return unit.ModifierApplierController.TryAddEffectApplier(EffectIdManager.GetIdOld(name));
 		}
 
 		internal static void TryCast(this Unit unit, string name, IModifierOwner target)
@@ -64,12 +64,12 @@ namespace ModiBuff.Tests
 			unit.TryCast(ModifierIdManager.GetIdOld(name), target);
 		}
 
-		internal static void TryCast(this IModifierOwner unit, string name, IModifierOwner target)
+		internal static void TryCast(this IModifierApplierOwner unit, string name, IModifierOwner target)
 		{
 			unit.TryCast(ModifierIdManager.GetIdOld(name), target);
 		}
 
-		internal static void TryCastEffect(this IModifierOwner unit, string name, IUnit target)
+		internal static void TryCastEffect(this IModifierApplierOwner unit, string name, IUnit target)
 		{
 			unit.TryCastEffect(EffectIdManager.GetIdOld(name), target);
 		}

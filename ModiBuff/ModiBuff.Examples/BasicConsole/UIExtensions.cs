@@ -6,9 +6,10 @@ namespace ModiBuff.Examples.BasicConsole
 {
 	public static class UIExtensions
 	{
-		public static void PrintStateAndModifiers(this IModifierOwner owner, ModifierRecipes modifierRecipes)
+		public static void PrintStateAndModifiers(this IModifierApplierOwner owner, ModifierRecipes modifierRecipes)
 		{
-			var modifierController = owner.ModifierController;
+			var modifierController = ((IModifierOwner)owner).ModifierController;
+			var modifierApplierController = owner.ModifierApplierController;
 			//Stats, ApplyModifiers, Normal modifiers.
 			var damagable = (IDamagable)owner;
 			var attacker = (IAttacker)owner;
@@ -16,7 +17,7 @@ namespace ModiBuff.Examples.BasicConsole
 			                    $"{attacker.Damage} Damage");
 			//Appliers
 			//Name, description, checks, (states, like cooldown)
-			var applierAttackIds = modifierController.GetApplierAttackModifierIds();
+			var applierAttackIds = modifierApplierController.GetApplierAttackModifierIds();
 			if (applierAttackIds != null && applierAttackIds.Count > 0)
 			{
 				Console.GameMessage("Player attack appliers:");
@@ -27,7 +28,7 @@ namespace ModiBuff.Examples.BasicConsole
 				}
 			}
 
-			var applierCastIds = modifierController.GetApplierCastModifierIds();
+			var applierCastIds = modifierApplierController.GetApplierCastModifierIds();
 			if (applierCastIds != null && applierCastIds.Count > 0)
 			{
 				Console.GameMessage("Player cast appliers:");
@@ -38,7 +39,7 @@ namespace ModiBuff.Examples.BasicConsole
 				}
 			}
 
-			var applierAttackChecks = modifierController.GetApplierAttackCheckModifiers();
+			var applierAttackChecks = modifierApplierController.GetApplierAttackCheckModifiers();
 			if (applierAttackChecks != null && applierAttackChecks.Count > 0)
 			{
 				Console.GameMessage("Player attack applier checks:");
@@ -72,7 +73,7 @@ namespace ModiBuff.Examples.BasicConsole
 				}
 			}
 
-			var applierCastChecks = modifierController.GetApplierCastCheckModifiers();
+			var applierCastChecks = modifierApplierController.GetApplierCastCheckModifiers();
 			if (applierCastChecks != null && applierCastChecks.Count > 0)
 			{
 				Console.GameMessage("Player attack applier checks:");

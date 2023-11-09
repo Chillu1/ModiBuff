@@ -43,8 +43,8 @@ namespace ModiBuff.Examples.BasicConsole
 			//But we're adding it as an applier, and not as a normal modifier
 			//This means that instead of it being applier to the player
 			//it will be applied to a unit that the player attacks
-			_player.ModifierController.TryAddApplier(_idManager.GetId("DoT"), false, ApplierType.Attack);
-			_player.ModifierController.TryAddApplier(_idManager.GetId("InitHeal"), false, ApplierType.Cast);
+			_player.ModifierApplierController.TryAddApplier(_idManager.GetId("DoT"), false, ApplierType.Attack);
+			_player.ModifierApplierController.TryAddApplier(_idManager.GetId("InitHeal"), false, ApplierType.Cast);
 			//_player.ModifierController.TryAddApplier(_idManager.GetId("DisarmChance"), true, ApplierType.Cast);
 		}
 
@@ -96,7 +96,7 @@ namespace ModiBuff.Examples.BasicConsole
 		private bool PlayerCastAction()
 		{
 			//Display all possible modifiers to cast, then when one was chosen, choose the target
-			var modifierIds = _player.ModifierController.GetApplierCastModifierIds();
+			var modifierIds = _player.ModifierApplierController.GetApplierCastModifierIds();
 
 			while (true)
 			{

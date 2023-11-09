@@ -22,7 +22,7 @@ namespace ModiBuff.Tests
 			UnitTag = UnitTag.Default;
 			MaxHealth = Health = health;
 
-			ModifierController = new ModifierController(this);
+			ModifierController = new ModifierController();
 		}
 
 		public void Update(float delta)
