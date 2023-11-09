@@ -13,8 +13,8 @@ namespace ModiBuff.Tests
 		protected override void SetupUnitFactory() =>
 			UnitFactory = (health, damage, heal, mana, type, tag) => new DamagableUnit(health, type);
 
-		public sealed class DamagableUnit : IUnit, IModifierOwner, IDamagable, IEventOwner, IUpdatable,
-			IUnitEntity, ICallbackRegistrable<CallbackType>, IHealthCost, IModifierApplierOwner, IKillable
+		public sealed class DamagableUnit : IUnit, IModifierOwner, IDamagable, IUpdatable,
+			IUnitEntity, IHealthCost, IModifierApplierOwner, IKillable
 		{
 			public UnitTag UnitTag { get; }
 			public UnitType UnitType { get; }
@@ -26,20 +26,14 @@ namespace ModiBuff.Tests
 			public ModifierController ModifierController { get; }
 			public ModifierApplierController ModifierApplierController { get; }
 
-			private const int MaxRecursionEventCount = 1;
-
-			private readonly List<HealthChangedEvent> _healthChangedEvents;
-			private int _healthChangedCounter;
-
 			public DamagableUnit(float health, UnitType unitType = UnitType.Good)
 			{
 				UnitType = unitType;
 				UnitTag = UnitTag.Default;
 				MaxHealth = Health = health;
 
-				ModifierController = new ModifierController();
-				ModifierApplierController = new ModifierApplierController();
-				_healthChangedEvents = new List<HealthChangedEvent>();
+				ModifierController = ModifierControllerPool.Instance.Rent();
+				ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
 			}
 
 			public void Update(float delta)
@@ -55,26 +49,10 @@ namespace ModiBuff.Tests
 
 				float dealtDamage = oldHealth - Health;
 
-				if (dealtDamage > 0)
-				{
-					_healthChangedCounter++;
-					if (_healthChangedCounter <= MaxRecursionEventCount)
-					{
-						for (int i = 0; i < _healthChangedEvents.Count; i++)
-							_healthChangedEvents[i](this, source, Health, dealtDamage);
-					}
-				}
-
 				if (Health <= 0 && !IsDead)
 				{
 					ModifierController.Clear();
 					IsDead = true;
-				}
-
-				if (_healthChangedCounter <= MaxRecursionEventCount)
-				{
-					ResetEventCounters();
-					(source as IEventOwner)?.ResetEventCounters();
 				}
 
 				return dealtDamage;
@@ -83,54 +61,6 @@ namespace ModiBuff.Tests
 			public void UseHealth(float value)
 			{
 				Health -= value;
-			}
-
-			public void RegisterCallbacks(Callback<CallbackType>[] callbacks)
-			{
-				for (int i = 0; i < callbacks.Length; i++)
-				{
-					var callback = callbacks[i];
-					switch (callback.CallbackType)
-					{
-						case CallbackType.CurrentHealthChanged:
-							if (callback.CheckCallback(out HealthChangedEvent healthEvent))
-							{
-								healthEvent.Invoke(this, this, Health, 0f);
-								_healthChangedEvents.Add(healthEvent);
-							}
-
-							break;
-						default:
-							Logger.Log(
-								$"CallbackType {callback.CallbackType} is not implemented. For unit {nameof(DamagableUnit)}.");
-							break;
-					}
-				}
-			}
-
-			public void UnRegisterCallbacks(Callback<CallbackType>[] callbacks)
-			{
-				for (int i = 0; i < callbacks.Length; i++)
-				{
-					var callback = callbacks[i];
-					switch (callback.CallbackType)
-					{
-						case CallbackType.CurrentHealthChanged:
-							var @event = (HealthChangedEvent)callback.Action;
-							if (_healthChangedEvents.Remove(@event))
-								@event.Invoke(this, this, Health, 0f);
-							break;
-						default:
-							Logger.Log(
-								$"CallbackType {callback.CallbackType} is not implemented. For unit {nameof(DamagableUnit)}.");
-							break;
-					}
-				}
-			}
-
-			public void ResetEventCounters()
-			{
-				_healthChangedCounter = 0;
 			}
 		}
 

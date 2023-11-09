@@ -45,10 +45,9 @@ namespace ModiBuff.Examples.BasicConsole
 			Health = MaxHealth = health;
 			Damage = damage;
 
-			//Remember to create the modifier controller in the constructor
-			//and feed it the owner (this)
-			ModifierController = new ModifierController();
-			ModifierApplierController = new ModifierApplierController();
+			//Remember to rent the modifier controllers in the constructor
+			ModifierController = ModifierControllerPool.Instance.Rent();
+			ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
 			StatusEffectController = new StatusEffectController();
 			_targetingSystem = new TargetingSystem();
 		}
@@ -118,6 +117,7 @@ namespace ModiBuff.Examples.BasicConsole
 			{
 				Health = 0;
 				IsDead = true;
+				ModifierControllerPool.Instance.Return(ModifierController);
 				DeathEvent?.Invoke(this, source);
 				Console.GameMessage($"{this} died");
 			}

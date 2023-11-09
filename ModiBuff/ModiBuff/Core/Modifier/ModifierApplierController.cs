@@ -150,7 +150,6 @@ namespace ModiBuff.Core
 			foreach (var check in _modifierAttackChecksAppliers.Values)
 				ModifierPool.Instance.ReturnCheck(check);
 
-			//Clear the rest, if the unit will be reused/pooled. Otherwise this is not needed
 			_modifierAttackAppliers.Clear();
 			_modifierCastAppliers.Clear();
 			_modifierCastChecksAppliers.Clear();

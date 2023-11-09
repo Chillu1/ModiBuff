@@ -13,6 +13,7 @@ namespace ModiBuff.Tests
 		protected ModifierRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
 		protected ModifierLessEffects Effects { get; private set; }
+		protected ModifierControllerPool ModifierControllerPool { get; private set; }
 
 		protected TUnit Unit { get; private set; }
 		protected float UnitHealth { get; private set; }
@@ -83,6 +84,7 @@ namespace ModiBuff.Tests
 			Recipes.CreateGenerators();
 			Effects.Finish();
 			Pool = new ModifierPool(Recipes.GetGenerators());
+			ModifierControllerPool = new ModifierControllerPool();
 
 			Unit = UnitFactory(UnitHealth, UnitDamage, UnitHeal, UnitMana, UnitType.Good, UnitTag.Default);
 			Enemy = new Unit(EnemyHealth, EnemyDamage, EnemyHeal, unitType: UnitType.Bad);
@@ -96,6 +98,7 @@ namespace ModiBuff.Tests
 			Effects.Reset();
 			IdManager.Reset();
 			EffectIdManager.Reset();
+			ModifierControllerPool.Reset();
 
 			IdManager = null;
 			EffectIdManager = null;
@@ -111,6 +114,7 @@ namespace ModiBuff.Tests
 			Effects?.Reset();
 			IdManager?.Reset();
 			EffectIdManager?.Reset();
+			ModifierControllerPool?.Reset();
 
 			IdManager = null;
 			EffectIdManager = null;

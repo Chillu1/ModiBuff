@@ -30,7 +30,7 @@ namespace ModiBuff.Tests
 				MaxHealth = Health = health;
 				Damage = damage;
 
-				ModifierApplierController = new ModifierApplierController();
+				ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
 			}
 
 			public float Attack(IUnit target)

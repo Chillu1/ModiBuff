@@ -4,26 +4,30 @@ namespace ModiBuff.Core
 {
 	public static class Config
 	{
-		public const int DefaultDefaultTag = (int)TagType.Default;
+		private const int DefaultDefaultTag = (int)TagType.Default;
 
-		public const bool DefaultUseDictionaryIndexes = false;
+		private const bool DefaultUseDictionaryIndexes = false;
 		public const int DefaultPoolSize = 64;
-		public const int DefaultMaxPoolSize = 16_384;
+		private const int DefaultMaxPoolSize = 16_384;
+
+		private const int DefaultModifierControllerPoolSize = 256;
+		private const int DefaultMaxModifierControllerPoolSize = 32_768;
+		private const int DefaultModifierApplierControllerPoolSize = 64;
 
 		public const int DefaultModifierArraySize = 32;
-		public const int DefaultModifierRemoveSize = 4;
-		public const int DefaultModifierIndexDictionarySize = 8;
+		private const int DefaultModifierRemoveSize = 4;
+		private const int DefaultModifierIndexDictionarySize = 8;
 
-		public const int DefaultMultiTargetComponentInitialCapacity = 4;
+		private const int DefaultMultiTargetComponentInitialCapacity = 4;
 
-		public const int DefaultAttackApplierSize = 4,
+		private const int DefaultAttackApplierSize = 4,
 			DefaultCastApplierSize = 4,
 			DefaultAttackCheckApplierSize = 4,
 			DefaultCastCheckApplierSize = 4;
 
-		public const int DefaultEffectCastsSize = 4;
+		private const int DefaultEffectCastsSize = 4;
 
-		public const float DefaultDeltaTolerance = 0.001f;
+		private const float DefaultDeltaTolerance = 0.001f;
 
 
 		public static int DefaultTag = DefaultDefaultTag;
@@ -38,6 +42,10 @@ namespace ModiBuff.Core
 
 		public static int PoolSize = DefaultPoolSize;
 		public static int MaxPoolSize = DefaultMaxPoolSize;
+
+		public static int ModifierControllerPoolSize = DefaultModifierControllerPoolSize;
+		public static int MaxModifierControllerPoolSize = DefaultMaxModifierControllerPoolSize;
+		public static int ModifierApplierControllerPoolSize = DefaultModifierApplierControllerPoolSize;
 
 		public static int ModifierArraySize = DefaultModifierArraySize;
 		public static int ModifierRemoveSize = DefaultModifierRemoveSize;
@@ -71,6 +79,10 @@ namespace ModiBuff.Core
 			UseDictionaryIndexes = DefaultUseDictionaryIndexes;
 			PoolSize = DefaultPoolSize;
 			MaxPoolSize = DefaultMaxPoolSize;
+
+			ModifierControllerPoolSize = DefaultModifierControllerPoolSize;
+			MaxModifierControllerPoolSize = DefaultMaxModifierControllerPoolSize;
+			ModifierApplierControllerPoolSize = DefaultModifierApplierControllerPoolSize;
 
 			ModifierArraySize = DefaultModifierArraySize;
 			ModifierRemoveSize = DefaultModifierRemoveSize;

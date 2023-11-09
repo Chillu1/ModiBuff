@@ -10,6 +10,7 @@ namespace ModiBuff.Examples.BasicConsole
 		private readonly ModifierIdManager _idManager;
 		private readonly ModifierRecipes _recipes;
 		private readonly ModifierPool _pool;
+		private readonly ModifierControllerPool _modifierControllerPool;
 
 		private readonly Unit _player;
 
@@ -29,7 +30,7 @@ namespace ModiBuff.Examples.BasicConsole
 			//We need to register our recipes inside the pool, so we can pre-allocate the modifiers
 			//Most likely you won't use the pool directly, but we still need to create it 
 			_pool = new ModifierPool(_recipes);
-			//_defenseModifierId = idManager.GetId("Defense");
+			_modifierControllerPool = new ModifierControllerPool();
 
 			//Now we've come to the game logic initialization, which will be custom for your game
 			//Here we have just one player, and one enemy spawning each time the enemy dies

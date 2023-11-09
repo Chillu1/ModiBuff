@@ -27,8 +27,8 @@ namespace ModiBuff.Tests
 				UnitType = unitType;
 				UnitTag = UnitTag.Default;
 
-				ModifierController = new ModifierController();
-				ModifierApplierController = new ModifierApplierController();
+				ModifierController = ModifierControllerPool.Instance.Rent();
+				ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
 			}
 
 			public void Update(float delta)

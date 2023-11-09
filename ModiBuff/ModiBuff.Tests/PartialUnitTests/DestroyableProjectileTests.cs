@@ -37,7 +37,7 @@ namespace ModiBuff.Tests
 				UnitTag = UnitTag.Default;
 				MaxHealth = Health = health;
 
-				ModifierController = new ModifierController();
+				ModifierController = ModifierControllerPool.Instance.Rent();
 				StatusEffectController = new MultiInstanceStatusEffectController(this, new List<StatusEffectEvent>(),
 					new List<StatusEffectEvent>());
 			}
@@ -64,7 +64,7 @@ namespace ModiBuff.Tests
 
 				if (Health <= 0 && !IsDead)
 				{
-					ModifierController.Clear();
+					ModifierControllerPool.Instance.Return(ModifierController);
 					IsDead = true;
 				}
 

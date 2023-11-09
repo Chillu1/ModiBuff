@@ -94,8 +94,8 @@ namespace ModiBuff.Core.Units
 			_targetsInRange.Add(this);
 			_auraModifiers = new List<Modifier>();
 
-			ModifierController = new ModifierController();
-			ModifierApplierController = new ModifierApplierController();
+			ModifierController = ModifierControllerPool.Instance.Rent();
+			ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
 			_statusEffectController = new MultiInstanceStatusEffectController
 				(this, _statusEffectAddedEvents, _statusEffectRemovedEvents);
 			_singleInstanceStatusEffectController = new StatusEffectController();
@@ -250,8 +250,8 @@ namespace ModiBuff.Core.Units
 					_whenDeathEffects[i].Effect(this, source);
 
 				//Unit Death TODO Destroy/pool unit
-				ModifierController.Clear();
-				ModifierApplierController.Clear();
+				ModifierControllerPool.Instance.Return(ModifierController);
+				ModifierControllerPool.Instance.ReturnApplier(ModifierApplierController);
 
 				IsDead = true;
 			}
