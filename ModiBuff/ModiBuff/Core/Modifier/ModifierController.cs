@@ -153,16 +153,26 @@ namespace ModiBuff.Core
 				modifier.Stack();
 		}
 
-		public bool Contains(int id)
+		public bool Contains(int id, int genId = -1)
 		{
 			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
 				return Config.UseDictionaryIndexes ? _modifierIndexesDict.ContainsKey(id) : _modifierIndexes[id] != -1;
 
-			for (int i = 0; i < _modifiersTop; i++)
-				if (_modifiers[i].Id == id)
-					return true;
-
-			//TODO GenId if we want to check for specific modifiers
+			if (genId == -1)
+			{
+				for (int i = 0; i < _modifiersTop; i++)
+					if (_modifiers[i].Id == id)
+						return true;
+			}
+			else
+			{
+				for (int i = 0; i < _modifiersTop; i++)
+				{
+					var modifier = _modifiers[i];
+					if (modifier.Id == id && modifier.GenId == genId)
+						return true;
+				}
+			}
 
 			return false;
 		}

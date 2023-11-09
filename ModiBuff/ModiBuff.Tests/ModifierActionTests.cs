@@ -67,5 +67,36 @@ namespace ModiBuff.Tests
 			Unit.TakeDamage(UnitHealth * 0.6f, Unit); //Reset stacks
 			Assert.AreEqual(UnitDamage, Unit.Damage);
 		}
+
+		[Test]
+		public void InstanceStackableAddDamageDurationRefreshOnStrongHit()
+		{
+			AddRecipe("InstanceStackableDurationAddDamageHealthChangedRefresh")
+				.InstanceStackable()
+				.Effect(new AddDamageEffect(5), EffectOn.CallbackEffect)
+				.ModifierAction(ModifierAction.Refresh, EffectOn.CallbackEffect)
+				.CallbackEffect(CallbackType.CurrentHealthChanged,
+					effect => new HealthChangedEvent((target, source, health, deltaHealth) =>
+					{
+						if (deltaHealth > 0)
+							effect.Effect(target, source);
+					}))
+				.Remove(3).Refresh();
+			Setup();
+
+			Unit.AddModifierSelf("InstanceStackableDurationAddDamageHealthChangedRefresh");
+			Unit.AddModifierSelf("InstanceStackableDurationAddDamageHealthChangedRefresh");
+			Unit.Update(1);
+
+			Unit.TakeDamage(1, Unit);
+			Assert.AreEqual(UnitDamage + 5 + 5, Unit.Damage);
+
+			Unit.Update(1);
+			Unit.AddModifierSelf("InstanceStackableDurationAddDamageHealthChangedRefresh");
+			Unit.Update(2);
+
+			Unit.TakeDamage(1, Unit);
+			Assert.AreEqual(UnitDamage + 5 + 5 + 5, Unit.Damage);
+		}
 	}
 }
