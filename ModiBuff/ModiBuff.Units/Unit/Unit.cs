@@ -23,7 +23,7 @@ namespace ModiBuff.Core.Units
 		IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
 		ICallbackRegistrable<CallbackType>, ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>,
-		ICallbackEffectRegistrable<CallbackType>, IAllNonGeneric
+		ICallbackEffectRegistrable<CallbackType>, IAllNonGeneric, ICaster
 	{
 		public UnitTag UnitTag { get; private set; }
 		public float Health { get; private set; }

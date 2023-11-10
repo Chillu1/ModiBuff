@@ -91,5 +91,20 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
+
+		[Test]
+		public void CastOnCastEventRecursion()
+		{
+			AddRecipe("CastInitDamageEvent")
+				.Effect(new CastActionEffect("InitDamage"), EffectOn.Event)
+				.Event(EffectOnEvent.OnCast);
+			Setup();
+
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Cast);
+			Unit.AddModifierSelf("CastInitDamageEvent");
+
+			Unit.TryCast(IdManager.GetId("InitDamage"), Enemy);
+			Assert.AreEqual(EnemyHealth - 5 - 5 * Unit.MaxRecursionEventCount, Enemy.Health);
+		}
 	}
 }
