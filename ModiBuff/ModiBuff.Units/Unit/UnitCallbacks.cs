@@ -8,6 +8,8 @@ namespace ModiBuff.Core.Units
 
 	public delegate void DispelEvent(IUnit target, IUnit source, TagType tag);
 
+	public delegate void StrongDispelEvent(IUnit target, IUnit source);
+
 	public delegate void PoisonEvent(IUnit target, IUnit source, int poisonStacks, int totalStacks, float dealtDamage);
 
 	public delegate void StatusEffectEvent(IUnit target, IUnit source, StatusEffectType statusEffect,
@@ -46,12 +48,14 @@ namespace ModiBuff.Core.Units
 			_onKillEffects,
 			_onHealEffects;
 
+		private readonly List<IEffect> _strongDispelCallbacks;
 		private readonly List<IEffect> _strongHitCallbacks;
 		private readonly List<UnitCallback> _strongHitUnitCallbacks;
 
 		private readonly List<PoisonEvent> _poisonEvents;
 
 		private readonly List<DispelEvent> _dispelEvents;
+		private readonly List<StrongDispelEvent> _strongDispelEvents;
 		private readonly List<HealthChangedEvent> _healthChangedEvents;
 		private readonly List<DamageChangedEvent> _damageChangedEvents;
 		private readonly List<StatusEffectEvent> _statusEffectAddedEvents;
@@ -166,6 +170,9 @@ namespace ModiBuff.Core.Units
 		{
 			switch (callbackType)
 			{
+				case CallbackUnitType.StrongDispel:
+					_strongDispelCallbacks.AddRange(callbacks);
+					break;
 				case CallbackUnitType.StrongHit:
 					_strongHitCallbacks.AddRange(callbacks);
 					break;
@@ -178,6 +185,17 @@ namespace ModiBuff.Core.Units
 		{
 			switch (callbackType)
 			{
+				case CallbackUnitType.StrongDispel:
+					for (int i = 0; i < callbacks.Length; i++)
+					{
+						bool removed = _strongDispelCallbacks.Remove(callbacks[i]);
+#if DEBUG && !MODIBUFF_PROFILE
+						if (!removed)
+							Logger.LogError("Could not remove callback: " + callbacks[i]);
+#endif
+					}
+
+					break;
 				case CallbackUnitType.StrongHit:
 					for (int i = 0; i < callbacks.Length; i++)
 					{
@@ -204,6 +222,10 @@ namespace ModiBuff.Core.Units
 					case CallbackType.Dispel:
 						if (callback.CheckCallback(out DispelEvent dispelEvent))
 							_dispelEvents.Add(dispelEvent);
+						break;
+					case CallbackType.StrongDispel:
+						if (callback.CheckCallback(out StrongDispelEvent strongDispelEvent))
+							_strongDispelEvents.Add(strongDispelEvent);
 						break;
 					case CallbackType.PoisonDamage:
 						if (callback.CheckCallback(out PoisonEvent poisonEvent))
@@ -261,6 +283,9 @@ namespace ModiBuff.Core.Units
 					case CallbackType.Dispel:
 						_dispelEvents.Remove((DispelEvent)callback.Action);
 						break;
+					case CallbackType.StrongDispel:
+						_strongDispelEvents.Remove((StrongDispelEvent)callback.Action);
+						break;
 					case CallbackType.PoisonDamage:
 						_poisonEvents.Remove((PoisonEvent)callback.Action);
 						break;
@@ -300,6 +325,10 @@ namespace ModiBuff.Core.Units
 				case CallbackType.Dispel:
 					if (callback.CheckCallback(out DispelEvent dispelEvent))
 						_dispelEvents.Add(dispelEvent);
+					break;
+				case CallbackType.StrongDispel:
+					if (callback.CheckCallback(out StrongDispelEvent strongDispelEvent))
+						_strongDispelEvents.Add(strongDispelEvent);
 					break;
 				case CallbackType.PoisonDamage:
 					if (callback.CheckCallback(out PoisonEvent poisonEvent))
@@ -348,6 +377,9 @@ namespace ModiBuff.Core.Units
 			{
 				case CallbackType.Dispel:
 					_dispelEvents.Remove((DispelEvent)callback);
+					break;
+				case CallbackType.StrongDispel:
+					_strongDispelEvents.Remove((StrongDispelEvent)callback);
 					break;
 				case CallbackType.PoisonDamage:
 					_poisonEvents.Remove((PoisonEvent)callback);

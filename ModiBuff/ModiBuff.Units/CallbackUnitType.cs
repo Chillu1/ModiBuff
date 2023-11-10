@@ -2,6 +2,7 @@ namespace ModiBuff.Core.Units
 {
 	public enum CallbackUnitType
 	{
-		StrongHit = 1,
+		StrongDispel = 1,
+		StrongHit = 2,
 	}
 }

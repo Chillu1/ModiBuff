@@ -79,12 +79,14 @@ namespace ModiBuff.Core.Units
 			_onKillEffects = new List<IEffect>();
 			_onHealEffects = new List<IEffect>();
 
+			_strongDispelCallbacks = new List<IEffect>();
 			_strongHitCallbacks = new List<IEffect>();
 			_strongHitUnitCallbacks = new List<UnitCallback>();
 
 			_poisonEvents = new List<PoisonEvent>();
 
 			_dispelEvents = new List<DispelEvent>();
+			_strongDispelEvents = new List<StrongDispelEvent>();
 			_healthChangedEvents = new List<HealthChangedEvent>();
 			_damageChangedEvents = new List<DamageChangedEvent>();
 			_statusEffectAddedEvents = new List<StatusEffectEvent>();
@@ -412,6 +414,18 @@ namespace ModiBuff.Core.Units
 		{
 			for (int i = 0; i < _dispelEvents.Count; i++)
 				_dispelEvents[i](this, source, tag);
+		}
+
+		/// <summary>
+		///		If we'd want to an easier way to setup callbacks, without the need for a custom signature.
+		///		We could split our "dispels" into multiple events, like here.
+		/// </summary>
+		public void StrongDispel(IUnit source)
+		{
+			for (int i = 0; i < _strongDispelCallbacks.Count; i++)
+				_strongDispelCallbacks[i].Effect(this, source);
+			for (int i = 0; i < _strongDispelEvents.Count; i++)
+				_strongDispelEvents[i](this, source);
 		}
 
 		//---Aura---

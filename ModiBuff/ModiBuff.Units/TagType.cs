@@ -19,15 +19,16 @@ namespace ModiBuff.Core.Units
 		DurationIgnoresStatusResistance = Core.TagType.DurationIgnoresStatusResistance,
 		LastReserved = Core.TagType.LastReserved,
 
-		LegalTargetSelf = 1ul << 17,
-		LegalTargetAlly = 1ul << 18,
-		LegalTargetEnemy = 1ul << 19,
+		LegalTargetSelf = 1ul << 18,
+		LegalTargetAlly = 1ul << 19,
+		LegalTargetEnemy = 1ul << 20,
 
 		//LegalTargetStructure = 1ul << 20,
 		//LegalTargetUnits = LegalTargetAlly | LegalTargetEnemy,
 		LegalTargetAll = LegalTargetSelf | LegalTargetAlly | LegalTargetEnemy, // | LegalTargetStructure,
 		BasicDispel = 1ul << 21,
-		UserTag6 = 1ul << 22,
+		StrongDispel = 1ul << 22,
+		UserTag7 = 1ul << 23,
 	}
 
 	public static class TagTypeExtensions

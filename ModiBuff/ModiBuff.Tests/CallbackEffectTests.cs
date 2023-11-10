@@ -87,10 +87,10 @@ namespace ModiBuff.Tests
 			Assert.False(Enemy.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
 		}
 
-		[Test]
-		public void DispelAddDamageReact()
+		private static readonly RecipeAddFunc[] dispelAddDamageRecipes =
 		{
-			AddRecipe("InitStatusEffectSleep_RemoveOnDispel")
+			//Most control-oriented dispel solution
+			add => add("InitStatusEffectSleep_RemoveOnDispel")
 				.Tag(TagType.BasicDispel)
 				.Effect(new StatusEffectEffect(StatusEffectType.Sleep, 5f, true), EffectOn.Init)
 				.Remove(RemoveEffectOn.CallbackEffect)
@@ -101,13 +101,31 @@ namespace ModiBuff.Tests
 						//Could feed it through DispelEvent, but that's meh
 						if ((TagType.BasicDispel & eventTag) != 0)
 							removeEffect.Effect(target, source);
-					}));
+					})),
+			add => add("InitStatusEffectSleep_RemoveOnDispel")
+				.Tag(TagType.StrongDispel)
+				.Effect(new StatusEffectEffect(StatusEffectType.Sleep, 5f, true), EffectOn.Init)
+				.Remove(RemoveEffectOn.CallbackEffect)
+				.CallbackEffect(CallbackType.StrongDispel, removeEffect => new StrongDispelEvent(removeEffect.Effect)),
+			//Easiest dispel solution, note that we can't control for what else can happen in the dispel event
+			add => add("InitStatusEffectSleep_RemoveOnDispel")
+				.Tag(TagType.StrongDispel)
+				.Effect(new StatusEffectEffect(StatusEffectType.Sleep, 5f, true), EffectOn.Init)
+				.Remove(RemoveEffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.StrongDispel)
+		};
+
+		[TestCaseSource(nameof(dispelAddDamageRecipes))]
+		public void DispelAddDamageReact(RecipeAddFunc recipe)
+		{
+			AddRecipe(recipe);
 			Setup();
 
 			Unit.AddModifierSelf("InitStatusEffectSleep_RemoveOnDispel");
 			Unit.Dispel(TagType.IsStack | TagType.IsRefresh, Unit);
 			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
 			Unit.Dispel(TagType.BasicDispel, Unit);
+			Unit.StrongDispel(Unit);
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Sleep));
 		}
 
