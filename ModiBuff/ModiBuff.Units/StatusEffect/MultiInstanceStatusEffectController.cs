@@ -9,7 +9,7 @@ namespace ModiBuff.Core.Units
 	///		Note that this approach is much slower than having a simple timer for each legal action.
 	///		But allows for infinite unique status effect instances.
 	/// </summary>
-	public sealed class MultiInstanceStatusEffectController :
+	public sealed class MultiInstanceStatusEffectController : IStateReset,
 		IMultiInstanceStatusEffectController<LegalAction, StatusEffectType>
 	{
 		private readonly IUnit _owner;
@@ -28,8 +28,8 @@ namespace ModiBuff.Core.Units
 
 		private LegalAction _legalActions;
 
-		public MultiInstanceStatusEffectController(IUnit owner, List<StatusEffectEvent> statusEffectAddedEvents,
-			List<StatusEffectEvent> statusEffectRemovedEvents)
+		public MultiInstanceStatusEffectController(IUnit owner, List<StatusEffectEvent> statusEffectAddedEvents = null,
+			List<StatusEffectEvent> statusEffectRemovedEvents = null)
 		{
 			_owner = owner;
 			_statusEffectAddedEvents = statusEffectAddedEvents;
@@ -213,14 +213,30 @@ namespace ModiBuff.Core.Units
 
 		private void CallAddEvents(StatusEffectType statusEffectType, LegalAction oldLegalAction, IUnit source)
 		{
+			if (_statusEffectAddedEvents == null)
+				return;
+
 			for (int i = 0; i < _statusEffectAddedEvents.Count; i++)
 				_statusEffectAddedEvents[i].Invoke(_owner, source, statusEffectType, oldLegalAction, _legalActions);
 		}
 
 		private void CallRemoveEvents(StatusEffectType statusEffectType, LegalAction oldLegalAction, IUnit source)
 		{
+			if (_statusEffectRemovedEvents == null)
+				return;
+
 			for (int i = 0; i < _statusEffectRemovedEvents.Count; i++)
 				_statusEffectRemovedEvents[i].Invoke(_owner, source, statusEffectType, oldLegalAction, _legalActions);
+		}
+
+		public void ResetState()
+		{
+			_legalActionsTimers.Clear();
+			_stackEffectInstancesForRemoval.Clear();
+			for (int i = 0; i < _legalActionTypeCounters.Length; i++)
+				_legalActionTypeCounters[i] = 0;
+
+			_legalActions = LegalAction.All;
 		}
 
 		private readonly struct StatusEffectInstance : IEquatable<StatusEffectInstance>

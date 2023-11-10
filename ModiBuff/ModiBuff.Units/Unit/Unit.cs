@@ -1,4 +1,4 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ModiBuff.Core.Units.Interfaces.NonGeneric;
@@ -23,7 +23,7 @@ namespace ModiBuff.Core.Units
 		IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
 		ICallbackRegistrable<CallbackType>, ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>,
-		ICallbackEffectRegistrable<CallbackType>, IAllNonGeneric, ICaster
+		ICallbackEffectRegistrable<CallbackType>, IAllNonGeneric, ICaster, IStateReset
 	{
 		public UnitTag UnitTag { get; private set; }
 		public float Health { get; private set; }
@@ -251,9 +251,7 @@ namespace ModiBuff.Core.Units
 				for (int i = 0; i < _whenDeathEffects.Count; i++)
 					_whenDeathEffects[i].Effect(this, source);
 
-				//Unit Death TODO Destroy/pool unit
-				ModifierControllerPool.Instance.Return(ModifierController);
-				ModifierControllerPool.Instance.ReturnApplier(ModifierApplierController);
+				ResetState();
 
 				IsDead = true;
 			}
@@ -440,6 +438,31 @@ namespace ModiBuff.Core.Units
 			var modifier = ModifierPool.Instance.Rent(id);
 			modifier.UpdateTargets(_targetsInRange, this);
 			_auraModifiers.Add(modifier);
+		}
+
+		public void ResetState()
+		{
+			ResetEventCounters();
+			ClearEvents(_whenAttackedEffects, _afterAttackedEffects, _whenDeathEffects, _whenHealedEffects,
+				_beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects,
+				_strongDispelCallbacks, _strongHitCallbacks, _strongHitUnitCallbacks, _poisonEvents,
+				_dispelEvents, _strongDispelEvents, _healthChangedEvents, _damageChangedEvents,
+				_statusEffectAddedEvents, _statusEffectRemovedEvents);
+
+			_targetsInRange.Clear();
+			for (int i = 0; i < _auraModifiers.Count; i++)
+				ModifierPool.Instance.Return(_auraModifiers[i]);
+			_auraModifiers.Clear();
+			_statusEffectController.ResetState();
+			_singleInstanceStatusEffectController.ResetState();
+			ModifierControllerPool.Instance.Return(ModifierController);
+			ModifierControllerPool.Instance.ReturnApplier(ModifierApplierController);
+
+			void ClearEvents(params IList[] lists)
+			{
+				for (int i = 0; i < lists.Length; i++)
+					lists[i].Clear();
+			}
 		}
 
 		public override string ToString()

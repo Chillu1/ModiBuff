@@ -38,8 +38,7 @@ namespace ModiBuff.Tests
 				MaxHealth = Health = health;
 
 				ModifierController = ModifierControllerPool.Instance.Rent();
-				StatusEffectController = new MultiInstanceStatusEffectController(this, new List<StatusEffectEvent>(),
-					new List<StatusEffectEvent>());
+				StatusEffectController = new MultiInstanceStatusEffectController(this);
 			}
 
 			public void Update(float delta)

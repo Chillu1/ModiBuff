@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
@@ -6,7 +7,8 @@ namespace ModiBuff.Core.Units
 	///		Simple status effect controller. Doesn't care about different status effect instances.
 	///		Much faster than <see cref="MultiInstanceStatusEffectController"/> but can't have infinite unique status effect instances.
 	/// </summary>
-	public sealed class StatusEffectController : ISingleInstanceStatusEffectController<LegalAction, StatusEffectType>
+	public sealed class StatusEffectController : ISingleInstanceStatusEffectController<LegalAction, StatusEffectType>,
+		IStateReset
 	{
 		private readonly float[] _legalActionTimers;
 
@@ -95,6 +97,12 @@ namespace ModiBuff.Core.Units
 					_legalActionTimers[legalActionIndex] = currentDuration;
 				}
 			}
+		}
+
+		public void ResetState()
+		{
+			Array.Clear(_legalActionTimers, 0, _legalActionTimers.Length);
+			_legalActions = LegalAction.All;
 		}
 	}
 }
