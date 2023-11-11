@@ -39,7 +39,12 @@ namespace ModiBuff.Core.Units
 		{
 			_targeting.UpdateTarget(ref target, source);
 			if (!(target is IAddDamage<float> addDamage))
+			{
+#if MODIBUFF_EFFECT_CHECK
+				EffectHelper.LogImplError(target, nameof(IAddDamage<float>));
+#endif
 				return;
+			}
 
 			if (_effectState.IsTogglable())
 			{

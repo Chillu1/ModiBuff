@@ -78,6 +78,10 @@ namespace ModiBuff.Core.Units
 				if (IsRevertible)
 					_totalHeal += returnHeal;
 			}
+#if MODIBUFF_EFFECT_CHECK
+			else
+				EffectHelper.LogImplError(target, nameof(IHealable<float, float>));
+#endif
 
 			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)

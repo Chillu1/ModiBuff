@@ -31,7 +31,13 @@ namespace ModiBuff.Core
 		public void Effect(IUnit target, IUnit source)
 		{
 			if (!(target is IEventOwner<TEvent> eventTarget))
+			{
+#if MODIBUFF_EFFECT_CHECK
+				EffectHelper.LogImplError(target, nameof(IEventOwner<TEvent>));
+#endif
 				return;
+			}
+
 			if (_isRegistered)
 				return;
 

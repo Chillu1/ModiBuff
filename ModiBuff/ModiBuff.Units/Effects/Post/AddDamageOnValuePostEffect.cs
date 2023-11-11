@@ -11,7 +11,12 @@ namespace ModiBuff.Core.Units
 		{
 			_targeting.UpdateTarget(ref target, source);
 			if (!(target is IAddDamage<float> addDamageTarget))
+			{
+#if MODIBUFF_EFFECT_CHECK
+				EffectHelper.LogImplError(target, nameof(IAddDamage<float>));
+#endif
 				return;
+			}
 
 			addDamageTarget.AddDamage(value);
 		}

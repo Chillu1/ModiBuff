@@ -21,7 +21,12 @@ namespace ModiBuff.Core.Units
 			    damagable.Health + value > 0 && source is IKillable killable && killable.IsDead)
 			{
 				if (!(target is IAddDamage<float> addDamageTarget))
+				{
+#if MODIBUFF_EFFECT_CHECK
+					EffectHelper.LogImplError(target, nameof(IAddDamage<float>));
+#endif
 					return;
+				}
 
 				addDamageTarget.AddDamage(_damage);
 			}

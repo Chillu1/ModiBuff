@@ -71,6 +71,10 @@ namespace ModiBuff.Core.Units
 				//returnDamageInfo = effectTarget.TakeDamage(damage, effectSource);
 				returnDamageInfo = damagableTarget.TakeDamage(damage, effectSource);
 			}
+#if MODIBUFF_EFFECT_CHECK
+			else
+				EffectHelper.LogImplError(effectTarget, nameof(IAttackable<float, float>));
+#endif
 
 			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)

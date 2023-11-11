@@ -22,7 +22,13 @@ namespace ModiBuff.Core
 		public void Effect(IUnit target, IUnit source)
 		{
 			if (!(target is ICallbackEffectRegistrable<TCallback> registrableTarget))
+			{
+#if MODIBUFF_EFFECT_CHECK
+				EffectHelper.LogImplError(target, nameof(ICallbackEffectRegistrable<TCallback>));
+#endif
 				return;
+			}
+
 			if (_isRegistered)
 				return;
 

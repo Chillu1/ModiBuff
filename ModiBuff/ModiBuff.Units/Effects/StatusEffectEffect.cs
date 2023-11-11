@@ -52,7 +52,12 @@ namespace ModiBuff.Core.Units
 				Logger.LogError("GenId is not set for status effect effect.");
 #endif
 			if (!(target is IStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget))
+			{
+#if MODIBUFF_EFFECT_CHECK
+				EffectHelper.LogImplError(target, nameof(IStatusEffectOwner<LegalAction, StatusEffectType>));
+#endif
 				return;
+			}
 
 			if (IsRevertible)
 				_totalDuration = _duration + _extraDuration;

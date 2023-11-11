@@ -27,7 +27,13 @@ namespace ModiBuff.Core.Units
 		public void Effect(IUnit target, IUnit source)
 		{
 			if (!(target is ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget))
+			{
+#if MODIBUFF_EFFECT_CHECK
+				EffectHelper.LogImplError(target,
+					nameof(ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>));
+#endif
 				return;
+			}
 
 			if (IsRevertible)
 				_totalDuration = _duration + _extraDuration;

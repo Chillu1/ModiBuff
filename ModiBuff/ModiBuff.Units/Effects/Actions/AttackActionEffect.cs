@@ -17,7 +17,12 @@ namespace ModiBuff.Core.Units
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
 			if (!(source is IAttacker<float, float> attackerSource))
+			{
+#if MODIBUFF_EFFECT_CHECK
+				EffectHelper.LogImplError(target, nameof(IAttacker<float, float>));
+#endif
 				return;
+			}
 
 			float returnDamage = attackerSource.Attack(target);
 

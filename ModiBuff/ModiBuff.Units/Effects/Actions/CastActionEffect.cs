@@ -25,9 +25,20 @@ namespace ModiBuff.Core.Units
 		public void Effect(IUnit target, IUnit source)
 		{
 			if (!(source is IModifierApplierOwner applierSource))
+			{
+#if MODIBUFF_EFFECT_CHECK
+				EffectHelper.LogImplErrorSource(source, nameof(IModifierApplierOwner));
+#endif
 				return;
+			}
+
 			if (!(target is IModifierOwner modifierTarget))
+			{
+#if MODIBUFF_EFFECT_CHECK
+				EffectHelper.LogImplError(target, nameof(IModifierOwner));
+#endif
 				return;
+			}
 
 			if (source is ICaster casterSource)
 			{

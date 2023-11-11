@@ -41,7 +41,12 @@ namespace ModiBuff.Core
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
 			if (!(target is IModifierOwner modifierOwnerTarget))
+			{
+#if MODIBUFF_EFFECT_CHECK
+				EffectHelper.LogImplError(target, nameof(IModifierOwner));
+#endif
 				return;
+			}
 
 			modifierOwnerTarget.ModifierController.Add(_modifierId, target, source);
 		}

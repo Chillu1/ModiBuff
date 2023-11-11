@@ -17,11 +17,24 @@ namespace ModiBuff.Core.Units
 			{
 				case CostType.Health:
 					if (!(unit is IDamagable<float, float> damagable) || !(unit is IHealthCost<float>))
+					{
+#if MODIBUFF_EFFECT_CHECK //TODO This might be an issue/unwanted
+						EffectHelper.LogImplError(unit,
+							nameof(IDamagable<float, float>) + "or " + nameof(IHealthCost<float>));
+#endif
 						return false;
+					}
+
 					return damagable.Health > damagable.MaxHealth * _costPercent;
 				case CostType.Mana:
 					if (!(unit is IManaOwner<float, float> manaOwner))
+					{
+#if MODIBUFF_EFFECT_CHECK //TODO This might be an issue/unwanted
+						EffectHelper.LogImplError(unit, nameof(IManaOwner<float, float>));
+#endif
 						return false;
+					}
+
 					return manaOwner.Mana >= manaOwner.MaxMana * _costPercent;
 				default:
 					Logger.LogError("Unknown cost type: " + _costType);

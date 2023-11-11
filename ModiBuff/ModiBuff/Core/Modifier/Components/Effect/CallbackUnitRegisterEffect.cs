@@ -42,7 +42,13 @@ namespace ModiBuff.Core
 				Logger.LogError("[ModiBuff] Callback wasn't set");
 #endif
 			if (!(target is ICallbackUnitRegistrable<TCallbackUnit> registrableTarget))
+			{
+#if MODIBUFF_EFFECT_CHECK
+				EffectHelper.LogImplError(target, nameof(ICallbackUnitRegistrable<TCallbackUnit>));
+#endif
 				return;
+			}
+
 			if (_isRegistered)
 				return;
 
