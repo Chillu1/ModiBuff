@@ -26,6 +26,7 @@ namespace ModiBuff.Core
 		private readonly WhenStackEffect _whenStackEffect;
 		private readonly int _maxStacks;
 		private readonly int _everyXStacks;
+		private readonly float _singleStackTime;
 		private readonly float _independentStackTime;
 
 		private readonly int _timeComponentCount;
@@ -73,6 +74,7 @@ namespace ModiBuff.Core
 			_whenStackEffect = data.WhenStackEffect;
 			_maxStacks = data.MaxStacks;
 			_everyXStacks = data.EveryXStacks;
+			_singleStackTime = data.SingleStackTime;
 			_independentStackTime = data.IndependentStackTime;
 
 			if (data.Interval > 0)
@@ -178,7 +180,7 @@ namespace ModiBuff.Core
 
 			if (effects.StackEffects != null)
 				stackComponent = new StackComponent(_whenStackEffect, _maxStacks,
-					_everyXStacks, _independentStackTime, effects.StackEffects, effectCheck);
+					_everyXStacks, _singleStackTime, _independentStackTime, effects.StackEffects, effectCheck);
 
 			ITargetComponent targetComponent;
 			if (!_isAura)

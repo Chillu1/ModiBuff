@@ -50,7 +50,7 @@ namespace ModiBuff.Core
 
 			_timeComponents = timeComponents;
 			_stackComponent = stackComponent;
-			if (stackComponent != null && stackComponent.UsesIndependentStackTime)
+			if (stackComponent != null && stackComponent.UsesStackTime)
 				_stackTimerComponent = stackComponent;
 			_effectCheck = effectCheck;
 

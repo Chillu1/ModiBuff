@@ -5,6 +5,7 @@ namespace ModiBuff.Core.Units
 	{
 		public bool IsRevertible { get; }
 		public bool UsesMutableState => IsRevertible || _stackEffect.UsesMutableState();
+		public bool UsesMutableStackEffect => _stackEffect.UsesMutableState();
 
 		private readonly StatusEffectType _statusEffectType;
 		private readonly float _duration;

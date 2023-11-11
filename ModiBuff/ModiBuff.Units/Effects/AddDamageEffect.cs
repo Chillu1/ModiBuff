@@ -5,6 +5,7 @@ namespace ModiBuff.Core.Units
 	{
 		public bool IsRevertible => _effectState.IsRevertible();
 		public bool UsesMutableState => _effectState.IsRevertibleOrTogglable() || _stackEffect.UsesMutableState();
+		public bool UsesMutableStackEffect => _stackEffect.UsesMutableState();
 
 		private readonly float _damage;
 		private readonly EffectState _effectState;
@@ -38,7 +39,7 @@ namespace ModiBuff.Core.Units
 		public void Effect(IUnit target, IUnit source)
 		{
 			_targeting.UpdateTarget(ref target, source);
-			if (!(target is IAddDamage<float> addDamage))
+			if (!(target is IAddDamage<float> addDamageTarget))
 			{
 #if MODIBUFF_EFFECT_CHECK
 				EffectHelper.LogImplError(target, nameof(IAddDamage<float>));
@@ -59,7 +60,7 @@ namespace ModiBuff.Core.Units
 			if (IsRevertible)
 				_totalAddedDamage += damage;
 
-			addDamage.AddDamage(damage);
+			addDamageTarget.AddDamage(damage);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
@@ -71,6 +72,7 @@ namespace ModiBuff.Core.Units
 			if (_effectState.IsTogglable())
 				_isEnabled = false;
 
+			//Might want to have a special method for reverting stats state, to not trigger events
 			addDamage.AddDamage(-_totalAddedDamage);
 			_totalAddedDamage = 0;
 		}
@@ -95,6 +97,7 @@ namespace ModiBuff.Core.Units
 
 				_targeting.UpdateTarget(ref target, source);
 				if (target is IAddDamage<float> addDamageTarget)
+					//Might want to have a special method for reverting stats state, to not trigger events 
 					addDamageTarget.AddDamage(-_damage - _extraDamage);
 			}
 

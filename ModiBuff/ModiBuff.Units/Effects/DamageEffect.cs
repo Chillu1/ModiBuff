@@ -5,6 +5,7 @@ namespace ModiBuff.Core.Units
 		IModifierStateInfo<DamageEffect.Data>
 	{
 		public bool UsesMutableState => _stackEffect.UsesMutableState();
+		public bool UsesMutableStackEffect => _stackEffect.UsesMutableState();
 
 		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;

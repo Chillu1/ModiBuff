@@ -7,9 +7,10 @@ namespace ModiBuff.Core
 	{
 		public int Stacks => _stacks;
 		public int MaxStacks => _maxStacks;
-		public bool UsesIndependentStackTime => _independentStackTime > 0;
+		public bool UsesStackTime => _singleStackTime > 0 || _independentStackTime > 0;
 
 		private readonly WhenStackEffect _whenStackEffect;
+		private readonly float _singleStackTime;
 		private readonly float _independentStackTime;
 		private readonly int _maxStacks;
 		private readonly int _everyXStacks;
@@ -17,6 +18,8 @@ namespace ModiBuff.Core
 		private readonly IStackRevertEffect[] _revertEffects;
 		private readonly ModifierCheck _modifierCheck;
 		private readonly IStateReset[] _stateResetEffects;
+
+		private float _singleStackTimer;
 		private readonly List<float> _stackTimers;
 
 		private ITargetComponent _targetComponent;
@@ -24,9 +27,12 @@ namespace ModiBuff.Core
 		private int _stacks;
 
 		public StackComponent(WhenStackEffect whenStackEffect, int maxStacks, int everyXStacks,
-			float independentStackTime, IStackEffect[] effects, ModifierCheck check)
+			float singleStackTime, float independentStackTime, IStackEffect[] effects, ModifierCheck check)
 		{
 			_whenStackEffect = whenStackEffect;
+			_singleStackTime = singleStackTime;
+			if (singleStackTime > 0)
+				_singleStackTimer = singleStackTime;
 			_independentStackTime = independentStackTime;
 			if (_independentStackTime > 0)
 				_stackTimers = new List<float>();
@@ -43,7 +49,13 @@ namespace ModiBuff.Core
 				if (effects[i] is IStackRevertEffect stackRevertEffect && stackRevertEffect.IsRevertible)
 					revertEffectsList.Add(stackRevertEffect);
 				if (effects[i] is IStateReset stateResetEffect)
+				{
+					//Skip mutable state effects that don't use mutable stack effects
+					if (effects[i] is IMutableStateEffect stateEffect && !stateEffect.UsesMutableStackEffect)
+						continue;
+
 					stateEffectsList.Add(stateResetEffect);
+				}
 			}
 
 			_revertEffects = revertEffectsList.ToArray();
@@ -54,7 +66,7 @@ namespace ModiBuff.Core
 
 		public void Update(float delta)
 		{
-			for (int i = 0; i < _stackTimers.Count;)
+			for (int i = 0; i < _stackTimers?.Count;)
 			{
 				float stackTimer = _stackTimers[i] - delta;
 
@@ -83,10 +95,24 @@ namespace ModiBuff.Core
 				_stackTimers.RemoveAt(i);
 				_stacks--;
 			}
+
+			if (_stacks == 0 || _singleStackTimer <= 0)
+				return;
+
+			_singleStackTimer -= delta;
+			if (_singleStackTimer <= 0)
+			{
+				_singleStackTimer = _singleStackTime;
+				ResetStacks();
+			}
 		}
 
 		public void Stack()
 		{
+			//Do we want to always reset the timer, or only on successful stack?
+			if (_singleStackTime > 0)
+				_singleStackTimer = _singleStackTime;
+
 			if (_maxStacks != -1 && _stacks >= _maxStacks)
 				return;
 
@@ -128,7 +154,8 @@ namespace ModiBuff.Core
 			else
 			{
 				//TODO We could revert state with one RevertEffect call here,
-				//but we'd need to update the total value after to 0 
+				//but we'd need to update the total value after to 0
+				//^This won't reset the extra state, which we probably want if we have a stack timer
 				RevertStacks(_stacks);
 			}
 
@@ -176,8 +203,12 @@ namespace ModiBuff.Core
 
 		public void ResetState()
 		{
+			_singleStackTimer = _singleStackTime;
 			_stackTimers?.Clear();
 			_stacks = 0;
+			//We reset effect state in stack component only because Stack() is the only method
+			//that changes extra state. When the effect is reverted total state is always set back to default.
+			//Will be an issue if we try to change state in Effect() or other methods.
 			for (int i = 0; i < _stateResetEffects.Length; i++)
 				_stateResetEffects[i].ResetState();
 		}

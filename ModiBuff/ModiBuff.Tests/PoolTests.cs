@@ -122,6 +122,25 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitDamage + 5 + 2 + 5 + 2 + 2, Unit.Damage);
 		}
 
-		//TODO Pool AddedDamage revertible state reset
+		[Test]
+		public void AddDamageRevertible_PoolStateReset()
+		{
+			AddRecipe("AddDamageRevertible")
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
+				.Remove(5);
+			Setup();
+			Pool.Clear();
+			Pool.Allocate(IdManager.GetId("AddDamageRevertible"), 1);
+
+			Unit.AddModifierSelf("AddDamageRevertible");
+			Unit.AddModifierSelf("AddDamageRevertible");
+			Assert.AreEqual(UnitDamage + 5 + 5, Unit.Damage);
+
+			Unit.Update(5);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+
+			Unit.AddModifierSelf("AddDamageRevertible");
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+		}
 	}
 }

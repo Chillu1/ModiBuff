@@ -6,5 +6,6 @@ namespace ModiBuff.Core
 	public interface IMutableStateEffect : IStateEffect
 	{
 		bool UsesMutableState { get; }
+		bool UsesMutableStackEffect { get; } //TODO Probably refactor/streamline, enum?
 	}
 }
