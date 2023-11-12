@@ -10,6 +10,7 @@ namespace ModiBuff.Core
 		private readonly EffectWrapper[] _effectWrappers;
 		private readonly EffectWrapper[] _effectsWithModifierInfoWrappers;
 		private readonly EffectWrapper _removeEffectWrapper;
+		private readonly EffectWrapper _dispelRegisterWrapper;
 		private readonly EffectWrapper _eventRegisterWrapper;
 		private readonly EffectWrapper _callbackUnitRegisterWrapper;
 		private readonly EffectWrapper _callbackEffectRegisterWrapper;
@@ -33,12 +34,13 @@ namespace ModiBuff.Core
 			_callbackEffectEffectsIndex;
 
 		public ModifierEffectsCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper,
-			EffectWrapper eventRegisterWrapper, EffectWrapper callbackUnitRegisterWrapper,
-			EffectWrapper callbackEffectRegisterWrapper)
+			EffectWrapper dispelRegisterWrapper, EffectWrapper eventRegisterWrapper,
+			EffectWrapper callbackUnitRegisterWrapper, EffectWrapper callbackEffectRegisterWrapper)
 		{
 			var effectsWithModifierInfoWrappers = new List<EffectWrapper>();
 			_effectWrappers = effectWrappers.ToArray();
 			_removeEffectWrapper = removeEffectWrapper;
+			_dispelRegisterWrapper = dispelRegisterWrapper;
 			_eventRegisterWrapper = eventRegisterWrapper;
 			_callbackUnitRegisterWrapper = callbackUnitRegisterWrapper;
 			_callbackEffectRegisterWrapper = callbackEffectRegisterWrapper;
@@ -162,30 +164,17 @@ namespace ModiBuff.Core
 			}
 
 			//Set the effects arrays on our special effects (callback, event, remove-revert)
-			if (_eventRegisterWrapper != null)
-			{
-				((IRecipeFeedEffects)_eventRegisterWrapper.GetEffect()).SetEffects(_eventEffects);
-				_eventRegisterWrapper.Reset();
-			}
+			//No need to reset manually special wrappers manually
+			//Since they're always fed to effectWrappers, that we reset at the end
+			_eventRegisterWrapper?.GetEffectAs<IRecipeFeedEffects>().SetEffects(_eventEffects);
+			_callbackUnitRegisterWrapper?.GetEffectAs<IRecipeFeedEffects>().SetEffects(_callbackUnitEffects);
+			_callbackEffectRegisterWrapper?.GetEffectAs<IRecipeFeedEffects>().SetEffects(_callbackEffectEffects);
 
-			if (_callbackUnitRegisterWrapper != null)
-			{
-				((IRecipeFeedEffects)_callbackUnitRegisterWrapper.GetEffect()).SetEffects(_callbackUnitEffects);
-				_callbackUnitRegisterWrapper.Reset();
-			}
+			if (_removeEffectWrapper != null && _revertEffects != null)
+				_removeEffectWrapper.GetEffectAs<RemoveEffect>().SetRevertibleEffects(_revertEffects);
 
-			if (_callbackEffectRegisterWrapper != null)
-			{
-				((IRecipeFeedEffects)_callbackEffectRegisterWrapper.GetEffect()).SetEffects(_callbackEffectEffects);
-				_callbackEffectRegisterWrapper.Reset();
-			}
-
-			if (_removeEffectWrapper != null)
-			{
-				if (_revertEffects != null)
-					((RemoveEffect)_removeEffectWrapper.GetEffect()).SetRevertibleEffects(_revertEffects);
-				_removeEffectWrapper.Reset();
-			}
+			_dispelRegisterWrapper?.GetEffectAs<DispelRegisterEffect>()
+				.SetRemoveEffect(_removeEffectWrapper.GetEffectAs<RemoveEffect>());
 
 			//Reset all the clones in wrappers
 			for (int i = 0; i < _effectWrappers.Length; i++)

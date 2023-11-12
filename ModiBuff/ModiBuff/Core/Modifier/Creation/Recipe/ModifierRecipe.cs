@@ -27,6 +27,7 @@ namespace ModiBuff.Core
 		private float _duration;
 
 		private EffectWrapper _removeEffectWrapper;
+		private EffectWrapper _dispelRegisterWrapper;
 		private EffectWrapper _eventRegisterWrapper;
 		private EffectWrapper _callbackUnitRegisterWrapper;
 		private EffectWrapper _callbackEffectRegisterWrapper;
@@ -188,8 +189,7 @@ namespace ModiBuff.Core
 		public ModifierRecipe Remove(float duration)
 		{
 			Duration(duration);
-			_removeEffectWrapper = new EffectWrapper(new RemoveEffect(Id), EffectOn.Duration);
-			_effectWrappers.Add(_removeEffectWrapper);
+			AddRemoveEffect(EffectOn.Duration);
 			return this;
 		}
 
@@ -198,8 +198,7 @@ namespace ModiBuff.Core
 		/// </summary>
 		public ModifierRecipe Remove(RemoveEffectOn removeEffectOn = RemoveEffectOn.CallbackUnit)
 		{
-			_removeEffectWrapper = new EffectWrapper(new RemoveEffect(Id), removeEffectOn.ToEffectOn());
-			_effectWrappers.Add(_removeEffectWrapper);
+			AddRemoveEffect(removeEffectOn.ToEffectOn());
 			return this;
 		}
 
@@ -274,6 +273,28 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		public ModifierRecipe Dispel(DispelType dispelType)
+		{
+			AddRemoveEffect(EffectOn.None);
+
+			var dispelRegister = new DispelRegisterEffect(dispelType);
+			_dispelRegisterWrapper = new EffectWrapper(dispelRegister, EffectOn.Init);
+			_effectWrappers.Add(_dispelRegisterWrapper);
+			return this;
+		}
+
+		private void AddRemoveEffect(EffectOn effectOn)
+		{
+			if (_removeEffectWrapper != null)
+			{
+				effectOn |= _removeEffectWrapper.EffectOn;
+				_effectWrappers.Remove(_removeEffectWrapper);
+			}
+
+			_removeEffectWrapper = new EffectWrapper(new RemoveEffect(Id), effectOn);
+			_effectWrappers.Add(_removeEffectWrapper);
+		}
+
 		//---Effects---
 
 		/// <summary>
@@ -305,8 +326,7 @@ namespace ModiBuff.Core
 					effectOn &= ~EffectOn.Stack;
 				}
 #endif
-				_removeEffectWrapper = new EffectWrapper(effect, effectOn);
-				_effectWrappers.Add(_removeEffectWrapper);
+				AddRemoveEffect(effectOn);
 				return this;
 			}
 
@@ -428,11 +448,11 @@ namespace ModiBuff.Core
 			if (_isInstanceStackable)
 				_tag |= TagType.IsInstanceStackable;
 
-			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _eventRegisterWrapper,
-				_callbackUnitRegisterWrapper, _callbackEffectRegisterWrapper, _hasApplyChecks, _applyCheckList,
-				_hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura, _tag,
-				_oneTimeInit, _interval, _duration, _refreshDuration, _refreshInterval, _whenStackEffect, _maxStacks,
-				_everyXStacks, _singleStackTime, _independentStackTime);
+			var data = new ModifierRecipeData(Id, Name, _effectWrappers, _removeEffectWrapper, _dispelRegisterWrapper,
+				_eventRegisterWrapper, _callbackUnitRegisterWrapper, _callbackEffectRegisterWrapper, _hasApplyChecks,
+				_applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura,
+				_tag, _oneTimeInit, _interval, _duration, _refreshDuration, _refreshInterval, _whenStackEffect,
+				_maxStacks, _everyXStacks, _singleStackTime, _independentStackTime);
 			return new ModifierGenerator(in data);
 		}
 

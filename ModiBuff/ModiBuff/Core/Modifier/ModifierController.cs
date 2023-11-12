@@ -16,6 +16,8 @@ namespace ModiBuff.Core
 		private readonly Dictionary<int, int> _modifierIndexesDict;
 		private int _modifiersTop;
 
+		private readonly List<DispelReference> _dispellableModifiers;
+
 		private readonly List<ModifierReference> _modifiersToRemove;
 
 		public ModifierController()
@@ -29,6 +31,8 @@ namespace ModiBuff.Core
 				for (int i = 0; i < _modifierIndexes.Length; i++)
 					_modifierIndexes[i] = -1;
 			}
+
+			_dispellableModifiers = new List<DispelReference>();
 
 			_modifiersToRemove = new List<ModifierReference>(Config.ModifierRemoveSize);
 		}
@@ -99,11 +103,11 @@ namespace ModiBuff.Core
 		public void Add(int id, IUnit target, IUnit source)
 		{
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);
-			bool instanceStackable = tag.HasTag(TagType.IsInstanceStackable);
-			bool useDictionaryIndexes = Config.UseDictionaryIndexes;
 
-			if (!instanceStackable)
+			if (!tag.HasTag(TagType.IsInstanceStackable))
 			{
+				bool useDictionaryIndexes = Config.UseDictionaryIndexes;
+
 				bool exists;
 				int index;
 				if (useDictionaryIndexes)
@@ -128,6 +132,11 @@ namespace ModiBuff.Core
 
 					return;
 				}
+
+				if (useDictionaryIndexes)
+					_modifierIndexesDict.Add(id, _modifiersTop);
+				else
+					_modifierIndexes[id] = _modifiersTop;
 			}
 
 			if (_modifiersTop == _modifiers.Length)
@@ -137,14 +146,6 @@ namespace ModiBuff.Core
 
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
 			modifier.UpdateSingleTargetSource(target, source);
-
-			if (!instanceStackable)
-			{
-				if (useDictionaryIndexes)
-					_modifierIndexesDict.Add(id, _modifiersTop);
-				else
-					_modifierIndexes[id] = _modifiersTop;
-			}
 
 			_modifiers[_modifiersTop++] = modifier;
 			if (tag.HasTag(TagType.IsInit))
@@ -175,6 +176,27 @@ namespace ModiBuff.Core
 			}
 
 			return false;
+		}
+
+		internal void RegisterDispel(DispelType dispel, RemoveEffect effect)
+		{
+			_dispellableModifiers.Add(new DispelReference(effect, dispel));
+		}
+
+		public void Dispel(DispelType dispelType, IUnit target, IUnit source)
+		{
+			for (int i = 0; i < _dispellableModifiers.Count;)
+			{
+				var dispelReference = _dispellableModifiers[i];
+				if (dispelReference.Type.HasAny(dispelType))
+				{
+					dispelReference.Effect.Effect(target, source);
+					_dispellableModifiers.RemoveAt(i);
+					continue;
+				}
+
+				i++;
+			}
 		}
 
 		public void PrepareRemove(int id, int genId)

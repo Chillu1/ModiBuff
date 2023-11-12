@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace ModiBuff.Core
 {
 	public sealed class EffectWrapper
@@ -36,9 +38,9 @@ namespace ModiBuff.Core
 			return _effectClone;
 		}
 
-		public void Reset()
-		{
-			_effectClone = null;
-		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T GetEffectAs<T>() => (T)GetEffect();
+
+		public void Reset() => _effectClone = null;
 	}
 }
