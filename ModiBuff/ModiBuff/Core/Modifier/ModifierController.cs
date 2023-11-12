@@ -16,7 +16,7 @@ namespace ModiBuff.Core
 		private readonly Dictionary<int, int> _modifierIndexesDict;
 		private int _modifiersTop;
 
-		private readonly List<DispelReference> _dispellableModifiers;
+		private readonly List<DispelReference> _dispellableReferences;
 
 		private readonly List<ModifierReference> _modifiersToRemove;
 
@@ -32,7 +32,7 @@ namespace ModiBuff.Core
 					_modifierIndexes[i] = -1;
 			}
 
-			_dispellableModifiers = new List<DispelReference>();
+			_dispellableReferences = new List<DispelReference>(Config.DispellableSize);
 
 			_modifiersToRemove = new List<ModifierReference>(Config.ModifierRemoveSize);
 		}
@@ -180,18 +180,18 @@ namespace ModiBuff.Core
 
 		internal void RegisterDispel(DispelType dispel, RemoveEffect effect)
 		{
-			_dispellableModifiers.Add(new DispelReference(effect, dispel));
+			_dispellableReferences.Add(new DispelReference(effect, dispel));
 		}
 
 		public void Dispel(DispelType dispelType, IUnit target, IUnit source)
 		{
-			for (int i = 0; i < _dispellableModifiers.Count;)
+			for (int i = 0; i < _dispellableReferences.Count;)
 			{
-				var dispelReference = _dispellableModifiers[i];
+				var dispelReference = _dispellableReferences[i];
 				if (dispelReference.Type.HasAny(dispelType))
 				{
 					dispelReference.Effect.Effect(target, source);
-					_dispellableModifiers.RemoveAt(i);
+					_dispellableReferences.RemoveAt(i);
 					continue;
 				}
 

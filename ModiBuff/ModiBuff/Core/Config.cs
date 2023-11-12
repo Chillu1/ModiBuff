@@ -15,6 +15,7 @@ namespace ModiBuff.Core
 		private const int DefaultModifierApplierControllerPoolSize = 64;
 
 		public const int DefaultModifierArraySize = 32;
+		private const int DefaultDispellableSize = 4;
 		private const int DefaultModifierRemoveSize = 4;
 		private const int DefaultModifierIndexDictionarySize = 8;
 
@@ -48,6 +49,7 @@ namespace ModiBuff.Core
 		public static int ModifierApplierControllerPoolSize = DefaultModifierApplierControllerPoolSize;
 
 		public static int ModifierArraySize = DefaultModifierArraySize;
+		public static int DispellableSize = DefaultDispellableSize;
 		public static int ModifierRemoveSize = DefaultModifierRemoveSize;
 		public static int ModifierIndexDictionarySize = DefaultModifierIndexDictionarySize;
 
@@ -85,6 +87,7 @@ namespace ModiBuff.Core
 			ModifierApplierControllerPoolSize = DefaultModifierApplierControllerPoolSize;
 
 			ModifierArraySize = DefaultModifierArraySize;
+			DispellableSize = DefaultDispellableSize;
 			ModifierRemoveSize = DefaultModifierRemoveSize;
 			ModifierIndexDictionarySize = DefaultModifierIndexDictionarySize;
 

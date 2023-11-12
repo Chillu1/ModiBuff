@@ -7,11 +7,11 @@ namespace ModiBuff.Core
 	public enum DispelType
 	{
 		None,
-		Interval,
-		Duration,
-		Stack,
-		Basic,
-		Strong,
+		Interval = 1,
+		Duration = 2,
+		Stack = 4,
+		Basic = 8,
+		Strong = 16,
 
 		Time = Interval | Duration,
 

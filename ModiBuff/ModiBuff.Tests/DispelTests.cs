@@ -10,16 +10,16 @@ namespace ModiBuff.Tests
 		public void DispelDoT()
 		{
 			AddRecipe("DoTDispellable")
+				.Dispel()
 				.Interval(1)
-				.Effect(new DamageEffect(5), EffectOn.Interval)
-				.Dispel(DispelType.Interval);
+				.Effect(new DamageEffect(5), EffectOn.Interval);
 			Setup();
 
 			Unit.AddModifierSelf("DoTDispellable");
 			Unit.Update(1);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
-			Unit.ModifierController.Dispel(DispelType.Time, Unit, Unit);
+			Unit.Dispel(DispelType.Time, Unit);
 			Unit.Update(0);
 
 			Unit.Update(1);
@@ -30,22 +30,56 @@ namespace ModiBuff.Tests
 		public void DispelDoTDuration()
 		{
 			AddRecipe("DoTDispellableDuration")
+				.Dispel()
 				.Interval(1)
 				.Effect(new DamageEffect(5), EffectOn.Interval)
-				.Dispel(DispelType.Interval | DispelType.Duration)
 				.Remove(5);
 			Setup();
 
 			Unit.AddModifierSelf("DoTDispellableDuration");
-			Unit.ModifierController.Dispel(DispelType.Stack, Unit, Unit);
+			Unit.Dispel(DispelType.Stack, Unit);
 			Unit.Update(1);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
-			Unit.ModifierController.Dispel(DispelType.Duration, Unit, Unit);
+			Unit.Dispel(DispelType.Duration, Unit);
 			Unit.Update(0);
 
 			Unit.Update(1);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void BasicDispel()
+		{
+			AddRecipe("BasicDispellable")
+				.Dispel()
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("BasicDispellable");
+
+			Unit.Dispel(DispelType.Basic, Unit);
+			Unit.Update(0);
+			Assert.False(Unit.ContainsModifier("BasicDispellable"));
+		}
+
+		[Test]
+		public void StrongDispel()
+		{
+			AddRecipe("StrongDispellable")
+				.Dispel(DispelType.Strong)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("StrongDispellable");
+
+			Unit.Dispel(DispelType.Basic, Unit);
+			Unit.Update(0);
+			Assert.True(Unit.ContainsModifier("StrongDispellable"));
+
+			Unit.Dispel(DispelType.Strong, Unit);
+			Unit.Update(0);
+			Assert.False(Unit.ContainsModifier("StrongDispellable"));
 		}
 	}
 }

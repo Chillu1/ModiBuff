@@ -7,6 +7,11 @@ namespace ModiBuff.Core
 			owner.ModifierController.Add(id, owner, source);
 		}
 
+		public static void Dispel(this IModifierOwner owner, DispelType dispelType, IUnit source)
+		{
+			owner.ModifierController.Dispel(dispelType, owner, source);
+		}
+
 		public static void TryAddModifierReference(this IUnit owner, ModifierAddReference reference)
 		{
 			TryAddModifierReference(owner, reference, owner);

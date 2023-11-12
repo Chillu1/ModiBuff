@@ -2,7 +2,7 @@ namespace ModiBuff.Core
 {
 	public sealed class DispelRegisterEffect : IEffect, IShallowClone<IEffect>
 	{
-		private readonly DispelType _dispelType;
+		private DispelType _dispelType;
 		private RemoveEffect _removeEffect;
 
 		public DispelRegisterEffect(DispelType dispelType) : this(dispelType, null)
@@ -17,6 +17,8 @@ namespace ModiBuff.Core
 
 		public static DispelRegisterEffect Create(DispelType dispelType, RemoveEffect removeEffect)
 			=> new DispelRegisterEffect(dispelType, removeEffect);
+
+		public void UpdateDispelType(DispelType dispelType) => _dispelType |= dispelType;
 
 		public void SetRemoveEffect(RemoveEffect removeEffect) => _removeEffect = removeEffect;
 
