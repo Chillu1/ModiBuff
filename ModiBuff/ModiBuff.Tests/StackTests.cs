@@ -220,10 +220,8 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-		public void IndependentAndSingleStackTimerAddValueEffectRevert()
+		public void IndependentAndLongSingleStackTimerAddValueEffectRevert()
 		{
-			//Each stack always timeouts after 2 seconds, but they also all timeout after 5 seconds
-			//Doesn't make sense to mix them, but w/e
 			AddRecipe("AddDamageStackTimer")
 				.Effect(
 					new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Effect | StackEffectType.Add, 2),
@@ -247,6 +245,38 @@ namespace ModiBuff.Tests
 
 			Unit.Update(2);
 			Unit.Update(3);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+		}
+
+		[Test]
+		public void IndependentAndShortSingleStackTimerAddValueEffectRevert()
+		{
+			AddRecipe("AddDamageStackTimer")
+				.Effect(
+					new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Effect | StackEffectType.Add, 2),
+					EffectOn.Stack)
+				.Stack(WhenStackEffect.Always, independentStackTime: 4, singleStackTime: 3);
+			Setup();
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+
+			Unit.Update(2);
+			Unit.AddModifierSelf("AddDamageStackTimer");
+			Assert.AreEqual(UnitDamage + 5 + 2 + 5 + 4, Unit.Damage);
+
+			Unit.Update(2);
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+
+			Unit.AddModifierSelf("AddDamageStackTimer");
+
+			Unit.Update(1);
+			Assert.AreEqual(UnitDamage + 5 + 2 + 5 + 4, Unit.Damage);
+
+			Unit.Update(1);
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+
+			Unit.Update(1);
 			Assert.AreEqual(UnitDamage, Unit.Damage);
 		}
 	}

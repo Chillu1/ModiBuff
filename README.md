@@ -30,6 +30,12 @@ manipulation of effects on entities.
 
 **It focuses on Feature Set, Performance and Ease of use, in that order.**
 
+**Library goals:**
+
+* Capable of creating very sopisticated modifiers
+* Modifiers being fast
+* Creating them easily
+
 The library is split into two core parts:
 
 ModiBuff is the core backend part that handles all the modifier logic and is mostly unopinionated when it comes to the
