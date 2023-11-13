@@ -239,7 +239,18 @@ namespace ModiBuff.Core.Units
 			_legalActions = LegalAction.All;
 		}
 
-		private readonly struct StatusEffectInstance : IEquatable<StatusEffectInstance>
+		public SaveData SaveState() => new SaveData(_legalActionsTimers, _legalActionTypeCounters, _legalActions);
+
+		public void LoadState(SaveData data)
+		{
+			foreach (var instance in data.LegalActionsTimers)
+				_legalActionsTimers.Add(instance.Key, instance.Value);
+			for (int i = 0; i < data.LegalActionTypeCounters.Length; i++)
+				_legalActionTypeCounters[i] = data.LegalActionTypeCounters[i];
+			_legalActions = data.LegalActions;
+		}
+
+		public readonly struct StatusEffectInstance : IEquatable<StatusEffectInstance>
 		{
 			private readonly int _id;
 			private readonly int _genId;
@@ -272,6 +283,22 @@ namespace ModiBuff.Core.Units
 					hashCode = (hashCode * 397) ^ StatusEffectTypeInt;
 					return hashCode;
 				}
+			}
+		}
+
+		public readonly struct SaveData
+		{
+			//TODO GenId of this will be wrong, since we refresh the genId counters
+			public readonly Dictionary<StatusEffectInstance, float> LegalActionsTimers;
+			public readonly int[] LegalActionTypeCounters;
+			public readonly LegalAction LegalActions;
+
+			public SaveData(Dictionary<StatusEffectInstance, float> legalActionsTimers, int[] legalActionTypeCounters,
+				LegalAction legalActions)
+			{
+				LegalActionsTimers = legalActionsTimers;
+				LegalActionTypeCounters = legalActionTypeCounters;
+				LegalActions = legalActions;
 			}
 		}
 	}

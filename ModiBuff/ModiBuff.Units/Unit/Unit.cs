@@ -468,7 +468,8 @@ namespace ModiBuff.Core.Units
 		public SaveData SaveState()
 		{
 			return new SaveData(UnitTag, Health, MaxHealth, Damage, HealValue, Mana, MaxMana, StatusResistance,
-				UnitType, IsDead, ModifierController.SaveState());
+				UnitType, IsDead, ModifierController.SaveState(), ModifierApplierController.SaveState(),
+				_statusEffectController.SaveState(), _singleInstanceStatusEffectController.SaveState());
 		}
 
 		public void LoadState(SaveData data)
@@ -484,6 +485,9 @@ namespace ModiBuff.Core.Units
 			UnitType = data.UnitType;
 			IsDead = data.IsDead;
 			ModifierController.LoadState(data.ModifierControllerSaveData, this);
+			ModifierApplierController.LoadState(data.ModifierApplierControllerSaveData);
+			_statusEffectController.LoadState(data.MultiInstanceStatusEffectControllerSaveData);
+			_singleInstanceStatusEffectController.LoadState(data.SingleInstanceStatusEffectControllerSaveData);
 		}
 
 		public override string ToString()
@@ -504,10 +508,16 @@ namespace ModiBuff.Core.Units
 			public readonly UnitType UnitType;
 			public readonly bool IsDead;
 			public readonly ModifierController.SaveData ModifierControllerSaveData;
+			public readonly ModifierApplierController.SaveData ModifierApplierControllerSaveData;
+			public readonly MultiInstanceStatusEffectController.SaveData MultiInstanceStatusEffectControllerSaveData;
+			public readonly StatusEffectController.SaveData SingleInstanceStatusEffectControllerSaveData;
 
 			public SaveData(UnitTag unitTag, float health, float maxHealth, float damage, float healValue, float mana,
 				float maxMana, float statusResistance, UnitType unitType, bool isDead,
-				ModifierController.SaveData modifierControllerSaveData)
+				ModifierController.SaveData modifierControllerSaveData,
+				ModifierApplierController.SaveData modifierApplierControllerSaveData,
+				MultiInstanceStatusEffectController.SaveData multiInstanceStatusEffectControllerSaveData,
+				StatusEffectController.SaveData singleInstanceStatusEffectControllerSaveData)
 			{
 				UnitTag = unitTag;
 				Health = health;
@@ -520,6 +530,9 @@ namespace ModiBuff.Core.Units
 				UnitType = unitType;
 				IsDead = isDead;
 				ModifierControllerSaveData = modifierControllerSaveData;
+				ModifierApplierControllerSaveData = modifierApplierControllerSaveData;
+				MultiInstanceStatusEffectControllerSaveData = multiInstanceStatusEffectControllerSaveData;
+				SingleInstanceStatusEffectControllerSaveData = singleInstanceStatusEffectControllerSaveData;
 			}
 		}
 	}

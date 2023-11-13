@@ -59,5 +59,14 @@ namespace ModiBuff.Core
 		}
 
 		public void Reset() => _instance = null;
+
+		public SaveData SaveState() => new SaveData(_idMap);
+
+		public readonly struct SaveData
+		{
+			public readonly Dictionary<string, int> IdMap;
+
+			public SaveData(Dictionary<string, int> idMap) => IdMap = idMap;
+		}
 	}
 }

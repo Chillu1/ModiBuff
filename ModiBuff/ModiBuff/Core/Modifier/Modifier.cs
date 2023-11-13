@@ -325,7 +325,6 @@ namespace ModiBuff.Core
 
 		public readonly struct SaveData
 		{
-			//TODO This ID can be wrong (when we change the order of recipes, etc, have to save it's name as well)
 			public readonly int Id;
 			public readonly ITargetComponentSaveData TargetSaveData;
 			public readonly bool IsMultiTarget;

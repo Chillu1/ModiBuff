@@ -97,6 +97,42 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitDamage, loadedUnit.Damage);
 		}
 
+		[Test]
+		public void SaveLoadStatusEffect()
+		{
+			AddRecipe("InitStun")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2f), EffectOn.Init)
+				.Remove(2);
+			Setup();
+
+			Unit.AddModifierSelf("InitStun");
+			Unit.Update(1);
+
+			var saveData = Unit.SaveState();
+			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
+			loadedUnit.LoadState(saveData);
+
+			Assert.True(loadedUnit.HasStatusEffectMulti(StatusEffectType.Stun));
+			loadedUnit.Update(1);
+			Assert.False(loadedUnit.HasStatusEffectMulti(StatusEffectType.Stun));
+		}
+
+		//[Test]
+		public void SaveNewModifierIdLoad()
+		{
+			Setup();
+
+			//TODO Save name next to Id (then check if the id has changed since last save)
+			//Saves to file what each modifier name was in relation to id
+			//So if we change the order of recipes/generators, we can still load the correct modifiers
+			//Also will warn us if a recipe is missing / has been renamed
+			var saveModifierData = IdManager.SaveState();
+		}
+
+		//TODO Saving Target&Source Unit Id
+		//TODO GenIds will be wrong in some places (StatusEffect), how to fix, feed correct id & genId somehow?
+		//TODO Applier check
+		//TODO CallbackEffect, CallbackUnit, CallbackState
 		//TODO add damage is enabled check
 	}
 }

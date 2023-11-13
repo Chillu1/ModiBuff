@@ -156,5 +156,43 @@ namespace ModiBuff.Core
 			_modifierAttackChecksAppliers.Clear();
 			_effectCasts.Clear();
 		}
+
+		public SaveData SaveState()
+		{
+			return new SaveData(_modifierAttackAppliers, _modifierCastAppliers, _modifierCastChecksAppliers,
+				_modifierAttackChecksAppliers, _effectCasts);
+		}
+
+		public void LoadState(SaveData saveData)
+		{
+			_modifierAttackAppliers.AddRange(saveData.ModifierAttackAppliers);
+			_modifierCastAppliers.AddRange(saveData.ModifierCastAppliers);
+			//TODO Appliers need to be fed state
+			foreach (var kvp in saveData.ModifierCastChecksAppliers)
+				_modifierCastChecksAppliers.Add(kvp.Key, kvp.Value);
+			foreach (var kvp in saveData.ModifierAttackChecksAppliers)
+				_modifierAttackChecksAppliers.Add(kvp.Key, kvp.Value);
+			_effectCasts.AddRange(saveData.EffectCasts);
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly int[] ModifierAttackAppliers;
+			public readonly int[] ModifierCastAppliers;
+			public readonly Dictionary<int, ModifierCheck> ModifierCastChecksAppliers;
+			public readonly Dictionary<int, ModifierCheck> ModifierAttackChecksAppliers;
+			public readonly int[] EffectCasts;
+
+			public SaveData(List<int> modifierAttackAppliers, List<int> modifierCastAppliers,
+				Dictionary<int, ModifierCheck> modifierCastChecksAppliers,
+				Dictionary<int, ModifierCheck> modifierAttackChecksAppliers, List<int> effectCasts)
+			{
+				ModifierAttackAppliers = modifierAttackAppliers.ToArray();
+				ModifierCastAppliers = modifierCastAppliers.ToArray();
+				ModifierCastChecksAppliers = modifierCastChecksAppliers;
+				ModifierAttackChecksAppliers = modifierAttackChecksAppliers;
+				EffectCasts = effectCasts.ToArray();
+			}
+		}
 	}
 }

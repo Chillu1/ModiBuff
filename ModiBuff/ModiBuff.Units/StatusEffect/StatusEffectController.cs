@@ -104,5 +104,25 @@ namespace ModiBuff.Core.Units
 			Array.Clear(_legalActionTimers, 0, _legalActionTimers.Length);
 			_legalActions = LegalAction.All;
 		}
+
+		public SaveData SaveState() => new SaveData(_legalActionTimers, _legalActions);
+
+		public void LoadState(SaveData saveData)
+		{
+			Array.Copy(saveData.LegalActionTimers, _legalActionTimers, _legalActionTimers.Length);
+			_legalActions = saveData.LegalActions;
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly float[] LegalActionTimers;
+			public readonly LegalAction LegalActions;
+
+			public SaveData(float[] legalActionTimers, LegalAction legalActions)
+			{
+				LegalActionTimers = legalActionTimers;
+				LegalActions = legalActions;
+			}
+		}
 	}
 }
