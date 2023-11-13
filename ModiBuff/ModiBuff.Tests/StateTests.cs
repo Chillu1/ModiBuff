@@ -328,5 +328,27 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(EnemyHealth - 5 * 2, Enemy.Health);
 		}*/
+
+		[Test]
+		public void SaveLoadInitDamage()
+		{
+			AddRecipe("NoDamage")
+				.Effect(new DamageEffect(0), EffectOn.Init);
+			Setup();
+
+			//Process:
+			//Save MC
+			//Save Modifier Ids, Save Modifier Mutable State
+
+			var modifier = Pool.Rent(IdManager.GetId("InitDamage"));
+			var saveState = modifier.GetSaveState();
+			//Logger.Log($"SaveState: {saveState.Id}, {string.Join(", ", saveState.EffectsSaveData)}");
+			var loadedModifier = Pool.Rent(IdManager.GetId("NoDamage"));
+			loadedModifier.LoadSaveState(saveState);
+
+			modifier.UpdateSingleTargetSource(Unit, Unit);
+			modifier.Init();
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
 	}
 }

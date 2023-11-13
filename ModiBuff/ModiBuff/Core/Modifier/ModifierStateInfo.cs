@@ -44,5 +44,32 @@ namespace ModiBuff.Core
 			Logger.LogError($"[ModiBuff] Couldn't find {typeof(TData)} at number {stateNumber}");
 			return default;
 		}
+
+		public object[] GetSaveState()
+		{
+			object[] saveData = new object[_effects.Length];
+			for (int i = 0; i < _effects.Length; i++)
+			{
+				//TODO Temp Remove
+				if (!(_effects[i] is ISavableEffect effect))
+					continue;
+
+				saveData[i] = effect.GetSaveData();
+			}
+
+			return saveData;
+		}
+
+		public void LoadSaveState(object[] saveData)
+		{
+			for (int i = 0; i < _effects.Length; i++)
+			{
+				//TODO Temp Remove
+				if (!(_effects[i] is ISavableEffect effect))
+					continue;
+
+				effect.LoadSaveData(saveData[i]);
+			}
+		}
 	}
 }

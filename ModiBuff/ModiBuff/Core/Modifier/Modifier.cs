@@ -228,6 +228,22 @@ namespace ModiBuff.Core
 			return _effectStateInfo.GetEffectState<TData>(stateNumber);
 		}
 
+		public SaveData GetSaveState()
+		{
+			if (_effectStateInfo == null)
+			{
+				Logger.LogError("[ModiBuff] Trying to get state info from a modifier that doesn't have any.");
+				return default;
+			}
+
+			return new SaveData(Id, _effectStateInfo.GetSaveState());
+		}
+
+		public void LoadSaveState(SaveData saveData)
+		{
+			_effectStateInfo.LoadSaveState(saveData.EffectsSaveData);
+		}
+
 		public void ResetState()
 		{
 			if (_hasInit)
@@ -266,6 +282,18 @@ namespace ModiBuff.Core
 			unchecked
 			{
 				return (Id * 397) ^ GenId;
+			}
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly int Id;
+			public readonly object[] EffectsSaveData;
+
+			public SaveData(int id, object[] effectsSaveData)
+			{
+				Id = id;
+				EffectsSaveData = effectsSaveData;
 			}
 		}
 	}
