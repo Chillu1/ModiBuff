@@ -230,6 +230,30 @@ namespace ModiBuff.Core
 					break;
 			}
 		}
+
+		public SaveData SaveState() => new SaveData(_stacks, _singleStackTimer, _stackTimers);
+
+		public void LoadState(SaveData saveData)
+		{
+			_stacks = saveData.Stacks;
+			_singleStackTimer = saveData.SingleStackTime;
+			if (saveData.StackTimers != null)
+				_stackTimers.AddRange(saveData.StackTimers);
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly int Stacks;
+			public readonly float SingleStackTime;
+			public readonly List<float> StackTimers;
+
+			public SaveData(int stacks, float singleStackTime, List<float> stackTimers)
+			{
+				Stacks = stacks;
+				SingleStackTime = singleStackTime;
+				StackTimers = stackTimers;
+			}
+		}
 	}
 
 

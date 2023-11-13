@@ -50,5 +50,15 @@ namespace ModiBuff.Core
 		}
 
 		public void ResetState() => _isInitialized = false;
+
+		public SaveData SaveState() => new SaveData(_isInitialized);
+		public void LoadState(SaveData data) => _isInitialized = data.IsInitialized;
+
+		public readonly struct SaveData
+		{
+			public readonly bool IsInitialized;
+
+			public SaveData(bool isInitialized) => IsInitialized = isInitialized;
+		}
 	}
 }

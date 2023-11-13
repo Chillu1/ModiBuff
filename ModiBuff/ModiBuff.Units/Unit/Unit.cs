@@ -33,7 +33,7 @@ namespace ModiBuff.Core.Units
 		public float Mana { get; private set; }
 		public float MaxMana { get; private set; }
 		public float StatusResistance { get; private set; } = 1f;
-		public UnitType UnitType { get; }
+		public UnitType UnitType { get; private set; }
 		public Vector2 Position { get; private set; }
 		public int PoisonStacks { get; private set; }
 
@@ -467,13 +467,22 @@ namespace ModiBuff.Core.Units
 
 		public SaveData SaveState()
 		{
-			return new SaveData(Health, Damage, ModifierController.SaveState());
+			return new SaveData(UnitTag, Health, MaxHealth, Damage, HealValue, Mana, MaxMana, StatusResistance,
+				UnitType, IsDead, ModifierController.SaveState());
 		}
 
 		public void LoadState(SaveData data)
 		{
+			UnitTag = data.UnitTag;
 			Health = data.Health;
+			MaxHealth = data.MaxHealth;
 			Damage = data.Damage;
+			HealValue = data.HealValue;
+			Mana = data.Mana;
+			MaxMana = data.MaxMana;
+			StatusResistance = data.StatusResistance;
+			UnitType = data.UnitType;
+			IsDead = data.IsDead;
 			ModifierController.LoadState(data.ModifierControllerSaveData, this);
 		}
 
@@ -484,15 +493,33 @@ namespace ModiBuff.Core.Units
 
 		public readonly struct SaveData
 		{
+			public readonly UnitTag UnitTag;
 			public readonly float Health;
+			public readonly float MaxHealth;
 			public readonly float Damage;
+			public readonly float HealValue;
+			public readonly float Mana;
+			public readonly float MaxMana;
+			public readonly float StatusResistance;
+			public readonly UnitType UnitType;
+			public readonly bool IsDead;
 			public readonly ModifierController.SaveData ModifierControllerSaveData;
 
-			public SaveData(float health, float damage, ModifierController.SaveData saveState)
+			public SaveData(UnitTag unitTag, float health, float maxHealth, float damage, float healValue, float mana,
+				float maxMana, float statusResistance, UnitType unitType, bool isDead,
+				ModifierController.SaveData modifierControllerSaveData)
 			{
+				UnitTag = unitTag;
 				Health = health;
+				MaxHealth = maxHealth;
 				Damage = damage;
-				ModifierControllerSaveData = saveState;
+				HealValue = healValue;
+				Mana = mana;
+				MaxMana = maxMana;
+				StatusResistance = statusResistance;
+				UnitType = unitType;
+				IsDead = isDead;
+				ModifierControllerSaveData = modifierControllerSaveData;
 			}
 		}
 	}

@@ -87,7 +87,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitDamage + 5 + 5 + 2, Unit.Damage);
 
 			var saveData = Unit.SaveState();
-			var loadedUnit = new Unit();
+			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
 			loadedUnit.LoadState(saveData);
 
 			Assert.AreEqual(UnitHealth - 5, loadedUnit.Health);

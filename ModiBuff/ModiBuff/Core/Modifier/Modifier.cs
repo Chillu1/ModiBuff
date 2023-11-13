@@ -236,7 +236,10 @@ namespace ModiBuff.Core
 				return default;
 			}
 
-			var targetComponentSaveData = _targetComponent.SaveState();
+			var targetSaveData = _targetComponent.SaveState();
+			InitComponent.SaveData? initSaveData =
+				_hasInit ? (InitComponent.SaveData?)_initComponent.SaveState() : null;
+			var stackSaveData = _stackComponent?.SaveState();
 
 			TimeComponentSaveData[] timeComponentsSaveData = null;
 			if (_timeComponents != null && _timeComponents.Length > 0)
@@ -246,13 +249,19 @@ namespace ModiBuff.Core
 					timeComponentsSaveData[i] = _timeComponents[i].SaveState();
 			}
 
-			return new SaveData(Id, targetComponentSaveData, timeComponentsSaveData, _effectStateInfo.SaveState());
+			//TODO SaveLoad effect checks mutable state
+
+			return new SaveData(Id, targetSaveData, _multiTarget, initSaveData, stackSaveData, timeComponentsSaveData,
+				_effectStateInfo.SaveState());
 		}
 
 		public void LoadState(SaveData data, IUnit owner)
 		{
-			_targetComponent.LoadState(data.TargetComponentSaveData);
-			switch (data.TargetComponentSaveData)
+			_isTargetSetup = false;
+			_multiTarget = data.IsMultiTarget;
+
+			_targetComponent.LoadState(data.TargetSaveData);
+			switch (data.TargetSaveData)
 			{
 				case SingleTargetComponent.SaveData _:
 					UpdateSingleTargetSource(owner, owner); //TODO Temporary
@@ -261,6 +270,12 @@ namespace ModiBuff.Core
 					//UpdateTargets(multiSaveData.Targets, multiSaveData.Source);
 					break;
 			}
+
+			if (data.InitSaveData != null)
+				_initComponent.LoadState(data.InitSaveData.Value);
+
+			if (data.StackSaveData != null)
+				_stackComponent.LoadState(data.StackSaveData.Value);
 
 			for (int i = 0; i < _timeComponents?.Length; i++)
 				_timeComponents[i].LoadState(data.TimeComponentsSaveData[i]);
@@ -310,16 +325,24 @@ namespace ModiBuff.Core
 
 		public readonly struct SaveData
 		{
+			//TODO This ID can be wrong (when we change the order of recipes, etc, have to save it's name as well)
 			public readonly int Id;
-			public readonly ITargetComponentSaveData TargetComponentSaveData;
+			public readonly ITargetComponentSaveData TargetSaveData;
+			public readonly bool IsMultiTarget;
+			public readonly InitComponent.SaveData? InitSaveData;
+			public readonly StackComponent.SaveData? StackSaveData;
 			public readonly TimeComponentSaveData[] TimeComponentsSaveData;
 			public readonly object[] EffectsSaveData;
 
-			public SaveData(int id, ITargetComponentSaveData targetComponentSaveData,
+			public SaveData(int id, ITargetComponentSaveData targetSaveData, bool isMultiTarget,
+				InitComponent.SaveData? initSaveData, StackComponent.SaveData? stackSaveData,
 				TimeComponentSaveData[] timeComponentsSaveData, object[] effectsSaveData)
 			{
 				Id = id;
-				TargetComponentSaveData = targetComponentSaveData;
+				TargetSaveData = targetSaveData;
+				IsMultiTarget = isMultiTarget;
+				InitSaveData = initSaveData;
+				StackSaveData = stackSaveData;
 				TimeComponentsSaveData = timeComponentsSaveData;
 				EffectsSaveData = effectsSaveData;
 			}

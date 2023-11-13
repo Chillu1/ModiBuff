@@ -324,6 +324,9 @@ namespace ModiBuff.Core
 
 		public SaveData SaveState()
 		{
+			//TODO Possible that we have modifiers to remove right when we call this?
+			//If so, we should remove them before saving
+
 			Modifier.SaveData[] modifiersSaveData = new Modifier.SaveData[_modifiersTop];
 			for (int i = 0; i < _modifiersTop; i++)
 				modifiersSaveData[i] = _modifiers[i].SaveState();
@@ -336,14 +339,17 @@ namespace ModiBuff.Core
 			{
 				var modifierSaveData = saveData.ModifiersSaveData[i];
 
+				if (!ModifierRecipes.GetTag(modifierSaveData.Id).HasTag(TagType.IsInstanceStackable))
+				{
+					if (Config.UseDictionaryIndexes)
+						_modifierIndexesDict.Add(modifierSaveData.Id, _modifiersTop);
+					else
+						_modifierIndexes[modifierSaveData.Id] = _modifiersTop;
+				}
+
 				var modifier = ModifierPool.Instance.Rent(modifierSaveData.Id);
 				modifier.LoadState(modifierSaveData, owner);
-				if (Config.UseDictionaryIndexes)
-					_modifierIndexesDict.Add(modifierSaveData.Id, _modifiersTop);
-				else
-					_modifierIndexes[modifierSaveData.Id] = _modifiersTop;
 				_modifiers[_modifiersTop++] = modifier;
-				//TODO Setup indexes, what about register effects?
 			}
 		}
 
