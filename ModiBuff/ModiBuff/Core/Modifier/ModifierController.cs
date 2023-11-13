@@ -322,6 +322,27 @@ namespace ModiBuff.Core
 			_modifiersToRemove.Clear();
 		}
 
+		public SaveData SaveState()
+		{
+			object[] modifiersSaveData = new object[_modifiersTop];
+			for (int i = 0; i < _modifiersTop; i++)
+				modifiersSaveData[i] = _modifiers[i].SaveState();
+			return new SaveData(modifiersSaveData);
+		}
+
+		public void LoadState(SaveData saveData)
+		{
+			for (int i = 0; i < saveData.ModifiersSaveData.Length; i++)
+			{
+				var modifierSaveData = (Modifier.SaveData)saveData.ModifiersSaveData[i];
+
+				var modifier = ModifierPool.Instance.Rent(modifierSaveData.Id);
+				modifier.LoadState(modifierSaveData);
+				_modifiers[_modifiersTop++] = modifier;
+				//TODO Setup indexes, what about register effects?
+			}
+		}
+
 		private Modifier GetModifier(int id, int genId)
 		{
 			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
@@ -344,6 +365,13 @@ namespace ModiBuff.Core
 			}
 
 			return null;
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly object[] ModifiersSaveData;
+
+			public SaveData(object[] modifiersSaveData) => ModifiersSaveData = modifiersSaveData;
 		}
 	}
 }

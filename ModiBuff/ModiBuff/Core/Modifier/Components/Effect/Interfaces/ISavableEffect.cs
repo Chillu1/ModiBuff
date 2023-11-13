@@ -2,8 +2,8 @@ namespace ModiBuff.Core
 {
 	public interface ISavableEffect
 	{
-		object GetSaveData();
-		void LoadSaveData(object saveData);
+		object SaveState();
+		void LoadState(object saveData);
 	}
 
 	public interface ISavableEffect<out TData> : ISavableEffect

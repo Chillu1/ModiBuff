@@ -45,7 +45,7 @@ namespace ModiBuff.Core
 			return default;
 		}
 
-		public object[] GetSaveState()
+		public object[] SaveState()
 		{
 			object[] saveData = new object[_effects.Length];
 			for (int i = 0; i < _effects.Length; i++)
@@ -54,13 +54,13 @@ namespace ModiBuff.Core
 				if (!(_effects[i] is ISavableEffect effect))
 					continue;
 
-				saveData[i] = effect.GetSaveData();
+				saveData[i] = effect.SaveState();
 			}
 
 			return saveData;
 		}
 
-		public void LoadSaveState(object[] saveData)
+		public void LoadState(object[] data)
 		{
 			for (int i = 0; i < _effects.Length; i++)
 			{
@@ -68,7 +68,7 @@ namespace ModiBuff.Core
 				if (!(_effects[i] is ISavableEffect effect))
 					continue;
 
-				effect.LoadSaveData(saveData[i]);
+				effect.LoadState(data[i]);
 			}
 		}
 	}

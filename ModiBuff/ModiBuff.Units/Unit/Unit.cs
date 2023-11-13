@@ -465,9 +465,35 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
+		public SaveData SaveState()
+		{
+			return new SaveData(Health, Damage, ModifierController.SaveState());
+		}
+
+		public void LoadState(SaveData data)
+		{
+			Health = data.Health;
+			Damage = data.Damage;
+			ModifierController.LoadState(data.ModifierControllerSaveData);
+		}
+
 		public override string ToString()
 		{
 			return $"Health: {Health}, Damage: {Damage}, HealValue: {HealValue}";
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly float Health;
+			public readonly float Damage;
+			public readonly ModifierController.SaveData ModifierControllerSaveData;
+
+			public SaveData(float health, float damage, ModifierController.SaveData saveState)
+			{
+				Health = health;
+				Damage = damage;
+				ModifierControllerSaveData = saveState;
+			}
 		}
 	}
 }

@@ -228,7 +228,7 @@ namespace ModiBuff.Core
 			return _effectStateInfo.GetEffectState<TData>(stateNumber);
 		}
 
-		public SaveData GetSaveState()
+		public SaveData SaveState()
 		{
 			if (_effectStateInfo == null)
 			{
@@ -236,12 +236,12 @@ namespace ModiBuff.Core
 				return default;
 			}
 
-			return new SaveData(Id, _effectStateInfo.GetSaveState());
+			return new SaveData(Id, _effectStateInfo.SaveState());
 		}
 
-		public void LoadSaveState(SaveData saveData)
+		public void LoadState(SaveData data)
 		{
-			_effectStateInfo.LoadSaveState(saveData.EffectsSaveData);
+			_effectStateInfo.LoadState(data.EffectsSaveData);
 		}
 
 		public void ResetState()

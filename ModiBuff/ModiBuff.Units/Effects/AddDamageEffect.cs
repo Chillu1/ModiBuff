@@ -1,7 +1,7 @@
 namespace ModiBuff.Core.Units
 {
 	public sealed class AddDamageEffect : IStackEffect, IMutableStateEffect, IRevertEffect,
-		IStackRevertEffect, IEffect, IModifierStateInfo<AddDamageEffect.Data>
+		IStackRevertEffect, IEffect, IModifierStateInfo<AddDamageEffect.Data>, ISavableEffect
 	{
 		public bool IsRevertible => _effectState.IsRevertible();
 		public bool UsesMutableState => _effectState.IsRevertibleOrTogglable() || _stackEffect.UsesMutableState();
@@ -122,6 +122,16 @@ namespace ModiBuff.Core.Units
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 
+		public object SaveState() => new SaveData(_isEnabled, _extraDamage, _totalAddedDamage);
+
+		public void LoadState(object saveData)
+		{
+			var data = (SaveData)saveData;
+			_isEnabled = data.IsEnabled;
+			_extraDamage = data.ExtraDamage;
+			_totalAddedDamage = data.TotalAddedDamage;
+		}
+
 		public readonly struct Data
 		{
 			public readonly float BaseDamage;
@@ -131,6 +141,20 @@ namespace ModiBuff.Core.Units
 			{
 				BaseDamage = baseDamage;
 				ExtraDamage = extraDamage;
+			}
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly bool IsEnabled;
+			public readonly float ExtraDamage;
+			public readonly float TotalAddedDamage;
+
+			public SaveData(bool isEnabled, float extraDamage, float totalAddedDamage)
+			{
+				IsEnabled = isEnabled;
+				ExtraDamage = extraDamage;
+				TotalAddedDamage = totalAddedDamage;
 			}
 		}
 	}
