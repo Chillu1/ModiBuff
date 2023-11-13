@@ -324,20 +324,24 @@ namespace ModiBuff.Core
 
 		public SaveData SaveState()
 		{
-			object[] modifiersSaveData = new object[_modifiersTop];
+			Modifier.SaveData[] modifiersSaveData = new Modifier.SaveData[_modifiersTop];
 			for (int i = 0; i < _modifiersTop; i++)
 				modifiersSaveData[i] = _modifiers[i].SaveState();
 			return new SaveData(modifiersSaveData);
 		}
 
-		public void LoadState(SaveData saveData)
+		public void LoadState(SaveData saveData, IUnit owner)
 		{
 			for (int i = 0; i < saveData.ModifiersSaveData.Length; i++)
 			{
-				var modifierSaveData = (Modifier.SaveData)saveData.ModifiersSaveData[i];
+				var modifierSaveData = saveData.ModifiersSaveData[i];
 
 				var modifier = ModifierPool.Instance.Rent(modifierSaveData.Id);
-				modifier.LoadState(modifierSaveData);
+				modifier.LoadState(modifierSaveData, owner);
+				if (Config.UseDictionaryIndexes)
+					_modifierIndexesDict.Add(modifierSaveData.Id, _modifiersTop);
+				else
+					_modifierIndexes[modifierSaveData.Id] = _modifiersTop;
 				_modifiers[_modifiersTop++] = modifier;
 				//TODO Setup indexes, what about register effects?
 			}
@@ -369,9 +373,9 @@ namespace ModiBuff.Core
 
 		public readonly struct SaveData
 		{
-			public readonly object[] ModifiersSaveData;
+			public readonly Modifier.SaveData[] ModifiersSaveData;
 
-			public SaveData(object[] modifiersSaveData) => ModifiersSaveData = modifiersSaveData;
+			public SaveData(Modifier.SaveData[] modifiersSaveData) => ModifiersSaveData = modifiersSaveData;
 		}
 	}
 }

@@ -79,5 +79,13 @@ namespace ModiBuff.Core
 			_statusResistanceImplemented = false;
 			_statusResistanceTarget = null;
 		}
+
+		public TimeComponentSaveData SaveState() => new TimeComponentSaveData(_timer, _statusResistanceImplemented);
+
+		public void LoadState(TimeComponentSaveData saveData)
+		{
+			_timer = saveData.Timer;
+			_statusResistanceImplemented = saveData.StatusResistanceImplemented;
+		}
 	}
 }

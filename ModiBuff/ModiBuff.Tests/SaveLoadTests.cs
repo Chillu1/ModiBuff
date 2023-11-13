@@ -16,7 +16,7 @@ namespace ModiBuff.Tests
 			var modifier = Pool.Rent(IdManager.GetId("InitDamage"));
 			var saveState = modifier.SaveState();
 			var loadedModifier = Pool.Rent(IdManager.GetId("InitDamage"));
-			loadedModifier.LoadState(saveState);
+			loadedModifier.LoadState(saveState, Unit);
 
 			loadedModifier.UpdateSingleTargetSource(Unit, Unit);
 			loadedModifier.Init();
@@ -36,7 +36,7 @@ namespace ModiBuff.Tests
 			modifier.Stack();
 			var saveState = modifier.SaveState();
 			var loadedModifier = Pool.Rent(IdManager.GetId("InitStackExtraDamage"));
-			loadedModifier.LoadState(saveState);
+			loadedModifier.LoadState(saveState, Unit);
 
 			loadedModifier.UpdateSingleTargetSource(Unit, Unit);
 			loadedModifier.Init();
@@ -59,7 +59,7 @@ namespace ModiBuff.Tests
 
 			var saveState = modifier.SaveState();
 			var loadedModifier = Pool.Rent(IdManager.GetId("AddDamageExtraState"));
-			loadedModifier.LoadState(saveState);
+			loadedModifier.LoadState(saveState, Unit);
 
 			loadedModifier.UpdateSingleTargetSource(Unit, Unit);
 			loadedModifier.Init();
@@ -83,6 +83,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 			Unit.AddModifierSelf("AddDamageExtraState");
 			Unit.AddModifierSelf("AddDamageExtraState");
+			Unit.Update(2);
 			Assert.AreEqual(UnitDamage + 5 + 5 + 2, Unit.Damage);
 
 			var saveData = Unit.SaveState();
@@ -91,6 +92,9 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(UnitHealth - 5, loadedUnit.Health);
 			Assert.AreEqual(UnitDamage + 5 + 5 + 2, loadedUnit.Damage);
+
+			loadedUnit.Update(3);
+			Assert.AreEqual(UnitDamage, loadedUnit.Damage);
 		}
 
 		//TODO add damage is enabled check

@@ -474,7 +474,7 @@ namespace ModiBuff.Core.Units
 		{
 			Health = data.Health;
 			Damage = data.Damage;
-			ModifierController.LoadState(data.ModifierControllerSaveData);
+			ModifierController.LoadState(data.ModifierControllerSaveData, this);
 		}
 
 		public override string ToString()

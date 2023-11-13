@@ -4,6 +4,21 @@ namespace ModiBuff.Core
 	{
 		void Update(float deltaTime);
 		void Refresh();
+
+		TimeComponentSaveData SaveState();
+		void LoadState(TimeComponentSaveData saveData);
+	}
+
+	public readonly struct TimeComponentSaveData
+	{
+		public readonly float Timer;
+		public readonly bool StatusResistanceImplemented;
+
+		public TimeComponentSaveData(float timer, bool statusResistanceImplemented)
+		{
+			Timer = timer;
+			StatusResistanceImplemented = statusResistanceImplemented;
+		}
 	}
 
 	public interface ITimeReference

@@ -236,11 +236,34 @@ namespace ModiBuff.Core
 				return default;
 			}
 
-			return new SaveData(Id, _effectStateInfo.SaveState());
+			var targetComponentSaveData = _targetComponent.SaveState();
+
+			TimeComponentSaveData[] timeComponentsSaveData = null;
+			if (_timeComponents != null && _timeComponents.Length > 0)
+			{
+				timeComponentsSaveData = new TimeComponentSaveData[_timeComponents.Length];
+				for (int i = 0; i < _timeComponents.Length; i++)
+					timeComponentsSaveData[i] = _timeComponents[i].SaveState();
+			}
+
+			return new SaveData(Id, targetComponentSaveData, timeComponentsSaveData, _effectStateInfo.SaveState());
 		}
 
-		public void LoadState(SaveData data)
+		public void LoadState(SaveData data, IUnit owner)
 		{
+			_targetComponent.LoadState(data.TargetComponentSaveData);
+			switch (data.TargetComponentSaveData)
+			{
+				case SingleTargetComponent.SaveData _:
+					UpdateSingleTargetSource(owner, owner); //TODO Temporary
+					break;
+				case MultiTargetComponent.SaveData multiSaveData:
+					//UpdateTargets(multiSaveData.Targets, multiSaveData.Source);
+					break;
+			}
+
+			for (int i = 0; i < _timeComponents?.Length; i++)
+				_timeComponents[i].LoadState(data.TimeComponentsSaveData[i]);
 			_effectStateInfo.LoadState(data.EffectsSaveData);
 		}
 
@@ -288,11 +311,16 @@ namespace ModiBuff.Core
 		public readonly struct SaveData
 		{
 			public readonly int Id;
+			public readonly ITargetComponentSaveData TargetComponentSaveData;
+			public readonly TimeComponentSaveData[] TimeComponentsSaveData;
 			public readonly object[] EffectsSaveData;
 
-			public SaveData(int id, object[] effectsSaveData)
+			public SaveData(int id, ITargetComponentSaveData targetComponentSaveData,
+				TimeComponentSaveData[] timeComponentsSaveData, object[] effectsSaveData)
 			{
 				Id = id;
+				TargetComponentSaveData = targetComponentSaveData;
+				TimeComponentsSaveData = timeComponentsSaveData;
 				EffectsSaveData = effectsSaveData;
 			}
 		}
