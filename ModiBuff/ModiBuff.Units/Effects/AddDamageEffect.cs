@@ -1,7 +1,7 @@
 namespace ModiBuff.Core.Units
 {
 	public sealed class AddDamageEffect : IStackEffect, IMutableStateEffect, IRevertEffect,
-		IStackRevertEffect, IEffect, IModifierStateInfo<AddDamageEffect.Data>, ISavableEffect
+		IStackRevertEffect, IEffect, IModifierStateInfo<AddDamageEffect.Data>, ISavableEffect<AddDamageEffect.SaveData>
 	{
 		public bool IsRevertible => _effectState.IsRevertible();
 		public bool UsesMutableState => _effectState.IsRevertibleOrTogglable() || _stackEffect.UsesMutableState();
@@ -132,11 +132,6 @@ namespace ModiBuff.Core.Units
 			_totalAddedDamage = data.TotalAddedDamage;
 		}
 
-		public object Create(object[] saveParameters)
-		{
-			return new SaveData((bool)saveParameters[0], (float)saveParameters[1], (float)saveParameters[2]);
-		}
-
 		public readonly struct Data
 		{
 			public readonly float BaseDamage;
@@ -155,9 +150,6 @@ namespace ModiBuff.Core.Units
 			public readonly float ExtraDamage;
 			public readonly float TotalAddedDamage;
 
-#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
-			//[System.Text.Json.Serialization.JsonConstructor]
-#endif
 			public SaveData(bool isEnabled, float extraDamage, float totalAddedDamage)
 			{
 				IsEnabled = isEnabled;

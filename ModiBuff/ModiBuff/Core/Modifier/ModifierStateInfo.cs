@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 
 namespace ModiBuff.Core
@@ -78,35 +79,27 @@ namespace ModiBuff.Core
 					continue;
 				}
 
-				object effectData = null;
-
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
 				if (data[i].Data is System.Text.Json.JsonElement jsonElement)
 				{
-					var enumerateObject = jsonElement.EnumerateObject();
-					object[] parameters = enumerateObject.Select<System.Text.Json.JsonProperty, object>(j =>
+					var genericType = effect.GetType().GetInterfaces().FirstOrDefault(x =>
+						x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ISavableEffect<>));
+					if (genericType != null)
 					{
-						switch (j.Value.ValueKind)
-						{
-							//TODO int, double, etc
-							case System.Text.Json.JsonValueKind.String:
-								return j.Value.GetString();
-							case System.Text.Json.JsonValueKind.Number:
-								return j.Value.GetSingle();
-							case System.Text.Json.JsonValueKind.True:
-								return true;
-							case System.Text.Json.JsonValueKind.False:
-								return false;
-							default:
-								return null;
-						}
-					}).ToArray();
+						Type genericTypeArgument = genericType.GetGenericArguments()[0];
+						object[] parameters = jsonElement.EnumerateObject().Select(j => j.Value.ReturnUnderlyingType())
+							.ToArray();
+						object saveData = Activator.CreateInstance(genericTypeArgument, parameters);
+						effect.LoadState(saveData);
+						continue;
+					}
 
-					effectData = effect.Create(parameters);
-					effect.LoadState(effectData);
+					Logger.LogError(
+						$"[ModiBuff] Effect {effect.GetType()} doesn't implement ISavableEffect<TSaveData>");
 				}
 #endif
-				//effect.LoadState(effectData);
+
+				effect.LoadState(data[i].Data);
 			}
 		}
 
