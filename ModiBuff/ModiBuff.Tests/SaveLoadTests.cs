@@ -126,8 +126,39 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5, loadedUnit.Health);
 			Assert.AreEqual(UnitDamage + 5 + 5 + 2, loadedUnit.Damage);
 
-			//loadedUnit.Update(3);
-			//Assert.AreEqual(UnitDamage, loadedUnit.Damage);
+			loadedUnit.Update(3);
+			Assert.AreEqual(UnitDamage, loadedUnit.Damage);
+		}
+
+		[Test]
+		public void SaveEffectCooldownCheckLoadFile()
+		{
+			AddRecipe("AddDamageExtraState")
+				.EffectCooldown(2)
+				.Stack(WhenStackEffect.Always)
+				.Effect(
+					new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Effect | StackEffectType.Add,
+						stackValue: 2), EffectOn.Stack);
+			Setup();
+
+			Unit.AddModifierSelf("AddDamageExtraState");
+			Unit.Update(1);
+			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
+
+			var saveController = new SaveController("test.json");
+			saveController.Save(Unit.SaveState());
+
+			var loadData = saveController.Load<Unit.SaveData>();
+
+			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
+			loadedUnit.LoadState(loadData);
+
+			Assert.AreEqual(UnitDamage + 5 + 2, loadedUnit.Damage);
+			loadedUnit.AddModifierSelf("AddDamageExtraState");
+			Assert.AreEqual(UnitDamage + 5 + 2, loadedUnit.Damage);
+			loadedUnit.Update(1);
+			loadedUnit.AddModifierSelf("AddDamageExtraState");
+			Assert.AreEqual(UnitDamage + 5 + 2 + 5 + 4, loadedUnit.Damage);
 		}
 
 		[Test]

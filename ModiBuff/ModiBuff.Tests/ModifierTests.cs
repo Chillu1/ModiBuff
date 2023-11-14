@@ -7,6 +7,7 @@ namespace ModiBuff.Tests
 {
 	public abstract class ModifierTests
 	{
+		protected EffectTypeIdManager EffectTypeIdManager { get; private set; }
 		protected ModifierIdManager IdManager { get; private set; }
 		protected EffectIdManager EffectIdManager { get; private set; }
 		protected ModifierRecipes Recipes { get; private set; }
@@ -39,8 +40,8 @@ namespace ModiBuff.Tests
 			Config.PoolSize = 1;
 			Config.ModifierControllerPoolSize = 3;
 			Config.ModifierApplierControllerPoolSize = 3;
-			var effectTypeIdManager = new EffectTypeIdManager();
-			effectTypeIdManager.RegisterEffectTypes(typeof(DamageEffect), typeof(AddDamageEffect));
+			EffectTypeIdManager = new EffectTypeIdManager();
+			EffectTypeIdManager.RegisterEffectTypes(typeof(DamageEffect), typeof(AddDamageEffect));
 
 			UnitHealth = AllyHealth = 500;
 			UnitDamage = AllyDamage = 10;
@@ -105,6 +106,7 @@ namespace ModiBuff.Tests
 		[OneTimeTearDown]
 		public void OneTimeTearDown()
 		{
+			EffectTypeIdManager.Reset();
 			Pool?.Reset();
 			Effects?.Reset();
 			IdManager?.Reset();

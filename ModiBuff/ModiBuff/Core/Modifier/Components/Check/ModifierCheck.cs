@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ModiBuff.Core
 {
@@ -94,6 +95,52 @@ namespace ModiBuff.Core
 		{
 			for (int i = 0; i < _stateResetChecks?.Length; i++)
 				_stateResetChecks[i].ResetState();
+		}
+
+		public SaveData SaveState()
+		{
+			var stateCheckData = new object[_stateResetChecks?.Length ?? 0];
+			for (int i = 0; i < _stateResetChecks?.Length; i++)
+				stateCheckData[i] = _stateResetChecks[i].SaveState();
+			return new SaveData(stateCheckData);
+		}
+
+		public void LoadState(SaveData data)
+		{
+			for (int i = 0; i < _stateResetChecks?.Length; i++)
+			{
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+				if (data.StateCheckData[i] is System.Text.Json.JsonElement jsonElement)
+				{
+					var check = _stateResetChecks[i];
+					var genericType = check.GetType().GetInterfaces().FirstOrDefault(x =>
+						x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ISavable<>));
+					if (genericType != null)
+					{
+						Type genericTypeArgument = genericType.GetGenericArguments()[0];
+						object[] parameters = jsonElement.EnumerateObject().Select(j => j.Value.ReturnUnderlyingType())
+							.ToArray();
+						object saveData = Activator.CreateInstance(genericTypeArgument, parameters);
+						check.LoadState(saveData);
+						continue;
+					}
+
+					Logger.LogError($"[ModiBuff] Check {check.GetType()} doesn't implement ISavable<TSaveData>");
+				}
+#endif
+
+				_stateResetChecks[i].LoadState(data.StateCheckData[i]);
+			}
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly object[] StateCheckData;
+
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveData(object[] stateCheckData) => StateCheckData = stateCheckData;
 		}
 	}
 }

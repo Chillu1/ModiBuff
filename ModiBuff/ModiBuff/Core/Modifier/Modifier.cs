@@ -237,8 +237,7 @@ namespace ModiBuff.Core
 			}
 
 			var targetSaveData = _targetComponent.SaveState();
-			InitComponent.SaveData? initSaveData =
-				_hasInit ? (InitComponent.SaveData?)_initComponent.SaveState() : null;
+			var initSaveData = _hasInit ? (InitComponent.SaveData?)_initComponent.SaveState() : null;
 			var stackSaveData = _stackComponent?.SaveState();
 
 			TimeComponentSaveData[] timeComponentsSaveData = null;
@@ -249,10 +248,10 @@ namespace ModiBuff.Core
 					timeComponentsSaveData[i] = _timeComponents[i].SaveState();
 			}
 
-			//TODO SaveLoad effect checks mutable state
+			var effectCheckSaveData = _effectCheck?.SaveState();
 
-			return new SaveData(Id, targetSaveData, _multiTarget, initSaveData, stackSaveData, timeComponentsSaveData,
-				_effectStateInfo.SaveState());
+			return new SaveData(Id, targetSaveData, _multiTarget, effectCheckSaveData, initSaveData, stackSaveData,
+				timeComponentsSaveData, _effectStateInfo.SaveState());
 		}
 
 		public void LoadState(SaveData data, IUnit owner)
@@ -280,6 +279,10 @@ namespace ModiBuff.Core
 
 			for (int i = 0; i < _timeComponents?.Length; i++)
 				_timeComponents[i].LoadState(data.TimeComponentsSaveData[i]);
+
+			if (data.EffectCheckSaveData != null)
+				_effectCheck?.LoadState(data.EffectCheckSaveData.Value);
+
 			_effectStateInfo.LoadState(data.EffectsSaveData);
 		}
 
@@ -329,6 +332,7 @@ namespace ModiBuff.Core
 			public readonly int Id;
 			public readonly object TargetSaveData;
 			public readonly bool IsMultiTarget;
+			public readonly ModifierCheck.SaveData? EffectCheckSaveData;
 			public readonly InitComponent.SaveData? InitSaveData;
 			public readonly StackComponent.SaveData? StackSaveData;
 			public readonly TimeComponentSaveData[] TimeComponentsSaveData;
@@ -338,12 +342,14 @@ namespace ModiBuff.Core
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(int id, object targetSaveData, bool isMultiTarget,
-				InitComponent.SaveData? initSaveData, StackComponent.SaveData? stackSaveData,
-				TimeComponentSaveData[] timeComponentsSaveData, ModifierStateInfo.EffectSaveData[] effectsSaveData)
+				ModifierCheck.SaveData? effectCheckSaveData, InitComponent.SaveData? initSaveData,
+				StackComponent.SaveData? stackSaveData, TimeComponentSaveData[] timeComponentsSaveData,
+				ModifierStateInfo.EffectSaveData[] effectsSaveData)
 			{
 				Id = id;
 				TargetSaveData = targetSaveData;
 				IsMultiTarget = isMultiTarget;
+				EffectCheckSaveData = effectCheckSaveData;
 				InitSaveData = initSaveData;
 				StackSaveData = stackSaveData;
 				TimeComponentsSaveData = timeComponentsSaveData;
