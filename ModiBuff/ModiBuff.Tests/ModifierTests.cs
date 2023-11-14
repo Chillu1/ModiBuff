@@ -39,6 +39,8 @@ namespace ModiBuff.Tests
 			Config.PoolSize = 1;
 			Config.ModifierControllerPoolSize = 3;
 			Config.ModifierApplierControllerPoolSize = 3;
+			var effectTypeIdManager = new EffectTypeIdManager();
+			effectTypeIdManager.RegisterEffectTypes(typeof(DamageEffect), typeof(AddDamageEffect));
 
 			UnitHealth = AllyHealth = 500;
 			UnitDamage = AllyDamage = 10;

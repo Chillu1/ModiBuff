@@ -4,6 +4,8 @@ namespace ModiBuff.Core
 	{
 		object SaveState();
 		void LoadState(object saveData);
+
+		object Create(object[] saveParameters);
 	}
 
 	//public interface ISavableEffect<out TData> : ISavableEffect

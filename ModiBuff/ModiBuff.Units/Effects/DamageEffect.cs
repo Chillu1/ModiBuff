@@ -106,6 +106,11 @@ namespace ModiBuff.Core.Units
 		public object SaveState() => new SaveData(_extraDamage);
 		public void LoadState(object saveData) => _extraDamage = ((SaveData)saveData).ExtraDamage;
 
+		public object Create(object[] saveParameters)
+		{
+			return new SaveData((float)saveParameters[0]);
+		}
+
 		public readonly struct Data
 		{
 			public readonly float BaseDamage;
