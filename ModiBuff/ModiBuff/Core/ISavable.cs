@@ -8,7 +8,7 @@ namespace ModiBuff.Core
 
 	public interface ISavable<TSaveData> : ISavable
 	{
-		new TSaveData SaveState();
-		void LoadState(TSaveData data);
+		//new TSaveData SaveState();
+		//void LoadState(TSaveData data);
 	}
 }

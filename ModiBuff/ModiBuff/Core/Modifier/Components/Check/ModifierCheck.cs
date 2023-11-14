@@ -110,23 +110,8 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _stateResetChecks?.Length; i++)
 			{
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
-				if (data.StateCheckData[i] is System.Text.Json.JsonElement jsonElement)
-				{
-					var check = _stateResetChecks[i];
-					var genericType = check.GetType().GetInterfaces().FirstOrDefault(x =>
-						x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ISavable<>));
-					if (genericType != null)
-					{
-						Type genericTypeArgument = genericType.GetGenericArguments()[0];
-						object[] parameters = jsonElement.EnumerateObject().Select(j => j.Value.ReturnUnderlyingType())
-							.ToArray();
-						object saveData = Activator.CreateInstance(genericTypeArgument, parameters);
-						check.LoadState(saveData);
-						continue;
-					}
-
-					Logger.LogError($"[ModiBuff] Check {check.GetType()} doesn't implement ISavable<TSaveData>");
-				}
+				if (data.StateCheckData[i].FromAnonymousJsonObjectToSaveData(_stateResetChecks[i]))
+					continue;
 #endif
 
 				_stateResetChecks[i].LoadState(data.StateCheckData[i]);

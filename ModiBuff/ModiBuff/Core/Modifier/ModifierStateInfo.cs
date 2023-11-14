@@ -54,7 +54,7 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _effects.Length; i++)
 			{
 				//TODO Temp Remove
-				if (!(_effects[i] is ISavableEffect effect))
+				if (!(_effects[i] is ISavable effect))
 					continue;
 
 				int id = EffectTypeIdManager.Instance.GetId(effect.GetType());
@@ -69,7 +69,7 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _effects.Length; i++)
 			{
 				//TODO Temp Remove
-				if (!(_effects[i] is ISavableEffect effect))
+				if (!(_effects[i] is ISavable effect))
 					continue;
 
 				if (!EffectTypeIdManager.Instance.MatchesId(effect.GetType(), data[i].Id))
@@ -80,23 +80,8 @@ namespace ModiBuff.Core
 				}
 
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
-				if (data[i].Data is System.Text.Json.JsonElement jsonElement)
-				{
-					var genericType = effect.GetType().GetInterfaces().FirstOrDefault(x =>
-						x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ISavableEffect<>));
-					if (genericType != null)
-					{
-						Type genericTypeArgument = genericType.GetGenericArguments()[0];
-						object[] parameters = jsonElement.EnumerateObject().Select(j => j.Value.ReturnUnderlyingType())
-							.ToArray();
-						object saveData = Activator.CreateInstance(genericTypeArgument, parameters);
-						effect.LoadState(saveData);
-						continue;
-					}
-
-					Logger.LogError(
-						$"[ModiBuff] Effect {effect.GetType()} doesn't implement ISavableEffect<TSaveData>");
-				}
+				if (data[i].Data.FromAnonymousJsonObjectToSaveData(effect))
+					continue;
 #endif
 
 				effect.LoadState(data[i].Data);

@@ -24,17 +24,20 @@ namespace ModiBuff.Extensions.Serialization.Json
 
 		public bool Save<T>(T obj)
 		{
-			using (var stream = File.Create(_path))
-			{
-				JsonSerializer.Serialize(stream, obj, _options);
-				return true;
-			}
+			File.WriteAllText(_path, JsonSerializer.Serialize(obj, _options));
+			//using (var stream = File.Create(_path))
+			//{
+			//	JsonSerializer.Serialize(stream, obj, _options);
+			//	return true;
+			//}
+			return true;
 		}
 
 		public T Load<T>()
 		{
-			using (var stream = File.OpenRead(_path))
-				return JsonSerializer.Deserialize<T>(stream, _options);
+			return JsonSerializer.Deserialize<T>(File.ReadAllText(_path), _options);
+			//using (var stream = File.OpenRead(_path))
+			//	return JsonSerializer.Deserialize<T>(stream, _options);
 		}
 	}
 
