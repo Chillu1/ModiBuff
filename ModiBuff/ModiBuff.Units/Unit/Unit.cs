@@ -23,8 +23,9 @@ namespace ModiBuff.Core.Units
 		IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
 		ICallbackRegistrable<CallbackType>, ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>,
-		ICallbackEffectRegistrable<CallbackType>, IAllNonGeneric, ICaster, IStateReset
+		ICallbackEffectRegistrable<CallbackType>, IAllNonGeneric, ICaster, IStateReset, IIdOwner
 	{
+		public int Id { get; }
 		public UnitTag UnitTag { get; private set; }
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -56,9 +57,12 @@ namespace ModiBuff.Core.Units
 		private readonly MultiInstanceStatusEffectController _statusEffectController;
 		private readonly StatusEffectController _singleInstanceStatusEffectController;
 
+		private static int _idCounter;
+
 		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000,
 			UnitType unitType = UnitType.Good, UnitTag unitTag = UnitTag.Default)
 		{
+			Id = _idCounter++;
 			UnitTag = unitTag;
 
 			Health = health;

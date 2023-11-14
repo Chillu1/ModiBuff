@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public sealed class SingleTargetComponent : ITargetComponent
+	public sealed class SingleTargetComponent : ITargetComponent, ISavable<SingleTargetComponent.SaveData>
 	{
 		/// <summary>
 		///		Unit that applied the modifier.
@@ -25,29 +25,27 @@ namespace ModiBuff.Core
 			Target = null;
 		}
 
-		public object SaveState() => new SaveData(Target, Source);
+		public object SaveState() => new SaveData(((IIdOwner)Target).Id, ((IIdOwner)Source).Id);
 
 		public void LoadState(object saveData)
 		{
 			var data = (SaveData)saveData;
-			Target = data.Target;
-			Source = data.Source;
+			Target = UnitHelper.GetUnit(data.TargetId);
+			Source = UnitHelper.GetUnit(data.SourceId);
 		}
 
 		public readonly struct SaveData
 		{
-			//public readonly int TargetId;
-			//public readonly int SourceId;
-			public readonly IUnit Target; //TODO Can't save references to file
-			public readonly IUnit Source;
+			public readonly int TargetId;
+			public readonly int SourceId;
 
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public SaveData(IUnit target, IUnit source)
+			public SaveData(int targetId, int sourceId)
 			{
-				Target = target;
-				Source = source;
+				TargetId = targetId;
+				SourceId = sourceId;
 			}
 		}
 	}

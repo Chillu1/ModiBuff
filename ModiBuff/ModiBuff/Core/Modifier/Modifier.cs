@@ -259,17 +259,12 @@ namespace ModiBuff.Core
 			_isTargetSetup = false;
 			_multiTarget = data.IsMultiTarget;
 
-			//_targetComponent.LoadState(data.TargetSaveData);
-			UpdateSingleTargetSource(owner, owner); //TODO Temporary
-			// switch (data.TargetSaveData)
-			// {
-			// 	case SingleTargetComponent.SaveData _:
-			// 		//UpdateSingleTargetSource
-			// 		break;
-			// 	case MultiTargetComponent.SaveData multiSaveData:
-			// 		//UpdateTargets(multiSaveData.Targets, multiSaveData.Source);
-			// 		break;
-			// }
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+			if (!data.TargetSaveData.FromAnonymousJsonObjectToSaveData(_targetComponent))
+				_targetComponent.LoadState(data.TargetSaveData);
+#endif
+			//TODO TEMP
+			UpdateSingleTargetSource(((SingleTargetComponent)_targetComponent).Target, _targetComponent.Source);
 
 			if (data.InitSaveData != null)
 				_initComponent.LoadState(data.InitSaveData.Value);

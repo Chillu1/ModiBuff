@@ -60,6 +60,19 @@ namespace ModiBuff.Tests
 			Recipes = new ModifierRecipes(IdManager);
 			Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
 			Effects = new ModifierLessEffects(EffectIdManager);
+
+			UnitHelper.Setup(i =>
+			{
+				if (i == Unit.Id)
+					return Unit;
+				if (i == Enemy.Id)
+					return Enemy;
+				if (i == Ally.Id)
+					return Ally;
+
+				Logger.LogError($"Unit with id {i} not found");
+				return null;
+			});
 		}
 
 		protected ModifierRecipe AddRecipe(string name) => Recipes.Add(name, "", "");
@@ -95,6 +108,7 @@ namespace ModiBuff.Tests
 			IdManager.Reset();
 			EffectIdManager.Reset();
 			ModifierControllerPool.Reset();
+			UnitHelper.Clear();
 
 			IdManager = null;
 			EffectIdManager = null;

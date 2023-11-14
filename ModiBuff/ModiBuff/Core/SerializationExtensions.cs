@@ -19,11 +19,35 @@ namespace ModiBuff.Core
 				return false;
 			}
 
-			object[] parameters = jsonElement.EnumerateObject().Select(j => j.Value.ReturnUnderlyingType())
+			var constructorParameterTypes = genericType.GetGenericArguments()[0].GetConstructors()[0]
+				.GetParameters().Select(x => x.ParameterType).ToArray();
+
+			int i = 0;
+			object[] parameters = jsonElement.EnumerateObject()
+				.Select(j => j.Value.ToValue(constructorParameterTypes[i++]))
 				.ToArray();
 			object saveData = Activator.CreateInstance(genericType.GetGenericArguments()[0], parameters);
 			toLoad.LoadState(saveData);
 			return true;
+		}
+
+		private static object ToValue(this System.Text.Json.JsonElement element, Type type)
+		{
+			if (type == typeof(int))
+				return element.GetInt32();
+			if (type == typeof(float))
+				return element.GetSingle();
+			if (type == typeof(bool))
+				return element.GetBoolean();
+			if (type == typeof(double))
+				return element.GetDouble();
+			if (type == typeof(long))
+				return element.GetInt64();
+			if (type == typeof(byte))
+				return element.GetByte();
+
+			Logger.LogError($"[ModiBuff] Unknown ValueType {type}");
+			return null;
 		}
 
 		public static object ReturnUnderlyingType(this System.Text.Json.JsonElement element)

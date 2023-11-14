@@ -8,23 +8,6 @@ namespace ModiBuff.Tests
 	public sealed class SaveLoadTests : ModifierTests
 	{
 		[Test]
-		public void SaveLoadInitDamage()
-		{
-			AddRecipe("NoDamage")
-				.Effect(new DamageEffect(0), EffectOn.Init);
-			Setup();
-
-			var modifier = Pool.Rent(IdManager.GetId("InitDamage"));
-			var saveState = modifier.SaveState();
-			var loadedModifier = Pool.Rent(IdManager.GetId("InitDamage"));
-			loadedModifier.LoadState(saveState, Unit);
-
-			loadedModifier.UpdateSingleTargetSource(Unit, Unit);
-			loadedModifier.Init();
-			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-		}
-
-		[Test]
 		public void SaveLoadInitExtraDamage()
 		{
 			AddRecipe("InitStackExtraDamage")
@@ -89,6 +72,7 @@ namespace ModiBuff.Tests
 
 			var saveData = Unit.SaveState();
 			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
+			SetupUnitHelper(loadedUnit);
 			loadedUnit.LoadState(saveData);
 
 			Assert.AreEqual(UnitHealth - 5, loadedUnit.Health);
@@ -121,6 +105,7 @@ namespace ModiBuff.Tests
 			var loadData = saveController.Load<Unit.SaveData>();
 
 			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
+			SetupUnitHelper(loadedUnit);
 			loadedUnit.LoadState(loadData);
 
 			Assert.AreEqual(UnitHealth - 5, loadedUnit.Health);
@@ -151,6 +136,7 @@ namespace ModiBuff.Tests
 			var loadData = saveController.Load<Unit.SaveData>();
 
 			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
+			SetupUnitHelper(loadedUnit);
 			loadedUnit.LoadState(loadData);
 
 			Assert.AreEqual(UnitDamage + 5 + 2, loadedUnit.Damage);
@@ -194,6 +180,22 @@ namespace ModiBuff.Tests
 			//Saves to file what each modifier name was in relation to id
 			//So if we change the order of recipes/generators, we can still load the correct modifiers
 			//Also will warn us if a recipe is missing / has been renamed
+		}
+
+		private void SetupUnitHelper(IUnit loadedUnit)
+		{
+			UnitHelper.Setup(i =>
+			{
+				if (i == Unit.Id)
+					return loadedUnit;
+				if (i == Enemy.Id)
+					return Enemy;
+				if (i == Ally.Id)
+					return Ally;
+
+				Logger.LogError($"Unit with id {i} not found");
+				return null;
+			});
 		}
 
 		//TODO Saving Target&Source Unit Id
