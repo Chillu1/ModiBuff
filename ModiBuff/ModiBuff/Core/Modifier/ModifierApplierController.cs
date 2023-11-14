@@ -183,6 +183,9 @@ namespace ModiBuff.Core
 			public readonly Dictionary<int, ModifierCheck> ModifierAttackChecksAppliers;
 			public readonly int[] EffectCasts;
 
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
 			public SaveData(List<int> modifierAttackAppliers, List<int> modifierCastAppliers,
 				Dictionary<int, ModifierCheck> modifierCastChecksAppliers,
 				Dictionary<int, ModifierCheck> modifierAttackChecksAppliers, List<int> effectCasts)

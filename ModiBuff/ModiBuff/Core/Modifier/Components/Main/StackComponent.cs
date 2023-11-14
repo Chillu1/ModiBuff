@@ -247,6 +247,9 @@ namespace ModiBuff.Core
 			public readonly float SingleStackTime;
 			public readonly List<float> StackTimers;
 
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
 			public SaveData(int stacks, float singleStackTime, List<float> stackTimers)
 			{
 				Stacks = stacks;

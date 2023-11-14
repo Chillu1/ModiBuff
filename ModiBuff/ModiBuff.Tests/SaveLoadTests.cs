@@ -1,5 +1,6 @@
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
+using ModiBuff.Extensions.Serialization.Json;
 using NUnit.Framework;
 
 namespace ModiBuff.Tests
@@ -98,6 +99,38 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+		public void SaveUnitLoadFile()
+		{
+			AddRecipe("AddDamageExtraState")
+				.Stack(WhenStackEffect.Always)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Add, stackValue: 2),
+					EffectOn.Init | EffectOn.Stack)
+				.Remove(5);
+			Setup();
+
+			Unit.AddModifierSelf("InitDamage");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.AddModifierSelf("AddDamageExtraState");
+			Unit.AddModifierSelf("AddDamageExtraState");
+			Unit.Update(2);
+			Assert.AreEqual(UnitDamage + 5 + 5 + 2, Unit.Damage);
+
+			var saveController = new SaveController("test.json");
+			saveController.Save(Unit.SaveState());
+
+			var loadData = saveController.Load<Unit.SaveData>();
+
+			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
+			loadedUnit.LoadState(loadData);
+
+			Assert.AreEqual(UnitHealth - 5, loadedUnit.Health);
+			Assert.AreEqual(UnitDamage + 5 + 5 + 2, loadedUnit.Damage);
+
+			//loadedUnit.Update(3);
+			//Assert.AreEqual(UnitDamage, loadedUnit.Damage);
+		}
+
+		[Test]
 		public void SaveLoadStatusEffect()
 		{
 			AddRecipe("InitStun")
@@ -120,13 +153,16 @@ namespace ModiBuff.Tests
 		//[Test]
 		public void SaveNewModifierIdLoad()
 		{
+			var saveModifierData = IdManager.SaveState();
+			AddRecipe("InitDamage2")
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			var saveModifierData2 = IdManager.SaveState();
 			Setup();
 
 			//TODO Save name next to Id (then check if the id has changed since last save)
 			//Saves to file what each modifier name was in relation to id
 			//So if we change the order of recipes/generators, we can still load the correct modifiers
 			//Also will warn us if a recipe is missing / has been renamed
-			var saveModifierData = IdManager.SaveState();
 		}
 
 		//TODO Saving Target&Source Unit Id

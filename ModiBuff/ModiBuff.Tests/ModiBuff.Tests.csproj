@@ -22,6 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\ModiBuff.Extensions.Serialization.Json\ModiBuff.Extensions.Serialization.Json.csproj"/>
         <ProjectReference Include="..\ModiBuff.Units\ModiBuff.Units.csproj"/>
         <ProjectReference Include="..\ModiBuff\ModiBuff.csproj"/>
     </ItemGroup>

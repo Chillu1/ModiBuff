@@ -30,9 +30,9 @@ namespace ModiBuff.Core
 			Targets.Clear();
 		}
 
-		public ITargetComponentSaveData SaveState() => new SaveData(Targets, Source);
+		public object SaveState() => new SaveData(Targets, Source);
 
-		public void LoadState(ITargetComponentSaveData saveData)
+		public void LoadState(object saveData)
 		{
 			var data = (SaveData)saveData;
 			Targets.Clear();
@@ -40,13 +40,16 @@ namespace ModiBuff.Core
 			Source = data.Source;
 		}
 
-		public readonly struct SaveData : ITargetComponentSaveData
+		public readonly struct SaveData
 		{
 			//public readonly int[] TargetsId;
 			//public readonly int SourceId;
 			public readonly List<IUnit> Targets;
 			public readonly IUnit Source;
 
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
 			public SaveData(List<IUnit> targets, IUnit source)
 			{
 				Targets = targets;

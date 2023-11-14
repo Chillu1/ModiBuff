@@ -62,6 +62,7 @@ namespace ModiBuff.Core
 
 		public void LoadState(object[] data)
 		{
+			return; //TODO A way to figure out what the effect data is (probably an effect id system)
 			for (int i = 0; i < _effects.Length; i++)
 			{
 				//TODO Temp Remove

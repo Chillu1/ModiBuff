@@ -381,6 +381,9 @@ namespace ModiBuff.Core
 		{
 			public readonly Modifier.SaveData[] ModifiersSaveData;
 
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
 			public SaveData(Modifier.SaveData[] modifiersSaveData) => ModifiersSaveData = modifiersSaveData;
 		}
 	}

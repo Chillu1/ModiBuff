@@ -8,11 +8,7 @@ namespace ModiBuff.Core
 		IUnit Source { get; set; }
 		//IUnit OriginalOwner { get; }
 
-		ITargetComponentSaveData SaveState();
-		void LoadState(ITargetComponentSaveData saveData);
-	}
-
-	public interface ITargetComponentSaveData
-	{
+		object SaveState();
+		void LoadState(object saveData);
 	}
 }
