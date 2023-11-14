@@ -1,7 +1,8 @@
 namespace ModiBuff.Core.Units
 {
 	public sealed class StatusEffectEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect,
-		IModifierIdOwner, IModifierGenIdOwner, IModifierStateInfo<StatusEffectEffect.Data>
+		IModifierIdOwner, IModifierGenIdOwner, IModifierStateInfo<StatusEffectEffect.Data>,
+		ISavableEffect<StatusEffectEffect.SaveData>
 	{
 		public bool IsRevertible { get; }
 
@@ -101,6 +102,15 @@ namespace ModiBuff.Core.Units
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 
+		public object SaveState() => new SaveData(_extraDuration, _totalDuration);
+
+		public void LoadState(object state)
+		{
+			var saveData = (SaveData)state;
+			_extraDuration = saveData.ExtraDuration;
+			_totalDuration = saveData.TotalDuration;
+		}
+
 		public readonly struct Data
 		{
 			public readonly float Duration;
@@ -110,6 +120,18 @@ namespace ModiBuff.Core.Units
 			{
 				Duration = duration;
 				ExtraDuration = extraDuration;
+			}
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly float ExtraDuration;
+			public readonly float TotalDuration;
+
+			public SaveData(float extraDuration, float totalDuration)
+			{
+				ExtraDuration = extraDuration;
+				TotalDuration = totalDuration;
 			}
 		}
 	}

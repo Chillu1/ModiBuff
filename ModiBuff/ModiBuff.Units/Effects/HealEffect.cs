@@ -2,7 +2,7 @@ namespace ModiBuff.Core.Units
 {
 	public sealed class HealEffect : IMutableStateEffect, IStackEffect, IRevertEffect, IEffect, ICallbackEffect,
 		IStackRevertEffect, IMetaEffectOwner<HealEffect, float, float>, IPostEffectOwner<HealEffect, float>,
-		IModifierStateInfo<HealEffect.Data>
+		IModifierStateInfo<HealEffect.Data>, ISavableEffect<HealEffect.SaveData>
 	{
 		public bool IsRevertible => _effectState != 0;
 		public bool UsesMutableState => IsRevertible || _stackEffect.UsesMutableState();
@@ -167,6 +167,15 @@ namespace ModiBuff.Core.Units
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 
+		public object SaveState() => new SaveData(_extraHeal, _totalHeal);
+
+		public void LoadState(object data)
+		{
+			var saveData = (SaveData)data;
+			_extraHeal = saveData.ExtraHeal;
+			_totalHeal = saveData.TotalHeal;
+		}
+
 		public readonly struct Data
 		{
 			public readonly float BaseHeal;
@@ -176,6 +185,18 @@ namespace ModiBuff.Core.Units
 			{
 				BaseHeal = baseHeal;
 				ExtraHeal = extraHeal;
+			}
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly float ExtraHeal;
+			public readonly float TotalHeal;
+
+			public SaveData(float extraHeal, float totalHeal)
+			{
+				ExtraHeal = extraHeal;
+				TotalHeal = totalHeal;
 			}
 		}
 

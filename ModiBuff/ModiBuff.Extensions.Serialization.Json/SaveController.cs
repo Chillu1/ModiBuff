@@ -14,13 +14,7 @@ namespace ModiBuff.Extensions.Serialization.Json
 		{
 			_path = Path.Combine(Environment.CurrentDirectory, fileName);
 
-			_options = new JsonSerializerOptions
-			{
-				WriteIndented = true, IncludeFields = true /*, Converters =
-				{
-					new UnitSaveDataJsonConverter()
-				}*/
-			};
+			_options = new JsonSerializerOptions { WriteIndented = true, IncludeFields = true };
 		}
 
 		public string Save(Unit.SaveData obj) => JsonSerializer.Serialize(obj, _options);
@@ -33,27 +27,4 @@ namespace ModiBuff.Extensions.Serialization.Json
 		public Unit.SaveData LoadFromFile() => JsonSerializer.Deserialize<Unit.SaveData>(LoadFromFileJson(), _options);
 		public string LoadFromFileJson() => File.ReadAllText(_path);
 	}
-
-	/*public class UnitSaveDataJsonConverter : JsonConverter<Unit.SaveData>
-	{
-		public override Unit.SaveData Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-		{
-			Logger.Log("Custom Read");
-			var jsonObject = JsonDocument.ParseValue(ref reader).RootElement;
-			var health = jsonObject.GetProperty("Health").GetSingle();
-			var mana = jsonObject.GetProperty("Mana").GetSingle();
-			var damage = jsonObject.GetProperty("Damage").GetSingle();
-			return new Unit.SaveData(UnitTag.None, health, 0, damage, 0, mana, 0, 0,
-				UnitType.Good, false, default, default, default, default);
-		}
-
-		public override void Write(Utf8JsonWriter writer, Unit.SaveData value, JsonSerializerOptions options)
-		{
-			writer.WriteStartObject();
-			writer.WriteNumber("Health", value.Health);
-			writer.WriteNumber("Mana", value.Mana);
-			writer.WriteNumber("Damage", value.Damage);
-			writer.WriteEndObject();
-		}
-	}*/
 }

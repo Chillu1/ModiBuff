@@ -1,7 +1,7 @@
 namespace ModiBuff.Core.Units
 {
 	public sealed class AddDamageEffect : IStackEffect, IMutableStateEffect, IRevertEffect,
-		IStackRevertEffect, IEffect, IModifierStateInfo<AddDamageEffect.Data>, ISavable<AddDamageEffect.SaveData>
+		IStackRevertEffect, IEffect, IModifierStateInfo<AddDamageEffect.Data>, ISavableEffect<AddDamageEffect.SaveData>
 	{
 		public bool IsRevertible => _effectState.IsRevertible();
 		public bool UsesMutableState => _effectState.IsRevertibleOrTogglable() || _stackEffect.UsesMutableState();

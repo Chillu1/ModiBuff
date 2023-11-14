@@ -1,3 +1,4 @@
+using System;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
@@ -41,7 +42,16 @@ namespace ModiBuff.Tests
 			Config.ModifierControllerPoolSize = 3;
 			Config.ModifierApplierControllerPoolSize = 3;
 			EffectTypeIdManager = new EffectTypeIdManager();
-			EffectTypeIdManager.RegisterEffectTypes(typeof(DamageEffect), typeof(AddDamageEffect));
+
+			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+			foreach (var type in assembly.GetTypes())
+			{
+				if (!type.IsClass || type.IsAbstract)
+					continue;
+
+				if (typeof(IEffect).IsAssignableFrom(type))
+					EffectTypeIdManager.RegisterEffectType(type);
+			}
 
 			UnitHealth = AllyHealth = 500;
 			UnitDamage = AllyDamage = 10;

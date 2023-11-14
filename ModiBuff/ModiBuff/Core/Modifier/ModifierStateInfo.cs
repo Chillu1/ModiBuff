@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-
 namespace ModiBuff.Core
 {
 	/// <summary>
@@ -53,12 +50,17 @@ namespace ModiBuff.Core
 			EffectSaveData[] saveData = new EffectSaveData[_effects.Length];
 			for (int i = 0; i < _effects.Length; i++)
 			{
-				//TODO Temp Remove
-				if (!(_effects[i] is ISavable effect))
+				var effect = _effects[i];
+				if (!(_effects[i] is ISavable savableEffect))
+				{
+					if (effect is IStateEffect)
+						Logger.LogError(
+							$"[ModiBuff] Effect {effect.GetType()} has state (IStateEffect) but is not savable (ISavable)");
 					continue;
+				}
 
-				int id = EffectTypeIdManager.Instance.GetId(effect.GetType());
-				saveData[i] = new EffectSaveData(id, effect.SaveState());
+				int id = EffectTypeIdManager.Instance.GetId(savableEffect.GetType());
+				saveData[i] = new EffectSaveData(id, savableEffect.SaveState());
 			}
 
 			return saveData;
@@ -68,7 +70,6 @@ namespace ModiBuff.Core
 		{
 			for (int i = 0; i < _effects.Length; i++)
 			{
-				//TODO Temp Remove
 				if (!(_effects[i] is ISavable effect))
 					continue;
 

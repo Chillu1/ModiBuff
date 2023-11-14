@@ -2,7 +2,7 @@ namespace ModiBuff.Core.Units
 {
 	public sealed class DamageEffect : IStackEffect, IMutableStateEffect, IEffect,
 		IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
-		IModifierStateInfo<DamageEffect.Data>, ISavable<DamageEffect.SaveData>
+		IModifierStateInfo<DamageEffect.Data>, ISavableEffect<DamageEffect.SaveData>
 	{
 		public bool UsesMutableState => _stackEffect.UsesMutableState();
 		public bool UsesMutableStackEffect => _stackEffect.UsesMutableState();
