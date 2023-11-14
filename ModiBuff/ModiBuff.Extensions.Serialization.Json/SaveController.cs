@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text.Json;
+using ModiBuff.Core.Units;
 
 namespace ModiBuff.Extensions.Serialization.Json
 {
@@ -22,23 +23,15 @@ namespace ModiBuff.Extensions.Serialization.Json
 			};
 		}
 
-		public bool Save<T>(T obj)
-		{
-			File.WriteAllText(_path, JsonSerializer.Serialize(obj, _options));
-			//using (var stream = File.Create(_path))
-			//{
-			//	JsonSerializer.Serialize(stream, obj, _options);
-			//	return true;
-			//}
-			return true;
-		}
+		public string Save(Unit.SaveData obj) => JsonSerializer.Serialize(obj, _options);
 
-		public T Load<T>()
-		{
-			return JsonSerializer.Deserialize<T>(File.ReadAllText(_path), _options);
-			//using (var stream = File.OpenRead(_path))
-			//	return JsonSerializer.Deserialize<T>(stream, _options);
-		}
+		public void SaveToFile(Unit.SaveData obj) => SaveToFile(Save(obj));
+		public void SaveToFile(string json) => File.WriteAllText(_path, json);
+
+		public Unit.SaveData Load(string json) => JsonSerializer.Deserialize<Unit.SaveData>(json, _options);
+
+		public Unit.SaveData LoadFromFile() => JsonSerializer.Deserialize<Unit.SaveData>(LoadFromFileJson(), _options);
+		public string LoadFromFileJson() => File.ReadAllText(_path);
 	}
 
 	/*public class UnitSaveDataJsonConverter : JsonConverter<Unit.SaveData>

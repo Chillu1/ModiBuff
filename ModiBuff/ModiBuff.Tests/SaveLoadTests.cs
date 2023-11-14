@@ -70,39 +70,10 @@ namespace ModiBuff.Tests
 			Unit.Update(2);
 			Assert.AreEqual(UnitDamage + 5 + 5 + 2, Unit.Damage);
 
-			var saveData = Unit.SaveState();
-			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
-			SetupUnitHelper(loadedUnit);
-			loadedUnit.LoadState(saveData);
-
-			Assert.AreEqual(UnitHealth - 5, loadedUnit.Health);
-			Assert.AreEqual(UnitDamage + 5 + 5 + 2, loadedUnit.Damage);
-
-			loadedUnit.Update(3);
-			Assert.AreEqual(UnitDamage, loadedUnit.Damage);
-		}
-
-		[Test]
-		public void SaveUnitLoadFile()
-		{
-			AddRecipe("AddDamageExtraState")
-				.Stack(WhenStackEffect.Always)
-				.Effect(new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Add, stackValue: 2),
-					EffectOn.Init | EffectOn.Stack)
-				.Remove(5);
-			Setup();
-
-			Unit.AddModifierSelf("InitDamage");
-			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-			Unit.AddModifierSelf("AddDamageExtraState");
-			Unit.AddModifierSelf("AddDamageExtraState");
-			Unit.Update(2);
-			Assert.AreEqual(UnitDamage + 5 + 5 + 2, Unit.Damage);
-
 			var saveController = new SaveController("test.json");
-			saveController.Save(Unit.SaveState());
+			string json = saveController.Save(Unit.SaveState());
 
-			var loadData = saveController.Load<Unit.SaveData>();
+			var loadData = saveController.Load(json);
 
 			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
 			SetupUnitHelper(loadedUnit);
@@ -116,7 +87,7 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-		public void SaveEffectCooldownCheckLoadFile()
+		public void SaveEffectCooldownCheckLoad()
 		{
 			AddRecipe("AddDamageExtraState")
 				.EffectCooldown(2)
@@ -131,9 +102,9 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
 
 			var saveController = new SaveController("test.json");
-			saveController.Save(Unit.SaveState());
+			string json = saveController.Save(Unit.SaveState());
 
-			var loadData = saveController.Load<Unit.SaveData>();
+			var loadData = saveController.Load(json);
 
 			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
 			SetupUnitHelper(loadedUnit);
