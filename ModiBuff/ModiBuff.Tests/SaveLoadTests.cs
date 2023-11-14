@@ -138,6 +138,40 @@ namespace ModiBuff.Tests
 			Assert.False(loadedUnit.HasStatusEffectMulti(StatusEffectType.Stun));
 		}
 
+		[Test]
+		public void SaveLoadEventCallbackState()
+		{
+			AddRecipe("InitCallbackState")
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Event | EffectOn.CallbackEffect)
+				.Event(EffectOnEvent.WhenAttacked)
+				.CallbackEffect(CallbackType.CurrentHealthChanged,
+					effect => new HealthChangedEvent((target, source, health, deltaHealth) =>
+					{
+						if (deltaHealth > 0)
+							effect.Effect(target, source);
+					}))
+				.Remove(5);
+			Setup();
+
+			Unit.AddModifierSelf("InitCallbackState");
+			Unit.TakeDamage(5, Unit);
+			Assert.AreEqual(UnitDamage + 5 + 5, Unit.Damage);
+
+			var saveController = new SaveController("test.json");
+			string json = saveController.Save(Unit.SaveState());
+
+			var loadData = saveController.Load(json);
+			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
+			SetupUnitHelper(loadedUnit);
+			loadedUnit.LoadState(loadData);
+
+			loadedUnit.TakeDamage(5, loadedUnit);
+			Assert.AreEqual(UnitDamage + 5 + 5 + 5 + 5, loadedUnit.Damage);
+
+			loadedUnit.Update(5);
+			Assert.AreEqual(UnitDamage, loadedUnit.Damage);
+		}
+
 		//[Test]
 		public void SaveNewModifierIdLoad()
 		{

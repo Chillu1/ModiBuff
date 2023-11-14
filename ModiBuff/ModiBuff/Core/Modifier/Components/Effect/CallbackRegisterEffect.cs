@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public sealed class CallbackRegisterEffect<TCallback> : IRevertEffect, IEffect, IStateEffect
+	public sealed class CallbackRegisterEffect<TCallback> : IRevertEffect, IEffect, IStateEffect, IRegisterEffect
 	{
 		public bool IsRevertible => true;
 

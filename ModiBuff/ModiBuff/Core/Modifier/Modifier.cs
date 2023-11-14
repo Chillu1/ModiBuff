@@ -136,6 +136,26 @@ namespace ModiBuff.Core
 #endif
 		}
 
+		/// <summary>
+		///		Special init to register callbacks/events on load
+		/// </summary>
+		public void InitLoad()
+		{
+#if UNSAFE
+			if (_multiTarget)
+				_initComponent.InitLoad(Unsafe.As<MultiTargetComponent>(_targetComponent).Targets,
+					_targetComponent.Source);
+			else
+				_initComponent.InitLoad(Unsafe.As<SingleTargetComponent>(_targetComponent).Target,
+					_targetComponent.Source);
+#else
+			if (_multiTarget)
+				_initComponent.InitLoad(((MultiTargetComponent)_targetComponent).Targets, _targetComponent.Source);
+			else
+				_initComponent.InitLoad(((SingleTargetComponent)_targetComponent).Target, _targetComponent.Source);
+#endif
+		}
+
 		public void Update(float deltaTime)
 		{
 			_effectCheck?.Update(deltaTime);

@@ -1,6 +1,7 @@
 namespace ModiBuff.Core
 {
-	public sealed class EventRegisterEffect<TEvent> : IRevertEffect, IRecipeFeedEffects, IEffect, IStateEffect
+	public sealed class EventRegisterEffect<TEvent> : IRevertEffect, IRecipeFeedEffects, IEffect, IStateEffect,
+		IRegisterEffect
 	{
 		//Always revert event effect?
 		public bool IsRevertible => true;

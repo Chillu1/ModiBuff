@@ -49,6 +49,26 @@ namespace ModiBuff.Core
 			_isInitialized = true;
 		}
 
+		public void InitLoad(IUnit target, IUnit owner)
+		{
+			for (int i = 0; i < _effects.Length; i++)
+			{
+				var effect = _effects[i];
+				if (effect is IRegisterEffect)
+					effect.Effect(target, owner);
+			}
+		}
+
+		public void InitLoad(IList<IUnit> targets, IUnit owner)
+		{
+			for (int i = 0; i < _effects.Length; i++)
+			{
+				var effect = _effects[i];
+				if (effect is IRegisterEffect)
+					effect.Effect(targets, owner);
+			}
+		}
+
 		public void ResetState() => _isInitialized = false;
 
 		public SaveData SaveState() => new SaveData(_isInitialized);

@@ -2,7 +2,7 @@ using System;
 
 namespace ModiBuff.Core
 {
-	public sealed class CallbackStateRegisterEffect<TCallback> : IRevertEffect, IEffect, IStateEffect
+	public sealed class CallbackStateRegisterEffect<TCallback> : IRevertEffect, IEffect, IStateEffect, IRegisterEffect
 	{
 		public bool IsRevertible => true;
 

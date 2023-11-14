@@ -338,18 +338,22 @@ namespace ModiBuff.Core
 			for (int i = 0; i < saveData.ModifiersSaveData.Length; i++)
 			{
 				var modifierSaveData = saveData.ModifiersSaveData[i];
+				int id = modifierSaveData.Id;
+				ref readonly var tag = ref ModifierRecipes.GetTag(id);
 
-				if (!ModifierRecipes.GetTag(modifierSaveData.Id).HasTag(TagType.IsInstanceStackable))
+				if (!tag.HasTag(TagType.IsInstanceStackable))
 				{
 					if (Config.UseDictionaryIndexes)
-						_modifierIndexesDict.Add(modifierSaveData.Id, _modifiersTop);
+						_modifierIndexesDict.Add(id, _modifiersTop);
 					else
-						_modifierIndexes[modifierSaveData.Id] = _modifiersTop;
+						_modifierIndexes[id] = _modifiersTop;
 				}
 
-				var modifier = ModifierPool.Instance.Rent(modifierSaveData.Id);
+				var modifier = ModifierPool.Instance.Rent(id);
 				modifier.LoadState(modifierSaveData, owner);
 				_modifiers[_modifiersTop++] = modifier;
+				if (tag.HasTag(TagType.IsInit))
+					modifier.InitLoad();
 			}
 		}
 

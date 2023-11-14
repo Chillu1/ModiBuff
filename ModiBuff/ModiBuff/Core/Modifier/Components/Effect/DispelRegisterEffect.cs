@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public sealed class DispelRegisterEffect : IEffect, IShallowClone<IEffect>
+	public sealed class DispelRegisterEffect : IEffect, IShallowClone<IEffect>, IRegisterEffect
 	{
 		private DispelType _dispelType;
 		private RemoveEffect _removeEffect;

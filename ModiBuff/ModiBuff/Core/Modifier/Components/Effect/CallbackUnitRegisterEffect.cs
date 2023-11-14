@@ -4,7 +4,7 @@ namespace ModiBuff.Core
 	///		Registers a callback of effects to the target, for non-IEffect version see <see cref="CallbackRegisterDelegateEffect{TCallback}"/>
 	/// </summary>
 	public sealed class CallbackUnitRegisterEffect<TCallbackUnit> : IRecipeFeedEffects, IRevertEffect, IEffect,
-		IStateEffect
+		IStateEffect, IRegisterEffect
 	{
 		//Callback register should always be revertible, since we're using IEffect instances that will be pooled back 
 		public bool IsRevertible => true;
