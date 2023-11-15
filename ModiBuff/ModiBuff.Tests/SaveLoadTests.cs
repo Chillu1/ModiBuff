@@ -15,6 +15,16 @@ namespace ModiBuff.Tests
 			_saveController = new SaveController("test.json");
 		}
 
+		private Unit LoadUnit(Unit unit)
+		{
+			string json = _saveController.Save(unit.SaveState());
+			var loadData = _saveController.Load(json);
+			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
+			SetupUnitHelper(loadedUnit);
+			loadedUnit.LoadState(loadData);
+			return loadedUnit;
+		}
+
 		[Test]
 		public void SaveLoadInitExtraDamage()
 		{
@@ -78,13 +88,7 @@ namespace ModiBuff.Tests
 			Unit.Update(2);
 			Assert.AreEqual(UnitDamage + 5 + 5 + 2, Unit.Damage);
 
-			string json = _saveController.Save(Unit.SaveState());
-
-			var loadData = _saveController.Load(json);
-
-			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
-			SetupUnitHelper(loadedUnit);
-			loadedUnit.LoadState(loadData);
+			var loadedUnit = LoadUnit(Unit);
 
 			Assert.AreEqual(UnitHealth - 5, loadedUnit.Health);
 			Assert.AreEqual(UnitDamage + 5 + 5 + 2, loadedUnit.Damage);
@@ -108,11 +112,7 @@ namespace ModiBuff.Tests
 			Unit.Update(1);
 			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
 
-			string json = _saveController.Save(Unit.SaveState());
-			var loadData = _saveController.Load(json);
-			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
-			SetupUnitHelper(loadedUnit);
-			loadedUnit.LoadState(loadData);
+			var loadedUnit = LoadUnit(Unit);
 
 			Assert.AreEqual(UnitDamage + 5 + 2, loadedUnit.Damage);
 			loadedUnit.AddModifierSelf("AddDamageExtraState");
@@ -127,21 +127,21 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("InitStun")
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2f), EffectOn.Init)
+				.Effect(new SingleInstanceStatusEffectEffect(StatusEffectType.Stun, 2f), EffectOn.Init)
 				.Remove(2);
 			Setup();
 
 			Unit.AddModifierSelf("InitStun");
 			Unit.Update(1);
 
-			string json = _saveController.Save(Unit.SaveState());
-			var loadData = _saveController.Load(json);
-			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
-			SetupUnitHelper(loadedUnit);
-			loadedUnit.LoadState(loadData);
+			var loadedUnit = LoadUnit(Unit);
 
 			Assert.True(loadedUnit.HasStatusEffectMulti(StatusEffectType.Stun));
+			Assert.True(loadedUnit.HasStatusEffectSingle(StatusEffectType.Stun));
 			loadedUnit.Update(1);
 			Assert.False(loadedUnit.HasStatusEffectMulti(StatusEffectType.Stun));
+			Assert.False(loadedUnit.HasStatusEffectSingle(StatusEffectType.Stun));
+			Assert.False(loadedUnit.ContainsModifier("InitStun"));
 		}
 
 		[Test]
@@ -163,17 +163,36 @@ namespace ModiBuff.Tests
 			Unit.TakeDamage(5, Unit);
 			Assert.AreEqual(UnitDamage + 5 + 5, Unit.Damage);
 
-			string json = _saveController.Save(Unit.SaveState());
-			var loadData = _saveController.Load(json);
-			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
-			SetupUnitHelper(loadedUnit);
-			loadedUnit.LoadState(loadData);
+			var loadedUnit = LoadUnit(Unit);
 
 			loadedUnit.TakeDamage(5, loadedUnit);
 			Assert.AreEqual(UnitDamage + 5 + 5 + 5 + 5, loadedUnit.Damage);
 
 			loadedUnit.Update(5);
 			Assert.AreEqual(UnitDamage, loadedUnit.Damage);
+		}
+
+		[Test]
+		public void SaveLoadApplierState()
+		{
+			AddRecipe("InitDamageChecks")
+				.ApplyCooldown(1)
+				.ApplyCost(CostType.Health, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
+
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageChecks"), ApplierType.Cast);
+			Unit.TryCast("InitDamageChecks", Unit);
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+
+			var loadedUnit = LoadUnit(Unit);
+
+			loadedUnit.TryCast("InitDamageChecks", loadedUnit);
+			Assert.AreEqual(UnitHealth - 5 - 5, loadedUnit.Health);
+
+			loadedUnit.Update(1);
+			loadedUnit.TryCast("InitDamageChecks", loadedUnit);
+			Assert.AreEqual(UnitHealth - 5 - 5 - 5 - 5, loadedUnit.Health);
 		}
 
 		//[Test]
