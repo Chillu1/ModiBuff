@@ -14,7 +14,7 @@ namespace ModiBuff.Core
 		public readonly float Timer;
 		public readonly bool StatusResistanceImplemented;
 
-#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 		[System.Text.Json.Serialization.JsonConstructor]
 #endif
 		public TimeComponentSaveData(float timer, bool statusResistanceImplemented)

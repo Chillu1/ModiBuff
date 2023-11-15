@@ -5,7 +5,7 @@ namespace ModiBuff.Core
 {
 	public static class SerializationExtensions
 	{
-#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 		public static bool FromAnonymousJsonObjectToSaveData(this object fromLoad, ISavable toLoad)
 		{
 			if (!(fromLoad is System.Text.Json.JsonElement jsonElement))

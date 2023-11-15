@@ -109,7 +109,7 @@ namespace ModiBuff.Core
 		{
 			for (int i = 0; i < _stateResetChecks?.Length; i++)
 			{
-#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 				if (data.StateCheckData[i].FromAnonymousJsonObjectToSaveData(_stateResetChecks[i]))
 					continue;
 #endif
@@ -122,7 +122,7 @@ namespace ModiBuff.Core
 		{
 			public readonly object[] StateCheckData;
 
-#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(object[] stateCheckData) => StateCheckData = stateCheckData;

@@ -279,12 +279,25 @@ namespace ModiBuff.Core
 			_isTargetSetup = false;
 			_multiTarget = data.IsMultiTarget;
 
-#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			if (!data.TargetSaveData.FromAnonymousJsonObjectToSaveData(_targetComponent))
-				_targetComponent.LoadState(data.TargetSaveData);
 #endif
-			//TODO TEMP
-			UpdateSingleTargetSource(((SingleTargetComponent)_targetComponent).Target, _targetComponent.Source);
+			{
+				_targetComponent.LoadState(data.TargetSaveData);
+			}
+
+			switch (_targetComponent)
+			{
+				case SingleTargetComponent singleTargetComponent:
+					UpdateSingleTargetSource(singleTargetComponent.Target, _targetComponent.Source);
+					break;
+				case MultiTargetComponent multiTargetComponent:
+					UpdateTargets(multiTargetComponent.Targets, _targetComponent.Source);
+					break;
+				default:
+					Logger.LogError("[ModiBuff] Trying to load target component that isn't single or multi target");
+					break;
+			}
 
 			if (data.InitSaveData != null)
 				_initComponent.LoadState(data.InitSaveData.Value);
@@ -353,7 +366,7 @@ namespace ModiBuff.Core
 			public readonly TimeComponentSaveData[] TimeComponentsSaveData;
 			public readonly ModifierStateInfo.EffectSaveData[] EffectsSaveData;
 
-#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(int id, object targetSaveData, bool isMultiTarget,

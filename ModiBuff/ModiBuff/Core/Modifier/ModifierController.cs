@@ -324,8 +324,13 @@ namespace ModiBuff.Core
 
 		public SaveData SaveState()
 		{
-			//TODO Possible that we have modifiers to remove right when we call this?
-			//If so, we should remove them before saving
+			//There's a chance(?) we have modifiers to remove when we're saving. We should remove them before saving
+			if (_modifiersToRemove.Count > 0)
+			{
+				for (int i = 0; i < _modifiersToRemove.Count; i++)
+					Remove(_modifiersToRemove[i]);
+				_modifiersToRemove.Clear();
+			}
 
 			Modifier.SaveData[] modifiersSaveData = new Modifier.SaveData[_modifiersTop];
 			for (int i = 0; i < _modifiersTop; i++)
@@ -385,7 +390,7 @@ namespace ModiBuff.Core
 		{
 			public readonly Modifier.SaveData[] ModifiersSaveData;
 
-#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER)
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(Modifier.SaveData[] modifiersSaveData) => ModifiersSaveData = modifiersSaveData;
