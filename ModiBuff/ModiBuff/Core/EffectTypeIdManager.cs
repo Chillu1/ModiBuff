@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
+	/// <summary>
+	///		Useless right now, because of how we handle modifier effects
+	/// </summary>
 	public sealed class EffectTypeIdManager
 	{
 		public static EffectTypeIdManager Instance { get; private set; }

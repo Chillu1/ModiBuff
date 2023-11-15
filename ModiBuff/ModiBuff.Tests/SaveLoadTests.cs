@@ -273,6 +273,35 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 10, loadedUnit.Health);
 		}
 
+		[Test]
+		public void SaveModifierNewEffectLoad()
+		{
+			AddRecipe("InitHeal")
+				.Stack(WhenStackEffect.Always)
+				.Effect(new HealEffect(5, HealEffect.EffectState.IsRevertible,
+					StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack);
+			AddRecipe("AddDamage")
+				.Effect(new AddDamageEffect(5), EffectOn.Init);
+			Setup();
+
+			const int damage = 100;
+
+			const string gameStateFile = "modifierNewEffectIdGameStateTest.json";
+
+			//TODO save will not have modifier id redirection
+			if (!File.Exists(_saveController.Path + "/" + gameStateFile))
+			{
+				Unit.TakeDamage(damage, Unit);
+				Unit.AddModifierSelf("InitHeal");
+				SaveGameState(gameStateFile, Unit);
+			}
+
+			LoadGameState(gameStateFile, out var loadedUnit);
+
+			loadedUnit.AddModifierSelf("InitHeal");
+			Assert.AreEqual(UnitHealth - damage + 5 + 2 + 5 + 4, loadedUnit.Health);
+		}
+
 		//TODO GenIds will be wrong in some places (StatusEffect), how to fix, feed correct id & genId somehow?
 		//TODO add damage is enabled check
 	}

@@ -59,8 +59,8 @@ namespace ModiBuff.Core
 					continue;
 				}
 
-				int id = EffectTypeIdManager.Instance.GetId(savableEffect.GetType());
-				saveData[i] = new EffectSaveData(id, savableEffect.SaveState());
+				//int id = EffectTypeIdManager.Instance.GetId(savableEffect.GetType());
+				saveData[i] = new EffectSaveData(savableEffect.SaveState());
 			}
 
 			return saveData;
@@ -73,12 +73,12 @@ namespace ModiBuff.Core
 				if (!(_effects[i] is ISavable effect))
 					continue;
 
-				if (!EffectTypeIdManager.Instance.MatchesId(effect.GetType(), data[i].Id))
-				{
-					Logger.LogError(
-						$"[ModiBuff] Effect type mismatch, expected {effect.GetType()} but got {data[i].Id}");
-					continue;
-				}
+				//if (!EffectTypeIdManager.Instance.MatchesId(effect.GetType(), data[i].Id))
+				//{
+				//	Logger.LogError(
+				//		$"[ModiBuff] Effect type mismatch, expected {effect.GetType()} but got {data[i].Id}");
+				//	continue;
+				//}
 
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 				if (data[i].Data.FromAnonymousJsonObjectToSaveData(effect))
@@ -91,15 +91,15 @@ namespace ModiBuff.Core
 
 		public readonly struct EffectSaveData
 		{
-			public readonly int Id;
+			//public readonly int Id;
 			public readonly object Data;
 
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public EffectSaveData(int id, object data)
+			public EffectSaveData(object data)
 			{
-				Id = id;
+				//Id = id;
 				Data = data;
 			}
 		}
