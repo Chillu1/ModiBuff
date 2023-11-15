@@ -7,6 +7,14 @@ namespace ModiBuff.Tests
 {
 	public sealed class SaveLoadTests : ModifierTests
 	{
+		private SaveController _saveController;
+
+		public override void IterationSetup()
+		{
+			base.IterationSetup();
+			_saveController = new SaveController("test.json");
+		}
+
 		[Test]
 		public void SaveLoadInitExtraDamage()
 		{
@@ -70,10 +78,9 @@ namespace ModiBuff.Tests
 			Unit.Update(2);
 			Assert.AreEqual(UnitDamage + 5 + 5 + 2, Unit.Damage);
 
-			var saveController = new SaveController("test.json");
-			string json = saveController.Save(Unit.SaveState());
+			string json = _saveController.Save(Unit.SaveState());
 
-			var loadData = saveController.Load(json);
+			var loadData = _saveController.Load(json);
 
 			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
 			SetupUnitHelper(loadedUnit);
@@ -101,11 +108,8 @@ namespace ModiBuff.Tests
 			Unit.Update(1);
 			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
 
-			var saveController = new SaveController("test.json");
-			string json = saveController.Save(Unit.SaveState());
-
-			var loadData = saveController.Load(json);
-
+			string json = _saveController.Save(Unit.SaveState());
+			var loadData = _saveController.Load(json);
 			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
 			SetupUnitHelper(loadedUnit);
 			loadedUnit.LoadState(loadData);
@@ -129,9 +133,11 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("InitStun");
 			Unit.Update(1);
 
-			var saveData = Unit.SaveState();
+			string json = _saveController.Save(Unit.SaveState());
+			var loadData = _saveController.Load(json);
 			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
-			loadedUnit.LoadState(saveData);
+			SetupUnitHelper(loadedUnit);
+			loadedUnit.LoadState(loadData);
 
 			Assert.True(loadedUnit.HasStatusEffectMulti(StatusEffectType.Stun));
 			loadedUnit.Update(1);
@@ -157,10 +163,8 @@ namespace ModiBuff.Tests
 			Unit.TakeDamage(5, Unit);
 			Assert.AreEqual(UnitDamage + 5 + 5, Unit.Damage);
 
-			var saveController = new SaveController("test.json");
-			string json = saveController.Save(Unit.SaveState());
-
-			var loadData = saveController.Load(json);
+			string json = _saveController.Save(Unit.SaveState());
+			var loadData = _saveController.Load(json);
 			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
 			SetupUnitHelper(loadedUnit);
 			loadedUnit.LoadState(loadData);

@@ -63,7 +63,7 @@ namespace ModiBuff.Tests
 		}
 
 		[SetUp]
-		public void IterationSetup()
+		public virtual void IterationSetup()
 		{
 			IdManager = new ModifierIdManager();
 			EffectIdManager = new EffectIdManager();
