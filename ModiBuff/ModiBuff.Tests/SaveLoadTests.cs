@@ -188,25 +188,19 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(10), EffectOn.Interval);
 			Setup();
 
-			const string idManagerPath = "idManagerTest.json";
-			const string unitPath = "unitIdTest.json";
+			const string gameStateFile = "modifierIdGameStateTest.json";
 
 			//TODO save will not have modifier id redirection
-			if (!File.Exists(_saveController.Path + "/" + idManagerPath))
-				_saveController.SaveToPath(_saveController.Save(IdManager.SaveState()), idManagerPath);
-
-			if (!File.Exists(_saveController.Path + "/" + unitPath))
+			if (!File.Exists(_saveController.Path + "/" + gameStateFile))
 			{
 				Unit.AddModifierSelf("DoT");
-				_saveController.SaveToPath(_saveController.Save(Unit.SaveState()), unitPath);
+				_saveController.SaveToPath(_saveController.Save(GameState.SaveState(IdManager, new[] { Unit })),
+					gameStateFile);
 			}
 
-			var idManagerData = _saveController.LoadFromPath<ModifierIdManager.SaveData>(idManagerPath);
-			IdManager.LoadState(idManagerData);
-
-			var loadData = _saveController.LoadFromPath<Unit.SaveData>(unitPath);
-			var loadedUnit = Unit.LoadUnit(loadData.Id);
-			loadedUnit.LoadState(loadData);
+			var loadDataGameState = _saveController.LoadFromPath<GameState.SaveData>(gameStateFile);
+			GameState.LoadState(loadDataGameState, IdManager, out var loadedUnits);
+			var loadedUnit = loadedUnits[0];
 
 			loadedUnit.Update(1);
 			Assert.AreEqual(UnitHealth - 10, loadedUnit.Health);
@@ -226,26 +220,20 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(10), EffectOn.Interval);
 			Setup();
 
-			const string idManagerPath = "idManagerApplierTest.json";
-			const string unitPath = "unitIdApplierTest.json";
+			const string gameStateFile = "modifierApplierIdGameStateTest.json";
 
 			//TODO save will not have modifier id redirection
-			if (!File.Exists(_saveController.Path + "/" + idManagerPath))
-				_saveController.SaveToPath(_saveController.Save(IdManager.SaveState()), idManagerPath);
-
-			if (!File.Exists(_saveController.Path + "/" + unitPath))
+			if (!File.Exists(_saveController.Path + "/" + gameStateFile))
 			{
 				Unit.AddApplierModifier(Recipes.GetGenerator("DoT"), ApplierType.Cast);
 				Unit.AddApplierModifier(Recipes.GetGenerator("DoTHealthCost"), ApplierType.Cast);
-				_saveController.SaveToPath(_saveController.Save(Unit.SaveState()), unitPath);
+				_saveController.SaveToPath(_saveController.Save(GameState.SaveState(IdManager, new[] { Unit })),
+					gameStateFile);
 			}
 
-			var idManagerData = _saveController.LoadFromPath<ModifierIdManager.SaveData>(idManagerPath);
-			IdManager.LoadState(idManagerData);
-
-			var loadData = _saveController.LoadFromPath<Unit.SaveData>(unitPath);
-			var loadedUnit = Unit.LoadUnit(loadData.Id);
-			loadedUnit.LoadState(loadData);
+			var loadDataGameState = _saveController.LoadFromPath<GameState.SaveData>(gameStateFile);
+			GameState.LoadState(loadDataGameState, IdManager, out var loadedUnits);
+			var loadedUnit = loadedUnits[0];
 
 			loadedUnit.TryCast("DoT", loadedUnit);
 			loadedUnit.TryCast("DoTHealthCost", loadedUnit);
@@ -253,6 +241,37 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 10 - 5 - 10, loadedUnit.Health);
 			loadedUnit.Update(1);
 			Assert.AreEqual(UnitHealth - 10 - 5 - 10 - 10 - 10, loadedUnit.Health);
+		}
+
+		[Test]
+		public void SaveNewEffectIdLoad()
+		{
+			AddEffect("InitDamage", new DamageEffect(5));
+			AddEffect("InitBigDamage", new DamageEffect(10));
+			Setup();
+
+			const string idManagerPath = "idManagerEffectTest.json";
+			const string unitPath = "unitIdEffectTest.json";
+
+			//TODO save will not have modifier id redirection
+			if (!File.Exists(_saveController.Path + "/" + idManagerPath))
+				_saveController.SaveToPath(_saveController.Save(EffectIdManager.SaveState()), idManagerPath);
+
+			if (!File.Exists(_saveController.Path + "/" + unitPath))
+			{
+				Unit.AddEffectApplier("InitBigDamage");
+				_saveController.SaveToPath(_saveController.Save(Unit.SaveState()), unitPath);
+			}
+
+			var idManagerData = _saveController.LoadFromPath<EffectIdManager.SaveData>(idManagerPath);
+			EffectIdManager.LoadState(idManagerData);
+
+			var loadData = _saveController.LoadFromPath<Unit.SaveData>(unitPath);
+			var loadedUnit = Unit.LoadUnit(loadData.Id);
+			loadedUnit.LoadState(loadData);
+
+			loadedUnit.TryCastEffect("InitBigDamage", loadedUnit);
+			Assert.AreEqual(UnitHealth - 10, loadedUnit.Health);
 		}
 
 		//TODO GenIds will be wrong in some places (StatusEffect), how to fix, feed correct id & genId somehow?

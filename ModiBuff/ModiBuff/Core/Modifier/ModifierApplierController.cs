@@ -188,10 +188,8 @@ namespace ModiBuff.Core
 				_modifierAttackChecksAppliers.Add(newId, check);
 			}
 
-			//TODO Effect mapping
-			//for (int i = 0; i < saveData.EffectCasts.Length; i++)
-			// _effectCasts.Add(EffectIdManager.GetNewId(saveData.EffectCasts[i]));
-			_effectCasts.AddRange(saveData.EffectCasts);
+			for (int i = 0; i < saveData.EffectCasts.Length; i++)
+				_effectCasts.Add(EffectIdManager.GetNewId(saveData.EffectCasts[i]));
 		}
 
 		public readonly struct SaveData
