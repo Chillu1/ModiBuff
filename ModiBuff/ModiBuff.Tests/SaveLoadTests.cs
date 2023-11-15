@@ -1,3 +1,4 @@
+using System.IO;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using ModiBuff.Extensions.Serialization.Json;
@@ -33,6 +34,7 @@ namespace ModiBuff.Tests
 					EffectOn.Init | EffectOn.Stack)
 				.Remove(5);
 			Setup();
+			IdManager.LoadState(IdManager.SaveState());
 
 			Unit.AddModifierSelf("InitDamage");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
@@ -60,6 +62,7 @@ namespace ModiBuff.Tests
 					new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Effect | StackEffectType.Add,
 						stackValue: 2), EffectOn.Stack);
 			Setup();
+			IdManager.LoadState(IdManager.SaveState());
 
 			Unit.AddModifierSelf("AddDamageExtraState");
 			Unit.Update(1);
@@ -83,6 +86,7 @@ namespace ModiBuff.Tests
 				.Effect(new SingleInstanceStatusEffectEffect(StatusEffectType.Stun, 2f), EffectOn.Init)
 				.Remove(2);
 			Setup();
+			IdManager.LoadState(IdManager.SaveState());
 
 			Unit.AddModifierSelf("InitStun");
 			Unit.Update(1);
@@ -111,6 +115,7 @@ namespace ModiBuff.Tests
 					}))
 				.Remove(5);
 			Setup();
+			IdManager.LoadState(IdManager.SaveState());
 
 			Unit.AddModifierSelf("InitCallbackState");
 			Unit.TakeDamage(5, Unit);
@@ -133,6 +138,7 @@ namespace ModiBuff.Tests
 				.ApplyCost(CostType.Health, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
+			IdManager.LoadState(IdManager.SaveState());
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageChecks"), ApplierType.Cast);
 			Unit.TryCast("InitDamageChecks", Unit);
@@ -155,6 +161,7 @@ namespace ModiBuff.Tests
 				.Interval(1)
 				.Effect(new DamageEffect(5), EffectOn.Interval);
 			Setup();
+			IdManager.LoadState(IdManager.SaveState());
 
 			Enemy.AddModifierTarget("DoT", Unit);
 			Enemy.Update(1);
@@ -179,25 +186,43 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 - 5, loadedUnit.Health);
 		}
 
-		//[Test]
+		[Test]
 		public void SaveNewModifierIdLoad()
 		{
-			var saveModifierData = IdManager.SaveState();
-			AddRecipe("InitDamage2")
-				.Effect(new DamageEffect(5), EffectOn.Init);
-			var saveModifierData2 = IdManager.SaveState();
+			AddRecipe("DoT")
+				.Interval(1)
+				.Effect(new DamageEffect(10), EffectOn.Interval);
 			Setup();
 
-			//TODO Save name next to Id (then check if the id has changed since last save)
-			//Saves to file what each modifier name was in relation to id
-			//So if we change the order of recipes/generators, we can still load the correct modifiers
-			//Also will warn us if a recipe is missing / has been renamed
+			const string idManagerPath = "idManagerTest.json";
+			const string unitPath = "unitIdTest.json";
+
+			//TODO save will not have modifier id redirection
+			if (!File.Exists(_saveController.Path + "/" + idManagerPath))
+			{
+				_saveController.SaveToPath(_saveController.Save(IdManager.SaveState()), idManagerPath);
+			}
+
+			if (!File.Exists(_saveController.Path + "/" + unitPath))
+			{
+				Unit.AddModifierSelf("DoT");
+				_saveController.SaveToPath(_saveController.Save(Unit.SaveState()), unitPath);
+			}
+
+			var idManagerData = _saveController.LoadFromPath<ModifierIdManager.SaveData>(idManagerPath);
+			IdManager.LoadState(idManagerData);
+
+			var loadData = _saveController.LoadFromPath<Unit.SaveData>(unitPath);
+			var loadedUnit = Unit.LoadUnit(loadData.Id);
+			loadedUnit.LoadState(loadData);
+
+			loadedUnit.Update(1);
+			Assert.AreEqual(UnitHealth - 10, loadedUnit.Health);
+			loadedUnit.Update(1);
+			Assert.AreEqual(UnitHealth - 20, loadedUnit.Health);
 		}
 
-		//TODO Saving Target&Source Unit Id
 		//TODO GenIds will be wrong in some places (StatusEffect), how to fix, feed correct id & genId somehow?
-		//TODO Applier check
-		//TODO CallbackEffect, CallbackUnit, CallbackState
 		//TODO add damage is enabled check
 	}
 }
