@@ -4,7 +4,8 @@ using System.Runtime.CompilerServices;
 namespace ModiBuff.Core.Units
 {
 	public sealed class PoisonDamageEffect : IStackEffect, IEffect, IStateEffect,
-		IMetaEffectOwner<PoisonDamageEffect, float, int, float>, IPostEffectOwner<PoisonDamageEffect, float, int>
+			IMetaEffectOwner<PoisonDamageEffect, float, int, float>, IPostEffectOwner<PoisonDamageEffect, float, int>
+		//TODO SaveLoad
 	{
 		private const float PoisonDamage = 5f;
 

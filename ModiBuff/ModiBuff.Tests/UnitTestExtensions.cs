@@ -14,7 +14,7 @@ namespace ModiBuff.Tests
 		internal static void AddModifierSelf(this IModifierOwner unit, string name)
 		{
 			CheckForSetup(unit);
-			unit.ModifierController.Add(ModifierIdManager.GetIdOld(name), unit, unit);
+			unit.ModifierController.Add(ModifierIdManager.GetIdByName(name), unit, unit);
 		}
 
 		internal static void ApplyEffectSelf(this IUnit unit, string name)
@@ -26,7 +26,7 @@ namespace ModiBuff.Tests
 		internal static void AddModifierTarget(this IModifierOwner unit, string name, IUnit target)
 		{
 			CheckForSetup(unit);
-			unit.ModifierController.Add(ModifierIdManager.GetIdOld(name), target, unit);
+			unit.ModifierController.Add(ModifierIdManager.GetIdByName(name), target, unit);
 		}
 
 		internal static void ApplyEffectTarget(this IUnit unit, string name, IUnit target)
@@ -37,12 +37,12 @@ namespace ModiBuff.Tests
 
 		internal static bool ContainsModifier(this IModifierOwner unit, string name)
 		{
-			return unit.ModifierController.Contains(ModifierIdManager.GetIdOld(name));
+			return unit.ModifierController.Contains(ModifierIdManager.GetIdByName(name));
 		}
 
 		internal static bool ContainsApplier(this IModifierApplierOwner unit, string name)
 		{
-			return unit.ModifierApplierController.ContainsApplier(ModifierIdManager.GetIdOld(name));
+			return unit.ModifierApplierController.ContainsApplier(ModifierIdManager.GetIdByName(name));
 		}
 
 		internal static bool AddApplierModifier(this IModifierApplierOwner unit, IModifierGenerator generator,
@@ -61,12 +61,12 @@ namespace ModiBuff.Tests
 
 		internal static void TryCast(this Unit unit, string name, IModifierOwner target)
 		{
-			unit.TryCast(ModifierIdManager.GetIdOld(name), target);
+			unit.TryCast(ModifierIdManager.GetIdByName(name), target);
 		}
 
 		internal static void TryCast(this IModifierApplierOwner unit, string name, IModifierOwner target)
 		{
-			unit.TryCast(ModifierIdManager.GetIdOld(name), target);
+			unit.TryCast(ModifierIdManager.GetIdByName(name), target);
 		}
 
 		internal static void TryCastEffect(this IModifierApplierOwner unit, string name, IUnit target)

@@ -322,6 +322,47 @@ namespace ModiBuff.Core
 			_modifiersToRemove.Clear();
 		}
 
+		public SaveData SaveState()
+		{
+			//There's a chance(?) we have modifiers to remove when we're saving. We should remove them before saving
+			if (_modifiersToRemove.Count > 0)
+			{
+				for (int i = 0; i < _modifiersToRemove.Count; i++)
+					Remove(_modifiersToRemove[i]);
+				_modifiersToRemove.Clear();
+			}
+
+			Modifier.SaveData[] modifiersSaveData = new Modifier.SaveData[_modifiersTop];
+			for (int i = 0; i < _modifiersTop; i++)
+				modifiersSaveData[i] = _modifiers[i].SaveState();
+			return new SaveData(modifiersSaveData);
+		}
+
+		public void LoadState(SaveData saveData, IUnit owner)
+		{
+			for (int i = 0; i < saveData.ModifiersSaveData.Length; i++)
+			{
+				var modifierSaveData = saveData.ModifiersSaveData[i];
+				int id = ModifierIdManager.GetNewId(modifierSaveData.Id);
+
+				ref readonly var tag = ref ModifierRecipes.GetTag(id);
+
+				if (!tag.HasTag(TagType.IsInstanceStackable))
+				{
+					if (Config.UseDictionaryIndexes)
+						_modifierIndexesDict.Add(id, _modifiersTop);
+					else
+						_modifierIndexes[id] = _modifiersTop;
+				}
+
+				var modifier = ModifierPool.Instance.Rent(id);
+				modifier.LoadState(modifierSaveData, owner);
+				_modifiers[_modifiersTop++] = modifier;
+				if (tag.HasTag(TagType.IsInit))
+					modifier.InitLoad();
+			}
+		}
+
 		private Modifier GetModifier(int id, int genId)
 		{
 			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
@@ -344,6 +385,16 @@ namespace ModiBuff.Core
 			}
 
 			return null;
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly Modifier.SaveData[] ModifiersSaveData;
+
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveData(Modifier.SaveData[] modifiersSaveData) => ModifiersSaveData = modifiersSaveData;
 		}
 	}
 }

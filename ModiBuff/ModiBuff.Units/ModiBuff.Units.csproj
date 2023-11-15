@@ -21,6 +21,14 @@
         <PackageIcon>ModiBuffSmallIcon.png</PackageIcon>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DefineConstants>TRACE JSON_SERIALIZATION</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DefineConstants>TRACE JSON_SERIALIZATION</DefineConstants>
+    </PropertyGroup>
+
     <ItemGroup>
         <ProjectReference Include="..\ModiBuff\ModiBuff.csproj"/>
     </ItemGroup>
@@ -28,6 +36,10 @@
     <ItemGroup>
         <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
         <None Include="..\..\Docs\ModiBuffSmallIcon.png" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <PackageReference Include="System.Text.Json" Version="7.0.3"/>
     </ItemGroup>
 
 </Project>

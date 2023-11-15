@@ -8,6 +8,7 @@ namespace ModiBuff.Core
 		private int _nextId;
 
 		private readonly Dictionary<string, int> _idMap;
+		private readonly Dictionary<int, int> _oldModifierIdToNewModifierIdMap;
 
 		public EffectIdManager()
 		{
@@ -17,6 +18,7 @@ namespace ModiBuff.Core
 			_instance = this;
 			_nextId = 0;
 			_idMap = new Dictionary<string, int>();
+			_oldModifierIdToNewModifierIdMap = new Dictionary<int, int>();
 		}
 
 		public int GetFreeId(string name)
@@ -41,7 +43,7 @@ namespace ModiBuff.Core
 #if DEBUG && !MODIBUFF_PROFILE
 			if (!_idMap.ContainsKey(name))
 			{
-				if (!ModifierIdManager.HasIdOld(name))
+				if (!ModifierIdManager.HasIdByName(name))
 					Logger.LogError("[ModiBuff] No effect with name " + name + " found.");
 				else
 					Logger.LogError("[ModiBuff] No effect with name " + name + " found. " +
@@ -53,12 +55,45 @@ namespace ModiBuff.Core
 			return _idMap[name];
 		}
 
+		public static int GetNewId(int oldId)
+		{
+			if (_instance._oldModifierIdToNewModifierIdMap.TryGetValue(oldId, out int newId))
+				return newId;
+
+			Logger.LogError($"Modifier with id {oldId} not found");
+			return -1;
+		}
+
 		public void Clear()
 		{
 			_nextId = 0;
 			_idMap.Clear();
+			_oldModifierIdToNewModifierIdMap.Clear();
 		}
 
 		public void Reset() => _instance = null;
+
+		public SaveData SaveState() => new SaveData(_idMap);
+
+		public void LoadState(SaveData saveData)
+		{
+			foreach (var pair in saveData.IdMap)
+			{
+				if (_idMap.TryGetValue(pair.Key, out int newId))
+					_oldModifierIdToNewModifierIdMap.Add(pair.Value, newId);
+				else
+					Logger.LogError($"[ModiBuff] Effect in save file with name {pair.Key} not found.");
+			}
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly Dictionary<string, int> IdMap;
+
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveData(Dictionary<string, int> idMap) => IdMap = idMap;
+		}
 	}
 }

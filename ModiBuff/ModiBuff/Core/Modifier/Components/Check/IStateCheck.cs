@@ -1,10 +1,10 @@
 namespace ModiBuff.Core
 {
-	public interface IStateCheck : ICheck, IDefaultState, IStateReset, IShallowClone
+	public interface IStateCheck : ICheck, IDefaultState, IStateReset, IShallowClone, ISavable
 	{
 	}
 
-	public interface IStateCheck<out TSelf> : IShallowClone<TSelf>, IStateCheck
+	public interface IStateCheck<out TSelf, TSaveData> : IShallowClone<TSelf>, IStateCheck, ISavable<TSaveData>
 	{
 	}
 }

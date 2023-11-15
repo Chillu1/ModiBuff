@@ -23,8 +23,9 @@ namespace ModiBuff.Core.Units
 		IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
 		ICallbackRegistrable<CallbackType>, ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>,
-		ICallbackEffectRegistrable<CallbackType>, IAllNonGeneric, ICaster, IStateReset
+		ICallbackEffectRegistrable<CallbackType>, IAllNonGeneric, ICaster, IStateReset, IIdOwner
 	{
+		public int Id { get; }
 		public UnitTag UnitTag { get; private set; }
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
@@ -33,7 +34,7 @@ namespace ModiBuff.Core.Units
 		public float Mana { get; private set; }
 		public float MaxMana { get; private set; }
 		public float StatusResistance { get; private set; } = 1f;
-		public UnitType UnitType { get; }
+		public UnitType UnitType { get; private set; }
 		public Vector2 Position { get; private set; }
 		public int PoisonStacks { get; private set; }
 
@@ -56,9 +57,12 @@ namespace ModiBuff.Core.Units
 		private readonly MultiInstanceStatusEffectController _statusEffectController;
 		private readonly StatusEffectController _singleInstanceStatusEffectController;
 
+		private static int _idCounter;
+
 		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000,
 			UnitType unitType = UnitType.Good, UnitTag unitTag = UnitTag.Default)
 		{
+			Id = _idCounter++;
 			UnitTag = unitTag;
 
 			Health = health;
@@ -109,6 +113,13 @@ namespace ModiBuff.Core.Units
 		{
 			foreach (var modifierAddReference in modifierAddReferences)
 				this.TryAddModifierReference(modifierAddReference);
+		}
+
+		public static Unit LoadUnit(int oldId)
+		{
+			var unit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
+			UnitHelper.LoadUnit(unit, oldId, unit.Id);
+			return unit;
 		}
 
 		public void Update(float deltaTime)
@@ -465,9 +476,82 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
+		public SaveData SaveState()
+		{
+			return new SaveData(Id, UnitTag, Health, MaxHealth, Damage, HealValue, Mana, MaxMana, StatusResistance,
+				UnitType, IsDead, ModifierController.SaveState(), ModifierApplierController.SaveState(),
+				_statusEffectController.SaveState(), _singleInstanceStatusEffectController.SaveState());
+		}
+
+		public void LoadState(SaveData data)
+		{
+			UnitTag = data.UnitTag;
+			Health = data.Health;
+			MaxHealth = data.MaxHealth;
+			Damage = data.Damage;
+			HealValue = data.HealValue;
+			Mana = data.Mana;
+			MaxMana = data.MaxMana;
+			StatusResistance = data.StatusResistance;
+			UnitType = data.UnitType;
+			IsDead = data.IsDead;
+			ModifierController.LoadState(data.ModifierControllerSaveData, this);
+			ModifierApplierController.LoadState(data.ModifierApplierControllerSaveData);
+			_statusEffectController.LoadState(data.MultiInstanceStatusEffectControllerSaveData);
+			_singleInstanceStatusEffectController.LoadState(data.SingleInstanceStatusEffectControllerSaveData);
+		}
+
 		public override string ToString()
 		{
 			return $"Health: {Health}, Damage: {Damage}, HealValue: {HealValue}";
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly int Id;
+			public readonly UnitTag UnitTag;
+			public readonly float Health;
+			public readonly float MaxHealth;
+			public readonly float Damage;
+			public readonly float HealValue;
+			public readonly float Mana;
+			public readonly float MaxMana;
+			public readonly float StatusResistance;
+			public readonly UnitType UnitType;
+			public readonly bool IsDead;
+
+			public readonly ModifierController.SaveData ModifierControllerSaveData;
+
+			public readonly ModifierApplierController.SaveData ModifierApplierControllerSaveData;
+			public readonly MultiInstanceStatusEffectController.SaveData MultiInstanceStatusEffectControllerSaveData;
+			public readonly StatusEffectController.SaveData SingleInstanceStatusEffectControllerSaveData;
+
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveData(int id, UnitTag unitTag, float health, float maxHealth, float damage, float healValue,
+				float mana, float maxMana, float statusResistance, UnitType unitType, bool isDead,
+				ModifierController.SaveData modifierControllerSaveData,
+				ModifierApplierController.SaveData modifierApplierControllerSaveData,
+				MultiInstanceStatusEffectController.SaveData multiInstanceStatusEffectControllerSaveData,
+				StatusEffectController.SaveData singleInstanceStatusEffectControllerSaveData)
+			{
+				Id = id;
+				UnitTag = unitTag;
+				Health = health;
+				MaxHealth = maxHealth;
+				Damage = damage;
+				HealValue = healValue;
+				Mana = mana;
+				MaxMana = maxMana;
+				StatusResistance = statusResistance;
+				UnitType = unitType;
+				IsDead = isDead;
+				ModifierControllerSaveData = modifierControllerSaveData;
+				ModifierApplierControllerSaveData = modifierApplierControllerSaveData;
+				MultiInstanceStatusEffectControllerSaveData = multiInstanceStatusEffectControllerSaveData;
+				SingleInstanceStatusEffectControllerSaveData = singleInstanceStatusEffectControllerSaveData;
+			}
 		}
 	}
 }

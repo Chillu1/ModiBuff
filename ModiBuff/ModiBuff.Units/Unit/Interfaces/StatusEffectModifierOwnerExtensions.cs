@@ -44,5 +44,12 @@ namespace ModiBuff.Core.Units
 		{
 			return owner.StatusEffectController.HasStatusEffect(statusEffectType);
 		}
+
+		public static bool HasStatusEffectMulti(
+			this IStatusEffectOwner<LegalAction, StatusEffectType> owner,
+			StatusEffectType statusEffectType)
+		{
+			return owner.StatusEffectController.HasStatusEffect(statusEffectType);
+		}
 	}
 }

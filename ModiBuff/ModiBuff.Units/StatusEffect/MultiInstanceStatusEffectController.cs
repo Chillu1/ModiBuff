@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
@@ -239,7 +240,20 @@ namespace ModiBuff.Core.Units
 			_legalActions = LegalAction.All;
 		}
 
-		private readonly struct StatusEffectInstance : IEquatable<StatusEffectInstance>
+		public SaveData SaveState() =>
+			new SaveData(_legalActionsTimers.ToDictionary(pair => pair.Key.SaveState(), pair => pair.Value),
+				_legalActionTypeCounters, _legalActions);
+
+		public void LoadState(SaveData data)
+		{
+			foreach (var instance in data.LegalActionsTimers)
+				_legalActionsTimers.Add(StatusEffectInstance.LoadState(instance.Key), instance.Value);
+			for (int i = 0; i < data.LegalActionTypeCounters.Length; i++)
+				_legalActionTypeCounters[i] = data.LegalActionTypeCounters[i];
+			_legalActions = data.LegalActions;
+		}
+
+		public readonly struct StatusEffectInstance : IEquatable<StatusEffectInstance>
 		{
 			private readonly int _id;
 			private readonly int _genId;
@@ -247,10 +261,23 @@ namespace ModiBuff.Core.Units
 			//public readonly StatusEffectType StatusEffectType;
 
 			public StatusEffectInstance(int id, int genId, StatusEffectType statusEffectType)
+				: this(id, genId, (int)statusEffectType)
+			{
+			}
+
+			private StatusEffectInstance(int id, int genId, int statusEffectTypeInt)
 			{
 				_id = id;
 				_genId = genId;
-				StatusEffectTypeInt = (int)statusEffectType;
+				StatusEffectTypeInt = statusEffectTypeInt;
+			}
+
+			public long SaveState() => SaveData.DoubleCantor(_genId, _id, StatusEffectTypeInt);
+
+			public static StatusEffectInstance LoadState(long data)
+			{
+				var loadData = SaveData.LoadDoubleCantor(data);
+				return new StatusEffectInstance(loadData.Item1, loadData.Item2, loadData.Item3);
 			}
 
 			public bool Equals(StatusEffectInstance other)
@@ -272,6 +299,52 @@ namespace ModiBuff.Core.Units
 					hashCode = (hashCode * 397) ^ StatusEffectTypeInt;
 					return hashCode;
 				}
+			}
+
+			public static class SaveData
+			{
+				/// <summary>
+				///		Descending order of values
+				/// </summary>
+				public static long DoubleCantor(long a, long b, long c) => Cantor(a, Cantor(b, c));
+
+				public static Tuple<int, int, int> LoadDoubleCantor(long doubleCantor)
+				{
+					ReverseCantor(doubleCantor, out long a, out long firstCantor);
+					ReverseCantor(firstCantor, out long b, out long c);
+
+					return new Tuple<int, int, int>((int)a, (int)b, (int)c);
+				}
+
+				[MethodImpl(MethodImplOptions.AggressiveInlining)]
+				private static void ReverseCantor(long cantor, out long x, out long y)
+				{
+					long t = (long)Math.Floor((-1 + Math.Sqrt(1 + 8 * cantor)) / 2);
+					x = t * (t + 3) / 2 - cantor;
+					y = cantor - t * (t + 1) / 2;
+				}
+
+				[MethodImpl(MethodImplOptions.AggressiveInlining)]
+				private static long Cantor(long a, long b) => (a + b) * (a + b + 1) / 2 + b;
+			}
+		}
+
+		public readonly struct SaveData
+		{
+			//TODO GenId of this will be wrong, since we refresh the genId counters
+			public readonly Dictionary<long, float> LegalActionsTimers;
+			public readonly int[] LegalActionTypeCounters;
+			public readonly LegalAction LegalActions;
+
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveData(Dictionary<long, float> legalActionsTimers,
+				int[] legalActionTypeCounters, LegalAction legalActions)
+			{
+				LegalActionsTimers = legalActionsTimers;
+				LegalActionTypeCounters = legalActionTypeCounters;
+				LegalActions = legalActions;
 			}
 		}
 	}

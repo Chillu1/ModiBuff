@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ModiBuff.Core
 {
@@ -155,6 +156,63 @@ namespace ModiBuff.Core
 			_modifierCastChecksAppliers.Clear();
 			_modifierAttackChecksAppliers.Clear();
 			_effectCasts.Clear();
+		}
+
+		public SaveData SaveState()
+		{
+			return new SaveData(_modifierAttackAppliers.ToArray(), _modifierCastAppliers.ToArray(),
+				_modifierCastChecksAppliers.ToDictionary(pair => pair.Key, pair => pair.Value.SaveState()),
+				_modifierAttackChecksAppliers.ToDictionary(pair => pair.Key, pair => pair.Value.SaveState()),
+				_effectCasts.ToArray());
+		}
+
+		public void LoadState(SaveData saveData)
+		{
+			for (int i = 0; i < saveData.ModifierAttackAppliers.Length; i++)
+				_modifierAttackAppliers.Add(ModifierIdManager.GetNewId(saveData.ModifierAttackAppliers[i]));
+			for (int i = 0; i < saveData.ModifierCastAppliers.Length; i++)
+				_modifierCastAppliers.Add(ModifierIdManager.GetNewId(saveData.ModifierCastAppliers[i]));
+			foreach (var kvp in saveData.ModifierCastChecksAppliers)
+			{
+				int newId = ModifierIdManager.GetNewId(kvp.Key);
+				var check = ModifierPool.Instance.RentModifierCheck(newId);
+				check.LoadState(kvp.Value);
+				_modifierCastChecksAppliers.Add(newId, check);
+			}
+
+			foreach (var kvp in saveData.ModifierAttackChecksAppliers)
+			{
+				int newId = ModifierIdManager.GetNewId(kvp.Key);
+				var check = ModifierPool.Instance.RentModifierCheck(newId);
+				check.LoadState(kvp.Value);
+				_modifierAttackChecksAppliers.Add(newId, check);
+			}
+
+			for (int i = 0; i < saveData.EffectCasts.Length; i++)
+				_effectCasts.Add(EffectIdManager.GetNewId(saveData.EffectCasts[i]));
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly int[] ModifierAttackAppliers;
+			public readonly int[] ModifierCastAppliers;
+			public readonly Dictionary<int, ModifierCheck.SaveData> ModifierCastChecksAppliers;
+			public readonly Dictionary<int, ModifierCheck.SaveData> ModifierAttackChecksAppliers;
+			public readonly int[] EffectCasts;
+
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveData(int[] modifierAttackAppliers, int[] modifierCastAppliers,
+				Dictionary<int, ModifierCheck.SaveData> modifierCastChecksAppliers,
+				Dictionary<int, ModifierCheck.SaveData> modifierAttackChecksAppliers, int[] effectCasts)
+			{
+				ModifierAttackAppliers = modifierAttackAppliers;
+				ModifierCastAppliers = modifierCastAppliers;
+				ModifierCastChecksAppliers = modifierCastChecksAppliers;
+				ModifierAttackChecksAppliers = modifierAttackChecksAppliers;
+				EffectCasts = effectCasts;
+			}
 		}
 	}
 }

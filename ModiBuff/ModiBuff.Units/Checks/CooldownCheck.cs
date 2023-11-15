@@ -1,8 +1,8 @@
 namespace ModiBuff.Core.Units
 {
 	//The only check where data state is mutable
-	public sealed class CooldownCheck : IUpdatableCheck, INoUnitCheck,
-		IStateCheck<CooldownCheck>, IDataCheck<CooldownCheck.Data>
+	public sealed class CooldownCheck : IUpdatableCheck, INoUnitCheck, IDataCheck<CooldownCheck.Data>,
+		IStateCheck<CooldownCheck, CooldownCheck.SaveData>
 	{
 		private readonly float _cooldown;
 
@@ -46,6 +46,17 @@ namespace ModiBuff.Core.Units
 		public CooldownCheck ShallowClone() => new CooldownCheck(_cooldown);
 		object IShallowClone.ShallowClone() => ShallowClone();
 
+		public SaveData SaveState() => new SaveData(_timer, _multiplier);
+		object ISavable.SaveState() => SaveState();
+
+		public void LoadState(SaveData data)
+		{
+			_timer = data.Timer;
+			_multiplier = data.Multiplier;
+		}
+
+		void ISavable.LoadState(object data) => LoadState((SaveData)data);
+
 		public readonly struct Data
 		{
 			public readonly float Cooldown;
@@ -55,6 +66,18 @@ namespace ModiBuff.Core.Units
 			{
 				Cooldown = cooldown;
 				Timer = timer;
+			}
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly float Timer;
+			public readonly float Multiplier;
+
+			public SaveData(float timer, float multiplier)
+			{
+				Timer = timer;
+				Multiplier = multiplier;
 			}
 		}
 	}

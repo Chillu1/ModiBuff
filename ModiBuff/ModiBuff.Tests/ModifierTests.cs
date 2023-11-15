@@ -1,3 +1,4 @@
+using System;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
@@ -7,12 +8,14 @@ namespace ModiBuff.Tests
 {
 	public abstract class ModifierTests
 	{
+		protected EffectTypeIdManager EffectTypeIdManager { get; private set; }
 		protected ModifierIdManager IdManager { get; private set; }
 		protected EffectIdManager EffectIdManager { get; private set; }
 		protected ModifierRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
 		protected ModifierLessEffects Effects { get; private set; }
 		protected ModifierControllerPool ModifierControllerPool { get; private set; }
+		protected UnitHelper UnitHelper { get; private set; }
 
 		protected Unit Unit { get; private set; }
 		protected float UnitHealth { get; private set; }
@@ -39,6 +42,17 @@ namespace ModiBuff.Tests
 			Config.PoolSize = 1;
 			Config.ModifierControllerPoolSize = 3;
 			Config.ModifierApplierControllerPoolSize = 3;
+			EffectTypeIdManager = new EffectTypeIdManager();
+
+			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+			foreach (var type in assembly.GetTypes())
+			{
+				if (!type.IsClass || type.IsAbstract)
+					continue;
+
+				if (typeof(IEffect).IsAssignableFrom(type))
+					EffectTypeIdManager.RegisterEffectType(type);
+			}
 
 			UnitHealth = AllyHealth = 500;
 			UnitDamage = AllyDamage = 10;
@@ -50,13 +64,14 @@ namespace ModiBuff.Tests
 		}
 
 		[SetUp]
-		public void IterationSetup()
+		public virtual void IterationSetup()
 		{
 			IdManager = new ModifierIdManager();
 			EffectIdManager = new EffectIdManager();
 			Recipes = new ModifierRecipes(IdManager);
 			Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
 			Effects = new ModifierLessEffects(EffectIdManager);
+			UnitHelper = new UnitHelper();
 		}
 
 		protected ModifierRecipe AddRecipe(string name) => Recipes.Add(name, "", "");
@@ -82,6 +97,9 @@ namespace ModiBuff.Tests
 			Unit = new Unit(UnitHealth, UnitDamage, UnitHeal, UnitMana, UnitType.Good);
 			Enemy = new Unit(EnemyHealth, EnemyDamage, EnemyHeal, unitType: UnitType.Bad);
 			Ally = new Unit(AllyHealth, AllyDamage, AllyHeal, unitType: UnitType.Good);
+			UnitHelper.AddUnit(Unit, Unit.Id);
+			UnitHelper.AddUnit(Enemy, Enemy.Id);
+			UnitHelper.AddUnit(Ally, Ally.Id);
 		}
 
 		[TearDown]
@@ -92,6 +110,7 @@ namespace ModiBuff.Tests
 			IdManager.Reset();
 			EffectIdManager.Reset();
 			ModifierControllerPool.Reset();
+			UnitHelper.Reset();
 
 			IdManager = null;
 			EffectIdManager = null;
@@ -103,6 +122,7 @@ namespace ModiBuff.Tests
 		[OneTimeTearDown]
 		public void OneTimeTearDown()
 		{
+			EffectTypeIdManager.Reset();
 			Pool?.Reset();
 			Effects?.Reset();
 			IdManager?.Reset();

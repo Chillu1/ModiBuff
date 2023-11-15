@@ -136,6 +136,26 @@ namespace ModiBuff.Core
 #endif
 		}
 
+		/// <summary>
+		///		Special init to register callbacks/events on load
+		/// </summary>
+		public void InitLoad()
+		{
+#if UNSAFE
+			if (_multiTarget)
+				_initComponent.InitLoad(Unsafe.As<MultiTargetComponent>(_targetComponent).Targets,
+					_targetComponent.Source);
+			else
+				_initComponent.InitLoad(Unsafe.As<SingleTargetComponent>(_targetComponent).Target,
+					_targetComponent.Source);
+#else
+			if (_multiTarget)
+				_initComponent.InitLoad(((MultiTargetComponent)_targetComponent).Targets, _targetComponent.Source);
+			else
+				_initComponent.InitLoad(((SingleTargetComponent)_targetComponent).Target, _targetComponent.Source);
+#endif
+		}
+
 		public void Update(float deltaTime)
 		{
 			_effectCheck?.Update(deltaTime);
@@ -228,6 +248,72 @@ namespace ModiBuff.Core
 			return _effectStateInfo.GetEffectState<TData>(stateNumber);
 		}
 
+		public SaveData SaveState()
+		{
+			if (_effectStateInfo == null)
+			{
+				Logger.LogError("[ModiBuff] Trying to get state info from a modifier that doesn't have any.");
+				return default;
+			}
+
+			var targetSaveData = _targetComponent.SaveState();
+			var initSaveData = _hasInit ? (InitComponent.SaveData?)_initComponent.SaveState() : null;
+			var stackSaveData = _stackComponent?.SaveState();
+
+			TimeComponentSaveData[] timeComponentsSaveData = null;
+			if (_timeComponents != null && _timeComponents.Length > 0)
+			{
+				timeComponentsSaveData = new TimeComponentSaveData[_timeComponents.Length];
+				for (int i = 0; i < _timeComponents.Length; i++)
+					timeComponentsSaveData[i] = _timeComponents[i].SaveState();
+			}
+
+			var effectCheckSaveData = _effectCheck?.SaveState();
+
+			return new SaveData(Id, targetSaveData, _multiTarget, effectCheckSaveData, initSaveData, stackSaveData,
+				timeComponentsSaveData, _effectStateInfo.SaveState());
+		}
+
+		public void LoadState(SaveData data, IUnit owner)
+		{
+			_isTargetSetup = false;
+			_multiTarget = data.IsMultiTarget;
+
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
+			if (!data.TargetSaveData.FromAnonymousJsonObjectToSaveData(_targetComponent))
+#endif
+			{
+				_targetComponent.LoadState(data.TargetSaveData);
+			}
+
+			switch (_targetComponent)
+			{
+				case SingleTargetComponent singleTargetComponent:
+					UpdateSingleTargetSource(singleTargetComponent.Target, _targetComponent.Source);
+					break;
+				case MultiTargetComponent multiTargetComponent:
+					UpdateTargets(multiTargetComponent.Targets, _targetComponent.Source);
+					break;
+				default:
+					Logger.LogError("[ModiBuff] Trying to load target component that isn't single or multi target");
+					break;
+			}
+
+			if (data.InitSaveData != null)
+				_initComponent.LoadState(data.InitSaveData.Value);
+
+			if (data.StackSaveData != null)
+				_stackComponent.LoadState(data.StackSaveData.Value);
+
+			for (int i = 0; i < _timeComponents?.Length; i++)
+				_timeComponents[i].LoadState(data.TimeComponentsSaveData[i]);
+
+			if (data.EffectCheckSaveData != null)
+				_effectCheck?.LoadState(data.EffectCheckSaveData.Value);
+
+			_effectStateInfo.LoadState(data.EffectsSaveData);
+		}
+
 		public void ResetState()
 		{
 			if (_hasInit)
@@ -266,6 +352,36 @@ namespace ModiBuff.Core
 			unchecked
 			{
 				return (Id * 397) ^ GenId;
+			}
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly int Id;
+			public readonly object TargetSaveData;
+			public readonly bool IsMultiTarget;
+			public readonly ModifierCheck.SaveData? EffectCheckSaveData;
+			public readonly InitComponent.SaveData? InitSaveData;
+			public readonly StackComponent.SaveData? StackSaveData;
+			public readonly TimeComponentSaveData[] TimeComponentsSaveData;
+			public readonly ModifierStateInfo.EffectSaveData[] EffectsSaveData;
+
+#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveData(int id, object targetSaveData, bool isMultiTarget,
+				ModifierCheck.SaveData? effectCheckSaveData, InitComponent.SaveData? initSaveData,
+				StackComponent.SaveData? stackSaveData, TimeComponentSaveData[] timeComponentsSaveData,
+				ModifierStateInfo.EffectSaveData[] effectsSaveData)
+			{
+				Id = id;
+				TargetSaveData = targetSaveData;
+				IsMultiTarget = isMultiTarget;
+				EffectCheckSaveData = effectCheckSaveData;
+				InitSaveData = initSaveData;
+				StackSaveData = stackSaveData;
+				TimeComponentsSaveData = timeComponentsSaveData;
+				EffectsSaveData = effectsSaveData;
 			}
 		}
 	}
