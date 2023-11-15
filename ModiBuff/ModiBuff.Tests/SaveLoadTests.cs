@@ -199,9 +199,7 @@ namespace ModiBuff.Tests
 
 			//TODO save will not have modifier id redirection
 			if (!File.Exists(_saveController.Path + "/" + idManagerPath))
-			{
 				_saveController.SaveToPath(_saveController.Save(IdManager.SaveState()), idManagerPath);
-			}
 
 			if (!File.Exists(_saveController.Path + "/" + unitPath))
 			{
@@ -220,6 +218,47 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 10, loadedUnit.Health);
 			loadedUnit.Update(1);
 			Assert.AreEqual(UnitHealth - 20, loadedUnit.Health);
+		}
+
+		[Test]
+		public void SaveNewModifierApplierIdLoad()
+		{
+			AddRecipe("DoT")
+				.Interval(1)
+				.Effect(new DamageEffect(10), EffectOn.Interval);
+			AddRecipe("DoTHealthCost")
+				.ApplyCost(CostType.Health, 5)
+				.Interval(1)
+				.Effect(new DamageEffect(10), EffectOn.Interval);
+			Setup();
+
+			const string idManagerPath = "idManagerApplierTest.json";
+			const string unitPath = "unitIdApplierTest.json";
+
+			//TODO save will not have modifier id redirection
+			if (!File.Exists(_saveController.Path + "/" + idManagerPath))
+				_saveController.SaveToPath(_saveController.Save(IdManager.SaveState()), idManagerPath);
+
+			if (!File.Exists(_saveController.Path + "/" + unitPath))
+			{
+				Unit.AddApplierModifier(Recipes.GetGenerator("DoT"), ApplierType.Cast);
+				Unit.AddApplierModifier(Recipes.GetGenerator("DoTHealthCost"), ApplierType.Cast);
+				_saveController.SaveToPath(_saveController.Save(Unit.SaveState()), unitPath);
+			}
+
+			var idManagerData = _saveController.LoadFromPath<ModifierIdManager.SaveData>(idManagerPath);
+			IdManager.LoadState(idManagerData);
+
+			var loadData = _saveController.LoadFromPath<Unit.SaveData>(unitPath);
+			var loadedUnit = Unit.LoadUnit(loadData.Id);
+			loadedUnit.LoadState(loadData);
+
+			loadedUnit.TryCast("DoT", loadedUnit);
+			loadedUnit.TryCast("DoTHealthCost", loadedUnit);
+			loadedUnit.Update(1);
+			Assert.AreEqual(UnitHealth - 10 - 5 - 10, loadedUnit.Health);
+			loadedUnit.Update(1);
+			Assert.AreEqual(UnitHealth - 10 - 5 - 10 - 10 - 10, loadedUnit.Health);
 		}
 
 		//TODO GenIds will be wrong in some places (StatusEffect), how to fix, feed correct id & genId somehow?

@@ -33,9 +33,9 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Lazy implementation for ease of use.
 		/// </summary>
-		internal static int GetIdOld(string name) => _instance.GetId(name);
+		internal static int GetIdByName(string name) => _instance.GetId(name);
 
-		internal static bool HasIdOld(string name) => _instance._idMap.ContainsKey(name);
+		internal static bool HasIdByName(string name) => _instance._idMap.ContainsKey(name);
 
 		public int GetId(string name)
 		{

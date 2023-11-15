@@ -168,23 +168,29 @@ namespace ModiBuff.Core
 
 		public void LoadState(SaveData saveData)
 		{
-			//TODO old to new id mapping
-			_modifierAttackAppliers.AddRange(saveData.ModifierAttackAppliers);
-			_modifierCastAppliers.AddRange(saveData.ModifierCastAppliers);
+			for (int i = 0; i < saveData.ModifierAttackAppliers.Length; i++)
+				_modifierAttackAppliers.Add(ModifierIdManager.GetNewId(saveData.ModifierAttackAppliers[i]));
+			for (int i = 0; i < saveData.ModifierCastAppliers.Length; i++)
+				_modifierCastAppliers.Add(ModifierIdManager.GetNewId(saveData.ModifierCastAppliers[i]));
 			foreach (var kvp in saveData.ModifierCastChecksAppliers)
 			{
-				var check = ModifierPool.Instance.RentModifierCheck(kvp.Key);
+				int newId = ModifierIdManager.GetNewId(kvp.Key);
+				var check = ModifierPool.Instance.RentModifierCheck(newId);
 				check.LoadState(kvp.Value);
-				_modifierCastChecksAppliers.Add(kvp.Key, check);
+				_modifierCastChecksAppliers.Add(newId, check);
 			}
 
 			foreach (var kvp in saveData.ModifierAttackChecksAppliers)
 			{
-				var check = ModifierPool.Instance.RentModifierCheck(kvp.Key);
+				int newId = ModifierIdManager.GetNewId(kvp.Key);
+				var check = ModifierPool.Instance.RentModifierCheck(newId);
 				check.LoadState(kvp.Value);
-				_modifierAttackChecksAppliers.Add(kvp.Key, check);
+				_modifierAttackChecksAppliers.Add(newId, check);
 			}
 
+			//TODO Effect mapping
+			//for (int i = 0; i < saveData.EffectCasts.Length; i++)
+			// _effectCasts.Add(EffectIdManager.GetNewId(saveData.EffectCasts[i]));
 			_effectCasts.AddRange(saveData.EffectCasts);
 		}
 
