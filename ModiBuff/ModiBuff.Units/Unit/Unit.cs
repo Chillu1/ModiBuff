@@ -115,6 +115,13 @@ namespace ModiBuff.Core.Units
 				this.TryAddModifierReference(modifierAddReference);
 		}
 
+		public static Unit LoadUnit(int oldId)
+		{
+			var unit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
+			UnitHelper.AddUnit(oldId, unit.Id);
+			return unit;
+		}
+
 		public void Update(float deltaTime)
 		{
 			_statusEffectController.Update(deltaTime);
@@ -471,7 +478,7 @@ namespace ModiBuff.Core.Units
 
 		public SaveData SaveState()
 		{
-			return new SaveData(UnitTag, Health, MaxHealth, Damage, HealValue, Mana, MaxMana, StatusResistance,
+			return new SaveData(Id, UnitTag, Health, MaxHealth, Damage, HealValue, Mana, MaxMana, StatusResistance,
 				UnitType, IsDead, ModifierController.SaveState(), ModifierApplierController.SaveState(),
 				_statusEffectController.SaveState(), _singleInstanceStatusEffectController.SaveState());
 		}
@@ -501,6 +508,7 @@ namespace ModiBuff.Core.Units
 
 		public readonly struct SaveData
 		{
+			public readonly int Id;
 			public readonly UnitTag UnitTag;
 			public readonly float Health;
 			public readonly float MaxHealth;
@@ -521,13 +529,14 @@ namespace ModiBuff.Core.Units
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public SaveData(UnitTag unitTag, float health, float maxHealth, float damage, float healValue, float mana,
-				float maxMana, float statusResistance, UnitType unitType, bool isDead,
+			public SaveData(int id, UnitTag unitTag, float health, float maxHealth, float damage, float healValue,
+				float mana, float maxMana, float statusResistance, UnitType unitType, bool isDead,
 				ModifierController.SaveData modifierControllerSaveData,
 				ModifierApplierController.SaveData modifierApplierControllerSaveData,
 				MultiInstanceStatusEffectController.SaveData multiInstanceStatusEffectControllerSaveData,
 				StatusEffectController.SaveData singleInstanceStatusEffectControllerSaveData)
 			{
+				Id = id;
 				UnitTag = unitTag;
 				Health = health;
 				MaxHealth = maxHealth;

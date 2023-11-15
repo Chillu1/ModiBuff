@@ -15,6 +15,7 @@ namespace ModiBuff.Tests
 		protected ModifierPool Pool { get; private set; }
 		protected ModifierLessEffects Effects { get; private set; }
 		protected ModifierControllerPool ModifierControllerPool { get; private set; }
+		protected UnitHelper UnitHelper { get; private set; }
 
 		protected Unit Unit { get; private set; }
 		protected float UnitHealth { get; private set; }
@@ -70,6 +71,7 @@ namespace ModiBuff.Tests
 			Recipes = new ModifierRecipes(IdManager);
 			Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
 			Effects = new ModifierLessEffects(EffectIdManager);
+			UnitHelper = new UnitHelper();
 
 			UnitHelper.Setup(i =>
 			{
@@ -118,7 +120,7 @@ namespace ModiBuff.Tests
 			IdManager.Reset();
 			EffectIdManager.Reset();
 			ModifierControllerPool.Reset();
-			UnitHelper.Clear();
+			UnitHelper.Reset();
 
 			IdManager = null;
 			EffectIdManager = null;

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
@@ -6,21 +7,46 @@ namespace ModiBuff.Core
 	{
 		private static UnitHelper _instance;
 
-		private readonly Func<int, IUnit> _unitGetter;
+		private readonly Dictionary<int, int> _oldUnitIdToNewUnitIdMap;
 
-		public static void Setup(Func<int, IUnit> unitGetter)
-		{
-			_ = new UnitHelper(unitGetter);
-		}
+		private Func<int, IUnit> _unitGetter;
 
-		public UnitHelper(Func<int, IUnit> unitGetter)
+		public UnitHelper()
 		{
 			_instance = this;
-			_unitGetter = unitGetter;
+			_oldUnitIdToNewUnitIdMap = new Dictionary<int, int>();
 		}
 
-		public static IUnit GetUnit(int id) => _instance._unitGetter(id);
+		public void Setup(Func<int, IUnit> unitGetter) => _instance._unitGetter = unitGetter;
 
-		public static void Clear() => _instance = null;
+		public static void AddUnit(int oldId, int newId)
+		{
+			if (_instance._oldUnitIdToNewUnitIdMap.ContainsKey(oldId))
+			{
+				Logger.LogError($"Unit with id {oldId} already exists");
+				return;
+			}
+
+			_instance._oldUnitIdToNewUnitIdMap.Add(oldId, newId);
+		}
+
+		public static IUnit GetUnit(int oldId)
+		{
+			if (_instance._oldUnitIdToNewUnitIdMap.TryGetValue(oldId, out int newId))
+			{
+				Logger.Log($"Old id: {oldId}, new id: {newId}");
+				return _instance._unitGetter(newId);
+			}
+
+			Logger.LogError($"Unit with id {oldId} not found");
+			return null;
+		}
+
+		public void Reset()
+		{
+			_oldUnitIdToNewUnitIdMap.Clear();
+			_unitGetter = null;
+			_instance = null;
+		}
 	}
 }

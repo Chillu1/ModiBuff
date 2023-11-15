@@ -343,6 +343,7 @@ namespace ModiBuff.Core
 			for (int i = 0; i < saveData.ModifiersSaveData.Length; i++)
 			{
 				var modifierSaveData = saveData.ModifiersSaveData[i];
+				//TODO Modifier Mapping
 				int id = modifierSaveData.Id;
 				ref readonly var tag = ref ModifierRecipes.GetTag(id);
 

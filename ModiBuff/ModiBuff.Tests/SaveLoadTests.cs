@@ -195,6 +195,40 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 - 5 - 5 - 5, loadedUnit.Health);
 		}
 
+		[Test]
+		public void SaveLoadTargetId()
+		{
+			AddRecipe("DoT")
+				.Interval(1)
+				.Effect(new DamageEffect(5), EffectOn.Interval);
+			Setup();
+
+			Enemy.AddModifierTarget("DoT", Unit);
+			Enemy.Update(1);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			//Needed order: new id for all units assigned.
+			//Save old and new id to id map.
+			//Setup unit getter (should be automatic).
+			//Load all units states.
+
+			string json = _saveController.Save(Unit.SaveState());
+			var loadData = _saveController.Load(json);
+			var loadedUnit = Unit.LoadUnit(loadData.Id);
+
+			string jsonEnemy = _saveController.Save(Enemy.SaveState());
+			var loadDataEnemy = _saveController.Load(jsonEnemy);
+			var loadedEnemy = Unit.LoadUnit(loadDataEnemy.Id);
+
+			SetupUnitHelper(loadedUnit, loadedEnemy);
+
+			loadedEnemy.LoadState(loadDataEnemy);
+			loadedUnit.LoadState(loadData);
+
+			loadedEnemy.Update(1);
+			Assert.AreEqual(UnitHealth - 5 - 5, loadedUnit.Health);
+		}
+
 		//[Test]
 		public void SaveNewModifierIdLoad()
 		{
@@ -212,16 +246,37 @@ namespace ModiBuff.Tests
 
 		private void SetupUnitHelper(IUnit loadedUnit)
 		{
-			UnitHelper.Setup(i =>
+			UnitHelper.Setup(id =>
 			{
-				if (i == Unit.Id)
+				if (id == ((IIdOwner)loadedUnit).Id)
 					return loadedUnit;
-				if (i == Enemy.Id)
+				if (id == Unit.Id)
+					return Unit;
+				if (id == Enemy.Id)
 					return Enemy;
-				if (i == Ally.Id)
+				if (id == Ally.Id)
 					return Ally;
 
-				Logger.LogError($"Unit with id {i} not found");
+				Logger.LogError($"Unit with id {id} not found");
+				return null;
+			});
+		}
+
+		private void SetupUnitHelper(params IUnit[] loadedUnits)
+		{
+			UnitHelper.Setup(id =>
+			{
+				foreach (var loadedUnit in loadedUnits)
+					if (id == ((IIdOwner)loadedUnit).Id)
+						return loadedUnit;
+				if (id == Unit.Id)
+					return Unit;
+				if (id == Enemy.Id)
+					return Enemy;
+				if (id == Ally.Id)
+					return Ally;
+
+				Logger.LogError($"Unit with id {id} not found");
 				return null;
 			});
 		}
