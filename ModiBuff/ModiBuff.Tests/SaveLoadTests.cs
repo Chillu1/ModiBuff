@@ -18,17 +18,31 @@ namespace ModiBuff.Tests
 
 		private void SaveLoadGameState(Unit unit, out Unit loadedUnit)
 		{
-			string jsonGameState = _saveController.Save(GameState.SaveState(IdManager, new[] { unit }));
+			string jsonGameState =
+				_saveController.Save(GameState.SaveState(IdManager, EffectIdManager, new[] { unit }));
 			var loadDataGameState = _saveController.Load(jsonGameState);
-			GameState.LoadState(loadDataGameState, IdManager, out var loadedUnits);
+			GameState.LoadState(loadDataGameState, IdManager, EffectIdManager, out var loadedUnits);
 			loadedUnit = loadedUnits[0];
 		}
 
 		private void SaveLoadGameState(Unit[] units, out Unit[] loadedUnits)
 		{
-			string jsonGameState = _saveController.Save(GameState.SaveState(IdManager, units));
+			string jsonGameState = _saveController.Save(GameState.SaveState(IdManager, EffectIdManager, units));
 			var loadDataGameState = _saveController.Load(jsonGameState);
-			GameState.LoadState(loadDataGameState, IdManager, out loadedUnits);
+			GameState.LoadState(loadDataGameState, IdManager, EffectIdManager, out loadedUnits);
+		}
+
+		private void SaveGameState(string gameStateFile, Unit unit)
+		{
+			_saveController.SaveToPath(
+				_saveController.Save(GameState.SaveState(IdManager, EffectIdManager, new[] { unit })), gameStateFile);
+		}
+
+		private void LoadGameState(string gameStateFile, out Unit loadedUnit)
+		{
+			var loadDataGameState = _saveController.LoadFromPath<GameState.SaveData>(gameStateFile);
+			GameState.LoadState(loadDataGameState, IdManager, EffectIdManager, out var loadedUnits);
+			loadedUnit = loadedUnits[0];
 		}
 
 		[Test]
@@ -194,13 +208,10 @@ namespace ModiBuff.Tests
 			if (!File.Exists(_saveController.Path + "/" + gameStateFile))
 			{
 				Unit.AddModifierSelf("DoT");
-				_saveController.SaveToPath(_saveController.Save(GameState.SaveState(IdManager, new[] { Unit })),
-					gameStateFile);
+				SaveGameState(gameStateFile, Unit);
 			}
 
-			var loadDataGameState = _saveController.LoadFromPath<GameState.SaveData>(gameStateFile);
-			GameState.LoadState(loadDataGameState, IdManager, out var loadedUnits);
-			var loadedUnit = loadedUnits[0];
+			LoadGameState(gameStateFile, out var loadedUnit);
 
 			loadedUnit.Update(1);
 			Assert.AreEqual(UnitHealth - 10, loadedUnit.Health);
@@ -227,13 +238,10 @@ namespace ModiBuff.Tests
 			{
 				Unit.AddApplierModifier(Recipes.GetGenerator("DoT"), ApplierType.Cast);
 				Unit.AddApplierModifier(Recipes.GetGenerator("DoTHealthCost"), ApplierType.Cast);
-				_saveController.SaveToPath(_saveController.Save(GameState.SaveState(IdManager, new[] { Unit })),
-					gameStateFile);
+				SaveGameState(gameStateFile, Unit);
 			}
 
-			var loadDataGameState = _saveController.LoadFromPath<GameState.SaveData>(gameStateFile);
-			GameState.LoadState(loadDataGameState, IdManager, out var loadedUnits);
-			var loadedUnit = loadedUnits[0];
+			LoadGameState(gameStateFile, out var loadedUnit);
 
 			loadedUnit.TryCast("DoT", loadedUnit);
 			loadedUnit.TryCast("DoTHealthCost", loadedUnit);
@@ -250,25 +258,16 @@ namespace ModiBuff.Tests
 			AddEffect("InitBigDamage", new DamageEffect(10));
 			Setup();
 
-			const string idManagerPath = "idManagerEffectTest.json";
-			const string unitPath = "unitIdEffectTest.json";
+			const string gameStateFile = "effectIdGameStateTest.json";
 
 			//TODO save will not have modifier id redirection
-			if (!File.Exists(_saveController.Path + "/" + idManagerPath))
-				_saveController.SaveToPath(_saveController.Save(EffectIdManager.SaveState()), idManagerPath);
-
-			if (!File.Exists(_saveController.Path + "/" + unitPath))
+			if (!File.Exists(_saveController.Path + "/" + gameStateFile))
 			{
 				Unit.AddEffectApplier("InitBigDamage");
-				_saveController.SaveToPath(_saveController.Save(Unit.SaveState()), unitPath);
+				SaveGameState(gameStateFile, Unit);
 			}
 
-			var idManagerData = _saveController.LoadFromPath<EffectIdManager.SaveData>(idManagerPath);
-			EffectIdManager.LoadState(idManagerData);
-
-			var loadData = _saveController.LoadFromPath<Unit.SaveData>(unitPath);
-			var loadedUnit = Unit.LoadUnit(loadData.Id);
-			loadedUnit.LoadState(loadData);
+			LoadGameState(gameStateFile, out var loadedUnit);
 
 			loadedUnit.TryCastEffect("InitBigDamage", loadedUnit);
 			Assert.AreEqual(UnitHealth - 10, loadedUnit.Health);
