@@ -72,19 +72,6 @@ namespace ModiBuff.Tests
 			Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
 			Effects = new ModifierLessEffects(EffectIdManager);
 			UnitHelper = new UnitHelper();
-
-			UnitHelper.Setup(i =>
-			{
-				if (i == Unit.Id)
-					return Unit;
-				if (i == Enemy.Id)
-					return Enemy;
-				if (i == Ally.Id)
-					return Ally;
-
-				Logger.LogError($"Unit with id {i} not found");
-				return null;
-			});
 		}
 
 		protected ModifierRecipe AddRecipe(string name) => Recipes.Add(name, "", "");
@@ -110,6 +97,9 @@ namespace ModiBuff.Tests
 			Unit = new Unit(UnitHealth, UnitDamage, UnitHeal, UnitMana, UnitType.Good);
 			Enemy = new Unit(EnemyHealth, EnemyDamage, EnemyHeal, unitType: UnitType.Bad);
 			Ally = new Unit(AllyHealth, AllyDamage, AllyHeal, unitType: UnitType.Good);
+			UnitHelper.AddUnit(Unit, Unit.Id);
+			UnitHelper.AddUnit(Enemy, Enemy.Id);
+			UnitHelper.AddUnit(Ally, Ally.Id);
 		}
 
 		[TearDown]

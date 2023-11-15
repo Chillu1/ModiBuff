@@ -118,7 +118,7 @@ namespace ModiBuff.Core.Units
 		public static Unit LoadUnit(int oldId)
 		{
 			var unit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
-			UnitHelper.AddUnit(oldId, unit.Id);
+			UnitHelper.LoadUnit(unit, oldId, unit.Id);
 			return unit;
 		}
 

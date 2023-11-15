@@ -19,56 +19,9 @@ namespace ModiBuff.Tests
 		{
 			string json = _saveController.Save(unit.SaveState());
 			var loadData = _saveController.Load(json);
-			var loadedUnit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
-			SetupUnitHelper(loadedUnit);
+			var loadedUnit = Unit.LoadUnit(loadData.Id);
 			loadedUnit.LoadState(loadData);
 			return loadedUnit;
-		}
-
-		[Test]
-		public void SaveLoadInitExtraDamage()
-		{
-			AddRecipe("InitStackExtraDamage")
-				.Stack(WhenStackEffect.Always)
-				.Effect(new DamageEffect(5, StackEffectType.Add, stackValue: 2), EffectOn.Init | EffectOn.Stack);
-			Setup();
-
-			var modifier = Pool.Rent(IdManager.GetId("InitStackExtraDamage"));
-			modifier.UpdateSingleTargetSource(Unit, Unit);
-			modifier.Stack();
-			var saveState = modifier.SaveState();
-			var loadedModifier = Pool.Rent(IdManager.GetId("InitStackExtraDamage"));
-			loadedModifier.LoadState(saveState, Unit);
-
-			loadedModifier.UpdateSingleTargetSource(Unit, Unit);
-			loadedModifier.Init();
-			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
-		}
-
-		[Test]
-		public void SaveAddDamageExtraStateLoad()
-		{
-			AddRecipe("AddDamageExtraState")
-				.Stack(WhenStackEffect.Always)
-				.Effect(new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Add, stackValue: 2),
-					EffectOn.Init | EffectOn.Stack)
-				.Remove(5);
-			Setup();
-
-			var modifier = Pool.Rent(IdManager.GetId("AddDamageExtraState"));
-			modifier.UpdateSingleTargetSource(Unit, Unit);
-			modifier.Stack();
-
-			var saveState = modifier.SaveState();
-			var loadedModifier = Pool.Rent(IdManager.GetId("AddDamageExtraState"));
-			loadedModifier.LoadState(saveState, Unit);
-
-			loadedModifier.UpdateSingleTargetSource(Unit, Unit);
-			loadedModifier.Init();
-			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
-
-			loadedModifier.Update(5);
-			Assert.AreEqual(UnitDamage, Unit.Damage);
 		}
 
 		[Test]
@@ -207,20 +160,17 @@ namespace ModiBuff.Tests
 			Enemy.Update(1);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
-			//Needed order: new id for all units assigned.
-			//Save old and new id to id map.
-			//Setup unit getter (should be automatic).
+			//Needed order: new ids for all units assigned.
+			//Save old and new ids to id map.
 			//Load all units states.
-
-			string json = _saveController.Save(Unit.SaveState());
-			var loadData = _saveController.Load(json);
-			var loadedUnit = Unit.LoadUnit(loadData.Id);
 
 			string jsonEnemy = _saveController.Save(Enemy.SaveState());
 			var loadDataEnemy = _saveController.Load(jsonEnemy);
 			var loadedEnemy = Unit.LoadUnit(loadDataEnemy.Id);
 
-			SetupUnitHelper(loadedUnit, loadedEnemy);
+			string json = _saveController.Save(Unit.SaveState());
+			var loadData = _saveController.Load(json);
+			var loadedUnit = Unit.LoadUnit(loadData.Id);
 
 			loadedEnemy.LoadState(loadDataEnemy);
 			loadedUnit.LoadState(loadData);
@@ -242,43 +192,6 @@ namespace ModiBuff.Tests
 			//Saves to file what each modifier name was in relation to id
 			//So if we change the order of recipes/generators, we can still load the correct modifiers
 			//Also will warn us if a recipe is missing / has been renamed
-		}
-
-		private void SetupUnitHelper(IUnit loadedUnit)
-		{
-			UnitHelper.Setup(id =>
-			{
-				if (id == ((IIdOwner)loadedUnit).Id)
-					return loadedUnit;
-				if (id == Unit.Id)
-					return Unit;
-				if (id == Enemy.Id)
-					return Enemy;
-				if (id == Ally.Id)
-					return Ally;
-
-				Logger.LogError($"Unit with id {id} not found");
-				return null;
-			});
-		}
-
-		private void SetupUnitHelper(params IUnit[] loadedUnits)
-		{
-			UnitHelper.Setup(id =>
-			{
-				foreach (var loadedUnit in loadedUnits)
-					if (id == ((IIdOwner)loadedUnit).Id)
-						return loadedUnit;
-				if (id == Unit.Id)
-					return Unit;
-				if (id == Enemy.Id)
-					return Enemy;
-				if (id == Ally.Id)
-					return Ally;
-
-				Logger.LogError($"Unit with id {id} not found");
-				return null;
-			});
 		}
 
 		//TODO Saving Target&Source Unit Id

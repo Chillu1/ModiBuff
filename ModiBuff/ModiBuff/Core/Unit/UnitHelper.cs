@@ -8,18 +8,27 @@ namespace ModiBuff.Core
 		private static UnitHelper _instance;
 
 		private readonly Dictionary<int, int> _oldUnitIdToNewUnitIdMap;
-
-		private Func<int, IUnit> _unitGetter;
+		private readonly Dictionary<int, IUnit> _idToUnitMap;
 
 		public UnitHelper()
 		{
 			_instance = this;
+			_idToUnitMap = new Dictionary<int, IUnit>();
 			_oldUnitIdToNewUnitIdMap = new Dictionary<int, int>();
 		}
 
-		public void Setup(Func<int, IUnit> unitGetter) => _instance._unitGetter = unitGetter;
+		public void AddUnit(IUnit unit, int id)
+		{
+			if (_idToUnitMap.ContainsKey(id))
+			{
+				Logger.LogError($"Unit with id {id} already exists");
+				return;
+			}
 
-		public static void AddUnit(int oldId, int newId)
+			_idToUnitMap.Add(id, unit);
+		}
+
+		public static void LoadUnit(IUnit unit, int oldId, int newId)
 		{
 			if (_instance._oldUnitIdToNewUnitIdMap.ContainsKey(oldId))
 			{
@@ -28,15 +37,13 @@ namespace ModiBuff.Core
 			}
 
 			_instance._oldUnitIdToNewUnitIdMap.Add(oldId, newId);
+			_instance._idToUnitMap.Add(newId, unit);
 		}
 
 		public static IUnit GetUnit(int oldId)
 		{
 			if (_instance._oldUnitIdToNewUnitIdMap.TryGetValue(oldId, out int newId))
-			{
-				Logger.Log($"Old id: {oldId}, new id: {newId}");
-				return _instance._unitGetter(newId);
-			}
+				return _instance._idToUnitMap[newId];
 
 			Logger.LogError($"Unit with id {oldId} not found");
 			return null;
@@ -45,7 +52,7 @@ namespace ModiBuff.Core
 		public void Reset()
 		{
 			_oldUnitIdToNewUnitIdMap.Clear();
-			_unitGetter = null;
+			_idToUnitMap.Clear();
 			_instance = null;
 		}
 	}
