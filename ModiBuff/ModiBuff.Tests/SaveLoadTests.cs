@@ -13,16 +13,22 @@ namespace ModiBuff.Tests
 		public override void IterationSetup()
 		{
 			base.IterationSetup();
-			_saveController = new SaveController("test.json");
+			_saveController = new SaveController("fullSave.json");
 		}
 
-		private Unit LoadUnit(Unit unit)
+		private void SaveLoadGameState(Unit unit, out Unit loadedUnit)
 		{
-			string json = _saveController.Save(unit.SaveState());
-			var loadData = _saveController.Load(json);
-			var loadedUnit = Unit.LoadUnit(loadData.Id);
-			loadedUnit.LoadState(loadData);
-			return loadedUnit;
+			string jsonGameState = _saveController.Save(GameState.SaveState(IdManager, new[] { unit }));
+			var loadDataGameState = _saveController.Load(jsonGameState);
+			GameState.LoadState(loadDataGameState, IdManager, out var loadedUnits);
+			loadedUnit = loadedUnits[0];
+		}
+
+		private void SaveLoadGameState(Unit[] units, out Unit[] loadedUnits)
+		{
+			string jsonGameState = _saveController.Save(GameState.SaveState(IdManager, units));
+			var loadDataGameState = _saveController.Load(jsonGameState);
+			GameState.LoadState(loadDataGameState, IdManager, out loadedUnits);
 		}
 
 		[Test]
@@ -34,7 +40,6 @@ namespace ModiBuff.Tests
 					EffectOn.Init | EffectOn.Stack)
 				.Remove(5);
 			Setup();
-			IdManager.LoadState(IdManager.SaveState());
 
 			Unit.AddModifierSelf("InitDamage");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
@@ -43,7 +48,7 @@ namespace ModiBuff.Tests
 			Unit.Update(2);
 			Assert.AreEqual(UnitDamage + 5 + 5 + 2, Unit.Damage);
 
-			var loadedUnit = LoadUnit(Unit);
+			SaveLoadGameState(Unit, out var loadedUnit);
 
 			Assert.AreEqual(UnitHealth - 5, loadedUnit.Health);
 			Assert.AreEqual(UnitDamage + 5 + 5 + 2, loadedUnit.Damage);
@@ -62,13 +67,12 @@ namespace ModiBuff.Tests
 					new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Effect | StackEffectType.Add,
 						stackValue: 2), EffectOn.Stack);
 			Setup();
-			IdManager.LoadState(IdManager.SaveState());
 
 			Unit.AddModifierSelf("AddDamageExtraState");
 			Unit.Update(1);
 			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
 
-			var loadedUnit = LoadUnit(Unit);
+			SaveLoadGameState(Unit, out var loadedUnit);
 
 			Assert.AreEqual(UnitDamage + 5 + 2, loadedUnit.Damage);
 			loadedUnit.AddModifierSelf("AddDamageExtraState");
@@ -86,12 +90,11 @@ namespace ModiBuff.Tests
 				.Effect(new SingleInstanceStatusEffectEffect(StatusEffectType.Stun, 2f), EffectOn.Init)
 				.Remove(2);
 			Setup();
-			IdManager.LoadState(IdManager.SaveState());
 
 			Unit.AddModifierSelf("InitStun");
 			Unit.Update(1);
 
-			var loadedUnit = LoadUnit(Unit);
+			SaveLoadGameState(Unit, out var loadedUnit);
 
 			Assert.True(loadedUnit.HasStatusEffectMulti(StatusEffectType.Stun));
 			Assert.True(loadedUnit.HasStatusEffectSingle(StatusEffectType.Stun));
@@ -115,13 +118,12 @@ namespace ModiBuff.Tests
 					}))
 				.Remove(5);
 			Setup();
-			IdManager.LoadState(IdManager.SaveState());
 
 			Unit.AddModifierSelf("InitCallbackState");
 			Unit.TakeDamage(5, Unit);
 			Assert.AreEqual(UnitDamage + 5 + 5, Unit.Damage);
 
-			var loadedUnit = LoadUnit(Unit);
+			SaveLoadGameState(Unit, out var loadedUnit);
 
 			loadedUnit.TakeDamage(5, loadedUnit);
 			Assert.AreEqual(UnitDamage + 5 + 5 + 5 + 5, loadedUnit.Damage);
@@ -138,13 +140,12 @@ namespace ModiBuff.Tests
 				.ApplyCost(CostType.Health, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
-			IdManager.LoadState(IdManager.SaveState());
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageChecks"), ApplierType.Cast);
 			Unit.TryCast("InitDamageChecks", Unit);
 			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
 
-			var loadedUnit = LoadUnit(Unit);
+			SaveLoadGameState(Unit, out var loadedUnit);
 
 			loadedUnit.TryCast("InitDamageChecks", loadedUnit);
 			Assert.AreEqual(UnitHealth - 5 - 5, loadedUnit.Health);
@@ -161,7 +162,6 @@ namespace ModiBuff.Tests
 				.Interval(1)
 				.Effect(new DamageEffect(5), EffectOn.Interval);
 			Setup();
-			IdManager.LoadState(IdManager.SaveState());
 
 			Enemy.AddModifierTarget("DoT", Unit);
 			Enemy.Update(1);
@@ -171,16 +171,10 @@ namespace ModiBuff.Tests
 			//Save old and new ids to id map.
 			//Load all units states.
 
-			string jsonEnemy = _saveController.Save(Enemy.SaveState());
-			var loadDataEnemy = _saveController.Load(jsonEnemy);
-			var loadedEnemy = Unit.LoadUnit(loadDataEnemy.Id);
+			SaveLoadGameState(new[] { Enemy, Unit }, out var loadedUnits);
 
-			string json = _saveController.Save(Unit.SaveState());
-			var loadData = _saveController.Load(json);
-			var loadedUnit = Unit.LoadUnit(loadData.Id);
-
-			loadedEnemy.LoadState(loadDataEnemy);
-			loadedUnit.LoadState(loadData);
+			var loadedEnemy = loadedUnits[0];
+			var loadedUnit = loadedUnits[1];
 
 			loadedEnemy.Update(1);
 			Assert.AreEqual(UnitHealth - 5 - 5, loadedUnit.Health);

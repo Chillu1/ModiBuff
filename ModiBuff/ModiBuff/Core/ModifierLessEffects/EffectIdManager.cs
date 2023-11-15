@@ -41,7 +41,7 @@ namespace ModiBuff.Core
 #if DEBUG && !MODIBUFF_PROFILE
 			if (!_idMap.ContainsKey(name))
 			{
-				if (!ModifierIdManager.HasIdOld(name))
+				if (!ModifierIdManager.HasIdByName(name))
 					Logger.LogError("[ModiBuff] No effect with name " + name + " found.");
 				else
 					Logger.LogError("[ModiBuff] No effect with name " + name + " found. " +
