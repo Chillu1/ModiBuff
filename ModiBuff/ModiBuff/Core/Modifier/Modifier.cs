@@ -121,6 +121,7 @@ namespace ModiBuff.Core
 					_timeComponents[i].UpdateTargetStatusResistance();
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Init()
 		{
 #if UNSAFE
@@ -139,6 +140,7 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Special init to register callbacks/events on load
 		/// </summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void InitLoad()
 		{
 #if UNSAFE
@@ -164,20 +166,24 @@ namespace ModiBuff.Core
 			if (_timeComponents == null)
 				return;
 
-			int length = _timeComponents.Length;
-			for (int i = 0; i < length; i++)
+			for (int i = 0; i < _timeComponents.Length; i++)
 				_timeComponents[i].Update(deltaTime);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Refresh()
 		{
-			int length = _timeComponents.Length;
-			for (int i = 0; i < length; i++)
+			for (int i = 0; i < _timeComponents.Length; i++)
 				_timeComponents[i].Refresh();
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Stack() => _stackComponent.Stack();
+
 		public void ResetStacks() => _stackComponent.ResetStacks();
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void UseScheduledCheck() => _effectCheck?.Use(_targetComponent.Source);
 
 		public ITimeComponent[] GetTimers() => _timeComponents;
 

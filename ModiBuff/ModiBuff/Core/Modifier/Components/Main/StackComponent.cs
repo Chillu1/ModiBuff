@@ -216,16 +216,15 @@ namespace ModiBuff.Core
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void StackEffect()
 		{
-			int length = _effects.Length;
 			switch (_targetComponent)
 			{
 				case MultiTargetComponent multiTargetComponent:
-					for (int i = 0; i < length; i++)
+					for (int i = 0; i < _effects.Length; i++)
 					for (int j = 0; j < multiTargetComponent.Targets.Count; j++)
 						_effects[i].StackEffect(_stacks, multiTargetComponent.Targets[j], multiTargetComponent.Source);
 					break;
 				case SingleTargetComponent singleTargetComponent:
-					for (int i = 0; i < length; i++)
+					for (int i = 0; i < _effects.Length; i++)
 						_effects[i].StackEffect(_stacks, singleTargetComponent.Target, singleTargetComponent.Source);
 					break;
 			}

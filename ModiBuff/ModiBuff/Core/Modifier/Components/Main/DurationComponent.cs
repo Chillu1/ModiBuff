@@ -53,15 +53,14 @@ namespace ModiBuff.Core
 			if (_timer < _duration)
 				return;
 
-			int length = _effects.Length;
 			switch (_targetComponent)
 			{
 				case MultiTargetComponent targetComponent:
-					for (int i = 0; i < length; i++)
+					for (int i = 0; i < _effects.Length; i++)
 						_effects[i].Effect(targetComponent.Targets, targetComponent.Source);
 					break;
 				case SingleTargetComponent targetComponent:
-					for (int i = 0; i < length; i++)
+					for (int i = 0; i < _effects.Length; i++)
 						_effects[i].Effect(targetComponent.Target, targetComponent.Source);
 					break;
 			}

@@ -18,6 +18,8 @@ namespace ModiBuff.Core
 
 		private readonly ICheck[] _checks; //TODO Probably rethink this
 
+		private bool _useScheduled;
+
 		public ModifierCheck(int id, Func<IUnit, bool>[] funcChecks, IUpdatableCheck[] updatableChecks,
 			INoUnitCheck[] noUnitChecks, IUnitCheck[] unitChecks, IUsableCheck[] usableChecks,
 			IStateCheck[] stateResetChecks)
@@ -61,6 +63,21 @@ namespace ModiBuff.Core
 				_updatableChecks[i].Update(delta);
 		}
 
+		/// <summary>
+		///		Check if all checks pass, restarts state and uses values
+		/// </summary>
+		public bool CheckUse(IUnit unit)
+		{
+			if (!Check(unit))
+				return false;
+
+			Use(unit);
+			return true;
+		}
+
+		/// <summary>
+		///		Check if all checks pass, don't restart state and don't use values, needs to be called after
+		/// </summary>
 		public bool Check(IUnit unit)
 		{
 			for (int i = 0; i < _funcChecks?.Length; i++)
@@ -81,20 +98,33 @@ namespace ModiBuff.Core
 					return false;
 			}
 
-			//All checks passed
+			_useScheduled = true;
+
+			return true;
+		}
+
+		/// <summary>
+		///		When all checks passed, restart state and use values
+		/// </summary>
+		public void Use(IUnit unit)
+		{
+			if (!_useScheduled)
+				return;
+
+			_useScheduled = false;
+
 			for (int i = 0; i < _stateResetChecks?.Length; i++)
 				_stateResetChecks[i].RestartState();
 
 			for (int i = 0; i < _usableChecks?.Length; i++)
 				_usableChecks[i].Use(unit);
-
-			return true;
 		}
 
 		public void ResetState()
 		{
 			for (int i = 0; i < _stateResetChecks?.Length; i++)
 				_stateResetChecks[i].ResetState();
+			_useScheduled = false;
 		}
 
 		public SaveData SaveState()

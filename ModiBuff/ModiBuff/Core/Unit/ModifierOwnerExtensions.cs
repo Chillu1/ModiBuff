@@ -73,7 +73,7 @@ namespace ModiBuff.Core
 		public static void TryApplyAttackCheckModifiers(this IModifierApplierOwner owner, IModifierOwner target)
 		{
 			foreach (var check in owner.ModifierApplierController.GetApplierAttackCheckModifiers())
-				if (check.Check(owner))
+				if (check.CheckUse(owner))
 					target.ModifierController.Add(check.Id, target, owner);
 		}
 

@@ -45,7 +45,7 @@ namespace ModiBuff.Core
 		/// </summary>
 		internal bool TryCastCheck(int id, IModifierApplierOwner owner)
 		{
-			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.Check(owner);
+			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.CheckUse(owner);
 		}
 
 		/// <summary>
@@ -56,7 +56,7 @@ namespace ModiBuff.Core
 			if (_modifierCastAppliers.Contains(id))
 				return true;
 
-			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.Check(owner);
+			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.CheckUse(owner);
 		}
 
 		public bool CanCastEffect(int id) => _effectCasts.Contains(id);
@@ -66,7 +66,7 @@ namespace ModiBuff.Core
 			if (_modifierAttackAppliers.Contains(id))
 				return true;
 
-			return _modifierAttackChecksAppliers.TryGetValue(id, out var check) && check.Check(owner);
+			return _modifierAttackChecksAppliers.TryGetValue(id, out var check) && check.CheckUse(owner);
 		}
 
 		public bool TryAddApplier(int id, bool hasApplyChecks, ApplierType applierType)

@@ -183,11 +183,7 @@ namespace ModiBuff.Core
 				stackComponent = new StackComponent(_whenStackEffect, _maxStacks,
 					_everyXStacks, _singleStackTime, _independentStackTime, effects.StackEffects, effectCheck);
 
-			ITargetComponent targetComponent;
-			if (!_isAura)
-				targetComponent = new SingleTargetComponent();
-			else
-				targetComponent = new MultiTargetComponent();
+			var targetComponent = !_isAura ? (ITargetComponent)new SingleTargetComponent() : new MultiTargetComponent();
 
 			return new Modifier(Id, genId, Name, initComponent, timeComponents, stackComponent,
 				effectCheck, targetComponent, effects.ModifierStateInfo);

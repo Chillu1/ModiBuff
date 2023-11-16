@@ -130,6 +130,8 @@ namespace ModiBuff.Core
 					if ((tag & TagType.IsStack) != 0)
 						existingModifier.Stack();
 
+					existingModifier.UseScheduledCheck();
+
 					return;
 				}
 
@@ -152,6 +154,8 @@ namespace ModiBuff.Core
 				modifier.Init();
 			if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.ZeroDefaultStacks))
 				modifier.Stack();
+
+			modifier.UseScheduledCheck();
 		}
 
 		public bool Contains(int id, int genId = -1)
@@ -248,6 +252,7 @@ namespace ModiBuff.Core
 					                  "modifier that doesn't have a stack flag set");
 #endif
 				modifier.Stack();
+				modifier.UseScheduledCheck();
 			}
 		}
 

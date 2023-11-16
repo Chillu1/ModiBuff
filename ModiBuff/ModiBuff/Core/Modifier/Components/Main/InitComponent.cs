@@ -27,8 +27,7 @@ namespace ModiBuff.Core
 			if (_modifierCheck != null && !_modifierCheck.Check(owner))
 				return;
 
-			int length = _effects.Length;
-			for (int i = 0; i < length; i++)
+			for (int i = 0; i < _effects.Length; i++)
 				_effects[i].Effect(target, owner);
 
 			_isInitialized = true;
@@ -42,8 +41,7 @@ namespace ModiBuff.Core
 			if (_modifierCheck != null && !_modifierCheck.Check(owner))
 				return;
 
-			int length = _effects.Length;
-			for (int i = 0; i < length; i++)
+			for (int i = 0; i < _effects.Length; i++)
 				_effects[i].Effect(targets, owner);
 
 			_isInitialized = true;

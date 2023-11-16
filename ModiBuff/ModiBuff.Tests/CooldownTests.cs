@@ -134,5 +134,19 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("InitDamage_Cooldown");
 			Assert.AreEqual(UnitHealth - 5 * 5, Unit.Health);
 		}
+
+		[Test]
+		public void MultipleEffectsTwoEffectOnCooldownCheck()
+		{
+			AddRecipe("MultipleEffectsCooldownCheck")
+				.EffectCooldown(1)
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Stack(WhenStackEffect.Always)
+				.Effect(new DamageEffect(5), EffectOn.Stack);
+			Setup();
+
+			Unit.AddModifierSelf("MultipleEffectsCooldownCheck");
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+		}
 	}
 }
