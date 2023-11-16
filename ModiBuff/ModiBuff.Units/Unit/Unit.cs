@@ -103,7 +103,7 @@ namespace ModiBuff.Core.Units
 			ModifierController = ModifierControllerPool.Instance.Rent();
 			ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
 			_statusEffectController = new MultiInstanceStatusEffectController
-				(this, _statusEffectAddedEvents, _statusEffectRemovedEvents);
+				(this, StatusEffectType.None, _statusEffectAddedEvents, _statusEffectRemovedEvents);
 			_singleInstanceStatusEffectController = new StatusEffectController();
 		}
 

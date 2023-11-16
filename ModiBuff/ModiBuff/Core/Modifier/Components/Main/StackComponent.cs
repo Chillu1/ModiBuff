@@ -109,19 +109,20 @@ namespace ModiBuff.Core
 
 		public void Stack()
 		{
-			//Do we want to always reset the timer, or only on successful stack?
+			//TODO Do we want to always reset the timer, or only on successful stack? Maybe enum configurable?
 			if (_singleStackTime > 0)
 				_singleStackTimer = _singleStackTime;
 
 			if (_maxStacks != -1 && _stacks >= _maxStacks)
 				return;
 
+			//TODO Should effect check guard stacks as well? Maybe enum configurable?
+			if (_modifierCheck != null && !_modifierCheck.Check(_targetComponent.Source))
+				return;
+
 			_stacks++;
 			if (_independentStackTime > 0)
 				_stackTimers.Add(_independentStackTime);
-
-			if (_modifierCheck != null && !_modifierCheck.Check(_targetComponent.Source))
-				return;
 
 			switch (_whenStackEffect)
 			{

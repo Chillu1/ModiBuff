@@ -120,5 +120,26 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 			Assert.AreEqual(UnitHealth - UnitHealth * 0.6f, Unit.Health);
 		}
+
+		[Test]
+		public void TripleEffect_SharedCostTwoEffects()
+		{
+			AddRecipe("InitStackIntervalDamage_CostMana")
+				.EffectCost(CostType.Mana, 5)
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Stack(WhenStackEffect.Always)
+				.Effect(new DamageEffect(5), EffectOn.Stack)
+				.Interval(1)
+				.Effect(new DamageEffect(5), EffectOn.Interval);
+			Setup();
+
+			Unit.AddModifierSelf("InitStackIntervalDamage_CostMana");
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+			Assert.AreEqual(UnitMana - 5, Unit.Mana);
+
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5 - 5 - 5, Unit.Health);
+			Assert.AreEqual(UnitMana - 5 - 5, Unit.Mana);
+		}
 	}
 }

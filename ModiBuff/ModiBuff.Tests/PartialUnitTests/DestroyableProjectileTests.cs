@@ -28,7 +28,6 @@ namespace ModiBuff.Tests
 
 			public ModifierController ModifierController { get; }
 
-			//TODO Projectile can't be slept
 			public IMultiInstanceStatusEffectController<LegalAction, StatusEffectType> StatusEffectController { get; }
 
 			public DestroyableProjectile(int health, UnitType unitType = UnitType.Good)
@@ -38,7 +37,8 @@ namespace ModiBuff.Tests
 				MaxHealth = Health = health;
 
 				ModifierController = ModifierControllerPool.Instance.Rent();
-				StatusEffectController = new MultiInstanceStatusEffectController(this);
+				StatusEffectController = new MultiInstanceStatusEffectController(this,
+					StatusEffectType.Silence | StatusEffectType.Taunt | StatusEffectType.Sleep);
 			}
 
 			public void Update(float delta)
@@ -51,7 +51,8 @@ namespace ModiBuff.Tests
 
 			public void Move(Vector2 velocity)
 			{
-				if (!StatusEffectController.HasLegalAction(LegalAction.Move))
+				if (!StatusEffectController.HasLegalAction(LegalAction.Move) ||
+				    !StatusEffectController.HasLegalAction(LegalAction.Disarm))
 					return;
 
 				Position += velocity;
@@ -117,6 +118,26 @@ namespace ModiBuff.Tests
 
 			Unit.Update(1f);
 			AssertExtensions.AreEqual(new Vector2(2, 0), Unit.Position);
+		}
+
+		[Test]
+		public void SleepDisarmProjectile()
+		{
+			AddRecipe("Sleep")
+				.Effect(new StatusEffectEffect(StatusEffectType.Sleep, 1f), EffectOn.Init);
+			AddRecipe("SleepDisarm")
+				.Effect(new StatusEffectEffect(StatusEffectType.Sleep | StatusEffectType.Disarm, 1f), EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("Sleep");
+			for (int i = 0; i < 100; i++)
+				Unit.Update(0.01f);
+			AssertExtensions.AreEqual(new Vector2(1, 0), Unit.Position);
+
+			Unit.AddModifierSelf("SleepDisarm");
+			for (int i = 0; i < 100; i++)
+				Unit.Update(0.01f);
+			AssertExtensions.AreEqual(new Vector2(1, 0), Unit.Position);
 		}
 	}
 }

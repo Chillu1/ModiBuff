@@ -14,6 +14,7 @@ namespace ModiBuff.Core.Units
 		IMultiInstanceStatusEffectController<LegalAction, StatusEffectType>
 	{
 		private readonly IUnit _owner;
+		private readonly StatusEffectType _immuneToStatusEffects;
 		private readonly List<StatusEffectEvent> _statusEffectAddedEvents;
 		private readonly List<StatusEffectEvent> _statusEffectRemovedEvents;
 
@@ -29,10 +30,13 @@ namespace ModiBuff.Core.Units
 
 		private LegalAction _legalActions;
 
-		public MultiInstanceStatusEffectController(IUnit owner, List<StatusEffectEvent> statusEffectAddedEvents = null,
+		public MultiInstanceStatusEffectController(IUnit owner,
+			StatusEffectType immuneToStatusEffects = StatusEffectType.None,
+			List<StatusEffectEvent> statusEffectAddedEvents = null,
 			List<StatusEffectEvent> statusEffectRemovedEvents = null)
 		{
 			_owner = owner;
+			_immuneToStatusEffects = immuneToStatusEffects;
 			_statusEffectAddedEvents = statusEffectAddedEvents;
 			_statusEffectRemovedEvents = statusEffectRemovedEvents;
 
@@ -155,6 +159,17 @@ namespace ModiBuff.Core.Units
 		public void ChangeStatusEffect(int id, int genId, StatusEffectType statusEffectType, float duration,
 			IUnit source)
 		{
+			//TODO There's two ways to do immunity, either ignore it like we do here
+			//Or add timers but don't change the legal actions associated or the counters, making it so the events still get called
+			if (_immuneToStatusEffects.HasStatusEffect(statusEffectType))
+			{
+				var restStatusEffects = statusEffectType & ~_immuneToStatusEffects;
+				if (restStatusEffects != StatusEffectType.None)
+					ChangeStatusEffect(id, genId, restStatusEffects, duration, source);
+
+				return;
+			}
+
 			var statusEffectInstance = new StatusEffectInstance(id, genId, statusEffectType);
 			//If an instance with same id and status effect type exists, refresh it
 			if (_legalActionsTimers.TryGetValue(statusEffectInstance, out float currentDuration))
@@ -183,6 +198,15 @@ namespace ModiBuff.Core.Units
 		public void DecreaseStatusEffect(int id, int genId, StatusEffectType statusEffectType, float duration,
 			IUnit source)
 		{
+			if (_immuneToStatusEffects.HasStatusEffect(statusEffectType))
+			{
+				var restStatusEffects = statusEffectType & ~_immuneToStatusEffects;
+				if (restStatusEffects != StatusEffectType.None)
+					DecreaseStatusEffect(id, genId, restStatusEffects, duration, source);
+
+				return;
+			}
+
 			var statusEffectInstance = new StatusEffectInstance(id, genId, statusEffectType);
 			if (!_legalActionsTimers.TryGetValue(statusEffectInstance, out float currentDuration))
 				return;
