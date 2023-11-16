@@ -363,16 +363,16 @@ namespace ModiBuff.Core
 			public readonly ModifierCheck.SaveData? EffectCheckSaveData;
 			public readonly InitComponent.SaveData? InitSaveData;
 			public readonly StackComponent.SaveData? StackSaveData;
-			public readonly TimeComponentSaveData[] TimeComponentsSaveData;
-			public readonly ModifierStateInfo.EffectSaveData[] EffectsSaveData;
+			public readonly IReadOnlyList<TimeComponentSaveData> TimeComponentsSaveData;
+			public readonly IReadOnlyList<ModifierStateInfo.EffectSaveData> EffectsSaveData;
 
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(int id, object targetSaveData, bool isMultiTarget,
 				ModifierCheck.SaveData? effectCheckSaveData, InitComponent.SaveData? initSaveData,
-				StackComponent.SaveData? stackSaveData, TimeComponentSaveData[] timeComponentsSaveData,
-				ModifierStateInfo.EffectSaveData[] effectsSaveData)
+				StackComponent.SaveData? stackSaveData, IReadOnlyList<TimeComponentSaveData> timeComponentsSaveData,
+				IReadOnlyList<ModifierStateInfo.EffectSaveData> effectsSaveData)
 			{
 				Id = id;
 				TargetSaveData = targetSaveData;

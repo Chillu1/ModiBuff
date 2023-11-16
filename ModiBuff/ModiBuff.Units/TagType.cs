@@ -55,7 +55,8 @@ namespace ModiBuff.Core.Units
 				return true;
 
 #if DEBUG
-			Logger.Log($"Tag {tag} is not a legal target for UnitType.{target} from UnitType.{source}");
+			Logger.Log(
+				$"[ModiBuff.Units] Tag {tag} is not a legal target for UnitType.{target} from UnitType.{source}");
 #endif
 			return false;
 		}

@@ -340,7 +340,7 @@ namespace ModiBuff.Core
 
 		public void LoadState(SaveData saveData, IUnit owner)
 		{
-			for (int i = 0; i < saveData.ModifiersSaveData.Length; i++)
+			for (int i = 0; i < saveData.ModifiersSaveData.Count; i++)
 			{
 				var modifierSaveData = saveData.ModifiersSaveData[i];
 				int id = ModifierIdManager.GetNewId(modifierSaveData.Id);
@@ -389,12 +389,15 @@ namespace ModiBuff.Core
 
 		public readonly struct SaveData
 		{
-			public readonly Modifier.SaveData[] ModifiersSaveData;
+			public readonly IReadOnlyList<Modifier.SaveData> ModifiersSaveData;
 
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public SaveData(Modifier.SaveData[] modifiersSaveData) => ModifiersSaveData = modifiersSaveData;
+			public SaveData(IReadOnlyList<Modifier.SaveData> modifiersSaveData)
+			{
+				ModifiersSaveData = modifiersSaveData;
+			}
 		}
 	}
 }

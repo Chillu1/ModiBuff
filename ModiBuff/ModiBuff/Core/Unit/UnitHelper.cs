@@ -20,7 +20,7 @@ namespace ModiBuff.Core
 		{
 			if (_idToUnitMap.ContainsKey(id))
 			{
-				Logger.LogError($"Unit with id {id} already exists");
+				Logger.LogError($"[ModiBuff] Unit with id {id} already exists");
 				return;
 			}
 
@@ -31,7 +31,7 @@ namespace ModiBuff.Core
 		{
 			if (_instance._oldUnitIdToNewUnitIdMap.ContainsKey(oldId))
 			{
-				Logger.LogError($"Unit with id {oldId} already exists");
+				Logger.LogError($"[ModiBuff] Unit with id {oldId} already exists");
 				return;
 			}
 
@@ -44,7 +44,7 @@ namespace ModiBuff.Core
 			if (_instance._oldUnitIdToNewUnitIdMap.TryGetValue(oldId, out int newId))
 				return _instance._idToUnitMap[newId];
 
-			Logger.LogError($"Unit with id {oldId} not found");
+			Logger.LogError($"[ModiBuff] Unit with id {oldId} not found");
 			return null;
 		}
 

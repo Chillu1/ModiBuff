@@ -248,7 +248,7 @@ namespace ModiBuff.Core.Units
 		{
 			foreach (var instance in data.LegalActionsTimers)
 				_legalActionsTimers.Add(StatusEffectInstance.LoadState(instance.Key), instance.Value);
-			for (int i = 0; i < data.LegalActionTypeCounters.Length; i++)
+			for (int i = 0; i < data.LegalActionTypeCounters.Count; i++)
 				_legalActionTypeCounters[i] = data.LegalActionTypeCounters[i];
 			_legalActions = data.LegalActions;
 		}
@@ -332,15 +332,15 @@ namespace ModiBuff.Core.Units
 		public readonly struct SaveData
 		{
 			//TODO GenId of this will be wrong, since we refresh the genId counters
-			public readonly Dictionary<long, float> LegalActionsTimers;
-			public readonly int[] LegalActionTypeCounters;
+			public readonly IReadOnlyDictionary<long, float> LegalActionsTimers;
+			public readonly IReadOnlyList<int> LegalActionTypeCounters;
 			public readonly LegalAction LegalActions;
 
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public SaveData(Dictionary<long, float> legalActionsTimers,
-				int[] legalActionTypeCounters, LegalAction legalActions)
+			public SaveData(IReadOnlyDictionary<long, float> legalActionsTimers,
+				IReadOnlyList<int> legalActionTypeCounters, LegalAction legalActions)
 			{
 				LegalActionsTimers = legalActionsTimers;
 				LegalActionTypeCounters = legalActionTypeCounters;

@@ -168,9 +168,9 @@ namespace ModiBuff.Core
 
 		public void LoadState(SaveData saveData)
 		{
-			for (int i = 0; i < saveData.ModifierAttackAppliers.Length; i++)
+			for (int i = 0; i < saveData.ModifierAttackAppliers.Count; i++)
 				_modifierAttackAppliers.Add(ModifierIdManager.GetNewId(saveData.ModifierAttackAppliers[i]));
-			for (int i = 0; i < saveData.ModifierCastAppliers.Length; i++)
+			for (int i = 0; i < saveData.ModifierCastAppliers.Count; i++)
 				_modifierCastAppliers.Add(ModifierIdManager.GetNewId(saveData.ModifierCastAppliers[i]));
 			foreach (var kvp in saveData.ModifierCastChecksAppliers)
 			{
@@ -188,24 +188,25 @@ namespace ModiBuff.Core
 				_modifierAttackChecksAppliers.Add(newId, check);
 			}
 
-			for (int i = 0; i < saveData.EffectCasts.Length; i++)
+			for (int i = 0; i < saveData.EffectCasts.Count; i++)
 				_effectCasts.Add(EffectIdManager.GetNewId(saveData.EffectCasts[i]));
 		}
 
 		public readonly struct SaveData
 		{
-			public readonly int[] ModifierAttackAppliers;
-			public readonly int[] ModifierCastAppliers;
-			public readonly Dictionary<int, ModifierCheck.SaveData> ModifierCastChecksAppliers;
-			public readonly Dictionary<int, ModifierCheck.SaveData> ModifierAttackChecksAppliers;
-			public readonly int[] EffectCasts;
+			public readonly IReadOnlyList<int> ModifierAttackAppliers;
+			public readonly IReadOnlyList<int> ModifierCastAppliers;
+			public readonly IReadOnlyDictionary<int, ModifierCheck.SaveData> ModifierCastChecksAppliers;
+			public readonly IReadOnlyDictionary<int, ModifierCheck.SaveData> ModifierAttackChecksAppliers;
+			public readonly IReadOnlyList<int> EffectCasts;
 
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public SaveData(int[] modifierAttackAppliers, int[] modifierCastAppliers,
-				Dictionary<int, ModifierCheck.SaveData> modifierCastChecksAppliers,
-				Dictionary<int, ModifierCheck.SaveData> modifierAttackChecksAppliers, int[] effectCasts)
+			public SaveData(IReadOnlyList<int> modifierAttackAppliers, IReadOnlyList<int> modifierCastAppliers,
+				IReadOnlyDictionary<int, ModifierCheck.SaveData> modifierCastChecksAppliers,
+				IReadOnlyDictionary<int, ModifierCheck.SaveData> modifierAttackChecksAppliers,
+				IReadOnlyList<int> effectCasts)
 			{
 				ModifierAttackAppliers = modifierAttackAppliers;
 				ModifierCastAppliers = modifierCastAppliers;

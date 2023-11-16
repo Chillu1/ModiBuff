@@ -56,7 +56,7 @@ namespace ModiBuff.Core.Units
 			if (chance > 1)
 				chance /= 100;
 			if (chance <= 0 || chance > 1)
-				Logger.LogError("Chance must be between 0 and 1");
+				Logger.LogError("[ModiBuff.Units] Chance must be between 0 and 1");
 			return recipe.ApplyCheck(new ChanceCheck(chance));
 		}
 
@@ -110,7 +110,7 @@ namespace ModiBuff.Core.Units
 			if (chance > 1)
 				chance /= 100;
 			if (chance <= 0 || chance > 1)
-				Logger.LogError("Chance must be between 0 and 1");
+				Logger.LogError("[ModiBuff.Units] Chance must be between 0 and 1");
 			return recipe.EffectCheck(new ChanceCheck(chance));
 		}
 

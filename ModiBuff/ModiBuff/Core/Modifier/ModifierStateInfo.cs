@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace ModiBuff.Core
 {
 	/// <summary>
@@ -66,7 +68,7 @@ namespace ModiBuff.Core
 			return saveData;
 		}
 
-		public void LoadState(EffectSaveData[] data)
+		public void LoadState(IReadOnlyList<EffectSaveData> data)
 		{
 			for (int i = 0; i < _effects.Length; i++)
 			{

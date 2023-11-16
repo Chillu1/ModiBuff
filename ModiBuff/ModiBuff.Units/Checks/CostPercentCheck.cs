@@ -37,7 +37,7 @@ namespace ModiBuff.Core.Units
 
 					return manaOwner.Mana >= manaOwner.MaxMana * _costPercent;
 				default:
-					Logger.LogError("Unknown cost type: " + _costType);
+					Logger.LogError("[ModiBuff.Units] Unknown cost type: " + _costType);
 					return false;
 			}
 		}
@@ -55,7 +55,7 @@ namespace ModiBuff.Core.Units
 					healthCost.UseHealth(((IDamagable<float, float>)unit).MaxHealth * _costPercent);
 					break;
 				default:
-					Logger.LogError("Unknown cost type: " + _costType);
+					Logger.LogError("[ModiBuff.Units] Unknown cost type: " + _costType);
 					break;
 			}
 		}

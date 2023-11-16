@@ -38,7 +38,7 @@ namespace ModiBuff.Core.Units
 					return manaOwner.Mana >= _cost;
 				default:
 #if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError("Unknown cost type: " + _costType);
+					Logger.LogError("[ModiBuff.Units] Unknown cost type: " + _costType);
 #endif
 					return false;
 			}
@@ -58,7 +58,7 @@ namespace ModiBuff.Core.Units
 					return;
 				default:
 #if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError("Unknown cost type: " + _costType);
+					Logger.LogError("[ModiBuff.Units] Unknown cost type: " + _costType);
 #endif
 					return;
 			}

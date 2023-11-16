@@ -120,12 +120,12 @@ namespace ModiBuff.Core
 
 		public readonly struct SaveData
 		{
-			public readonly object[] StateCheckData;
+			public readonly IReadOnlyList<object> StateCheckData;
 
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public SaveData(object[] stateCheckData) => StateCheckData = stateCheckData;
+			public SaveData(IReadOnlyList<object> stateCheckData) => StateCheckData = stateCheckData;
 		}
 	}
 }

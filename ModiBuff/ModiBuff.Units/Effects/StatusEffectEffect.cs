@@ -48,9 +48,9 @@ namespace ModiBuff.Core.Units
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (_id == -1)
-				Logger.LogError("ModifierId is not set for status effect effect.");
+				Logger.LogError("[ModiBuff.Units] ModifierId is not set for status effect effect.");
 			if (_genId == -1)
-				Logger.LogError("GenId is not set for status effect effect.");
+				Logger.LogError("[ModiBuff.Units] GenId is not set for status effect effect.");
 #endif
 			if (!(target is IStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget))
 			{

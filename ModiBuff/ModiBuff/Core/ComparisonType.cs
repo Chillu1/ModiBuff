@@ -33,7 +33,7 @@ namespace ModiBuff.Core
 				case ComparisonType.LessOrEqual:
 					return valueOne <= valueTwo;
 				default:
-					Logger.LogError("Invalid comparison type: " + comparisonType);
+					Logger.LogError("[ModiBuff] Invalid comparison type: " + comparisonType);
 					return false;
 			}
 		}

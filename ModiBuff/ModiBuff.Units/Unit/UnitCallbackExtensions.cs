@@ -12,7 +12,8 @@ namespace ModiBuff.Core.Units
 		{
 			if (!(callbackObject is TCallback callback))
 			{
-				Logger.LogError($"objectDelegate is not of type {nameof(TCallback)}, use named delegates instead.");
+				Logger.LogError(
+					$"[ModiBuff.Units] objectDelegate is not of type {nameof(TCallback)}, use named delegates instead.");
 				callbackOut = default;
 				return false;
 			}

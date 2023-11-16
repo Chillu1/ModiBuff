@@ -41,20 +41,20 @@ namespace ModiBuff.Core
 			Targets.Clear();
 
 			var data = (SaveData)saveData;
-			for (int i = 0; i < data.TargetsId.Length; i++)
+			for (int i = 0; i < data.TargetsId.Count; i++)
 				Targets.Add(UnitHelper.GetUnit(data.TargetsId[i]));
 			Source = UnitHelper.GetUnit(data.SourceId);
 		}
 
 		public readonly struct SaveData
 		{
-			public readonly int[] TargetsId;
+			public readonly IReadOnlyList<int> TargetsId;
 			public readonly int SourceId;
 
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public SaveData(int[] targets, int source)
+			public SaveData(IReadOnlyList<int> targets, int source)
 			{
 				TargetsId = targets;
 				SourceId = source;

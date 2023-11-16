@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
@@ -109,19 +110,20 @@ namespace ModiBuff.Core.Units
 
 		public void LoadState(SaveData saveData)
 		{
-			Array.Copy(saveData.LegalActionTimers, _legalActionTimers, _legalActionTimers.Length);
+			for (int i = 0; i < _legalActionTimers.Length; i++)
+				_legalActionTimers[i] = saveData.LegalActionTimers[i];
 			_legalActions = saveData.LegalActions;
 		}
 
 		public readonly struct SaveData
 		{
-			public readonly float[] LegalActionTimers;
+			public readonly IReadOnlyList<float> LegalActionTimers;
 			public readonly LegalAction LegalActions;
 
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public SaveData(float[] legalActionTimers, LegalAction legalActions)
+			public SaveData(IReadOnlyList<float> legalActionTimers, LegalAction legalActions)
 			{
 				LegalActionTimers = legalActionTimers;
 				LegalActions = legalActions;

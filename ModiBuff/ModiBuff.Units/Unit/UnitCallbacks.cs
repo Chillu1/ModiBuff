@@ -105,7 +105,7 @@ namespace ModiBuff.Core.Units
 					break;
 				default:
 #if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError("Unknown event type: " + @event);
+					Logger.LogError("[ModiBuff.Units] Unknown event type: " + @event);
 #endif
 					return;
 			}
@@ -144,7 +144,7 @@ namespace ModiBuff.Core.Units
 					break;
 				default:
 #if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError("Unknown event type: " + @event);
+					Logger.LogError("[ModiBuff.Units] Unknown event type: " + @event);
 #endif
 					return;
 			}
@@ -155,7 +155,7 @@ namespace ModiBuff.Core.Units
 
 #if DEBUG && !MODIBUFF_PROFILE
 				if (!remove)
-					Logger.LogError("Could not remove event: " + effectToRemove.GetType());
+					Logger.LogError("[ModiBuff.Units] Could not remove event: " + effectToRemove.GetType());
 #endif
 			}
 		}
@@ -191,7 +191,7 @@ namespace ModiBuff.Core.Units
 						bool removed = _strongDispelCallbacks.Remove(callbacks[i]);
 #if DEBUG && !MODIBUFF_PROFILE
 						if (!removed)
-							Logger.LogError("Could not remove callback: " + callbacks[i]);
+							Logger.LogError("[ModiBuff.Units] Could not remove callback: " + callbacks[i]);
 #endif
 					}
 
@@ -202,7 +202,7 @@ namespace ModiBuff.Core.Units
 						bool removed = _strongHitCallbacks.Remove(callbacks[i]);
 #if DEBUG && !MODIBUFF_PROFILE
 						if (!removed)
-							Logger.LogError("Could not remove callback: " + callbacks[i]);
+							Logger.LogError("[ModiBuff.Units] Could not remove callback: " + callbacks[i]);
 #endif
 					}
 

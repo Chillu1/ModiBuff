@@ -410,7 +410,7 @@ namespace ModiBuff.Core.Units
 #if DEBUG && !MODIBUFF_PROFILE
 			if (value <= 0)
 			{
-				Logger.LogError("StatusResistance can't be negative or zero.");
+				Logger.LogError("[ModiBuff.Units] StatusResistance can't be negative or zero.");
 				return;
 			}
 #endif
