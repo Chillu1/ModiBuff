@@ -160,7 +160,7 @@ namespace ModiBuff.Core
 		{
 			foreach (string name in names)
 			{
-				if (_registeredNames.Any(tuple => tuple.Name == name))
+				if (_registeredNames.Exists(d => d.Name == name))
 				{
 #if DEBUG && !MODIBUFF_PROFILE
 					Logger.LogError($"[ModiBuff] Modifier with id {name} already exists");

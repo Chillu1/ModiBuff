@@ -609,7 +609,7 @@ namespace ModiBuff.Core
 				if (_removeEffectWrapper != null && _removeEffectWrapper.EffectOn.HasFlag(flag))
 					return false;
 
-				return _effectWrappers.All(w => !w.EffectOn.HasFlag(flag));
+				return _effectWrappers.TrueForAll(w => !w.EffectOn.HasFlag(flag));
 			}
 
 			bool WrappersHaveFlag(EffectOn flag)
@@ -617,7 +617,7 @@ namespace ModiBuff.Core
 				if (_removeEffectWrapper != null && _removeEffectWrapper.EffectOn.HasFlag(flag))
 					return true;
 
-				return _effectWrappers.Any(w => w.EffectOn.HasFlag(flag));
+				return _effectWrappers.Exists(w => w.EffectOn.HasFlag(flag));
 			}
 		}
 

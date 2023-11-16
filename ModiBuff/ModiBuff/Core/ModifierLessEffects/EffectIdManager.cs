@@ -8,7 +8,7 @@ namespace ModiBuff.Core
 		private int _nextId;
 
 		private readonly Dictionary<string, int> _idMap;
-		private readonly Dictionary<int, int> _oldModifierIdToNewModifierIdMap;
+		private readonly Dictionary<int, int> _oldIdToNewIdMap;
 
 		public EffectIdManager()
 		{
@@ -18,7 +18,7 @@ namespace ModiBuff.Core
 			_instance = this;
 			_nextId = 0;
 			_idMap = new Dictionary<string, int>();
-			_oldModifierIdToNewModifierIdMap = new Dictionary<int, int>();
+			_oldIdToNewIdMap = new Dictionary<int, int>();
 		}
 
 		public int GetFreeId(string name)
@@ -57,7 +57,7 @@ namespace ModiBuff.Core
 
 		public static int GetNewId(int oldId)
 		{
-			if (_instance._oldModifierIdToNewModifierIdMap.TryGetValue(oldId, out int newId))
+			if (_instance._oldIdToNewIdMap.TryGetValue(oldId, out int newId))
 				return newId;
 
 			Logger.LogError($"[ModiBuff] Modifier with id {oldId} not found");
@@ -68,7 +68,7 @@ namespace ModiBuff.Core
 		{
 			_nextId = 0;
 			_idMap.Clear();
-			_oldModifierIdToNewModifierIdMap.Clear();
+			_oldIdToNewIdMap.Clear();
 		}
 
 		public void Reset() => _instance = null;
@@ -80,7 +80,7 @@ namespace ModiBuff.Core
 			foreach (var pair in saveData.IdMap)
 			{
 				if (_idMap.TryGetValue(pair.Key, out int newId))
-					_oldModifierIdToNewModifierIdMap.Add(pair.Value, newId);
+					_oldIdToNewIdMap.Add(pair.Value, newId);
 				else
 					Logger.LogError($"[ModiBuff] Effect in save file with name {pair.Key} not found.");
 			}

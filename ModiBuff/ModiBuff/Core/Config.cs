@@ -67,12 +67,7 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		How many modifiers should the pool allocate for each modifier type. Should be a power of 2.
 		/// </summary>
-		public static Dictionary<string, int> ModifierAllocationsCount;
-
-		static Config()
-		{
-			ModifierAllocationsCount = new Dictionary<string, int>();
-		}
+		public static readonly Dictionary<string, int> ModifierAllocationsCount = new Dictionary<string, int>();
 
 		public static void Reset()
 		{
