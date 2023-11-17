@@ -70,7 +70,12 @@ namespace ModiBuff.Core.Units
 				return;
 
 			if (_effectState.IsTogglable())
+			{
+				if (!_isEnabled)
+					return;
+
 				_isEnabled = false;
+			}
 
 			//Might want to have a special method for reverting stats state, to not trigger events
 			addDamage.AddDamage(-_totalAddedDamage);

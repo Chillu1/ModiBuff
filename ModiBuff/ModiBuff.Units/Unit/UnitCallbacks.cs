@@ -21,6 +21,7 @@ namespace ModiBuff.Core.Units
 	public partial class Unit
 	{
 		public const int MaxRecursionEventCount = 1;
+		public const int MaxEventCount = 1 + MaxRecursionEventCount;
 
 		private int _preAttackCounter,
 			_onAttackCounter,

@@ -111,7 +111,7 @@ namespace ModiBuff.Tests
 
 			Enemy.Attack(Unit);
 
-			Assert.AreEqual(UnitHealth - EnemyDamage - UnitDamage * Unit.MaxRecursionEventCount, Unit.Health);
+			Assert.AreEqual(UnitHealth - EnemyDamage - UnitDamage * Unit.MaxEventCount, Unit.Health);
 		}
 
 		[Test]
@@ -149,11 +149,11 @@ namespace ModiBuff.Tests
 			Enemy.AddModifierSelf("ThornsWhenAttackedEvent");
 
 			Enemy.Attack(Unit); //Enemy gets thorned, and recursively thorns Unit
-			Assert.AreEqual(EnemyHealth - thornsDamage * Unit.MaxRecursionEventCount, Enemy.Health);
-			Assert.AreEqual(UnitHealth - EnemyDamage - thornsDamage * Unit.MaxRecursionEventCount, Unit.Health);
+			Assert.AreEqual(EnemyHealth - thornsDamage * Unit.MaxEventCount, Enemy.Health);
+			Assert.AreEqual(UnitHealth - EnemyDamage - thornsDamage * Unit.MaxEventCount, Unit.Health);
 
 			Unit.Attack(Enemy);
-			Assert.AreEqual(UnitHealth - EnemyDamage - thornsDamage * 2 * Unit.MaxRecursionEventCount, Unit.Health);
+			Assert.AreEqual(UnitHealth - EnemyDamage - thornsDamage * 2 * Unit.MaxEventCount, Unit.Health);
 		}
 
 		[Test]
@@ -241,7 +241,7 @@ namespace ModiBuff.Tests
 
 			Unit.AddModifierSelf("HealSelfWhenHealed_Recursion");
 			Unit.Heal(5, Unit);
-			Assert.AreEqual(UnitHealth - damage + 5 + 5 * Unit.MaxRecursionEventCount, Unit.Health);
+			Assert.AreEqual(UnitHealth - damage + 5 + 5 * Unit.MaxEventCount, Unit.Health);
 		}
 
 		[Test]
@@ -262,7 +262,7 @@ namespace ModiBuff.Tests
 
 			Unit.Heal(Unit);
 			Assert.AreEqual(
-				UnitHealth - damage + UnitHeal + 2 * Unit.MaxRecursionEventCount - 1 * Unit.MaxRecursionEventCount,
+				UnitHealth - damage + UnitHeal + 2 * Unit.MaxEventCount - 1 * Unit.MaxEventCount,
 				Unit.Health);
 		}
 
@@ -284,8 +284,8 @@ namespace ModiBuff.Tests
 			Enemy.AddModifierSelf("ThornsSourceWhenHealed_Recursion");
 
 			Unit.Heal(Enemy);
-			Assert.AreEqual(UnitHealth - damage - 1 * Unit.MaxRecursionEventCount, Unit.Health);
-			Assert.AreEqual(EnemyHealth - damage + UnitHeal + 2 * Unit.MaxRecursionEventCount, Enemy.Health);
+			Assert.AreEqual(UnitHealth - damage - 1 * Unit.MaxEventCount, Unit.Health);
+			Assert.AreEqual(EnemyHealth - damage + UnitHeal + 2 * Unit.MaxEventCount, Enemy.Health);
 		}
 
 		[Test]
@@ -302,16 +302,18 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("ThornsSourceWhenAttacked_Recursion");
 			Unit.AddModifierSelf("ThornsSourceAfterAttacked_Recursion");
 
+			//Unit attack itself, dealing 10 damage. First thorns gets activated, deals 2 damage * Recursion.
+			//Second thorns gets activated, deals 2 damage * Recursion.
 			Unit.Attack(Unit);
 			Assert.AreEqual(
-				UnitHealth - UnitDamage - 2 * Unit.MaxRecursionEventCount - 2 * Unit.MaxRecursionEventCount,
+				UnitHealth - UnitDamage - 2 * Unit.MaxEventCount - 2 * Unit.MaxEventCount,
 				Unit.Health);
 
 			Unit.Heal(UnitHealth, Unit);
 
 			Unit.Attack(Unit);
 			Assert.AreEqual(
-				UnitHealth - UnitDamage - 2 * Unit.MaxRecursionEventCount - 2 * Unit.MaxRecursionEventCount,
+				UnitHealth - UnitDamage - 2 * Unit.MaxEventCount - 2 * Unit.MaxEventCount,
 				Unit.Health);
 		}
 	}

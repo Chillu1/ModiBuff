@@ -104,7 +104,7 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("CastInitDamageEvent");
 
 			Unit.TryCast(IdManager.GetId("InitDamage"), Enemy);
-			Assert.AreEqual(EnemyHealth - 5 - 5 * Unit.MaxRecursionEventCount, Enemy.Health);
+			Assert.AreEqual(EnemyHealth - 5 - 5 * Unit.MaxEventCount, Enemy.Health);
 		}
 	}
 }

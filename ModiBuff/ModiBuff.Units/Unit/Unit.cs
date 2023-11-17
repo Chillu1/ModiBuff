@@ -143,15 +143,13 @@ namespace ModiBuff.Core.Units
 			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act))
 				return;
 
-			_preAttackCounter++;
-
-			if (_preAttackCounter <= MaxRecursionEventCount)
+			if (++_preAttackCounter <= MaxEventCount)
 			{
 				for (int i = 0; i < _beforeAttackEffects.Count; i++)
 					_beforeAttackEffects[i].Effect(target, this);
 			}
 
-			if (_preAttackCounter <= MaxRecursionEventCount)
+			if (_preAttackCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
 				(target as IEventOwner)?.ResetEventCounters();
@@ -181,12 +179,10 @@ namespace ModiBuff.Core.Units
 			var killableTarget = target as IKillable;
 			bool wasDead = killableTarget != null && killableTarget.IsDead;
 
-			_onAttackCounter++;
-
 			if (target is IModifierOwner modifierOwner)
 				this.ApplyAllAttackModifier(modifierOwner);
 
-			if (_onAttackCounter <= MaxRecursionEventCount)
+			if (++_onAttackCounter <= MaxEventCount)
 			{
 				for (int i = 0; i < _onAttackEffects.Count; i++)
 					_onAttackEffects[i].Effect(target, this);
@@ -199,16 +195,14 @@ namespace ModiBuff.Core.Units
 
 				if (killableTarget != null && killableTarget.IsDead && !wasDead)
 				{
-					_onKillCounter++;
-
-					if (_onKillCounter <= MaxRecursionEventCount)
+					if (++_onKillCounter <= MaxEventCount)
 						for (int i = 0; i < _onKillEffects.Count; i++)
 							_onKillEffects[i].Effect(target, this);
 				}
 			}
 
-			if (_onAttackCounter <= MaxRecursionEventCount &&
-			    _onKillCounter <= MaxRecursionEventCount)
+			if (_onAttackCounter <= MaxEventCount &&
+			    _onKillCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
 				(target as IEventOwner)?.ResetEventCounters();
@@ -219,8 +213,7 @@ namespace ModiBuff.Core.Units
 
 		public float TakeDamage(float damage, IUnit source)
 		{
-			_whenAttackedCounter++;
-			if (_whenAttackedCounter <= MaxRecursionEventCount)
+			if (++_whenAttackedCounter <= MaxEventCount)
 			{
 				for (int i = 0; i < _whenAttackedEffects.Count; i++)
 					_whenAttackedEffects[i].Effect(this, source);
@@ -231,8 +224,7 @@ namespace ModiBuff.Core.Units
 			float dealtDamage = oldHealth - newHealth;
 			Health = newHealth;
 
-			_afterAttackedCounter++;
-			if (_afterAttackedCounter <= MaxRecursionEventCount)
+			if (++_afterAttackedCounter <= MaxEventCount)
 			{
 				for (int i = 0; i < _afterAttackedEffects.Count; i++)
 					_afterAttackedEffects[i].Effect(this, source);
@@ -240,8 +232,7 @@ namespace ModiBuff.Core.Units
 
 			if (dealtDamage > 0)
 			{
-				_healthChangedCounter++;
-				if (_healthChangedCounter <= MaxRecursionEventCount)
+				if (++_healthChangedCounter <= MaxEventCount)
 				{
 					for (int i = 0; i < _healthChangedEvents.Count; i++)
 						_healthChangedEvents[i](this, source, Health, dealtDamage);
@@ -267,9 +258,9 @@ namespace ModiBuff.Core.Units
 				IsDead = true;
 			}
 
-			if (_whenAttackedCounter <= MaxRecursionEventCount &&
-			    _afterAttackedCounter <= MaxRecursionEventCount &&
-			    _healthChangedCounter <= MaxRecursionEventCount)
+			if (_whenAttackedCounter <= MaxEventCount &&
+			    _afterAttackedCounter <= MaxEventCount &&
+			    _healthChangedCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
 				(source as IEventOwner)?.ResetEventCounters();
@@ -280,16 +271,14 @@ namespace ModiBuff.Core.Units
 
 		public float Heal(float heal, IUnit source)
 		{
-			_healCounter++;
-
 			float oldHealth = Health;
-			if (_healCounter <= MaxRecursionEventCount)
+			if (++_healCounter <= MaxEventCount)
 			{
 				for (int i = 0; i < _whenHealedEffects.Count; i++)
 					_whenHealedEffects[i].Effect(this, source);
 			}
 
-			if (_healCounter <= MaxRecursionEventCount)
+			if (_healCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
 				(source as IEventOwner)?.ResetEventCounters();
@@ -307,9 +296,7 @@ namespace ModiBuff.Core.Units
 			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
-			_healTargetCounter++;
-
-			if (_healTargetCounter <= MaxRecursionEventCount)
+			if (++_healTargetCounter <= MaxEventCount)
 			{
 				for (int i = 0; i < _onHealEffects.Count; i++)
 					_onHealEffects[i].Effect(target, this);
@@ -317,7 +304,7 @@ namespace ModiBuff.Core.Units
 
 			float valueHealed = target.Heal(HealValue, this);
 
-			if (_healTargetCounter <= MaxRecursionEventCount)
+			if (_healTargetCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
 				(target as IEventOwner)?.ResetEventCounters();
@@ -337,14 +324,13 @@ namespace ModiBuff.Core.Units
 			if (!this.CanCastModifier(modifierId))
 				return;
 
-			_onCastCounter++;
-			if (_onCastCounter <= MaxRecursionEventCount)
+			if (++_onCastCounter <= MaxEventCount)
 				for (int i = 0; i < _onCastEffects.Count; i++)
 					_onCastEffects[i].Effect(target, this);
 
 			modifierTarget.ModifierController.Add(modifierId, modifierTarget, this);
 
-			if (_onCastCounter <= MaxRecursionEventCount)
+			if (_onCastCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
 				(target as IEventOwner)?.ResetEventCounters();
@@ -353,16 +339,14 @@ namespace ModiBuff.Core.Units
 
 		public void AddDamage(float damage)
 		{
-			_addDamageCounter++;
-
 			Damage += damage;
-			if (_addDamageCounter <= MaxRecursionEventCount)
+			if (++_addDamageCounter <= MaxEventCount)
 			{
 				for (int i = 0; i < _damageChangedEvents.Count; i++)
 					_damageChangedEvents[i](this, Damage, damage);
 			}
 
-			if (_addDamageCounter <= MaxRecursionEventCount)
+			if (_addDamageCounter <= MaxEventCount)
 				ResetEventCounters();
 		}
 
@@ -387,14 +371,13 @@ namespace ModiBuff.Core.Units
 
 			float oldHealth = Health;
 
-			_poisonDamageCounter++;
-			if (_poisonDamageCounter <= MaxRecursionEventCount)
+			if (++_poisonDamageCounter <= MaxEventCount)
 			{
 				for (int i = 0; i < _poisonEvents.Count; i++)
 					_poisonEvents[i](this, source, stacks, totalStacks, dealtDamage);
 			}
 
-			if (_poisonDamageCounter <= MaxRecursionEventCount)
+			if (_poisonDamageCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
 				(source as IEventOwner)?.ResetEventCounters();
