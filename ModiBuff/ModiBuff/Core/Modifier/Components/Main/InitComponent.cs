@@ -5,6 +5,7 @@ namespace ModiBuff.Core
 	public struct InitComponent : IStateReset
 	{
 		private readonly IEffect[] _effects;
+		private readonly IEffect[] _registerEffects;
 		private readonly bool _oneTime;
 		private readonly ModifierCheck _modifierCheck;
 
@@ -14,6 +15,34 @@ namespace ModiBuff.Core
 		{
 			_oneTime = oneTimeInit;
 			_effects = effects;
+
+			//TEMP
+			var registerEffectsList = new List<IEffect>();
+			for (int i = 0; i < effects.Length; i++)
+			{
+				var effect = effects[i];
+				if (effect is IRegisterEffect)
+					registerEffectsList.Add(effect);
+			}
+
+			if (registerEffectsList.Count > 0)
+			{
+				_registerEffects = registerEffectsList.ToArray();
+				_effects = new IEffect[effects.Length - registerEffectsList.Count];
+				int effectsIndex = 0;
+				for (int i = 0; i < effects.Length; i++)
+				{
+					var effect = effects[i];
+					if (effect is IRegisterEffect)
+						continue;
+
+					_effects[effectsIndex] = effect;
+					effectsIndex++;
+				}
+			}
+			else
+				_registerEffects = null;
+
 			_modifierCheck = check;
 
 			_isInitialized = false;
@@ -23,6 +52,10 @@ namespace ModiBuff.Core
 		{
 			if (_oneTime && _isInitialized)
 				return;
+
+			//TODO Not ideal, especially since init is called often, and effects will be duplicated in _effects array as well now
+			for (int i = 0; i < _registerEffects?.Length; i++)
+				_registerEffects[i].Effect(target, owner);
 
 			if (_modifierCheck != null && !_modifierCheck.Check(owner))
 				return;
@@ -38,6 +71,9 @@ namespace ModiBuff.Core
 			if (_oneTime && _isInitialized)
 				return;
 
+			for (int i = 0; i < _registerEffects?.Length; i++)
+				_registerEffects[i].Effect(targets, owner);
+
 			if (_modifierCheck != null && !_modifierCheck.Check(owner))
 				return;
 
@@ -49,22 +85,20 @@ namespace ModiBuff.Core
 
 		public void InitLoad(IUnit target, IUnit owner)
 		{
-			for (int i = 0; i < _effects.Length; i++)
-			{
-				var effect = _effects[i];
-				if (effect is IRegisterEffect)
-					effect.Effect(target, owner);
-			}
+			if (_registerEffects == null)
+				return;
+
+			for (int i = 0; i < _registerEffects.Length; i++)
+				_registerEffects[i].Effect(target, owner);
 		}
 
 		public void InitLoad(IList<IUnit> targets, IUnit owner)
 		{
-			for (int i = 0; i < _effects.Length; i++)
-			{
-				var effect = _effects[i];
-				if (effect is IRegisterEffect)
-					effect.Effect(targets, owner);
-			}
+			if (_registerEffects == null)
+				return;
+
+			for (int i = 0; i < _registerEffects?.Length; i++)
+				_registerEffects[i].Effect(targets, owner);
 		}
 
 		public void ResetState() => _isInitialized = false;

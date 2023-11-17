@@ -5,6 +5,8 @@ namespace ModiBuff.Core
 		private DispelType _dispelType;
 		private RemoveEffect _removeEffect;
 
+		private bool _isRegistered;
+
 		public DispelRegisterEffect(DispelType dispelType) : this(dispelType, null)
 		{
 		}
@@ -20,10 +22,18 @@ namespace ModiBuff.Core
 
 		public void UpdateDispelType(DispelType dispelType) => _dispelType |= dispelType;
 
-		public void SetRemoveEffect(RemoveEffect removeEffect) => _removeEffect = removeEffect;
+		public void SetRemoveEffect(RemoveEffect removeEffect)
+		{
+			_isRegistered = false;
+			_removeEffect = removeEffect;
+		}
 
 		public void Effect(IUnit target, IUnit source)
 		{
+			if (_isRegistered)
+				return;
+
+			_isRegistered = true;
 			((IModifierOwner)target).ModifierController.RegisterDispel(_dispelType, _removeEffect);
 		}
 

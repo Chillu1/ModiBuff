@@ -575,28 +575,28 @@ namespace ModiBuff.Core
 			if (WrappersHaveFlag(EffectOn.CallbackUnit) && _callbackUnitRegisterWrapper == null)
 			{
 				validRecipe = false;
-				Logger.LogError("[ModiBuff] Effects on callback set, but no callback registration type set, " +
+				Logger.LogError("[ModiBuff] Effects on CallbackUnit set, but no callback registration type set, " +
 				                "for modifier: " + Name + " id: " + Id);
 			}
 
 			if (_callbackUnitRegisterWrapper != null && !WrappersHaveFlag(EffectOn.CallbackUnit))
 			{
 				validRecipe = false;
-				Logger.LogError("[ModiBuff] Callback registration type set, but no effects on callback set, " +
+				Logger.LogError("[ModiBuff] CallbackUnit registration type set, but no effects on callback set, " +
 				                "for modifier: " + Name + " id: " + Id);
 			}
 
 			if (WrappersHaveFlag(EffectOn.CallbackEffect) && _callbackEffectRegisterWrapper == null)
 			{
 				validRecipe = false;
-				Logger.LogError("[ModiBuff] Effects on callback set, but no callback registration type set, " +
+				Logger.LogError("[ModiBuff] Effects on CallbackEffect set, but no callback registration type set, " +
 				                "for modifier: " + Name + " id: " + Id);
 			}
 
 			if (_callbackEffectRegisterWrapper != null && !WrappersHaveFlag(EffectOn.CallbackEffect))
 			{
 				validRecipe = false;
-				Logger.LogError("[ModiBuff] Callback registration type set, but no effects on callback set, " +
+				Logger.LogError("[ModiBuff] CallbackEffect registration type set, but no effects on callback set, " +
 				                "for modifier: " + Name + " id: " + Id);
 			}
 

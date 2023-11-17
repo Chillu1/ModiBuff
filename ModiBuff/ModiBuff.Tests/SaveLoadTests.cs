@@ -302,6 +302,27 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - damage + 5 + 2 + 5 + 4, loadedUnit.Health);
 		}
 
+		//[Test]
+		public void SaveStatusEffectGenIdLoad()
+		{
+			AddRecipe("InitStun")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2f, true), EffectOn.Init)
+				.Remove(RemoveEffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.StrongDispel);
+			Setup();
+
+			Unit.AddModifierSelf("InitStun");
+
+			SaveLoadGameState(Unit, out var loadedUnit);
+			//TODO Save Id & GenId, update it to correct values
+			//StatusEffectEffect needs to save it's id and genId when saving state
+			//Then we need to feed the new updated id and genId to StatusEffectController
+
+			Assert.True(loadedUnit.HasStatusEffectMulti(StatusEffectType.Stun));
+			loadedUnit.StrongDispel(loadedUnit);
+			Assert.False(loadedUnit.HasStatusEffectMulti(StatusEffectType.Stun));
+		}
+
 		//TODO GenIds will be wrong in some places (StatusEffect), how to fix, feed correct id & genId somehow?
 		//TODO add damage is enabled check
 	}

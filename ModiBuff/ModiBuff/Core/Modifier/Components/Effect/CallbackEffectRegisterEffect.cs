@@ -2,8 +2,8 @@ using System;
 
 namespace ModiBuff.Core
 {
-	public sealed class CallbackEffectRegisterEffect<TCallback> : IRevertEffect, IEffect, IStateEffect,
-		IRecipeFeedEffects, IRegisterEffect
+	public sealed class CallbackEffectRegisterEffect<TCallback> : IRevertEffect, IEffect,
+		IRecipeFeedEffects, IRegisterEffect, IShallowClone<IEffect>
 	{
 		public bool IsRevertible => true;
 
@@ -53,13 +53,7 @@ namespace ModiBuff.Core
 			_isRegistered = false;
 		}
 
-		public void ResetState()
-		{
-			_isRegistered = false;
-		}
-
 		public IEffect ShallowClone() => new CallbackEffectRegisterEffect<TCallback>(_callbackType, _event);
-
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

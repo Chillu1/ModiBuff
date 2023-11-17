@@ -1,9 +1,8 @@
 namespace ModiBuff.Core
 {
-	public sealed class EventRegisterEffect<TEvent> : IRevertEffect, IRecipeFeedEffects, IEffect, IStateEffect,
-		IRegisterEffect
+	public sealed class EventRegisterEffect<TEvent> : IRevertEffect, IRecipeFeedEffects, IEffect,
+		IRegisterEffect, IShallowClone<IEffect>
 	{
-		//Always revert event effect?
 		public bool IsRevertible => true;
 
 		private readonly TEvent _effectOnEvent;
@@ -42,9 +41,9 @@ namespace ModiBuff.Core
 			if (_isRegistered)
 				return;
 
+			_isRegistered = true;
 			for (int i = 0; i < _effects.Length; i++)
 				eventTarget.AddEffectEvent(_effects[i], _effectOnEvent);
-			_isRegistered = true;
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
@@ -56,8 +55,6 @@ namespace ModiBuff.Core
 				eventTarget.RemoveEffectEvent(_effects[i], _effectOnEvent);
 			_isRegistered = false;
 		}
-
-		public void ResetState() => _isRegistered = false;
 
 		public IEffect ShallowClone() => new EventRegisterEffect<TEvent>(_effectOnEvent);
 		object IShallowClone.ShallowClone() => ShallowClone();

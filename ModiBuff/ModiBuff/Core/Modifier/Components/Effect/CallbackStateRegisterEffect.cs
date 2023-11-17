@@ -2,7 +2,8 @@ using System;
 
 namespace ModiBuff.Core
 {
-	public sealed class CallbackStateRegisterEffect<TCallback> : IRevertEffect, IEffect, IStateEffect, IRegisterEffect
+	public sealed class CallbackStateRegisterEffect<TCallback> : IRevertEffect, IEffect,
+		IRegisterEffect, IShallowClone<IEffect>
 	{
 		public bool IsRevertible => true;
 
@@ -42,11 +43,6 @@ namespace ModiBuff.Core
 				return;
 
 			registrableTarget.UnRegisterCallback(_callbackType, _callback);
-			_isRegistered = false;
-		}
-
-		public void ResetState()
-		{
 			_isRegistered = false;
 		}
 

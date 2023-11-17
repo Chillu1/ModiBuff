@@ -82,5 +82,35 @@ namespace ModiBuff.Tests
 			Unit.TakeDamage(UnitHealth * 0.6f, Unit);
 			Assert.AreEqual(UnitHealth * 0.4f, Unit.Health);
 		}
+
+		[Test]
+		public void Init_RegisterDamageAll_EffectCheckIgnored()
+		{
+			AddRecipe("InitRegisterAllDamage")
+				.EffectCost(CostType.Mana, 5)
+				.EffectChance(float.Epsilon)
+				.Effect(new DamageEffect(5), EffectOn.CallbackEffect | EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.StrongDispel)
+				.CallbackEffect(CallbackType.CurrentHealthChanged,
+					effect => new HealthChangedEvent((target, source, health, deltaHealth) =>
+					{
+						if (deltaHealth > 0)
+							effect.Effect(target, source);
+					}))
+				.Callback(new Callback<CallbackType>(CallbackType.CurrentHealthChanged,
+					new HealthChangedEvent((target, source, health, deltaHealth) =>
+					{
+						if (deltaHealth > 0)
+							source.TakeDamage(5, target);
+					})));
+			Setup();
+
+			Unit.AddModifierSelf("InitRegisterAllDamage");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+			Assert.AreEqual(UnitMana, Unit.Mana);
+
+			Unit.TakeDamage(1, Unit);
+			Assert.AreEqual(UnitHealth - 1 - 5 * Unit.MaxEventCount - 5 * Unit.MaxEventCount, Unit.Health);
+		}
 	}
 }

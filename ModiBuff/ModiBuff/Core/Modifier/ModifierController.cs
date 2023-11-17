@@ -258,51 +258,51 @@ namespace ModiBuff.Core
 
 		public void Remove(in ModifierReference modifierReference)
 		{
-			if (!ModifierRecipes.GetTag(modifierReference.Id).HasTag(TagType.IsInstanceStackable))
+			if (ModifierRecipes.GetTag(modifierReference.Id).HasTag(TagType.IsInstanceStackable))
 			{
-#if DEBUG && !MODIBUFF_PROFILE
-				bool modifierExists = Config.UseDictionaryIndexes
-					? _modifierIndexesDict.ContainsKey(modifierReference.Id)
-					: _modifierIndexes[modifierReference.Id] != -1;
-
-				if (!modifierExists)
+				for (int i = 0; i < _modifiersTop; i++)
 				{
-					Logger.LogError("[ModiBuff] Tried to remove a modifier that doesn't exist on entity, id: " +
-					                $"{modifierReference.Id}, genId: {modifierReference.GenId}");
-					return;
-				}
-#endif
-
-				int modifierIndex;
-				if (Config.UseDictionaryIndexes)
-				{
-					modifierIndex = _modifierIndexesDict[modifierReference.Id];
-					ModifierPool.Instance.Return(_modifiers[modifierIndex]);
-					_modifiers[modifierIndex] = _modifiers[--_modifiersTop];
-					_modifiers[_modifiersTop] = null;
-					_modifierIndexesDict.Remove(modifierReference.Id);
-					return;
+					var modifier = _modifiers[i];
+					if (modifier.Id == modifierReference.Id && modifier.GenId == modifierReference.GenId)
+					{
+						ModifierPool.Instance.Return(modifier);
+						_modifiers[i] = _modifiers[--_modifiersTop]; //TODO This switching might cause some order issues
+						_modifiers[_modifiersTop] = null;
+						break;
+					}
 				}
 
-				modifierIndex = _modifierIndexes[modifierReference.Id];
-				ModifierPool.Instance.Return(_modifiers[modifierIndex]);
-				_modifiers[modifierIndex] = _modifiers[--_modifiersTop];
-				_modifiers[_modifiersTop] = null;
-				_modifierIndexes[modifierReference.Id] = -1;
 				return;
 			}
 
-			for (int i = 0; i < _modifiersTop; i++)
+#if DEBUG && !MODIBUFF_PROFILE
+			bool modifierExists = Config.UseDictionaryIndexes
+				? _modifierIndexesDict.ContainsKey(modifierReference.Id)
+				: _modifierIndexes[modifierReference.Id] != -1;
+
+			if (!modifierExists)
 			{
-				var modifier = _modifiers[i];
-				if (modifier.Id == modifierReference.Id && modifier.GenId == modifierReference.GenId)
-				{
-					ModifierPool.Instance.Return(modifier);
-					_modifiers[i] = _modifiers[--_modifiersTop]; //TODO This switching might cause some order issues
-					_modifiers[_modifiersTop] = null;
-					break;
-				}
+				Logger.LogError("[ModiBuff] Tried to remove a modifier that doesn't exist on entity, id: " +
+				                $"{modifierReference.Id}, genId: {modifierReference.GenId}");
+				return;
 			}
+#endif
+
+			int modifierIndex;
+			if (Config.UseDictionaryIndexes)
+			{
+				modifierIndex = _modifierIndexesDict[modifierReference.Id];
+				_modifierIndexesDict.Remove(modifierReference.Id);
+			}
+			else
+			{
+				modifierIndex = _modifierIndexes[modifierReference.Id];
+				_modifierIndexes[modifierReference.Id] = -1;
+			}
+
+			ModifierPool.Instance.Return(_modifiers[modifierIndex]);
+			_modifiers[modifierIndex] = _modifiers[--_modifiersTop];
+			_modifiers[_modifiersTop] = null;
 		}
 
 		/// <summary>

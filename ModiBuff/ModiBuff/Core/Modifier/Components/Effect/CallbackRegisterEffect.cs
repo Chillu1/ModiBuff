@@ -1,6 +1,7 @@
 namespace ModiBuff.Core
 {
-	public sealed class CallbackRegisterEffect<TCallback> : IRevertEffect, IEffect, IStateEffect, IRegisterEffect
+	public sealed class CallbackRegisterEffect<TCallback> : IRevertEffect, IEffect, IRegisterEffect,
+		IShallowClone<IEffect>
 	{
 		public bool IsRevertible => true;
 
@@ -39,13 +40,7 @@ namespace ModiBuff.Core
 			_isRegistered = false;
 		}
 
-		public void ResetState()
-		{
-			_isRegistered = false;
-		}
-
 		public IEffect ShallowClone() => new CallbackRegisterEffect<TCallback>(_callbacks);
-
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 
