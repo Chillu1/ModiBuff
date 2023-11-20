@@ -140,6 +140,25 @@ namespace ModiBuff.Core
 		public bool ContainsApplier(int id) =>
 			_modifierCastAppliers.Contains(id) || _modifierCastChecksAppliers.ContainsKey(id);
 
+		public void RemoveApplier(int id, ApplierType applierType, bool hasApplyChecks)
+		{
+			switch (applierType)
+			{
+				case ApplierType.Cast when hasApplyChecks:
+					_modifierCastChecksAppliers.Remove(id);
+					return;
+				case ApplierType.Cast:
+					_modifierCastAppliers.Remove(id);
+					return;
+				case ApplierType.Attack when hasApplyChecks:
+					_modifierAttackChecksAppliers.Remove(id);
+					return;
+				case ApplierType.Attack:
+					_modifierAttackAppliers.Remove(id);
+					return;
+			}
+		}
+
 		/// <summary>
 		///		Returns all modifiers back to the pool
 		/// </summary>

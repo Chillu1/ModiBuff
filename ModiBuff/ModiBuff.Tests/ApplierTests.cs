@@ -155,7 +155,8 @@ namespace ModiBuff.Tests
 				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
 				.Remove(5).Refresh();
 			AddRecipe("ComplexApplier2_WhenAttacked_Event")
-				.Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd", Targeting.SourceTarget), EffectOn.Event)
+				.Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd", targeting: Targeting.SourceTarget),
+					EffectOn.Event)
 				.Event(EffectOnEvent.WhenAttacked)
 				.Remove(5).Refresh();
 			AddRecipe("ComplexApplier2_OnAttack_Event")
@@ -167,7 +168,8 @@ namespace ModiBuff.Tests
 				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5)
 				.Remove(5).Refresh();
 			AddRecipe("ComplexApplier2_WhenHealed_Event")
-				.Effect(new ApplierEffect("ComplexApplier2_WhenHealed", Targeting.SourceTarget), EffectOn.Event)
+				.Effect(new ApplierEffect("ComplexApplier2_WhenHealed", targeting: Targeting.SourceTarget),
+					EffectOn.Event)
 				.Event(EffectOnEvent.WhenHealed);
 			Setup();
 
@@ -223,6 +225,27 @@ namespace ModiBuff.Tests
 			Assert.True(unit.ContainsModifier("AddModifierApplier_Flag"));
 
 			Config.ModifierArraySize = Config.DefaultModifierArraySize;
+		}
+
+		[Test]
+		public void Cast_AddApplier()
+		{
+			AddRecipe("AddApplier_Effect")
+				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init)
+				.RemoveApplier(5, ApplierType.Cast, false);
+			AddEffect("AddApplier_ApplierEffect", new ApplierEffect("AddApplier_Effect", ApplierType.Cast, false));
+			Setup();
+
+			Unit.AddEffectApplier("AddApplier_ApplierEffect");
+			Unit.TryCast("AddApplier_Effect", Enemy);
+			Unit.TryCastEffect("AddApplier_ApplierEffect", Unit);
+
+			Unit.TryCast("AddApplier_Effect", Enemy);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+
+			Unit.Update(5);
+			Assert.False(Unit.ContainsApplier("AddApplier_Effect"));
+			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
 		}
 	}
 }

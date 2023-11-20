@@ -194,6 +194,18 @@ namespace ModiBuff.Core
 		}
 
 		/// <summary>
+		///		How many seconds should pass before the modifier gets removed.
+		/// </summary>
+		/// <remarks>OVERWRITES all previous remove effects.</remarks>
+		public ModifierRecipe RemoveApplier(float duration, ApplierType applierType, bool hasApplyChecks)
+		{
+			Duration(duration);
+			_removeEffectWrapper =
+				new RemoveEffectWrapper(new RemoveEffect(Id, applierType, hasApplyChecks), EffectOn.Duration);
+			return this;
+		}
+
+		/// <summary>
 		///		Adds a basic remove effect, that should be triggered on either stack, or callback
 		/// </summary>
 		public ModifierRecipe Remove(RemoveEffectOn removeEffectOn = RemoveEffectOn.CallbackUnit)
@@ -598,6 +610,15 @@ namespace ModiBuff.Core
 				validRecipe = false;
 				Logger.LogError("[ModiBuff] CallbackEffect registration type set, but no effects on callback set, " +
 				                "for modifier: " + Name + " id: " + Id);
+			}
+
+			if (_effectWrappers.Exists(w =>
+				    w.GetEffect() is ApplierEffect applierEffect && applierEffect.ApplierType != ApplierType.None))
+			{
+				Logger.LogWarning(
+					"[ModiBuff] ApplierEffect ApplierType set in a modifier, adding this modifier will add " +
+					"the applier effect to the owner because of how modifiers work, use effect (modifier-less-effects) " +
+					"if not desired in modifier: " + Name + " id: " + Id);
 			}
 
 			if (!validRecipe)

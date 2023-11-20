@@ -309,5 +309,26 @@ namespace ModiBuff.Tests
 			Unit.Attack(Enemy);
 			Assert.AreEqual(EnemyHealth - UnitDamage, Enemy.Health);
 		}
+
+		//[Test]
+		public void Stun_StackAddTime()
+		{
+			//TODO We need to sync remove timer with status effect timer
+			AddRecipe("InitStunStackAddTime")
+				.Stack(WhenStackEffect.Always)
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 2, true,
+					StackEffectType.Effect | StackEffectType.Add, 1), EffectOn.Stack)
+				.Remove(2).Refresh();
+			Setup();
+
+			Unit.AddModifierSelf("InitStunStackAddTime");
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+
+			Unit.Update(2.5f);
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+
+			Unit.Update(0.5f);
+			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+		}
 	}
 }

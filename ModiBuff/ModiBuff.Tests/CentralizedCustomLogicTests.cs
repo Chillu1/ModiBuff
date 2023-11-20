@@ -82,7 +82,7 @@ namespace ModiBuff.Tests
 					.SetMetaEffects(new AddValueBasedOnPoisonStacksMetaEffect(1f)), EffectOn.Stack);
 			AddEffect("PoisonHeal",
 				new ApplierEffect("Poison"),
-				new ApplierEffect("PoisonHealHeal", Targeting.SourceTarget));
+				new ApplierEffect("PoisonHealHeal", targeting: Targeting.SourceTarget));
 			Setup();
 
 			Unit.TakeDamage(UnitHealth / 2f, Unit);
