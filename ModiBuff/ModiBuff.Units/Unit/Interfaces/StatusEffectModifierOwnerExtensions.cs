@@ -51,5 +51,12 @@ namespace ModiBuff.Core.Units
 		{
 			return owner.StatusEffectController.HasStatusEffect(statusEffectType);
 		}
+
+		public static bool HasStatusEffectDurationLess(
+			this IDurationLessStatusEffectOwner<LegalAction, StatusEffectType> owner,
+			StatusEffectType statusEffectType)
+		{
+			return owner.StatusEffectController.HasStatusEffect(statusEffectType);
+		}
 	}
 }

@@ -290,5 +290,24 @@ namespace ModiBuff.Tests
 			Unit.Update(1); //Second instance removed & reverted
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 		}
+
+		[Test]
+		public void DurationLessStatusEffect_DurationOver()
+		{
+			AddRecipe("InitDurationLessStun")
+				.Effect(new DurationLessStatusEffectEffect(StatusEffectType.Stun), EffectOn.Init)
+				.Remove(2);
+			Setup();
+
+			Unit.AddModifierSelf("InitDurationLessStun");
+
+			Unit.Update(1f);
+			Assert.True(Unit.HasStatusEffectDurationLess(StatusEffectType.Stun));
+			Unit.Update(1f);
+			Assert.False(Unit.HasStatusEffectDurationLess(StatusEffectType.Stun));
+
+			Unit.Attack(Enemy);
+			Assert.AreEqual(EnemyHealth - UnitDamage, Enemy.Health);
+		}
 	}
 }

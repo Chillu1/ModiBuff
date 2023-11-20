@@ -23,7 +23,8 @@ namespace ModiBuff.Core.Units
 		IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
 		ICallbackRegistrable<CallbackType>, ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>,
-		ICallbackEffectRegistrable<CallbackType>, IAllNonGeneric, ICaster, IStateReset, IIdOwner
+		ICallbackEffectRegistrable<CallbackType>, IAllNonGeneric, ICaster, IStateReset, IIdOwner,
+		IDurationLessStatusEffectOwner<LegalAction, StatusEffectType>
 	{
 		public int Id { get; }
 		public UnitTag UnitTag { get; private set; }
@@ -51,11 +52,16 @@ namespace ModiBuff.Core.Units
 			ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>.StatusEffectController =>
 			_singleInstanceStatusEffectController;
 
+		IDurationLessStatusEffectController<LegalAction, StatusEffectType>
+			IDurationLessStatusEffectOwner<LegalAction, StatusEffectType>.StatusEffectController =>
+			_durationLessStatusEffectController;
+
 		private readonly List<IUnit> _targetsInRange;
 		private readonly List<Modifier> _auraModifiers;
 
 		private readonly MultiInstanceStatusEffectController _statusEffectController;
 		private readonly StatusEffectController _singleInstanceStatusEffectController;
+		private readonly DurationLessStatusEffectController _durationLessStatusEffectController;
 
 		private static int _idCounter;
 
@@ -105,6 +111,7 @@ namespace ModiBuff.Core.Units
 			_statusEffectController = new MultiInstanceStatusEffectController
 				(this, StatusEffectType.None, _statusEffectAddedEvents, _statusEffectRemovedEvents);
 			_singleInstanceStatusEffectController = new StatusEffectController();
+			_durationLessStatusEffectController = new DurationLessStatusEffectController();
 		}
 
 		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences,
@@ -140,7 +147,8 @@ namespace ModiBuff.Core.Units
 			if (target is IUnitEntity entity && !UnitType.IsLegalTarget(entity.UnitType))
 				return;
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act) ||
-			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act))
+			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act) ||
+			    !_durationLessStatusEffectController.HasLegalAction(LegalAction.Act))
 				return;
 
 			if (++_preAttackCounter <= MaxEventCount)
@@ -173,7 +181,8 @@ namespace ModiBuff.Core.Units
 		public float Attack(IUnit target)
 		{
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act) ||
-			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act))
+			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act) ||
+			    !_durationLessStatusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
 			var killableTarget = target as IKillable;
@@ -293,7 +302,8 @@ namespace ModiBuff.Core.Units
 		public float Heal(IHealable<float, float> target)
 		{
 			if (!_statusEffectController.HasLegalAction(LegalAction.Act) ||
-			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act))
+			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act) ||
+			    !_durationLessStatusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
 			if (++_healTargetCounter <= MaxEventCount)
@@ -449,6 +459,7 @@ namespace ModiBuff.Core.Units
 			_auraModifiers.Clear();
 			_statusEffectController.ResetState();
 			_singleInstanceStatusEffectController.ResetState();
+			_durationLessStatusEffectController.ResetState();
 			ModifierControllerPool.Instance.Return(ModifierController);
 			ModifierControllerPool.Instance.ReturnApplier(ModifierApplierController);
 
