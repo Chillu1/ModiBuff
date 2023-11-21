@@ -19,12 +19,10 @@ namespace ModiBuff.Core.Units
 		IDamagable<float, float, float, float>, IHealable<float, float>, IHealer<float, float>,
 		IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker, IEventOwner<EffectOnEvent>,
 		IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance, IKillable,
-		ICallbackUnitRegistrable<CallbackUnitType>,
-		IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
+		ICallbackUnitRegistrable<CallbackUnitType>, IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
-		ICallbackRegistrable<CallbackType>, ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>,
-		ICallbackEffectRegistrable<CallbackType>, IAllNonGeneric, ICaster, IStateReset, IIdOwner,
-		IDurationLessStatusEffectOwner<LegalAction, StatusEffectType>
+		ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>, ICallbackRegistrable<CallbackType>,
+		IAllNonGeneric, ICaster, IStateReset, IIdOwner, IDurationLessStatusEffectOwner<LegalAction, StatusEffectType>
 	{
 		public int Id { get; }
 		public UnitTag UnitTag { get; private set; }

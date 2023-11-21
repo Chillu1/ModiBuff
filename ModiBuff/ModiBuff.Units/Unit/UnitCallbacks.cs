@@ -174,158 +174,6 @@ namespace ModiBuff.Core.Units
 		//single delegates are 76% faster than arrays of IEffects with 1 subscriber/item
 		//But arrays are much faster when there are multiple subscribers/items, 58% faster with 2 items, 150% faster with 5 items.
 		//It's recommended to use the array version generally. But in cases where most modifiers have single callbacks, use delegates.
-		public void RegisterCallbacks(CallbackUnitType callbackType, IEffect[] callbacks)
-		{
-			switch (callbackType)
-			{
-				case CallbackUnitType.StrongDispel:
-					_strongDispelCallbacks.AddRange(callbacks);
-					break;
-				case CallbackUnitType.StrongHit:
-					_strongHitCallbacks.AddRange(callbacks);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
-			}
-		}
-
-		public void UnRegisterCallbacks(CallbackUnitType callbackType, IEffect[] callbacks)
-		{
-			switch (callbackType)
-			{
-				case CallbackUnitType.StrongDispel:
-					for (int i = 0; i < callbacks.Length; i++)
-					{
-						bool removed = _strongDispelCallbacks.Remove(callbacks[i]);
-#if DEBUG && !MODIBUFF_PROFILE
-						if (!removed)
-							Logger.LogError("[ModiBuff.Units] Could not remove callback: " + callbacks[i]);
-#endif
-					}
-
-					break;
-				case CallbackUnitType.StrongHit:
-					for (int i = 0; i < callbacks.Length; i++)
-					{
-						bool removed = _strongHitCallbacks.Remove(callbacks[i]);
-#if DEBUG && !MODIBUFF_PROFILE
-						if (!removed)
-							Logger.LogError("[ModiBuff.Units] Could not remove callback: " + callbacks[i]);
-#endif
-					}
-
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
-			}
-		}
-
-		public void RegisterCallbacks(Callback<CallbackType>[] callbacks)
-		{
-			for (int i = 0; i < callbacks.Length; i++)
-			{
-				ref readonly var callback = ref callbacks[i];
-				switch (callback.CallbackType)
-				{
-					case CallbackType.Dispel:
-						if (callback.CheckCallback(out DispelEvent dispelEvent))
-							_dispelEvents.Add(dispelEvent);
-						break;
-					case CallbackType.StrongDispel:
-						if (callback.CheckCallback(out StrongDispelEvent strongDispelEvent))
-							_strongDispelEvents.Add(strongDispelEvent);
-						break;
-					case CallbackType.PoisonDamage:
-						if (callback.CheckCallback(out PoisonEvent poisonEvent))
-							_poisonEvents.Add(poisonEvent);
-						break;
-					case CallbackType.CurrentHealthChanged:
-						if (callback.CheckCallback(out HealthChangedEvent healthEvent))
-						{
-							healthEvent.Invoke(this, this, Health, 0f);
-							_healthChangedEvents.Add(healthEvent);
-						}
-
-						break;
-					case CallbackType.DamageChanged:
-						if (callback.CheckCallback(out DamageChangedEvent damageEvent))
-						{
-							damageEvent.Invoke(this, Damage, 0f);
-							_damageChangedEvents.Add(damageEvent);
-						}
-
-						break;
-					case CallbackType.StrongHit:
-						if (callback.CheckCallback(out UnitCallback unitCallback))
-							_strongHitUnitCallbacks.Add(unitCallback);
-						break;
-					case CallbackType.StatusEffectAdded:
-						if (callback.CheckCallback(out StatusEffectEvent statusEffectEvent))
-						{
-							_statusEffectController.TriggerEvent(statusEffectEvent);
-							_statusEffectAddedEvents.Add(statusEffectEvent);
-						}
-
-						break;
-					case CallbackType.StatusEffectRemoved:
-						if (callback.CheckCallback(out StatusEffectEvent statusEffectRemovedEvent))
-						{
-							_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
-							_statusEffectRemovedEvents.Add(statusEffectRemovedEvent);
-						}
-
-						break;
-					default:
-						throw new ArgumentOutOfRangeException(nameof(callbacks), callback.CallbackType, null);
-				}
-			}
-		}
-
-		public void UnRegisterCallbacks(Callback<CallbackType>[] callbacks)
-		{
-			for (int i = 0; i < callbacks.Length; i++)
-			{
-				ref readonly var callback = ref callbacks[i];
-				switch (callback.CallbackType)
-				{
-					case CallbackType.Dispel:
-						_dispelEvents.Remove((DispelEvent)callback.Action);
-						break;
-					case CallbackType.StrongDispel:
-						_strongDispelEvents.Remove((StrongDispelEvent)callback.Action);
-						break;
-					case CallbackType.PoisonDamage:
-						_poisonEvents.Remove((PoisonEvent)callback.Action);
-						break;
-					case CallbackType.CurrentHealthChanged:
-						var healthChangedEvent = (HealthChangedEvent)callback.Action;
-						if (_healthChangedEvents.Remove(healthChangedEvent))
-							healthChangedEvent.Invoke(this, this, Health, 0f);
-						break;
-					case CallbackType.DamageChanged:
-						var damageChangedEvent = (DamageChangedEvent)callback.Action;
-						if (_damageChangedEvents.Remove(damageChangedEvent))
-							damageChangedEvent.Invoke(this, Damage, 0f);
-						break;
-					case CallbackType.StrongHit:
-						_strongHitUnitCallbacks.Remove((UnitCallback)callback.Action);
-						break;
-					case CallbackType.StatusEffectAdded:
-						var statusEffectEvent = (StatusEffectEvent)callback.Action;
-						if (_statusEffectAddedEvents.Remove(statusEffectEvent))
-							_statusEffectController.TriggerEvent(statusEffectEvent);
-						break;
-					case CallbackType.StatusEffectRemoved:
-						var statusEffectRemovedEvent = (StatusEffectEvent)callback.Action;
-						if (_statusEffectRemovedEvents.Remove(statusEffectRemovedEvent))
-							_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
-						break;
-					default:
-						throw new ArgumentOutOfRangeException();
-				}
-			}
-		}
-
 		public void RegisterCallback(CallbackType callbackType, object callback)
 		{
 			switch (callbackType)
@@ -357,6 +205,10 @@ namespace ModiBuff.Core.Units
 						_damageChangedEvents.Add(damageEvent);
 					}
 
+					break;
+				case CallbackType.StrongHit:
+					if (callback.CheckCallback(out UnitCallback unitCallback))
+						_strongHitUnitCallbacks.Add(unitCallback);
 					break;
 				case CallbackType.StatusEffectAdded:
 					if (callback.CheckCallback(out StatusEffectEvent statusEffectEvent))
@@ -410,6 +262,9 @@ namespace ModiBuff.Core.Units
 					if (_damageChangedEvents.Remove(damageChangedEvent))
 						damageChangedEvent.Invoke(this, Damage, 0f);
 					break;
+				case CallbackType.StrongHit:
+					_strongHitUnitCallbacks.Remove((UnitCallback)callback);
+					break;
 				case CallbackType.StatusEffectAdded:
 					var statusEffectEvent = (StatusEffectEvent)callback;
 					if (_statusEffectAddedEvents.Remove(statusEffectEvent))
@@ -430,16 +285,50 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public void RegisterCallbacks(CallbackType callbackType, object[] callbacks)
+		public void RegisterCallbacks(CallbackUnitType callbackType, IEffect[] callbacks)
 		{
-			for (int i = 0; i < callbacks.Length; i++)
-				RegisterCallback(callbackType, callbacks[i]);
+			switch (callbackType)
+			{
+				case CallbackUnitType.StrongDispel:
+					_strongDispelCallbacks.AddRange(callbacks);
+					break;
+				case CallbackUnitType.StrongHit:
+					_strongHitCallbacks.AddRange(callbacks);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+			}
 		}
 
-		public void UnRegisterCallbacks(CallbackType callbackType, object[] callbacks)
+		public void UnRegisterCallbacks(CallbackUnitType callbackType, IEffect[] callbacks)
 		{
-			for (int i = 0; i < callbacks.Length; i++)
-				UnRegisterCallback(callbackType, callbacks[i]);
+			switch (callbackType)
+			{
+				case CallbackUnitType.StrongDispel:
+					for (int i = 0; i < callbacks.Length; i++)
+					{
+						bool removed = _strongDispelCallbacks.Remove(callbacks[i]);
+#if DEBUG && !MODIBUFF_PROFILE
+						if (!removed)
+							Logger.LogError("[ModiBuff.Units] Could not remove callback: " + callbacks[i]);
+#endif
+					}
+
+					break;
+				case CallbackUnitType.StrongHit:
+					for (int i = 0; i < callbacks.Length; i++)
+					{
+						bool removed = _strongHitCallbacks.Remove(callbacks[i]);
+#if DEBUG && !MODIBUFF_PROFILE
+						if (!removed)
+							Logger.LogError("[ModiBuff.Units] Could not remove callback: " + callbacks[i]);
+#endif
+					}
+
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+			}
 		}
 	}
 }

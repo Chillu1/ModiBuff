@@ -1,8 +1,8 @@
 namespace ModiBuff.Core
 {
-	public interface ICallbackRegistrable<TCallback>
+	public interface ICallbackRegistrable<in TCallback>
 	{
-		void RegisterCallbacks(Callback<TCallback>[] callbacks);
-		void UnRegisterCallbacks(Callback<TCallback>[] callbacks);
+		void RegisterCallback(TCallback callbackType, object callback);
+		void UnRegisterCallback(TCallback callbackType, object callback);
 	}
 }

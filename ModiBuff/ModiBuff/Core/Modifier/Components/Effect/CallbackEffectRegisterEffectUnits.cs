@@ -30,10 +30,10 @@ namespace ModiBuff.Core
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			if (!(target is ICallbackEffectRegistrable<TCallback> registrableTarget))
+			if (!(target is ICallbackRegistrable<TCallback> registrableTarget))
 			{
 #if MODIBUFF_EFFECT_CHECK
-				EffectHelper.LogImplError(target, nameof(ICallbackEffectRegistrable<TCallback>));
+				EffectHelper.LogImplError(target, nameof(ICallbackRegistrable<TCallback>));
 #endif
 				return;
 			}
@@ -48,7 +48,7 @@ namespace ModiBuff.Core
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			if (!(target is ICallbackEffectRegistrable<TCallback> registrableTarget))
+			if (!(target is ICallbackRegistrable<TCallback> registrableTarget))
 				return;
 
 			for (int i = 0; i < _callbacks.Length; i++)
