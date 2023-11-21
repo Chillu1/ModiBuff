@@ -10,5 +10,7 @@ namespace ModiBuff.Core.Units
 		StrongHit,
 		StatusEffectAdded,
 		StatusEffectRemoved,
+
+		Update,
 	}
 }

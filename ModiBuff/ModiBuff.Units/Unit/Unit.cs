@@ -102,6 +102,8 @@ namespace ModiBuff.Core.Units
 			_statusEffectAddedEvents = new List<StatusEffectEvent>();
 			_statusEffectRemovedEvents = new List<StatusEffectEvent>();
 
+			_updateTimerCallbacks = new List<UpdateTimerEvent>();
+
 			_targetsInRange = new List<IUnit>();
 			_targetsInRange.Add(this);
 			_auraModifiers = new List<Modifier>();
@@ -137,6 +139,15 @@ namespace ModiBuff.Core.Units
 			ModifierApplierController.Update(deltaTime);
 			for (int i = 0; i < _auraModifiers.Count; i++)
 				_auraModifiers[i].Update(deltaTime);
+
+			_callbackTimer += deltaTime;
+			if (_callbackTimer >= CallbackTimerCooldown)
+			{
+				_callbackTimer = 0;
+
+				for (int i = 0; i < _updateTimerCallbacks.Count; i++)
+					_updateTimerCallbacks[i]();
+			}
 		}
 
 		/// <summary>
@@ -451,12 +462,13 @@ namespace ModiBuff.Core.Units
 				_beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects,
 				_strongDispelCallbacks, _strongHitCallbacks, _strongHitUnitCallbacks, _poisonEvents,
 				_dispelEvents, _strongDispelEvents, _healthChangedEvents, _damageChangedEvents,
-				_statusEffectAddedEvents, _statusEffectRemovedEvents);
+				_statusEffectAddedEvents, _statusEffectRemovedEvents, _updateTimerCallbacks);
 
 			_targetsInRange.Clear();
 			for (int i = 0; i < _auraModifiers.Count; i++)
 				ModifierPool.Instance.Return(_auraModifiers[i]);
 			_auraModifiers.Clear();
+			_callbackTimer = 0;
 			_statusEffectController.ResetState();
 			_singleInstanceStatusEffectController.ResetState();
 			_durationLessStatusEffectController.ResetState();

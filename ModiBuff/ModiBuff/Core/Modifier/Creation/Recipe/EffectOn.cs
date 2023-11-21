@@ -13,5 +13,6 @@ namespace ModiBuff.Core
 		Event = 16,
 		CallbackUnit = 32,
 		CallbackEffect = 64,
+		CallbackEffectUnits = 128,
 	}
 }

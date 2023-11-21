@@ -6,6 +6,8 @@ namespace ModiBuff.Core.Units
 	//Often updated delegates
 	public delegate void HealthChangedEvent(IUnit target, IUnit source, float newHealth, float deltaHealth);
 
+	public delegate void UpdateTimerEvent();
+
 	public delegate void DispelEvent(IUnit target, IUnit source, TagType tag);
 
 	public delegate void StrongDispelEvent(IUnit target, IUnit source);
@@ -61,6 +63,11 @@ namespace ModiBuff.Core.Units
 		private readonly List<DamageChangedEvent> _damageChangedEvents;
 		private readonly List<StatusEffectEvent> _statusEffectAddedEvents;
 		private readonly List<StatusEffectEvent> _statusEffectRemovedEvents;
+
+		private readonly List<UpdateTimerEvent> _updateTimerCallbacks;
+
+		public const float CallbackTimerCooldown = 1f;
+		private float _callbackTimer;
 
 		/// <summary>
 		///		Resets all event/callback counters, so we can trigger them again
@@ -367,6 +374,14 @@ namespace ModiBuff.Core.Units
 					}
 
 					break;
+				case CallbackType.Update:
+					if (callback.CheckCallback(out UpdateTimerEvent updateTimerEvent))
+					{
+						updateTimerEvent.Invoke();
+						_updateTimerCallbacks.Add(updateTimerEvent);
+					}
+
+					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
 			}
@@ -404,6 +419,11 @@ namespace ModiBuff.Core.Units
 					var statusEffectRemovedEvent = (StatusEffectEvent)callback;
 					if (_statusEffectRemovedEvents.Remove(statusEffectRemovedEvent))
 						_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
+					break;
+				case CallbackType.Update:
+					var updateTimerEvent = (UpdateTimerEvent)callback;
+					if (_updateTimerCallbacks.Remove(updateTimerEvent))
+						updateTimerEvent.Invoke();
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);

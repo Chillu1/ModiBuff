@@ -69,7 +69,6 @@ namespace ModiBuff.Core.Units
 
 				damage += _extraDamage;
 
-				//returnDamageInfo = effectTarget.TakeDamage(damage, effectSource);
 				returnDamageInfo = damagableTarget.TakeDamage(damage, effectSource);
 			}
 #if MODIBUFF_EFFECT_CHECK

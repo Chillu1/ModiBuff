@@ -112,5 +112,39 @@ namespace ModiBuff.Tests
 			Unit.TakeDamage(1, Unit);
 			Assert.AreEqual(UnitHealth - 1 - 5 * Unit.MaxEventCount - 5 * Unit.MaxEventCount, Unit.Health);
 		}
+
+		[Test]
+		public void Init_RegisterTimerCallback_TogglableState()
+		{
+			AddRecipe("AddDamageTogglableBasedOnDistance")
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertibleAndTogglable), EffectOn.CallbackEffectUnits)
+				.CallbackEffectUnits(CallbackType.Update, effect => (target, source) =>
+				{
+					var positionTarget = (IPosition<Vector2>)target;
+					var positionSource = (IPosition<Vector2>)source;
+
+					return new UpdateTimerEvent(() =>
+					{
+						if (positionTarget.Position.DistanceTo(positionSource.Position) < 3f)
+							effect.Effect(target, source);
+						else
+							((IRevertEffect)effect).RevertEffect(target, source);
+					});
+				});
+			Setup();
+
+			//One of a kind setup, usually source and owner are the same
+			Enemy.ModifierController.Add(IdManager.GetId("AddDamageTogglableBasedOnDistance"), Enemy, Unit);
+			Enemy.Update(Unit.CallbackTimerCooldown);
+			Assert.AreEqual(EnemyDamage + 5, Enemy.Damage);
+
+			Enemy.Move(3, 3);
+			Enemy.Update(Unit.CallbackTimerCooldown);
+			Assert.AreEqual(EnemyDamage, Enemy.Damage);
+
+			Enemy.Move(-2, -2);
+			Enemy.Update(Unit.CallbackTimerCooldown);
+			Assert.AreEqual(EnemyDamage + 5, Enemy.Damage);
+		}
 	}
 }

@@ -74,6 +74,8 @@ namespace ModiBuff.Core.Units
 
 				heal += _extraHeal;
 
+				//TODO Design choice, do we want to revert overheal? Or only applied heals?
+
 				returnHeal = healableTarget.Heal(heal, effectSource);
 
 				if (IsRevertible)
@@ -81,7 +83,7 @@ namespace ModiBuff.Core.Units
 			}
 #if MODIBUFF_EFFECT_CHECK
 			else
-				EffectHelper.LogImplError(target, nameof(IHealable<float, float>));
+				EffectHelper.LogImplError(effectTarget, nameof(IHealable<float, float>));
 #endif
 
 			if (_postEffects != null)
@@ -131,14 +133,15 @@ namespace ModiBuff.Core.Units
 
 		public void RevertStack(int stacks, IUnit target, IUnit source)
 		{
-			if (_effectState != EffectState.ValueIsRevertible && (_stackEffect & StackEffectType.Effect) != 0)
+			if ((_stackEffect & StackEffectType.Effect) != 0 && _effectState != EffectState.ValueIsRevertible)
 			{
-				_totalHeal -= _heal + _extraHeal;
-
 				_targeting.UpdateTargetSource(ref target, ref source);
 				//TODO Do we want a custom negative heal method?
 				if (target is IHealable<float, float> healableTarget)
+				{
+					_totalHeal -= _heal + _extraHeal;
 					healableTarget.Heal(-_heal - _extraHeal, source);
+				}
 			}
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)

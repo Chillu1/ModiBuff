@@ -15,16 +15,16 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			_targeting.UpdateTargetSource(ref target, ref source);
-			if (!(source is IAttacker<float, float> attackerSource))
+			_targeting.UpdateTargetSource(target, source, out var effectTarget, out var effectSource);
+			if (!(effectSource is IAttacker<float, float> attackerSource))
 			{
 #if MODIBUFF_EFFECT_CHECK
-				EffectHelper.LogImplError(target, nameof(IAttacker<float, float>));
+				EffectHelper.LogImplError(effectSource, nameof(IAttacker<float, float>));
 #endif
 				return;
 			}
 
-			float returnDamage = attackerSource.Attack(target);
+			float returnDamage = attackerSource.Attack(effectTarget);
 
 			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)

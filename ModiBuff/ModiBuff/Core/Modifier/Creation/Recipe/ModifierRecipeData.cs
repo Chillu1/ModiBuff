@@ -13,6 +13,7 @@ namespace ModiBuff.Core
 		public readonly EffectWrapper EventRegisterWrapper;
 		public readonly EffectWrapper CallbackUnitRegisterWrapper;
 		public readonly EffectWrapper CallbackEffectRegisterWrapper;
+		public readonly EffectWrapper CallbackEffectUnitsRegisterWrapper;
 		public readonly bool HasApplyChecks;
 		public readonly List<ICheck> ApplyCheckList;
 		public readonly bool HasEffectChecks;
@@ -34,12 +35,12 @@ namespace ModiBuff.Core
 
 		public ModifierRecipeData(int id, string name, List<EffectWrapper> effectWrappers,
 			EffectWrapper removeEffectWrapper, EffectWrapper dispelRegisterWrapper, EffectWrapper eventRegisterWrapper,
-			EffectWrapper callbackUnitRegisterWrapper, EffectWrapper callbackEffectRegisterWrapper, bool hasApplyChecks,
-			List<ICheck> applyCheckList, bool hasEffectChecks, List<ICheck> effectCheckList,
-			List<Func<IUnit, bool>> applyFuncCheckList, List<Func<IUnit, bool>> effectFuncCheckList, bool isAura,
-			TagType tag, bool oneTimeInit, float interval, float duration, bool refreshDuration, bool refreshInterval,
-			WhenStackEffect whenStackEffect, int maxStacks, int everyXStacks, float singleStackTime,
-			float independentStackTime)
+			EffectWrapper callbackUnitRegisterWrapper, EffectWrapper callbackEffectRegisterWrapper,
+			EffectWrapper callbackEffectUnitsRegisterWrapper, bool hasApplyChecks, List<ICheck> applyCheckList,
+			bool hasEffectChecks, List<ICheck> effectCheckList, List<Func<IUnit, bool>> applyFuncCheckList,
+			List<Func<IUnit, bool>> effectFuncCheckList, bool isAura, TagType tag, bool oneTimeInit, float interval,
+			float duration, bool refreshDuration, bool refreshInterval, WhenStackEffect whenStackEffect, int maxStacks,
+			int everyXStacks, float singleStackTime, float independentStackTime)
 		{
 			Id = id;
 			Name = name;
@@ -49,6 +50,7 @@ namespace ModiBuff.Core
 			EventRegisterWrapper = eventRegisterWrapper;
 			CallbackUnitRegisterWrapper = callbackUnitRegisterWrapper;
 			CallbackEffectRegisterWrapper = callbackEffectRegisterWrapper;
+			CallbackEffectUnitsRegisterWrapper = callbackEffectUnitsRegisterWrapper;
 			HasApplyChecks = hasApplyChecks;
 			ApplyCheckList = applyCheckList;
 			HasEffectChecks = hasEffectChecks;

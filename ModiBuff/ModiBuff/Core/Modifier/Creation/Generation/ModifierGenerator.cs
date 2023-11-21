@@ -84,7 +84,7 @@ namespace ModiBuff.Core
 
 			_modifierEffectsCreator = new ModifierEffectsCreator(data.EffectWrappers, data.RemoveEffectWrapper,
 				data.DispelRegisterWrapper, data.EventRegisterWrapper, data.CallbackUnitRegisterWrapper,
-				data.CallbackEffectRegisterWrapper);
+				data.CallbackEffectRegisterWrapper, data.CallbackEffectUnitsRegisterWrapper);
 
 			if (HasApplyChecks)
 			{
