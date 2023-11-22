@@ -263,6 +263,7 @@ namespace ModiBuff.Tests
 					});
 				}),
 			//Stack version, worst version, adding the modifier again will trigger the stack logic
+			//TODO This can be fixed by having a don't trigger stack effect when adding modifier flag?
 			add => add("StunnedFourTimesDispelAllStatusEffects")
 				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
 				.Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.Stack)

@@ -323,6 +323,47 @@ namespace ModiBuff.Tests
 			Assert.False(loadedUnit.HasStatusEffectMulti(StatusEffectType.Stun));
 		}
 
+		[Test]
+		public void SaveCallbackLocalVarState()
+		{
+			AddGenerator("InitTakeFiveDamageOnTenDamageTaken", (id, genId, name, tag) =>
+			{
+				//TODO To Recipe
+				var callbackStateSave = new CallbackStateSaveRegisterEffect<CallbackType>(
+					CallbackType.CurrentHealthChanged, () =>
+					{
+						float totalDamageTaken = 0f; //state != null ? (float)state : 0f;
+
+						return new CallbackStateContext(new HealthChangedEvent(
+							(target, source, health, deltaHealth) =>
+							{
+								//Don't count "negative damage/healing damage"
+								if (deltaHealth > 0)
+									totalDamageTaken += deltaHealth;
+								if (totalDamageTaken >= 10)
+								{
+									totalDamageTaken = 0f;
+									target.TakeDamage(5, source);
+								}
+							}), () => totalDamageTaken, stateSet => totalDamageTaken = float.Parse((string)stateSet));
+					});
+
+				var initComponent = new InitComponent(false, new IEffect[] { callbackStateSave }, null);
+
+				return new Modifier(id, genId, name, initComponent, null, null, null, new SingleTargetComponent(),
+					new ModifierStateInfo(callbackStateSave));
+			});
+			Setup();
+
+			Unit.AddModifierSelf("InitTakeFiveDamageOnTenDamageTaken");
+			Unit.TakeDamage(5, Unit);
+
+			SaveLoadGameState(Unit, out var loadedUnit);
+
+			loadedUnit.TakeDamage(5, loadedUnit);
+			Assert.AreEqual(UnitHealth - 5 - 5 - 5, loadedUnit.Health);
+		}
+
 		//TODO GenIds will be wrong in some places (StatusEffect), how to fix, feed correct id & genId somehow?
 		//TODO add damage is enabled check
 	}

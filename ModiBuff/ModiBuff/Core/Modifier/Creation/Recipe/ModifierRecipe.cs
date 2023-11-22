@@ -439,10 +439,11 @@ namespace ModiBuff.Core
 		}
 
 		/// <summary>
-		///		Special callbacks, all EffectOn.<see cref="EffectOn.CallbackEffect"/> effects will
+		///		Special callbacks, all EffectOn.<see cref="EffectOn.CallbackEffectUnits"/> effects will
 		///		trigger when <see cref="callbackType"/> is triggered.
 		///		Supports custom callback signatures (beside <see cref="UnitCallback"/>.
 		///		Only ONE CallbackEffect can be registered per modifier.
+		///		Allows to store the target and source when registering the callback, for further access.
 		/// </summary>
 		public ModifierRecipe CallbackEffectUnits<TCallbackEffect>(TCallbackEffect callbackType,
 			Func<IEffect, Func<IUnit, IUnit, object>> @event)

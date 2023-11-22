@@ -59,6 +59,8 @@ namespace ModiBuff.Core
 				return element.GetInt16();
 			if (type == typeof(decimal))
 				return element.GetDecimal();
+			if (type == typeof(object))
+				return element.GetRawText();
 
 			Logger.LogError($"[ModiBuff] Unknown ValueType {type}");
 			return null;
