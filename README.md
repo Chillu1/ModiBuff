@@ -592,7 +592,7 @@ public static bool IsLegalTarget(this int modifierId, IUnitEntity target, IUnitE
 {
     var tag = (TagType)ModifierRecipes.GetTag(modifierId);
     if (tag.HasTag(TagType.LegalTargetSelf) && target == source)
-    	return true;
+        return true;
 
     return tag.IsLegalTarget(target.UnitType, source.UnitType);
 }
@@ -639,8 +639,8 @@ public static ModifierRecipe LegalTarget(this ModifierRecipe recipe, LegalTarget
 
 ```csharp
 Add("InitDamageEnemyOnly")
-	.LegalTarget(LegalTarget.Enemy)
-	.Effect(new DamageEffect(5f), EffectOn.Init);
+    .LegalTarget(LegalTarget.Enemy)
+    .Effect(new DamageEffect(5f), EffectOn.Init);
 ```
 
 ### Order
@@ -843,7 +843,7 @@ public class DamageEffect : IEffect, IStateEffect, IStackEffect
 
 `StackEffectType` is a generic flag enum, that works with most stack logic, but not all, so feel free to make your own.
 
-All right, but what about reverting the effect? We need to introducea new variable to store how much the total value
+All right, but what about reverting the effect? We need to introduce a new variable to store how much the total value
 changed.
 We also need to implement `IRevertEffect`.
 
@@ -1072,7 +1072,7 @@ Add("InitDamageManual", "", "", (id, genId, name, tag) =>
     var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
 
     return new Modifier(id, genId, name, initComponent, null, null, null,
-    	new SingleTargetComponent(), null);
+        new SingleTargetComponent(), null);
 }/*>Supply possible tags here<*/);
 ```
 
@@ -1109,21 +1109,21 @@ Add("InitStatusEffectSleep_RemoveOnTenDamageTaken", (id, genId, name, tag) =>
     float totalDamageTaken = 0f;
     var @event = new HealthChangedEvent((target, source, health, deltaHealth) =>
     {
-    	totalDamageTaken += deltaHealth;
-    	if (totalDamageTaken >= 10)
-    		removeEffect.Effect(target, source);
+        totalDamageTaken += deltaHealth;
+        if (totalDamageTaken >= 10)
+            removeEffect.Effect(target, source);
     });
     var registerReactEffect = new ReactCallbackRegisterEffect<ReactType>(
-    	new ReactCallback<ReactType>(ReactType.CurrentHealthChanged, @event));
+        new ReactCallback<ReactType>(ReactType.CurrentHealthChanged, @event));
 
     //Order of reverts matters here, if we revert the captured variable after
     //it will trigger a recursive effect, because the captured variable will never be reset
     removeEffect.SetRevertibleEffects(new IRevertEffect[]
-    	{ effect, new RevertActionEffect(() => { totalDamageTaken = 0f; }), registerReactEffect });
+        { effect, new RevertActionEffect(() => { totalDamageTaken = 0f; }), registerReactEffect });
 
     var initComponent = new InitComponent(false, new IEffect[] { effect, registerReactEffect }, null);
     return new Modifier(id, genId, name, initComponent, null, null, null,
-    	new SingleTargetComponent(), null);
+        new SingleTargetComponent(), null);
 });
 ```
 
@@ -1137,17 +1137,17 @@ Add("InitStatusEffectSleep_RemoveOnDispel", (id, genId, name, tag) =>
 
     var @event = new DispelEvent((target, source, eventTag) =>
     {
-    	if ((tag & eventTag.ToInternalTag()) != 0)
-    		removeEffect.Effect(target, source);
+        if ((tag & eventTag.ToInternalTag()) != 0)
+            removeEffect.Effect(target, source);
     });
     var registerReactEffect = new ReactCallbackRegisterEffect<ReactType>(
-    	new ReactCallback<ReactType>(ReactType.Dispel, @event));
+        new ReactCallback<ReactType>(ReactType.Dispel, @event));
 
     removeEffect.SetRevertibleEffects(new IRevertEffect[] { effect, registerReactEffect });
 
     var initComponent = new InitComponent(false, new IEffect[] { effect, registerReactEffect }, null);
     return new Modifier(id, genId, name, initComponent, null, null, null,
-    	new SingleTargetComponent(), null);
+        new SingleTargetComponent(), null);
 }, TagType.BasicDispel);
 ```
 

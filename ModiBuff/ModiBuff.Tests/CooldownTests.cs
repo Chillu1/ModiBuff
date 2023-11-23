@@ -148,5 +148,34 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("MultipleEffectsCooldownCheck");
 			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
 		}
+
+		[Test]
+		public void InitDamage_ChargesCooldown()
+		{
+			AddRecipe("InitDamage_Cooldown")
+				.ApplyChargesCooldown(1, 2)
+				.Effect(new DamageEffect(5), EffectOn.Init);
+			Setup();
+
+			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_Cooldown"), ApplierType.Cast);
+
+			Unit.TryCast("InitDamage_Cooldown", Enemy);
+
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+
+			// 1 more charge
+			Unit.TryCast("InitDamage_Cooldown", Enemy);
+			Assert.AreEqual(EnemyHealth - 5 - 5, Enemy.Health);
+
+			// 0 charges
+			Unit.TryCast("InitDamage_Cooldown", Enemy);
+			Assert.AreEqual(EnemyHealth - 5 - 5, Enemy.Health);
+
+			Unit.Update(1);
+			Unit.Update(1);
+			Unit.TryCast("InitDamage_Cooldown", Enemy);
+			Unit.TryCast("InitDamage_Cooldown", Enemy);
+			Assert.AreEqual(EnemyHealth - 5 - 5 - 5 - 5, Enemy.Health);
+		}
 	}
 }

@@ -49,6 +49,14 @@ namespace ModiBuff.Core.Units
 		}
 
 		/// <summary>
+		///		Cooldown set for when we can try to apply the modifier to a target, with <paramref name="charges"/>.
+		/// </summary>
+		public static ModifierRecipe ApplyChargesCooldown(this ModifierRecipe recipe, float cooldown, int charges)
+		{
+			return recipe.ApplyCheck(new ChargesCooldownCheck(cooldown, charges));
+		}
+
+		/// <summary>
 		///		When trying to apply a modifier, what should the chance be of it being applied?
 		/// </summary>
 		public static ModifierRecipe ApplyChance(this ModifierRecipe recipe, float chance)
