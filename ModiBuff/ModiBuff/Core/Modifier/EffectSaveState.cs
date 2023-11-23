@@ -2,58 +2,21 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
-	/// <summary>
-	///		Holds all effects that have state information, used for UI/UX
-	/// </summary>
-	public sealed class ModifierStateInfo
+	public readonly struct EffectSaveState
 	{
-		private readonly IModifierStateInfo[] _effects;
+		public bool Valid => _savableEffects != null;
 
-		public ModifierStateInfo(params IModifierStateInfo[] effects)
-		{
-			_effects = effects;
-		}
+		private readonly ISavable[] _savableEffects;
 
-		/// <summary>
-		///		Gets state from effect
-		/// </summary>
-		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
-		public TData GetEffectState<TData>(int stateNumber = 0) where TData : struct
-		{
-#if DEBUG && !MODIBUFF_PROFILE
-			if (stateNumber < 0 || stateNumber >= _effects.Length)
-			{
-				Logger.LogError("[ModiBuff] State number can't be lower than 0 or higher than effects length");
-				return default;
-			}
-#endif
-
-			int currentNumber = stateNumber;
-			for (int i = 0; i < _effects.Length; i++)
-			{
-				if (!(_effects[i] is IModifierStateInfo<TData> stateInfo))
-					continue;
-
-				if (currentNumber > 0)
-				{
-					currentNumber--;
-					continue;
-				}
-
-				return stateInfo.GetEffectData();
-			}
-
-			Logger.LogError($"[ModiBuff] Couldn't find {typeof(TData)} at number {stateNumber}");
-			return default;
-		}
+		public EffectSaveState(params ISavable[] savableEffects) => _savableEffects = savableEffects;
 
 		public EffectSaveData[] SaveState()
 		{
-			EffectSaveData[] saveData = new EffectSaveData[_effects.Length];
-			for (int i = 0; i < _effects.Length; i++)
+			EffectSaveData[] saveData = new EffectSaveData[_savableEffects.Length];
+			for (int i = 0; i < _savableEffects.Length; i++)
 			{
-				var effect = _effects[i];
-				if (!(_effects[i] is ISavable savableEffect))
+				var effect = _savableEffects[i];
+				if (!(_savableEffects[i] is ISavable savableEffect))
 				{
 					if (effect is IStateEffect)
 						Logger.LogError(
@@ -70,9 +33,9 @@ namespace ModiBuff.Core
 
 		public void LoadState(IReadOnlyList<EffectSaveData> data)
 		{
-			for (int i = 0; i < _effects.Length; i++)
+			for (int i = 0; i < _savableEffects.Length; i++)
 			{
-				if (!(_effects[i] is ISavable effect))
+				if (!(_savableEffects[i] is ISavable effect))
 					continue;
 
 				//if (!EffectTypeIdManager.Instance.MatchesId(effect.GetType(), data[i].Id))

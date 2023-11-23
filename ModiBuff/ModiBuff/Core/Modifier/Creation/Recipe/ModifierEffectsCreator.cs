@@ -9,6 +9,7 @@ namespace ModiBuff.Core
 	{
 		private readonly EffectWrapper[] _effectWrappers;
 		private readonly EffectWrapper[] _effectsWithModifierInfoWrappers;
+		private readonly EffectWrapper[] _savableEffectsWrappers;
 		private readonly EffectWrapper _removeEffectWrapper;
 		private readonly EffectWrapper _dispelRegisterWrapper;
 		private readonly EffectWrapper _eventRegisterWrapper;
@@ -42,6 +43,7 @@ namespace ModiBuff.Core
 			EffectWrapper callbackEffectUnitsRegisterWrapper)
 		{
 			var effectsWithModifierInfoWrappers = new List<EffectWrapper>();
+			var savableEffectsWrappers = new List<EffectWrapper>();
 			_effectWrappers = effectWrappers.ToArray();
 			_removeEffectWrapper = removeEffectWrapper;
 			_dispelRegisterWrapper = dispelRegisterWrapper;
@@ -54,8 +56,10 @@ namespace ModiBuff.Core
 			{
 				var effectWrapper = _effectWrappers[i];
 
-				if (effectWrapper.GetEffect() is IModifierStateInfo)
+				if (effectWrapper.GetEffect() is IEffectStateInfo)
 					effectsWithModifierInfoWrappers.Add(effectWrapper);
+				if (effectWrapper.GetEffect() is ISavable)
+					savableEffectsWrappers.Add(effectWrapper);
 
 				if (effectWrapper.GetEffect() is IRevertEffect revertEffect && revertEffect.IsRevertible)
 					_revertEffectsIndex++;
@@ -79,6 +83,7 @@ namespace ModiBuff.Core
 			}
 
 			_effectsWithModifierInfoWrappers = effectsWithModifierInfoWrappers.ToArray();
+			_savableEffectsWrappers = savableEffectsWrappers.ToArray();
 		}
 
 		public SyncedModifierEffects Create(int genId)
@@ -169,13 +174,22 @@ namespace ModiBuff.Core
 					_callbackEffectUnitsEffects[_callbackEffectUnitsEffectsIndex++] = effect;
 			}
 
-			ModifierStateInfo modifierStateInfo = null;
+			EffectStateInfo effectStateInfo = default;
 			if (_effectsWithModifierInfoWrappers.Length > 0)
 			{
-				var modifierStateInfoEffects = new IModifierStateInfo[_effectsWithModifierInfoWrappers.Length];
+				var modifierStateInfoEffects = new IEffectStateInfo[_effectsWithModifierInfoWrappers.Length];
 				for (int i = 0; i < _effectsWithModifierInfoWrappers.Length; i++)
-					modifierStateInfoEffects[i] = (IModifierStateInfo)_effectsWithModifierInfoWrappers[i].GetEffect();
-				modifierStateInfo = new ModifierStateInfo(modifierStateInfoEffects);
+					modifierStateInfoEffects[i] = (IEffectStateInfo)_effectsWithModifierInfoWrappers[i].GetEffect();
+				effectStateInfo = new EffectStateInfo(modifierStateInfoEffects);
+			}
+
+			EffectSaveState effectSaveState = default;
+			if (_savableEffectsWrappers.Length > 0)
+			{
+				var savableEffects = new ISavable[_savableEffectsWrappers.Length];
+				for (int i = 0; i < _savableEffectsWrappers.Length; i++)
+					savableEffects[i] = (ISavable)_savableEffectsWrappers[i].GetEffect();
+				effectSaveState = new EffectSaveState(savableEffects);
 			}
 
 			//Set the effects arrays on our special effects (callback, event, remove-revert)
@@ -198,7 +212,7 @@ namespace ModiBuff.Core
 				_effectWrappers[i].Reset();
 
 			return new SyncedModifierEffects(_initEffects, _intervalEffects, _durationEffects, _stackEffects,
-				modifierStateInfo);
+				effectStateInfo, effectSaveState);
 		}
 	}
 
@@ -208,17 +222,19 @@ namespace ModiBuff.Core
 		public readonly IEffect[] IntervalEffects;
 		public readonly IEffect[] DurationEffects;
 		public readonly IStackEffect[] StackEffects;
-		public readonly ModifierStateInfo ModifierStateInfo;
+		public readonly EffectStateInfo effectStateInfo;
+		public readonly EffectSaveState EffectSaveState;
 
 		public SyncedModifierEffects(IEffect[] initEffectsArray, IEffect[] intervalEffectsArray,
 			IEffect[] durationEffectsArray, IStackEffect[] stackEffectsArray,
-			ModifierStateInfo modifierStateInfo)
+			EffectStateInfo effectStateInfo, EffectSaveState effectSaveState)
 		{
 			InitEffects = initEffectsArray;
 			IntervalEffects = intervalEffectsArray;
 			DurationEffects = durationEffectsArray;
 			StackEffects = stackEffectsArray;
-			ModifierStateInfo = modifierStateInfo;
+			this.effectStateInfo = effectStateInfo;
+			EffectSaveState = effectSaveState;
 		}
 	}
 }

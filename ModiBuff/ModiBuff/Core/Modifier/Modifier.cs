@@ -32,11 +32,12 @@ namespace ModiBuff.Core
 		private bool _multiTarget;
 
 		//TODO ideally this would be outside of the modifier, but renting (returning) a tuple/wrapper is kinda meh
-		private readonly ModifierStateInfo _effectStateInfo;
+		private readonly EffectStateInfo _effectStateInfo;
+		private readonly EffectSaveState _effectSaveState;
 
 		public Modifier(int id, int genId, string name, InitComponent? initComponent,
 			ITimeComponent[] timeComponents, StackComponent stackComponent, ModifierCheck effectCheck,
-			ITargetComponent targetComponent, ModifierStateInfo effectStateInfo)
+			ITargetComponent targetComponent, EffectStateInfo? effectStateInfo, EffectSaveState? effectSaveState)
 		{
 			Id = id;
 			GenId = genId;
@@ -58,7 +59,10 @@ namespace ModiBuff.Core
 			if (targetComponent is MultiTargetComponent)
 				_multiTarget = true;
 
-			_effectStateInfo = effectStateInfo;
+			if (effectStateInfo != null)
+				_effectStateInfo = effectStateInfo.Value;
+			if (effectSaveState != null)
+				_effectSaveState = effectSaveState.Value;
 		}
 
 		public void UpdateTargets(List<IUnit> targetsInRange, IUnit source)
@@ -245,7 +249,7 @@ namespace ModiBuff.Core
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
 		public TData GetEffectState<TData>(int stateNumber = 0) where TData : struct
 		{
-			if (_effectStateInfo == null)
+			if (!_effectStateInfo.Valid)
 			{
 				Logger.LogWarning("[ModiBuff] Trying to get state info from a modifier that doesn't have any.");
 				return default;
@@ -256,12 +260,6 @@ namespace ModiBuff.Core
 
 		public SaveData SaveState()
 		{
-			if (_effectStateInfo == null)
-			{
-				Logger.LogError("[ModiBuff] Trying to get state info from a modifier that doesn't have any.");
-				return default;
-			}
-
 			var targetSaveData = _targetComponent.SaveState();
 			var initSaveData = _hasInit ? (InitComponent.SaveData?)_initComponent.SaveState() : null;
 			var stackSaveData = _stackComponent?.SaveState();
@@ -276,8 +274,12 @@ namespace ModiBuff.Core
 
 			var effectCheckSaveData = _effectCheck?.SaveState();
 
+			EffectSaveState.EffectSaveData[] effectSaveState = null;
+			if (_effectSaveState.Valid)
+				effectSaveState = _effectSaveState.SaveState();
+
 			return new SaveData(Id, targetSaveData, _multiTarget, effectCheckSaveData, initSaveData, stackSaveData,
-				timeComponentsSaveData, _effectStateInfo.SaveState());
+				timeComponentsSaveData, effectSaveState);
 		}
 
 		public void LoadState(SaveData data, IUnit owner)
@@ -317,7 +319,7 @@ namespace ModiBuff.Core
 			if (data.EffectCheckSaveData != null)
 				_effectCheck?.LoadState(data.EffectCheckSaveData.Value);
 
-			_effectStateInfo.LoadState(data.EffectsSaveData);
+			_effectSaveState.LoadState(data.EffectsSaveData);
 		}
 
 		public void ResetState()
@@ -370,7 +372,7 @@ namespace ModiBuff.Core
 			public readonly InitComponent.SaveData? InitSaveData;
 			public readonly StackComponent.SaveData? StackSaveData;
 			public readonly IReadOnlyList<TimeComponentSaveData> TimeComponentsSaveData;
-			public readonly IReadOnlyList<ModifierStateInfo.EffectSaveData> EffectsSaveData;
+			public readonly IReadOnlyList<EffectSaveState.EffectSaveData> EffectsSaveData;
 
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
@@ -378,7 +380,7 @@ namespace ModiBuff.Core
 			public SaveData(int id, object targetSaveData, bool isMultiTarget,
 				ModifierCheck.SaveData? effectCheckSaveData, InitComponent.SaveData? initSaveData,
 				StackComponent.SaveData? stackSaveData, IReadOnlyList<TimeComponentSaveData> timeComponentsSaveData,
-				IReadOnlyList<ModifierStateInfo.EffectSaveData> effectsSaveData)
+				IReadOnlyList<EffectSaveState.EffectSaveData> effectsSaveData)
 			{
 				Id = id;
 				TargetSaveData = targetSaveData;

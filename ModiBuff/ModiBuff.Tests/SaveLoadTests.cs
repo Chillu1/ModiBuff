@@ -351,7 +351,7 @@ namespace ModiBuff.Tests
 				var initComponent = new InitComponent(false, new IEffect[] { callbackStateSave }, null);
 
 				return new Modifier(id, genId, name, initComponent, null, null, null, new SingleTargetComponent(),
-					new ModifierStateInfo(callbackStateSave));
+					null, new EffectSaveState(callbackStateSave));
 			});
 			Setup();
 

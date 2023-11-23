@@ -1,7 +1,7 @@
 namespace ModiBuff.Core.Units
 {
 	public sealed class StatusEffectEffect : IStateEffect, IStackEffect, IRevertEffect, IEffect,
-		IModifierIdOwner, IModifierGenIdOwner, IModifierStateInfo<StatusEffectEffect.Data>,
+		IModifierIdOwner, IModifierGenIdOwner, IEffectStateInfo<StatusEffectEffect.Data>,
 		ISavableEffect<StatusEffectEffect.SaveData>
 	{
 		public bool IsRevertible { get; }

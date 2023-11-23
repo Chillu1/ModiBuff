@@ -18,7 +18,7 @@ namespace ModiBuff.Core
 
 	public sealed class CallbackStateSaveRegisterEffect<TCallback> : IRevertEffect, IEffect,
 		IRegisterEffect, IShallowClone<IEffect>, ISavable<CallbackStateSaveRegisterEffect<TCallback>.SaveData>,
-		IModifierStateInfo
+		IEffectStateInfo<CallbackStateSaveRegisterEffect<TCallback>.Data>
 	{
 		public bool IsRevertible => true;
 
@@ -73,13 +73,22 @@ namespace ModiBuff.Core
 			_isRegistered = false;
 		}
 
+		public Data GetEffectData() => new Data(_stateGetter());
+
 		public IEffect ShallowClone() => new CallbackStateSaveRegisterEffect<TCallback>(_callbackType, _event);
 		object IShallowClone.ShallowClone() => ShallowClone();
 
 		public object SaveState() => new SaveData(_stateGetter());
 		public void LoadState(object data) => _stateSetter(((SaveData)data).State);
 
-		public struct SaveData
+		public readonly struct Data
+		{
+			public readonly object State;
+
+			public Data(object state) => State = state;
+		}
+
+		public readonly struct SaveData
 		{
 			public readonly object State;
 

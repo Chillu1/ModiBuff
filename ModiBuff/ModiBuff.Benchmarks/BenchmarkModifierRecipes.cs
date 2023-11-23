@@ -23,7 +23,7 @@ namespace ModiBuff.Tests
 				var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
 
 				var modifier = new Modifier(id, genId, name, initComponent, null, null, null,
-					new SingleTargetComponent(), null);
+					new SingleTargetComponent(), null, null);
 
 				return modifier;
 			});

@@ -2,7 +2,7 @@ namespace ModiBuff.Core.Units
 {
 	public sealed class HealEffect : IMutableStateEffect, IStackEffect, IRevertEffect, IEffect, ICallbackEffect,
 		IStackRevertEffect, IMetaEffectOwner<HealEffect, float, float>, IPostEffectOwner<HealEffect, float>,
-		IModifierStateInfo<HealEffect.Data>, ISavableEffect<HealEffect.SaveData>
+		IEffectStateInfo<HealEffect.Data>, ISavableEffect<HealEffect.SaveData>
 	{
 		public bool IsRevertible => _effectState != 0;
 		public bool UsesMutableState => IsRevertible || _stackEffect.UsesMutableState();
