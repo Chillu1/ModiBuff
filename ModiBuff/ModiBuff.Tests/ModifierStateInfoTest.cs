@@ -114,33 +114,24 @@ namespace ModiBuff.Tests
 		[Test]
 		public void CallbackLocalVarState()
 		{
-			AddGenerator("InitTakeTwoDamageOnTenDamageTaken", (id, genId, name, tag) =>
-			{
-				//TODO To Recipe
-				var callbackStateSave = new CallbackStateSaveRegisterEffect<CallbackType>(
-					CallbackType.CurrentHealthChanged, () =>
-					{
-						float totalDamageTaken = 0f;
+			AddRecipe("InitTakeTwoDamageOnTenDamageTaken")
+				.CallbackStateSave(CallbackType.CurrentHealthChanged, () =>
+				{
+					float totalDamageTaken = 0f;
 
-						return new CallbackStateContext(new HealthChangedEvent(
-							(target, source, health, deltaHealth) =>
+					return new CallbackStateContext(new HealthChangedEvent(
+						(target, source, health, deltaHealth) =>
+						{
+							//Don't count "negative damage/healing damage"
+							if (deltaHealth > 0)
+								totalDamageTaken += deltaHealth;
+							if (totalDamageTaken >= 10)
 							{
-								//Don't count "negative damage/healing damage"
-								if (deltaHealth > 0)
-									totalDamageTaken += deltaHealth;
-								if (totalDamageTaken >= 10)
-								{
-									totalDamageTaken = 0f;
-									target.TakeDamage(2, source);
-								}
-							}), () => totalDamageTaken, stateSet => totalDamageTaken = float.Parse((string)stateSet));
-					});
-
-				var initComponent = new InitComponent(false, new IEffect[] { callbackStateSave }, null);
-
-				return new Modifier(id, genId, name, initComponent, null, null, null, new SingleTargetComponent(),
-					new EffectStateInfo(callbackStateSave), null);
-			});
+								totalDamageTaken = 0f;
+								target.TakeDamage(2, source);
+							}
+						}), () => totalDamageTaken, stateSet => totalDamageTaken = float.Parse((string)stateSet));
+				});
 			Setup();
 
 			Unit.AddModifierSelf("InitTakeTwoDamageOnTenDamageTaken");

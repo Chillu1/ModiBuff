@@ -41,7 +41,7 @@ namespace ModiBuff.Tests
 					})),
 			//ModifierAction.Stack version
 			add => add("HealPerPoisonStack")
-				.Tag(Core.TagType.ZeroDefaultStacks)
+				.Tag(Core.TagType.CustomStack)
 				.Stack(WhenStackEffect.Always)
 				.Effect(new HealEffect(0, HealEffect.EffectState.None,
 					StackEffectType.Effect | StackEffectType.SetStacksBased, 1), EffectOn.Stack)
@@ -64,6 +64,7 @@ namespace ModiBuff.Tests
 			Unit.AddApplierModifier(Recipes.GetGenerator("Poison"), ApplierType.Cast);
 			Unit.TryCast("Poison", Enemy);
 			Enemy.Update(1);
+			Enemy.AddModifierSelf("HealPerPoisonStack"); //Checks for stack behaviour
 			Assert.AreEqual(EnemyHealth - 5 + 1, Enemy.Health);
 
 			Unit.TryCast("Poison", Enemy);

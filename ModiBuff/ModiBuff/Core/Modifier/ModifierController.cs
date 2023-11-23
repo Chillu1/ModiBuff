@@ -123,11 +123,11 @@ namespace ModiBuff.Core
 					var existingModifier = _modifiers[index];
 					//TODO should we update the modifier targets when init/refreshing/stacking?
 					existingModifier.UpdateSource(source);
-					if ((tag & TagType.IsInit) != 0)
+					if (tag.HasTag(TagType.IsInit))
 						existingModifier.Init();
-					if ((tag & TagType.IsRefresh) != 0)
+					if (tag.HasTag(TagType.IsRefresh))
 						existingModifier.Refresh();
-					if ((tag & TagType.IsStack) != 0)
+					if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.CustomStack))
 						existingModifier.Stack();
 
 					existingModifier.UseScheduledCheck();
@@ -152,7 +152,8 @@ namespace ModiBuff.Core
 			_modifiers[_modifiersTop++] = modifier;
 			if (tag.HasTag(TagType.IsInit))
 				modifier.Init();
-			if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.ZeroDefaultStacks))
+			if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.CustomStack)
+			                                && !tag.HasTag(TagType.ZeroDefaultStacks))
 				modifier.Stack();
 
 			modifier.UseScheduledCheck();

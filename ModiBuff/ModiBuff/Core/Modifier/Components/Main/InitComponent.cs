@@ -53,7 +53,7 @@ namespace ModiBuff.Core
 			if (_oneTime && _isInitialized)
 				return;
 
-			//TODO Not ideal, especially since init is called often, and effects will be duplicated in _effects array as well now
+			//TODO Not ideal, especially since init is called often
 			for (int i = 0; i < _registerEffects?.Length; i++)
 				_registerEffects[i].Effect(target, owner);
 

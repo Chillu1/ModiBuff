@@ -134,7 +134,7 @@ namespace ModiBuff.Tests
 			//TODO If we add the modifier again, it will trigger the stack effect, which we don't want
 			//Stack redirection version
 			add => add("StunHealStackReset")
-				.Tag(Core.TagType.ZeroDefaultStacks)
+				.Tag(Core.TagType.CustomStack)
 				.Stack(WhenStackEffect.Always)
 				.Effect(new HealEffect(0, HealEffect.EffectState.ValueIsRevertible,
 					StackEffectType.Effect | StackEffectType.Add, 5), EffectOn.Stack)
@@ -149,7 +149,7 @@ namespace ModiBuff.Tests
 				.Interval(10).Refresh(),
 			//Non-stack version
 			add => add("StunHealStackReset")
-				.Tag(Core.TagType.ZeroDefaultStacks)
+				.Tag(Core.TagType.CustomStack)
 				.Stack(WhenStackEffect.OnMaxStacks, 10000)
 				.Effect(new HealEffect(0, HealEffect.EffectState.ValueIsRevertible,
 					StackEffectType.Effect | StackEffectType.Add, 5), EffectOn.Stack | EffectOn.CallbackEffect)
@@ -174,6 +174,7 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("StunHealStackReset");
 
 			Unit.StatusEffectController.ChangeStatusEffect(0, 0, StatusEffectType.Stun, 5f, Unit);
+			Unit.AddModifierSelf("StunHealStackReset"); //Check stack behaviour
 			Assert.AreEqual(UnitHealth / 2f + 5, Unit.Health);
 
 			Unit.Update(1);
@@ -262,9 +263,9 @@ namespace ModiBuff.Tests
 						}
 					});
 				}),
-			//Stack version, worst version, adding the modifier again will trigger the stack logic
-			//TODO This can be fixed by having a don't trigger stack effect when adding modifier flag?
+			//Stack version
 			add => add("StunnedFourTimesDispelAllStatusEffects")
+				.Tag(TagType.CustomStack)
 				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
 				.Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.Stack)
 				.ModifierAction(ModifierAction.Stack, EffectOn.CallbackEffect)
@@ -284,12 +285,15 @@ namespace ModiBuff.Tests
 			AddRecipe(addFunc);
 			Setup();
 
-			Unit.AddModifierSelf("StunnedFourTimesDispelAllStatusEffects");
+			//Add 3 times to check if adding will add stacks
+			for (int i = 0; i < 3; i++)
+				Unit.AddModifierSelf("StunnedFourTimesDispelAllStatusEffects");
 			Unit.AddModifierSelf("Freeze"); //Different effect to dispel
-			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Freeze));
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
+			Unit.StatusEffectController.ChangeStatusEffect(0, 0, StatusEffectType.Stun, 5f, Unit);
+			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Freeze));
 
-			for (int i = 0; i < 4; i++)
+			for (int i = 0; i < 3; i++)
 				Unit.StatusEffectController.ChangeStatusEffect(0, 0, StatusEffectType.Stun, 5f, Unit);
 
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Freeze));

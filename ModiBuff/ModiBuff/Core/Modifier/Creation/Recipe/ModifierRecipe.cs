@@ -51,6 +51,8 @@ namespace ModiBuff.Core
 		private List<ICheck> _effectCheckList;
 		private List<Func<IUnit, bool>> _effectFuncCheckList;
 
+		private ModifierAction _modifierActions;
+
 		public ModifierRecipe(int id, string name, string displayName, string description, ModifierIdManager idManager)
 		{
 			Id = id;
@@ -354,6 +356,7 @@ namespace ModiBuff.Core
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			ValidateModifierAction(modifierAction, effectOn);
+			_modifierActions |= modifierAction;
 #endif
 			Effect(new ModifierActionEffect(modifierAction, Id), effectOn);
 			return this;
@@ -414,6 +417,16 @@ namespace ModiBuff.Core
 		public ModifierRecipe CallbackState<TCallback>(TCallback callbackType, Func<object> callback)
 		{
 			return Effect(new CallbackStateRegisterEffect<TCallback>(callbackType, callback), EffectOn.Init);
+		}
+
+		/// <summary>
+		///		Registers a callback that can have unique state for each modifier instance, and has savable data
+		///		It will NOT trigger any EffectOn.<see cref="EffectOn.CallbackUnit"/> or <see cref="EffectOn.CallbackEffect"/> effects, only the supplied callback.
+		///		Can be used with other signatures than <see cref="UnitCallback"/>. 
+		/// </summary>
+		public ModifierRecipe CallbackStateSave<TCallback>(TCallback callbackType, Func<CallbackStateContext> @event)
+		{
+			return Effect(new CallbackStateSaveRegisterEffect<TCallback>(callbackType, @event), EffectOn.Init);
 		}
 
 		/// <summary>
@@ -544,8 +557,8 @@ namespace ModiBuff.Core
 			if (WrappersHaveFlag(EffectOn.Stack) && _whenStackEffect == WhenStackEffect.None)
 			{
 				validRecipe = false;
-				Logger.LogError("[ModiBuff] Stack effects set, but no stack effect type set, for modifier: " +
-				                "" + Name + " id: " + Id);
+				Logger.LogError("[ModiBuff] Stack effects set, but no stack effect type set, for modifier: "
+				                + Name + " id: " + Id);
 			}
 
 			if (NoWrappersHaveFlag(EffectOn.Stack) && _whenStackEffect != WhenStackEffect.None)
@@ -558,15 +571,15 @@ namespace ModiBuff.Core
 			if (_refreshInterval && _interval == 0)
 			{
 				validRecipe = false;
-				Logger.LogError("[ModiBuff] Refresh interval set, but interval is 0, for modifier: " +
-				                "" + Name + " id: " + Id);
+				Logger.LogError("[ModiBuff] Refresh interval set, but interval is 0, for modifier: "
+				                + Name + " id: " + Id);
 			}
 
 			if (_refreshDuration && _duration == 0)
 			{
 				validRecipe = false;
-				Logger.LogError("[ModiBuff] Refresh duration set, but duration is 0, for modifier: " +
-				                "" + Name + " id: " + Id);
+				Logger.LogError("[ModiBuff] Refresh duration set, but duration is 0, for modifier: "
+				                + Name + " id: " + Id);
 			}
 
 			ValidateCallbacks(EffectOn.Event, _eventRegisterWrapper);
@@ -581,6 +594,14 @@ namespace ModiBuff.Core
 					"[ModiBuff] ApplierEffect ApplierType set in a modifier, adding this modifier will add " +
 					"the applier effect to the owner because of how modifiers work, use effect (modifier-less-effects) " +
 					"if not desired in modifier: " + Name + " id: " + Id);
+			}
+
+			if (_tag.HasTag(TagType.CustomStack) && !_modifierActions.HasFlag(Core.ModifierAction.Stack))
+			{
+				validRecipe = false;
+				Logger.LogError(
+					"[ModiBuff] CustomStack tag set, but no custom stack modifier action set, for modifier: " + Name +
+					" id: " + Id);
 			}
 
 			if (!validRecipe)

@@ -17,6 +17,7 @@ namespace ModiBuff.Core.Units
 		IsStack = Core.TagType.IsStack,
 		IntervalIgnoresStatusResistance = Core.TagType.IntervalIgnoresStatusResistance,
 		DurationIgnoresStatusResistance = Core.TagType.DurationIgnoresStatusResistance,
+		CustomStack = Core.TagType.CustomStack,
 		LastReserved = Core.TagType.LastReserved,
 
 		LegalTargetSelf = 1ul << 18,

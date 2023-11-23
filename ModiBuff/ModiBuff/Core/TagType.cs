@@ -25,11 +25,15 @@ namespace ModiBuff.Core
 		//Will be decided/fixed on 1.0 release
 
 		/// <summary>
+		///		Modifier won't be stacked when getting added to a unit, only on custom stack actions.
+		/// </summary>
+		CustomStack = 1ul << 6,
+
+		/// <summary>
 		///		One stack is always added and triggered on init, this tag nullifies that.
 		/// </summary>
-		ZeroDefaultStacks = 1ul << 6,
-		Reserved2 = ZeroDefaultStacks << 1,
-		Reserved3 = Reserved2 << 1,
+		ZeroDefaultStacks = CustomStack << 1,
+		Reserved3 = CustomStack << 1,
 		Reserved4 = Reserved3 << 1,
 		Reserved5 = Reserved4 << 1,
 		Reserved6 = Reserved5 << 1,
