@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ModiBuff.Core
@@ -61,8 +62,16 @@ namespace ModiBuff.Core
 				return element.GetDecimal();
 			if (type == typeof(object))
 				return element.GetRawText();
+			if (type == typeof(IReadOnlyDictionary<int, int>))
+			{
+				var dictionary = new Dictionary<int, int>();
+				foreach (var kvp in element.EnumerateObject())
+					dictionary.Add(int.Parse(kvp.Name), kvp.Value.GetInt32());
+				return dictionary;
+			}
+			//TODO Being able to feed custom effect save data types
 
-			Logger.LogError($"[ModiBuff] Unknown ValueType {type}");
+			Logger.LogWarning($"[ModiBuff] Unknown ValueType {type}");
 			return null;
 		}
 #endif

@@ -6,16 +6,16 @@ namespace ModiBuff.Tests
 {
 	public sealed class CentralizedCustomLogicTests : ModifierTests
 	{
-		private readonly RecipeAddFunc _poisonRecipe = add => add("Poison")
+		public static readonly RecipeAddFunc PoisonRecipe = add => add("Poison")
 			.Stack(WhenStackEffect.Always)
-			.Effect(new PoisonDamageEffect(StackEffectType.None, 5), EffectOn.Interval | EffectOn.Stack)
+			.Effect(new PoisonDamageEffect(), EffectOn.Interval | EffectOn.Stack)
 			.Interval(1)
 			.Remove(5).Refresh();
 
 		[Test]
 		public void PoisonEffect()
 		{
-			AddRecipe(_poisonRecipe);
+			AddRecipe(PoisonRecipe);
 			Setup();
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("Poison"), ApplierType.Cast);
@@ -56,7 +56,7 @@ namespace ModiBuff.Tests
 		[TestCaseSource(nameof(healBasedOnPoisonStacksEventRecipes))]
 		public void HealBasedOnPoisonStacksEvent(RecipeAddFunc recipe)
 		{
-			AddRecipe(_poisonRecipe);
+			AddRecipe(PoisonRecipe);
 			AddRecipe(recipe);
 			Setup();
 
@@ -75,7 +75,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HealBasedOnPoisonStacks()
 		{
-			AddRecipe(_poisonRecipe);
+			AddRecipe(PoisonRecipe);
 			AddRecipe("PoisonHealHeal")
 				.Stack(WhenStackEffect.Always)
 				.Effect(new HealEffect(0, HealEffect.EffectState.None,
@@ -99,7 +99,7 @@ namespace ModiBuff.Tests
 		[Test]
 		public void PoisonDamageThornsEvent()
 		{
-			AddRecipe(_poisonRecipe);
+			AddRecipe(PoisonRecipe);
 			AddRecipe("PoisonThorns")
 				.Callback(new Callback<CallbackType>(CallbackType.PoisonDamage,
 					new PoisonEvent((target, source, stacks, totalStacks, damage) =>

@@ -106,5 +106,65 @@ namespace ModiBuff.Tests
 			Unit.TryCast(IdManager.GetId("InitDamage"), Enemy);
 			Assert.AreEqual(EnemyHealth - 5 - 5 * Unit.MaxEventCount, Enemy.Health);
 		}
+
+		//[Test]
+		public void SelfApplyIfNotCast()
+		{
+			//Trigger duration timer, if duration timer ends, damages self
+			//If we cast this modifier, remove the debuff modifier of us, and apply the damage effect to the enemy 
+
+			Recipes.Register("DurationDamageSelfCast");
+			int modId = IdManager.GetId("DurationDamageSelfCast");
+
+			AddRecipe("DurationDamageSelfCast")
+				.Effect(new ApplierEffect("InitDamage"), EffectOn.Duration | EffectOn.CallbackEffect)
+				.Remove(1)
+				.CallbackEffect(CallbackType.OnCast, effect => new CastEvent((target, source, id) =>
+				{
+					if (id == modId)
+						switch (effect)
+						{
+							case ApplierEffect applierEffect:
+								applierEffect.Effect(target, source);
+								break;
+							case RemoveEffect removeEffect:
+								removeEffect.Effect(target, source);
+								break;
+						}
+				}))
+				.Remove(RemoveEffectOn.CallbackEffect);
+
+			//AddEffect("DurationDamageCast", new ApplierEffect("DurationDamageSelfCast", ApplierType.Cast));
+			AddRecipe("DurationDamageCast")
+				.Effect(new ApplierEffect("DurationDamageSelfCast", ApplierType.Cast), EffectOn.Init)
+				.RemoveApplier(RemoveEffectOn.CallbackEffect, ApplierType.Cast, false)
+				.CallbackEffect(CallbackType.OnCast, effect => new CastEvent((target, source, id) =>
+				{
+					if (id == modId)
+						effect.Effect(target, source);
+				}));
+			//.Effect(new RemoveEffect("DurationDamageSelfCast"), EffectOn.Init);
+			Setup();
+
+			//Unit.AddEffectApplier("DurationDamageCast");
+			//Unit.TryCastEffect("DurationDamageCast", Unit); //Adds modifier, starts duration
+			Unit.AddApplierModifier(Recipes.GetGenerator("DurationDamageCast"), ApplierType.Cast);
+			Unit.TryCast("DurationDamageCast", Unit); //Adds modifier, starts duration
+
+			Unit.TryCast("DurationDamageSelfCast", Enemy); //Removes modifier, applies damage to enemy
+			Unit.Update(0);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+			//TODO Enemy has SelfCast (shouldn't), Unit doesn't get his appliers removed
+			Assert.False(Unit.ContainsModifier("DurationDamageSelfCast"));
+			Assert.False(Unit.ContainsApplier("DurationDamageSelfCast"));
+
+			//Unit.TryCastEffect("DurationDamageCast", Unit); //Adds modifier, starts duration
+			Unit.TryCast("DurationDamageCast", Unit);
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Assert.False(Unit.ContainsModifier("DurationDamageSelfCast"));
+			Assert.False(Unit.ContainsApplier("DurationDamageSelfCast"));
+		}
 	}
 }

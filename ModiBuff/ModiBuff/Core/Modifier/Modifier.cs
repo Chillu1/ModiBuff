@@ -319,7 +319,8 @@ namespace ModiBuff.Core
 			if (data.EffectCheckSaveData != null)
 				_effectCheck?.LoadState(data.EffectCheckSaveData.Value);
 
-			_effectSaveState.LoadState(data.EffectsSaveData);
+			if (data.EffectsSaveData != null)
+				_effectSaveState.LoadState(data.EffectsSaveData);
 		}
 
 		public void ResetState()

@@ -38,11 +38,23 @@ namespace ModiBuff.Tests
 				_saveController.Save(GameState.SaveState(IdManager, EffectIdManager, new[] { unit })), gameStateFile);
 		}
 
+		private void SaveGameState(string gameStateFile, params Unit[] units)
+		{
+			_saveController.SaveToPath(_saveController.Save(GameState.SaveState(IdManager, EffectIdManager, units)),
+				gameStateFile);
+		}
+
 		private void LoadGameState(string gameStateFile, out Unit loadedUnit)
 		{
 			var loadDataGameState = _saveController.LoadFromPath<GameState.SaveData>(gameStateFile);
 			GameState.LoadState(loadDataGameState, IdManager, EffectIdManager, out var loadedUnits);
 			loadedUnit = loadedUnits[0];
+		}
+
+		private void LoadGameState(string gameStateFile, out Unit[] loadedUnits)
+		{
+			var loadDataGameState = _saveController.LoadFromPath<GameState.SaveData>(gameStateFile);
+			GameState.LoadState(loadDataGameState, IdManager, EffectIdManager, out loadedUnits);
 		}
 
 		[Test]
@@ -211,7 +223,7 @@ namespace ModiBuff.Tests
 				SaveGameState(gameStateFile, Unit);
 			}
 
-			LoadGameState(gameStateFile, out var loadedUnit);
+			LoadGameState(gameStateFile, out Unit loadedUnit);
 
 			loadedUnit.Update(1);
 			Assert.AreEqual(UnitHealth - 10, loadedUnit.Health);
@@ -241,7 +253,7 @@ namespace ModiBuff.Tests
 				SaveGameState(gameStateFile, Unit);
 			}
 
-			LoadGameState(gameStateFile, out var loadedUnit);
+			LoadGameState(gameStateFile, out Unit loadedUnit);
 
 			loadedUnit.TryCast("DoT", loadedUnit);
 			loadedUnit.TryCast("DoTHealthCost", loadedUnit);
@@ -267,7 +279,7 @@ namespace ModiBuff.Tests
 				SaveGameState(gameStateFile, Unit);
 			}
 
-			LoadGameState(gameStateFile, out var loadedUnit);
+			LoadGameState(gameStateFile, out Unit loadedUnit);
 
 			loadedUnit.TryCastEffect("InitBigDamage", loadedUnit);
 			Assert.AreEqual(UnitHealth - 10, loadedUnit.Health);
@@ -296,7 +308,7 @@ namespace ModiBuff.Tests
 				SaveGameState(gameStateFile, Unit);
 			}
 
-			LoadGameState(gameStateFile, out var loadedUnit);
+			LoadGameState(gameStateFile, out Unit loadedUnit);
 
 			loadedUnit.AddModifierSelf("InitHeal");
 			Assert.AreEqual(UnitHealth - damage + 5 + 2 + 5 + 4, loadedUnit.Health);
@@ -353,6 +365,44 @@ namespace ModiBuff.Tests
 
 			loadedUnit.TakeDamage(5, loadedUnit);
 			Assert.AreEqual(UnitHealth - 5 - 5 - 5, loadedUnit.Health);
+		}
+
+		[Test]
+		public void SavePoisonEffectLoad()
+		{
+			AddRecipe(CentralizedCustomLogicTests.PoisonRecipe);
+			AddRecipe("PoisonThorns")
+				.Callback(new Callback<CallbackType>(CallbackType.PoisonDamage,
+					new PoisonEvent((target, source, stacks, totalStacks, damage) =>
+					{
+						((IAttackable<float, float>)source).TakeDamage(damage, target);
+					})));
+			Setup();
+
+			const string gameStateFile = "poisonEffectGameStateTest.json";
+
+			//TODO save will not have unit id redirection
+			if (!File.Exists(_saveController.Path + "/" + gameStateFile))
+			{
+				Ally.AddApplierModifier(Recipes.GetGenerator("Poison"), ApplierType.Cast);
+				Enemy.AddApplierModifier(Recipes.GetGenerator("Poison"), ApplierType.Cast);
+				Unit.AddModifierSelf("PoisonThorns");
+
+				Ally.TryCast("Poison", Unit);
+				Enemy.TryCast("Poison", Unit);
+				Enemy.TryCast("Poison", Unit);
+				SaveGameState(gameStateFile, Ally, Enemy, Unit);
+			}
+
+			LoadGameState(gameStateFile, out Unit[] loadedUnits);
+
+			var loadedAlly = loadedUnits[0];
+			var loadedEnemy = loadedUnits[1];
+			var loadedUnit = loadedUnits[2];
+			loadedUnit.Update(1);
+			Assert.AreEqual(UnitHealth - 5 - 5 * 2, loadedUnit.Health);
+			Assert.AreEqual(AllyHealth - 5, loadedAlly.Health);
+			Assert.AreEqual(EnemyHealth - 5 * 2, loadedEnemy.Health);
 		}
 
 		//TODO GenIds will be wrong in some places (StatusEffect), how to fix, feed correct id & genId somehow?

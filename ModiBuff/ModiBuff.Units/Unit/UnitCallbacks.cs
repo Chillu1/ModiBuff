@@ -8,6 +8,8 @@ namespace ModiBuff.Core.Units
 
 	public delegate void UpdateTimerEvent();
 
+	public delegate void CastEvent(IUnit target, IUnit source, int castId);
+
 	public delegate void DispelEvent(IUnit target, IUnit source, TagType tag);
 
 	public delegate void StrongDispelEvent(IUnit target, IUnit source);
@@ -63,6 +65,7 @@ namespace ModiBuff.Core.Units
 		private readonly List<DamageChangedEvent> _damageChangedEvents;
 		private readonly List<StatusEffectEvent> _statusEffectAddedEvents;
 		private readonly List<StatusEffectEvent> _statusEffectRemovedEvents;
+		private readonly List<CastEvent> _onCastEvents;
 
 		private readonly List<UpdateTimerEvent> _updateTimerCallbacks;
 
@@ -226,6 +229,10 @@ namespace ModiBuff.Core.Units
 					}
 
 					break;
+				case CallbackType.OnCast:
+					if (callback.CheckCallback(out CastEvent castEvent))
+						_onCastEvents.Add(castEvent);
+					break;
 				case CallbackType.Update:
 					if (callback.CheckCallback(out UpdateTimerEvent updateTimerEvent))
 					{
@@ -274,6 +281,9 @@ namespace ModiBuff.Core.Units
 					var statusEffectRemovedEvent = (StatusEffectEvent)callback;
 					if (_statusEffectRemovedEvents.Remove(statusEffectRemovedEvent))
 						_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
+					break;
+				case CallbackType.OnCast:
+					_onCastEvents.Remove((CastEvent)callback);
 					break;
 				case CallbackType.Update:
 					var updateTimerEvent = (UpdateTimerEvent)callback;

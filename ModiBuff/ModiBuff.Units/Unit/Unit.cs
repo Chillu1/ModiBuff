@@ -99,6 +99,7 @@ namespace ModiBuff.Core.Units
 			_damageChangedEvents = new List<DamageChangedEvent>();
 			_statusEffectAddedEvents = new List<StatusEffectEvent>();
 			_statusEffectRemovedEvents = new List<StatusEffectEvent>();
+			_onCastEvents = new List<CastEvent>();
 
 			_updateTimerCallbacks = new List<UpdateTimerEvent>();
 
@@ -344,8 +345,12 @@ namespace ModiBuff.Core.Units
 				return;
 
 			if (++_onCastCounter <= MaxEventCount)
+			{
 				for (int i = 0; i < _onCastEffects.Count; i++)
 					_onCastEffects[i].Effect(target, this);
+				for (int i = 0; i < _onCastEvents.Count; i++)
+					_onCastEvents[i](target, this, modifierId);
+			}
 
 			modifierTarget.ModifierController.Add(modifierId, modifierTarget, this);
 
@@ -460,7 +465,7 @@ namespace ModiBuff.Core.Units
 				_beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects,
 				_strongDispelCallbacks, _strongHitCallbacks, _strongHitUnitCallbacks, _poisonEvents,
 				_dispelEvents, _strongDispelEvents, _healthChangedEvents, _damageChangedEvents,
-				_statusEffectAddedEvents, _statusEffectRemovedEvents, _updateTimerCallbacks);
+				_statusEffectAddedEvents, _statusEffectRemovedEvents, _onCastEvents, _updateTimerCallbacks);
 
 			_targetsInRange.Clear();
 			for (int i = 0; i < _auraModifiers.Count; i++)

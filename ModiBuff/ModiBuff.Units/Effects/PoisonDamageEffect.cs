@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class PoisonDamageEffect : IStackEffect, IEffect, IStateEffect,
-			IMetaEffectOwner<PoisonDamageEffect, float, int, float>, IPostEffectOwner<PoisonDamageEffect, float, int>
-		//TODO SaveLoad
+	public sealed class PoisonDamageEffect : IStackEffect, IStateEffect, IEffect,
+		ISavableEffect<PoisonDamageEffect.SaveData>, IMetaEffectOwner<PoisonDamageEffect, float, int, float>,
+		IPostEffectOwner<PoisonDamageEffect, float, int>
 	{
 		private const float PoisonDamage = 5f;
 
@@ -19,7 +20,7 @@ namespace ModiBuff.Core.Units
 		private int _totalStacks;
 		private readonly Dictionary<IUnit, int> _poisonStacksPerUnit;
 
-		public PoisonDamageEffect(StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
+		public PoisonDamageEffect(StackEffectType stackEffect = StackEffectType.None, float stackValue = -1,
 			Targeting targeting = Targeting.TargetSource) : this(stackEffect, stackValue, targeting, null, null)
 		{
 		}
@@ -116,5 +117,28 @@ namespace ModiBuff.Core.Units
 			new PoisonDamageEffect(_stackEffect, _stackValue, _targeting, _metaEffects, _postEffects);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
+
+		public object SaveState() => new SaveData(_extraDamage,
+			_poisonStacksPerUnit.ToDictionary(k => ((IIdOwner)k.Key).Id, v => v.Value));
+
+		public void LoadState(object saveData)
+		{
+			var poisonSaveData = (SaveData)saveData;
+			_extraDamage = poisonSaveData.ExtraDamage;
+			foreach (var kvp in poisonSaveData.PoisonStacksPerUnitId)
+				_poisonStacksPerUnit.Add(UnitHelper.GetUnit(kvp.Key), kvp.Value);
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly float ExtraDamage;
+			public readonly IReadOnlyDictionary<int, int> PoisonStacksPerUnitId;
+
+			public SaveData(float extraDamage, IReadOnlyDictionary<int, int> poisonStacksPerUnitId)
+			{
+				ExtraDamage = extraDamage;
+				PoisonStacksPerUnitId = poisonStacksPerUnitId;
+			}
+		}
 	}
 }

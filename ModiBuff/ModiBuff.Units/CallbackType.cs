@@ -10,6 +10,7 @@ namespace ModiBuff.Core.Units
 		StrongHit,
 		StatusEffectAdded,
 		StatusEffectRemoved,
+		OnCast,
 
 		Update,
 	}
