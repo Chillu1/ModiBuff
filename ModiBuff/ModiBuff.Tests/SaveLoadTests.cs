@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
@@ -370,6 +371,14 @@ namespace ModiBuff.Tests
 		[Test]
 		public void SavePoisonEffectLoad()
 		{
+			SerializationExtensions.AddCustomValueType<IReadOnlyDictionary<int, int>>(element =>
+			{
+				var dictionary = new Dictionary<int, int>();
+				foreach (var kvp in element.EnumerateObject())
+					dictionary.Add(int.Parse(kvp.Name), kvp.Value.GetInt32());
+				return dictionary;
+			});
+
 			AddRecipe(CentralizedCustomLogicTests.PoisonRecipe);
 			AddRecipe("PoisonThorns")
 				.Callback(new Callback<CallbackType>(CallbackType.PoisonDamage,

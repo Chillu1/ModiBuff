@@ -7,6 +7,19 @@ namespace ModiBuff.Core
 	public static class SerializationExtensions
 	{
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
+		private static readonly Dictionary<Type, Func<System.Text.Json.JsonElement, object>> customValueTypes =
+			new Dictionary<Type, Func<System.Text.Json.JsonElement, object>>();
+
+		public static void AddCustomValueType<T>(Func<System.Text.Json.JsonElement, object> converter)
+		{
+			AddCustomValueType(typeof(T), converter);
+		}
+
+		public static void AddCustomValueType(Type type, Func<System.Text.Json.JsonElement, object> converter)
+		{
+			customValueTypes.Add(type, converter);
+		}
+
 		public static bool FromAnonymousJsonObjectToSaveData(this object fromLoad, ISavable toLoad)
 		{
 			if (!(fromLoad is System.Text.Json.JsonElement jsonElement))
@@ -69,7 +82,12 @@ namespace ModiBuff.Core
 					dictionary.Add(int.Parse(kvp.Name), kvp.Value.GetInt32());
 				return dictionary;
 			}
-			//TODO Being able to feed custom effect save data types
+
+			foreach (var kvp in customValueTypes)
+			{
+				if (type == kvp.Key)
+					return kvp.Value(element);
+			}
 
 			Logger.LogWarning($"[ModiBuff] Unknown ValueType {type}");
 			return null;
