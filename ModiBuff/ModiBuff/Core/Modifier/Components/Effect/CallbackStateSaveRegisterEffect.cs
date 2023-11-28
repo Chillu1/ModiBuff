@@ -2,13 +2,14 @@ using System;
 
 namespace ModiBuff.Core
 {
-	public struct CallbackStateContext
+	public struct CallbackStateContext<TObjectSaveData>
 	{
 		public readonly object Callback;
-		public readonly Func<object> StateGetter;
-		public readonly Action<object> StateSetter;
+		public readonly Func<TObjectSaveData> StateGetter;
+		public readonly Action<TObjectSaveData> StateSetter;
 
-		public CallbackStateContext(object callback, Func<object> stateGetter, Action<object> stateSetter)
+		public CallbackStateContext(object callback, Func<TObjectSaveData> stateGetter,
+			Action<TObjectSaveData> stateSetter)
 		{
 			Callback = callback;
 			StateGetter = stateGetter;
@@ -16,21 +17,23 @@ namespace ModiBuff.Core
 		}
 	}
 
-	public sealed class CallbackStateSaveRegisterEffect<TCallback> : IRevertEffect, IEffect,
-		IRegisterEffect, IShallowClone<IEffect>, ISavable<CallbackStateSaveRegisterEffect<TCallback>.SaveData>,
-		IEffectStateInfo<CallbackStateSaveRegisterEffect<TCallback>.Data>
+	public sealed class CallbackStateSaveRegisterEffect<TCallback, TEffectStateData> : IRevertEffect, IEffect,
+		IRegisterEffect, IShallowClone<IEffect>,
+		ISavable<CallbackStateSaveRegisterEffect<TCallback, TEffectStateData>.SaveData>,
+		IEffectStateInfo<CallbackStateSaveRegisterEffect<TCallback, TEffectStateData>.Data>
 	{
 		public bool IsRevertible => true;
 
 		private readonly TCallback _callbackType;
-		private readonly Func<CallbackStateContext> _event;
+		private readonly Func<CallbackStateContext<TEffectStateData>> _event;
 		private readonly object _callback;
-		private readonly Func<object> _stateGetter;
-		private readonly Action<object> _stateSetter;
+		private readonly Func<TEffectStateData> _stateGetter;
+		private readonly Action<TEffectStateData> _stateSetter;
 
 		private bool _isRegistered;
 
-		public CallbackStateSaveRegisterEffect(TCallback callbackType, Func<CallbackStateContext> @event)
+		public CallbackStateSaveRegisterEffect(TCallback callbackType,
+			Func<CallbackStateContext<TEffectStateData>> @event)
 		{
 			_callbackType = callbackType;
 			_event = @event;
@@ -75,7 +78,9 @@ namespace ModiBuff.Core
 
 		public Data GetEffectData() => new Data(_stateGetter());
 
-		public IEffect ShallowClone() => new CallbackStateSaveRegisterEffect<TCallback>(_callbackType, _event);
+		public IEffect ShallowClone() =>
+			new CallbackStateSaveRegisterEffect<TCallback, TEffectStateData>(_callbackType, _event);
+
 		object IShallowClone.ShallowClone() => ShallowClone();
 
 		public object SaveState() => new SaveData(_stateGetter());
@@ -83,19 +88,19 @@ namespace ModiBuff.Core
 
 		public readonly struct Data
 		{
-			public readonly object State;
+			public readonly TEffectStateData State;
 
-			public Data(object state) => State = state;
+			public Data(TEffectStateData state) => State = state;
 		}
 
 		public readonly struct SaveData
 		{
-			public readonly object State;
+			public readonly TEffectStateData State;
 
 #if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public SaveData(object state) => State = state;
+			public SaveData(TEffectStateData state) => State = state;
 		}
 	}
 }

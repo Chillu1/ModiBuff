@@ -119,7 +119,7 @@ namespace ModiBuff.Tests
 				{
 					float totalDamageTaken = 0f;
 
-					return new CallbackStateContext(new HealthChangedEvent(
+					return new CallbackStateContext<float>(new HealthChangedEvent(
 						(target, source, health, deltaHealth) =>
 						{
 							//Don't count "negative damage/healing damage"
@@ -130,21 +130,23 @@ namespace ModiBuff.Tests
 								totalDamageTaken = 0f;
 								target.TakeDamage(2, source);
 							}
-						}), () => totalDamageTaken, stateSet => totalDamageTaken = float.Parse((string)stateSet));
+						}), () => totalDamageTaken, stateSet => totalDamageTaken = stateSet);
 				});
 			Setup();
 
 			Unit.AddModifierSelf("InitTakeTwoDamageOnTenDamageTaken");
 			Unit.TakeDamage(5, Unit);
 
-			var state = Unit.ModifierController.GetEffectState<CallbackStateSaveRegisterEffect<CallbackType>.Data>(
-				IdManager.GetId("InitTakeTwoDamageOnTenDamageTaken"));
-			Assert.AreEqual(5, (float)state.State);
+			var state = Unit.ModifierController
+				.GetEffectState<CallbackStateSaveRegisterEffect<CallbackType, float>.Data>(
+					IdManager.GetId("InitTakeTwoDamageOnTenDamageTaken"));
+			Assert.AreEqual(5, state.State);
 
 			Unit.TakeDamage(5, Unit);
-			var state2 = Unit.ModifierController.GetEffectState<CallbackStateSaveRegisterEffect<CallbackType>.Data>(
-				IdManager.GetId("InitTakeTwoDamageOnTenDamageTaken"));
-			Assert.AreEqual(2, (float)state2.State);
+			var state2 = Unit.ModifierController
+				.GetEffectState<CallbackStateSaveRegisterEffect<CallbackType, float>.Data>(
+					IdManager.GetId("InitTakeTwoDamageOnTenDamageTaken"));
+			Assert.AreEqual(2, state2.State);
 		}
 	}
 }

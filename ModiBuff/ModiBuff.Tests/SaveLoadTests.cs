@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using ModiBuff.Core;
@@ -344,7 +345,7 @@ namespace ModiBuff.Tests
 				{
 					float totalDamageTaken = 0f; //state != null ? (float)state : 0f;
 
-					return new CallbackStateContext(new HealthChangedEvent(
+					return new CallbackStateContext<float>(new HealthChangedEvent(
 						(target, source, health, deltaHealth) =>
 						{
 							//Don't count "negative damage/healing damage"
@@ -355,7 +356,7 @@ namespace ModiBuff.Tests
 								totalDamageTaken = 0f;
 								target.TakeDamage(5, source);
 							}
-						}), () => totalDamageTaken, stateSet => totalDamageTaken = float.Parse((string)stateSet));
+						}), () => totalDamageTaken, stateSet => totalDamageTaken = stateSet);
 				});
 			Setup();
 
@@ -412,6 +413,63 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 - 5 * 2, loadedUnit.Health);
 			Assert.AreEqual(AllyHealth - 5, loadedAlly.Health);
 			Assert.AreEqual(EnemyHealth - 5 * 2, loadedEnemy.Health);
+		}
+
+		[Test]
+		public void SaveCallbackLocalTupleVarState()
+		{
+			SerializationExtensions.AddCustomValueType<Tuple<float, float>>(element =>
+			{
+				float[] array = new float[2];
+				int i = 0;
+				foreach (var kvp in element.EnumerateObject())
+					array[i++] = kvp.Value.GetSingle();
+				return new Tuple<float, float>(array[0], array[1]);
+			});
+
+			AddRecipe("InitTakeFiveDamageOnTenDamageTaken")
+				.CallbackStateSave(CallbackType.CurrentHealthChanged, () =>
+				{
+					float totalDamageTaken = 0f;
+					float maxDamageTaken = 0f;
+
+					return new CallbackStateContext<Tuple<float, float>>(new HealthChangedEvent(
+							(target, source, health, deltaHealth) =>
+							{
+								//Don't count "negative damage/healing damage"
+								if (deltaHealth > 0)
+								{
+									totalDamageTaken += deltaHealth;
+									if (deltaHealth > maxDamageTaken)
+									{
+										totalDamageTaken = 0f;
+										maxDamageTaken = deltaHealth;
+									}
+								}
+
+								if (totalDamageTaken >= 10)
+								{
+									totalDamageTaken = 0f;
+									target.TakeDamage(5, source);
+								}
+							}),
+						() => new Tuple<float, float>(totalDamageTaken, maxDamageTaken),
+						stateSet =>
+						{
+							totalDamageTaken = stateSet.Item1;
+							maxDamageTaken = stateSet.Item2;
+						});
+				});
+			Setup();
+
+			Unit.AddModifierSelf("InitTakeFiveDamageOnTenDamageTaken");
+			Unit.TakeDamage(5, Unit);
+			Unit.TakeDamage(5, Unit);
+
+			SaveLoadGameState(Unit, out var loadedUnit);
+
+			loadedUnit.TakeDamage(5, loadedUnit);
+			Assert.AreEqual(UnitHealth - 5 - 5 - 5 - 5, loadedUnit.Health);
 		}
 
 		//TODO GenIds will be wrong in some places (StatusEffect), how to fix, feed correct id & genId somehow?

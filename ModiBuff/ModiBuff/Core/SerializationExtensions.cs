@@ -73,8 +73,6 @@ namespace ModiBuff.Core
 				return element.GetInt16();
 			if (type == typeof(decimal))
 				return element.GetDecimal();
-			if (type == typeof(object))
-				return element.GetRawText();
 			if (type == typeof(IReadOnlyDictionary<int, int>))
 			{
 				var dictionary = new Dictionary<int, int>();
@@ -88,6 +86,9 @@ namespace ModiBuff.Core
 				if (type == kvp.Key)
 					return kvp.Value(element);
 			}
+
+			if (type == typeof(object))
+				return element.GetRawText();
 
 			Logger.LogWarning($"[ModiBuff] Unknown ValueType {type}");
 			return null;

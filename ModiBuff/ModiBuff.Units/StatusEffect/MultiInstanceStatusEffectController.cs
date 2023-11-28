@@ -301,7 +301,13 @@ namespace ModiBuff.Core.Units
 			public static StatusEffectInstance LoadState(long data)
 			{
 				var loadData = SaveData.LoadDoubleCantor(data);
-				return new StatusEffectInstance(loadData.Item1, loadData.Item2, loadData.Item3);
+				//TODO Need to update the old genId to the current genId.
+				//We need to store 3 things: sourceUnitId, genId, and Id. To figure out the new genId
+				//Because we need to fetch the new genId from the source unit by id & old genId
+				int genId = loadData.Item1;
+				int id = loadData.Item2;
+				int statusEffectTypeInt = loadData.Item3;
+				return new StatusEffectInstance(id, genId, statusEffectTypeInt);
 			}
 
 			public bool Equals(StatusEffectInstance other)
@@ -355,7 +361,6 @@ namespace ModiBuff.Core.Units
 
 		public readonly struct SaveData
 		{
-			//TODO GenId of this will be wrong, since we refresh the genId counters
 			public readonly IReadOnlyDictionary<long, float> LegalActionsTimers;
 			public readonly IReadOnlyList<int> LegalActionTypeCounters;
 			public readonly LegalAction LegalActions;
