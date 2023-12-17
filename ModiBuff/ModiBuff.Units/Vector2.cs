@@ -20,6 +20,11 @@ namespace ModiBuff.Core.Units
 			return (float)Math.Sqrt(DistanceToSquared(other));
 		}
 
+		public float Distance()
+		{
+			return (float)Math.Sqrt(X * X + Y * Y);
+		}
+
 		public float DistanceToSquared(Vector2 other)
 		{
 			float dx = X - other.X;
@@ -35,6 +40,11 @@ namespace ModiBuff.Core.Units
 		public static Vector2 operator *(Vector2 a, float b)
 		{
 			return new Vector2(a.X * b, a.Y * b);
+		}
+
+		public static Vector2 Abs(Vector2 a)
+		{
+			return new Vector2(Math.Abs(a.X), Math.Abs(a.Y));
 		}
 
 		public bool Equals(Vector2 other)
@@ -59,6 +69,14 @@ namespace ModiBuff.Core.Units
 		{
 			int xComparison = X.CompareTo(other.X);
 			return xComparison != 0 ? xComparison : Y.CompareTo(other.Y);
+		}
+	}
+
+	public static class Vector2Extensions
+	{
+		public static Vector2 Abs(this Vector2 a)
+		{
+			return new Vector2(Math.Abs(a.X), Math.Abs(a.Y));
 		}
 	}
 }

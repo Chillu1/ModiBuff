@@ -32,7 +32,7 @@ manipulation of effects on entities.
 
 **Library goals:**
 
-* Capable of creating very sopisticated modifiers
+* Capable of creating very sophisticated modifiers
 * Modifiers being fast
 * Creating them easily
 
@@ -57,7 +57,7 @@ This library solves that, but also allows for more complex and deeper modifiers 
 
 # Features
 
-* No GC/heap allocations (fully pooled with state reset)
+* No GC/runtime heap allocations (fully pooled with state reset)
 * Low memory usage (2-5 MB for 10_000 modifiers)
 * Fast effects [10_000 damage modifiers in 0.24ms](#benchmarks)
 * Fast iteration [10_000 interval modifiers & 10_000 units in 1.37ms](#benchmarks)
@@ -1189,6 +1189,10 @@ by using `Config.UseDictionaryIndexes`, at a small performance cost.
 Q: There's too much code duplication in `ModiBuff.Units` Effects, why not use inheritance or something else?  
 A: Not all effects use stack or targeting logic, and post/meta effects can have different signatures.
 So it's better to have a bit of code duplication that force every effect into the same basket.
+
+Q: What about multi-threading?  
+A: ModiBuff isn't thread safe, and currently has no concurrency support. This might be a subject of change after
+the 1.0 release.
 
 Q: My stack effect is not working, what's wrong?  
 A: StackEffectType needs to be set in all: `IEffect` (ex. DamageEffect), `Recipe.Effect.EffectOn.Stack`

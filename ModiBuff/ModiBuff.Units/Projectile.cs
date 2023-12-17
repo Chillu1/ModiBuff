@@ -2,10 +2,11 @@ namespace ModiBuff.Core.Units
 {
 	//TODO Should depend on/be created by the Unit?
 	public sealed class Projectile : IUnit, IPosition<Vector2>, IMovable<Vector2>,
-		IInitialPosition<Vector2>, IUpdatable
+		IInitialPosition<Vector2>, ITravelDistance<Vector2>, IUpdatable
 	{
 		public Vector2 Position { get; private set; }
 		public Vector2 InitialPosition { get; }
+		public Vector2 DistanceTraveled { get; private set; }
 
 		private readonly IUnit _source;
 		private readonly int[] _modifierIds;
@@ -24,7 +25,12 @@ namespace ModiBuff.Core.Units
 		}
 
 		public void Move(float x, float y) => Move(new Vector2(x, y));
-		public void Move(Vector2 value) => Position += value;
+
+		public void Move(Vector2 value)
+		{
+			Position += value;
+			DistanceTraveled += Vector2.Abs(value);
+		}
 
 		public void Hit(IUnit unit)
 		{

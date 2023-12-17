@@ -5,7 +5,7 @@ namespace ModiBuff.Core
 {
 	public sealed class ApplierEffect : IStackEffect, IEffect
 	{
-		public ApplierType ApplierType => _applierType;
+		public bool HasApplierType => _applierType != ApplierType.None;
 
 		private readonly int _modifierId;
 		private readonly ApplierType _applierType;

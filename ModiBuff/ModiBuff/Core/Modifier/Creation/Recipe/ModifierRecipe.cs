@@ -601,7 +601,7 @@ namespace ModiBuff.Core
 			ValidateCallbacks(EffectOn.CallbackEffectUnits, _callbackEffectUnitsRegisterWrapper);
 
 			if (_effectWrappers.Exists(w =>
-				    w.GetEffect() is ApplierEffect applierEffect && applierEffect.ApplierType != ApplierType.None))
+				    w.GetEffect() is ApplierEffect applierEffect && applierEffect.HasApplierType))
 			{
 				Logger.LogWarning(
 					"[ModiBuff] ApplierEffect ApplierType set in a modifier, adding this modifier will add " +

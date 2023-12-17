@@ -295,7 +295,7 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-		public void UnitProjectileSavedState_DamageBasedOnDistanceMoved()
+		public void UnitProjectileSavedState_DamageBasedOnPositionDifference()
 		{
 			AddRecipe("InitDamageDistanceMultiplier")
 				.Effect(new DamageEffect(5).SetMetaEffects(new DistanceMultiplierMetaEffect(10f, 1f)), EffectOn.Init);
@@ -304,6 +304,22 @@ namespace ModiBuff.Tests
 			Enemy.Move(10, 0);
 			var projectile = new Projectile(Vector2.Zero, Unit, IdManager.GetId("InitDamageDistanceMultiplier"));
 			projectile.Move(10, 0);
+			projectile.Hit(Enemy);
+
+			Assert.AreEqual(EnemyHealth - 5 * 2, Enemy.Health);
+		}
+
+		[Test]
+		public void UnitProjectileSavedState_DamageBasedOnDistanceMoved()
+		{
+			AddRecipe("InitDamageDistanceMultiplier")
+				.Effect(new DamageEffect(5).SetMetaEffects(new DistanceTraveledMultiplierMetaEffect(10f, 1f)),
+					EffectOn.Init);
+			Setup();
+
+			var projectile = new Projectile(Vector2.Zero, Unit, IdManager.GetId("InitDamageDistanceMultiplier"));
+			projectile.Move(5, 0);
+			projectile.Move(-5, 0);
 			projectile.Hit(Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5 * 2, Enemy.Health);
