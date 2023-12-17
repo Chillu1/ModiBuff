@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
-	public sealed class ApplierEffect : IStackEffect, IEffect
+	public sealed class ApplierEffect : IStackEffect, IEffect, IMetaEffectOwner<ApplierEffect, int, int>
 	{
 		public bool HasApplierType => _applierType != ApplierType.None;
 
@@ -11,6 +11,7 @@ namespace ModiBuff.Core
 		private readonly ApplierType _applierType;
 		private readonly bool _hasApplyChecks;
 		private readonly Targeting _targeting;
+		private IMetaEffect<int, int>[] _metaEffects;
 
 		public ApplierEffect(string modifierName, ApplierType applierType = ApplierType.None,
 			bool hasApplyChecks = false, Targeting targeting = Targeting.TargetSource)
@@ -48,9 +49,19 @@ namespace ModiBuff.Core
 			_targeting = targeting;
 		}
 
+		public ApplierEffect SetMetaEffects(params IMetaEffect<int, int>[] metaEffects)
+		{
+			_metaEffects = metaEffects;
+			return this;
+		}
+
 		public void Effect(IUnit target, IUnit source)
 		{
-			_targeting.UpdateTargetSource(ref target, ref source);
+			_targeting.UpdateTargetSource(target, source, out var effectTarget, out var effectSource);
+			int modifierId = _modifierId;
+			if (_metaEffects != null)
+				foreach (var metaEffect in _metaEffects)
+					modifierId = metaEffect.Effect(modifierId, target, source);
 
 			switch (_applierType)
 			{
@@ -58,30 +69,30 @@ namespace ModiBuff.Core
 					break;
 				case ApplierType.Cast:
 				case ApplierType.Attack:
-					if (!(target is IModifierApplierOwner modifierApplierOwnerTarget))
+					if (!(effectTarget is IModifierApplierOwner modifierApplierOwnerTarget))
 					{
 #if MODIBUFF_EFFECT_CHECK
-						EffectHelper.LogImplError(target, nameof(IModifierApplierOwner));
+						EffectHelper.LogImplError(effectTarget, nameof(IModifierApplierOwner));
 #endif
 						return;
 					}
 
-					modifierApplierOwnerTarget.ModifierApplierController.TryAddApplier(_modifierId, _hasApplyChecks,
+					modifierApplierOwnerTarget.ModifierApplierController.TryAddApplier(modifierId, _hasApplyChecks,
 						_applierType);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
 
-			if (!(target is IModifierOwner modifierOwnerTarget))
+			if (!(effectTarget is IModifierOwner modifierOwnerTarget))
 			{
 #if MODIBUFF_EFFECT_CHECK
-				EffectHelper.LogImplError(target, nameof(IModifierOwner));
+				EffectHelper.LogImplError(effectTarget, nameof(IModifierOwner));
 #endif
 				return;
 			}
 
-			modifierOwnerTarget.ModifierController.Add(_modifierId, modifierOwnerTarget, source);
+			modifierOwnerTarget.ModifierController.Add(modifierId, modifierOwnerTarget, effectSource);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)

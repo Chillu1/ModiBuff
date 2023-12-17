@@ -247,5 +247,32 @@ namespace ModiBuff.Tests
 			Assert.False(Unit.ContainsApplier("AddApplier_Effect"));
 			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
 		}
+
+		[Test]
+		public void ConditionalApplierBasedOnUnitType()
+		{
+			AddRecipe("InitHeal")
+				.Effect(new HealEffect(5), EffectOn.Init);
+			AddRecipe("ConditionalApplierBasedOnUnitType")
+				.Effect(new ApplierEffect("InitDamage").SetMetaEffects(new ModifierIdBasedOnUnitTypeMetaEffect(
+						new Dictionary<UnitType, int>()
+						{
+							{ UnitType.Bad, IdManager.GetId("InitDamage") },
+							{ UnitType.Good, IdManager.GetId("InitHeal") }
+						})),
+					EffectOn.Init)
+				.Remove(5).Refresh();
+			Setup();
+
+			Unit.AddApplierModifier(Recipes.GetGenerator("ConditionalApplierBasedOnUnitType"), ApplierType.Cast);
+
+			Enemy.TakeDamage(5, Enemy);
+			Ally.TakeDamage(5, Ally);
+
+			Unit.TryCast("ConditionalApplierBasedOnUnitType", Enemy);
+			Assert.AreEqual(EnemyHealth - 5 - 5, Enemy.Health);
+			Unit.TryCast("ConditionalApplierBasedOnUnitType", Ally);
+			Assert.AreEqual(AllyHealth - 5 + 5, Ally.Health);
+		}
 	}
 }
