@@ -325,6 +325,33 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - 5 * 2, Enemy.Health);
 		}
 
+		[Test]
+		public void NonStackingEffectAddableDuration_SeparateTriggers()
+		{
+			AddRecipe("NonStackingEffectAddableDuration")
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertibleAndTogglable), EffectOn.Init)
+				.Remove(1);
+			AddEffect("AddStackingEffectShortDuration",
+				new ApplierEffect("NonStackingEffectAddableDuration", addData: new ModifierAddData(2)));
+			AddEffect("AddStackingEffectLongDuration",
+				new ApplierEffect("NonStackingEffectAddableDuration", addData: new ModifierAddData(3)));
+			Setup();
+
+			Unit.AddModifierSelf("NonStackingEffectAddableDuration");
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+
+			Unit.ApplyEffectSelf("AddStackingEffectShortDuration");
+			Unit.Update(2);
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+
+			Unit.ApplyEffectSelf("AddStackingEffectLongDuration");
+			Unit.Update(3);
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+
+			Unit.Update(1);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+		}
+
 		/*[Test]
 		public void UnitEffectSavedState_DamageBasedOnDistanceMoved()
 		{

@@ -30,6 +30,8 @@ namespace ModiBuff.Core
 			_effects = effects;
 			_modifierCheck = check;
 			_affectedByStatusResistance = affectedByStatusResistance;
+
+			_timer = interval;
 		}
 
 		public void SetupTarget(ITargetComponent targetComponent)
@@ -51,17 +53,17 @@ namespace ModiBuff.Core
 		public void Update(float deltaTime)
 		{
 			//Special calculation if target has status resistance functionality
-			_timer += _affectedByStatusResistance && _statusResistanceImplemented
+			_timer -= _affectedByStatusResistance && _statusResistanceImplemented
 				? deltaTime / _statusResistanceTarget.StatusResistance
 				: deltaTime;
 
-			if (_timer < _interval)
+			if (_timer > 0)
 				return;
 
 			//_intervalCount++;
 			//_totalTime += _timer;
 
-			_timer -= _interval;
+			_timer += _interval;
 
 			if (_modifierCheck != null && !_modifierCheck.CheckUse(_targetComponent.Source))
 				return;
@@ -82,12 +84,12 @@ namespace ModiBuff.Core
 		public void Refresh()
 		{
 			if (_isRefreshable)
-				_timer = 0;
+				_timer = _interval;
 		}
 
 		public void ResetState()
 		{
-			_timer = 0;
+			_timer = _interval;
 			_statusResistanceImplemented = false;
 			_statusResistanceTarget = null;
 		}

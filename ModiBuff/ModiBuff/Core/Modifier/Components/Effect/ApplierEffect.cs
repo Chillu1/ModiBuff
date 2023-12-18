@@ -11,10 +11,12 @@ namespace ModiBuff.Core
 		private readonly ApplierType _applierType;
 		private readonly bool _hasApplyChecks;
 		private readonly Targeting _targeting;
+		private readonly ModifierAddData _modifierAddData;
 		private IMetaEffect<int, int>[] _metaEffects;
 
 		public ApplierEffect(string modifierName, ApplierType applierType = ApplierType.None,
-			bool hasApplyChecks = false, Targeting targeting = Targeting.TargetSource)
+			bool hasApplyChecks = false, Targeting targeting = Targeting.TargetSource,
+			ModifierAddData addData = default)
 		{
 			try
 			{
@@ -32,6 +34,7 @@ namespace ModiBuff.Core
 			_applierType = applierType;
 			_hasApplyChecks = hasApplyChecks;
 			_targeting = targeting;
+			_modifierAddData = addData;
 		}
 
 		/// <summary>
@@ -92,7 +95,11 @@ namespace ModiBuff.Core
 				return;
 			}
 
-			modifierOwnerTarget.ModifierController.Add(modifierId, modifierOwnerTarget, effectSource);
+			if (_modifierAddData.IsValid)
+				modifierOwnerTarget.ModifierController.AddWithData(modifierId, _modifierAddData, modifierOwnerTarget,
+					effectSource);
+			else
+				modifierOwnerTarget.ModifierController.Add(modifierId, modifierOwnerTarget, effectSource);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)

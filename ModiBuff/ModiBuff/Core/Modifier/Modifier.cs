@@ -182,6 +182,14 @@ namespace ModiBuff.Core
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void AddDuration(float duration)
+		{
+			for (int i = 0; i < _timeComponents.Length; i++)
+				if (_timeComponents[i] is DurationComponent durationComponent)
+					durationComponent.AddDuration(duration);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Stack() => _stackComponent.Stack();
 
 		public void ResetStacks() => _stackComponent.ResetStacks();

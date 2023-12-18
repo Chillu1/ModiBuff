@@ -81,14 +81,14 @@ namespace ModiBuff.Tests
 			var durationReference = Unit.ModifierController.GetTimer<DurationComponent>(id);
 			Assert.AreEqual(intervalReference.Time, 1);
 			Assert.AreEqual(durationReference.Time, 5);
-			Assert.AreEqual(0, intervalReference.Timer);
-			Assert.AreEqual(0, durationReference.Timer);
+			Assert.AreEqual(intervalReference.Time, intervalReference.Timer);
+			Assert.AreEqual(durationReference.Time, durationReference.Timer);
 			Unit.Update(0.5f);
-			Assert.AreEqual(0.5f, intervalReference.Timer);
-			Assert.AreEqual(0.5f, durationReference.Timer);
+			Assert.AreEqual(intervalReference.Time - 0.5f, intervalReference.Timer);
+			Assert.AreEqual(durationReference.Time - 0.5f, durationReference.Timer);
 			Unit.Update(0.5f);
-			Assert.AreEqual(0f, intervalReference.Timer);
-			Assert.AreEqual(1f, durationReference.Timer);
+			Assert.AreEqual(intervalReference.Time, intervalReference.Timer);
+			Assert.AreEqual(durationReference.Time - 1f, durationReference.Timer);
 		}
 
 		[Test]

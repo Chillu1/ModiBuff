@@ -100,7 +100,17 @@ namespace ModiBuff.Core
 			return default;
 		}
 
-		public void Add(int id, IUnit target, IUnit source)
+		public void AddWithData(int id, ModifierAddData addData, IUnit target, IUnit source)
+		{
+			//TODO Not the fastest, but makes it so we don't have to make add modifier public
+			int genId = Add(id, target, source);
+			var modifier = GetModifier(id, genId);
+
+			if (addData.DurationTime != 0)
+				modifier.AddDuration(addData.DurationTime);
+		}
+
+		public int Add(int id, IUnit target, IUnit source)
 		{
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);
 
@@ -132,7 +142,7 @@ namespace ModiBuff.Core
 
 					existingModifier.UseScheduledCheck();
 
-					return;
+					return existingModifier.GenId;
 				}
 
 				if (useDictionaryIndexes)
@@ -157,6 +167,7 @@ namespace ModiBuff.Core
 				modifier.Stack();
 
 			modifier.UseScheduledCheck();
+			return modifier.GenId;
 		}
 
 		public bool Contains(int id, int genId = -1)
