@@ -230,19 +230,21 @@ namespace ModiBuff.Tests
 				.CallbackState(CallbackType.StatusEffectAdded, () =>
 				{
 					float totalTimesStunned = 0f;
-					return new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
-					{
-						if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+					return new CallbackStateContext<float>(new StatusEffectEvent(
+						(target, source, statusEffect, oldLegalAction, newLegalAction) =>
 						{
-							totalTimesStunned++;
-							if (totalTimesStunned >= 4)
+							if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
 							{
-								totalTimesStunned = 0f;
-								((IStatusEffectOwner<LegalAction, StatusEffectType>)target).StatusEffectController
-									.DispelAll(source);
+								totalTimesStunned++;
+								if (totalTimesStunned >= 4)
+								{
+									totalTimesStunned = 0f;
+									((IStatusEffectOwner<LegalAction, StatusEffectType>)target)
+										.StatusEffectController
+										.DispelAll(source);
+								}
 							}
-						}
-					});
+						}), () => totalTimesStunned, value => totalTimesStunned = value);
 				}),
 			//CallbackEffect version, preferred version with general effects
 			add => add("StunnedFourTimesDispelAllStatusEffects")

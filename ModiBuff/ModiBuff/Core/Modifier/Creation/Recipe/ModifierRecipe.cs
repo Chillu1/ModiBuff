@@ -421,24 +421,14 @@ namespace ModiBuff.Core
 		}
 
 		/// <summary>
-		///		Registers a callback that can have unique state for each modifier instance
-		///		It will NOT trigger any EffectOn.<see cref="EffectOn.CallbackUnit"/> or <see cref="EffectOn.CallbackEffect"/> effects, only the supplied callback.
-		///		Can be used with other signatures than <see cref="UnitCallback"/>. 
-		/// </summary>
-		public ModifierRecipe CallbackState<TCallback>(TCallback callbackType, Func<object> callback)
-		{
-			return Effect(new CallbackStateRegisterEffect<TCallback>(callbackType, callback), EffectOn.Init);
-		}
-
-		/// <summary>
 		///		Registers a callback that can have unique state for each modifier instance, and has savable data
 		///		It will NOT trigger any EffectOn.<see cref="EffectOn.CallbackUnit"/> or <see cref="EffectOn.CallbackEffect"/> effects, only the supplied callback.
 		///		Can be used with other signatures than <see cref="UnitCallback"/>. 
 		/// </summary>
-		public ModifierRecipe CallbackStateSave<TCallback, TObjectSaveData>(TCallback callbackType,
-			Func<CallbackStateContext<TObjectSaveData>> @event)
+		public ModifierRecipe CallbackState<TCallback, TSaveData>(TCallback callbackType,
+			Func<CallbackStateContext<TSaveData>> @event)
 		{
-			return Effect(new CallbackStateSaveRegisterEffect<TCallback, TObjectSaveData>(callbackType, @event),
+			return Effect(new CallbackStateSaveRegisterEffect<TCallback, TSaveData>(callbackType, @event),
 				EffectOn.Init);
 		}
 

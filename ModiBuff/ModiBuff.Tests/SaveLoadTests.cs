@@ -341,7 +341,7 @@ namespace ModiBuff.Tests
 		public void SaveCallbackLocalVarState()
 		{
 			AddRecipe("InitTakeFiveDamageOnTenDamageTaken")
-				.CallbackStateSave(CallbackType.CurrentHealthChanged, () =>
+				.CallbackState(CallbackType.CurrentHealthChanged, () =>
 				{
 					float totalDamageTaken = 0f; //state != null ? (float)state : 0f;
 
@@ -356,7 +356,7 @@ namespace ModiBuff.Tests
 								totalDamageTaken = 0f;
 								target.TakeDamage(5, source);
 							}
-						}), () => totalDamageTaken, stateSet => totalDamageTaken = stateSet);
+						}), () => totalDamageTaken, value => totalDamageTaken = value);
 				});
 			Setup();
 
@@ -428,7 +428,7 @@ namespace ModiBuff.Tests
 			});
 
 			AddRecipe("InitTakeFiveDamageOnTenDamageTaken")
-				.CallbackStateSave(CallbackType.CurrentHealthChanged, () =>
+				.CallbackState(CallbackType.CurrentHealthChanged, () =>
 				{
 					float totalDamageTaken = 0f;
 					float maxDamageTaken = 0f;
@@ -454,10 +454,10 @@ namespace ModiBuff.Tests
 								}
 							}),
 						() => new Tuple<float, float>(totalDamageTaken, maxDamageTaken),
-						stateSet =>
+						value =>
 						{
-							totalDamageTaken = stateSet.Item1;
-							maxDamageTaken = stateSet.Item2;
+							totalDamageTaken = value.Item1;
+							maxDamageTaken = value.Item2;
 						});
 				});
 			Setup();

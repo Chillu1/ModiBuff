@@ -115,7 +115,7 @@ namespace ModiBuff.Tests
 		public void CallbackLocalVarState()
 		{
 			AddRecipe("InitTakeTwoDamageOnTenDamageTaken")
-				.CallbackStateSave(CallbackType.CurrentHealthChanged, () =>
+				.CallbackState(CallbackType.CurrentHealthChanged, () =>
 				{
 					float totalDamageTaken = 0f;
 
@@ -130,7 +130,7 @@ namespace ModiBuff.Tests
 								totalDamageTaken = 0f;
 								target.TakeDamage(2, source);
 							}
-						}), () => totalDamageTaken, stateSet => totalDamageTaken = stateSet);
+						}), () => totalDamageTaken, value => totalDamageTaken = value);
 				});
 			Setup();
 
