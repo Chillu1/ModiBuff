@@ -69,7 +69,7 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Interval
 	* Duration
 	* Stack
-	* Event (ex. When Attacked/Cast/Killed/Healed, On Attack/Cast/Kill/Heal)
+	* Event (ex. When Attacked/Cast/Killed/Healed/Stunned/Silenced, On Attack/Cast/Kill/Heal)
 	* Callbacks (any user logic)
 		* Unit callbacks
 		* Effect callbacks
@@ -92,6 +92,11 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Remove (remove modifier)
 	* Revert Action
 * Meta & Post effect manipulation (ex. lifesteal)
+* Stack Logic
+	* Custom
+	* Stack timer
+	* Independent stack timers
+	* Revertable independent stacks
 * Condition implementations (checks)
 	* Chance 0-100%
 	* Cooldown
@@ -361,13 +366,21 @@ Add("DamageOverTimeRefreshableDuration")
 
 ### Stack
 
-Then there's `Stack(WhenStackEffect whenStackEffect, int maxStacks, int everyXStacks)`.
+Then there's
+`Stack(WhenStackEffect whenStackEffect, int maxStacks, int everyXStacks, float singleStackTime, float independentStackTime)`.
 It's used for tracking how many times the modifier has been re-added to the unit, or other stacking logic.
 
 `WhenStackEffect` tells the modifier when the stack action should be triggered: Always, OnMaxStacks, EveryXStacks,
 etc.  
-`StackEffectType` tells the effect what to do when the stack action is triggered:
-Trigger it's effect, add to it's effect, or both or all, etc.
+`MaxStacks` limits on how many stacks the modifier can have.  
+`EveryXStacks` makes it possible to trigger the stack action every X stacks.  
+`SingleStackTime` adds a single stack timer, that will remove and revert all stacks after X seconds.
+Unless refreshed through a stack action.  
+`IndependentStackTime` adds a stack timer for each stack, that will remove and revert a single stack every X seconds.
+Independent stacks are non-refreshable.
+
+Most stack effects also have a `StackEffectType` parameter, that tells the effect what to do when the stack action is
+triggered. It can triggers the effect, add some kind of value to the effect, or other custom logic.
 
 In this example we deal 5 damage every 1 second, but each time we add the modifier, we add 2 damage to the effect.
 Resulting in 7 damage every 1 second with 1 stack. 9 with 2 stacks, etc.

@@ -10,6 +10,7 @@
 - [Callback Recipes](#callback-recipes)
 - [Modifier Action Recipes](#modifier-action-recipes)
 - [Advanced Recipes](#advanced-recipes)
+- [Centralized Effect](#centralized-effect)
 
 [//]: # (TODO Recipe examples for usual game mechanics)
 [//]: # (DoT, InitDoTSeparateDmg, OnXStacks, StackableDamage, StunEverySecondFor0.2Seconds)
@@ -82,6 +83,22 @@ Every stack, add 2 damage to the effect, then deal 5 base damage + 2 added damag
 Add("StackBasedDamage")
     .Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
     .Stack(WhenStackEffect.Always, value: 2);
+```
+
+Add 5 damage on stack, remove and revert all stacks after 10 seconds.
+
+```csharp
+Add("AddDamageSingleStackTimer")
+    .Effect(new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Effect), EffectOn.Stack)
+    .Stack(WhenStackEffect.Always, singleStackTime: 10);
+```
+
+Add 5 damage on stack, each stack has it's own independent timer that removes and reverts one stack after 10 seconds.
+
+```csharp
+Add("AddDamageStackTimer")
+    .Effect(new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Effect), EffectOn.Stack)
+    .Stack(WhenStackEffect.Always, independentStackTime: 10);
 ```
 
 Costs 5 mana, deal 5 damage on init
@@ -555,7 +572,13 @@ Add("StunHealStackReset")
 
 ## Centralized Effect
 
+Effects that are used by multiple modifiers, and it's state is only stored in one place inside the effect.
+This is a common way to implement effects like: "Burning", "Poison", "Bleeding", etc.
+If there's only going to be one type of each.
+
 ### Poison
+
+Central poison effect, that holds the poison stacks states, and other effects can use those stacks.
 
 ```csharp
 Add("Poison")
@@ -563,4 +586,32 @@ Add("Poison")
     .Effect(new PoisonDamageEffect(), EffectOn.Interval | EffectOn.Stack)
     .Interval(1)
     .Remove(5).Refresh();
+```
+
+Heal per poison stack on poison damage tick effect. There's two ways to achieve this, first is by manually using the stack effect.
+The second is by setting up custom stack logic with modifier action based on when the poison damage effect is triggered.
+
+```csharp
+Add("HealPerPoisonStack")
+    .Effect(new HealEffect(0, HealEffect.EffectState.None,
+        StackEffectType.Effect | StackEffectType.SetStacksBased, 1), EffectOn.CallbackEffect)
+    .CallbackEffect(CallbackType.PoisonDamage, effect =>
+        new PoisonEvent((target, source, stacks, totalStacks, damage) =>
+        {
+            //Stacks hack, using stack effect in callbacks
+            ((IStackEffect)effect).StackEffect(stacks, target, source);
+        }));
+
+//ModifierAction.Stack version
+Add("HealPerPoisonStack")
+    .Tag(Core.TagType.CustomStack)
+    .Stack(WhenStackEffect.Always)
+    .Effect(new HealEffect(0, HealEffect.EffectState.None,
+        StackEffectType.Effect | StackEffectType.SetStacksBased, 1), EffectOn.Stack)
+    .CallbackEffect(CallbackType.PoisonDamage, effect =>
+        new PoisonEvent((target, source, stacks, totalStacks, damage) =>
+        {
+            effect.Effect(target, source);
+        }))
+    .ModifierAction(ModifierAction.Stack, EffectOn.CallbackEffect);
 ```

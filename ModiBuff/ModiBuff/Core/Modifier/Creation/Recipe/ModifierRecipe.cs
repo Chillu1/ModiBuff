@@ -283,11 +283,11 @@ namespace ModiBuff.Core
 		/// 	Adds stack functionality to the modifier. A stack is added every time the modifier gets re-added to the target.
 		/// </summary>
 		/// <param name="whenStackEffect">When should the stack effects be triggered.</param>
-		/// <param name="value">Values that can be used by the stack effects.</param>
 		/// <param name="maxStacks">Max amount of stacks that can be applied.</param>
 		/// <param name="everyXStacks">If <see cref="whenStackEffect"/> is set to
 		/// <see cref="whenStackEffect.EveryXStacks"/>, this value will be used to determine when the stack effects should be triggered.</param>
-		/// <param name="independentStackTime">If set, will add a timer for each stack, and remove a stack after a timer expires</param>
+		/// <param name="singleStackTime">Adds a single timer, and removes and reverts all stacks after the timer expires</param>
+		/// <param name="independentStackTime">Adds a timer for each stack, and removes a stack after a timer expires</param>
 		public ModifierRecipe Stack(WhenStackEffect whenStackEffect, int maxStacks = -1,
 			int everyXStacks = -1, float singleStackTime = -1, float independentStackTime = -1)
 		{
