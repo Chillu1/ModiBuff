@@ -91,6 +91,7 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Modifier Action (refresh, reset stacks)
 	* Remove (remove modifier)
 	* Revert Action
+* Modifierless-Effects
 * Meta & Post effect manipulation (ex. lifesteal)
 * Stack Logic
 	* Custom
@@ -100,6 +101,7 @@ This library solves that, but also allows for more complex and deeper modifiers 
 * Condition implementations (checks)
 	* Chance 0-100%
 	* Cooldown
+		* Charges (multiple use with cooldown)
 	* Health/Mana cost
 	* General:
 		* Stat (health/mana/damage) >/=/< than X
@@ -117,11 +119,11 @@ This library solves that, but also allows for more complex and deeper modifiers 
 
 # RoadMap
 
-| V0.3.0                            | V0.4.0-V0.?.0                                   | V1.0.0                                                         |
-|-----------------------------------|-------------------------------------------------|----------------------------------------------------------------|
-| Improved Appliers API             | GenId based<br/>modifier stacking               | Fully released open source<br/>game using ModiBuff at its core |
-| Improved event recursion solution | Proper game samples<br/>(Godot and maybe Unity) | 98% of game mechanics<br/>implementable                        |
-| Modifier-less init Effects?       | Saving & loading<br/>state (runtime)            | ...                                                            |
+| V0.4.0-V0.?.0                                   | V1.0.0                                                         |
+|-------------------------------------------------|----------------------------------------------------------------|
+| GenId based<br/>modifier stacking               | Fully released open source<br/>game using ModiBuff at its core |
+| Proper game samples<br/>(Godot and maybe Unity) | 98% of game mechanics<br/>implementable                        |
+| Improved Appliers API?                          | ...                                                            |
 
 # Benchmarks
 
@@ -482,6 +484,14 @@ Add("InitDamage_CostMana")
     .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
+There's also `ChargeCooldown` that works like normal cooldown, but with charges.
+
+```csharp
+Add("InitDamage_ChargesCooldown")
+    .ApplyChargesCooldown(cooldown: 1, charges: 2)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
 ### Event
 
 Events are a way to call effects on certain unit events.
@@ -702,8 +712,8 @@ There's multiple ways to add modifiers to a unit.
 For normal modifiers, the best approach is to use `IModifierOwner.TryAddModifier(int, IUnit)`.
 By feeding the modifier ID, and the source unit.
 
-For applier (attack, cast, etc) modifiers, `IModifierOwner.ModifierController.TryAddApplier(int, bool, ApplierType)`
-should be used.
+For applier (attack, cast, etc)modifiers,
+`IModifierOwner.ModifierApplierController.TryAddApplier(int, bool, ApplierType)`should be used.
 
 Currently for aura modifiers it has to be implemented directly into the unit. An example of this can be found
 in `CoreUnits.Unit.AddAuraModifier(int)`.
@@ -1258,6 +1268,60 @@ SerializationExtensions.AddCustomValueType<IReadOnlyDictionary<int, int>>(elemen
 Also checkout [applier branch](https://github.com/Chillu1/ModiBuff/compare/master...feature/duration-add-modifier)
 for applying extra different durations (undecided feature).
 
+## Modifierless-Effects
+
+Sometimes we don't want to need to use the entire functionality of modifiers, and only add a simple effect to a unit.
+This can be done by registering an effect with a name. Modifierless-effects are mostly used for simple init effects.
+
+> Note: Modifierless-effects **CANNOT** use mutable state. Because their not cloned or kept by the target/source unit.
+> If we try to use mutable state that state will be shared between all units that the effect applied to.
+
+Modifierless-effects work similarly to modifiers in both access and registering.
+
+A simple 5 damage effect can be registered like this:
+
+```csharp
+AddEffect("5Damage", new DamageEffect(5f));
+```
+
+Effects can also be added as "castable" to the unit, and cast, like this:
+
+```csharp
+unit.ModifierApplierController.TryAddEffectApplier(effectId);
+
+unit.TryCastEffect(effectId, target);
+```
+
+Modifiers that only use `init` and have no mutable state can almost always be transformed into modifierless-effects.
+
+A common way to use modifierless-effects is to add one time effects as appliers.
+
+```csharp
+Add("AddApplier_Effect")
+    .Effect(new ApplierEffect("InitDamage"), EffectOn.Init)
+    .RemoveApplier(5, ApplierType.Cast, false);
+
+AddEffect("AddApplier_ApplierEffect", new ApplierEffect("AddApplier_Effect", ApplierType.Cast, false));
+```
+
+Or combine two different effects together, so it's possible to trigger both on same cast, with different modifier
+targets/owners.
+
+This example uses centralized effects, where we apply poison and heal from the poison stacks. In one cast.
+
+```csharp
+Add(PoisonRecipe);
+Add("PoisonHealHeal")
+    .Stack(WhenStackEffect.Always)
+    .Effect(new HealEffect(0, HealEffect.EffectState.None,
+            StackEffectType.Effect | StackEffectType.SetStacksBased, 1)
+        .SetMetaEffects(new AddValueBasedOnPoisonStacksMetaEffect(1f)), EffectOn.Stack);
+
+AddEffect("PoisonHeal",
+    new ApplierEffect("Poison"),
+    new ApplierEffect("PoisonHealHeal", targeting: Targeting.SourceTarget));
+```
+
 # FAQ
 
 Q: ModiBuff.Units seems to use excessive casting in effects. Why not have a master unit interface?  
@@ -1282,7 +1346,8 @@ An example of this is a
 
 Q: How to handle UI?  
 A: There's two main ways of handling UI. The first general info is Modifier Name and Modifier Description,
-through `ModifierRecipes.GetModifierInfo()`. There's also `ModifierController.GetApplier*()` methods for appliers info.
+through `ModifierRecipes.GetModifierInfo()`. There's also `ModifierApplierController.GetApplier*()` methods for appliers
+info.
 And `ModifierController.GetModifierReferences()` for normal modifiers. Basic usage is shown in the
 [BasicConsole sample](https://github.com/Chillu1/ModiBuff/blob/d56ab4d1748e483a638b9ef7169a07413dbe3957/ModiBuff/ModiBuff.Examples/BasicConsole/UIExtensions.cs).
 
