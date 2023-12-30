@@ -552,3 +552,15 @@ Add("StunHealStackReset")
     .ModifierAction(ModifierAction.Refresh | ModifierAction.Stack, EffectOn.CallbackEffect)
     .Interval(10).Refresh();
 ```
+
+## Centralized Effect
+
+### Poison
+
+```csharp
+Add("Poison")
+    .Stack(WhenStackEffect.Always)
+    .Effect(new PoisonDamageEffect(), EffectOn.Interval | EffectOn.Stack)
+    .Interval(1)
+    .Remove(5).Refresh();
+```

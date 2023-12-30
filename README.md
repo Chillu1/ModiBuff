@@ -19,6 +19,7 @@
 	- [Recipe](#recipe)
 	- [Adding Modifiers to Units](#adding-modifiers-to-units)
 	- [Effect](#effect)
+	- [Serialization](#serialization)
 - [FAQ](#faq)
 - [Examples](#examples)
 - [Differences to ModiBuffEcs and Old](#differences-to-modibuffecs-and-old)
@@ -106,6 +107,8 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Cast
 * Fully revertible effects
 * Manual modifier generation (for full control)
+* Serialization
+	* System.Text.Json
 
 # RoadMap
 
@@ -960,12 +963,36 @@ mutable state. `IMutableStateEffect` is already part of `IStateEffect`.
 
 ```csharp
 public class DamageEffect : IEffect, IStateEffect, IStackEffect, IRevertEffect,
-    IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>, IMutableStateEffect
+    IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
+    IMutableStateEffect
 {
     public bool UsesMutableState => IsRevertible || _stackEffect.UsesMutableState();
 
     ...
 }
+```
+
+Since we have mutable state in our effect, we probably want to serialize it.
+To do that we need to implement `ISavableEffect<TEffect.SaveData>`.
+This interface forces us to return and load an object that will holds the effects mutable state.
+This object should be a readonly struct, and should be called `SaveData`.
+
+```csharp
+public class DamageEffect : IEffect, IStateEffect, IStackEffect, IRevertEffect,
+    IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
+    IMutableStateEffect, ISavableEffect<DamageEffect.SaveData>
+{
+        ...
+        
+        public object SaveState() => new SaveData(_extraDamage);
+        public void LoadState(object saveData) => _extraDamage = ((SaveData)saveData).ExtraDamage;
+
+        public readonly struct SaveData
+        {
+            public readonly float ExtraDamage;
+
+            public SaveData(float extraDamage) => ExtraDamage = extraDamage;
+        }
 ```
 
 ### Applier Effect
@@ -1152,6 +1179,71 @@ Add("InitStatusEffectSleep_RemoveOnDispel", (id, genId, name, tag) =>
 ```
 
 Then we can dispel this modifier with `Unit.Dispel(TagType.BasicDispel, Unit);`.
+
+## Serialization
+
+To correctly serialize data, two things need to be serialized: The identification, and the mutable state.
+
+Mutable state is fully opened up for serialization through nested structs called "SaveData" in every object that has
+mutable state.
+
+This allows for easy serialization of objects through generic means.
+Without extra need custom serialization logic inside the objects.
+
+The identifiers might have also changed Id order, or new ones might have been added to the game,
+so it's important to handle that correctly. Like mapping old Ids to new ones.
+This is achieved by calling `LoadState(SaveData)` on controllers/managers,
+[ModiBuff.Units.GameState](https://github.com/Chillu1/ModiBuff/blob/bd5d4ac541fce02383ba43d0946c20a889ff80a5/ModiBuff/ModiBuff.Units/GameState.cs)
+is a good example of this.
+
+### JSON
+
+ModiBuff currently supports JSON serialization through `System.Text.Json`.
+To enable it in the library, you need to add a preprocessor directive define `MODIBUFF_SYSTEM_TEXT_JSON`.
+
+This enables the constructor attributes on objects, that allow for deserialization.
+
+An example `SaveController` is shown in `ModiBuff.Extensions.Serialization.Json`,
+but it's essentially not needed at all.
+
+## Centralized Effects
+
+Sometimes we want to have the effects be centralized, so they're affected and controlled in one place.
+Common examples of this are singular effects of: Poison, Bleed, Wet, etc.
+While ModiBuff wasn't designed for this, it's still possible to do, but at extra complexity cost.
+
+> Note that this is possible to do in ModiBuff, but also harder than normal.
+> While it's possible to do manage this, it might be better to create your own system for this.
+> Unless you want some of the other features of ModiBuff.
+
+The issue is that we need to store the state in the effect itself or the unit.
+If we chose the unit, we're coupling together effect code with unit implementation (not good).
+So let's settle with effect, an example of this is
+[PoisonDamageEffect](https://github.com/Chillu1/ModiBuff/blob/bd5d4ac541fce02383ba43d0946c20a889ff80a5/ModiBuff/ModiBuff.Units/Effects/PoisonDamageEffect.cs).
+We store all the poison stacks and their owners inside a dictionary that's inside the effect.
+We also need a custom `StackEffect` implementation for saving those stacks,
+and a custom `Effect` function for when we should trigger applying the poison stacks.
+
+There are some
+[tests](https://github.com/Chillu1/ModiBuff/blob/bd5d4ac541fce02383ba43d0946c20a889ff80a5/ModiBuff/ModiBuff.Tests/CentralizedCustomLogicTests.cs)
+that show how one can use the centralized effects.
+
+When using centralized effects, it often happens that we have custom state inside them.
+And if we also want to serialize that data, we might need to implement a parser for it.
+For example a dictionary of `int unitId` and `int stacks`:
+
+```csharp
+SerializationExtensions.AddCustomValueType<IReadOnlyDictionary<int, int>>(element =>
+{
+    var dictionary = new Dictionary<int, int>();
+    foreach (var kvp in element.EnumerateObject())
+        dictionary.Add(int.Parse(kvp.Name), kvp.Value.GetInt32());
+    return dictionary;
+});
+```
+
+Also checkout [applier branch](https://github.com/Chillu1/ModiBuff/compare/master...feature/duration-add-modifier)
+for applying extra different durations (undecided feature).
 
 # FAQ
 
