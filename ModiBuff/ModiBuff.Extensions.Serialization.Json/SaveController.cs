@@ -22,8 +22,6 @@ namespace ModiBuff.Extensions.Serialization.Json
 		public string Save<T>(T obj) => JsonSerializer.Serialize(obj, _options);
 		public string Save(GameState.SaveData obj) => JsonSerializer.Serialize(obj, _options);
 
-		public void SaveToFile(string json) => File.WriteAllText(System.IO.Path.Combine(Path, _fileName), json);
-
 		public void SaveToPath(string json, string fileName) =>
 			File.WriteAllText(System.IO.Path.Combine(Path, fileName), json);
 
@@ -32,7 +30,5 @@ namespace ModiBuff.Extensions.Serialization.Json
 
 		public T LoadFromPath<T>(string fileName) =>
 			JsonSerializer.Deserialize<T>(File.ReadAllText(System.IO.Path.Combine(Path, fileName)), _options);
-
-		public string LoadFromFileJson() => File.ReadAllText(System.IO.Path.Combine(Path, _fileName));
 	}
 }
