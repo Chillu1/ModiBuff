@@ -70,7 +70,7 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Duration
 	* Stack
 	* Event (ex. When Attacked/Cast/Killed/Healed/Stunned/Silenced, On Attack/Cast/Kill/Heal)
-	* Callbacks (any user logic)
+	* Callbacks (any user logic, support mutable and serializable state inside)
 		* Unit callbacks
 		* Effect callbacks
 		* Custom signature callbacks
@@ -78,23 +78,26 @@ This library solves that, but also allows for more complex and deeper modifiers 
 * Effect implementation examples
 	* Damage (& self damage)
 	* Heal
-	* Status effects (stun, silence, disarm, etc.)
+	* Status effects (stun, silence, disarm, etc.) & immunity
 	* [Multi instance Status effects](https://github.com/Chillu1/ModiBuff/blob/d56ab4d1748e483a638b9ef7169a07413dbe3957/ModiBuff/ModiBuff.Units/Effects/StatusEffectEffect.cs)
 	  [impl](https://github.com/Chillu1/ModiBuff/blob/d56ab4d1748e483a638b9ef7169a07413dbe3957/ModiBuff/ModiBuff.Units/StatusEffect/MultiInstanceStatusEffectController.cs)
 	  (2 same stuns, 2 different sources, unique timers)
+	* Dispel status effect(s)
 	* Add stat (Damage, Heal)
-	* Actions (Attack, Heal, etc.)
+	* Actions (Attack, Heal, Cast, etc.)
 	* [Special Applier (another Modifier)](#applier-effect)
+		* Applying Applier Modifiers as Applier Modifiers
+	* Centralized Effect
 	* And more, see [the rest](ModiBuff/ModiBuff.Units/Effects)
 * Internal Effects
 	* Applier (another Modifier)
-	* Modifier Action (refresh, reset stacks)
+	* Modifier Action (refresh, reset stacks, custom stack)
 	* Remove (remove modifier)
 	* Revert Action
 * Modifierless-Effects
 * Meta & Post effect manipulation (ex. lifesteal)
 * Stack Logic
-	* Custom
+	* Custom (callback/interval/duration triggers)
 	* Stack timer
 	* Independent stack timers
 	* Revertable independent stacks
@@ -102,7 +105,7 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Chance 0-100%
 	* Cooldown
 		* Charges (multiple use with cooldown)
-	* Health/Mana cost
+	* Health/Mana cost, flat & percent
 	* General:
 		* Stat (health/mana/damage) >/=/< than X
 		* Stat is full/empty
@@ -114,7 +117,7 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Cast
 * Fully revertible effects
 * Manual modifier generation (for full control)
-* Serialization
+* Open generic serialization (of all mutable state and id's)
 	* System.Text.Json
 
 # RoadMap
@@ -584,7 +587,8 @@ Tags are a way to mark modifiers, there are a few internal tags that tell the `M
 should be handled. Tags are stored inside `ModifierRecipes` and can only be set on modifier generator creation.
 
 Then there's a few other internal tags that are there for the user:
-IsInstanceStackable, IntervalIgnoresStatusResistance and DurationIgnoresStatusResistance.
+`IsInstanceStackable`, `IntervalIgnoresStatusResistance` and `DurationIgnoresStatusResistance`.
+There's also automatic tagging for manual modifier generation of: `IsInit`, `IsStack`, and `IsRefresh`.
 
 There's also a `TagType.Default` which we can use in the beginning to define our default tags in the config.
 `Config.DefaultTag = /*Your*/TagType.Default;`
@@ -709,11 +713,11 @@ Each modifier should have at least one effect, unless it's used as a flag.
 
 There's multiple ways to add modifiers to a unit.
 
-For normal modifiers, the best approach is to use `IModifierOwner.TryAddModifier(int, IUnit)`.
-By feeding the modifier ID, and the source unit.
+For normal modifiers, the best approach is to use `IModifierOwner.AddModifier(int id, IUnit source)`.
+By feeding the modifier ID, and the source unit. These modifiers are stored and managed by `ModifierController`.
 
-For applier (attack, cast, etc)modifiers,
-`IModifierOwner.ModifierApplierController.TryAddApplier(int, bool, ApplierType)`should be used.
+For applier (attack, cast, etc) modifiers,
+`unit.ModifierApplierController.TryAddApplier(int id, bool hasApplyChecks, ApplierType applierType)`should be used.
 
 Currently for aura modifiers it has to be implemented directly into the unit. An example of this can be found
 in `CoreUnits.Unit.AddAuraModifier(int)`.
@@ -980,7 +984,7 @@ public class DamageEffect : IEffect, IStateEffect, IStackEffect, IRevertEffect,
     ...
 ```
 
-With the current newest master (not V0.2.0) we can clone only when needed (when using mutable state).
+We're not always using or changing mutable state in our effects, in these cases we can clone only when needed.
 `IMutableStateEffect` needs to be implemented, and it's property `UsesMutableState` needs to say if the effect is using
 mutable state. `IMutableStateEffect` is already part of `IStateEffect`.
 
