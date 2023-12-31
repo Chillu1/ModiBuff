@@ -1,0 +1,16 @@
+{
+  "name": "com.chillu.modibuff",
+  "displayName": "ModiBuff",
+  "version": "1.0.0",
+  "description": "ModiBuff",
+  "keywords": [
+    "ModiBuff",
+    "unity"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Chillu",
+    "url": "https://github.com/Chillu1"
+  },
+  "repository": "https://github.com/Chillu1/ModiBuff.git"
+}
