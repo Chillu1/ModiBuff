@@ -8,13 +8,11 @@ namespace ModiBuff.Extensions.Serialization.Json
 	public sealed class SaveController
 	{
 		public readonly string Path;
-		private readonly string _fileName;
 		private readonly JsonSerializerOptions _options;
 
 		public SaveController(string fileName)
 		{
 			Path = Environment.CurrentDirectory;
-			_fileName = fileName;
 
 			_options = new JsonSerializerOptions { WriteIndented = true, IncludeFields = true };
 		}
