@@ -189,6 +189,10 @@ Currently the library is on [NuGet](https://www.nuget.org/packages/ModiBuff/) an
 [Godot Asset Library](https://godotengine.org/asset-library/asset/2166), it will also be coming to Unity Asset Store
 soon.
 
+## Unity
+
+Install package from git url: https://github.com/Chillu1/ModiBuff.git#upm
+
 ## Step by step installation
 
 1. Download the latest DLL from [Releases](https://github.com/Chillu1/ModiBuff/releases) or ModiBuff source code.
