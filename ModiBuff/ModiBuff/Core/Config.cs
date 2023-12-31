@@ -15,7 +15,7 @@ namespace ModiBuff.Core
 		private const int DefaultModifierApplierControllerPoolSize = 64;
 
 		public const int DefaultModifierArraySize = 32;
-		private const int DefaultDispellableSize = 4;
+		private const int DefaultDispellableSize = 8;
 		private const int DefaultModifierRemoveSize = 4;
 		private const int DefaultModifierIndexDictionarySize = 8;
 
