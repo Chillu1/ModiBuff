@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public enum EffectState //TODO Rename
+	public enum EffectState //TODO Rename, EffectOption(s)?
 	{
 		None,
 		IsRevertible,

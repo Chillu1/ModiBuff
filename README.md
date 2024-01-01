@@ -409,7 +409,7 @@ with `Aura()`.
 ```csharp
 Add("InitAddDamageBuff")
     .OneTimeInit()
-    .Effect(new AddDamageEffect(5, true), EffectOn.Init)
+    .Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
     .Remove(1.05f).Refresh();
 Add("InitAddDamageBuff_Interval")
     .Aura()
@@ -523,7 +523,7 @@ Essentially a hit that deals more than half units health in damage (ex. game log
 
 ```csharp
 Add("InitAddDamageRevertibleHalfHealthCallback")
-    .Effect(new AddDamageEffect(5, true), EffectOn.Init)
+    .Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
     .Remove(RemoveEffectOn.Callback)
     .Callback(CallbackType.StrongHit);
 ```
@@ -711,13 +711,21 @@ Each modifier should have at least one effect, unless it's used as a flag.
 
 ## Adding Modifiers To Units
 
+For units to be able to use and own modifiers, they need to implement `IModifierOwner` interface.
+A `ModifierControllerPool` should be used to avoid runtime heap allocations. The pool needs to be initialized manually.
+Then it can be rented inside the unit like so: `ModifierController = ModifierControllerPool.Instance.Rent();`.
+
+For units to be able to use and own modifier appliers, they need to implement `IModifierApplierOwner` interface.
+It also has a pool, and works the same way as `ModifierController`.
+
 There's multiple ways to add modifiers to a unit.
 
 For normal modifiers, the best approach is to use `IModifierOwner.AddModifier(int id, IUnit source)`.
 By feeding the modifier ID, and the source unit. These modifiers are stored and managed by `ModifierController`.
 
 For applier (attack, cast, etc) modifiers,
-`unit.ModifierApplierController.TryAddApplier(int id, bool hasApplyChecks, ApplierType applierType)`should be used.
+`IModifierApplierOwner.ModifierApplierController.TryAddApplier(int id, bool hasApplyChecks, ApplierType applierType)`
+should be used.
 
 Currently for aura modifiers it has to be implemented directly into the unit. An example of this can be found
 in `CoreUnits.Unit.AddAuraModifier(int)`.
@@ -1022,6 +1030,24 @@ public class DamageEffect : IEffect, IStateEffect, IStackEffect, IRevertEffect,
         }
 ```
 
+### Unit logic implementation check
+
+Target unit might not have the logic implemented that's needed for the effect to work.
+`ModiBuff.Units` effects have a check for that, and if it doesn't it can log an error if desired.
+
+Ex. if a unit doesn't have health/is damagable, we can either ignore the effect (by default), or log an error that
+the effect was supposed to work (since either all our units should be damagable, or we have some other validation system
+on top). These checks can be enabled with a preprocessor directive define `MODIBUFF_EFFECT_CHECK`.
+
+```csharp
+if (target is IAttackable<float, float> damagableTarget)
+    //Effect logic
+#if MODIBUFF_EFFECT_CHECK
+else
+    EffectHelper.LogImplError(effectTarget, nameof(IAttackable<float, float>));
+#endif
+```
+
 ### Applier Effect
 
 Hands down, the most powerful effect is the ApplierEffect.  
@@ -1090,7 +1116,7 @@ Add("ComplexApplier2_AddDamageAdd")
 //AddDamage 5, one time init, remove in 10 seconds, refreshable.
 Add("ComplexApplier2_AddDamage")
     .OneTimeInit()
-    .Effect(new AddDamageEffect(5, true), EffectOn.Init)
+    .Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
     .Remove(10).Refresh();
 ```
 
@@ -1211,17 +1237,20 @@ Then we can dispel this modifier with `Unit.Dispel(TagType.BasicDispel, Unit);`.
 
 To correctly serialize data, two things need to be serialized: The identification, and the mutable state.
 
-Mutable state is fully opened up for serialization through nested structs called "SaveData" in every object that has
+Mutable state is fully opened up for serialization through nested structs called `SaveData` in every object that has
 mutable state.
 
-This allows for easy serialization of objects through generic means.
+This allows for easy serialization of objects through generic means, because the data is fully exposed.
 Without extra need custom serialization logic inside the objects.
 
-The identifiers might have also changed Id order, or new ones might have been added to the game,
-so it's important to handle that correctly. Like mapping old Ids to new ones.
+The identifiers might have also changed Id order, or new ones might have been added to the game, through things like dlc
+or mods, so it's important to handle that correctly. Like mapping old Ids to new ones.
 This is achieved by calling `LoadState(SaveData)` on controllers/managers,
 [ModiBuff.Units.GameState](https://github.com/Chillu1/ModiBuff/blob/bd5d4ac541fce02383ba43d0946c20a889ff80a5/ModiBuff/ModiBuff.Units/GameState.cs)
 is a good example of this.
+
+Any effect (mostly callback effects) that inherits from `IRegisterEffect` will be loaded automatically
+on load (through init). This is done through `ModifierController.LoadState(SaveData, IUnit)`.
 
 ### JSON
 
@@ -1232,6 +1261,8 @@ This enables the constructor attributes on objects, that allow for deserializati
 
 An example `SaveController` is shown in `ModiBuff.Extensions.Serialization.Json`,
 but it's essentially not needed at all.
+Because the only things that's needed is to serialize the object with `JsonSerializer.Serialize(obj, _options);`
+and have options have `IncludeFields = True`.
 
 ## Centralized Effects
 

@@ -33,7 +33,7 @@ Add damage to unit, revert it on remove, remove it after 5 seconds.
 
 ```csharp
 Add("InitAddDamageRevertible")
-    .Effect(new AddDamageEffect(5, true), EffectOn.Init)
+    .Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
     .Remove(5);
 ```
 

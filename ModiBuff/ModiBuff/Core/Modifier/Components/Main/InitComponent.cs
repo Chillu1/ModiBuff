@@ -85,18 +85,12 @@ namespace ModiBuff.Core
 
 		public void InitLoad(IUnit target, IUnit owner)
 		{
-			if (_registerEffects == null)
-				return;
-
-			for (int i = 0; i < _registerEffects.Length; i++)
+			for (int i = 0; i < _registerEffects?.Length; i++)
 				_registerEffects[i].Effect(target, owner);
 		}
 
 		public void InitLoad(IList<IUnit> targets, IUnit owner)
 		{
-			if (_registerEffects == null)
-				return;
-
 			for (int i = 0; i < _registerEffects?.Length; i++)
 				_registerEffects[i].Effect(targets, owner);
 		}
