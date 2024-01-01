@@ -4,7 +4,7 @@ namespace ModiBuff.Core
 {
 	public static class Config
 	{
-		private const int DefaultDefaultTag = (int)TagType.Default;
+		private const ulong DefaultDefaultTag = (int)TagType.Default;
 
 		private const bool DefaultUseDictionaryIndexes = false;
 		public const int DefaultPoolSize = 64;
@@ -31,7 +31,7 @@ namespace ModiBuff.Core
 		private const float DefaultDeltaTolerance = 0.001f;
 
 
-		public static int DefaultTag = DefaultDefaultTag;
+		public static ulong DefaultTag = DefaultDefaultTag;
 
 		/// <summary>
 		///		Whether to use dictionary or an array for modifiers.
