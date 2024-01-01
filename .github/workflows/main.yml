@@ -4,49 +4,50 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    types:
+      - closed
+  workflow_dispatch:
 
 jobs:
   merge-folders:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Switch to upm branch (Create upm branch if not exists)
-      run: |
-        if ! git ls-remote --exit-code origin upm &>/dev/null; then
-          echo "No upm branch detected on the remote, creating and pushing..."
-          git checkout -b upm
-          git push origin upm
-        else
-          echo "Switching to upm branch..."
-          git fetch origin upm:upm
-          git checkout upm
-          git pull origin upm
-        fi
+      - name: Switch to upm branch (Create upm branch if not exists)
+        run: |
+          if ! git ls-remote --exit-code origin upm &>/dev/null; then
+            echo "No upm branch detected on the remote, creating and pushing..."
+            git checkout -b upm
+            git push origin upm
+          else
+            echo "Switching to upm branch..."
+            git fetch origin upm:upm
+            git checkout upm
+            git pull origin upm
+          fi
 
-    - name: Merge folders
-      run: |
-        git rm -r --ignore-unmatch .
-        git checkout master -- ModiBuff/ModiBuff/Core
-        git checkout master -- ModiBuff/ModiBuff.Unity
-        rsync -a ModiBuff/ModiBuff/Core/ .
-        rsync -a ModiBuff/ModiBuff.Unity/ .
-        rm -r ModiBuff/ModiBuff/Core
-        rm -r ModiBuff/ModiBuff.Unity
+      - name: Merge folders
+        run: |
+          git rm -r --ignore-unmatch .
+          git clean -fxd
+          git checkout master -- ModiBuff/ModiBuff/Core
+          git checkout master -- ModiBuff/ModiBuff.Unity
+          rsync -a ModiBuff/ModiBuff/Core/ .
+          rsync -a ModiBuff/ModiBuff.Unity/ .
+          rm -r ModiBuff/ModiBuff/Core
+          rm -r ModiBuff/ModiBuff.Unity
+          echo "Finish executing Merge folders"
 
-    - name: Commit and push changes
-      run: |
-        if git diff-index --quiet HEAD --; then
-          echo "Changes detected, committing and pushing..."
+      - name: Commit and push changes
+        run: |
           git config user.name "GitHub Action Bot"
           git config user.email "bot@bot.com"
-          git add --all  # Stage all changes (including untracked files)
-          git commit -m "Merge folders from master"
-          git push origin upm
-        else
-          echo "No changes detected, skipping commit and push."
-        fi
+          git add --all
+          git commit -m "Merge folders from master" || true
+          git push origin upm || true
