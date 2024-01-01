@@ -85,12 +85,11 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Dispel status effect(s)
 	* Add stat (Damage, Heal)
 	* Actions (Attack, Heal, Cast, etc.)
-	* [Special Applier (another Modifier)](#applier-effect)
-		* Applying Applier Modifiers as Applier Modifiers
 	* Centralized Effect
 	* And more, see [the rest](ModiBuff/ModiBuff.Units/Effects)
 * Internal Effects
-	* Applier (another Modifier)
+	* [Special Applier (another Modifier)](#applier-effect)
+		* Applying Applier Modifiers as Applier Modifiers
 	* Modifier Action (refresh, reset stacks, custom stack)
 	* Remove (remove modifier)
 	* Revert Action
@@ -334,14 +333,21 @@ Add("IntervalDamage")
 Next is `Duration(float)`. It's used to set the duration of the duration effects. It's usually used to remove the
 modifier after X seconds.
 But it can be used for any effect.
-> Note: When we want to remove the modifier after X seconds, it's simpler to use the `Remove(float)` method,
-> which is just a QoL wrapper for `Duration(float)`.
 
 ```csharp
 Add("InitDamageDurationRemove")
     .Effect(new DamageEffect(5), EffectOn.Init)
     .Effect(new RemoveEffect(), EffectOn.Duration)
     .Duration(5);
+```
+
+> Note: When we want to remove the modifier after X seconds, it's simpler to use the `Remove(float)` method,
+> which is just a QoL wrapper for `Duration(float)`.
+
+```csharp
+Add("InitDamageDurationRemove")
+    .Effect(new DamageEffect(5), EffectOn.Init)
+    .Remove(5);
 ```
 
 ### Refresh
@@ -419,7 +425,7 @@ Add("InitAddDamageBuff_Interval")
 
 ### InstanceStackable
 
-`InstanceStackable()` makes the modifier instance stackable,meaning that we can have
+`InstanceStackable()` makes the modifier instance stackable, meaning that we can have
 multiple instances of the same modifier on the same unit.
 
 This will impose a slight performance penalty, and will require to use unique `genId` for each instance.
@@ -440,9 +446,9 @@ AddRecipe("InstanceStackableDoT")
 Effects can store meta effects, that will manipulate the effect values with optional conditions.
 Meta effects, just like normal effects, are user-generated. Note that meta-effect can't have **mutable** state.
 Any mutable state should be stored in the effect itself or on the unit.
-Effects support many meta effects after each other. Allowing for very complex interactions.
+Effects support using many meta effects after each other. Allowing for very complex interactions.
 
-This example scales our 5 damage value based on the source unit's health times some multiplier.
+This example scales our 5 damage value based on the source unit's health multiplied by it.
 
 ```csharp
 Add("InitDamageValueBasedOnHealthMeta")
@@ -474,12 +480,13 @@ modifier.
 The common conditions are: cooldown, mana cost, chance, status effect, etc.
 
 This example deals 5 damage on init apply, only if:
-the source unit has at least 5 mana, passes the 50% roll, is not on 1 second cooldown, source is able to act (attack,
-heal), and target is silenced.
+the source unit has at least 5 mana (uses up that mana), has at least 10% hp (uses up the hp),
+passes the 50% roll, is not on 1 second cooldown, source is able to act (attack, heal), and target is silenced.
 
 ```csharp
 Add("InitDamage_CostMana")
     .ApplyCost(CostType.Mana, 5)
+    .ApplyCostPercent(CostType.Health, 0.1f)
     .ApplyChance(0.5f)
     .ApplyCooldown(1f)
     .ApplyCondition(LegalAction.Act)
@@ -557,7 +564,7 @@ Add("InitHealToFullHalfHealthCallback")
 ### Modifier Actions
 
 Sometimes we need extra control of what happens inside the modifier, with game logic.
-This can be achieved with modifier actions, currently there's two: Refresh and ResetStacks.
+This can be achieved with modifier actions, currently there's three: Refresh, ResetStacks and CustomStack.
 
 Here we have a delayed add damage, that triggers after 2 seconds.
 But if a unit takes a "StrongHit", it will reset the timer.
@@ -579,6 +586,53 @@ Add("StackAddDamageStrongHitResetStacks")
     .ModifierAction(ModifierAction.ResetStacks, EffectOn.Callback)
     .Callback(CallbackType.StrongHit)
     .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5);
+```
+
+Custom stack is an experimental modifier action, that might be removed in the future.
+It allows to trigger the stack action as an modifier action.
+
+Ex. every 4th stun, dispel all status effects.
+
+```csharp
+Add("StunnedFourTimesDispelAllStatusEffects")
+    .Tag(TagType.CustomStack)
+    .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
+    .Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.Stack)
+    .ModifierAction(ModifierAction.Stack, EffectOn.CallbackEffect)
+    .CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+        new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
+        {
+            if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+                effect.Effect(target, source);
+        }));
+```
+
+### Dispel
+
+ModiBuff currently contains an internal dispel system, that doesn't yet allow for custom dispel logic through it.
+
+```csharp
+Add("BasicDispellable")
+    .Dispel(DispelType.Basic)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+
+IModifierOwner.Dispel(DispelType dispelType, IUnit source)
+```
+
+It's recommended to make your own dispel system inside the unit for better control, if needed.
+Ex. through tags and callbacks.
+
+```csharp
+Add("InitStatusEffectSleep_RemoveOnDispel")
+    .Tag(TagType.BasicDispel)
+    .Effect(new StatusEffectEffect(StatusEffectType.Sleep, 5f, true), EffectOn.Init)
+    .Remove(RemoveEffectOn.CallbackEffect)
+    .CallbackEffect(CallbackType.Dispel, removeEffect =>
+        new DispelEvent((target, source, eventTag) =>
+        {
+            if ((TagType.BasicDispel & eventTag) != 0)
+                removeEffect.Effect(target, source);
+        }))
 ```
 
 ### Tags
@@ -1017,17 +1071,17 @@ public class DamageEffect : IEffect, IStateEffect, IStackEffect, IRevertEffect,
     IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
     IMutableStateEffect, ISavableEffect<DamageEffect.SaveData>
 {
-        ...
-        
-        public object SaveState() => new SaveData(_extraDamage);
-        public void LoadState(object saveData) => _extraDamage = ((SaveData)saveData).ExtraDamage;
+    ...
+    
+    public object SaveState() => new SaveData(_extraDamage);
+    public void LoadState(object saveData) => _extraDamage = ((SaveData)saveData).ExtraDamage;
 
-        public readonly struct SaveData
-        {
-            public readonly float ExtraDamage;
+    public readonly struct SaveData
+    {
+        public readonly float ExtraDamage;
 
-            public SaveData(float extraDamage) => ExtraDamage = extraDamage;
-        }
+        public SaveData(float extraDamage) => ExtraDamage = extraDamage;
+    }
 ```
 
 ### Unit logic implementation check
@@ -1373,11 +1427,14 @@ A: If the mechanic is lacking internal ModiBuff functionality to work, and isn't
 an issue about it. The goal of ModiBuff is to support as many unique mechanics as possible,
 that don't rely on game logic.
 
-Q: Why can't effects hold my/some kind of state? How else can I achieve this?  
+Q: Why can't effects hold some kind of state? How else can I achieve this?  
 A: Feeding mutable (non-stack) state to effects would introduce way too much complexity.
 Instead we achieve this by using meta effects, and post effects on a secondary entity.
 An example of this is a
 [projectile](https://github.com/Chillu1/ModiBuff/blob/d0ba95f8f0696572b9cfb4f3e1374c2fc5f57726/ModiBuff/ModiBuff.Tests/StateTests.cs#L270-L277).
+It is possible to have (non-stack) mutable state in effects, but it's almost always a bad idea, unless you're working
+with centralized effects.
+[Poison example](https://github.com/Chillu1/ModiBuff/blob/8a61211fdbe2e7c4c909f1d86283794d02d62ac0/ModiBuff/ModiBuff.Units/Effects/PoisonDamageEffect.cs#L7).
 
 Q: How to handle UI?  
 A: There's two main ways of handling UI. The first general info is Modifier Name and Modifier Description,
