@@ -38,7 +38,7 @@ namespace ModiBuff.Tests
 		public void OneTimeSetup()
 		{
 			Logger.SetLogger<NUnitLogger>();
-			Config.DefaultTag = (int)Core.Units.TagType.Default;
+			Config.DefaultTag = (ulong)Core.Units.TagType.Default;
 			Config.PoolSize = 1;
 			Config.ModifierControllerPoolSize = 3;
 			Config.ModifierApplierControllerPoolSize = 3;
