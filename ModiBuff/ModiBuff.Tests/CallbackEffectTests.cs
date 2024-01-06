@@ -228,7 +228,7 @@ namespace ModiBuff.Tests
 		{
 			//CallbackState version, preferred version for one-off effects
 			add => add("StunnedFourTimesDispelAllStatusEffects")
-				.CallbackState(CallbackType.StatusEffectAdded, () =>
+				.Callback(CallbackType.StatusEffectAdded, () =>
 				{
 					float totalTimesStunned = 0f;
 					return new CallbackStateContext<float>(new StatusEffectEvent(

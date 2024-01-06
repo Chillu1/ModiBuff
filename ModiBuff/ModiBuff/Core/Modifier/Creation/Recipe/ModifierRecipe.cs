@@ -435,10 +435,10 @@ namespace ModiBuff.Core
 		///		It will NOT trigger any EffectOn.<see cref="EffectOn.CallbackUnit"/> or <see cref="EffectOn.CallbackEffect"/> effects, only the supplied callback.
 		///		Can be used with other signatures than <see cref="UnitCallback"/>. 
 		/// </summary>
-		public ModifierRecipe CallbackState<TCallback, TSaveData>(TCallback callbackType,
-			Func<CallbackStateContext<TSaveData>> @event)
+		public ModifierRecipe Callback<TCallback, TStateData>(TCallback callbackType,
+			Func<CallbackStateContext<TStateData>> @event)
 		{
-			return Effect(new CallbackStateSaveRegisterEffect<TCallback, TSaveData>(callbackType, @event),
+			return Effect(new CallbackStateSaveRegisterEffect<TCallback, TStateData>(callbackType, @event),
 				EffectOn.Init);
 		}
 

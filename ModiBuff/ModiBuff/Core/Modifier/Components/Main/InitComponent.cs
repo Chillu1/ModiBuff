@@ -6,6 +6,7 @@ namespace ModiBuff.Core
 	{
 		private readonly IEffect[] _effects;
 		private readonly IEffect[] _registerEffects;
+		private readonly IStateReset[] _stateResetEffects;
 		private readonly bool _oneTime;
 		private readonly ModifierCheck _modifierCheck;
 
@@ -42,6 +43,17 @@ namespace ModiBuff.Core
 			}
 			else
 				_registerEffects = null;
+
+			//Callbacks with mutable state
+			var stateResetEffectsList = new List<IStateReset>();
+			for (int i = 0; i < effects.Length; i++)
+			{
+				var effect = effects[i];
+				if (effect is IRegisterEffect && effect is IStateReset stateResetEffect)
+					stateResetEffectsList.Add(stateResetEffect);
+			}
+
+			_stateResetEffects = stateResetEffectsList.Count > 0 ? stateResetEffectsList.ToArray() : null;
 
 			_modifierCheck = check;
 
@@ -95,7 +107,12 @@ namespace ModiBuff.Core
 				_registerEffects[i].Effect(targets, owner);
 		}
 
-		public void ResetState() => _isInitialized = false;
+		public void ResetState()
+		{
+			_isInitialized = false;
+			for (int i = 0; i < _stateResetEffects?.Length; i++)
+				_stateResetEffects[i].ResetState();
+		}
 
 		public SaveData SaveState() => new SaveData(_isInitialized);
 		public void LoadState(SaveData data) => _isInitialized = data.IsInitialized;

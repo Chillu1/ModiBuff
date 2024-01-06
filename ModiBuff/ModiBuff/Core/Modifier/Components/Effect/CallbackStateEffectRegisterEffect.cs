@@ -3,7 +3,7 @@ using System;
 namespace ModiBuff.Core
 {
 	public sealed class CallbackStateEffectRegisterEffect<TCallback, TEffectStateData> :
-		IEffect, IRevertEffect, IRecipeFeedEffects, IRegisterEffect, IShallowClone<IEffect>,
+		IEffect, IRevertEffect, IRecipeFeedEffects, IMutableStateRegisterEffect, IShallowClone<IEffect>,
 		ISavable<CallbackStateEffectRegisterEffect<TCallback, TEffectStateData>.SaveData>,
 		IEffectStateInfo<CallbackStateEffectRegisterEffect<TCallback, TEffectStateData>.Data>
 	{
@@ -14,6 +14,7 @@ namespace ModiBuff.Core
 
 		private Func<TEffectStateData> _stateGetter;
 		private Action<TEffectStateData> _stateSetter;
+		private TEffectStateData _defaultState;
 		private object[] _callbacks;
 
 		private bool _isRegistered;
@@ -34,6 +35,7 @@ namespace ModiBuff.Core
 				_callbacks[i] = context.Callback;
 				_stateGetter = context.StateGetter;
 				_stateSetter = context.StateSetter;
+				_defaultState = context.DefaultState;
 			}
 		}
 
@@ -64,6 +66,8 @@ namespace ModiBuff.Core
 		}
 
 		public Data GetEffectData() => new Data(_stateGetter());
+
+		public void ResetState() => _stateSetter(_defaultState);
 
 		public IEffect ShallowClone() =>
 			new CallbackStateEffectRegisterEffect<TCallback, TEffectStateData>(_callbackType, _event);

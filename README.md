@@ -73,8 +73,7 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Callbacks (any user logic, support mutable and serializable state inside)
 		* Unit callbacks
 		* Effect callbacks
-		* Custom signature callbacks
-		* React + State callbacks
+		* Event/Custom signature callbacks
 * Effect implementation examples
 	* Damage (& self damage)
 	* Heal
@@ -519,7 +518,8 @@ Add("ThornsOnHitEvent")
 
 ### Callback
 
-Callbacks work like events, but have extra functionality, like being able to remove the modifier on callback.
+Callbacks work like events, but have extra functionality, like being able to remove the modifier on callback,
+using data sent through the event, and having mutable serializable state inside it.
 
 Callbacks are a way to add logic that can be triggered on any user/game-based action.
 This is particularly useful for removing modifiers on certain non-standard cases.
@@ -528,11 +528,14 @@ In this example we add 5 damage to unit on Init, and the modifier can only be re
 StrongHit".
 Essentially a hit that deals more than half units health in damage (ex. game logic).
 
+> Important: there can only be one callback `CallbackUnit` per modifier, but multiple effects that trigger on that
+> callback.
+
 ```csharp
 Add("InitAddDamageRevertibleHalfHealthCallback")
     .Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
-    .Remove(RemoveEffectOn.Callback)
-    .Callback(CallbackType.StrongHit);
+    .Remove(RemoveEffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.StrongHit);
 ```
 
 It's possible to use any IEffect for callbacks,
@@ -542,10 +545,8 @@ so we can for example heal the unit to full health every time they get hit by a 
 Add("InitHealToFullWhenStrongHitCallback")
     .Effect(new HealEffect(0)
         .SetMetaEffects(new AddValueBasedOnStatDiffMetaEffect(StatType.MaxHealth)), EffectOn.Callback)
-    .Callback(CallbackType.StrongHit);
+    .CallbackUnit(CallbackUnitType.StrongHit);
 ```
-
-#### Callback Unit delegate
 
 There's another version of callbacks, based on delegates instead of IEffects.
 It can be useful for simple one-off effects.
@@ -560,6 +561,78 @@ Add("InitHealToFullHalfHealthCallback")
 ```
 
 > Note that no effect or state can be defined or saved here, being mostly a downside.
+
+#### Callback with mutable state
+
+It's possible for callbacks to have internal mutable state, but this state should be handled carefully.
+It's important to reset the state when our condition is met first, before we trigger any effects.
+
+In this example every time unit's health changes, we add that change to our total, and when we reach 10 damage taken,
+we deal 5 damage to the unit.
+
+```csharp
+AddRecipe("InitTakeFiveDamageOnTenDamageTaken")
+    .Callback(CallbackType.CurrentHealthChanged, () =>
+    {
+        float totalDamageTaken = 0f;
+
+        return new CallbackStateContext<float>(new HealthChangedEvent(
+            (target, source, health, deltaHealth) =>
+            {
+                if (deltaHealth > 0)
+                    totalDamageTaken += deltaHealth;
+                if (totalDamageTaken >= 10)
+                {
+                    totalDamageTaken = 0f;
+                    target.TakeDamage(5, source);
+                }
+            }), () => totalDamageTaken, value => totalDamageTaken = value);
+    });
+```
+
+#### Callback Effect
+
+`CallbackEffect` are special callbacks that trigger on `EffectOn.CallbackEffect` effects.
+These callbacks get the effect fed as a parameter, this allows for condtional effect invoking, or custom effect use,
+like manual stack trigger. Supports custom callback signatures.
+
+> Important: there can only be one callback `CallbackEffect` per modifier, but multiple effects that trigger on that
+> callback.
+
+```csharp
+AddRecipe("SilenceSourceWhenSilenced")
+    .Effect(new StatusEffectEffect(StatusEffectType.Silence, 2f), EffectOn.CallbackEffect)
+    .CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+        new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+        {
+            if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Silence))
+                effect.Effect(source, target);
+        }));
+```
+
+It's possible to have mutable state in this callback as well.
+
+```csharp
+AddRecipe("StunnedFourTimesDispelAllStatusEffects")
+    .Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.CallbackEffect)
+    .CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+    {
+        float totalTimesStunned = 0f;
+        return new CallbackStateContext<float>(
+            new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
+            {
+                if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+                {
+                    totalTimesStunned++;
+                    if (totalTimesStunned >= 4)
+                    {
+                        totalTimesStunned = 0f;
+                        effect.Effect(target, source);
+                    }
+                }
+            }), () => totalTimesStunned, value => totalTimesStunned = value);
+    })
+```
 
 ### Modifier Actions
 
