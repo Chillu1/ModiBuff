@@ -421,6 +421,16 @@ namespace ModiBuff.Core
 		}
 
 		/// <summary>
+		///		Registers callbacks to a unit, this callback supports custom callback signatures.
+		///		It will NOT trigger any EffectOn.<see cref="EffectOn.CallbackUnit"/> or <see cref="EffectOn.CallbackEffect"/> effects, only the supplied callbacks.
+		///		Can be used with other signatures than <see cref="UnitCallback"/>.
+		/// </summary>
+		public ModifierRecipe Callback<TCallback>(TCallback callbackType, object callback)
+		{
+			return Callback(new Callback<TCallback>(callbackType, callback));
+		}
+
+		/// <summary>
 		///		Registers a callback that can have unique state for each modifier instance, and has savable data
 		///		It will NOT trigger any EffectOn.<see cref="EffectOn.CallbackUnit"/> or <see cref="EffectOn.CallbackEffect"/> effects, only the supplied callback.
 		///		Can be used with other signatures than <see cref="UnitCallback"/>. 
@@ -449,6 +459,29 @@ namespace ModiBuff.Core
 			}
 
 			var effect = new CallbackEffectRegisterEffect<TCallbackEffect>(callbackType, @event);
+			_callbackEffectRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
+			_effectWrappers.Add(_callbackEffectRegisterWrapper);
+			return this;
+		}
+
+		/// <summary>
+		///		Special callbacks, all EffectOn.<see cref="EffectOn.CallbackEffect"/> effects will
+		///		trigger when <see cref="callbackType"/> is triggered.
+		///		Supports custom callback signatures (beside <see cref="UnitCallback"/>.
+		///		Only ONE CallbackEffect can be registered per modifier.
+		///		Allows to save state through state context.
+		/// </summary>
+		public ModifierRecipe CallbackEffect<TCallbackEffect, TStateData>(TCallbackEffect callbackType,
+			Func<IEffect, CallbackStateContext<TStateData>> @event)
+		{
+			if (_callbackEffectRegisterWrapper != null)
+			{
+				Logger.LogError("[ModiBuff] Multiple CallbackEffect effects registered, " +
+				                "only one is allowed per modifier, ignoring.");
+				return this;
+			}
+
+			var effect = new CallbackStateEffectRegisterEffect<TCallbackEffect, TStateData>(callbackType, @event);
 			_callbackEffectRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
 			_effectWrappers.Add(_callbackEffectRegisterWrapper);
 			return this;

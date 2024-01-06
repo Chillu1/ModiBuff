@@ -97,12 +97,12 @@ namespace ModiBuff.Tests
 						if (deltaHealth > 0)
 							effect.Effect(target, source);
 					}))
-				.Callback(new Callback<CallbackType>(CallbackType.CurrentHealthChanged,
+				.Callback(CallbackType.CurrentHealthChanged,
 					new HealthChangedEvent((target, source, health, deltaHealth) =>
 					{
 						if (deltaHealth > 0)
 							source.TakeDamage(5, target);
-					})));
+					}));
 			Setup();
 
 			Unit.AddModifierSelf("InitRegisterAllDamage");
