@@ -132,7 +132,6 @@ namespace ModiBuff.Tests
 
 		private static readonly RecipeAddFunc[] stunStackingHealRecipes =
 		{
-			//TODO If we add the modifier again, it will trigger the stack effect, which we don't want
 			//Stack redirection version
 			add => add("StunHealStackReset")
 				.Tag(Core.TagType.CustomStack)

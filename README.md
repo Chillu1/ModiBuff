@@ -680,6 +680,17 @@ Add("StunnedFourTimesDispelAllStatusEffects")
         }));
 ```
 
+### Remove Applier
+
+It's possible to remove added appliers through recipes as well.
+We just need to specify applier type, and if it has any apply checks (ex. like chance, cooldown, etc.).
+
+```csharp
+AddRecipe("AddApplier_Effect")
+    .Effect(new ApplierEffect("InitDamage"), EffectOn.Init)
+    .RemoveApplier(5, ApplierType.Cast, false);
+```
+
 ### Dispel
 
 ModiBuff currently contains an internal dispel system, that doesn't yet allow for custom dispel logic through it.
@@ -798,6 +809,52 @@ public static ModifierRecipe LegalTarget(this ModifierRecipe recipe, LegalTarget
 Add("InitDamageEnemyOnly")
     .LegalTarget(LegalTarget.Enemy)
     .Effect(new DamageEffect(5f), EffectOn.Init);
+```
+
+### Custom Stack
+
+Stack is always triggered when we try to add the same type of modifier again.
+This behaviour can be changed by using CustomStack logic. Modifier stack action might be removed/refactored in
+a future release.
+
+The most usual usage of this is to trigger the stack action on a custom case.
+It's a way to glue callback/event logic to stacking behaviour.
+
+Here we dispell all status effects if the unit has been stunned 4 times.
+
+```csharp
+Add("StunnedFourTimesDispelAllStatusEffects")
+    .Tag(TagType.CustomStack)
+    .Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
+    .Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.Stack)
+    .ModifierAction(ModifierAction.Stack, EffectOn.CallbackEffect)
+    .CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+        new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
+        {
+            if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+                effect.Effect(target, source);
+        }));
+```
+
+Here we have a stacking heal that stacks based on the amount of times the unit has been stunned.
+That stacking number gets reset every 10 seconds (interval), but the interval timer gets refreshed every time the unit
+gets stunned. Also the heal itself isn't revertible, but the value we stack is.
+
+```csharp
+Add("StunHealStackReset")
+    .Tag(Core.TagType.CustomStack)
+    .Stack(WhenStackEffect.Always)
+    .Effect(new HealEffect(0, HealEffect.EffectState.ValueIsRevertible,
+        StackEffectType.Effect | StackEffectType.Add, 5), EffectOn.Stack)
+    .CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+        new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+        {
+            if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+                effect.Effect(target, source);
+        }))
+    .ModifierAction(ModifierAction.ResetStacks, EffectOn.Interval)
+    .ModifierAction(ModifierAction.Refresh | ModifierAction.Stack, EffectOn.CallbackEffect)
+    .Interval(10).Refresh();
 ```
 
 ### Order
@@ -1297,69 +1354,6 @@ For example effects that hold instance info.
 var effect = StatusEffectEffect.Create(id, genId, StatusEffectType.Sleep, 5f, true);
 ```
 
-#### React Callbacks
-
-One reason to use manual modifier generation right now is to use react callbacks (not supported yet in recipes).
-
-This example applies a sleep effect for 5 seconds, but if the unit takes 10 damage,
-it reverts the sleep effect and the modifier.
-
-We're using factory pattern constructors here for the effects,
-since they need the id and genId to work with modifier instances.
-
-```csharp
-Add("InitStatusEffectSleep_RemoveOnTenDamageTaken", (id, genId, name, tag) =>
-{
-    var effect = StatusEffectEffect.Create(id, genId, StatusEffectType.Sleep, 5f, true);
-    var removeEffect = RemoveEffect.Create(id, genId);
-
-    float totalDamageTaken = 0f;
-    var @event = new HealthChangedEvent((target, source, health, deltaHealth) =>
-    {
-        totalDamageTaken += deltaHealth;
-        if (totalDamageTaken >= 10)
-            removeEffect.Effect(target, source);
-    });
-    var registerReactEffect = new ReactCallbackRegisterEffect<ReactType>(
-        new ReactCallback<ReactType>(ReactType.CurrentHealthChanged, @event));
-
-    //Order of reverts matters here, if we revert the captured variable after
-    //it will trigger a recursive effect, because the captured variable will never be reset
-    removeEffect.SetRevertibleEffects(new IRevertEffect[]
-        { effect, new RevertActionEffect(() => { totalDamageTaken = 0f; }), registerReactEffect });
-
-    var initComponent = new InitComponent(false, new IEffect[] { effect, registerReactEffect }, null);
-    return new Modifier(id, genId, name, initComponent, null, null, null,
-        new SingleTargetComponent(), null);
-});
-```
-
-A basic dispel mechanic can also be implemented with react callbacks.
-
-```csharp
-Add("InitStatusEffectSleep_RemoveOnDispel", (id, genId, name, tag) =>
-{
-    var effect = StatusEffectEffect.Create(id, genId, StatusEffectType.Sleep, 5f, true);
-    var removeEffect = RemoveEffect.Create(id, genId);
-
-    var @event = new DispelEvent((target, source, eventTag) =>
-    {
-        if ((tag & eventTag.ToInternalTag()) != 0)
-            removeEffect.Effect(target, source);
-    });
-    var registerReactEffect = new ReactCallbackRegisterEffect<ReactType>(
-        new ReactCallback<ReactType>(ReactType.Dispel, @event));
-
-    removeEffect.SetRevertibleEffects(new IRevertEffect[] { effect, registerReactEffect });
-
-    var initComponent = new InitComponent(false, new IEffect[] { effect, registerReactEffect }, null);
-    return new Modifier(id, genId, name, initComponent, null, null, null,
-        new SingleTargetComponent(), null);
-}, TagType.BasicDispel);
-```
-
-Then we can dispel this modifier with `Unit.Dispel(TagType.BasicDispel, Unit);`.
-
 ## Serialization
 
 To correctly serialize data, two things need to be serialized: The identification, and the mutable state.
@@ -1425,6 +1419,23 @@ SerializationExtensions.AddCustomValueType<IReadOnlyDictionary<int, int>>(elemen
         dictionary.Add(int.Parse(kvp.Name), kvp.Value.GetInt32());
     return dictionary;
 });
+```
+
+Custom stack logic can also help us with implementing custom logic.
+Here we use stacks to determine the amount of poison stacks.
+
+```csharp
+Add("HealPerPoisonStack")
+    .Tag(Core.TagType.CustomStack)
+    .Stack(WhenStackEffect.Always)
+    .Effect(new HealEffect(0, HealEffect.EffectState.None,
+        StackEffectType.Effect | StackEffectType.SetStacksBased, 1), EffectOn.Stack)
+    .CallbackEffect(CallbackType.PoisonDamage, effect =>
+        new PoisonEvent((target, source, stacks, totalStacks, damage) =>
+        {
+            effect.Effect(target, source);
+        }))
+    .ModifierAction(ModifierAction.Stack, EffectOn.CallbackEffect);
 ```
 
 Also checkout [applier branch](https://github.com/Chillu1/ModiBuff/compare/master...feature/duration-add-modifier)
