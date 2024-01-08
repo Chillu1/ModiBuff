@@ -10,6 +10,7 @@ namespace ModiBuff.Tests
 		protected EffectIdManager EffectIdManager { get; private set; }
 		protected ModifierRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
+		protected ModifierControllerPool ModifierControllerPool { get; private set; }
 		protected ModifierLessEffects Effects { get; private set; }
 
 
@@ -22,6 +23,7 @@ namespace ModiBuff.Tests
 			EffectIdManager = new EffectIdManager();
 			Recipes = new BenchmarkModifierRecipes(IdManager);
 			Pool = new ModifierPool(Recipes.GetGenerators());
+			ModifierControllerPool = new ModifierControllerPool();
 			Effects = new ModifierLessEffects(EffectIdManager);
 			Effects.Add("InitDamage", new DamageEffect(5));
 			Effects.Finish();
@@ -31,6 +33,7 @@ namespace ModiBuff.Tests
 		public virtual void OneTimeTearDown()
 		{
 			Pool.Reset();
+			ModifierControllerPool.Reset();
 			IdManager.Reset();
 			Effects.Reset();
 
