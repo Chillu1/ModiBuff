@@ -365,7 +365,7 @@ namespace ModiBuff.Core.Units
 			public readonly IReadOnlyList<int> LegalActionTypeCounters;
 			public readonly LegalAction LegalActions;
 
-#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
+#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(IReadOnlyDictionary<long, float> legalActionsTimers,

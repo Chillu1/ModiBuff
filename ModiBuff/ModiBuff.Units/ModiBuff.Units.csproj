@@ -5,7 +5,7 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <TargetFrameworks>netstandard1.1;netstandard2.0</TargetFrameworks>
         <PackageId>ModiBuff.Units</PackageId>
-        <Version>0.2.0</Version>
+        <Version>0.3.0</Version>
         <Authors>Chillu</Authors>
         <Product>ModiBuff.Units</Product>
         <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
@@ -22,11 +22,11 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <DefineConstants>TRACE JSON_SERIALIZATION</DefineConstants>
+        <DefineConstants>TRACE MODIBUFF_SYSTEM_TEXT_JSON</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <DefineConstants>TRACE JSON_SERIALIZATION</DefineConstants>
+        <DefineConstants>TRACE MODIBUFF_SYSTEM_TEXT_JSON</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>

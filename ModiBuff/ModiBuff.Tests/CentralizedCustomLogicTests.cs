@@ -101,11 +101,11 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe(PoisonRecipe);
 			AddRecipe("PoisonThorns")
-				.Callback(new Callback<CallbackType>(CallbackType.PoisonDamage,
+				.Callback(CallbackType.PoisonDamage,
 					new PoisonEvent((target, source, stacks, totalStacks, damage) =>
 					{
 						((IAttackable<float, float>)source).TakeDamage(damage, target);
-					})));
+					}));
 			Setup();
 
 			Enemy.AddModifierSelf("PoisonThorns");

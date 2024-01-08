@@ -341,7 +341,7 @@ namespace ModiBuff.Tests
 		public void SaveCallbackLocalVarState()
 		{
 			AddRecipe("InitTakeFiveDamageOnTenDamageTaken")
-				.CallbackState(CallbackType.CurrentHealthChanged, () =>
+				.Callback(CallbackType.CurrentHealthChanged, () =>
 				{
 					float totalDamageTaken = 0f; //state != null ? (float)state : 0f;
 
@@ -382,11 +382,11 @@ namespace ModiBuff.Tests
 
 			AddRecipe(CentralizedCustomLogicTests.PoisonRecipe);
 			AddRecipe("PoisonThorns")
-				.Callback(new Callback<CallbackType>(CallbackType.PoisonDamage,
+				.Callback(CallbackType.PoisonDamage,
 					new PoisonEvent((target, source, stacks, totalStacks, damage) =>
 					{
 						((IAttackable<float, float>)source).TakeDamage(damage, target);
-					})));
+					}));
 			Setup();
 
 			const string gameStateFile = "poisonEffectGameStateTest.json";
@@ -428,7 +428,7 @@ namespace ModiBuff.Tests
 			});
 
 			AddRecipe("InitTakeFiveDamageOnTenDamageTaken")
-				.CallbackState(CallbackType.CurrentHealthChanged, () =>
+				.Callback(CallbackType.CurrentHealthChanged, () =>
 				{
 					float totalDamageTaken = 0f;
 					float maxDamageTaken = 0f;
@@ -470,6 +470,42 @@ namespace ModiBuff.Tests
 
 			loadedUnit.TakeDamage(5, loadedUnit);
 			Assert.AreEqual(UnitHealth - 5 - 5 - 5 - 5, loadedUnit.Health);
+		}
+
+		[Test]
+		public void SaveCallbackEffectLocalFloatVarState()
+		{
+			AddRecipe("StunnedFourTimesDispelAllStatusEffects")
+				.Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.CallbackEffect)
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+				{
+					float totalTimesStunned = 0f;
+					return new CallbackStateContext<float>(
+						new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
+						{
+							if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+							{
+								totalTimesStunned++;
+								if (totalTimesStunned >= 4)
+								{
+									totalTimesStunned = 0f;
+									effect.Effect(target, source);
+								}
+							}
+						}), () => totalTimesStunned, value => totalTimesStunned = value);
+				});
+			Setup();
+
+			Unit.AddModifierSelf("StunnedFourTimesDispelAllStatusEffects");
+			Unit.ChangeStatusEffect(StatusEffectType.Stun, 1f, Enemy);
+			Unit.ChangeStatusEffect(StatusEffectType.Stun, 1f, Enemy);
+			Assert.True(Unit.HasStatusEffectMulti(StatusEffectType.Stun));
+
+			SaveLoadGameState(Unit, out var loadedUnit);
+
+			loadedUnit.ChangeStatusEffect(StatusEffectType.Stun, 1f, Enemy);
+			loadedUnit.ChangeStatusEffect(StatusEffectType.Stun, 1f, Enemy);
+			Assert.False(loadedUnit.HasStatusEffectMulti(StatusEffectType.Stun));
 		}
 
 		//TODO GenIds will be wrong in some places (StatusEffect), how to fix, feed correct id & genId somehow?

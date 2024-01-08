@@ -142,5 +142,43 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("AddDamageRevertible");
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 		}
+
+		[Test]
+		public void CallbackStateReset()
+		{
+			AddRecipe("InitTakeFiveDamageOnTenDamageTaken")
+				.Callback(CallbackType.CurrentHealthChanged, () =>
+				{
+					float totalDamageTaken = 0f;
+
+					return new CallbackStateContext<float>(new HealthChangedEvent(
+						(target, source, health, deltaHealth) =>
+						{
+							if (deltaHealth > 0)
+								totalDamageTaken += deltaHealth;
+							if (totalDamageTaken >= 10)
+							{
+								totalDamageTaken = 0f;
+								target.TakeDamage(5, source);
+							}
+						}), () => totalDamageTaken, value => totalDamageTaken = value);
+				});
+			Setup();
+
+			Unit.AddModifierSelf("InitTakeFiveDamageOnTenDamageTaken");
+			var modRef = Unit.ModifierController.GetModifierReferences()[0];
+			Unit.TakeDamage(5, Unit);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.ModifierController.Remove(in modRef);
+			Assert.AreEqual(Unit.ModifierController.GetModifierReferences().Length, 0);
+			Unit.AddModifierSelf("InitTakeFiveDamageOnTenDamageTaken");
+			var newModRef = Unit.ModifierController.GetModifierReferences()[0];
+			Assert.AreEqual(modRef.Id, newModRef.Id);
+			Assert.AreEqual(modRef.GenId, newModRef.GenId);
+
+			Unit.TakeDamage(5, Unit);
+			Assert.AreEqual(UnitHealth - 10, Unit.Health);
+		}
 	}
 }

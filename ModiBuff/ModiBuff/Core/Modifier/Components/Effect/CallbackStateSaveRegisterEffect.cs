@@ -7,18 +7,20 @@ namespace ModiBuff.Core
 		public readonly object Callback;
 		public readonly Func<TObjectSaveData> StateGetter;
 		public readonly Action<TObjectSaveData> StateSetter;
+		public readonly TObjectSaveData DefaultState;
 
 		public CallbackStateContext(object callback, Func<TObjectSaveData> stateGetter,
-			Action<TObjectSaveData> stateSetter)
+			Action<TObjectSaveData> stateSetter, TObjectSaveData defaultState = default)
 		{
 			Callback = callback;
 			StateGetter = stateGetter;
 			StateSetter = stateSetter;
+			DefaultState = defaultState;
 		}
 	}
 
 	public sealed class CallbackStateSaveRegisterEffect<TCallback, TEffectStateData> : IRevertEffect, IEffect,
-		IRegisterEffect, IShallowClone<IEffect>,
+		IMutableStateRegisterEffect, IShallowClone<IEffect>,
 		ISavable<CallbackStateSaveRegisterEffect<TCallback, TEffectStateData>.SaveData>,
 		IEffectStateInfo<CallbackStateSaveRegisterEffect<TCallback, TEffectStateData>.Data>
 	{
@@ -27,6 +29,7 @@ namespace ModiBuff.Core
 		private readonly TCallback _callbackType;
 		private readonly Func<CallbackStateContext<TEffectStateData>> _event;
 		private readonly object _callback;
+		private readonly TEffectStateData _defaultState;
 		private readonly Func<TEffectStateData> _stateGetter;
 		private readonly Action<TEffectStateData> _stateSetter;
 
@@ -41,6 +44,7 @@ namespace ModiBuff.Core
 			_callback = context.Callback;
 			_stateGetter = context.StateGetter;
 			_stateSetter = context.StateSetter;
+			_defaultState = context.DefaultState;
 		}
 
 		//Won't work since we'd have to explicitly call this on load. Could have a special interface with reflection, but that's over-engineering
@@ -78,6 +82,8 @@ namespace ModiBuff.Core
 
 		public Data GetEffectData() => new Data(_stateGetter());
 
+		public void ResetState() => _stateSetter(_defaultState);
+
 		public IEffect ShallowClone() =>
 			new CallbackStateSaveRegisterEffect<TCallback, TEffectStateData>(_callbackType, _event);
 
@@ -97,7 +103,7 @@ namespace ModiBuff.Core
 		{
 			public readonly TEffectStateData State;
 
-#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
+#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(TEffectStateData state) => State = state;

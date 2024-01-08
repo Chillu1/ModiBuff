@@ -49,17 +49,18 @@ namespace ModiBuff.Tests
 				.CallbackEffect(CallbackType.CurrentHealthChanged, removeEffect =>
 				{
 					float totalDamageTaken = 0f;
-					return new HealthChangedEvent((target, source, health, deltaHealth) =>
-					{
-						//Don't count "negative damage/healing damage"
-						if (deltaHealth > 0)
-							totalDamageTaken += deltaHealth;
-						if (totalDamageTaken >= 10)
+					return new CallbackStateContext<float>(
+						new HealthChangedEvent((target, source, health, deltaHealth) =>
 						{
-							totalDamageTaken = 0f;
-							removeEffect.Effect(target, source);
-						}
-					});
+							//Don't count "negative damage/healing damage"
+							if (deltaHealth > 0)
+								totalDamageTaken += deltaHealth;
+							if (totalDamageTaken >= 10)
+							{
+								totalDamageTaken = 0f;
+								removeEffect.Effect(target, source);
+							}
+						}), () => totalDamageTaken, value => totalDamageTaken = value);
 				});
 			Setup();
 
@@ -131,7 +132,6 @@ namespace ModiBuff.Tests
 
 		private static readonly RecipeAddFunc[] stunStackingHealRecipes =
 		{
-			//TODO If we add the modifier again, it will trigger the stack effect, which we don't want
 			//Stack redirection version
 			add => add("StunHealStackReset")
 				.Tag(Core.TagType.CustomStack)
@@ -227,7 +227,7 @@ namespace ModiBuff.Tests
 		{
 			//CallbackState version, preferred version for one-off effects
 			add => add("StunnedFourTimesDispelAllStatusEffects")
-				.CallbackState(CallbackType.StatusEffectAdded, () =>
+				.Callback(CallbackType.StatusEffectAdded, () =>
 				{
 					float totalTimesStunned = 0f;
 					return new CallbackStateContext<float>(new StatusEffectEvent(
@@ -252,18 +252,19 @@ namespace ModiBuff.Tests
 				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
 				{
 					float totalTimesStunned = 0f;
-					return new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
-					{
-						if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+					return new CallbackStateContext<float>(
+						new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
 						{
-							totalTimesStunned++;
-							if (totalTimesStunned >= 4)
+							if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
 							{
-								totalTimesStunned = 0f;
-								effect.Effect(target, source);
+								totalTimesStunned++;
+								if (totalTimesStunned >= 4)
+								{
+									totalTimesStunned = 0f;
+									effect.Effect(target, source);
+								}
 							}
-						}
-					});
+						}), () => totalTimesStunned, value => totalTimesStunned = value);
 				}),
 			//Stack version
 			add => add("StunnedFourTimesDispelAllStatusEffects")
