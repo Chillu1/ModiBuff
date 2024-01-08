@@ -221,12 +221,12 @@ namespace ModiBuff.Core
 		///		Adds a basic remove effect, that should be triggered on either stack, or callback
 		/// </summary>
 		/// <remarks>OVERWRITES all previous remove effects.</remarks>
-		public ModifierRecipe RemoveApplier(RemoveEffectOn removeEffectOn, ApplierType applierType, bool hasApplyChecks)
-		{
-			_removeEffectWrapper =
-				new RemoveEffectWrapper(new RemoveEffect(Id, applierType, hasApplyChecks), removeEffectOn.ToEffectOn());
-			return this;
-		}
+		//public ModifierRecipe RemoveApplier(RemoveEffectOn removeEffectOn, ApplierType applierType, bool hasApplyChecks)
+		//{
+		//	_removeEffectWrapper =
+		//		new RemoveEffectWrapper(new RemoveEffect(Id, applierType, hasApplyChecks), removeEffectOn.ToEffectOn());
+		//	return this;
+		//}
 
 		/// <summary>
 		///		If a modifier gets applied to a target that already has the modifier, should the interval or duration be reset?
@@ -283,11 +283,11 @@ namespace ModiBuff.Core
 		/// 	Adds stack functionality to the modifier. A stack is added every time the modifier gets re-added to the target.
 		/// </summary>
 		/// <param name="whenStackEffect">When should the stack effects be triggered.</param>
-		/// <param name="value">Values that can be used by the stack effects.</param>
 		/// <param name="maxStacks">Max amount of stacks that can be applied.</param>
 		/// <param name="everyXStacks">If <see cref="whenStackEffect"/> is set to
 		/// <see cref="whenStackEffect.EveryXStacks"/>, this value will be used to determine when the stack effects should be triggered.</param>
-		/// <param name="independentStackTime">If set, will add a timer for each stack, and remove a stack after a timer expires</param>
+		/// <param name="singleStackTime">Adds a single timer, and removes and reverts all stacks after the timer expires</param>
+		/// <param name="independentStackTime">Adds a timer for each stack, and removes a stack after a timer expires</param>
 		public ModifierRecipe Stack(WhenStackEffect whenStackEffect, int maxStacks = -1,
 			int everyXStacks = -1, float singleStackTime = -1, float independentStackTime = -1)
 		{
@@ -421,14 +421,24 @@ namespace ModiBuff.Core
 		}
 
 		/// <summary>
+		///		Registers callbacks to a unit, this callback supports custom callback signatures.
+		///		It will NOT trigger any EffectOn.<see cref="EffectOn.CallbackUnit"/> or <see cref="EffectOn.CallbackEffect"/> effects, only the supplied callbacks.
+		///		Can be used with other signatures than <see cref="UnitCallback"/>.
+		/// </summary>
+		public ModifierRecipe Callback<TCallback>(TCallback callbackType, object callback)
+		{
+			return Callback(new Callback<TCallback>(callbackType, callback));
+		}
+
+		/// <summary>
 		///		Registers a callback that can have unique state for each modifier instance, and has savable data
 		///		It will NOT trigger any EffectOn.<see cref="EffectOn.CallbackUnit"/> or <see cref="EffectOn.CallbackEffect"/> effects, only the supplied callback.
 		///		Can be used with other signatures than <see cref="UnitCallback"/>. 
 		/// </summary>
-		public ModifierRecipe CallbackState<TCallback, TSaveData>(TCallback callbackType,
-			Func<CallbackStateContext<TSaveData>> @event)
+		public ModifierRecipe Callback<TCallback, TStateData>(TCallback callbackType,
+			Func<CallbackStateContext<TStateData>> @event)
 		{
-			return Effect(new CallbackStateSaveRegisterEffect<TCallback, TSaveData>(callbackType, @event),
+			return Effect(new CallbackStateSaveRegisterEffect<TCallback, TStateData>(callbackType, @event),
 				EffectOn.Init);
 		}
 
@@ -449,6 +459,29 @@ namespace ModiBuff.Core
 			}
 
 			var effect = new CallbackEffectRegisterEffect<TCallbackEffect>(callbackType, @event);
+			_callbackEffectRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
+			_effectWrappers.Add(_callbackEffectRegisterWrapper);
+			return this;
+		}
+
+		/// <summary>
+		///		Special callbacks, all EffectOn.<see cref="EffectOn.CallbackEffect"/> effects will
+		///		trigger when <see cref="callbackType"/> is triggered.
+		///		Supports custom callback signatures (beside <see cref="UnitCallback"/>.
+		///		Only ONE CallbackEffect can be registered per modifier.
+		///		Allows to save state through state context.
+		/// </summary>
+		public ModifierRecipe CallbackEffect<TCallbackEffect, TStateData>(TCallbackEffect callbackType,
+			Func<IEffect, CallbackStateContext<TStateData>> @event)
+		{
+			if (_callbackEffectRegisterWrapper != null)
+			{
+				Logger.LogError("[ModiBuff] Multiple CallbackEffect effects registered, " +
+				                "only one is allowed per modifier, ignoring.");
+				return this;
+			}
+
+			var effect = new CallbackStateEffectRegisterEffect<TCallbackEffect, TStateData>(callbackType, @event);
 			_callbackEffectRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
 			_effectWrappers.Add(_callbackEffectRegisterWrapper);
 			return this;

@@ -6,6 +6,7 @@ namespace ModiBuff.Core
 	{
 		private readonly IEffect[] _effects;
 		private readonly IEffect[] _registerEffects;
+		private readonly IStateReset[] _stateResetEffects;
 		private readonly bool _oneTime;
 		private readonly ModifierCheck _modifierCheck;
 
@@ -42,6 +43,17 @@ namespace ModiBuff.Core
 			}
 			else
 				_registerEffects = null;
+
+			//Callbacks with mutable state
+			var stateResetEffectsList = new List<IStateReset>();
+			for (int i = 0; i < effects.Length; i++)
+			{
+				var effect = effects[i];
+				if (effect is IRegisterEffect && effect is IStateReset stateResetEffect)
+					stateResetEffectsList.Add(stateResetEffect);
+			}
+
+			_stateResetEffects = stateResetEffectsList.Count > 0 ? stateResetEffectsList.ToArray() : null;
 
 			_modifierCheck = check;
 
@@ -85,23 +97,22 @@ namespace ModiBuff.Core
 
 		public void InitLoad(IUnit target, IUnit owner)
 		{
-			if (_registerEffects == null)
-				return;
-
-			for (int i = 0; i < _registerEffects.Length; i++)
+			for (int i = 0; i < _registerEffects?.Length; i++)
 				_registerEffects[i].Effect(target, owner);
 		}
 
 		public void InitLoad(IList<IUnit> targets, IUnit owner)
 		{
-			if (_registerEffects == null)
-				return;
-
 			for (int i = 0; i < _registerEffects?.Length; i++)
 				_registerEffects[i].Effect(targets, owner);
 		}
 
-		public void ResetState() => _isInitialized = false;
+		public void ResetState()
+		{
+			_isInitialized = false;
+			for (int i = 0; i < _stateResetEffects?.Length; i++)
+				_stateResetEffects[i].ResetState();
+		}
 
 		public SaveData SaveState() => new SaveData(_isInitialized);
 		public void LoadState(SaveData data) => _isInitialized = data.IsInitialized;
@@ -110,7 +121,7 @@ namespace ModiBuff.Core
 		{
 			public readonly bool IsInitialized;
 
-#if JSON_SERIALIZATION && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
+#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(bool isInitialized) => IsInitialized = isInitialized;
