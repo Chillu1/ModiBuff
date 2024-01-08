@@ -109,6 +109,14 @@ Add("InitDamage_CostMana")
     .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
+Costs 60% of max health, deal 5 damage on init
+
+```csharp
+Add("InitDamage_CostSixtyPercentHealth")
+    .ApplyCostPercent(CostType.Health, 0.6f)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
 Every two stacks, stun.
 
 ```csharp
@@ -282,6 +290,14 @@ Add("InitDamage_Cooldown")
     .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
+Can deal damage once every 1 second (cooldown), but has 2 charges
+
+```csharp
+Add("InitDamage_Cooldown")
+    .ApplyChargesCooldown(1, 2)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
 Costs health to deal damage, can't be activated if health is below the cost
 
 ```csharp
@@ -412,17 +428,18 @@ Add("InitStatusEffectSleep_RemoveOnTenDamageTaken")
     .CallbackEffect(CallbackType.CurrentHealthChanged, removeEffect =>
     {
         float totalDamageTaken = 0f;
-        return new HealthChangedEvent((target, source, health, deltaHealth) =>
-        {
-            //Don't count "negative damage/healing damage"
-            if (deltaHealth > 0)
-                totalDamageTaken += deltaHealth;
-            if (totalDamageTaken >= 10)
+        return new CallbackStateContext<float>(
+            new HealthChangedEvent((target, source, health, deltaHealth) =>
             {
-                totalDamageTaken = 0f;
-                removeEffect.Effect(target, source);
-            }
-        });
+                //Don't count "negative damage/healing damage"
+                if (deltaHealth > 0)
+                    totalDamageTaken += deltaHealth;
+                if (totalDamageTaken >= 10)
+                {
+                    totalDamageTaken = 0f;
+                    removeEffect.Effect(target, source);
+                }
+            }), () => totalDamageTaken, value => totalDamageTaken = value);
     });
 ```
 
@@ -496,6 +513,37 @@ Add("AddDamageStackTimerResetStacks")
     .Stack(WhenStackEffect.Always, independentStackTime: 5);
 ```
 
+## Applier Recipes
+
+Apply different modifiers based on unit type
+
+```csharp
+Add("ConditionalApplierBasedOnUnitType")
+    .Effect(new ApplierEffect("InitDamage").SetMetaEffects(new ModifierIdBasedOnUnitTypeMetaEffect(
+            new Dictionary<UnitType, int>()
+            {
+                { UnitType.Bad, IdManager.GetId("InitDamage") },
+                { UnitType.Good, IdManager.GetId("InitHeal") }
+            })),
+        EffectOn.Init)
+    .Remove(5).Refresh();
+```
+
+## Modifierless-effect Recipes
+
+Deal 5 damage on init
+
+```csharp
+Add("5Damage", new DamageEffect(5f));
+```
+
+Stun for 1 second and silence for 2 seconds on init
+
+```csharp
+Add("StunSilence", new SingleInstanceStatusEffectEffect(StatusEffectType.Stun, 1f),
+    new SingleInstanceStatusEffectEffect(StatusEffectType.Silence, 2f));
+```
+
 ## Advanced Recipes
 
 ### Centralized Effect
@@ -550,12 +598,36 @@ Add("PoisonThorns")
 
 ### Advanced Callbacks
 
+Dispel all status effects when stunned 4 times
+
+```csharp
+Add("StunnedFourTimesDispelAllStatusEffects")
+    .Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.CallbackEffect)
+    .CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+    {
+        float totalTimesStunned = 0f;
+        return new CallbackStateContext<float>(
+            new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
+            {
+                if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+                {
+                    totalTimesStunned++;
+                    if (totalTimesStunned >= 4)
+                    {
+                        totalTimesStunned = 0f;
+                        effect.Effect(target, source);
+                    }
+                }
+            }), () => totalTimesStunned, value => totalTimesStunned = value);
+    });
+```
+
 Every time we're stunned, add value to heal, and trigger heal effect.
 After 10 seconds, reset the heal stacks. If we're stunned in those 10 seconds, refresh the timer.
 
 ```csharp
 Add("StunHealStackReset")
-    .Tag(Core.TagType.ZeroDefaultStacks)
+    .Tag(Core.TagType.CustomStack) // ZeroDefaultStacks can also be used
     .Stack(WhenStackEffect.Always)
     .Effect(new HealEffect(0, HealEffect.EffectState.ValueIsRevertible,
         StackEffectType.Effect | StackEffectType.Add, 5), EffectOn.Stack)

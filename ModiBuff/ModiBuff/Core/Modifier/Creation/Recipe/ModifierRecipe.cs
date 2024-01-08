@@ -221,12 +221,12 @@ namespace ModiBuff.Core
 		///		Adds a basic remove effect, that should be triggered on either stack, or callback
 		/// </summary>
 		/// <remarks>OVERWRITES all previous remove effects.</remarks>
-		public ModifierRecipe RemoveApplier(RemoveEffectOn removeEffectOn, ApplierType applierType, bool hasApplyChecks)
-		{
-			_removeEffectWrapper =
-				new RemoveEffectWrapper(new RemoveEffect(Id, applierType, hasApplyChecks), removeEffectOn.ToEffectOn());
-			return this;
-		}
+		//public ModifierRecipe RemoveApplier(RemoveEffectOn removeEffectOn, ApplierType applierType, bool hasApplyChecks)
+		//{
+		//	_removeEffectWrapper =
+		//		new RemoveEffectWrapper(new RemoveEffect(Id, applierType, hasApplyChecks), removeEffectOn.ToEffectOn());
+		//	return this;
+		//}
 
 		/// <summary>
 		///		If a modifier gets applied to a target that already has the modifier, should the interval or duration be reset?

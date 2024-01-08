@@ -137,7 +137,7 @@ namespace ModiBuff.Tests
 			//AddEffect("DurationDamageCast", new ApplierEffect("DurationDamageSelfCast", ApplierType.Cast));
 			AddRecipe("DurationDamageCast")
 				.Effect(new ApplierEffect("DurationDamageSelfCast", ApplierType.Cast), EffectOn.Init)
-				.RemoveApplier(RemoveEffectOn.CallbackEffect, ApplierType.Cast, false)
+				//.RemoveApplier(RemoveEffectOn.CallbackEffect, ApplierType.Cast, false)
 				.CallbackEffect(CallbackType.OnCast, effect => new CastEvent((target, source, id) =>
 				{
 					if (id == modId)
