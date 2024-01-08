@@ -78,8 +78,8 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Damage (& self damage)
 	* Heal
 	* Status effects (stun, silence, disarm, etc.) & immunity
-	* [Multi instance Status effects](https://github.com/Chillu1/ModiBuff/blob/d56ab4d1748e483a638b9ef7169a07413dbe3957/ModiBuff/ModiBuff.Units/Effects/StatusEffectEffect.cs)
-	  [impl](https://github.com/Chillu1/ModiBuff/blob/d56ab4d1748e483a638b9ef7169a07413dbe3957/ModiBuff/ModiBuff.Units/StatusEffect/MultiInstanceStatusEffectController.cs)
+	* [Multi instance Status effects](https://github.com/Chillu1/ModiBuff/blob/905fff885dc45c4e31df03d8b995a82d40f24042/ModiBuff/ModiBuff.Units/Effects/StatusEffectEffect.cs)
+	  [impl](https://github.com/Chillu1/ModiBuff/blob/905fff885dc45c4e31df03d8b995a82d40f24042/ModiBuff/ModiBuff.Units/StatusEffect/MultiInstanceStatusEffectController.cs)
 	  (2 same stuns, 2 different sources, unique timers)
 	* Dispel status effect(s)
 	* Add stat (Damage, Heal)
@@ -198,16 +198,19 @@ BenchmarkDotNet.
 
 Currently the library is on [NuGet](https://www.nuget.org/packages/ModiBuff/) and
 [Godot Asset Library](https://godotengine.org/asset-library/asset/2166), it will also be coming to Unity Asset Store
-soon.
+at some point.
+
+> Note: It's recommended to use the source/non-DLL/debug version of the library in development, since it has
+> useful logging/debugging features.
 
 ## Step by step installation
 
 1. Download the latest DLL from [Releases](https://github.com/Chillu1/ModiBuff/releases) or ModiBuff source code.
 2. Add the DLL to your project.
 3. Make your own `ModifierRecipes` class that either
-   [inherits](https://github.com/Chillu1/ModiBuff/blob/d56ab4d1748e483a638b9ef7169a07413dbe3957/ModiBuff/ModiBuff.Units/TestModifierInheritanceRecipes.cs)
+   [inherits](https://github.com/Chillu1/ModiBuff/blob/905fff885dc45c4e31df03d8b995a82d40f24042/ModiBuff/ModiBuff.Units/TestModifierInheritanceRecipes.cs)
    from `ModiBuff.ModifierRecipes`or
-   [encapsulates](https://github.com/Chillu1/ModiBuff/blob/d56ab4d1748e483a638b9ef7169a07413dbe3957/ModiBuff/ModiBuff.Units/TestModifierRecipes.cs)
+   [encapsulates](https://github.com/Chillu1/ModiBuff/blob/905fff885dc45c4e31df03d8b995a82d40f24042/ModiBuff/ModiBuff.Units/TestModifierRecipes.cs)
    it and fill it with your modifier recipes.
 4. Make your own logger implementation, by inheriting `ILogger`, or use one of the built-in ones.
 5. Call ModiBuff setup systems in the initialization of your game.    
@@ -433,7 +436,7 @@ This example deals 5 damage every 1 second, the remove timer can't be refreshed 
 And each new call to add the modifier will add a new instance of the modifier.
 
 ```csharp
-AddRecipe("InstanceStackableDoT")
+Add("InstanceStackableDoT")
     .InstanceStackable()
     .Interval(1)
     .Effect(new DamageEffect(5), EffectOn.Interval)
@@ -468,7 +471,7 @@ This example deals 5 damage on init, and then heals for 50% of the damage dealt.
 ```csharp
 Add("InitDamageLifeStealPost")
     .Effect(new DamageEffect(5)
-        .SetPostEffects(new LifeStealPostEffect(0.5f, Targeting.SourceTarget)) , EffectOn.Init);
+        .SetPostEffects(new LifeStealPostEffect(0.5f, Targeting.SourceTarget)), EffectOn.Init);
 ```
 
 ### Apply & Effect Condition (checks)
@@ -528,8 +531,8 @@ In this example we add 5 damage to unit on Init, and the modifier can only be re
 StrongHit".
 Essentially a hit that deals more than half units health in damage (ex. game logic).
 
-> Important: there can only be one callback `CallbackUnit` per modifier, but multiple effects that trigger on that
-> callback.
+> Important: there can only be one callback `CallbackUnit` per modifier, but there can be
+> multiple effects that trigger on that callback.
 
 ```csharp
 Add("InitAddDamageRevertibleHalfHealthCallback")
@@ -571,7 +574,7 @@ In this example every time unit's health changes, we add that change to our tota
 we deal 5 damage to the unit.
 
 ```csharp
-AddRecipe("InitTakeFiveDamageOnTenDamageTaken")
+Add("InitTakeFiveDamageOnTenDamageTaken")
     .Callback(CallbackType.CurrentHealthChanged, () =>
     {
         float totalDamageTaken = 0f;
@@ -596,11 +599,11 @@ AddRecipe("InitTakeFiveDamageOnTenDamageTaken")
 These callbacks get the effect fed as a parameter, this allows for condtional effect invoking, or custom effect use,
 like manual stack trigger. Supports custom callback signatures.
 
-> Important: there can only be one callback `CallbackEffect` per modifier, but multiple effects that trigger on that
-> callback.
+> Important: there can only be one callback `CallbackEffect` per modifier, but there can be
+> multiple effects that trigger on that callback.
 
 ```csharp
-AddRecipe("SilenceSourceWhenSilenced")
+Add("SilenceSourceWhenSilenced")
     .Effect(new StatusEffectEffect(StatusEffectType.Silence, 2f), EffectOn.CallbackEffect)
     .CallbackEffect(CallbackType.StatusEffectAdded, effect =>
         new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
@@ -613,7 +616,7 @@ AddRecipe("SilenceSourceWhenSilenced")
 It's possible to have mutable state in this callback as well.
 
 ```csharp
-AddRecipe("StunnedFourTimesDispelAllStatusEffects")
+Add("StunnedFourTimesDispelAllStatusEffects")
     .Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.CallbackEffect)
     .CallbackEffect(CallbackType.StatusEffectAdded, effect =>
     {
@@ -686,7 +689,7 @@ It's possible to remove added appliers through recipes as well.
 We just need to specify applier type, and if it has any apply checks (ex. like chance, cooldown, etc.).
 
 ```csharp
-AddRecipe("AddApplier_Effect")
+Add("AddApplier_Effect")
     .Effect(new ApplierEffect("InitDamage"), EffectOn.Init)
     .RemoveApplier(5, ApplierType.Cast, false);
 ```
@@ -930,7 +933,7 @@ Effects have to implement `IEffect`.
 They can also implement `IStackEffect` for stacking functionality, `IStateEffect` for resetting runtime state.
 
 For fully featured effect implementation, look at
-[DamageEffect](https://github.com/Chillu1/ModiBuff/blob/master/ModiBuff/ModiBuff.Units/Effects/DamageEffect.cs)
+[DamageEffect](https://github.com/Chillu1/ModiBuff/blob/905fff885dc45c4e31df03d8b995a82d40f24042/ModiBuff/ModiBuff.Units/Effects/DamageEffect.cs)
 
 #### In-depth Effect Creation
 
@@ -1240,7 +1243,7 @@ This can create some very sophisticated modifiers:
 
 ```csharp
 //WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^ rupture modifier
-AddRecipe("ComplexApplier_OnHit_Event")
+Add("ComplexApplier_OnHit_Event")
     .Effect(new ApplierEffect("ComplexApplier_Rupture", Targeting.SourceTarget), EffectOn.Event)
     .Event(EffectOnEvent.WhenAttacked);
 
@@ -1367,7 +1370,7 @@ Without extra need custom serialization logic inside the objects.
 The identifiers might have also changed Id order, or new ones might have been added to the game, through things like dlc
 or mods, so it's important to handle that correctly. Like mapping old Ids to new ones.
 This is achieved by calling `LoadState(SaveData)` on controllers/managers,
-[ModiBuff.Units.GameState](https://github.com/Chillu1/ModiBuff/blob/bd5d4ac541fce02383ba43d0946c20a889ff80a5/ModiBuff/ModiBuff.Units/GameState.cs)
+[ModiBuff.Units.GameState](https://github.com/Chillu1/ModiBuff/blob/905fff885dc45c4e31df03d8b995a82d40f24042/ModiBuff/ModiBuff.Units/GameState.cs)
 is a good example of this.
 
 Any effect (mostly callback effects) that inherits from `IRegisterEffect` will be loaded automatically
@@ -1398,13 +1401,13 @@ While ModiBuff wasn't designed for this, it's still possible to do, but at extra
 The issue is that we need to store the state in the effect itself or the unit.
 If we chose the unit, we're coupling together effect code with unit implementation (not good).
 So let's settle with effect, an example of this is
-[PoisonDamageEffect](https://github.com/Chillu1/ModiBuff/blob/bd5d4ac541fce02383ba43d0946c20a889ff80a5/ModiBuff/ModiBuff.Units/Effects/PoisonDamageEffect.cs).
+[PoisonDamageEffect](https://github.com/Chillu1/ModiBuff/blob/905fff885dc45c4e31df03d8b995a82d40f24042/ModiBuff/ModiBuff.Units/Effects/PoisonDamageEffect.cs).
 We store all the poison stacks and their owners inside a dictionary that's inside the effect.
 We also need a custom `StackEffect` implementation for saving those stacks,
 and a custom `Effect` function for when we should trigger applying the poison stacks.
 
 There are some
-[tests](https://github.com/Chillu1/ModiBuff/blob/bd5d4ac541fce02383ba43d0946c20a889ff80a5/ModiBuff/ModiBuff.Tests/CentralizedCustomLogicTests.cs)
+[tests](https://github.com/Chillu1/ModiBuff/blob/905fff885dc45c4e31df03d8b995a82d40f24042/ModiBuff/ModiBuff.Tests/CentralizedCustomLogicTests.cs)
 that show how one can use the centralized effects.
 
 When using centralized effects, it often happens that we have custom state inside them.
@@ -1518,14 +1521,14 @@ An example of this is a
 [projectile](https://github.com/Chillu1/ModiBuff/blob/d0ba95f8f0696572b9cfb4f3e1374c2fc5f57726/ModiBuff/ModiBuff.Tests/StateTests.cs#L270-L277).
 It is possible to have (non-stack) mutable state in effects, but it's almost always a bad idea, unless you're working
 with centralized effects.
-[Poison example](https://github.com/Chillu1/ModiBuff/blob/8a61211fdbe2e7c4c909f1d86283794d02d62ac0/ModiBuff/ModiBuff.Units/Effects/PoisonDamageEffect.cs#L7).
+[Poison example](https://github.com/Chillu1/ModiBuff/blob/905fff885dc45c4e31df03d8b995a82d40f24042/ModiBuff/ModiBuff.Units/Effects/PoisonDamageEffect.cs).
 
 Q: How to handle UI?  
 A: There's two main ways of handling UI. The first general info is Modifier Name and Modifier Description,
 through `ModifierRecipes.GetModifierInfo()`. There's also `ModifierApplierController.GetApplier*()` methods for appliers
 info.
 And `ModifierController.GetModifierReferences()` for normal modifiers. Basic usage is shown in the
-[BasicConsole sample](https://github.com/Chillu1/ModiBuff/blob/d56ab4d1748e483a638b9ef7169a07413dbe3957/ModiBuff/ModiBuff.Examples/BasicConsole/UIExtensions.cs).
+[BasicConsole sample](https://github.com/Chillu1/ModiBuff/blob/905fff885dc45c4e31df03d8b995a82d40f24042/ModiBuff/ModiBuff.Examples/BasicConsole/UIExtensions.cs).
 
 Q: I have a lot of modifiers, and care about memory usage (ex. mobile). What can I do?  
 A: With huge amounts of modifier generators 500+ (recipes), and 10000+ units,
