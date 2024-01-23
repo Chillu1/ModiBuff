@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ModiBuff.Core
 {
@@ -25,9 +24,10 @@ namespace ModiBuff.Core
 		private readonly bool _refreshInterval;
 
 		private readonly WhenStackEffect _whenStackEffect;
-		private readonly float _stackValue;
 		private readonly int _maxStacks;
 		private readonly int _everyXStacks;
+		private readonly float _singleStackTime;
+		private readonly float _independentStackTime;
 
 		private readonly int _timeComponentCount;
 		private int _timeComponentIndex;
@@ -56,6 +56,9 @@ namespace ModiBuff.Core
 		private readonly IUsableCheck[] _usableEffectChecks;
 		private readonly IStateCheck[] _stateEffectChecks;
 
+		private readonly bool _intervalAffectedByStatusResistance;
+		private readonly bool _durationAffectedByStatusResistance;
+
 		public ModifierGenerator(ref ModifierRecipeData data)
 		{
 			Id = data.Id;
@@ -72,17 +75,19 @@ namespace ModiBuff.Core
 			_refreshDuration = data.RefreshDuration;
 			_refreshInterval = data.RefreshInterval;
 			_whenStackEffect = data.WhenStackEffect;
-			_stackValue = data.StackValue;
 			_maxStacks = data.MaxStacks;
 			_everyXStacks = data.EveryXStacks;
+			_singleStackTime = data.SingleStackTime;
+			_independentStackTime = data.IndependentStackTime;
 
 			if (data.Interval > 0)
 				_timeComponentCount++;
 			if (data.Duration > 0)
 				_timeComponentCount++;
 
-			_modifierEffectsCreator = new ModifierEffectsCreator(data.EffectWrappers,
-				data.RemoveEffectWrapper, data.EventRegisterWrapper, data.CallbackRegisterWrapper);
+			_modifierEffectsCreator = new ModifierEffectsCreator(data.EffectWrappers, data.RemoveEffectWrapper,
+				data.DispelRegisterWrapper, data.EventRegisterWrapper, data.CallbackUnitRegisterWrapper,
+				data.CallbackEffectRegisterWrapper, data.CallbackEffectUnitsRegisterWrapper);
 
 			if (HasApplyChecks)
 			{
@@ -99,6 +104,9 @@ namespace ModiBuff.Core
 					out _unitEffectChecksList, out _usableEffectChecksList, out _updatableEffectChecks,
 					out _noUnitEffectChecks, out _unitEffectChecks, out _usableEffectChecks, out _stateEffectChecks);
 			}
+
+			_intervalAffectedByStatusResistance = !_tag.HasTag(TagType.IntervalIgnoresStatusResistance);
+			_durationAffectedByStatusResistance = !_tag.HasTag(TagType.DurationIgnoresStatusResistance);
 
 			return;
 
@@ -168,27 +176,21 @@ namespace ModiBuff.Core
 				initComponent = new InitComponent(_oneTimeInit, effects.InitEffects, effectCheck);
 
 			if (effects.IntervalEffects != null)
-				timeComponents[_timeComponentIndex++] = new IntervalComponent(_interval,
-					_refreshInterval, effects.IntervalEffects, effectCheck,
-					!_tag.HasTag(TagType.IntervalIgnoresStatusResistance));
+				timeComponents[_timeComponentIndex++] = new IntervalComponent(_interval, _refreshInterval,
+					effects.IntervalEffects, effectCheck, _intervalAffectedByStatusResistance);
 
 			if (effects.DurationEffects != null)
-				timeComponents[_timeComponentIndex++] = new DurationComponent(_duration,
-					_refreshDuration, effects.DurationEffects,
-					!_tag.HasTag(TagType.DurationIgnoresStatusResistance));
+				timeComponents[_timeComponentIndex++] = new DurationComponent(_duration, _refreshDuration,
+					effects.DurationEffects, _durationAffectedByStatusResistance);
 
 			if (effects.StackEffects != null)
-				stackComponent = new StackComponent(_whenStackEffect, _stackValue, _maxStacks,
-					_everyXStacks, effects.StackEffects, effectCheck);
+				stackComponent = new StackComponent(_whenStackEffect, _maxStacks,
+					_everyXStacks, _singleStackTime, _independentStackTime, effects.StackEffects, effectCheck);
 
-			ITargetComponent targetComponent;
-			if (!_isAura)
-				targetComponent = new SingleTargetComponent();
-			else
-				targetComponent = new MultiTargetComponent();
+			var targetComponent = !_isAura ? (ITargetComponent)new SingleTargetComponent() : new MultiTargetComponent();
 
 			return new Modifier(Id, genId, Name, initComponent, timeComponents, stackComponent,
-				effectCheck, targetComponent, effects.ModifierStateInfo);
+				effectCheck, targetComponent, effects.effectStateInfo, effects.EffectSaveState);
 		}
 
 		ModifierCheck IModifierApplyCheckGenerator.CreateApplyCheck()

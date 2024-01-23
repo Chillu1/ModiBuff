@@ -26,6 +26,13 @@ namespace ModiBuff.Core.Units
 		//Stasis?
 		//Charm?
 
-		Last = Sleep
+		Last = Sleep,
+		All = Stun | Freeze | Root | Disarm | Silence | Taunt | Confuse | Sleep
+	}
+
+	public static class StatusEffectExtensions
+	{
+		public static bool HasStatusEffect(this StatusEffectType initial, StatusEffectType check) =>
+			(initial & check) != 0;
 	}
 }

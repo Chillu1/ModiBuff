@@ -7,4 +7,9 @@ namespace ModiBuff.Core
 	{
 		TEffect SetMetaEffects(params IMetaEffect<TValueIn, TReturnValue>[] metaEffects);
 	}
+
+	public interface IMetaEffectOwner<out TEffect, out TValueIn, out TValueIn2, in TReturnValue> //TODO Rename?
+	{
+		TEffect SetMetaEffects(params IMetaEffect<TValueIn, TValueIn2, TReturnValue>[] metaEffects);
+	}
 }

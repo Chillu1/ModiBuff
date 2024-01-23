@@ -33,7 +33,7 @@ namespace ModiBuff.Core.Units
 				var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
 
 				var modifier = new Modifier(id, genId, name, initComponent, null, null, null,
-					new SingleTargetComponent(), null);
+					new SingleTargetComponent(), null, null);
 
 				return modifier;
 			}, Core.TagType.IsInit);
@@ -50,13 +50,13 @@ namespace ModiBuff.Core.Units
 					.Effect(new ApplierEffect("StackingDamage"), EffectOn.Init);
 
 				Add("StackingDamage")
-					.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add), EffectOn.Stack)
-					.Stack(WhenStackEffect.Always, value: 2, maxStacks: -1)
+					.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
+					.Stack(WhenStackEffect.Always)
 					.Remove(5).Refresh();
 			}
 
 			Add("ThornsOnHitEvent")
-				.Effect(new DamageEffect(5), EffectOn.Event, Targeting.SourceTarget)
+				.Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
 				.Event(EffectOnEvent.WhenAttacked);
 		}
 	}

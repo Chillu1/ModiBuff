@@ -6,11 +6,11 @@ namespace ModiBuff.Core.Units
 
 		//When you're the target of X
 		WhenAttacked, //When being attacked (doesn't matter if it gets blocked, evaded or deals no damage)
+		AfterAttacked,
 
 		//WhenEvaded,
 		//WhenHit, //When attack connects
 		//WhenDamaged, //When attack deals damage
-		WhenCast,
 		WhenKilled,
 		WhenHealed,
 

@@ -63,18 +63,17 @@ namespace ModiBuff.Core
 
 			_timer -= _interval;
 
-			if (_modifierCheck != null && !_modifierCheck.Check(_targetComponent.Source))
+			if (_modifierCheck != null && !_modifierCheck.CheckUse(_targetComponent.Source))
 				return;
 
-			int length = _effects.Length;
 			switch (_targetComponent)
 			{
 				case MultiTargetComponent multiTargetComponent:
-					for (int i = 0; i < length; i++)
+					for (int i = 0; i < _effects.Length; i++)
 						_effects[i].Effect(multiTargetComponent.Targets, multiTargetComponent.Source);
 					break;
 				case SingleTargetComponent singleTargetComponent:
-					for (int i = 0; i < length; i++)
+					for (int i = 0; i < _effects.Length; i++)
 						_effects[i].Effect(singleTargetComponent.Target, singleTargetComponent.Source);
 					break;
 			}
@@ -91,6 +90,14 @@ namespace ModiBuff.Core
 			_timer = 0;
 			_statusResistanceImplemented = false;
 			_statusResistanceTarget = null;
+		}
+
+		public TimeComponentSaveData SaveState() => new TimeComponentSaveData(_timer, _statusResistanceImplemented);
+
+		public void LoadState(TimeComponentSaveData saveData)
+		{
+			_timer = saveData.Timer;
+			_statusResistanceImplemented = saveData.StatusResistanceImplemented;
 		}
 	}
 }

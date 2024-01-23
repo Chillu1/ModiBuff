@@ -49,6 +49,14 @@ namespace ModiBuff.Core.Units
 		}
 
 		/// <summary>
+		///		Cooldown set for when we can try to apply the modifier to a target, with <paramref name="charges"/>.
+		/// </summary>
+		public static ModifierRecipe ApplyChargesCooldown(this ModifierRecipe recipe, float cooldown, int charges)
+		{
+			return recipe.ApplyCheck(new ChargesCooldownCheck(cooldown, charges));
+		}
+
+		/// <summary>
 		///		When trying to apply a modifier, what should the chance be of it being applied?
 		/// </summary>
 		public static ModifierRecipe ApplyChance(this ModifierRecipe recipe, float chance)
@@ -56,7 +64,7 @@ namespace ModiBuff.Core.Units
 			if (chance > 1)
 				chance /= 100;
 			if (chance <= 0 || chance > 1)
-				Logger.LogError("Chance must be between 0 and 1");
+				Logger.LogError("[ModiBuff.Units] Chance must be between 0 and 1");
 			return recipe.ApplyCheck(new ChanceCheck(chance));
 		}
 
@@ -66,6 +74,11 @@ namespace ModiBuff.Core.Units
 		public static ModifierRecipe ApplyCost(this ModifierRecipe recipe, CostType costType, float cost)
 		{
 			return recipe.ApplyCheck(new CostCheck(costType, cost));
+		}
+
+		public static ModifierRecipe ApplyCostPercent(this ModifierRecipe recipe, CostType costType, float costPercent)
+		{
+			return recipe.ApplyCheck(new CostPercentCheck(costType, costPercent));
 		}
 
 		public static ModifierRecipe EffectCondition(this ModifierRecipe recipe, ConditionType conditionType)
@@ -105,7 +118,7 @@ namespace ModiBuff.Core.Units
 			if (chance > 1)
 				chance /= 100;
 			if (chance <= 0 || chance > 1)
-				Logger.LogError("Chance must be between 0 and 1");
+				Logger.LogError("[ModiBuff.Units] Chance must be between 0 and 1");
 			return recipe.EffectCheck(new ChanceCheck(chance));
 		}
 
@@ -114,9 +127,9 @@ namespace ModiBuff.Core.Units
 			return recipe.EffectCheck(new CostCheck(costType, cost));
 		}
 
-		public static ModifierRecipe Callback(this ModifierRecipe recipe, CallbackType callbackType)
+		public static ModifierRecipe CallbackUnit(this ModifierRecipe recipe, CallbackUnitType callbackType)
 		{
-			return recipe.Callback(callbackType);
+			return recipe.CallbackUnit(callbackType);
 		}
 
 		public static ModifierRecipe Event(this ModifierRecipe recipe, EffectOnEvent @event)

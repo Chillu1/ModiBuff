@@ -1,6 +1,7 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using ModiBuff.Core.Units.Interfaces.NonGeneric;
 
 [assembly: InternalsVisibleTo("ModiBuff.Tests")]
 
@@ -14,12 +15,17 @@ namespace ModiBuff.Core.Units
 	//IDamagable, IHealable, IAttacker, IHealer, IManaOwner, IHealthCost, IAddDamage, IEventOwner, IStatusEffectOwner
 
 	//Or the manual generic one:
-	public class Unit : IUpdatable, IModifierOwner, IAttacker<float, float>, IDamagable<float, float, float, float>,
-		IHealable<float, float>, IHealer<float, float>, IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>,
-		IPreAttacker, IEventOwner<EffectOnEvent>, IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance,
-		ICallbackRegistrable<CallbackType>, IReactable<ReactType>, IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
-		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>
+	public partial class Unit : IUpdatable, IModifierOwner, IModifierApplierOwner, IAttacker<float, float>,
+		IDamagable<float, float, float, float>, IHealable<float, float>, IHealer<float, float>,
+		IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker, IEventOwner<EffectOnEvent>,
+		IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance, IKillable,
+		ICallbackUnitRegistrable<CallbackUnitType>, IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
+		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
+		ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>, ICallbackRegistrable<CallbackType>,
+		IAllNonGeneric, ICaster, IStateReset, IIdOwner, IDurationLessStatusEffectOwner<LegalAction, StatusEffectType>
 	{
+		public int Id { get; }
+		public UnitTag UnitTag { get; private set; }
 		public float Health { get; private set; }
 		public float MaxHealth { get; private set; }
 		public float Damage { get; private set; }
@@ -27,45 +33,42 @@ namespace ModiBuff.Core.Units
 		public float Mana { get; private set; }
 		public float MaxMana { get; private set; }
 		public float StatusResistance { get; private set; } = 1f;
-		public UnitType UnitType { get; }
+		public UnitType UnitType { get; private set; }
 		public Vector2 Position { get; private set; }
+		public int PoisonStacks { get; private set; }
 
 		public bool IsDead { get; private set; }
 
 		public ModifierController ModifierController { get; }
+		public ModifierApplierController ModifierApplierController { get; }
 
+		//Note: use one of these, not both
 		public IMultiInstanceStatusEffectController<LegalAction, StatusEffectType> StatusEffectController =>
 			_statusEffectController;
 
-		//Note: These event lists should only be used for classic effects.
-		//If you try to tie core game logic to them, you will most likely have trouble with sequence of events.
-		private readonly List<IEffect> _whenAttackedEffects, _whenCastEffects, _whenDeathEffects, _whenHealedEffects;
+		ISingleInstanceStatusEffectController<LegalAction, StatusEffectType>
+			ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>.StatusEffectController =>
+			_singleInstanceStatusEffectController;
 
-		private readonly List<IEffect> _beforeAttackEffects,
-			_onAttackEffects,
-			_onCastEffects,
-			_onKillEffects,
-			_onHealEffects;
-
-		private int _whenAttackedCount, _whenCastCount, _whenDeathCount, _whenHealedCount;
-		private int _beforeAttackCount, _onAttackCount, _onCastCount, _onKillCount, _onHealCount;
-
-		private readonly List<IEffect> _strongHitCallbacks;
-		private UnitCallback _strongHitDelegateCallbacks;
-
-		private readonly List<DispelEvent> _dispelEvents;
-		private readonly List<HealthChangedEvent> _healthChangedEvent;
-		private readonly List<DamageChangedEvent> _damageChangedEvent;
-		private int _healthChangedCount = -1, _damageChangedCount;
+		IDurationLessStatusEffectController<LegalAction, StatusEffectType>
+			IDurationLessStatusEffectOwner<LegalAction, StatusEffectType>.StatusEffectController =>
+			_durationLessStatusEffectController;
 
 		private readonly List<IUnit> _targetsInRange;
 		private readonly List<Modifier> _auraModifiers;
 
 		private readonly MultiInstanceStatusEffectController _statusEffectController;
+		private readonly StatusEffectController _singleInstanceStatusEffectController;
+		private readonly DurationLessStatusEffectController _durationLessStatusEffectController;
+
+		private static int _idCounter;
 
 		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000,
-			UnitType unitType = UnitType.Good)
+			UnitType unitType = UnitType.Good, UnitTag unitTag = UnitTag.Default)
 		{
+			Id = _idCounter++;
+			UnitTag = unitTag;
+
 			Health = health;
 			MaxHealth = health;
 			Damage = damage;
@@ -75,7 +78,7 @@ namespace ModiBuff.Core.Units
 			UnitType = unitType;
 
 			_whenAttackedEffects = new List<IEffect>();
-			_whenCastEffects = new List<IEffect>();
+			_afterAttackedEffects = new List<IEffect>();
 			_whenDeathEffects = new List<IEffect>();
 			_whenHealedEffects = new List<IEffect>();
 			_beforeAttackEffects = new List<IEffect>();
@@ -84,38 +87,66 @@ namespace ModiBuff.Core.Units
 			_onKillEffects = new List<IEffect>();
 			_onHealEffects = new List<IEffect>();
 
+			_strongDispelCallbacks = new List<IEffect>();
 			_strongHitCallbacks = new List<IEffect>();
+			_strongHitUnitCallbacks = new List<UnitCallback>();
+
+			_poisonEvents = new List<PoisonEvent>();
 
 			_dispelEvents = new List<DispelEvent>();
-			_healthChangedEvent = new List<HealthChangedEvent>();
-			_damageChangedEvent = new List<DamageChangedEvent>();
+			_strongDispelEvents = new List<StrongDispelEvent>();
+			_healthChangedEvents = new List<HealthChangedEvent>();
+			_damageChangedEvents = new List<DamageChangedEvent>();
+			_statusEffectAddedEvents = new List<StatusEffectEvent>();
+			_statusEffectRemovedEvents = new List<StatusEffectEvent>();
+			_onCastEvents = new List<CastEvent>();
+
+			_updateTimerCallbacks = new List<UpdateTimerEvent>();
 
 			_targetsInRange = new List<IUnit>();
 			_targetsInRange.Add(this);
 			_auraModifiers = new List<Modifier>();
 
-			ModifierController = new ModifierController(this);
-			_statusEffectController = new MultiInstanceStatusEffectController();
+			ModifierController = ModifierControllerPool.Instance.Rent();
+			ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
+			_statusEffectController = new MultiInstanceStatusEffectController
+				(this, StatusEffectType.None, _statusEffectAddedEvents, _statusEffectRemovedEvents);
+			_singleInstanceStatusEffectController = new StatusEffectController();
+			_durationLessStatusEffectController = new DurationLessStatusEffectController();
 		}
 
-		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences, UnitType unitType)
-			: this(health, damage, unitType: unitType)
+		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences,
+			UnitType unitType, UnitTag unitTag)
+			: this(health, damage, unitType: unitType, unitTag: unitTag)
 		{
 			foreach (var modifierAddReference in modifierAddReferences)
-				ModifierController.TryAdd(modifierAddReference);
+				this.TryAddModifierReference(modifierAddReference);
+		}
+
+		public static Unit LoadUnit(int oldId)
+		{
+			var unit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
+			UnitHelper.LoadUnit(unit, oldId, unit.Id);
+			return unit;
 		}
 
 		public void Update(float deltaTime)
 		{
-			_whenAttackedCount = _whenCastCount = _whenDeathCount = _whenHealedCount = 0;
-			_beforeAttackCount = _onAttackCount = _onCastCount = _onKillCount = _onHealCount = 0;
-			_healthChangedCount = -1;
-			_damageChangedCount = 0;
-
 			_statusEffectController.Update(deltaTime);
+			_singleInstanceStatusEffectController.Update(deltaTime);
 			ModifierController.Update(deltaTime);
+			ModifierApplierController.Update(deltaTime);
 			for (int i = 0; i < _auraModifiers.Count; i++)
 				_auraModifiers[i].Update(deltaTime);
+
+			_callbackTimer += deltaTime;
+			if (_callbackTimer >= CallbackTimerCooldown)
+			{
+				_callbackTimer = 0;
+
+				for (int i = 0; i < _updateTimerCallbacks.Count; i++)
+					_updateTimerCallbacks[i]();
+			}
 		}
 
 		/// <summary>
@@ -123,43 +154,77 @@ namespace ModiBuff.Core.Units
 		/// </summary>
 		public void PreAttack(IUnit target)
 		{
-			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
+			if (target is IUnitEntity entity && !UnitType.IsLegalTarget(entity.UnitType))
+				return;
+			if (!_statusEffectController.HasLegalAction(LegalAction.Act) ||
+			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act) ||
+			    !_durationLessStatusEffectController.HasLegalAction(LegalAction.Act))
 				return;
 
-			if (_beforeAttackCount == 0)
+			if (++_preAttackCounter <= MaxEventCount)
 			{
-				_beforeAttackCount++;
 				for (int i = 0; i < _beforeAttackEffects.Count; i++)
 					_beforeAttackEffects[i].Effect(target, this);
 			}
+
+			if (_preAttackCounter <= MaxEventCount)
+			{
+				ResetEventCounters();
+				(target as IEventOwner)?.ResetEventCounters();
+			}
 		}
 
-		public float Attack(IUnit target)
+		/// <summary>
+		///		Would be an attack command in ex. a moba. So we can't always attack our allies our ourselves at will.
+		/// </summary>
+		public float TryAttackCommand(IUnit target)
 		{
-			return Attack((Unit)target);
-		}
-
-		public float Attack(Unit target)
-		{
-			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
+			if (target is IUnitEntity entity && !UnitType.IsLegalTarget(entity.UnitType))
 				return 0;
 
-			this.ApplyAllAttackModifier(target);
+			return Attack(target);
+		}
 
-			if (_onAttackCount == 0)
+		/// <summary>
+		///		Performs an attack if possible (not disarmed, not stunned)
+		/// </summary>
+		public float Attack(IUnit target)
+		{
+			if (!_statusEffectController.HasLegalAction(LegalAction.Act) ||
+			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act) ||
+			    !_durationLessStatusEffectController.HasLegalAction(LegalAction.Act))
+				return 0;
+
+			var killableTarget = target as IKillable;
+			bool wasDead = killableTarget != null && killableTarget.IsDead;
+
+			if (target is IModifierOwner modifierOwner)
+				this.ApplyAllAttackModifier(modifierOwner);
+
+			if (++_onAttackCounter <= MaxEventCount)
 			{
-				_onAttackCount++;
 				for (int i = 0; i < _onAttackEffects.Count; i++)
 					_onAttackEffects[i].Effect(target, this);
 			}
 
-			float dealtDamage = target.TakeDamage(Damage, this);
-
-			if (target.Health <= 0 && _onKillCount == 0)
+			float dealtDamage = 0;
+			if (target is IAttackable<float, float> damagableTarget)
 			{
-				_onKillCount++;
-				for (int i = 0; i < _onKillEffects.Count; i++)
-					_onKillEffects[i].Effect(target, this);
+				dealtDamage = damagableTarget.TakeDamage(Damage, this);
+
+				if (killableTarget != null && killableTarget.IsDead && !wasDead)
+				{
+					if (++_onKillCounter <= MaxEventCount)
+						for (int i = 0; i < _onKillEffects.Count; i++)
+							_onKillEffects[i].Effect(target, this);
+				}
+			}
+
+			if (_onAttackCounter <= MaxEventCount &&
+			    _onKillCounter <= MaxEventCount)
+			{
+				ResetEventCounters();
+				(target as IEventOwner)?.ResetEventCounters();
 			}
 
 			return dealtDamage;
@@ -167,24 +232,30 @@ namespace ModiBuff.Core.Units
 
 		public float TakeDamage(float damage, IUnit source)
 		{
-			if (_whenAttackedCount == 0)
+			if (++_whenAttackedCounter <= MaxEventCount)
 			{
-				_whenAttackedCount++;
 				for (int i = 0; i < _whenAttackedEffects.Count; i++)
 					_whenAttackedEffects[i].Effect(this, source);
 			}
 
 			float oldHealth = Health;
-			Health -= damage;
-			float dealtDamage = oldHealth - Health;
+			float newHealth = oldHealth - damage;
+			float dealtDamage = oldHealth - newHealth;
+			Health = newHealth;
 
-			//TODO This counting becomes a problem, since we'll miss on damage after the first damage instance this frame
-			//One solution could be to sum all the changes this frame, and then trigger the event once at the end of the frame.
-			if (_healthChangedCount <= 0)
+			if (++_afterAttackedCounter <= MaxEventCount)
 			{
-				_healthChangedCount++;
-				for (int i = 0; i < _healthChangedEvent.Count; i++)
-					_healthChangedEvent[i](this, source, Health, dealtDamage);
+				for (int i = 0; i < _afterAttackedEffects.Count; i++)
+					_afterAttackedEffects[i].Effect(this, source);
+			}
+
+			if (dealtDamage > 0)
+			{
+				if (++_healthChangedCounter <= MaxEventCount)
+				{
+					for (int i = 0; i < _healthChangedEvents.Count; i++)
+						_healthChangedEvents[i](this, source, Health, dealtDamage);
+				}
 			}
 
 			//if damage was bigger than half health, trigger strong attack callbacks
@@ -192,18 +263,26 @@ namespace ModiBuff.Core.Units
 			{
 				for (int i = 0; i < _strongHitCallbacks.Count; i++)
 					_strongHitCallbacks[i].Effect(this, source);
-				_strongHitDelegateCallbacks?.Invoke(this, source);
+				for (int i = 0; i < _strongHitUnitCallbacks.Count; i++)
+					_strongHitUnitCallbacks[i](this, source);
 			}
 
-			if (_whenDeathCount == 0 && Health <= 0 && !IsDead)
+			if (Health <= 0 && !IsDead)
 			{
-				_whenDeathCount++;
 				for (int i = 0; i < _whenDeathEffects.Count; i++)
 					_whenDeathEffects[i].Effect(this, source);
-				//Unit Death TODO Destroy/pool unit
-				ModifierController.Clear();
+
+				ResetState();
 
 				IsDead = true;
+			}
+
+			if (_whenAttackedCounter <= MaxEventCount &&
+			    _afterAttackedCounter <= MaxEventCount &&
+			    _healthChangedCounter <= MaxEventCount)
+			{
+				ResetEventCounters();
+				(source as IEventOwner)?.ResetEventCounters();
 			}
 
 			return dealtDamage;
@@ -212,11 +291,16 @@ namespace ModiBuff.Core.Units
 		public float Heal(float heal, IUnit source)
 		{
 			float oldHealth = Health;
-			if (_whenHealedCount == 0)
+			if (++_healCounter <= MaxEventCount)
 			{
-				_whenHealedCount++;
 				for (int i = 0; i < _whenHealedEffects.Count; i++)
 					_whenHealedEffects[i].Effect(this, source);
+			}
+
+			if (_healCounter <= MaxEventCount)
+			{
+				ResetEventCounters();
+				(source as IEventOwner)?.ResetEventCounters();
 			}
 
 			Health += heal;
@@ -227,28 +311,67 @@ namespace ModiBuff.Core.Units
 
 		public float Heal(IHealable<float, float> target)
 		{
-			if (!_statusEffectController.HasLegalAction(LegalAction.Act))
+			if (!_statusEffectController.HasLegalAction(LegalAction.Act) ||
+			    !_singleInstanceStatusEffectController.HasLegalAction(LegalAction.Act) ||
+			    !_durationLessStatusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
-			if (_onHealCount == 0)
+			if (++_healTargetCounter <= MaxEventCount)
 			{
-				_onHealCount++;
 				for (int i = 0; i < _onHealEffects.Count; i++)
 					_onHealEffects[i].Effect(target, this);
 			}
 
-			return target.Heal(HealValue, this);
+			float valueHealed = target.Heal(HealValue, this);
+
+			if (_healTargetCounter <= MaxEventCount)
+			{
+				ResetEventCounters();
+				(target as IEventOwner)?.ResetEventCounters();
+			}
+
+			return valueHealed;
+		}
+
+		public void TryCast(int modifierId, IUnit target)
+		{
+			if (!(target is IModifierOwner modifierTarget))
+				return;
+			if (!modifierId.IsLegalTarget((IUnitEntity)target, this))
+				return;
+			if (!StatusEffectController.HasLegalAction(LegalAction.Cast))
+				return;
+			if (!this.CanCastModifier(modifierId))
+				return;
+
+			if (++_onCastCounter <= MaxEventCount)
+			{
+				for (int i = 0; i < _onCastEffects.Count; i++)
+					_onCastEffects[i].Effect(target, this);
+				for (int i = 0; i < _onCastEvents.Count; i++)
+					_onCastEvents[i](target, this, modifierId);
+			}
+
+			modifierTarget.ModifierController.Add(modifierId, modifierTarget, this);
+
+			if (_onCastCounter <= MaxEventCount)
+			{
+				ResetEventCounters();
+				(target as IEventOwner)?.ResetEventCounters();
+			}
 		}
 
 		public void AddDamage(float damage)
 		{
 			Damage += damage;
-			if (_damageChangedCount == 0)
+			if (++_addDamageCounter <= MaxEventCount)
 			{
-				_damageChangedCount++;
-				for (int i = 0; i < _damageChangedEvent.Count; i++)
-					_damageChangedEvent[i](this, Damage, damage);
+				for (int i = 0; i < _damageChangedEvents.Count; i++)
+					_damageChangedEvents[i](this, Damage, damage);
 			}
+
+			if (_addDamageCounter <= MaxEventCount)
+				ResetEventCounters();
 		}
 
 		public void UseHealth(float value)
@@ -261,14 +384,30 @@ namespace ModiBuff.Core.Units
 			Mana -= value;
 		}
 
-		public void Move(Vector2 value) => Move(value.X, value.Y);
+		public void Move(float x, float y) => Move(new Vector2(x, y));
+		public void Move(Vector2 value) => Position += value;
 
-		public void Move(float x, float y)
+		public float TakeDamagePoison(float damage, int stacks, int totalStacks, IUnit source)
 		{
-			var position = Position;
-			position.X += x;
-			position.Y += y;
-			Position = position;
+			PoisonStacks = totalStacks;
+
+			float dealtDamage = TakeDamage(damage, source);
+
+			float oldHealth = Health;
+
+			if (++_poisonDamageCounter <= MaxEventCount)
+			{
+				for (int i = 0; i < _poisonEvents.Count; i++)
+					_poisonEvents[i](this, source, stacks, totalStacks, dealtDamage);
+			}
+
+			if (_poisonDamageCounter <= MaxEventCount)
+			{
+				ResetEventCounters();
+				(source as IEventOwner)?.ResetEventCounters();
+			}
+
+			return dealtDamage + oldHealth - Health;
 		}
 
 		//---StatusResistances---
@@ -278,7 +417,7 @@ namespace ModiBuff.Core.Units
 #if DEBUG && !MODIBUFF_PROFILE
 			if (value <= 0)
 			{
-				Logger.LogError("StatusResistance can't be negative or zero.");
+				Logger.LogError("[ModiBuff.Units] StatusResistance can't be negative or zero.");
 				return;
 			}
 #endif
@@ -293,239 +432,16 @@ namespace ModiBuff.Core.Units
 				_dispelEvents[i](this, source, tag);
 		}
 
-		public void AddEffectEvent(IEffect effect, EffectOnEvent @event)
+		/// <summary>
+		///		If we'd want to an easier way to setup callbacks, without the need for a custom signature.
+		///		We could split our "dispels" into multiple events, like here.
+		/// </summary>
+		public void StrongDispel(IUnit source)
 		{
-			switch (@event)
-			{
-				case EffectOnEvent.WhenAttacked:
-					_whenAttackedEffects.Add(effect);
-					break;
-				case EffectOnEvent.WhenCast:
-					_whenCastEffects.Add(effect);
-					break;
-				case EffectOnEvent.WhenKilled:
-					_whenDeathEffects.Add(effect);
-					break;
-				case EffectOnEvent.WhenHealed:
-					_whenHealedEffects.Add(effect);
-					break;
-				case EffectOnEvent.BeforeAttack:
-					_beforeAttackEffects.Add(effect);
-					break;
-				case EffectOnEvent.OnAttack:
-					_onAttackEffects.Add(effect);
-					break;
-				case EffectOnEvent.OnCast:
-					_onCastEffects.Add(effect);
-					break;
-				case EffectOnEvent.OnKill:
-					_onKillEffects.Add(effect);
-					break;
-				case EffectOnEvent.OnHeal:
-					_onHealEffects.Add(effect);
-					break;
-				default:
-#if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError("Unknown event type: " + @event);
-#endif
-					return;
-			}
-		}
-
-		public void RemoveEffectEvent(IEffect effect, EffectOnEvent @event)
-		{
-			switch (@event)
-			{
-				case EffectOnEvent.WhenAttacked:
-					Remove(_whenAttackedEffects, effect);
-					break;
-				case EffectOnEvent.WhenCast:
-					Remove(_whenCastEffects, effect);
-					break;
-				case EffectOnEvent.WhenKilled:
-					Remove(_whenDeathEffects, effect);
-					break;
-				case EffectOnEvent.WhenHealed:
-					Remove(_whenHealedEffects, effect);
-					break;
-				case EffectOnEvent.BeforeAttack:
-					Remove(_beforeAttackEffects, effect);
-					break;
-				case EffectOnEvent.OnAttack:
-					Remove(_onAttackEffects, effect);
-					break;
-				case EffectOnEvent.OnCast:
-					Remove(_onCastEffects, effect);
-					break;
-				case EffectOnEvent.OnKill:
-					Remove(_onKillEffects, effect);
-					break;
-				case EffectOnEvent.OnHeal:
-					Remove(_onHealEffects, effect);
-					break;
-				default:
-#if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError("Unknown event type: " + @event);
-#endif
-					return;
-			}
-
-			void Remove(List<IEffect> effects, IEffect effectToRemove)
-			{
-				bool remove = effects.Remove(effectToRemove);
-
-#if DEBUG && !MODIBUFF_PROFILE
-				if (!remove)
-					Logger.LogError("Could not remove event: " + effectToRemove.GetType());
-#endif
-			}
-		}
-
-		//---Callbacks---
-
-		//Something to think about when implementing callbacks:
-		//single delegates are 76% faster than arrays of IEffects with 1 subscriber/item
-		//But arrays are much faster when there are multiple subscribers/items, 58% faster with 2 items, 150% faster with 5 items.
-		//It's recommended to use the array version generally. But in cases where most modifiers have single callbacks, use delegates.
-		public void RegisterCallbacks(CallbackType callbackType, IEffect[] callbacks)
-		{
-			switch (callbackType)
-			{
-				case CallbackType.StrongHit:
-					_strongHitCallbacks.AddRange(callbacks);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
-			}
-		}
-
-		public void UnRegisterCallbacks(CallbackType callbackType, IEffect[] callbacks)
-		{
-			switch (callbackType)
-			{
-				case CallbackType.StrongHit:
-					for (int i = 0; i < callbacks.Length; i++)
-					{
-						bool removed = _strongHitCallbacks.Remove(callbacks[i]);
-#if DEBUG && !MODIBUFF_PROFILE
-						if (!removed)
-							Logger.LogError("Could not remove callback: " + callbacks[i]);
-#endif
-					}
-
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
-			}
-		}
-
-		public void RegisterCallbacks(CallbackType callbackType, UnitCallback callbacks)
-		{
-			switch (callbackType)
-			{
-				case CallbackType.StrongHit:
-					_strongHitDelegateCallbacks += callbacks;
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
-			}
-		}
-
-		public void UnRegisterCallbacks(CallbackType callbackType, UnitCallback callbacks)
-		{
-			switch (callbackType)
-			{
-				case CallbackType.StrongHit:
-					_strongHitDelegateCallbacks -= callbacks;
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
-			}
-		}
-
-		public void RegisterReact(ReactCallback<ReactType>[] reactCallbacks)
-		{
-			for (int i = 0; i < reactCallbacks.Length; i++)
-			{
-				ref var callback = ref reactCallbacks[i];
-				switch (callback.ReactType)
-				{
-					case ReactType.Dispel:
-						if (!(callback.Action is DispelEvent dispelEvent))
-						{
-							Logger.LogError(
-								"objectDelegate is not of type DispelEvent, use named delegates instead.");
-							break;
-						}
-
-						//dispelEvent.DynamicInvoke(this, this, TagType.None);
-						_dispelEvents.Add(dispelEvent);
-						break;
-					case ReactType.CurrentHealthChanged:
-						if (!(callback.Action is HealthChangedEvent healthEvent))
-						{
-							Logger.LogError(
-								"objectDelegate is not of type HealthChangedEvent, use named delegates instead.");
-							break;
-						}
-
-						healthEvent.DynamicInvoke(this, this, Health, 0f);
-						_healthChangedEvent.Add(healthEvent);
-						break;
-					case ReactType.DamageChanged:
-						if (!(callback.Action is DamageChangedEvent damageEvent))
-						{
-							Logger.LogError(
-								"objectDelegate is not of type DamagedChangedEvent, use named delegates instead.");
-							break;
-						}
-
-						damageEvent.DynamicInvoke(this, Damage, 0f);
-						_damageChangedEvent.Add(damageEvent);
-						break;
-					default:
-						throw new ArgumentOutOfRangeException(nameof(reactCallbacks), callback.ReactType, null);
-				}
-			}
-		}
-
-		public void UnRegisterReact(ReactCallback<ReactType>[] reactCallbacks)
-		{
-			for (int i = 0; i < reactCallbacks.Length; i++)
-			{
-				ref var callback = ref reactCallbacks[i];
-				switch (callback.ReactType)
-				{
-					case ReactType.Dispel:
-						//TODO Always revert internal effect?
-						var dispelEvent = (DispelEvent)callback.Action;
-						_dispelEvents.Remove(dispelEvent);
-						//dispelEvent.DynamicInvoke(this, this, TagType.None);
-						break;
-					case ReactType.CurrentHealthChanged:
-						//TODO Always revert internal effect?
-						var healthChangedEvent = (HealthChangedEvent)callback.Action;
-						if (_healthChangedEvent.Remove(healthChangedEvent))
-							healthChangedEvent.DynamicInvoke(this, this, Health, 0f);
-#if DEBUG && !MODIBUFF_PROFILE
-						else
-							Logger.LogError("Could not remove healthChangedEvent: " + healthChangedEvent);
-#endif
-						break;
-					case ReactType.DamageChanged:
-						//TODO Always revert internal effect?
-						var damageChangedEvent = (DamageChangedEvent)callback.Action;
-						if (_damageChangedEvent.Remove(damageChangedEvent))
-							damageChangedEvent.DynamicInvoke(this, Damage, 0f);
-#if DEBUG && !MODIBUFF_PROFILE
-						else
-							Logger.LogError("Could not remove damageChangedEvent: " + damageChangedEvent);
-#endif
-						break;
-					default:
-						throw new ArgumentOutOfRangeException(nameof(reactCallbacks), callback.ReactType, null);
-				}
-			}
+			for (int i = 0; i < _strongDispelCallbacks.Count; i++)
+				_strongDispelCallbacks[i].Effect(this, source);
+			for (int i = 0; i < _strongDispelEvents.Count; i++)
+				_strongDispelEvents[i](this, source);
 		}
 
 		//---Aura---
@@ -542,9 +458,109 @@ namespace ModiBuff.Core.Units
 			_auraModifiers.Add(modifier);
 		}
 
+		public void ResetState()
+		{
+			ResetEventCounters();
+			ClearEvents(_whenAttackedEffects, _afterAttackedEffects, _whenDeathEffects, _whenHealedEffects,
+				_beforeAttackEffects, _onAttackEffects, _onCastEffects, _onKillEffects, _onHealEffects,
+				_strongDispelCallbacks, _strongHitCallbacks, _strongHitUnitCallbacks, _poisonEvents,
+				_dispelEvents, _strongDispelEvents, _healthChangedEvents, _damageChangedEvents,
+				_statusEffectAddedEvents, _statusEffectRemovedEvents, _onCastEvents, _updateTimerCallbacks);
+
+			_targetsInRange.Clear();
+			for (int i = 0; i < _auraModifiers.Count; i++)
+				ModifierPool.Instance.Return(_auraModifiers[i]);
+			_auraModifiers.Clear();
+			_callbackTimer = 0;
+			_statusEffectController.ResetState();
+			_singleInstanceStatusEffectController.ResetState();
+			_durationLessStatusEffectController.ResetState();
+			ModifierControllerPool.Instance.Return(ModifierController);
+			ModifierControllerPool.Instance.ReturnApplier(ModifierApplierController);
+
+			void ClearEvents(params IList[] lists)
+			{
+				for (int i = 0; i < lists.Length; i++)
+					lists[i].Clear();
+			}
+		}
+
+		public SaveData SaveState()
+		{
+			return new SaveData(Id, UnitTag, Health, MaxHealth, Damage, HealValue, Mana, MaxMana, StatusResistance,
+				UnitType, IsDead, ModifierController.SaveState(), ModifierApplierController.SaveState(),
+				_statusEffectController.SaveState(), _singleInstanceStatusEffectController.SaveState());
+		}
+
+		public void LoadState(SaveData data)
+		{
+			UnitTag = data.UnitTag;
+			Health = data.Health;
+			MaxHealth = data.MaxHealth;
+			Damage = data.Damage;
+			HealValue = data.HealValue;
+			Mana = data.Mana;
+			MaxMana = data.MaxMana;
+			StatusResistance = data.StatusResistance;
+			UnitType = data.UnitType;
+			IsDead = data.IsDead;
+			ModifierController.LoadState(data.ModifierControllerSaveData, this);
+			ModifierApplierController.LoadState(data.ModifierApplierControllerSaveData);
+			_statusEffectController.LoadState(data.MultiInstanceStatusEffectControllerSaveData);
+			_singleInstanceStatusEffectController.LoadState(data.SingleInstanceStatusEffectControllerSaveData);
+		}
+
 		public override string ToString()
 		{
 			return $"Health: {Health}, Damage: {Damage}, HealValue: {HealValue}";
+		}
+
+		public struct SaveData
+		{
+			public readonly int Id;
+			public readonly UnitTag UnitTag;
+			public readonly float Health;
+			public readonly float MaxHealth;
+			public readonly float Damage;
+			public readonly float HealValue;
+			public readonly float Mana;
+			public readonly float MaxMana;
+			public readonly float StatusResistance;
+			public readonly UnitType UnitType;
+			public readonly bool IsDead;
+
+			public readonly ModifierController.SaveData ModifierControllerSaveData;
+
+			public readonly ModifierApplierController.SaveData ModifierApplierControllerSaveData;
+			public readonly MultiInstanceStatusEffectController.SaveData MultiInstanceStatusEffectControllerSaveData;
+			public readonly StatusEffectController.SaveData SingleInstanceStatusEffectControllerSaveData;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveData(int id, UnitTag unitTag, float health, float maxHealth, float damage, float healValue,
+				float mana, float maxMana, float statusResistance, UnitType unitType, bool isDead,
+				ModifierController.SaveData modifierControllerSaveData,
+				ModifierApplierController.SaveData modifierApplierControllerSaveData,
+				MultiInstanceStatusEffectController.SaveData multiInstanceStatusEffectControllerSaveData,
+				StatusEffectController.SaveData singleInstanceStatusEffectControllerSaveData)
+			{
+				Id = id;
+				UnitTag = unitTag;
+				Health = health;
+				MaxHealth = maxHealth;
+				Damage = damage;
+				HealValue = healValue;
+				Mana = mana;
+				MaxMana = maxMana;
+				StatusResistance = statusResistance;
+				UnitType = unitType;
+				IsDead = isDead;
+				ModifierControllerSaveData = modifierControllerSaveData;
+				ModifierApplierControllerSaveData = modifierApplierControllerSaveData;
+				MultiInstanceStatusEffectControllerSaveData = multiInstanceStatusEffectControllerSaveData;
+				SingleInstanceStatusEffectControllerSaveData = singleInstanceStatusEffectControllerSaveData;
+			}
 		}
 	}
 }

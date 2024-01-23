@@ -1,55 +1,58 @@
 namespace ModiBuff.Core
 {
-	/// <summary>
-	///		Registers a callback of effects to the target, for non-IEffect version see <see cref="CallbackRegisterDelegateEffect{TCallback}"/>
-	/// </summary>
-	public sealed class CallbackRegisterEffect<TCallback> : IRecipeFeedEffects, IRevertEffect, IEffect,
-		IShallowClone<CallbackRegisterEffect<TCallback>>
+	public sealed class CallbackRegisterEffect<TCallback> : IRevertEffect, IEffect, IRegisterEffect,
+		IShallowClone<IEffect>
 	{
-		//Callback register should always be revertible, since we're using IEffect instances that will be pooled back 
 		public bool IsRevertible => true;
 
-		private readonly TCallback _callbackType;
+		private readonly Callback<TCallback>[] _callbacks;
 
-		private IEffect[] _callbacks;
+		private bool _isRegistered;
 
-		public CallbackRegisterEffect(TCallback callbackType)
+		public CallbackRegisterEffect(params Callback<TCallback>[] callbacks)
 		{
-			_callbackType = callbackType;
-		}
-
-		/// <summary>
-		///		Manual modifier generation constructor
-		/// </summary>
-		public static CallbackRegisterEffect<TCallback> Create(TCallback callbackType, params IEffect[] callbacks) =>
-			new CallbackRegisterEffect<TCallback>(callbackType, callbacks);
-
-		private CallbackRegisterEffect(TCallback callbackType, IEffect[] callbacks)
-		{
-			_callbackType = callbackType;
 			_callbacks = callbacks;
 		}
 
-		public void SetEffects(IEffect[] callbacks) => _callbacks = callbacks;
-
 		public void Effect(IUnit target, IUnit source)
 		{
-#if DEBUG && !MODIBUFF_PROFILE
-			if (_callbacks == null)
-				Logger.LogError("[ModiBuff] Callback wasn't set");
+			if (!(target is ICallbackRegistrable<TCallback> registrableTarget))
+			{
+#if MODIBUFF_EFFECT_CHECK
+				EffectHelper.LogImplError(target, nameof(ICallbackRegistrable<TCallback>));
 #endif
+				return;
+			}
 
-			((ICallbackRegistrable<TCallback>)target).RegisterCallbacks(_callbackType, _callbacks);
+			if (_isRegistered)
+				return;
+
+			_isRegistered = true;
+			registrableTarget.RegisterCallbacks(_callbacks);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			((ICallbackRegistrable<TCallback>)target).UnRegisterCallbacks(_callbackType, _callbacks);
+			if (!(target is ICallbackRegistrable<TCallback> registrableTarget))
+				return;
+
+			registrableTarget.UnRegisterCallbacks(_callbacks);
+			_isRegistered = false;
 		}
 
-		public CallbackRegisterEffect<TCallback> ShallowClone() =>
-			new CallbackRegisterEffect<TCallback>(_callbackType);
-
+		public IEffect ShallowClone() => new CallbackRegisterEffect<TCallback>(_callbacks);
 		object IShallowClone.ShallowClone() => ShallowClone();
+	}
+
+	public struct Callback<TCallback>
+	{
+		public readonly TCallback CallbackType;
+		public readonly object Action;
+
+		public Callback(TCallback callbackType, object action)
+		{
+			CallbackType = callbackType;
+			Action = action;
+		}
 	}
 }

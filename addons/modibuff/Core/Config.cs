@@ -4,27 +4,34 @@ namespace ModiBuff.Core
 {
 	public static class Config
 	{
-		public const int DefaultDefaultTag = (int)TagType.Default;
+		private const ulong DefaultDefaultTag = (int)TagType.Default;
 
-		public const bool DefaultUseDictionaryIndexes = false;
+		private const bool DefaultUseDictionaryIndexes = false;
 		public const int DefaultPoolSize = 64;
-		public const int DefaultMaxPoolSize = 16_384;
+		private const int DefaultMaxPoolSize = 16_384;
+
+		private const int DefaultModifierControllerPoolSize = 256;
+		private const int DefaultMaxModifierControllerPoolSize = 32_768;
+		private const int DefaultModifierApplierControllerPoolSize = 64;
 
 		public const int DefaultModifierArraySize = 32;
-		public const int DefaultModifierRemoveSize = 4;
-		public const int DefaultModifierIndexDictionarySize = 8;
+		private const int DefaultDispellableSize = 8;
+		private const int DefaultModifierRemoveSize = 4;
+		private const int DefaultModifierIndexDictionarySize = 8;
 
-		public const int DefaultMultiTargetComponentInitialCapacity = 4;
+		private const int DefaultMultiTargetComponentInitialCapacity = 4;
 
-		public const int DefaultAttackApplierSize = 4,
+		private const int DefaultAttackApplierSize = 4,
 			DefaultCastApplierSize = 4,
 			DefaultAttackCheckApplierSize = 4,
 			DefaultCastCheckApplierSize = 4;
 
-		public const float DefaultDeltaTolerance = 0.001f;
+		private const int DefaultEffectCastsSize = 4;
+
+		private const float DefaultDeltaTolerance = 0.001f;
 
 
-		public static int DefaultTag = DefaultDefaultTag;
+		public static ulong DefaultTag = DefaultDefaultTag;
 
 		/// <summary>
 		///		Whether to use dictionary or an array for modifiers.
@@ -37,7 +44,12 @@ namespace ModiBuff.Core
 		public static int PoolSize = DefaultPoolSize;
 		public static int MaxPoolSize = DefaultMaxPoolSize;
 
+		public static int ModifierControllerPoolSize = DefaultModifierControllerPoolSize;
+		public static int MaxModifierControllerPoolSize = DefaultMaxModifierControllerPoolSize;
+		public static int ModifierApplierControllerPoolSize = DefaultModifierApplierControllerPoolSize;
+
 		public static int ModifierArraySize = DefaultModifierArraySize;
+		public static int DispellableSize = DefaultDispellableSize;
 		public static int ModifierRemoveSize = DefaultModifierRemoveSize;
 		public static int ModifierIndexDictionarySize = DefaultModifierIndexDictionarySize;
 
@@ -48,17 +60,14 @@ namespace ModiBuff.Core
 		public static int AttackCheckApplierSize = DefaultAttackCheckApplierSize;
 		public static int CastCheckApplierSize = DefaultCastCheckApplierSize;
 
+		public static int EffectCastsSize = DefaultEffectCastsSize;
+
 		public static float DeltaTolerance = DefaultDeltaTolerance;
 
 		/// <summary>
 		///		How many modifiers should the pool allocate for each modifier type. Should be a power of 2.
 		/// </summary>
-		public static Dictionary<string, int> ModifierAllocationsCount;
-
-		static Config()
-		{
-			ModifierAllocationsCount = new Dictionary<string, int>();
-		}
+		public static readonly Dictionary<string, int> ModifierAllocationsCount = new Dictionary<string, int>();
 
 		public static void Reset()
 		{
@@ -68,7 +77,12 @@ namespace ModiBuff.Core
 			PoolSize = DefaultPoolSize;
 			MaxPoolSize = DefaultMaxPoolSize;
 
+			ModifierControllerPoolSize = DefaultModifierControllerPoolSize;
+			MaxModifierControllerPoolSize = DefaultMaxModifierControllerPoolSize;
+			ModifierApplierControllerPoolSize = DefaultModifierApplierControllerPoolSize;
+
 			ModifierArraySize = DefaultModifierArraySize;
+			DispellableSize = DefaultDispellableSize;
 			ModifierRemoveSize = DefaultModifierRemoveSize;
 			ModifierIndexDictionarySize = DefaultModifierIndexDictionarySize;
 
@@ -78,6 +92,8 @@ namespace ModiBuff.Core
 			CastApplierSize = DefaultCastApplierSize;
 			AttackCheckApplierSize = DefaultAttackCheckApplierSize;
 			CastCheckApplierSize = DefaultCastCheckApplierSize;
+
+			EffectCastsSize = DefaultEffectCastsSize;
 
 			DeltaTolerance = DefaultDeltaTolerance;
 		}

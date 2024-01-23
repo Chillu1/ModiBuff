@@ -136,13 +136,13 @@ namespace ModiBuff.Extensions.Godot
 				recipe.Refresh(recipeResource.RefreshType.GetModiBuffRefreshType());
 
 			if (recipeResource.StackResource != null)
-				recipe.Stack(recipeResource.StackResource.WhenStackEffect, recipeResource.StackResource.Value,
-					recipeResource.StackResource.MaxStacks, recipeResource.StackResource.EveryXStacks);
+				recipe.Stack(recipeResource.StackResource.WhenStackEffect, recipeResource.StackResource.MaxStacks,
+					recipeResource.StackResource.EveryXStacks);
 
 			//---Effects---
 
 			foreach (var effectResource in recipeResource.EffectResources)
-				recipe.Effect(effectResource.GetEffect(), effectResource.EffectOn, effectResource.Targeting);
+				recipe.Effect(effectResource.GetEffect(), effectResource.EffectOn);
 
 			recipeResource.Reset();
 
@@ -195,8 +195,7 @@ namespace ModiBuff.Extensions.Godot
 				//---Effects---
 
 				foreach (var effectResource in auraEffectModifierRecipeResource.EffectResources)
-					auraEffectRecipe.Effect(effectResource.GetEffect(), effectResource.EffectOn,
-						effectResource.Targeting);
+					auraEffectRecipe.Effect(effectResource.GetEffect(), effectResource.EffectOn);
 			}
 		}
 

@@ -8,6 +8,7 @@ namespace ModiBuff.Core
 		private int _nextId;
 
 		private readonly Dictionary<string, int> _idMap;
+		private readonly Dictionary<int, int> _oldIdToNewIdMap;
 
 		public ModifierIdManager()
 		{
@@ -17,6 +18,7 @@ namespace ModiBuff.Core
 			_instance = this;
 			_nextId = 0;
 			_idMap = new Dictionary<string, int>();
+			_oldIdToNewIdMap = new Dictionary<int, int>();
 		}
 
 		public int GetFreeId(string name)
@@ -31,16 +33,66 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Lazy implementation for ease of use.
 		/// </summary>
-		internal static int GetIdOld(string name) => _instance._idMap[name];
+		internal static int GetIdByName(string name) => _instance.GetId(name);
 
-		public int GetId(string name) => _idMap[name];
+		internal static bool HasIdByName(string name) => _instance._idMap.ContainsKey(name);
+
+		public int GetId(string name)
+		{
+#if DEBUG && !MODIBUFF_PROFILE
+			if (!_idMap.ContainsKey(name))
+			{
+				if (!EffectIdManager.HasIdOld(name))
+					Logger.LogError("[ModiBuff] No modifier with name " + name + " found.");
+				else
+					Logger.LogError("[ModiBuff] No modifier with name " + name + " found. " +
+					                "But there is an effect with that name. Did you mean to use EffectIdManager?");
+				return -1;
+			}
+#endif
+
+			return _idMap[name];
+		}
+
+		public static int GetNewId(int oldId)
+		{
+			if (_instance._oldIdToNewIdMap.TryGetValue(oldId, out int newId))
+				return newId;
+
+			Logger.LogError($"Modifier with id {oldId} not found");
+			return -1;
+		}
 
 		public void Clear()
 		{
 			_nextId = 0;
 			_idMap.Clear();
+			_oldIdToNewIdMap.Clear();
 		}
 
 		public void Reset() => _instance = null;
+
+		public SaveData SaveState() => new SaveData(_idMap);
+
+		public void LoadState(SaveData saveData)
+		{
+			foreach (var pair in saveData.IdMap)
+			{
+				if (_idMap.TryGetValue(pair.Key, out int newId))
+					_oldIdToNewIdMap.Add(pair.Value, newId);
+				else
+					Logger.LogError($"[ModiBuff] Modifier in save file with name {pair.Key} not found.");
+			}
+		}
+
+		public struct SaveData
+		{
+			public readonly IReadOnlyDictionary<string, int> IdMap;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveData(IReadOnlyDictionary<string, int> idMap) => IdMap = idMap;
+		}
 	}
 }

@@ -1,6 +1,10 @@
 namespace ModiBuff.Core.Units.Interfaces.NonGeneric
 {
-	public interface IDamagable : IDamagable<float, float, float, float>
+	public interface IAttackable : IAttackable<float, float>
+	{
+	}
+
+	public interface IDamagable : IDamagable<float, float, float, float>, IAttackable
 	{
 	}
 }

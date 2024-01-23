@@ -11,6 +11,8 @@ namespace ModiBuff.Core
 		Duration = 4,
 		Stack = 8,
 		Event = 16,
-		Callback = 32,
+		CallbackUnit = 32,
+		CallbackEffect = 64,
+		CallbackEffectUnits = 128,
 	}
 }

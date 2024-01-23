@@ -9,41 +9,57 @@ namespace ModiBuff.Core
 	{
 		private readonly EffectWrapper[] _effectWrappers;
 		private readonly EffectWrapper[] _effectsWithModifierInfoWrappers;
+		private readonly EffectWrapper[] _savableEffectsWrappers;
 		private readonly EffectWrapper _removeEffectWrapper;
+		private readonly EffectWrapper _dispelRegisterWrapper;
 		private readonly EffectWrapper _eventRegisterWrapper;
-		private readonly EffectWrapper _callbackRegisterWrapper;
+		private readonly EffectWrapper _callbackUnitRegisterWrapper;
+		private readonly EffectWrapper _callbackEffectRegisterWrapper;
+		private readonly EffectWrapper _callbackEffectUnitsRegisterWrapper;
 
 		private IRevertEffect[] _revertEffects;
 		private IEffect[] _initEffects;
 		private IEffect[] _intervalEffects;
 		private IEffect[] _durationEffects;
 		private IStackEffect[] _stackEffects;
-		private IEffect[] _callbacks;
 		private IEffect[] _eventEffects;
+		private IEffect[] _callbackUnitEffects;
+		private IEffect[] _callbackEffectEffects;
+		private IEffect[] _callbackEffectUnitsEffects;
 
 		private int _revertEffectsIndex,
 			_initEffectsIndex,
 			_intervalEffectsIndex,
 			_durationEffectsIndex,
 			_stackEffectsIndex,
-			_callbackEffectsIndex,
-			_eventEffectsIndex;
+			_eventEffectsIndex,
+			_callbackUnitEffectsIndex,
+			_callbackEffectEffectsIndex,
+			_callbackEffectUnitsEffectsIndex;
 
 		public ModifierEffectsCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper,
-			EffectWrapper eventRegisterWrapper, EffectWrapper callbackRegisterWrapper)
+			EffectWrapper dispelRegisterWrapper, EffectWrapper eventRegisterWrapper,
+			EffectWrapper callbackUnitRegisterWrapper, EffectWrapper callbackEffectRegisterWrapper,
+			EffectWrapper callbackEffectUnitsRegisterWrapper)
 		{
 			var effectsWithModifierInfoWrappers = new List<EffectWrapper>();
+			var savableEffectsWrappers = new List<EffectWrapper>();
 			_effectWrappers = effectWrappers.ToArray();
 			_removeEffectWrapper = removeEffectWrapper;
+			_dispelRegisterWrapper = dispelRegisterWrapper;
 			_eventRegisterWrapper = eventRegisterWrapper;
-			_callbackRegisterWrapper = callbackRegisterWrapper;
+			_callbackUnitRegisterWrapper = callbackUnitRegisterWrapper;
+			_callbackEffectRegisterWrapper = callbackEffectRegisterWrapper;
+			_callbackEffectUnitsRegisterWrapper = callbackEffectUnitsRegisterWrapper;
 
 			for (int i = 0; i < _effectWrappers.Length; i++)
 			{
 				var effectWrapper = _effectWrappers[i];
 
-				if (effectWrapper.GetEffect() is IModifierStateInfo)
+				if (effectWrapper.GetEffect() is IEffectStateInfo)
 					effectsWithModifierInfoWrappers.Add(effectWrapper);
+				if (effectWrapper.GetEffect() is ISavable)
+					savableEffectsWrappers.Add(effectWrapper);
 
 				if (effectWrapper.GetEffect() is IRevertEffect revertEffect && revertEffect.IsRevertible)
 					_revertEffectsIndex++;
@@ -56,13 +72,18 @@ namespace ModiBuff.Core
 					_durationEffectsIndex++;
 				if ((effectWrapper.EffectOn & EffectOn.Stack) != 0)
 					_stackEffectsIndex++;
-				if ((effectWrapper.EffectOn & EffectOn.Callback) != 0)
-					_callbackEffectsIndex++;
 				if ((effectWrapper.EffectOn & EffectOn.Event) != 0)
 					_eventEffectsIndex++;
+				if ((effectWrapper.EffectOn & EffectOn.CallbackUnit) != 0)
+					_callbackUnitEffectsIndex++;
+				if ((effectWrapper.EffectOn & EffectOn.CallbackEffect) != 0)
+					_callbackEffectEffectsIndex++;
+				if ((effectWrapper.EffectOn & EffectOn.CallbackEffectUnits) != 0)
+					_callbackEffectUnitsEffectsIndex++;
 			}
 
 			_effectsWithModifierInfoWrappers = effectsWithModifierInfoWrappers.ToArray();
+			_savableEffectsWrappers = savableEffectsWrappers.ToArray();
 		}
 
 		public SyncedModifierEffects Create(int genId)
@@ -92,16 +113,28 @@ namespace ModiBuff.Core
 				_stackEffectsIndex = 0;
 			}
 
-			if (_callbackEffectsIndex > 0)
-			{
-				_callbacks = new IEffect[_callbackEffectsIndex];
-				_callbackEffectsIndex = 0;
-			}
-
 			if (_eventEffectsIndex > 0)
 			{
 				_eventEffects = new IEffect[_eventEffectsIndex];
 				_eventEffectsIndex = 0;
+			}
+
+			if (_callbackUnitEffectsIndex > 0)
+			{
+				_callbackUnitEffects = new IEffect[_callbackUnitEffectsIndex];
+				_callbackUnitEffectsIndex = 0;
+			}
+
+			if (_callbackEffectEffectsIndex > 0)
+			{
+				_callbackEffectEffects = new IEffect[_callbackEffectEffectsIndex];
+				_callbackEffectEffectsIndex = 0;
+			}
+
+			if (_callbackEffectUnitsEffectsIndex > 0)
+			{
+				_callbackEffectUnitsEffects = new IEffect[_callbackEffectUnitsEffectsIndex];
+				_callbackEffectUnitsEffectsIndex = 0;
 			}
 
 			if (_revertEffectsIndex > 0)
@@ -131,47 +164,55 @@ namespace ModiBuff.Core
 					_durationEffects[_durationEffectsIndex++] = effect;
 				if ((effectOn & EffectOn.Stack) != 0)
 					_stackEffects[_stackEffectsIndex++] = (IStackEffect)effect;
-				if ((effectOn & EffectOn.Callback) != 0)
-					_callbacks[_callbackEffectsIndex++] = effect;
 				if ((effectOn & EffectOn.Event) != 0)
 					_eventEffects[_eventEffectsIndex++] = effect;
+				if ((effectOn & EffectOn.CallbackUnit) != 0)
+					_callbackUnitEffects[_callbackUnitEffectsIndex++] = effect;
+				if ((effectOn & EffectOn.CallbackEffect) != 0)
+					_callbackEffectEffects[_callbackEffectEffectsIndex++] = effect;
+				if ((effectOn & EffectOn.CallbackEffectUnits) != 0)
+					_callbackEffectUnitsEffects[_callbackEffectUnitsEffectsIndex++] = effect;
 			}
 
-			ModifierStateInfo modifierStateInfo = null;
+			EffectStateInfo effectStateInfo = default(EffectStateInfo);
 			if (_effectsWithModifierInfoWrappers.Length > 0)
 			{
-				var modifierStateInfoEffects = new IModifierStateInfo[_effectsWithModifierInfoWrappers.Length];
+				var modifierStateInfoEffects = new IEffectStateInfo[_effectsWithModifierInfoWrappers.Length];
 				for (int i = 0; i < _effectsWithModifierInfoWrappers.Length; i++)
-					modifierStateInfoEffects[i] = (IModifierStateInfo)_effectsWithModifierInfoWrappers[i].GetEffect();
-				modifierStateInfo = new ModifierStateInfo(modifierStateInfoEffects);
+					modifierStateInfoEffects[i] = (IEffectStateInfo)_effectsWithModifierInfoWrappers[i].GetEffect();
+				effectStateInfo = new EffectStateInfo(modifierStateInfoEffects);
+			}
+
+			EffectSaveState effectSaveState = default(EffectSaveState);
+			if (_savableEffectsWrappers.Length > 0)
+			{
+				var savableEffects = new ISavable[_savableEffectsWrappers.Length];
+				for (int i = 0; i < _savableEffectsWrappers.Length; i++)
+					savableEffects[i] = (ISavable)_savableEffectsWrappers[i].GetEffect();
+				effectSaveState = new EffectSaveState(savableEffects);
 			}
 
 			//Set the effects arrays on our special effects (callback, event, remove-revert)
-			if (_eventRegisterWrapper != null)
-			{
-				((IRecipeFeedEffects)_eventRegisterWrapper.GetEffect()).SetEffects(_eventEffects);
-				_eventRegisterWrapper.Reset();
-			}
+			//No need to reset manually special wrappers manually
+			//Since they're always fed to effectWrappers, that we reset at the end
+			_eventRegisterWrapper?.GetEffectAs<IRecipeFeedEffects>().SetEffects(_eventEffects);
+			_callbackUnitRegisterWrapper?.GetEffectAs<IRecipeFeedEffects>().SetEffects(_callbackUnitEffects);
+			_callbackEffectRegisterWrapper?.GetEffectAs<IRecipeFeedEffects>().SetEffects(_callbackEffectEffects);
+			_callbackEffectUnitsRegisterWrapper?.GetEffectAs<IRecipeFeedEffects>()
+				.SetEffects(_callbackEffectUnitsEffects);
 
-			if (_callbackRegisterWrapper != null)
-			{
-				((IRecipeFeedEffects)_callbackRegisterWrapper.GetEffect()).SetEffects(_callbacks);
-				_callbackRegisterWrapper.Reset();
-			}
+			if (_removeEffectWrapper != null && _revertEffects != null)
+				_removeEffectWrapper.GetEffectAs<RemoveEffect>().SetRevertibleEffects(_revertEffects);
 
-			if (_removeEffectWrapper != null)
-			{
-				if (_revertEffects != null)
-					((RemoveEffect)_removeEffectWrapper.GetEffect()).SetRevertibleEffects(_revertEffects);
-				_removeEffectWrapper.Reset();
-			}
+			_dispelRegisterWrapper?.GetEffectAs<DispelRegisterEffect>()
+				.SetRemoveEffect(_removeEffectWrapper.GetEffectAs<RemoveEffect>());
 
 			//Reset all the clones in wrappers
 			for (int i = 0; i < _effectWrappers.Length; i++)
 				_effectWrappers[i].Reset();
 
 			return new SyncedModifierEffects(_initEffects, _intervalEffects, _durationEffects, _stackEffects,
-				modifierStateInfo);
+				effectStateInfo, effectSaveState);
 		}
 	}
 
@@ -181,17 +222,19 @@ namespace ModiBuff.Core
 		public readonly IEffect[] IntervalEffects;
 		public readonly IEffect[] DurationEffects;
 		public readonly IStackEffect[] StackEffects;
-		public readonly ModifierStateInfo ModifierStateInfo;
+		public readonly EffectStateInfo effectStateInfo;
+		public readonly EffectSaveState EffectSaveState;
 
 		public SyncedModifierEffects(IEffect[] initEffectsArray, IEffect[] intervalEffectsArray,
 			IEffect[] durationEffectsArray, IStackEffect[] stackEffectsArray,
-			ModifierStateInfo modifierStateInfo)
+			EffectStateInfo effectStateInfo, EffectSaveState effectSaveState)
 		{
 			InitEffects = initEffectsArray;
 			IntervalEffects = intervalEffectsArray;
 			DurationEffects = durationEffectsArray;
 			StackEffects = stackEffectsArray;
-			ModifierStateInfo = modifierStateInfo;
+			this.effectStateInfo = effectStateInfo;
+			EffectSaveState = effectSaveState;
 		}
 	}
 }

@@ -15,7 +15,17 @@ namespace ModiBuff.Core.Units
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
 
-			((IHealable<float, float>)target).Heal(value * _lifeStealPercent, source);
+			if (!((IUnitEntity)source).UnitTag.HasTag(UnitTag.Lifestealable))
+				return;
+			if (!(target is IHealable<float, float> healableTarget))
+			{
+#if MODIBUFF_EFFECT_CHECK
+				EffectHelper.LogImplError(target, nameof(IHealable<float, float>));
+#endif
+				return;
+			}
+
+			healableTarget.Heal(value * _lifeStealPercent, source);
 		}
 	}
 }

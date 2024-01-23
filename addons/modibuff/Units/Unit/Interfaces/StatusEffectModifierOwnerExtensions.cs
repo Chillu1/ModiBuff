@@ -11,7 +11,7 @@ namespace ModiBuff.Core.Units
 			if (!owner.StatusEffectController.HasLegalAction(LegalAction.Cast))
 				return false;
 
-			if (!owner.ModifierController.CanCastModifier(modifierId))
+			if (!owner.CanCastModifier(modifierId))
 				return false;
 
 			target.ModifierController.Add(modifierId, target, owner);
@@ -31,11 +31,32 @@ namespace ModiBuff.Core.Units
 			if (!owner.StatusEffectController.HasLegalAction(LegalAction.Cast))
 				return false;
 
-			if (!owner.ModifierController.ContainsApplier(modifierId))
+			if (!owner.ModifierApplierController.ContainsApplier(modifierId))
 				return false;
 
 			target.ModifierController.Add(modifierId, target, owner);
 			return true;
+		}
+
+		public static bool HasStatusEffectSingle(
+			this ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType> owner,
+			StatusEffectType statusEffectType)
+		{
+			return owner.StatusEffectController.HasStatusEffect(statusEffectType);
+		}
+
+		public static bool HasStatusEffectMulti(
+			this IStatusEffectOwner<LegalAction, StatusEffectType> owner,
+			StatusEffectType statusEffectType)
+		{
+			return owner.StatusEffectController.HasStatusEffect(statusEffectType);
+		}
+
+		public static bool HasStatusEffectDurationLess(
+			this IDurationLessStatusEffectOwner<LegalAction, StatusEffectType> owner,
+			StatusEffectType statusEffectType)
+		{
+			return owner.StatusEffectController.HasStatusEffect(statusEffectType);
 		}
 	}
 }

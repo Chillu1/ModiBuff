@@ -7,4 +7,9 @@ namespace ModiBuff.Core
 	{
 		TEffect SetPostEffects(params IPostEffect<TValue>[] postEffects);
 	}
+
+	public interface IPostEffectOwner<out TEffect, out TValue, out TValue2> //TODO Rename
+	{
+		TEffect SetPostEffects(params IPostEffect<TValue, TValue2>[] postEffects);
+	}
 }

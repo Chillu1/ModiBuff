@@ -91,14 +91,15 @@ namespace ModiBuff.Core.Units
 					break;
 				}
 				default:
-					Logger.LogError("Invalid condition type: " + conditionType);
+					Logger.LogError("[ModiBuff.Units] Invalid condition type: " + conditionType);
 					return false;
 			}
 
 			return true;
 		}
 
-		public static bool CheckStatType(this StatType statType, IUnit unit, ComparisonType comparisonType, float statValue)
+		public static bool CheckStatType(this StatType statType, IUnit unit, ComparisonType comparisonType,
+			float statValue)
 		{
 			switch (statType)
 			{

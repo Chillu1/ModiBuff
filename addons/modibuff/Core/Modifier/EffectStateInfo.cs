@@ -3,14 +3,13 @@ namespace ModiBuff.Core
 	/// <summary>
 	///		Holds all effects that have state information, used for UI/UX
 	/// </summary>
-	public sealed class ModifierStateInfo
+	public struct EffectStateInfo
 	{
-		private readonly IModifierStateInfo[] _effects;
+		public bool Valid => _effects != null;
 
-		public ModifierStateInfo(params IModifierStateInfo[] effects)
-		{
-			_effects = effects;
-		}
+		private readonly IEffectStateInfo[] _effects;
+
+		public EffectStateInfo(params IEffectStateInfo[] effects) => _effects = effects;
 
 		/// <summary>
 		///		Gets state from effect
@@ -29,7 +28,7 @@ namespace ModiBuff.Core
 			int currentNumber = stateNumber;
 			for (int i = 0; i < _effects.Length; i++)
 			{
-				if (!(_effects[i] is IModifierStateInfo<TData> stateInfo))
+				if (!(_effects[i] is IEffectStateInfo<TData> stateInfo))
 					continue;
 
 				if (currentNumber > 0)

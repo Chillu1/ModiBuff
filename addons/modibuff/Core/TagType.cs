@@ -23,9 +23,17 @@ namespace ModiBuff.Core
 
 		//Most likely need to reserve around 8-16 bits, or split internal and user tagging
 		//Will be decided/fixed on 1.0 release
-		Reserved1 = 1ul << 6,
-		Reserved2 = Reserved1 << 1,
-		Reserved3 = Reserved2 << 1,
+
+		/// <summary>
+		///		Modifier won't be stacked when getting added to a unit, only on custom stack actions.
+		/// </summary>
+		CustomStack = 1ul << 6,
+
+		/// <summary>
+		///		One stack is always added and triggered on init, this tag nullifies that.
+		/// </summary>
+		ZeroDefaultStacks = CustomStack << 1,
+		Reserved3 = CustomStack << 1,
 		Reserved4 = Reserved3 << 1,
 		Reserved5 = Reserved4 << 1,
 		Reserved6 = Reserved5 << 1,
@@ -47,8 +55,11 @@ namespace ModiBuff.Core
 			return (tagType & tag) == tag;
 		}
 
-		public static TagType UpdateTagBasedOnModifierComponents(this TagType tag, Modifier modifier) =>
-			TagTypeUtils.UpdateTagBasedOnModifierComponents(tag, modifier);
+		public static TagType UpdateTagBasedOnModifierComponents(this TagType tag, Modifier modifier)
+		{
+			TagTypeUtils.UpdateTagBasedOnModifierComponents(ref tag, modifier);
+			return tag;
+		}
 	}
 
 	public static class TagTypeUtils
@@ -68,7 +79,7 @@ namespace ModiBuff.Core
 		private static readonly FieldInfo isRefreshableDurationField =
 			typeof(DurationComponent).GetRuntimeFields().First(field => field.Name == "_isRefreshable");
 
-		public static TagType UpdateTagBasedOnModifierComponents(TagType tag, Modifier modifier)
+		public static void UpdateTagBasedOnModifierComponents(ref TagType tag, Modifier modifier)
 		{
 			if ((bool)hasInitField.GetValue(modifier))
 				tag |= TagType.IsInit;
@@ -97,8 +108,6 @@ namespace ModiBuff.Core
 					}
 				}
 			}
-			
-			return tag;
 		}
 	}
 }

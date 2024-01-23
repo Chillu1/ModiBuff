@@ -1,7 +1,9 @@
 namespace ModiBuff.Core
 {
-	public sealed class RemoveEffect : IModifierGenIdOwner, IEffect, IModifierIdOwner, IShallowClone<RemoveEffect>
+	public sealed class RemoveEffect : IModifierGenIdOwner, IEffect, IModifierIdOwner, IShallowClone<IEffect>
 	{
+		private readonly ApplierType _applierType;
+		private readonly bool _hasApplyChecks;
 		private IRevertEffect[] _revertibleEffects;
 		private int _id = -1;
 		private int _genId = -1;
@@ -12,15 +14,29 @@ namespace ModiBuff.Core
 
 		internal RemoveEffect(int id) => _id = id;
 
+		internal RemoveEffect(int id, ApplierType applierType = ApplierType.None, bool hasApplyChecks = false)
+		{
+			_id = id;
+			_applierType = applierType;
+			_hasApplyChecks = hasApplyChecks;
+		}
+
 		/// <summary>
 		///		Manual modifier generation constructor
 		/// </summary>
-		public static RemoveEffect Create(int id, int genId) => new RemoveEffect(id, genId);
+		public static RemoveEffect Create(int id, int genId, params IRevertEffect[] revertibleEffects)
+		{
+			var effect = new RemoveEffect(id, genId, ApplierType.None, false);
+			effect.SetRevertibleEffects(revertibleEffects);
+			return effect;
+		}
 
-		private RemoveEffect(int id, int genId)
+		private RemoveEffect(int id, int genId, ApplierType applierType, bool hasApplyChecks)
 		{
 			_id = id;
 			_genId = genId;
+			_applierType = applierType;
+			_hasApplyChecks = hasApplyChecks;
 		}
 
 		public void SetModifierId(int id) => _id = id;
@@ -42,11 +58,17 @@ namespace ModiBuff.Core
 				Logger.LogWarning("[ModiBuff] RemoveEffect.Effect: genId wasn't set");
 #endif
 
-			//TODO From which collection? Applier support?
+			if (_applierType != ApplierType.None)
+			{
+				((IModifierApplierOwner)target).ModifierApplierController.RemoveApplier(_id /*, _genId*/, _applierType,
+					_hasApplyChecks);
+				//return;
+			}
+
 			((IModifierOwner)target).ModifierController.PrepareRemove(_id, _genId);
 		}
 
-		public RemoveEffect ShallowClone() => new RemoveEffect(_id, _genId);
+		public IEffect ShallowClone() => new RemoveEffect(_id, _genId, _applierType, _hasApplyChecks);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

@@ -9,8 +9,11 @@ namespace ModiBuff.Core
 		public readonly string Name;
 		public readonly List<EffectWrapper> EffectWrappers;
 		public readonly EffectWrapper RemoveEffectWrapper;
+		public readonly EffectWrapper DispelRegisterWrapper;
 		public readonly EffectWrapper EventRegisterWrapper;
-		public readonly EffectWrapper CallbackRegisterWrapper;
+		public readonly EffectWrapper CallbackUnitRegisterWrapper;
+		public readonly EffectWrapper CallbackEffectRegisterWrapper;
+		public readonly EffectWrapper CallbackEffectUnitsRegisterWrapper;
 		public readonly bool HasApplyChecks;
 		public readonly List<ICheck> ApplyCheckList;
 		public readonly bool HasEffectChecks;
@@ -25,24 +28,29 @@ namespace ModiBuff.Core
 		public readonly bool RefreshDuration;
 		public readonly bool RefreshInterval;
 		public readonly WhenStackEffect WhenStackEffect;
-		public readonly float StackValue;
 		public readonly int MaxStacks;
 		public readonly int EveryXStacks;
+		public readonly float SingleStackTime;
+		public readonly float IndependentStackTime;
 
 		public ModifierRecipeData(int id, string name, List<EffectWrapper> effectWrappers,
-			EffectWrapper removeEffectWrapper, EffectWrapper eventRegisterWrapper,
-			EffectWrapper callbackRegisterWrapper, bool hasApplyChecks, List<ICheck> applyCheckList,
+			EffectWrapper removeEffectWrapper, EffectWrapper dispelRegisterWrapper, EffectWrapper eventRegisterWrapper,
+			EffectWrapper callbackUnitRegisterWrapper, EffectWrapper callbackEffectRegisterWrapper,
+			EffectWrapper callbackEffectUnitsRegisterWrapper, bool hasApplyChecks, List<ICheck> applyCheckList,
 			bool hasEffectChecks, List<ICheck> effectCheckList, List<Func<IUnit, bool>> applyFuncCheckList,
 			List<Func<IUnit, bool>> effectFuncCheckList, bool isAura, TagType tag, bool oneTimeInit, float interval,
-			float duration, bool refreshDuration, bool refreshInterval, WhenStackEffect whenStackEffect,
-			float stackValue, int maxStacks, int everyXStacks)
+			float duration, bool refreshDuration, bool refreshInterval, WhenStackEffect whenStackEffect, int maxStacks,
+			int everyXStacks, float singleStackTime, float independentStackTime)
 		{
 			Id = id;
 			Name = name;
 			EffectWrappers = effectWrappers;
 			RemoveEffectWrapper = removeEffectWrapper;
+			DispelRegisterWrapper = dispelRegisterWrapper;
 			EventRegisterWrapper = eventRegisterWrapper;
-			CallbackRegisterWrapper = callbackRegisterWrapper;
+			CallbackUnitRegisterWrapper = callbackUnitRegisterWrapper;
+			CallbackEffectRegisterWrapper = callbackEffectRegisterWrapper;
+			CallbackEffectUnitsRegisterWrapper = callbackEffectUnitsRegisterWrapper;
 			HasApplyChecks = hasApplyChecks;
 			ApplyCheckList = applyCheckList;
 			HasEffectChecks = hasEffectChecks;
@@ -57,9 +65,10 @@ namespace ModiBuff.Core
 			RefreshDuration = refreshDuration;
 			RefreshInterval = refreshInterval;
 			WhenStackEffect = whenStackEffect;
-			StackValue = stackValue;
 			MaxStacks = maxStacks;
 			EveryXStacks = everyXStacks;
+			SingleStackTime = singleStackTime;
+			IndependentStackTime = independentStackTime;
 		}
 	}
 }

@@ -10,28 +10,18 @@ namespace ModiBuff.Core
 	/// <remarks>This version supports multiple modifiers of the same type</remarks>
 	public sealed class ModifierController
 	{
-		private readonly IUnit _owner;
-
 		//A dict with multikey can be used, but we run into problems with modifiers that don't use instance stacking
 		private Modifier[] _modifiers;
 		private readonly int[] _modifierIndexes;
 		private readonly Dictionary<int, int> _modifierIndexesDict;
 		private int _modifiersTop;
 
-		private readonly List<int> _modifierAttackAppliers;
-
-		//TODO Will there be cast modifier without any appliers?
-		private readonly List<int> _modifierCastAppliers;
-
-		private readonly Dictionary<int, ModifierCheck> _modifierCastChecksAppliers;
-		private readonly Dictionary<int, ModifierCheck> _modifierAttackChecksAppliers;
+		private readonly List<DispelReference> _dispellableReferences;
 
 		private readonly List<ModifierReference> _modifiersToRemove;
 
-		public ModifierController(IUnit owner)
+		public ModifierController()
 		{
-			_owner = owner;
-
 			_modifiers = new Modifier[Config.ModifierArraySize];
 			if (Config.UseDictionaryIndexes)
 				_modifierIndexesDict = new Dictionary<int, int>(Config.ModifierIndexDictionarySize);
@@ -42,10 +32,7 @@ namespace ModiBuff.Core
 					_modifierIndexes[i] = -1;
 			}
 
-			_modifierAttackAppliers = new List<int>(Config.AttackApplierSize);
-			_modifierCastAppliers = new List<int>(Config.CastApplierSize);
-			_modifierCastChecksAppliers = new Dictionary<int, ModifierCheck>(Config.CastCheckApplierSize);
-			_modifierAttackChecksAppliers = new Dictionary<int, ModifierCheck>(Config.AttackCheckApplierSize);
+			_dispellableReferences = new List<DispelReference>(Config.DispellableSize);
 
 			_modifiersToRemove = new List<ModifierReference>(Config.ModifierRemoveSize);
 		}
@@ -56,14 +43,6 @@ namespace ModiBuff.Core
 			for (int i = 0; i < modifiersTop; i++)
 				_modifiers[i].Update(delta);
 
-			if (_modifierCastChecksAppliers.Count > 0)
-				foreach (var check in _modifierCastChecksAppliers.Values)
-					check.Update(delta);
-
-			if (_modifierAttackChecksAppliers.Count > 0)
-				foreach (var check in _modifierAttackChecksAppliers.Values)
-					check.Update(delta);
-
 			int removeCount = _modifiersToRemove.Count;
 			if (removeCount == 0)
 				return;
@@ -73,12 +52,6 @@ namespace ModiBuff.Core
 
 			_modifiersToRemove.Clear();
 		}
-
-		public ICollection<ModifierCheck> GetApplierCastCheckModifiers() => _modifierCastChecksAppliers.Values;
-		public ICollection<ModifierCheck> GetApplierAttackCheckModifiers() => _modifierAttackChecksAppliers.Values;
-
-		public IReadOnlyList<int> GetApplierAttackModifierIds() => _modifierAttackAppliers;
-		public IReadOnlyList<int> GetApplierCastModifierIds() => _modifierCastAppliers;
 
 		public ModifierReference[] GetModifierReferences()
 		{
@@ -127,125 +100,17 @@ namespace ModiBuff.Core
 			return default(TData);
 		}
 
-		public bool TryAdd(ModifierAddReference addReference) => TryAdd(addReference, _owner);
-
-		public bool TryAdd(ModifierAddReference addReference, IUnit target)
-		{
-			if (addReference.IsApplierType)
-				return TryAddApplier(addReference.Id, addReference.HasApplyChecks, addReference.ApplierType);
-
-			Add(addReference.Id, target, _owner);
-			return true;
-		}
-
-		//TODO do appliers make sense? Should we just store the id, what kind of state do appliers have?
-
-		/// <summary>
-		///		Only triggers the check, does not trigger the modifiers effect. Used when modifiers 
-		/// </summary>
-		public bool TryCastCheck(int id)
-		{
-			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.Check(_owner);
-		}
-
-		/// <summary>
-		///		Checks if we can cast the modifier, triggers the check if it exists
-		/// </summary>
-		public bool CanCastModifier(int id)
-		{
-			if (_modifierCastAppliers.Contains(id))
-				return true;
-
-			return _modifierCastChecksAppliers.TryGetValue(id, out var check) && check.Check(_owner);
-		}
-
-		public bool CanUseAttackModifier(int id)
-		{
-			if (_modifierAttackAppliers.Contains(id))
-				return true;
-
-			return _modifierAttackChecksAppliers.TryGetValue(id, out var check) && check.Check(_owner);
-		}
-
-		public bool TryAddApplier(int id, bool hasApplyChecks, ApplierType applierType)
-		{
-			switch (applierType)
-			{
-				case ApplierType.Cast when hasApplyChecks:
-				{
-					if (_modifierCastChecksAppliers.ContainsKey(id))
-					{
-						Logger.LogWarning("[ModiBuff] Tried to add a duplicate cast check applier, id: " + id);
-						return false;
-					}
-
-					_modifierCastChecksAppliers.Add(id, ModifierPool.Instance.RentModifierCheck(id));
-					return true;
-				}
-				case ApplierType.Cast:
-				{
-					if (_modifierCastAppliers.Contains(id))
-					{
-						Logger.LogWarning("[ModiBuff] Tried to add a duplicate cast applier, id: " + id);
-						return false;
-					}
-
-					_modifierCastAppliers.Add(id);
-					return true;
-				}
-				case ApplierType.Attack when hasApplyChecks:
-				{
-					if (_modifierAttackChecksAppliers.ContainsKey(id))
-					{
-						Logger.LogWarning("[ModiBuff] Tried to add a duplicate attack check applier, id: " + id);
-						return false;
-					}
-
-					_modifierAttackChecksAppliers.Add(id, ModifierPool.Instance.RentModifierCheck(id));
-					return true;
-				}
-				case ApplierType.Attack:
-				{
-					if (_modifierAttackAppliers.Contains(id))
-					{
-						Logger.LogWarning("[ModiBuff] Tried to add a duplicate attack applier, id: " + id);
-						return false;
-					}
-
-					_modifierAttackAppliers.Add(id);
-					return true;
-				}
-				default:
-#if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError("[ModiBuff] Unknown applier type: " + applierType);
-#endif
-					return false;
-			}
-		}
-
-		public void TryApplyAttackNonCheckModifiers(IEnumerable<int> modifierIds, IUnit target, IModifierOwner source)
-		{
-			foreach (int id in modifierIds)
-				Add(id, target, source);
-		}
-
-		public void TryApplyAttackCheckModifiers(IEnumerable<ModifierCheck> modifierChecks, IUnit target,
-			IModifierOwner source)
-		{
-			foreach (var check in modifierChecks)
-				if (check.Check(source))
-					Add(check.Id, target, source);
-		}
-
-		public int Add(int id, IUnit target, IUnit source)
+		public void Add(int id, IUnit target, IUnit source)
 		{
 			ref var tag = ref ModifierRecipes.GetTag(id);
 
 			if (!tag.HasTag(TagType.IsInstanceStackable))
 			{
+				bool useDictionaryIndexes = Config.UseDictionaryIndexes;
+
 				bool exists;
 				int index;
-				if (Config.UseDictionaryIndexes)
+				if (useDictionaryIndexes)
 					exists = _modifierIndexesDict.TryGetValue(id, out index);
 				else
 				{
@@ -258,15 +123,22 @@ namespace ModiBuff.Core
 					var existingModifier = _modifiers[index];
 					//TODO should we update the modifier targets when init/refreshing/stacking?
 					existingModifier.UpdateSource(source);
-					if ((tag & TagType.IsInit) != 0)
+					if (tag.HasTag(TagType.IsInit))
 						existingModifier.Init();
-					if ((tag & TagType.IsRefresh) != 0)
+					if (tag.HasTag(TagType.IsRefresh))
 						existingModifier.Refresh();
-					if ((tag & TagType.IsStack) != 0)
+					if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.CustomStack))
 						existingModifier.Stack();
 
-					return existingModifier.GenId;
+					existingModifier.UseScheduledCheck();
+
+					return;
 				}
+
+				if (useDictionaryIndexes)
+					_modifierIndexesDict.Add(id, _modifiersTop);
+				else
+					_modifierIndexes[id] = _modifiersTop;
 			}
 
 			if (_modifiersTop == _modifiers.Length)
@@ -277,41 +149,60 @@ namespace ModiBuff.Core
 			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
 			modifier.UpdateSingleTargetSource(target, source);
 
-			if (!tag.HasTag(TagType.IsInstanceStackable))
-			{
-				if (Config.UseDictionaryIndexes)
-					_modifierIndexesDict.Add(id, _modifiersTop);
-				else
-					_modifierIndexes[id] = _modifiersTop;
-			}
-
 			_modifiers[_modifiersTop++] = modifier;
 			if (tag.HasTag(TagType.IsInit))
 				modifier.Init();
-			if (tag.HasTag(TagType.IsStack))
+			if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.CustomStack)
+			                                && !tag.HasTag(TagType.ZeroDefaultStacks))
 				modifier.Stack();
 
-			return modifier.GenId;
+			modifier.UseScheduledCheck();
 		}
 
-		public bool Contains(int id)
+		public bool Contains(int id, int genId = -1)
 		{
 			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
-			{
 				return Config.UseDictionaryIndexes ? _modifierIndexesDict.ContainsKey(id) : _modifierIndexes[id] != -1;
+
+			if (genId == -1)
+			{
+				for (int i = 0; i < _modifiersTop; i++)
+					if (_modifiers[i].Id == id)
+						return true;
 			}
-
-			for (int i = 0; i < _modifiersTop; i++)
-				if (_modifiers[i].Id == id)
-					return true;
-
-			//TODO GenId if we want to check for specific modifiers
+			else
+			{
+				for (int i = 0; i < _modifiersTop; i++)
+				{
+					var modifier = _modifiers[i];
+					if (modifier.Id == id && modifier.GenId == genId)
+						return true;
+				}
+			}
 
 			return false;
 		}
 
-		public bool ContainsApplier(int id) =>
-			_modifierCastAppliers.Contains(id) || _modifierCastChecksAppliers.ContainsKey(id);
+		internal void RegisterDispel(DispelType dispel, RemoveEffect effect)
+		{
+			_dispellableReferences.Add(new DispelReference(effect, dispel));
+		}
+
+		public void Dispel(DispelType dispelType, IUnit target, IUnit source)
+		{
+			for (int i = 0; i < _dispellableReferences.Count;)
+			{
+				var dispelReference = _dispellableReferences[i];
+				if (dispelReference.Type.HasAny(dispelType))
+				{
+					dispelReference.Effect.Effect(target, source);
+					_dispellableReferences.RemoveAt(i);
+					continue;
+				}
+
+				i++;
+			}
+		}
 
 		public void PrepareRemove(int id, int genId)
 		{
@@ -320,7 +211,9 @@ namespace ModiBuff.Core
 
 		public void ModifierAction(int id, int genId, ModifierAction action)
 		{
+#if DEBUG && !MODIBUFF_PROFILE
 			ref var tag = ref ModifierRecipes.GetTag(id);
+#endif
 			var modifier = GetModifier(id, genId);
 
 			if (modifier == null)
@@ -332,76 +225,85 @@ namespace ModiBuff.Core
 				return;
 			}
 
-			switch (action)
+			if ((action & Core.ModifierAction.Refresh) != 0)
 			{
-				case Core.ModifierAction.Refresh:
 #if DEBUG && !MODIBUFF_PROFILE
-					if (!tag.HasTag(TagType.IsRefresh))
-						Logger.LogWarning("[ModiBuff] ModifierAction: Refresh was called on a " +
-						                  "modifier that doesn't have a refresh flag set");
+				if (!tag.HasTag(TagType.IsRefresh))
+					Logger.LogWarning("[ModiBuff] ModifierAction: Refresh was called on a " +
+					                  "modifier that doesn't have a refresh flag set");
 #endif
-					modifier.Refresh();
-					break;
-				case Core.ModifierAction.ResetStacks:
+				modifier.Refresh();
+			}
+
+			if ((action & Core.ModifierAction.ResetStacks) != 0)
+			{
 #if DEBUG && !MODIBUFF_PROFILE
-					if (!tag.HasTag(TagType.IsStack))
-						Logger.LogWarning("[ModiBuff] ModifierAction: ResetStacks was called on a " +
-						                  "modifier that doesn't have a stack flag set");
+				if (!tag.HasTag(TagType.IsStack))
+					Logger.LogWarning("[ModiBuff] ModifierAction: ResetStacks was called on a " +
+					                  "modifier that doesn't have a stack flag set");
 #endif
-					modifier.ResetStacks();
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(action), action, "Invalid modifier action");
+				modifier.ResetStacks();
+			}
+
+			if ((action & Core.ModifierAction.Stack) != 0)
+			{
+#if DEBUG && !MODIBUFF_PROFILE
+				if (!tag.HasTag(TagType.IsStack))
+					Logger.LogWarning("[ModiBuff] ModifierAction: Stack was called on a " +
+					                  "modifier that doesn't have a stack flag set");
+#endif
+				modifier.Stack();
+				modifier.UseScheduledCheck();
 			}
 		}
 
 		public void Remove(ModifierReference modifierReference)
 		{
-			if (!ModifierRecipes.GetTag(modifierReference.Id).HasTag(TagType.IsInstanceStackable))
+			if (ModifierRecipes.GetTag(modifierReference.Id).HasTag(TagType.IsInstanceStackable))
 			{
-#if DEBUG && !MODIBUFF_PROFILE
-				bool modifierExists = Config.UseDictionaryIndexes
-					? _modifierIndexesDict.ContainsKey(modifierReference.Id)
-					: _modifierIndexes[modifierReference.Id] != -1;
-
-				if (!modifierExists)
+				for (int i = 0; i < _modifiersTop; i++)
 				{
-					Logger.LogError("[ModiBuff] Tried to remove a modifier that doesn't exist on entity, id: " +
-					                $"{modifierReference.Id}, genId: {modifierReference.GenId}");
-					return;
-				}
-#endif
-
-				int modifierIndex;
-				if (Config.UseDictionaryIndexes)
-				{
-					modifierIndex = _modifierIndexesDict[modifierReference.Id];
-					ModifierPool.Instance.Return(_modifiers[modifierIndex]);
-					_modifiers[modifierIndex] = _modifiers[--_modifiersTop];
-					_modifiers[_modifiersTop] = null;
-					_modifierIndexesDict.Remove(modifierReference.Id);
-					return;
+					var modifier = _modifiers[i];
+					if (modifier.Id == modifierReference.Id && modifier.GenId == modifierReference.GenId)
+					{
+						ModifierPool.Instance.Return(modifier);
+						_modifiers[i] = _modifiers[--_modifiersTop]; //TODO This switching might cause some order issues
+						_modifiers[_modifiersTop] = null;
+						break;
+					}
 				}
 
-				modifierIndex = _modifierIndexes[modifierReference.Id];
-				ModifierPool.Instance.Return(_modifiers[modifierIndex]);
-				_modifiers[modifierIndex] = _modifiers[--_modifiersTop];
-				_modifiers[_modifiersTop] = null;
-				_modifierIndexes[modifierReference.Id] = -1;
 				return;
 			}
 
-			for (int i = 0; i < _modifiersTop; i++)
+#if DEBUG && !MODIBUFF_PROFILE
+			bool modifierExists = Config.UseDictionaryIndexes
+				? _modifierIndexesDict.ContainsKey(modifierReference.Id)
+				: _modifierIndexes[modifierReference.Id] != -1;
+
+			if (!modifierExists)
 			{
-				var modifier = _modifiers[i];
-				if (modifier.Id == modifierReference.Id && modifier.GenId == modifierReference.GenId)
-				{
-					ModifierPool.Instance.Return(modifier);
-					_modifiers[i] = _modifiers[--_modifiersTop]; //TODO This switching might cause some order issues
-					_modifiers[_modifiersTop] = null;
-					break;
-				}
+				Logger.LogError("[ModiBuff] Tried to remove a modifier that doesn't exist on entity, id: " +
+				                $"{modifierReference.Id}, genId: {modifierReference.GenId}");
+				return;
 			}
+#endif
+
+			int modifierIndex;
+			if (Config.UseDictionaryIndexes)
+			{
+				modifierIndex = _modifierIndexesDict[modifierReference.Id];
+				_modifierIndexesDict.Remove(modifierReference.Id);
+			}
+			else
+			{
+				modifierIndex = _modifierIndexes[modifierReference.Id];
+				_modifierIndexes[modifierReference.Id] = -1;
+			}
+
+			ModifierPool.Instance.Return(_modifiers[modifierIndex]);
+			_modifiers[modifierIndex] = _modifiers[--_modifiersTop];
+			_modifiers[_modifiersTop] = null;
 		}
 
 		/// <summary>
@@ -423,18 +325,48 @@ namespace ModiBuff.Core
 
 			_modifiersTop = 0;
 
-			foreach (var check in _modifierCastChecksAppliers.Values)
-				ModifierPool.Instance.ReturnCheck(check);
-
-			foreach (var check in _modifierAttackChecksAppliers.Values)
-				ModifierPool.Instance.ReturnCheck(check);
-
-			//Clear the rest, if the unit will be reused/pooled. Otherwise this is not needed
-			_modifierAttackAppliers.Clear();
-			_modifierCastAppliers.Clear();
-			_modifierCastChecksAppliers.Clear();
-			_modifierAttackChecksAppliers.Clear();
 			_modifiersToRemove.Clear();
+		}
+
+		public SaveData SaveState()
+		{
+			//There's a chance(?) we have modifiers to remove when we're saving. We should remove them before saving
+			if (_modifiersToRemove.Count > 0)
+			{
+				for (int i = 0; i < _modifiersToRemove.Count; i++)
+					Remove(_modifiersToRemove[i]);
+				_modifiersToRemove.Clear();
+			}
+
+			Modifier.SaveData[] modifiersSaveData = new Modifier.SaveData[_modifiersTop];
+			for (int i = 0; i < _modifiersTop; i++)
+				modifiersSaveData[i] = _modifiers[i].SaveState();
+			return new SaveData(modifiersSaveData);
+		}
+
+		public void LoadState(SaveData saveData, IUnit owner)
+		{
+			for (int i = 0; i < saveData.ModifiersSaveData.Count; i++)
+			{
+				var modifierSaveData = saveData.ModifiersSaveData[i];
+				int id = ModifierIdManager.GetNewId(modifierSaveData.Id);
+
+				ref var tag = ref ModifierRecipes.GetTag(id);
+
+				if (!tag.HasTag(TagType.IsInstanceStackable))
+				{
+					if (Config.UseDictionaryIndexes)
+						_modifierIndexesDict.Add(id, _modifiersTop);
+					else
+						_modifierIndexes[id] = _modifiersTop;
+				}
+
+				var modifier = ModifierPool.Instance.Rent(id);
+				modifier.LoadState(modifierSaveData, owner);
+				_modifiers[_modifiersTop++] = modifier;
+				if (tag.HasTag(TagType.IsInit))
+					modifier.InitLoad();
+			}
 		}
 
 		private Modifier GetModifier(int id, int genId)
@@ -459,6 +391,19 @@ namespace ModiBuff.Core
 			}
 
 			return null;
+		}
+
+		public struct SaveData
+		{
+			public readonly IReadOnlyList<Modifier.SaveData> ModifiersSaveData;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveData(IReadOnlyList<Modifier.SaveData> modifiersSaveData)
+			{
+				ModifiersSaveData = modifiersSaveData;
+			}
 		}
 	}
 }

@@ -17,16 +17,19 @@ namespace ModiBuff.Core.Units
 		IsStack = Core.TagType.IsStack,
 		IntervalIgnoresStatusResistance = Core.TagType.IntervalIgnoresStatusResistance,
 		DurationIgnoresStatusResistance = Core.TagType.DurationIgnoresStatusResistance,
+		CustomStack = Core.TagType.CustomStack,
 		LastReserved = Core.TagType.LastReserved,
 
-		LegalTargetSelf = 1ul << 17,
-		LegalTargetAlly = 1ul << 18,
-		LegalTargetEnemy = 1ul << 19,
+		LegalTargetSelf = 1ul << 18,
+		LegalTargetAlly = 1ul << 19,
+		LegalTargetEnemy = 1ul << 20,
 
 		//LegalTargetStructure = 1ul << 20,
 		//LegalTargetUnits = LegalTargetAlly | LegalTargetEnemy,
 		LegalTargetAll = LegalTargetSelf | LegalTargetAlly | LegalTargetEnemy, // | LegalTargetStructure,
-		UserTag5 = 1ul << 21
+		BasicDispel = 1ul << 21,
+		StrongDispel = 1ul << 22,
+		UserTag7 = 1ul << 23,
 	}
 
 	public static class TagTypeExtensions
@@ -53,7 +56,8 @@ namespace ModiBuff.Core.Units
 				return true;
 
 #if DEBUG
-			Logger.Log($"Tag {tag} is not a legal target for UnitType.{target} from UnitType.{source}");
+			Logger.Log(
+				$"[ModiBuff.Units] Tag {tag} is not a legal target for UnitType.{target} from UnitType.{source}");
 #endif
 			return false;
 		}

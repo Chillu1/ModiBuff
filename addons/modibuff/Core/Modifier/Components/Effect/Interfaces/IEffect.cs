@@ -16,4 +16,17 @@ namespace ModiBuff.Core
 				effect.Effect(targets[i], source);
 		}
 	}
+
+	public static class EffectHelper
+	{
+		public static void LogImplError(IUnit target, string interfaceName)
+		{
+			Logger.LogError($"[ModiBuff] Target {target} does not implement {interfaceName}");
+		}
+
+		public static void LogImplErrorSource(IUnit source, string interfaceName)
+		{
+			Logger.LogError($"[ModiBuff] Source {source} does not implement {interfaceName}");
+		}
+	}
 }

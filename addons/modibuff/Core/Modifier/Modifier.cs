@@ -23,6 +23,7 @@ namespace ModiBuff.Core
 
 		private readonly ITimeComponent[] _timeComponents;
 		private readonly StackComponent _stackComponent;
+		private readonly IUpdatable _stackTimerComponent;
 
 		private readonly ModifierCheck _effectCheck;
 
@@ -31,11 +32,12 @@ namespace ModiBuff.Core
 		private bool _multiTarget;
 
 		//TODO ideally this would be outside of the modifier, but renting (returning) a tuple/wrapper is kinda meh
-		private readonly ModifierStateInfo _effectStateInfo;
+		private readonly EffectStateInfo _effectStateInfo;
+		private readonly EffectSaveState _effectSaveState;
 
 		public Modifier(int id, int genId, string name, InitComponent? initComponent,
 			ITimeComponent[] timeComponents, StackComponent stackComponent, ModifierCheck effectCheck,
-			ITargetComponent targetComponent, ModifierStateInfo effectStateInfo)
+			ITargetComponent targetComponent, EffectStateInfo? effectStateInfo, EffectSaveState? effectSaveState)
 		{
 			Id = id;
 			GenId = genId;
@@ -49,13 +51,18 @@ namespace ModiBuff.Core
 
 			_timeComponents = timeComponents;
 			_stackComponent = stackComponent;
+			if (stackComponent != null && stackComponent.UsesStackTime)
+				_stackTimerComponent = stackComponent;
 			_effectCheck = effectCheck;
 
 			_targetComponent = targetComponent;
 			if (targetComponent is MultiTargetComponent)
 				_multiTarget = true;
 
-			_effectStateInfo = effectStateInfo;
+			if (effectStateInfo != null)
+				_effectStateInfo = effectStateInfo.Value;
+			if (effectSaveState != null)
+				_effectSaveState = effectSaveState.Value;
 		}
 
 		public void UpdateTargets(List<IUnit> targetsInRange, IUnit source)
@@ -118,6 +125,7 @@ namespace ModiBuff.Core
 					_timeComponents[i].UpdateTargetStatusResistance();
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Init()
 		{
 #if UNSAFE
@@ -133,27 +141,53 @@ namespace ModiBuff.Core
 #endif
 		}
 
+		/// <summary>
+		///		Special init to register callbacks/events on load
+		/// </summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void InitLoad()
+		{
+#if UNSAFE
+			if (_multiTarget)
+				_initComponent.InitLoad(Unsafe.As<MultiTargetComponent>(_targetComponent).Targets,
+					_targetComponent.Source);
+			else
+				_initComponent.InitLoad(Unsafe.As<SingleTargetComponent>(_targetComponent).Target,
+					_targetComponent.Source);
+#else
+			if (_multiTarget)
+				_initComponent.InitLoad(((MultiTargetComponent)_targetComponent).Targets, _targetComponent.Source);
+			else
+				_initComponent.InitLoad(((SingleTargetComponent)_targetComponent).Target, _targetComponent.Source);
+#endif
+		}
+
 		public void Update(float deltaTime)
 		{
 			_effectCheck?.Update(deltaTime);
+			_stackTimerComponent?.Update(deltaTime);
 
 			if (_timeComponents == null)
 				return;
 
-			int length = _timeComponents.Length;
-			for (int i = 0; i < length; i++)
+			for (int i = 0; i < _timeComponents.Length; i++)
 				_timeComponents[i].Update(deltaTime);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Refresh()
 		{
-			int length = _timeComponents.Length;
-			for (int i = 0; i < length; i++)
+			for (int i = 0; i < _timeComponents.Length; i++)
 				_timeComponents[i].Refresh();
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Stack() => _stackComponent.Stack();
+
 		public void ResetStacks() => _stackComponent.ResetStacks();
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void UseScheduledCheck() => _effectCheck?.Use(_targetComponent.Source);
 
 		public ITimeComponent[] GetTimers() => _timeComponents;
 
@@ -215,13 +249,78 @@ namespace ModiBuff.Core
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
 		public TData GetEffectState<TData>(int stateNumber = 0) where TData : struct
 		{
-			if (_effectStateInfo == null)
+			if (!_effectStateInfo.Valid)
 			{
 				Logger.LogWarning("[ModiBuff] Trying to get state info from a modifier that doesn't have any.");
 				return default(TData);
 			}
 
 			return _effectStateInfo.GetEffectState<TData>(stateNumber);
+		}
+
+		public SaveData SaveState()
+		{
+			var targetSaveData = _targetComponent.SaveState();
+			var initSaveData = _hasInit ? (InitComponent.SaveData?)_initComponent.SaveState() : null;
+			var stackSaveData = _stackComponent?.SaveState();
+
+			TimeComponentSaveData[] timeComponentsSaveData = null;
+			if (_timeComponents != null && _timeComponents.Length > 0)
+			{
+				timeComponentsSaveData = new TimeComponentSaveData[_timeComponents.Length];
+				for (int i = 0; i < _timeComponents.Length; i++)
+					timeComponentsSaveData[i] = _timeComponents[i].SaveState();
+			}
+
+			var effectCheckSaveData = _effectCheck?.SaveState();
+
+			EffectSaveState.EffectSaveData[] effectSaveState = null;
+			if (_effectSaveState.Valid)
+				effectSaveState = _effectSaveState.SaveState();
+
+			return new SaveData(Id, targetSaveData, _multiTarget, effectCheckSaveData, initSaveData, stackSaveData,
+				timeComponentsSaveData, effectSaveState);
+		}
+
+		public void LoadState(SaveData data, IUnit owner)
+		{
+			_isTargetSetup = false;
+			_multiTarget = data.IsMultiTarget;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
+			if (!data.TargetSaveData.FromAnonymousJsonObjectToSaveData(_targetComponent))
+#endif
+			{
+				_targetComponent.LoadState(data.TargetSaveData);
+			}
+
+			switch (_targetComponent)
+			{
+				case SingleTargetComponent singleTargetComponent:
+					UpdateSingleTargetSource(singleTargetComponent.Target, _targetComponent.Source);
+					break;
+				case MultiTargetComponent multiTargetComponent:
+					UpdateTargets(multiTargetComponent.Targets, _targetComponent.Source);
+					break;
+				default:
+					Logger.LogError("[ModiBuff] Trying to load target component that isn't single or multi target");
+					break;
+			}
+
+			if (data.InitSaveData != null)
+				_initComponent.LoadState(data.InitSaveData.Value);
+
+			if (data.StackSaveData != null)
+				_stackComponent.LoadState(data.StackSaveData.Value);
+
+			for (int i = 0; i < _timeComponents?.Length; i++)
+				_timeComponents[i].LoadState(data.TimeComponentsSaveData[i]);
+
+			if (data.EffectCheckSaveData != null)
+				_effectCheck?.LoadState(data.EffectCheckSaveData.Value);
+
+			if (data.EffectsSaveData != null)
+				_effectSaveState.LoadState(data.EffectsSaveData);
 		}
 
 		public void ResetState()
@@ -262,6 +361,36 @@ namespace ModiBuff.Core
 			unchecked
 			{
 				return (Id * 397) ^ GenId;
+			}
+		}
+
+		public struct SaveData
+		{
+			public readonly int Id;
+			public readonly object TargetSaveData;
+			public readonly bool IsMultiTarget;
+			public readonly ModifierCheck.SaveData? EffectCheckSaveData;
+			public readonly InitComponent.SaveData? InitSaveData;
+			public readonly StackComponent.SaveData? StackSaveData;
+			public readonly IReadOnlyList<TimeComponentSaveData> TimeComponentsSaveData;
+			public readonly IReadOnlyList<EffectSaveState.EffectSaveData> EffectsSaveData;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveData(int id, object targetSaveData, bool isMultiTarget,
+				ModifierCheck.SaveData? effectCheckSaveData, InitComponent.SaveData? initSaveData,
+				StackComponent.SaveData? stackSaveData, IReadOnlyList<TimeComponentSaveData> timeComponentsSaveData,
+				IReadOnlyList<EffectSaveState.EffectSaveData> effectsSaveData)
+			{
+				Id = id;
+				TargetSaveData = targetSaveData;
+				IsMultiTarget = isMultiTarget;
+				EffectCheckSaveData = effectCheckSaveData;
+				InitSaveData = initSaveData;
+				StackSaveData = stackSaveData;
+				TimeComponentsSaveData = timeComponentsSaveData;
+				EffectsSaveData = effectsSaveData;
 			}
 		}
 	}

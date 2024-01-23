@@ -22,8 +22,7 @@ namespace ModiBuff.Core
 
 			//Updates tags based on modifier state
 			//Generates a dummy modifier, to check for state
-			tag = tag.UpdateTagBasedOnModifierComponents(createFunc(Id, _genId, Name, tag));
-			Tag = tag;
+			Tag = tag.UpdateTagBasedOnModifierComponents(createFunc(Id, _genId, Name, tag));
 		}
 
 		public Modifier Create() => _createFunc(Id, _genId++, Name, Tag);

@@ -16,8 +16,20 @@ namespace ModiBuff.Core.Units
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
 
-			if (source is IDamagable<float, float> damagable && damagable.Health <= 0)
-				((IAddDamage<float>)target).AddDamage(_damage);
+			//Is damagable, health below 0, and health before attack was above 0
+			if (source is IDamagable<float, float> damagable && damagable.Health <= 0 &&
+			    damagable.Health + value > 0 && source is IKillable killable && killable.IsDead)
+			{
+				if (!(target is IAddDamage<float> addDamageTarget))
+				{
+#if MODIBUFF_EFFECT_CHECK
+					EffectHelper.LogImplError(target, nameof(IAddDamage<float>));
+#endif
+					return;
+				}
+
+				addDamageTarget.AddDamage(_damage);
+			}
 		}
 	}
 }
