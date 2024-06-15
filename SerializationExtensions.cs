@@ -45,6 +45,23 @@ namespace ModiBuff.Core
 			return true;
 		}
 
+		public static bool TryGetDataFromJsonObject<T>(this object fromLoad, out T data)
+		{
+			if (fromLoad is not System.Text.Json.JsonElement jsonElement)
+			{
+				data = default;
+				return false;
+			}
+
+			data = (T)jsonElement.ToValue(typeof(T));
+			return true;
+		}
+
+		public static T GetDataFromJsonObject<T>(this object fromLoad)
+		{
+			return TryGetDataFromJsonObject(fromLoad, out T data) ? data : default;
+		}
+
 		private static object ToValue(this System.Text.Json.JsonElement element, Type type)
 		{
 			if (type == typeof(int))

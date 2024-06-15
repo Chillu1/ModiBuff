@@ -188,6 +188,42 @@ namespace ModiBuff.Core
 			_registeredNames.Clear();
 		}
 
+		public SaveData SaveState()
+		{
+			var recipesSaveData = new ModifierRecipe.SaveData[_recipes.Count];
+			int i = 0;
+			foreach (var recipe in _recipes.Values)
+				recipesSaveData[i++] = recipe.SaveState();
+
+			return new SaveData(recipesSaveData);
+		}
+
+		public void LoadState(SaveData saveData)
+		{
+			foreach (var recipeSaveData in saveData.RecipesSaveData)
+			{
+				ModifierRecipe recipe = null;
+				foreach (var instruction in recipeSaveData.Instructions)
+				{
+					if (instruction.InstructionId == ModifierRecipe.SaveInstruction.Init.Id)
+					{
+						recipe = Add(instruction.Values.GetDataFromJsonObject<string>(),
+							"" /*init.DisplayName, init.Description*/);
+						break;
+					}
+				}
+
+				if (recipe == null)
+				{
+					//TODO Identification
+					Logger.LogError("[ModiBuff] Failed to load recipe, it's missing an Init instruction?");
+					continue;
+				}
+
+				recipe.LoadState(recipeSaveData);
+			}
+		}
+
 		private readonly struct RegisterData
 		{
 			public readonly string Name;
@@ -198,6 +234,16 @@ namespace ModiBuff.Core
 				Name = name;
 				Id = id;
 			}
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly ModifierRecipe.SaveData[] RecipesSaveData;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveData(ModifierRecipe.SaveData[] recipesSaveData) => RecipesSaveData = recipesSaveData;
 		}
 	}
 }

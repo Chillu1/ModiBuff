@@ -8,5 +8,9 @@ namespace ModiBuff.Core
 		IModifierGenerator CreateModifierGenerator();
 		ModifierInfo CreateModifierInfo();
 		TagType GetTag();
+
+		//TODO Move/refactor
+		ModifierRecipe.SaveData SaveState();
+		void LoadState(ModifierRecipe.SaveData saveData);
 	}
 }
