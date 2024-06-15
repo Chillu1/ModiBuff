@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ModiBuff.Core
 {
@@ -53,6 +52,8 @@ namespace ModiBuff.Core
 
 		private ModifierAction _modifierActions;
 
+		private readonly List<SaveInstruction> _saveInstructions;
+
 		public ModifierRecipe(int id, string name, string displayName, string description, ModifierIdManager idManager)
 		{
 			Id = id;
@@ -64,6 +65,9 @@ namespace ModiBuff.Core
 			_tag = (TagType)Config.DefaultTag;
 
 			_effectWrappers = new List<EffectWrapper>(3);
+
+			_saveInstructions = new List<SaveInstruction>
+				{ new SaveInstruction.Init(name /*displayName, description*/) };
 		}
 
 		//---Misc---
@@ -173,6 +177,7 @@ namespace ModiBuff.Core
 		{
 			_interval = interval;
 			_currentIsInterval = true;
+			_saveInstructions.Add(new SaveInstruction.Interval(interval));
 			return this;
 		}
 
@@ -336,6 +341,8 @@ namespace ModiBuff.Core
 				                "use manual modifier generation if the effect is needed");
 				return this;
 			}
+
+			_saveInstructions.Add(new SaveInstruction.Effect(effect, effectOn));
 
 			if (effect is IModifierIdOwner modifierIdOwner)
 				modifierIdOwner.SetModifierId(Id);
@@ -699,6 +706,33 @@ namespace ModiBuff.Core
 			}
 		}
 
+		public SaveData SaveState() => new SaveData(_saveInstructions.ToArray());
+
+		public void LoadState(SaveData saveData)
+		{
+			foreach (var instruction in saveData.Instructions)
+			{
+				switch (instruction.InstructionId)
+				{
+					case SaveInstruction.Init.Id:
+						break;
+					case SaveInstruction.Interval.Id:
+						instruction.Values.TryGetDataFromJsonObject(out float value);
+						Interval(value);
+						break;
+					case SaveInstruction.Effect.Id:
+						//TODO
+						//instruction.Values.TryGetDataFromJsonObject(out var value);
+						//_ = new SaveInstruction.Effect((IEffect)instruction.Values,
+						//	(EffectOn)instruction.InstructionId);
+						break;
+					default:
+						Logger.LogError($"Unknown instruction with id {instruction.InstructionId}");
+						throw new ArgumentOutOfRangeException();
+				}
+			}
+		}
+
 		public int CompareTo(ModifierRecipe other) => Id.CompareTo(other.Id);
 
 		public bool Equals(ModifierRecipe other)
@@ -714,5 +748,84 @@ namespace ModiBuff.Core
 		}
 
 		public override int GetHashCode() => Id;
+
+		public record SaveInstruction
+		{
+			public readonly object Values;
+			public readonly int InstructionId;
+
+			private const int BaseId = 0;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveInstruction(object values, int instructionId)
+			{
+				Values = values;
+				InstructionId = instructionId;
+			}
+
+			public sealed record Init : SaveInstruction
+			{
+				public const int Id = BaseId;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+				[System.Text.Json.Serialization.JsonConstructor]
+#endif
+				public Init(string name /*, string DisplayName, string Description*/) : base(
+					name /*, DisplayName, Description*/, Id)
+				{
+					Name = name;
+					//this.DisplayName = DisplayName;
+					//this.Description = Description;
+				}
+
+				public readonly string Name;
+				//public readonly string DisplayName;
+				//public readonly string Description;
+			}
+
+			public sealed record Interval : SaveInstruction
+			{
+				public const int Id = Init.Id + 1;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+				[System.Text.Json.Serialization.JsonConstructor]
+#endif
+				public Interval(float value) : base(value, Id)
+				{
+					Value = value;
+				}
+
+				public readonly float Value;
+			}
+
+			public sealed record Effect : SaveInstruction
+			{
+				public const int Id = Interval.Id + 1;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+				[System.Text.Json.Serialization.JsonConstructor]
+#endif
+				public Effect(IEffect value, EffectOn effectOn) : base(value, Id)
+				{
+					Value = value;
+					EffectOn = effectOn;
+				}
+
+				public readonly IEffect Value;
+				public readonly EffectOn EffectOn;
+			}
+		}
+
+		public readonly struct SaveData
+		{
+			public readonly SaveInstruction[] Instructions;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+			[System.Text.Json.Serialization.JsonConstructor]
+#endif
+			public SaveData(SaveInstruction[] instructions) => Instructions = instructions;
+		}
 	}
 }
