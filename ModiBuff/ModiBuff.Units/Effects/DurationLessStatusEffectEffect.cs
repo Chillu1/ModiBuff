@@ -16,7 +16,7 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			if (!(target is IDurationLessStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget))
+			if (target is not IDurationLessStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget)
 			{
 #if MODIBUFF_EFFECT_CHECK
 				EffectHelper.LogImplError(target,
@@ -30,7 +30,7 @@ namespace ModiBuff.Core.Units
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			if (!(target is IDurationLessStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget))
+			if (target is not IDurationLessStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget)
 				return;
 
 			statusEffectTarget.StatusEffectController.RemoveStatusEffect(_statusEffectType);

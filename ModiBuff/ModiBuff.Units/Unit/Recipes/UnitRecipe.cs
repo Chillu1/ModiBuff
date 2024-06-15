@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace ModiBuff.Core.Units
 {
 	public sealed class UnitRecipe
@@ -11,11 +13,14 @@ namespace ModiBuff.Core.Units
 
 		private ModifierAddReference[] _modifierAddReferences;
 
-		public UnitRecipe(string name, UnitType unitType)
+		private readonly IModifierRecipes _modifierRecipes;
+
+		public UnitRecipe(string name, UnitType unitType, ModifierRecipes modifierRecipes)
 		{
 			//Id = 
 			Name = name;
 			UnitType = unitType;
+			_modifierRecipes = modifierRecipes;
 		}
 
 		//public Unit Create() => new Unit(_health, _damage, _modifierAddReferences, UnitType);
@@ -32,9 +37,10 @@ namespace ModiBuff.Core.Units
 			return this;
 		}
 
-		public UnitRecipe Modifiers(params ModifierAddReference[] modifierAddReferences)
+		public UnitRecipe Modifiers(params (string name, ApplierType applier)[] modifiers)
 		{
-			_modifierAddReferences = modifierAddReferences;
+			_modifierAddReferences = modifiers
+				.Select(r => new ModifierAddReference(_modifierRecipes.GetGenerator(r.Item1), r.Item2)).ToArray();
 			return this;
 		}
 	}

@@ -17,7 +17,7 @@ namespace ModiBuff.Core.Units
 
 			if (!((IUnitEntity)source).UnitTag.HasTag(UnitTag.Lifestealable))
 				return;
-			if (!(target is IHealable<float, float> healableTarget))
+			if (target is not IHealable<float, float> healableTarget)
 			{
 #if MODIBUFF_EFFECT_CHECK
 				EffectHelper.LogImplError(target, nameof(IHealable<float, float>));

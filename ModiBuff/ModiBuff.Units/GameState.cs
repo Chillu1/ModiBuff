@@ -30,7 +30,7 @@ namespace ModiBuff.Core.Units
 			public readonly EffectIdManager.SaveData EffectIdManagerSaveData;
 			public readonly IReadOnlyList<Unit.SaveData> UnitsSaveData;
 
-#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
+#if MODIBUFF_SYSTEM_TEXT_JSON
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(ModifierIdManager.SaveData modifierIdManagerSaveData,

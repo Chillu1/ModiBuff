@@ -45,7 +45,7 @@ namespace ModiBuff.Core
 				//	continue;
 				//}
 
-#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
+#if MODIBUFF_SYSTEM_TEXT_JSON
 				if (data[i].Data.FromAnonymousJsonObjectToSaveData(effect))
 					continue;
 #endif
@@ -59,7 +59,7 @@ namespace ModiBuff.Core
 			//public readonly int Id;
 			public readonly object Data;
 
-#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
+#if MODIBUFF_SYSTEM_TEXT_JSON
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public EffectSaveData(object data)

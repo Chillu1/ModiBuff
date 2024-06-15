@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <LangVersion>7.2</LangVersion>
-        <TargetFrameworks>netstandard1.1;netstandard2.0</TargetFrameworks>
+        <LangVersion>default</LangVersion>
         <PackageId>ModiBuff</PackageId>
         <Version>0.3.0</Version>
         <Authors>Chillu</Authors>
@@ -18,6 +17,7 @@
         <Title>ModiBuff</Title>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>ModiBuffSmallIcon.png</PackageIcon>
+        <TargetFramework>netstandard2.0</TargetFramework>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

@@ -24,7 +24,7 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			if (!(source is IModifierApplierOwner applierSource))
+			if (source is not IModifierApplierOwner applierSource)
 			{
 #if MODIBUFF_EFFECT_CHECK
 				EffectHelper.LogImplErrorSource(source, nameof(IModifierApplierOwner));
@@ -32,7 +32,7 @@ namespace ModiBuff.Core.Units
 				return;
 			}
 
-			if (!(target is IModifierOwner modifierTarget))
+			if (target is not IModifierOwner modifierTarget)
 			{
 #if MODIBUFF_EFFECT_CHECK
 				EffectHelper.LogImplError(target, nameof(IModifierOwner));

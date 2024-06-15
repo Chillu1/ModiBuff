@@ -222,7 +222,7 @@ namespace ModiBuff.Core
 		public readonly IEffect[] IntervalEffects;
 		public readonly IEffect[] DurationEffects;
 		public readonly IStackEffect[] StackEffects;
-		public readonly EffectStateInfo effectStateInfo;
+		public readonly EffectStateInfo EffectStateInfo;
 		public readonly EffectSaveState EffectSaveState;
 
 		public SyncedModifierEffects(IEffect[] initEffectsArray, IEffect[] intervalEffectsArray,
@@ -233,7 +233,7 @@ namespace ModiBuff.Core
 			IntervalEffects = intervalEffectsArray;
 			DurationEffects = durationEffectsArray;
 			StackEffects = stackEffectsArray;
-			this.effectStateInfo = effectStateInfo;
+			EffectStateInfo = effectStateInfo;
 			EffectSaveState = effectSaveState;
 		}
 	}

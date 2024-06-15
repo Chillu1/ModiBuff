@@ -39,7 +39,7 @@ namespace ModiBuff.Core.Units
 		public void Effect(IUnit target, IUnit source)
 		{
 			_targeting.UpdateTarget(ref target, source);
-			if (!(target is IAddDamage<float> addDamageTarget))
+			if (target is not IAddDamage<float> addDamageTarget)
 			{
 #if MODIBUFF_EFFECT_CHECK
 				EffectHelper.LogImplError(target, nameof(IAddDamage<float>));
@@ -66,7 +66,7 @@ namespace ModiBuff.Core.Units
 		public void RevertEffect(IUnit target, IUnit source)
 		{
 			_targeting.UpdateTarget(ref target, source);
-			if (!(target is IAddDamage<float> addDamage))
+			if (target is not IAddDamage<float> addDamage)
 				return;
 
 			if (_effectState.IsTogglable())

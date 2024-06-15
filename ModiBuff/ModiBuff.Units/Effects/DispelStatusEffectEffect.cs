@@ -11,7 +11,7 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			if (!(target is IStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget))
+			if (target is not IStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget)
 			{
 #if MODIBUFF_EFFECT_CHECK
 				EffectHelper.LogImplError(target, nameof(IStatusEffectOwner<LegalAction, StatusEffectType>));

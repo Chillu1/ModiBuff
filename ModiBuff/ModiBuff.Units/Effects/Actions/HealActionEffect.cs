@@ -4,7 +4,7 @@ namespace ModiBuff.Core.Units
 	{
 		public void Effect(IUnit target, IUnit source)
 		{
-			if (!(source is IHealer<float, float> healerSource))
+			if (source is not IHealer<float, float> healerSource)
 			{
 #if MODIBUFF_EFFECT_CHECK
 				EffectHelper.LogImplErrorSource(source, nameof(IHealer<float, float>));
@@ -12,7 +12,7 @@ namespace ModiBuff.Core.Units
 				return;
 			}
 
-			if (!(target is IHealable<float, float> healableTarget))
+			if (target is not IHealable<float, float> healableTarget)
 			{
 #if MODIBUFF_EFFECT_CHECK
 				EffectHelper.LogImplError(target, nameof(IHealable<float, float>));

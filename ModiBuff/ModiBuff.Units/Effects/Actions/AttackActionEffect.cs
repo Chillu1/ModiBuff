@@ -16,7 +16,7 @@ namespace ModiBuff.Core.Units
 		public void Effect(IUnit target, IUnit source)
 		{
 			_targeting.UpdateTargetSource(target, source, out var effectTarget, out var effectSource);
-			if (!(effectSource is IAttacker<float, float> attackerSource))
+			if (effectSource is not IAttacker<float, float> attackerSource)
 			{
 #if MODIBUFF_EFFECT_CHECK
 				EffectHelper.LogImplError(effectSource, nameof(IAttacker<float, float>));

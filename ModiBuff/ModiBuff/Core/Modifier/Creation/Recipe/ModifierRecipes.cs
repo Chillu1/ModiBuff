@@ -6,7 +6,14 @@ namespace ModiBuff.Core
 {
 	public delegate ModifierRecipe RecipeAddFunc(Func<string, ModifierRecipe> addFunc);
 
-	public class ModifierRecipes
+	public interface IModifierRecipes
+	{
+		IModifierGenerator[] GetGenerators();
+		IModifierGenerator GetGenerator(string name);
+		ModifierInfo GetModifierInfo(int id);
+	}
+
+	public class ModifierRecipes : IModifierRecipes
 	{
 		public static int GeneratorCount { get; private set; }
 
@@ -81,7 +88,7 @@ namespace ModiBuff.Core
 
 		public IModifierGenerator GetGenerator(string name) => _modifierGenerators[name];
 
-		internal IModifierGenerator[] GetGenerators() => _modifierGenerators.Values.ToArray();
+		public IModifierGenerator[] GetGenerators() => _modifierGenerators.Values.ToArray();
 
 		public ModifierRecipe Add(string name, string displayName = "", string description = "")
 		{

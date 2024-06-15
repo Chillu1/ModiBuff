@@ -577,6 +577,9 @@ It's important to reset the state when our condition is met first, before we tri
 In this example every time unit's health changes, we add that change to our total, and when we reach 10 damage taken,
 we deal 5 damage to the unit.
 
+The point of `CallbackStateContext` is to encapsulate state, and have read/write access to it for serialization
+purposes.
+
 ```csharp
 Add("InitTakeFiveDamageOnTenDamageTaken")
     .Callback(CallbackType.CurrentHealthChanged, () =>

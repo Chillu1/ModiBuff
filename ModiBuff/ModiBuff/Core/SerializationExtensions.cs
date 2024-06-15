@@ -6,7 +6,7 @@ namespace ModiBuff.Core
 {
 	public static class SerializationExtensions
 	{
-#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
+#if MODIBUFF_SYSTEM_TEXT_JSON
 		private static readonly Dictionary<Type, Func<System.Text.Json.JsonElement, object>> customValueTypes =
 			new Dictionary<Type, Func<System.Text.Json.JsonElement, object>>();
 
@@ -22,7 +22,7 @@ namespace ModiBuff.Core
 
 		public static bool FromAnonymousJsonObjectToSaveData(this object fromLoad, ISavable toLoad)
 		{
-			if (!(fromLoad is System.Text.Json.JsonElement jsonElement))
+			if (fromLoad is not System.Text.Json.JsonElement jsonElement)
 				return false;
 
 			var genericType = toLoad.GetType().GetInterfaces().FirstOrDefault(x =>

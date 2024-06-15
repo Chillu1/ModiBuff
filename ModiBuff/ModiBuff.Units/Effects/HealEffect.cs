@@ -94,7 +94,7 @@ namespace ModiBuff.Core.Units
 		public void RevertEffect(IUnit target, IUnit source)
 		{
 			_targeting.UpdateTargetSource(ref target, ref source);
-			if (!(target is IHealable<float, float> healableTarget))
+			if (target is not IHealable<float, float> healableTarget)
 				return;
 
 			healableTarget.Heal(-_totalHeal, source);

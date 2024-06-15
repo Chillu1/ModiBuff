@@ -121,7 +121,7 @@ namespace ModiBuff.Core
 		{
 			public readonly bool IsInitialized;
 
-#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
+#if MODIBUFF_SYSTEM_TEXT_JSON
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(bool isInitialized) => IsInitialized = isInitialized;

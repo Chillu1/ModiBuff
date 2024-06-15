@@ -11,24 +11,19 @@ namespace ModiBuff.Core.Units
 			Add("Player", UnitType.Good)
 				.Health(100)
 				.Damage(10)
-				.Modifiers(
-					//TODO Maybe we could only supply name of the modifier?
-					new ModifierAddReference(ModifierRecipes.GetGenerator("DisarmChance"), ApplierType.Attack)
-				);
+				.Modifiers(("DisarmChance", ApplierType.Attack));
 
 			Add("Slime", UnitType.Bad)
 				.Health(50)
 				.Damage(5)
-				.Modifiers(
-					new ModifierAddReference(ModifierRecipes.GetGenerator("DoT"), ApplierType.Attack)
-				);
+				.Modifiers(("DoT", ApplierType.Attack));
 
 			Add("FireSlime", UnitType.Bad)
 				.Health(100)
 				.Damage(5)
 				.Modifiers(
-					new ModifierAddReference(ModifierRecipes.GetGenerator("DoT"), ApplierType.Attack),
-					new ModifierAddReference(ModifierRecipes.GetGenerator("FireSlimeSelfDoT"))
+					("DoT", ApplierType.Attack),
+					("FireSlimeSelfDoT", ApplierType.None)
 				);
 		}
 	}

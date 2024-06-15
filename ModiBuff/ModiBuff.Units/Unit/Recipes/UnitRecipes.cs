@@ -7,12 +7,12 @@ namespace ModiBuff.Core.Units
 	{
 		public static int RecipesCount { get; private set; }
 
-		protected readonly ModifierRecipes ModifierRecipes;
+		private readonly ModifierRecipes _modifierRecipes;
 		private readonly IDictionary<string, UnitRecipe> _recipes;
 
 		public UnitRecipes(ModifierRecipes modifierRecipes)
 		{
-			ModifierRecipes = modifierRecipes;
+			_modifierRecipes = modifierRecipes;
 			_recipes = new Dictionary<string, UnitRecipe>();
 
 			SetupRecipes();
@@ -39,7 +39,7 @@ namespace ModiBuff.Core.Units
 				return localRecipe;
 			}
 
-			var recipe = new UnitRecipe(name, unitType);
+			var recipe = new UnitRecipe(name, unitType, _modifierRecipes);
 			_recipes.Add(name, recipe);
 			return recipe;
 		}

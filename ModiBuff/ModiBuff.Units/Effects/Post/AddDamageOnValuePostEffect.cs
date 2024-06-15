@@ -10,7 +10,7 @@ namespace ModiBuff.Core.Units
 		public void Effect(float value, IUnit target, IUnit source)
 		{
 			_targeting.UpdateTarget(ref target, source);
-			if (!(target is IAddDamage<float> addDamageTarget))
+			if (target is not IAddDamage<float> addDamageTarget)
 			{
 #if MODIBUFF_EFFECT_CHECK
 				EffectHelper.LogImplError(target, nameof(IAddDamage<float>));

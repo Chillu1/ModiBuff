@@ -52,7 +52,7 @@ namespace ModiBuff.Core.Units
 			if (_genId == -1)
 				Logger.LogError("[ModiBuff.Units] GenId is not set for status effect effect.");
 #endif
-			if (!(target is IStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget))
+			if (target is not IStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget)
 			{
 #if MODIBUFF_EFFECT_CHECK
 				EffectHelper.LogImplError(target, nameof(IStatusEffectOwner<LegalAction, StatusEffectType>));
@@ -68,7 +68,7 @@ namespace ModiBuff.Core.Units
 
 		public void RevertEffect(IUnit target, IUnit source)
 		{
-			if (!(target is IStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget))
+			if (target is not IStatusEffectOwner<LegalAction, StatusEffectType> statusEffectTarget)
 				return;
 
 			statusEffectTarget.StatusEffectController.DecreaseStatusEffect(_id, _genId, _statusEffectType,

@@ -7,7 +7,7 @@ namespace ModiBuff.Examples.BasicConsole
 {
 	public static class UIExtensions
 	{
-		public static void PrintStateAndModifiers(this IModifierApplierOwner owner, ModifierRecipes modifierRecipes)
+		public static void PrintStateAndModifiers(this IModifierApplierOwner owner, IModifierRecipes modifierRecipes)
 		{
 			var modifierController = ((IModifierOwner)owner).ModifierController;
 			var modifierApplierController = owner.ModifierApplierController;
