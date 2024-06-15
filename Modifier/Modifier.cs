@@ -287,7 +287,7 @@ namespace ModiBuff.Core
 			_isTargetSetup = false;
 			_multiTarget = data.IsMultiTarget;
 
-#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
+#if MODIBUFF_SYSTEM_TEXT_JSON
 			if (!data.TargetSaveData.FromAnonymousJsonObjectToSaveData(_targetComponent))
 #endif
 			{
@@ -375,7 +375,7 @@ namespace ModiBuff.Core
 			public readonly IReadOnlyList<TimeComponentSaveData> TimeComponentsSaveData;
 			public readonly IReadOnlyList<EffectSaveState.EffectSaveData> EffectsSaveData;
 
-#if MODIBUFF_SYSTEM_TEXT_JSON && (NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER || NET5_0_OR_GREATER || NET462_OR_GREATER)
+#if MODIBUFF_SYSTEM_TEXT_JSON
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(int id, object targetSaveData, bool isMultiTarget,

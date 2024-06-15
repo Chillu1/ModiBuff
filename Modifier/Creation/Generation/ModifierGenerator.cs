@@ -14,7 +14,6 @@ namespace ModiBuff.Core
 		private readonly bool _hasEffectChecks;
 
 		private readonly bool _isAura;
-		private readonly TagType _tag;
 		private readonly bool _oneTimeInit;
 
 		private readonly float _interval;
@@ -68,7 +67,7 @@ namespace ModiBuff.Core
 			_hasEffectChecks = data.HasEffectChecks;
 
 			_isAura = data.IsAura;
-			_tag = data.Tag;
+			var tag = data.Tag;
 			_oneTimeInit = data.OneTimeInit;
 			_interval = data.Interval;
 			_duration = data.Duration;
@@ -105,8 +104,8 @@ namespace ModiBuff.Core
 					out _noUnitEffectChecks, out _unitEffectChecks, out _usableEffectChecks, out _stateEffectChecks);
 			}
 
-			_intervalAffectedByStatusResistance = !_tag.HasTag(TagType.IntervalIgnoresStatusResistance);
-			_durationAffectedByStatusResistance = !_tag.HasTag(TagType.DurationIgnoresStatusResistance);
+			_intervalAffectedByStatusResistance = !tag.HasTag(TagType.IntervalIgnoresStatusResistance);
+			_durationAffectedByStatusResistance = !tag.HasTag(TagType.DurationIgnoresStatusResistance);
 
 			return;
 
@@ -176,11 +175,11 @@ namespace ModiBuff.Core
 				initComponent = new InitComponent(_oneTimeInit, effects.InitEffects, effectCheck);
 
 			if (effects.IntervalEffects != null)
-				timeComponents[_timeComponentIndex++] = new IntervalComponent(_interval, _refreshInterval,
+				timeComponents![_timeComponentIndex++] = new IntervalComponent(_interval, _refreshInterval,
 					effects.IntervalEffects, effectCheck, _intervalAffectedByStatusResistance);
 
 			if (effects.DurationEffects != null)
-				timeComponents[_timeComponentIndex++] = new DurationComponent(_duration, _refreshDuration,
+				timeComponents![_timeComponentIndex++] = new DurationComponent(_duration, _refreshDuration,
 					effects.DurationEffects, _durationAffectedByStatusResistance);
 
 			if (effects.StackEffects != null)
@@ -190,7 +189,7 @@ namespace ModiBuff.Core
 			var targetComponent = !_isAura ? (ITargetComponent)new SingleTargetComponent() : new MultiTargetComponent();
 
 			return new Modifier(Id, genId, Name, initComponent, timeComponents, stackComponent,
-				effectCheck, targetComponent, effects.effectStateInfo, effects.EffectSaveState);
+				effectCheck, targetComponent, effects.EffectStateInfo, effects.EffectSaveState);
 		}
 
 		ModifierCheck IModifierApplyCheckGenerator.CreateApplyCheck()
