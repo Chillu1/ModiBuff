@@ -5,19 +5,12 @@ namespace ModiBuff.Core
 {
 	public sealed class EffectTypeIdManager
 	{
-		private static EffectTypeIdManager _instance;
-
 		private readonly Dictionary<Type, int> _effectTypeIds;
 
 		private int _currentId;
 
 		public EffectTypeIdManager()
 		{
-			if (_instance != null)
-				return;
-
-			_instance = this;
-
 			_effectTypeIds = new Dictionary<Type, int>();
 		}
 
@@ -71,7 +64,6 @@ namespace ModiBuff.Core
 		public void Reset()
 		{
 			_effectTypeIds.Clear();
-			_instance = null;
 		}
 	}
 }
