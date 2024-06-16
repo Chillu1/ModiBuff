@@ -44,6 +44,17 @@ namespace ModiBuff.Tests
 			Logger.SetLogger<NUnitLogger>();
 			Config.DefaultTag = (ulong)Core.Units.TagType.Default;
 			Config.PoolSize = 1;
+			EffectTypeIdManager = new EffectTypeIdManager();
+
+			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+			foreach (var type in assembly.GetTypes())
+			{
+				if (!type.IsClass || type.IsAbstract)
+					continue;
+
+				if (typeof(IEffect).IsAssignableFrom(type))
+					EffectTypeIdManager.RegisterEffectType(type);
+			}
 
 			UnitHealth = AllyHealth = 500;
 			UnitDamage = AllyDamage = 10;
@@ -61,7 +72,6 @@ namespace ModiBuff.Tests
 		public void IterationSetup()
 		{
 			IdManager = new ModifierIdManager();
-			EffectTypeIdManager = new EffectTypeIdManager();
 			EffectIdManager = new EffectIdManager();
 			Recipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
@@ -99,12 +109,10 @@ namespace ModiBuff.Tests
 			Pool.Reset();
 			Effects.Reset();
 			IdManager.Reset();
-			EffectTypeIdManager.Reset();
 			EffectIdManager.Reset();
 			ModifierControllerPool.Reset();
 
 			IdManager = null;
-			EffectTypeIdManager = null;
 			EffectIdManager = null;
 			Recipes = null;
 			Pool = null;
@@ -114,15 +122,15 @@ namespace ModiBuff.Tests
 		[OneTimeTearDown]
 		public void OneTimeTearDown()
 		{
+			EffectTypeIdManager.Reset();
 			Pool?.Reset();
 			Effects?.Reset();
 			IdManager?.Reset();
-			EffectTypeIdManager?.Reset();
 			EffectIdManager?.Reset();
 			ModifierControllerPool?.Reset();
 
-			IdManager = null;
 			EffectTypeIdManager = null;
+			IdManager = null;
 			EffectIdManager = null;
 			Recipes = null;
 			Pool = null;

@@ -210,18 +210,29 @@ namespace ModiBuff.Core
 				ModifierRecipe recipe = null;
 				foreach (var instruction in recipeSaveData.Instructions)
 				{
-					if (instruction.InstructionId == ModifierRecipe.SaveInstruction.Init.Id)
+					if (instruction.InstructionId != ModifierRecipe.SaveInstruction.Initialize.Id)
+						continue;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+					object[] values = instruction.GetValues(typeof(string), typeof(string), typeof(string));
+
+					if (values[0] == null)
 					{
-						recipe = Add(instruction.Values.GetDataFromJsonObject<string>(),
-							"" /*init.DisplayName, init.Description*/);
+						//TODO Identification
+						Logger.LogError(
+							"[ModiBuff] Failed to load recipe, couldn't find the name in the Initialize instruction.");
 						break;
 					}
+
+					recipe = Add((string)values[0], (string)values[1], (string)values[2]);
+#endif
+					break;
 				}
 
 				if (recipe == null)
 				{
 					//TODO Identification
-					Logger.LogError("[ModiBuff] Failed to load recipe, it's missing an Init instruction?");
+					Logger.LogError("[ModiBuff] Failed to load recipe, it's missing an Initialize instruction?");
 					continue;
 				}
 

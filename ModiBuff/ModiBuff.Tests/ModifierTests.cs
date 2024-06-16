@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
@@ -111,13 +110,11 @@ namespace ModiBuff.Tests
 			Pool.Reset();
 			Effects.Reset();
 			IdManager.Reset();
-			EffectTypeIdManager.Reset();
 			EffectIdManager.Reset();
 			ModifierControllerPool.Reset();
 			UnitHelper.Reset();
 
 			IdManager = null;
-			EffectTypeIdManager = null;
 			EffectIdManager = null;
 			Recipes = null;
 			Pool = null;
@@ -127,10 +124,10 @@ namespace ModiBuff.Tests
 		[OneTimeTearDown]
 		public void OneTimeTearDown()
 		{
+			EffectTypeIdManager.Reset();
 			Pool?.Reset();
 			Effects?.Reset();
 			IdManager?.Reset();
-			EffectTypeIdManager?.Reset();
 			EffectIdManager?.Reset();
 			ModifierControllerPool?.Reset();
 
