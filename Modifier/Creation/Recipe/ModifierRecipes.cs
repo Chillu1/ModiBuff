@@ -201,12 +201,10 @@ namespace ModiBuff.Core
 			return new SaveData(recipesSaveData);
 		}
 
-		public void TempRegisterEffects(Func<float, IEffect>[] types)
-		{
-			RegisterEffects = types;
-		}
+		public void TempRegisterEffects(Func<float, IEffect>[] types) => RegisterEffects = types;
 
 		public static Func<float, IEffect>[] RegisterEffects;
+		public static Dictionary<Type, int> IdToEffect;
 
 		public void LoadState(SaveData saveData)
 		{
