@@ -16,7 +16,7 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _savableEffects.Length; i++)
 			{
 				var effect = _savableEffects[i];
-				if (!(_savableEffects[i] is ISavable savableEffect))
+				if (_savableEffects[i] is not ISavable savableEffect)
 				{
 					if (effect is IStateEffect)
 						Logger.LogError(
@@ -35,7 +35,7 @@ namespace ModiBuff.Core
 		{
 			for (int i = 0; i < _savableEffects.Length; i++)
 			{
-				if (!(_savableEffects[i] is ISavable effect))
+				if (_savableEffects[i] is not ISavable effect)
 					continue;
 
 				//if (!EffectTypeIdManager.Instance.MatchesId(effect.GetType(), data[i].Id))
