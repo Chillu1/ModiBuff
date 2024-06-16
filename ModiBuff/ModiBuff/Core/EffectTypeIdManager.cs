@@ -3,12 +3,9 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
-	/// <summary>
-	///		Useless right now, because of how we handle modifier effects
-	/// </summary>
 	public sealed class EffectTypeIdManager
 	{
-		public static EffectTypeIdManager Instance { get; private set; }
+		private static EffectTypeIdManager _instance;
 
 		private readonly Dictionary<Type, int> _effectTypeIds;
 
@@ -16,10 +13,10 @@ namespace ModiBuff.Core
 
 		public EffectTypeIdManager()
 		{
-			if (Instance != null)
+			if (_instance != null)
 				return;
 
-			Instance = this;
+			_instance = this;
 
 			_effectTypeIds = new Dictionary<Type, int>();
 		}
@@ -50,6 +47,18 @@ namespace ModiBuff.Core
 			return -1;
 		}
 
+		public Type GetEffectType(int id)
+		{
+			foreach (var pair in _effectTypeIds)
+			{
+				if (pair.Value == id)
+					return pair.Key;
+			}
+
+			Logger.LogWarning($"[ModiBuff] Effect type with id {id} not registered");
+			return null;
+		}
+
 		public bool MatchesId(Type type, int id)
 		{
 			if (_effectTypeIds.TryGetValue(type, out int typeId))
@@ -62,7 +71,7 @@ namespace ModiBuff.Core
 		public void Reset()
 		{
 			_effectTypeIds.Clear();
-			Instance = null;
+			_instance = null;
 		}
 	}
 }

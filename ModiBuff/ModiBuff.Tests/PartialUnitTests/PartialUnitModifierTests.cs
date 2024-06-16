@@ -9,6 +9,7 @@ namespace ModiBuff.Tests
 	public abstract class PartialUnitModifierTests<TUnit>
 	{
 		protected ModifierIdManager IdManager { get; private set; }
+		protected EffectTypeIdManager EffectTypeIdManager { get; private set; }
 		protected EffectIdManager EffectIdManager { get; private set; }
 		protected ModifierRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
@@ -60,8 +61,9 @@ namespace ModiBuff.Tests
 		public void IterationSetup()
 		{
 			IdManager = new ModifierIdManager();
+			EffectTypeIdManager = new EffectTypeIdManager();
 			EffectIdManager = new EffectIdManager();
-			Recipes = new ModifierRecipes(IdManager);
+			Recipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
 			Effects = new ModifierLessEffects(EffectIdManager);
 		}
@@ -97,10 +99,12 @@ namespace ModiBuff.Tests
 			Pool.Reset();
 			Effects.Reset();
 			IdManager.Reset();
+			EffectTypeIdManager.Reset();
 			EffectIdManager.Reset();
 			ModifierControllerPool.Reset();
 
 			IdManager = null;
+			EffectTypeIdManager = null;
 			EffectIdManager = null;
 			Recipes = null;
 			Pool = null;
@@ -113,10 +117,12 @@ namespace ModiBuff.Tests
 			Pool?.Reset();
 			Effects?.Reset();
 			IdManager?.Reset();
+			EffectTypeIdManager?.Reset();
 			EffectIdManager?.Reset();
 			ModifierControllerPool?.Reset();
 
 			IdManager = null;
+			EffectTypeIdManager = null;
 			EffectIdManager = null;
 			Recipes = null;
 			Pool = null;

@@ -11,6 +11,7 @@ namespace ModiBuff.Tests
 		public int AllocationCount;
 
 		private ModifierIdManager _modifierIdManager;
+		private EffectTypeIdManager _effectTypeIdManager;
 		private BenchmarkModifierRecipes _recipes;
 		private ModifierPool _pool;
 
@@ -20,9 +21,11 @@ namespace ModiBuff.Tests
 			Config.PoolSize = AllocationCount;
 
 			_modifierIdManager = new ModifierIdManager();
-			_recipes = new BenchmarkModifierRecipes(_modifierIdManager);
+			_effectTypeIdManager = new EffectTypeIdManager();
+			_recipes = new BenchmarkModifierRecipes(_modifierIdManager, _effectTypeIdManager);
 
-			Console.WriteLine("Allocated: " + ModifierRecipes.GeneratorCount + " recipes, count: " + AllocationCount + " modifiers");
+			Console.WriteLine("Allocated: " + ModifierRecipes.GeneratorCount + " recipes, count: " + AllocationCount +
+			                  " modifiers");
 		}
 
 		[Benchmark]

@@ -5,7 +5,8 @@ namespace ModiBuff.Tests
 {
 	public sealed class BenchmarkModifierRecipes : ModifierRecipes
 	{
-		public BenchmarkModifierRecipes(ModifierIdManager idManager) : base(idManager)
+		public BenchmarkModifierRecipes(ModifierIdManager idManager, EffectTypeIdManager effectTypeIdManager)
+			: base(idManager, effectTypeIdManager)
 		{
 			CreateGenerators();
 		}

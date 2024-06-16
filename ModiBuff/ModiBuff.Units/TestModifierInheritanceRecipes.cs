@@ -5,7 +5,8 @@ namespace ModiBuff.Core.Units
 	/// </summary>
 	public sealed class TestModifierInheritanceRecipes : ModifierRecipes
 	{
-		public TestModifierInheritanceRecipes(ModifierIdManager idManager) : base(idManager)
+		public TestModifierInheritanceRecipes(ModifierIdManager idManager, EffectTypeIdManager effectTypeIdManager)
+			: base(idManager, effectTypeIdManager)
 		{
 			CreateGenerators();
 		}

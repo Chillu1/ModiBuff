@@ -4,9 +4,9 @@ namespace ModiBuff.Core.Units
 	{
 		private readonly ModifierRecipes _modifierRecipes;
 
-		public TestModifierRecipes(ModifierIdManager idManager)
+		public TestModifierRecipes(ModifierIdManager idManager, EffectTypeIdManager effectTypeIdManager)
 		{
-			_modifierRecipes = new ModifierRecipes(idManager);
+			_modifierRecipes = new ModifierRecipes(idManager, effectTypeIdManager);
 			SetupRecipes();
 			_modifierRecipes.CreateGenerators();
 		}

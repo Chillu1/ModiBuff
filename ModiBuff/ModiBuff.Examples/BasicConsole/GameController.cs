@@ -8,6 +8,7 @@ namespace ModiBuff.Examples.BasicConsole
 	public sealed class GameController : IGameController
 	{
 		private readonly ModifierIdManager _idManager;
+		private readonly EffectTypeIdManager _effectTypeIdManager;
 		private readonly ModifierRecipes _recipes;
 		private readonly ModifierPool _pool;
 		private readonly ModifierControllerPool _modifierControllerPool;
@@ -26,7 +27,8 @@ namespace ModiBuff.Examples.BasicConsole
 			//These 3 classes need to always be created in the start of the game
 			//The ModifierIdManage and ModifierRecipe will help us get info about the modifiers
 			_idManager = new ModifierIdManager();
-			_recipes = new ModifierRecipes(_idManager);
+			_effectTypeIdManager = new EffectTypeIdManager();
+			_recipes = new ModifierRecipes(_idManager, _effectTypeIdManager);
 			//We need to register our recipes inside the pool, so we can pre-allocate the modifiers
 			//Most likely you won't use the pool directly, but we still need to create it 
 			_pool = new ModifierPool(_recipes);

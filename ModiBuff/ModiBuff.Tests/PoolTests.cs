@@ -87,7 +87,8 @@ namespace ModiBuff.Tests
 			IdManager.Reset();
 
 			var idManager = new ModifierIdManager();
-			var recipes = new EmptyModifierRecipes(idManager);
+			var effectTypeIdManager = new EffectTypeIdManager();
+			var recipes = new EmptyModifierRecipes(idManager, effectTypeIdManager);
 			var pool = new ModifierPool(recipes.GetGenerators());
 
 			Config.PoolSize = Config.DefaultPoolSize;

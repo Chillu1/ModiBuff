@@ -7,6 +7,7 @@ namespace ModiBuff.Tests
 	public abstract class ModifierBenches
 	{
 		protected ModifierIdManager IdManager { get; private set; }
+		protected EffectTypeIdManager EffectTypeIdManager { get; private set; }
 		protected EffectIdManager EffectIdManager { get; private set; }
 		protected ModifierRecipes Recipes { get; private set; }
 		protected ModifierPool Pool { get; private set; }
@@ -20,8 +21,9 @@ namespace ModiBuff.Tests
 			Config.PoolSize = 1024;
 
 			IdManager = new ModifierIdManager();
+			EffectTypeIdManager = new EffectTypeIdManager();
 			EffectIdManager = new EffectIdManager();
-			Recipes = new BenchmarkModifierRecipes(IdManager);
+			Recipes = new BenchmarkModifierRecipes(IdManager, EffectTypeIdManager);
 			Pool = new ModifierPool(Recipes.GetGenerators());
 			ModifierControllerPool = new ModifierControllerPool();
 			Effects = new ModifierLessEffects(EffectIdManager);

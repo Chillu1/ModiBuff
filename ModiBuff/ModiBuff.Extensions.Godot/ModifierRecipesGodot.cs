@@ -12,7 +12,8 @@ namespace ModiBuff.Extensions.Godot
 
 		private readonly string _path;
 
-		public ModifierRecipesGodot(ModifierIdManager idManager, string path = DefaultPath) : base(idManager)
+		public ModifierRecipesGodot(ModifierIdManager idManager, EffectTypeIdManager effectTypeIdManager,
+			string path = DefaultPath) : base(idManager, effectTypeIdManager)
 		{
 			_path = path;
 		}

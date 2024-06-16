@@ -10,7 +10,8 @@ namespace ModiBuff.Examples.BasicConsole
 	/// </summary>
 	public sealed class ModifierRecipes : Core.ModifierRecipes
 	{
-		public ModifierRecipes(ModifierIdManager idManager) : base(idManager)
+		public ModifierRecipes(ModifierIdManager idManager, EffectTypeIdManager effectTypeIdManager)
+			: base(idManager, effectTypeIdManager)
 		{
 			//We need to call the CreateGenerators function, to finish the setup
 			//(Note that the base class will use the SetupRecipes function, which we override)

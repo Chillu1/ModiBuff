@@ -36,13 +36,6 @@ namespace ModiBuff.Tests
 
 		protected bool SkipInitDamageRecipe = false;
 
-		//TODO Remove
-		private readonly Dictionary<Type, int> _idToEffect = new Dictionary<Type, int>()
-		{
-			{ typeof(DamageEffect), 0 },
-			{ typeof(AddDamageEffect), 1 }
-		};
-
 		[OneTimeSetUp]
 		public virtual void OneTimeSetup()
 		{
@@ -51,7 +44,6 @@ namespace ModiBuff.Tests
 			Config.PoolSize = 1;
 			Config.ModifierControllerPoolSize = 3;
 			Config.ModifierApplierControllerPoolSize = 3;
-			ModifierRecipes.IdToEffect = _idToEffect;
 			EffectTypeIdManager = new EffectTypeIdManager();
 
 			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -78,7 +70,7 @@ namespace ModiBuff.Tests
 		{
 			IdManager = new ModifierIdManager();
 			EffectIdManager = new EffectIdManager();
-			Recipes = new ModifierRecipes(IdManager);
+			Recipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			if (!SkipInitDamageRecipe)
 				Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
 			Effects = new ModifierLessEffects(EffectIdManager);
@@ -119,11 +111,13 @@ namespace ModiBuff.Tests
 			Pool.Reset();
 			Effects.Reset();
 			IdManager.Reset();
+			EffectTypeIdManager.Reset();
 			EffectIdManager.Reset();
 			ModifierControllerPool.Reset();
 			UnitHelper.Reset();
 
 			IdManager = null;
+			EffectTypeIdManager = null;
 			EffectIdManager = null;
 			Recipes = null;
 			Pool = null;
@@ -133,14 +127,15 @@ namespace ModiBuff.Tests
 		[OneTimeTearDown]
 		public void OneTimeTearDown()
 		{
-			EffectTypeIdManager.Reset();
 			Pool?.Reset();
 			Effects?.Reset();
 			IdManager?.Reset();
+			EffectTypeIdManager?.Reset();
 			EffectIdManager?.Reset();
 			ModifierControllerPool?.Reset();
 
 			IdManager = null;
+			EffectTypeIdManager = null;
 			EffectIdManager = null;
 			Recipes = null;
 			Pool = null;

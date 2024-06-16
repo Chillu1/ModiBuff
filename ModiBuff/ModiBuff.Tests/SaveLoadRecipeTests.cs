@@ -1,4 +1,3 @@
-using System;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using ModiBuff.Extensions.Serialization.Json;
@@ -9,13 +8,6 @@ namespace ModiBuff.Tests
 	public sealed class SaveLoadRecipeTests : ModifierTests
 	{
 		private SaveController _saveController;
-
-		//TODO TEMP, object/parameters
-		private readonly Func<float, IEffect>[] _effects =
-		{
-			(damage) => new DamageEffect(damage),
-			addDamage => new AddDamageEffect(addDamage)
-		};
 
 		public override void OneTimeSetup()
 		{
@@ -29,40 +21,55 @@ namespace ModiBuff.Tests
 			_saveController = new SaveController("fullSave.json");
 		}
 
-		[Test]
-		public void SaveRecipeLoad()
+		private void SaveLoadState(ModifierRecipes saveRecipes)
 		{
-			var saveRecipes = new ModifierRecipes(IdManager);
-			saveRecipes.Add("InitDamage2")
-				.Effect(new DamageEffect(5), EffectOn.Init);
-
 			string jsonRecipeState = _saveController.Save(RecipeState.SaveState(saveRecipes));
 			var loadData = _saveController.Load<RecipeState.SaveData>(jsonRecipeState);
-			Recipes.TempRegisterEffects(_effects);
 			IdManager.Clear();
 			ModifierRecipes.SetInstance(Recipes);
 			RecipeState.LoadState(loadData, Recipes);
+		}
 
+		[Test]
+		public void SaveRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("InitDamage")
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
+			SaveLoadState(saveRecipes);
 			Setup();
 
-			Unit.AddModifierSelf("InitDamage2");
+			Unit.AddModifierSelf("InitDamage");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void SaveStackRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("StackDamage")
+				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add, 2f, Targeting.TargetSource),
+					EffectOn.Stack)
+				.Stack(WhenStackEffect.Always);
+
+			SaveLoadState(saveRecipes);
+			Setup();
+
+			Unit.AddModifierSelf("StackDamage");
+			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
+			Unit.AddModifierSelf("StackDamage");
+			Assert.AreEqual(UnitHealth - 5 - 2 - 5 - 2 - 2, Unit.Health);
 		}
 
 		[Test]
 		public void SaveAddDamageRecipeLoad()
 		{
-			var saveRecipes = new ModifierRecipes(IdManager);
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			saveRecipes.Add("InitAddDamage")
 				.Effect(new AddDamageEffect(5), EffectOn.Init);
 
-			string jsonRecipeState = _saveController.Save(RecipeState.SaveState(saveRecipes));
-			var loadData = _saveController.Load<RecipeState.SaveData>(jsonRecipeState);
-			Recipes.TempRegisterEffects(_effects);
-			IdManager.Clear();
-			ModifierRecipes.SetInstance(Recipes);
-			RecipeState.LoadState(loadData, Recipes);
-
+			SaveLoadState(saveRecipes);
 			Setup();
 
 			Unit.AddModifierSelf("InitAddDamage");
@@ -72,18 +79,12 @@ namespace ModiBuff.Tests
 		[Test]
 		public void SaveRecipeIntervalLoad()
 		{
-			var saveRecipes = new ModifierRecipes(IdManager);
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			saveRecipes.Add("IntervalDamage")
 				.Effect(new DamageEffect(5), EffectOn.Interval)
 				.Interval(5);
 
-			string jsonRecipeState = _saveController.Save(RecipeState.SaveState(saveRecipes));
-			var loadData = _saveController.Load<RecipeState.SaveData>(jsonRecipeState);
-			Recipes.TempRegisterEffects(_effects);
-			IdManager.Clear();
-			ModifierRecipes.SetInstance(Recipes);
-			RecipeState.LoadState(loadData, Recipes);
-
+			SaveLoadState(saveRecipes);
 			Setup();
 
 			Unit.AddModifierSelf("IntervalDamage");
