@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ModiBuff.Core
 {
@@ -53,6 +54,7 @@ namespace ModiBuff.Core
 		private ModifierAction _modifierActions;
 
 		private readonly List<SaveInstruction> _saveInstructions;
+		private readonly List<Type> _unsavableEffects;
 
 		public ModifierRecipe(int id, string name, string displayName, string description, ModifierIdManager idManager)
 		{
@@ -68,6 +70,7 @@ namespace ModiBuff.Core
 
 			_saveInstructions = new List<SaveInstruction>
 				{ new SaveInstruction.Init(name /*displayName, description*/) };
+			_unsavableEffects = new List<Type>();
 		}
 
 		//---Misc---
@@ -344,8 +347,13 @@ namespace ModiBuff.Core
 
 			if (effect is ISaveableRecipeEffect saveableRecipeEffect)
 			{
-				//TODO EffectId
-				_saveInstructions.Add(new SaveInstruction.Effect(saveableRecipeEffect.SaveRecipeState(), effectOn, 0));
+				_saveInstructions.Add(new SaveInstruction.Effect(saveableRecipeEffect.SaveRecipeState(), effectOn,
+					//TODO TEMP/Refactor
+					ModifierRecipes.IdToEffect[effect.GetType()]));
+			}
+			else
+			{
+				_unsavableEffects.Add(effect.GetType());
 			}
 
 			if (effect is IModifierIdOwner modifierIdOwner)
@@ -710,7 +718,17 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public SaveData SaveState() => new SaveData(_saveInstructions.ToArray());
+		public SaveData SaveState()
+		{
+			if (_unsavableEffects.Count > 0)
+			{
+				Logger.LogWarning("[ModiBuff] Saving recipe with unsavable effects, " +
+				                  $"please implement {nameof(ISaveableRecipeEffect)} for the following effects: " +
+				                  string.Join(", ", _unsavableEffects.Select(e => e.Name)));
+			}
+
+			return new SaveData(_saveInstructions.ToArray());
+		}
 
 		public void LoadState(SaveData saveData)
 		{
@@ -721,15 +739,17 @@ namespace ModiBuff.Core
 					case SaveInstruction.Init.Id:
 						break;
 					case SaveInstruction.Interval.Id:
+#if MODIBUFF_SYSTEM_TEXT_JSON
 						Interval(instruction.Values.GetDataFromJsonObject<float>());
+#endif
 						break;
 					case SaveInstruction.Effect.Id:
-						//TODO
 #if MODIBUFF_SYSTEM_TEXT_JSON
 						var values = ((System.Text.Json.JsonElement)instruction.Values).EnumerateObject();
-						float effectState = -1;
-						EffectOn effectOn = EffectOn.None;
-						int effectId = -1;
+						bool failed = false;
+						float? effectState = null;
+						EffectOn? effectOn = null;
+						int? effectId = null;
 						foreach (var value in values)
 						{
 							if (value.NameEquals("Item1"))
@@ -750,16 +770,37 @@ namespace ModiBuff.Core
 							}
 						}
 
+						if (effectState == null)
+						{
+							Logger.LogError(
+								$"[ModiBuff] Failed to load effect state from save data by {Name} {(effectId != -1 ? $"for effect {effectId}" : "")}");
+							failed = true;
+						}
 
-						var effectCtr = ModifierRecipes.RegisterEffects[effectId];
-						var effect = effectCtr(effectState);
+						if (effectOn == null)
+						{
+							Logger.LogError($"[ModiBuff] Failed to load effect on from save data by {Name}");
+							failed = true;
+						}
 
-						Effect(effect, effectOn);
+						if (effectId == null)
+						{
+							Logger.LogError($"[ModiBuff] Failed to load effect id from save data by {Name}");
+							failed = true;
+						}
+
+						if (failed)
+							break;
+
+						var effectCtr = ModifierRecipes.RegisterEffects[effectId.Value];
+						var effect = effectCtr(effectState.Value);
+
+						Effect(effect, effectOn.Value);
 #endif
 						break;
 					default:
 						Logger.LogError($"Unknown instruction with id {instruction.InstructionId}");
-						throw new ArgumentOutOfRangeException();
+						break;
 				}
 			}
 		}
@@ -806,14 +847,7 @@ namespace ModiBuff.Core
 				public Init(string name /*, string DisplayName, string Description*/) : base(
 					name /*, DisplayName, Description*/, Id)
 				{
-					Name = name;
-					//this.DisplayName = DisplayName;
-					//this.Description = Description;
 				}
-
-				public readonly string Name;
-				//public readonly string DisplayName;
-				//public readonly string Description;
 			}
 
 			public sealed record Interval : SaveInstruction
@@ -825,10 +859,7 @@ namespace ModiBuff.Core
 #endif
 				public Interval(float value) : base(value, Id)
 				{
-					Value = value;
 				}
-
-				public readonly float Value;
 			}
 
 			public sealed record Effect : SaveInstruction
@@ -841,14 +872,7 @@ namespace ModiBuff.Core
 				public Effect(object saveData, EffectOn effectOn, int effectId) : base(
 					(saveData, effectOn, effectId), Id)
 				{
-					SaveData = saveData;
-					EffectOn = effectOn;
-					EffectId = effectId;
 				}
-
-				public readonly object SaveData;
-				public readonly EffectOn EffectOn;
-				public readonly int EffectId;
 			}
 		}
 

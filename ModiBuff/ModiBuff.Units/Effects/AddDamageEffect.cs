@@ -1,7 +1,8 @@
 namespace ModiBuff.Core.Units
 {
 	public sealed class AddDamageEffect : IStackEffect, IMutableStateEffect, IRevertEffect,
-		IStackRevertEffect, IEffect, IEffectStateInfo<AddDamageEffect.Data>, ISavableEffect<AddDamageEffect.SaveData>
+		IStackRevertEffect, IEffect, IEffectStateInfo<AddDamageEffect.Data>,
+		ISavableEffect<AddDamageEffect.SaveData>, ISaveableRecipeEffect<AddDamageEffect.RecipeSaveData>
 	{
 		public bool IsRevertible => _effectState.IsRevertible();
 		public bool UsesMutableState => _effectState.IsRevertibleOrTogglable() || _stackEffect.UsesMutableState();
@@ -137,6 +138,8 @@ namespace ModiBuff.Core.Units
 			_totalAddedDamage = data.TotalAddedDamage;
 		}
 
+		public object SaveRecipeState() => new RecipeSaveData(_damage);
+
 		public readonly struct Data
 		{
 			public readonly float BaseDamage;
@@ -161,6 +164,13 @@ namespace ModiBuff.Core.Units
 				ExtraDamage = extraDamage;
 				TotalAddedDamage = totalAddedDamage;
 			}
+		}
+
+		public readonly struct RecipeSaveData
+		{
+			public readonly float Damage;
+
+			public RecipeSaveData(float damage) => Damage = damage;
 		}
 	}
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
@@ -35,6 +36,13 @@ namespace ModiBuff.Tests
 
 		protected bool SkipInitDamageRecipe = false;
 
+		//TODO Remove
+		private readonly Dictionary<Type, int> _idToEffect = new Dictionary<Type, int>()
+		{
+			{ typeof(DamageEffect), 0 },
+			{ typeof(AddDamageEffect), 1 }
+		};
+
 		[OneTimeSetUp]
 		public virtual void OneTimeSetup()
 		{
@@ -43,6 +51,7 @@ namespace ModiBuff.Tests
 			Config.PoolSize = 1;
 			Config.ModifierControllerPoolSize = 3;
 			Config.ModifierApplierControllerPoolSize = 3;
+			ModifierRecipes.IdToEffect = _idToEffect;
 			EffectTypeIdManager = new EffectTypeIdManager();
 
 			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
