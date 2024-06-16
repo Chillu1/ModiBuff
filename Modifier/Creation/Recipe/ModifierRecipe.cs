@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace ModiBuff.Core
 {
@@ -15,6 +16,7 @@ namespace ModiBuff.Core
 		private readonly string _description;
 
 		public readonly ModifierIdManager IdManager; //TODO Refactor to make it private/not needed
+		private readonly EffectTypeIdManager _effectTypeIdManager; //TODO Refactor to make it private/not needed
 
 		private bool _isInstanceStackable;
 		private bool _isAura;
@@ -56,13 +58,15 @@ namespace ModiBuff.Core
 		private readonly List<SaveInstruction> _saveInstructions;
 		private readonly List<Type> _unsavableEffects;
 
-		public ModifierRecipe(int id, string name, string displayName, string description, ModifierIdManager idManager)
+		public ModifierRecipe(int id, string name, string displayName, string description,
+			ModifierIdManager idManager, EffectTypeIdManager effectTypeIdManager)
 		{
 			Id = id;
 			Name = name;
 			_displayName = displayName;
 			_description = description;
 			IdManager = idManager;
+			_effectTypeIdManager = effectTypeIdManager;
 
 			_tag = (TagType)Config.DefaultTag;
 
@@ -191,6 +195,7 @@ namespace ModiBuff.Core
 		{
 			_duration = duration;
 			_currentIsInterval = false;
+			_saveInstructions.Add(new SaveInstruction.Duration(duration));
 			return this;
 		}
 
@@ -304,6 +309,7 @@ namespace ModiBuff.Core
 			_everyXStacks = everyXStacks;
 			_singleStackTime = singleStackTime;
 			_independentStackTime = independentStackTime;
+			_saveInstructions.Add(new SaveInstruction.Stack(whenStackEffect));
 			return this;
 		}
 
@@ -345,11 +351,10 @@ namespace ModiBuff.Core
 				return this;
 			}
 
-			if (effect is ISaveableRecipeEffect saveableRecipeEffect)
+			if (effect is ISaveableRecipeEffect savableRecipe)
 			{
-				_saveInstructions.Add(new SaveInstruction.Effect(saveableRecipeEffect.SaveRecipeState(), effectOn,
-					//TODO TEMP/Refactor
-					ModifierRecipes.IdToEffect[effect.GetType()]));
+				_saveInstructions.Add(new SaveInstruction.Effect(_effectTypeIdManager.GetId(effect.GetType()),
+					savableRecipe.SaveRecipeState(), effectOn));
 			}
 			else
 			{
@@ -743,34 +748,62 @@ namespace ModiBuff.Core
 						Interval(instruction.Values.GetDataFromJsonObject<float>());
 #endif
 						break;
+					case SaveInstruction.Duration.Id:
+#if MODIBUFF_SYSTEM_TEXT_JSON
+						Duration(instruction.Values.GetDataFromJsonObject<float>());
+#endif
+						break;
+					case SaveInstruction.Stack.Id:
+#if MODIBUFF_SYSTEM_TEXT_JSON
+						Stack(instruction.Values.GetDataFromJsonObject<WhenStackEffect>());
+#endif
+						break;
 					case SaveInstruction.Effect.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
 						var values = ((System.Text.Json.JsonElement)instruction.Values).EnumerateObject();
 						bool failed = false;
-						float? effectState = null;
-						EffectOn? effectOn = null;
 						int? effectId = null;
+						ConstructorInfo constructor = null;
+						object[] effectStates = null;
+						EffectOn? effectOn = null;
 						foreach (var value in values)
 						{
+							//TODO Not hardcode/dynamic order?
 							if (value.NameEquals("Item1"))
 							{
-								var enumeratedObject = value.Value.EnumerateObject();
-								enumeratedObject.MoveNext();
-								effectState = enumeratedObject.Current.Value.GetSingle();
+								effectId = value.Value.GetInt32();
 							}
 
 							if (value.NameEquals("Item2"))
 							{
-								effectOn = (EffectOn)value.Value.GetDataFromJsonObject<int>();
+								if (effectId == null)
+								{
+									Logger.LogWarning(
+										$"[ModiBuff] Couldn't extract recipe save data because of missing effect id for {Name}");
+									continue;
+								}
+
+								var effectType = _effectTypeIdManager.GetEffectType(effectId.Value);
+								//TODO Find constructor by saved types? Prob not worth
+								constructor = effectType.GetConstructors()[0];
+
+								var parameters = constructor.GetParameters();
+								effectStates = new object[parameters.Length];
+								int i = 0;
+								foreach (var property in value.Value.EnumerateObject())
+								{
+									effectStates[i] = property.Value.GetDataFromJsonObject(parameters[i].ParameterType);
+									i++;
+								}
 							}
 
 							if (value.NameEquals("Item3"))
 							{
-								effectId = value.Value.GetDataFromJsonObject<int>();
+								effectOn = (EffectOn)value.Value.GetInt32();
 							}
 						}
 
-						if (effectState == null)
+						if (effectStates == null)
 						{
 							Logger.LogError(
 								$"[ModiBuff] Failed to load effect state from save data by {Name} {(effectId != -1 ? $"for effect {effectId}" : "")}");
@@ -792,9 +825,7 @@ namespace ModiBuff.Core
 						if (failed)
 							break;
 
-						var effectCtr = ModifierRecipes.RegisterEffects[effectId.Value];
-						var effect = effectCtr(effectState.Value);
-
+						var effect = (IEffect)constructor.Invoke(effectStates);
 						Effect(effect, effectOn.Value);
 #endif
 						break;
@@ -857,20 +888,44 @@ namespace ModiBuff.Core
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Interval(float value) : base(value, Id)
+				public Interval(float interval) : base(interval, Id)
 				{
 				}
 			}
 
-			public sealed record Effect : SaveInstruction
+			public sealed record Duration : SaveInstruction
 			{
 				public const int Id = Interval.Id + 1;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Effect(object saveData, EffectOn effectOn, int effectId) : base(
-					(saveData, effectOn, effectId), Id)
+				public Duration(float duration) : base(duration, Id)
+				{
+				}
+			}
+
+			public sealed record Stack : SaveInstruction
+			{
+				public const int Id = Duration.Id + 1;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+				[System.Text.Json.Serialization.JsonConstructor]
+#endif
+				public Stack(WhenStackEffect when) : base(when, Id)
+				{
+				}
+			}
+
+			public sealed record Effect : SaveInstruction
+			{
+				public const int Id = Stack.Id + 1;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+				[System.Text.Json.Serialization.JsonConstructor]
+#endif
+				public Effect(int effectId, object saveData, EffectOn effectOn)
+					: base((effectId, saveData, effectOn), Id)
 				{
 				}
 			}

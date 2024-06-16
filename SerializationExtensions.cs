@@ -109,6 +109,11 @@ namespace ModiBuff.Core
 					return kvp.Value(element);
 			}
 
+			//TODO Might be an issue with long enums
+			//Fallback for custom enums
+			if (typeof(Enum).IsAssignableFrom(type))
+				return element.GetInt32();
+
 			if (type == typeof(object))
 				return element.GetRawText();
 

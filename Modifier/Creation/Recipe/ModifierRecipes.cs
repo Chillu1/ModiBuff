@@ -20,6 +20,7 @@ namespace ModiBuff.Core
 		private static ModifierRecipes _instance; //TODO TEMP
 
 		private readonly ModifierIdManager _idManager;
+		private readonly EffectTypeIdManager _effectTypeIdManager;
 		private readonly IDictionary<string, IModifierRecipe> _recipes;
 		private readonly IDictionary<string, ManualModifierGenerator> _manualGenerators;
 		private readonly IDictionary<string, IModifierGenerator> _modifierGenerators;
@@ -28,11 +29,12 @@ namespace ModiBuff.Core
 		private ModifierInfo[] _modifierInfos;
 		private TagType[] _tags;
 
-		public ModifierRecipes(ModifierIdManager idManager)
+		public ModifierRecipes(ModifierIdManager idManager, EffectTypeIdManager effectTypeIdManager)
 		{
 			_instance = this;
 
 			_idManager = idManager;
+			_effectTypeIdManager = effectTypeIdManager;
 			_recipes = new Dictionary<string, IModifierRecipe>(64);
 			_manualGenerators = new Dictionary<string, ManualModifierGenerator>(64);
 			_modifierGenerators = new Dictionary<string, IModifierGenerator>(64);
@@ -119,7 +121,7 @@ namespace ModiBuff.Core
 
 			if (string.IsNullOrEmpty(displayName))
 				displayName = name;
-			var recipe = new ModifierRecipe(id, name, displayName, description, _idManager);
+			var recipe = new ModifierRecipe(id, name, displayName, description, _idManager, _effectTypeIdManager);
 			_recipes.Add(name, recipe);
 			return recipe;
 		}
@@ -200,11 +202,6 @@ namespace ModiBuff.Core
 
 			return new SaveData(recipesSaveData);
 		}
-
-		public void TempRegisterEffects(Func<float, IEffect>[] types) => RegisterEffects = types;
-
-		public static Func<float, IEffect>[] RegisterEffects;
-		public static Dictionary<Type, int> IdToEffect;
 
 		public void LoadState(SaveData saveData)
 		{
