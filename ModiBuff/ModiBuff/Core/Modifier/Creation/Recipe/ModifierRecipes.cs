@@ -39,6 +39,9 @@ namespace ModiBuff.Core
 			_registeredNames = new List<RegisterData>(16);
 		}
 
+		//TODO TEMP
+		internal static void SetInstance(ModifierRecipes instance) => _instance = instance;
+
 		protected virtual void SetupRecipes()
 		{
 		}
@@ -197,6 +200,13 @@ namespace ModiBuff.Core
 
 			return new SaveData(recipesSaveData);
 		}
+
+		public void TempRegisterEffects(Func<float, IEffect>[] types)
+		{
+			RegisterEffects = types;
+		}
+
+		public static Func<float, IEffect>[] RegisterEffects;
 
 		public void LoadState(SaveData saveData)
 		{

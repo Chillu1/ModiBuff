@@ -33,9 +33,10 @@ namespace ModiBuff.Tests
 		protected float AllyDamage { get; private set; }
 		protected float AllyHeal { get; private set; }
 
+		protected bool SkipInitDamageRecipe = false;
 
 		[OneTimeSetUp]
-		public void OneTimeSetup()
+		public virtual void OneTimeSetup()
 		{
 			Logger.SetLogger<NUnitLogger>();
 			Config.DefaultTag = (ulong)Core.Units.TagType.Default;
@@ -69,7 +70,8 @@ namespace ModiBuff.Tests
 			IdManager = new ModifierIdManager();
 			EffectIdManager = new EffectIdManager();
 			Recipes = new ModifierRecipes(IdManager);
-			Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
+			if (!SkipInitDamageRecipe)
+				Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
 			Effects = new ModifierLessEffects(EffectIdManager);
 			UnitHelper = new UnitHelper();
 		}

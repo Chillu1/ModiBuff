@@ -1,4 +1,4 @@
-using System.Linq;
+using System;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using ModiBuff.Extensions.Serialization.Json;
@@ -9,6 +9,12 @@ namespace ModiBuff.Tests
 	public sealed class SaveLoadRecipeTests : ModifierTests
 	{
 		private SaveController _saveController;
+
+		public override void OneTimeSetup()
+		{
+			SkipInitDamageRecipe = true;
+			base.OneTimeSetup();
+		}
 
 		public override void IterationSetup()
 		{
@@ -34,7 +40,7 @@ namespace ModiBuff.Tests
 			//Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
-		//[Test]
+		[Test]
 		public void SaveRecipeIntervalLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager);
@@ -45,17 +51,16 @@ namespace ModiBuff.Tests
 			string jsonRecipeState = _saveController.Save(RecipeState.SaveState(saveRecipes));
 			Logger.Log(jsonRecipeState);
 			var loadData = _saveController.Load<RecipeState.SaveData>(jsonRecipeState);
-			loadData.ModifierRecipeSaveData.RecipesSaveData[0].Instructions
-				.First(i => i.InstructionId == ModifierRecipe.SaveInstruction.Interval.Id).Values
-				.TryGetDataFromJsonObject(out float interval);
-			Assert.AreEqual(5, interval);
+			Recipes.TempRegisterEffects(new Func<float, IEffect>[] { damage => new DamageEffect(damage) });
+			IdManager.Clear();
+			ModifierRecipes.SetInstance(Recipes);
 			RecipeState.LoadState(loadData, Recipes);
 
 			Setup();
 
 			Unit.AddModifierSelf("InitDamage2");
 			Unit.Update(5);
-			//Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 	}
 }

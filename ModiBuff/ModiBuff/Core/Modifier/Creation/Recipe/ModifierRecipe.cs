@@ -342,7 +342,11 @@ namespace ModiBuff.Core
 				return this;
 			}
 
-			_saveInstructions.Add(new SaveInstruction.Effect(effect, effectOn));
+			if (effect is ISaveableRecipeEffect saveableRecipeEffect)
+			{
+				//TODO EffectId
+				_saveInstructions.Add(new SaveInstruction.Effect(saveableRecipeEffect.SaveRecipeState(), effectOn, 0));
+			}
 
 			if (effect is IModifierIdOwner modifierIdOwner)
 				modifierIdOwner.SetModifierId(Id);
@@ -717,14 +721,41 @@ namespace ModiBuff.Core
 					case SaveInstruction.Init.Id:
 						break;
 					case SaveInstruction.Interval.Id:
-						instruction.Values.TryGetDataFromJsonObject(out float value);
-						Interval(value);
+						Interval(instruction.Values.GetDataFromJsonObject<float>());
 						break;
 					case SaveInstruction.Effect.Id:
 						//TODO
-						//instruction.Values.TryGetDataFromJsonObject(out var value);
-						//_ = new SaveInstruction.Effect((IEffect)instruction.Values,
-						//	(EffectOn)instruction.InstructionId);
+#if MODIBUFF_SYSTEM_TEXT_JSON
+						var values = ((System.Text.Json.JsonElement)instruction.Values).EnumerateObject();
+						float effectState = -1;
+						EffectOn effectOn = EffectOn.None;
+						int effectId = -1;
+						foreach (var value in values)
+						{
+							if (value.NameEquals("Item1"))
+							{
+								var enumeratedObject = value.Value.EnumerateObject();
+								enumeratedObject.MoveNext();
+								effectState = enumeratedObject.Current.Value.GetSingle();
+							}
+
+							if (value.NameEquals("Item2"))
+							{
+								effectOn = (EffectOn)value.Value.GetDataFromJsonObject<int>();
+							}
+
+							if (value.NameEquals("Item3"))
+							{
+								effectId = value.Value.GetDataFromJsonObject<int>();
+							}
+						}
+
+
+						var effectCtr = ModifierRecipes.RegisterEffects[effectId];
+						var effect = effectCtr(effectState);
+
+						Effect(effect, effectOn);
+#endif
 						break;
 					default:
 						Logger.LogError($"Unknown instruction with id {instruction.InstructionId}");
@@ -807,14 +838,17 @@ namespace ModiBuff.Core
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Effect(IEffect value, EffectOn effectOn) : base(value, Id)
+				public Effect(object saveData, EffectOn effectOn, int effectId) : base(
+					(saveData, effectOn, effectId), Id)
 				{
-					Value = value;
+					SaveData = saveData;
 					EffectOn = effectOn;
+					EffectId = effectId;
 				}
 
-				public readonly IEffect Value;
+				public readonly object SaveData;
 				public readonly EffectOn EffectOn;
+				public readonly int EffectId;
 			}
 		}
 

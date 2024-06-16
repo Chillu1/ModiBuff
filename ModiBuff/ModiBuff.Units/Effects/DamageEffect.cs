@@ -2,7 +2,8 @@ namespace ModiBuff.Core.Units
 {
 	public sealed class DamageEffect : IStackEffect, IMutableStateEffect, IEffect,
 		IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
-		IEffectStateInfo<DamageEffect.Data>, ISavableEffect<DamageEffect.SaveData>
+		IEffectStateInfo<DamageEffect.Data>, ISavableEffect<DamageEffect.SaveData>,
+		ISaveableRecipeEffect<DamageEffect.RecipeSaveData>
 	{
 		public bool UsesMutableState => _stackEffect.UsesMutableState();
 		public bool UsesMutableStackEffect => _stackEffect.UsesMutableState();
@@ -105,6 +106,8 @@ namespace ModiBuff.Core.Units
 		public object SaveState() => new SaveData(_extraDamage);
 		public void LoadState(object saveData) => _extraDamage = ((SaveData)saveData).ExtraDamage;
 
+		public object SaveRecipeState() => new RecipeSaveData(_baseDamage);
+
 		public readonly struct Data
 		{
 			public readonly float BaseDamage;
@@ -122,6 +125,13 @@ namespace ModiBuff.Core.Units
 			public readonly float ExtraDamage;
 
 			public SaveData(float extraDamage) => ExtraDamage = extraDamage;
+		}
+
+		public readonly struct RecipeSaveData
+		{
+			public readonly float BaseDamage;
+
+			public RecipeSaveData(float baseDamage) => BaseDamage = baseDamage;
 		}
 	}
 }
