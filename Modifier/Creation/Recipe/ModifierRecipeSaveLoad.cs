@@ -10,9 +10,11 @@ namespace ModiBuff.Core
 		{
 			if (_unsavableEffects.Count > 0)
 			{
-				Logger.LogWarning("[ModiBuff] Saving recipe with unsavable effects, " +
-				                  $"please implement {nameof(ISaveableRecipeEffect)} for the following effects: " +
-				                  string.Join(", ", _unsavableEffects.Select(e => e.Name)));
+				Logger.LogWarning("[ModiBuff] Saving recipe with unsavable effects, please implement " +
+				                  $"{nameof(ISaveableRecipeEffect)} for the following effects: " +
+				                  string.Join(", ", _unsavableEffects
+					                  .Where(e => !SpecialInstructionEffects.IsSpecialInstructionEffect(e))
+					                  .Select(e => e.Name)));
 			}
 
 			return new SaveData(_saveInstructions.ToArray());
