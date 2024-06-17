@@ -7,6 +7,22 @@ namespace ModiBuff.Tests
 	public sealed class ModifierActionTests : ModifierTests
 	{
 		[Test]
+		public void IntervalStackDamage()
+		{
+			AddRecipe("IntervalStackDamage")
+				.Interval(1)
+				.ModifierAction(ModifierAction.Stack, EffectOn.Interval)
+				.Stack(WhenStackEffect.Always)
+				.Effect(new DamageEffect(5), EffectOn.Stack);
+			Setup();
+
+			Unit.AddModifierSelf("IntervalStackDamage");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+		}
+
+		[Test]
 		public void AddDamageDurationRefreshOnStrongHit()
 		{
 			AddRecipe("DurationAddDamageStrongHitRefresh")

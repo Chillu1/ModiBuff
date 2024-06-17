@@ -1,8 +1,7 @@
 namespace ModiBuff.Core
 {
 	public sealed class ModifierActionEffect : IModifierGenIdOwner, IModifierIdOwner, IEffect,
-		IStackEffect, ICallbackEffect, IShallowClone<IEffect>,
-		ISaveableRecipeEffect<ModifierActionEffect.RecipeSavaData>
+		IStackEffect, ICallbackEffect, IShallowClone<IEffect>
 	{
 		private readonly ModifierAction _modifierAction;
 
@@ -51,16 +50,7 @@ namespace ModiBuff.Core
 		public void StackEffect(int stacks, IUnit target, IUnit source) => Effect(target, source);
 		public void CallbackEffect(IUnit target, IUnit source) => Effect(target, source);
 
-		public object SaveRecipeState() => new RecipeSavaData(_modifierAction);
-
 		public IEffect ShallowClone() => new ModifierActionEffect(_modifierAction, _id);
 		object IShallowClone.ShallowClone() => ShallowClone();
-
-		public readonly struct RecipeSavaData
-		{
-			public readonly ModifierAction ModifierAction;
-
-			public RecipeSavaData(ModifierAction modifierAction) => ModifierAction = modifierAction;
-		}
 	}
 }

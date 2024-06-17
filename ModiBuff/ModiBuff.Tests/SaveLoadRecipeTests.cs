@@ -113,7 +113,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
-		//[Test]
+		[Test]
 		public void SaveModifierActionRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -128,8 +128,10 @@ namespace ModiBuff.Tests
 
 			Unit.AddModifierSelf("IntervalStackDamage");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-			Unit.Update(1);
+			Unit.AddModifierSelf("IntervalStackDamage");
 			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5 - 5 - 5, Unit.Health);
 		}
 	}
 }
