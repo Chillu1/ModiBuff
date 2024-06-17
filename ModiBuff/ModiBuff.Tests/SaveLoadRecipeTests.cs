@@ -21,13 +21,14 @@ namespace ModiBuff.Tests
 			_saveController = new SaveController("fullSave.json");
 		}
 
-		private void SaveLoadState(ModifierRecipes saveRecipes)
+		private void SaveLoadStateAndSetup(ModifierRecipes saveRecipes)
 		{
 			string jsonRecipeState = _saveController.Save(RecipeState.SaveState(saveRecipes));
 			var loadData = _saveController.Load<RecipeState.SaveData>(jsonRecipeState);
 			IdManager.Clear();
 			ModifierRecipes.SetInstance(Recipes);
 			RecipeState.LoadState(loadData, Recipes);
+			Setup();
 		}
 
 		[Test]
@@ -37,8 +38,7 @@ namespace ModiBuff.Tests
 			saveRecipes.Add("InitDamage")
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
-			SaveLoadState(saveRecipes);
-			Setup();
+			SaveLoadStateAndSetup(saveRecipes);
 
 			Unit.AddModifierSelf("InitDamage");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
@@ -54,8 +54,7 @@ namespace ModiBuff.Tests
 			saveRecipes.Add(name, displayName, description)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
-			SaveLoadState(saveRecipes);
-			Setup();
+			SaveLoadStateAndSetup(saveRecipes);
 
 			Unit.AddModifierSelf("InitDamage");
 			int id = IdManager.GetId(name);
@@ -74,8 +73,7 @@ namespace ModiBuff.Tests
 					EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 
-			SaveLoadState(saveRecipes);
-			Setup();
+			SaveLoadStateAndSetup(saveRecipes);
 
 			Unit.AddModifierSelf("StackDamage");
 			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
@@ -90,8 +88,7 @@ namespace ModiBuff.Tests
 			saveRecipes.Add("InitAddDamage")
 				.Effect(new AddDamageEffect(5), EffectOn.Init);
 
-			SaveLoadState(saveRecipes);
-			Setup();
+			SaveLoadStateAndSetup(saveRecipes);
 
 			Unit.AddModifierSelf("InitAddDamage");
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
@@ -105,8 +102,7 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5), EffectOn.Interval)
 				.Interval(5);
 
-			SaveLoadState(saveRecipes);
-			Setup();
+			SaveLoadStateAndSetup(saveRecipes);
 
 			Unit.AddModifierSelf("IntervalDamage");
 			Unit.Update(5);
@@ -123,8 +119,7 @@ namespace ModiBuff.Tests
 				.Stack(WhenStackEffect.Always)
 				.Effect(new DamageEffect(5), EffectOn.Stack);
 
-			SaveLoadState(saveRecipes);
-			Setup();
+			SaveLoadStateAndSetup(saveRecipes);
 
 			Unit.AddModifierSelf("IntervalStackDamage");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
@@ -132,6 +127,75 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
 			Unit.Update(1);
 			Assert.AreEqual(UnitHealth - 5 - 5 - 5, Unit.Health);
+		}
+
+		[Test]
+		public void SaveRemoveRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("RemoveDamage")
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Remove(1);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("RemoveDamage");
+			Assert.True(Unit.ContainsModifier("RemoveDamage"));
+			Unit.Update(1);
+			Assert.False(Unit.ContainsModifier("RemoveDamage"));
+		}
+
+		[Test]
+		public void SaveRefreshIntervalRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("RefreshIntervalDamage")
+				.Effect(new DamageEffect(5), EffectOn.Interval)
+				.Interval(1)
+				.Refresh();
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("RefreshIntervalDamage");
+			Unit.Update(0.5f);
+			Unit.AddModifierSelf("RefreshIntervalDamage");
+			Unit.Update(0.5f);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
+
+		[Test]
+		public void SaveRefreshDurationRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("RefreshDuration")
+				.Remove(1)
+				.Refresh();
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("RefreshDuration");
+			Unit.Update(0.5f);
+			Unit.AddModifierSelf("RefreshDuration");
+			Unit.Update(0.5f);
+			Assert.True(Unit.ContainsModifier("RefreshDuration"));
+			Unit.Update(0.5f);
+			Assert.False(Unit.ContainsModifier("RefreshDuration"));
+		}
+
+		//[Test]
+		public void SaveRemoveStackRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("RemoveStack")
+				.Stack(WhenStackEffect.OnMaxStacks, 2)
+				.Remove(RemoveEffectOn.Stack);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("RemoveStack");
+			Assert.True(Unit.ContainsModifier("RemoveStack"));
+			Unit.AddModifierSelf("RemoveStack");
+			Assert.False(Unit.ContainsModifier("RemoveStack"));
 		}
 	}
 }

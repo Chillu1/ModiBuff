@@ -279,5 +279,19 @@ namespace ModiBuff.Tests
 			Unit.Update(1);
 			Assert.AreEqual(UnitDamage, Unit.Damage);
 		}
+
+		[Test]
+		public void RemoveOnMaxStacks()
+		{
+			AddRecipe("RemoveStack")
+				.Stack(WhenStackEffect.OnMaxStacks, 2)
+				.Remove(RemoveEffectOn.Stack);
+			Setup();
+
+			Unit.AddModifierSelf("RemoveStack");
+			Assert.True(Unit.ContainsModifier("RemoveStack"));
+			Unit.AddModifierSelf("RemoveStack");
+			Assert.False(Unit.ContainsModifier("RemoveStack"));
+		}
 	}
 }

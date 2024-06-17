@@ -281,13 +281,9 @@ namespace ModiBuff.Core
 				case RefreshType.Interval:
 					_refreshInterval = true;
 					break;
-				default:
-#if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError($"[ModiBuff] Unknown refresh type: {type}");
-#endif
-					return this;
 			}
 
+			_saveInstructions.Add(new SaveInstruction.Refresh(type));
 			return this;
 		}
 
@@ -308,7 +304,8 @@ namespace ModiBuff.Core
 			_everyXStacks = everyXStacks;
 			_singleStackTime = singleStackTime;
 			_independentStackTime = independentStackTime;
-			_saveInstructions.Add(new SaveInstruction.Stack(whenStackEffect));
+			_saveInstructions.Add(new SaveInstruction.Stack(whenStackEffect, maxStacks, everyXStacks,
+				singleStackTime, independentStackTime));
 			return this;
 		}
 
@@ -331,6 +328,7 @@ namespace ModiBuff.Core
 			}
 
 			_removeEffectWrapper = new RemoveEffectWrapper(new RemoveEffect(Id), effectOn);
+			_saveInstructions.Add(new SaveInstruction.Remove(effectOn.ToRemoveEffectOn()));
 		}
 
 		//---Effects---

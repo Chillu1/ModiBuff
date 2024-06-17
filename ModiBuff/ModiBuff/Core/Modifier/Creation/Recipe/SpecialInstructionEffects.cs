@@ -16,8 +16,11 @@ namespace ModiBuff.Core
 			effectTypes = new HashSet<Type>(new TypeEqualityComparer())
 			{
 				typeof(ModifierActionEffect),
+				typeof(RemoveEffect),
 			};
 		}
+
+		public static bool AddSpecialInstructionEffect(Type effectType) => effectTypes.Add(effectType);
 
 		public static bool IsSpecialInstructionEffect(Type effectType) => effectTypes.Contains(effectType);
 		public static bool IsSpecialInstructionEffect<T>() where T : IEffect => IsSpecialInstructionEffect(typeof(T));
