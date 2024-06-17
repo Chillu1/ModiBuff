@@ -1,6 +1,7 @@
 namespace ModiBuff.Core
 {
-	public sealed class RemoveEffect : IModifierGenIdOwner, IEffect, IModifierIdOwner, IShallowClone<IEffect>
+	public sealed class RemoveEffect : IModifierGenIdOwner, IEffect, IStackEffect, IModifierIdOwner,
+		IShallowClone<IEffect>
 	{
 		private readonly ApplierType _applierType;
 		private readonly bool _hasApplyChecks;
@@ -67,6 +68,8 @@ namespace ModiBuff.Core
 
 			((IModifierOwner)target).ModifierController.PrepareRemove(_id, _genId);
 		}
+
+		public void StackEffect(int stacks, IUnit target, IUnit source) => Effect(target, source);
 
 		public IEffect ShallowClone() => new RemoveEffect(_id, _genId, _applierType, _hasApplyChecks);
 		object IShallowClone.ShallowClone() => ShallowClone();

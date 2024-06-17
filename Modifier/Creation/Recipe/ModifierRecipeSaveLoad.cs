@@ -38,11 +38,26 @@ namespace ModiBuff.Core
 						Duration(instruction.Values.GetDataFromJsonObject<float>());
 #endif
 						break;
-					case SaveInstruction.Stack.Id:
+					case SaveInstruction.Remove.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
-						Stack(instruction.Values.GetDataFromJsonObject<WhenStackEffect>());
+						Remove(instruction.Values.GetDataFromJsonObject<RemoveEffectOn>());
 #endif
 						break;
+					case SaveInstruction.Refresh.Id:
+#if MODIBUFF_SYSTEM_TEXT_JSON
+						Refresh(instruction.Values.GetDataFromJsonObject<RefreshType>());
+#endif
+						break;
+					case SaveInstruction.Stack.Id:
+					{
+#if MODIBUFF_SYSTEM_TEXT_JSON
+						object[] stackValues = instruction.GetValues(typeof(WhenStackEffect), typeof(int), typeof(int),
+							typeof(float), typeof(float));
+						Stack((WhenStackEffect)stackValues[0], (int)stackValues[1], (int)stackValues[2],
+							(float)stackValues[3], (float)stackValues[4]);
+#endif
+						break;
+					}
 					case SaveInstruction.Effect.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
 						var (effect, effectOn) = HandleEffect(instruction);
@@ -52,8 +67,8 @@ namespace ModiBuff.Core
 						break;
 					case SaveInstruction.ModifierAction.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
-						object[] values = instruction.GetValues(typeof(ModifierAction), typeof(EffectOn));
-						ModifierAction((ModifierAction)values[0], (EffectOn)values[1]);
+						object[] actionValues = instruction.GetValues(typeof(ModifierAction), typeof(EffectOn));
+						ModifierAction((ModifierAction)actionValues[0], (EffectOn)actionValues[1]);
 #endif
 						break;
 					default:
@@ -188,14 +203,40 @@ namespace ModiBuff.Core
 				}
 			}
 
-			public sealed record Stack : SaveInstruction
+			public sealed record Remove : SaveInstruction
 			{
 				public const int Id = Duration.Id + 1;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Stack(WhenStackEffect when) : base(when, Id)
+				public Remove(RemoveEffectOn effectOn) : base(effectOn, Id)
+				{
+				}
+			}
+
+			public sealed record Refresh : SaveInstruction
+			{
+				public const int Id = Remove.Id + 1;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+				[System.Text.Json.Serialization.JsonConstructor]
+#endif
+				public Refresh(RefreshType type) : base(type, Id)
+				{
+				}
+			}
+
+			public sealed record Stack : SaveInstruction
+			{
+				public const int Id = Refresh.Id + 1;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+				[System.Text.Json.Serialization.JsonConstructor]
+#endif
+				public Stack(WhenStackEffect when, int maxStacks, int everyXStacks,
+					float singleStackTime, float independentStackTime)
+					: base((when, maxStacks, everyXStacks, singleStackTime, independentStackTime), Id)
 				{
 				}
 			}

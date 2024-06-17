@@ -15,4 +15,9 @@ namespace ModiBuff.Core
 		CallbackEffect = 64,
 		CallbackEffectUnits = 128,
 	}
+
+	public static class EffectOnExtensions
+	{
+		public static RemoveEffectOn ToRemoveEffectOn(this EffectOn effectOn) => (RemoveEffectOn)effectOn;
+	}
 }
