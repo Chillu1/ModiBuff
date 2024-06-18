@@ -28,6 +28,7 @@ namespace ModiBuff.Examples.BasicConsole
 			//The ModifierIdManage and ModifierRecipe will help us get info about the modifiers
 			_idManager = new ModifierIdManager();
 			_effectTypeIdManager = new EffectTypeIdManager();
+			_effectTypeIdManager.RegisterAllEffectTypesInAssemblies();
 			_recipes = new ModifierRecipes(_idManager, _effectTypeIdManager);
 			//We need to register our recipes inside the pool, so we can pre-allocate the modifiers
 			//Most likely you won't use the pool directly, but we still need to create it 

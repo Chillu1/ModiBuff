@@ -22,6 +22,7 @@ namespace ModiBuff.Tests
 
 			IdManager = new ModifierIdManager();
 			EffectTypeIdManager = new EffectTypeIdManager();
+			EffectTypeIdManager.RegisterAllEffectTypesInAssemblies();
 			EffectIdManager = new EffectIdManager();
 			Recipes = new BenchmarkModifierRecipes(IdManager, EffectTypeIdManager);
 			Pool = new ModifierPool(Recipes.GetGenerators());

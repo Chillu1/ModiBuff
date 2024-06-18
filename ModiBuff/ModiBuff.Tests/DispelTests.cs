@@ -81,5 +81,28 @@ namespace ModiBuff.Tests
 			Unit.Update(0);
 			Assert.False(Unit.ContainsModifier("StrongDispellable"));
 		}
+
+		[Test]
+		public void IntervalStrongDispel()
+		{
+			AddRecipe("StrongDispellable")
+				.Dispel(DispelType.Strong)
+				.Interval(1)
+				.Effect(new DamageEffect(5), EffectOn.Interval);
+			Setup();
+
+			Unit.AddModifierSelf("StrongDispellable");
+
+			Unit.Dispel(DispelType.Basic, Unit);
+			Unit.Update(1);
+			Assert.True(Unit.ContainsModifier("StrongDispellable"));
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.Dispel(DispelType.Strong, Unit);
+			Unit.Update(0);
+			Unit.Update(1);
+			Assert.False(Unit.ContainsModifier("StrongDispellable"));
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
 	}
 }

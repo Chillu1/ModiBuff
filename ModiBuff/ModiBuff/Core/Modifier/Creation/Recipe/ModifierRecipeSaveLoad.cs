@@ -49,7 +49,6 @@ namespace ModiBuff.Core
 #endif
 						break;
 					case SaveInstruction.Stack.Id:
-					{
 #if MODIBUFF_SYSTEM_TEXT_JSON
 						object[] stackValues = instruction.GetValues(typeof(WhenStackEffect), typeof(int), typeof(int),
 							typeof(float), typeof(float));
@@ -57,7 +56,11 @@ namespace ModiBuff.Core
 							(float)stackValues[3], (float)stackValues[4]);
 #endif
 						break;
-					}
+					case SaveInstruction.Dispel.Id:
+#if MODIBUFF_SYSTEM_TEXT_JSON
+						Dispel(instruction.Values.GetDataFromJsonObject<DispelType>());
+#endif
+						break;
 					case SaveInstruction.Effect.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
 						var (effect, effectOn) = HandleEffect(instruction);
@@ -241,9 +244,21 @@ namespace ModiBuff.Core
 				}
 			}
 
-			public sealed record Effect : SaveInstruction
+			public sealed record Dispel : SaveInstruction
 			{
 				public const int Id = Stack.Id + 1;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+				[System.Text.Json.Serialization.JsonConstructor]
+#endif
+				public Dispel(DispelType type) : base(type, Id)
+				{
+				}
+			}
+
+			public sealed record Effect : SaveInstruction
+			{
+				public const int Id = Dispel.Id + 1;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]

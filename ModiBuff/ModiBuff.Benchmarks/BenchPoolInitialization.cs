@@ -22,6 +22,7 @@ namespace ModiBuff.Tests
 
 			_modifierIdManager = new ModifierIdManager();
 			_effectTypeIdManager = new EffectTypeIdManager();
+			_effectTypeIdManager.RegisterAllEffectTypesInAssemblies();
 			_recipes = new BenchmarkModifierRecipes(_modifierIdManager, _effectTypeIdManager);
 
 			Console.WriteLine("Allocated: " + ModifierRecipes.GeneratorCount + " recipes, count: " + AllocationCount +

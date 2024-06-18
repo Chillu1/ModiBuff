@@ -88,6 +88,7 @@ namespace ModiBuff.Tests
 
 			var idManager = new ModifierIdManager();
 			var effectTypeIdManager = new EffectTypeIdManager();
+			effectTypeIdManager.RegisterAllEffectTypesInAssemblies();
 			var recipes = new EmptyModifierRecipes(idManager, effectTypeIdManager);
 			var pool = new ModifierPool(recipes.GetGenerators());
 

@@ -45,16 +45,7 @@ namespace ModiBuff.Tests
 			Config.DefaultTag = (ulong)Core.Units.TagType.Default;
 			Config.PoolSize = 1;
 			EffectTypeIdManager = new EffectTypeIdManager();
-
-			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-			foreach (var type in assembly.GetTypes())
-			{
-				if (!type.IsClass || type.IsAbstract)
-					continue;
-
-				if (typeof(IEffect).IsAssignableFrom(type))
-					EffectTypeIdManager.RegisterEffectType(type);
-			}
+			EffectTypeIdManager.RegisterAllEffectTypesInAssemblies();
 
 			UnitHealth = AllyHealth = 500;
 			UnitDamage = AllyDamage = 10;

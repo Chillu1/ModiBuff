@@ -44,16 +44,7 @@ namespace ModiBuff.Tests
 			Config.ModifierControllerPoolSize = 3;
 			Config.ModifierApplierControllerPoolSize = 3;
 			EffectTypeIdManager = new EffectTypeIdManager();
-
-			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-			foreach (var type in assembly.GetTypes())
-			{
-				if (!type.IsClass || type.IsAbstract)
-					continue;
-
-				if (typeof(IEffect).IsAssignableFrom(type))
-					EffectTypeIdManager.RegisterEffectType(type);
-			}
+			EffectTypeIdManager.RegisterAllEffectTypesInAssemblies();
 
 			UnitHealth = AllyHealth = 500;
 			UnitDamage = AllyDamage = 10;
