@@ -316,6 +316,7 @@ namespace ModiBuff.Core
 			var dispelRegister = new DispelRegisterEffect(dispelType);
 			_dispelRegisterWrapper = new EffectWrapper(dispelRegister, EffectOn.Init);
 			_effectWrappers.Add(_dispelRegisterWrapper);
+			_saveInstructions.Add(new SaveInstruction.Dispel(dispelType));
 			return this;
 		}
 

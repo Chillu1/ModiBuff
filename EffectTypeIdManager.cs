@@ -31,6 +31,19 @@ namespace ModiBuff.Core
 			_effectTypeIds.Add(type, _currentId++);
 		}
 
+		public void RegisterAllEffectTypesInAssemblies()
+		{
+			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+			foreach (var type in assembly.GetTypes())
+			{
+				if (!type.IsClass || type.IsAbstract)
+					continue;
+
+				if (typeof(IEffect).IsAssignableFrom(type))
+					RegisterEffectType(type);
+			}
+		}
+
 		public int GetId(Type type)
 		{
 			if (_effectTypeIds.TryGetValue(type, out int id))

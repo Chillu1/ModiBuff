@@ -17,6 +17,7 @@ namespace ModiBuff.Core
 			{
 				typeof(ModifierActionEffect),
 				typeof(RemoveEffect),
+				typeof(DispelRegisterEffect),
 			};
 		}
 
