@@ -61,6 +61,18 @@ namespace ModiBuff.Core
 						Dispel(instruction.Values.GetDataFromJsonObject<DispelType>());
 #endif
 						break;
+					case SaveInstruction.Tag.Id:
+#if MODIBUFF_SYSTEM_TEXT_JSON
+						object[] tagValues = instruction.GetValues(typeof(SaveInstruction.Tag.Type), typeof(TagType));
+						_ = (SaveInstruction.Tag.Type)tagValues[0] switch
+						{
+							SaveInstruction.Tag.Type.Add => Tag((TagType)tagValues[1]),
+							SaveInstruction.Tag.Type.Remove => RemoveTag((TagType)tagValues[1]),
+							SaveInstruction.Tag.Type.Set => SetTag((TagType)tagValues[1]),
+							_ => throw new ArgumentOutOfRangeException()
+						};
+#endif
+						break;
 					case SaveInstruction.Effect.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
 						var (effect, effectOn) = HandleEffect(instruction);
@@ -256,9 +268,28 @@ namespace ModiBuff.Core
 				}
 			}
 
-			public sealed record Effect : SaveInstruction
+			public sealed record Tag : SaveInstruction
 			{
 				public const int Id = Dispel.Id + 1;
+
+				public enum Type
+				{
+					Add,
+					Remove,
+					Set,
+				}
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+				[System.Text.Json.Serialization.JsonConstructor]
+#endif
+				public Tag(Type type, TagType tagType) : base((type, tagType), Id)
+				{
+				}
+			}
+
+			public sealed record Effect : SaveInstruction
+			{
+				public const int Id = Tag.Id + 1;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]

@@ -2,6 +2,7 @@ using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using ModiBuff.Extensions.Serialization.Json;
 using NUnit.Framework;
+using TagType = ModiBuff.Core.TagType;
 
 namespace ModiBuff.Tests
 {
@@ -217,6 +218,49 @@ namespace ModiBuff.Tests
 			Unit.Update(1);
 			Assert.False(Unit.ContainsModifier("DispelDamage"));
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void SaveTagRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("TagDamage")
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Tag(TagType.DurationIgnoresStatusResistance);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			int id = IdManager.GetId("TagDamage");
+			Assert.True(ModifierRecipes.GetTag(id).HasTag(TagType.DurationIgnoresStatusResistance));
+		}
+
+		[Test]
+		public void SaveRemoveTagRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("RemoveTagDamage")
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.RemoveTag(TagType.Default);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			int id = IdManager.GetId("RemoveTagDamage");
+			Assert.False(ModifierRecipes.GetTag(id).HasTag(TagType.Default));
+		}
+
+		[Test]
+		public void SaveSetTagRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("SetTagDamage")
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.SetTag(TagType.DurationIgnoresStatusResistance);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			int id = IdManager.GetId("SetTagDamage");
+			Assert.True(ModifierRecipes.GetTag(id).HasTag(TagType.DurationIgnoresStatusResistance));
+			Assert.False(ModifierRecipes.GetTag(id).HasTag(TagType.Default));
 		}
 	}
 }

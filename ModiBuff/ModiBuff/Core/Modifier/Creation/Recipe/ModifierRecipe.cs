@@ -104,6 +104,7 @@ namespace ModiBuff.Core
 		public ModifierRecipe Tag(TagType tag)
 		{
 			_tag |= tag;
+			_saveInstructions.Add(new SaveInstruction.Tag(SaveInstruction.Tag.Type.Add, tag));
 			return this;
 		}
 
@@ -114,12 +115,14 @@ namespace ModiBuff.Core
 		public ModifierRecipe SetTag(TagType tag)
 		{
 			_tag = tag;
+			_saveInstructions.Add(new SaveInstruction.Tag(SaveInstruction.Tag.Type.Set, tag));
 			return this;
 		}
 
 		public ModifierRecipe RemoveTag(TagType tag)
 		{
 			_tag &= ~tag;
+			_saveInstructions.Add(new SaveInstruction.Tag(SaveInstruction.Tag.Type.Remove, tag));
 			return this;
 		}
 
