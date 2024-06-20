@@ -7,9 +7,9 @@ namespace ModiBuff.Core
 			return new SaveData(recipes.SaveState());
 		}
 
-		public static void LoadState(SaveData saveData, ModifierRecipes recipes)
+		public static void LoadState<TUnitCallback>(SaveData saveData, ModifierRecipes recipes)
 		{
-			recipes.LoadState(saveData.ModifierRecipeSaveData);
+			recipes.LoadState<TUnitCallback>(saveData.ModifierRecipeSaveData);
 		}
 
 

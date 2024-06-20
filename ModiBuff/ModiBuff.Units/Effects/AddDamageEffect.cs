@@ -138,7 +138,8 @@ namespace ModiBuff.Core.Units
 			_totalAddedDamage = data.TotalAddedDamage;
 		}
 
-		public object SaveRecipeState() => new RecipeSaveData(_damage);
+		public object SaveRecipeState() =>
+			new RecipeSaveData(_damage, _effectState, _stackEffect, _stackValue, _targeting);
 
 		public readonly struct Data
 		{
@@ -169,8 +170,20 @@ namespace ModiBuff.Core.Units
 		public readonly struct RecipeSaveData
 		{
 			public readonly float Damage;
+			public readonly EffectState EffectState;
+			public readonly StackEffectType StackEffect;
+			public readonly float StackValue;
+			public readonly Targeting Targeting;
 
-			public RecipeSaveData(float damage) => Damage = damage;
+			public RecipeSaveData(float damage, EffectState effectState, StackEffectType stackEffect,
+				float stackValue, Targeting targeting)
+			{
+				Damage = damage;
+				EffectState = effectState;
+				StackEffect = stackEffect;
+				StackValue = stackValue;
+				Targeting = targeting;
+			}
 		}
 	}
 }

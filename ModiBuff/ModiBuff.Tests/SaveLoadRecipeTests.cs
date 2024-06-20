@@ -28,7 +28,7 @@ namespace ModiBuff.Tests
 			var loadData = _saveController.Load<RecipeState.SaveData>(jsonRecipeState);
 			IdManager.Clear();
 			ModifierRecipes.SetInstance(Recipes);
-			RecipeState.LoadState(loadData, Recipes);
+			RecipeState.LoadState<CallbackUnitType>(loadData, Recipes);
 			Setup();
 		}
 
@@ -197,6 +197,24 @@ namespace ModiBuff.Tests
 			Assert.True(Unit.ContainsModifier("RemoveStack"));
 			Unit.AddModifierSelf("RemoveStack");
 			Assert.False(Unit.ContainsModifier("RemoveStack"));
+		}
+
+		[Test]
+		public void SaveRemoveCallbackUnitRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("InitAddDamageRevertibleCallback")
+				.Tag(ModiBuff.Core.Units.TagType.StrongDispel)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
+				.Remove(RemoveEffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.StrongDispel);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("InitAddDamageRevertibleCallback");
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+			Unit.StrongDispel(Unit);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
 		}
 
 		[Test]

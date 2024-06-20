@@ -106,5 +106,14 @@ namespace ModiBuff.Core
 				}
 			}
 		}
+
+		public static bool IsInternalRecipeTag(this TagType tag) => tag switch
+		{
+			TagType.IsInit => true,
+			TagType.IsRefresh => true,
+			TagType.IsStack => true,
+			TagType.IsInstanceStackable => true,
+			_ => false
+		};
 	}
 }

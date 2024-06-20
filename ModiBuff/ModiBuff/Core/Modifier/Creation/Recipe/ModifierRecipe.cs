@@ -103,6 +103,9 @@ namespace ModiBuff.Core
 		/// </summary>
 		public ModifierRecipe Tag(TagType tag)
 		{
+#if DEBUG && !MODIBUFF_PROFILE
+			ValidateTag(tag);
+#endif
 			_tag |= tag;
 			_saveInstructions.Add(new SaveInstruction.Tag(SaveInstruction.Tag.Type.Add, tag));
 			return this;
@@ -114,6 +117,9 @@ namespace ModiBuff.Core
 		/// </summary>
 		public ModifierRecipe SetTag(TagType tag)
 		{
+#if DEBUG && !MODIBUFF_PROFILE
+			ValidateTag(tag);
+#endif
 			_tag = tag;
 			_saveInstructions.Add(new SaveInstruction.Tag(SaveInstruction.Tag.Type.Set, tag));
 			return this;
@@ -195,8 +201,7 @@ namespace ModiBuff.Core
 		/// </summary>
 		public ModifierRecipe Duration(float duration)
 		{
-			_duration = duration;
-			_currentIsInterval = false;
+			DurationInternal(duration);
 			_saveInstructions.Add(new SaveInstruction.Duration(duration));
 			return this;
 		}
@@ -206,8 +211,10 @@ namespace ModiBuff.Core
 		/// </summary>
 		public ModifierRecipe Remove(float duration)
 		{
-			Duration(duration);
+			DurationInternal(duration);
 			AddRemoveEffect(EffectOn.Duration);
+			_saveInstructions.Add(new SaveInstruction.Remove(SaveInstruction.Remove.Type.Duration, EffectOn.Duration,
+				duration));
 			return this;
 		}
 
@@ -229,6 +236,8 @@ namespace ModiBuff.Core
 		public ModifierRecipe Remove(RemoveEffectOn removeEffectOn = RemoveEffectOn.CallbackUnit)
 		{
 			AddRemoveEffect(removeEffectOn.ToEffectOn());
+			_saveInstructions.Add(new SaveInstruction.Remove(SaveInstruction.Remove.Type.RemoveOn,
+				removeEffectOn.ToEffectOn()));
 			return this;
 		}
 
@@ -332,7 +341,6 @@ namespace ModiBuff.Core
 			}
 
 			_removeEffectWrapper = new RemoveEffectWrapper(new RemoveEffect(Id), effectOn);
-			_saveInstructions.Add(new SaveInstruction.Remove(effectOn.ToRemoveEffectOn()));
 		}
 
 		//---Effects---
@@ -381,6 +389,7 @@ namespace ModiBuff.Core
 				}
 #endif
 				AddRemoveEffect(effectOn);
+				_saveInstructions.Add(new SaveInstruction.Remove(SaveInstruction.Remove.Type.RemoveOn, effectOn));
 				return this;
 			}
 
@@ -427,6 +436,7 @@ namespace ModiBuff.Core
 			var effect = new CallbackUnitRegisterEffect<TCallbackUnit>(callbackType);
 			_callbackUnitRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
 			_effectWrappers.Add(_callbackUnitRegisterWrapper);
+			_saveInstructions.Add(new SaveInstruction.CallbackUnit((int)(object)callbackType));
 			return this;
 		}
 
@@ -595,6 +605,20 @@ namespace ModiBuff.Core
 		}
 
 		public TagType GetTag() => _tag;
+
+		private ModifierRecipe DurationInternal(float duration)
+		{
+			_duration = duration;
+			_currentIsInterval = false;
+			return this;
+		}
+
+		private static void ValidateTag(TagType tag)
+		{
+			if (tag.IsInternalRecipeTag())
+				Logger.LogWarning("[ModiBuff] Setting internal tags directly is not recommended for recipes, " +
+				                  "they're automatically set based on the recipe settings");
+		}
 
 		private static void ValidateModifierAction(ModifierAction modifierAction, EffectOn effectOn)
 		{

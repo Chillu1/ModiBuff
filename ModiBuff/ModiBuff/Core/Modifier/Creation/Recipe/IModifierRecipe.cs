@@ -11,6 +11,6 @@ namespace ModiBuff.Core
 
 		//TODO Move/refactor
 		ModifierRecipe.SaveData SaveState();
-		void LoadState(ModifierRecipe.SaveData saveData);
+		//void LoadState(ModifierRecipe.SaveData saveData);
 	}
 }
