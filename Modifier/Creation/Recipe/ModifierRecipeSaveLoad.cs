@@ -10,17 +10,18 @@ namespace ModiBuff.Core
 		{
 			if (_unsavableEffects.Count > 0)
 			{
-				Logger.LogWarning("[ModiBuff] Saving recipe with unsavable effects, please implement " +
-				                  $"{nameof(ISaveableRecipeEffect)} for the following effects: " +
-				                  string.Join(", ", _unsavableEffects
-					                  .Where(e => !SpecialInstructionEffects.IsSpecialInstructionEffect(e))
-					                  .Select(e => e.Name)));
+				var nonSpecialInstructionEffects = _unsavableEffects
+					.Where(e => !SpecialInstructionEffects.IsSpecialInstructionEffect(e)).ToArray();
+				if (nonSpecialInstructionEffects.Length > 0)
+					Logger.LogWarning("[ModiBuff] Saving recipe with unsavable effects, please implement " +
+					                  $"{nameof(ISaveableRecipeEffect)} for the following effects: " +
+					                  string.Join(", ", nonSpecialInstructionEffects.Select(e => e.Name)));
 			}
 
 			return new SaveData(_saveInstructions.ToArray());
 		}
 
-		public void LoadState(SaveData saveData)
+		public void LoadState<TUnitCallback>(SaveData saveData)
 		{
 			foreach (var instruction in saveData.Instructions)
 			{
@@ -40,7 +41,22 @@ namespace ModiBuff.Core
 						break;
 					case SaveInstruction.Remove.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
-						Remove(instruction.Values.GetDataFromJsonObject<RemoveEffectOn>());
+						var removeType =
+							(SaveInstruction.Remove.Type)instruction.GetValues(typeof(SaveInstruction.Remove.Type))[0];
+						switch (removeType)
+						{
+							case SaveInstruction.Remove.Type.RemoveOn:
+								Remove(((EffectOn)instruction.GetValues(typeof(SaveInstruction.Remove.Type),
+									typeof(EffectOn))[1]).ToRemoveEffectOn());
+								break;
+							case SaveInstruction.Remove.Type.Duration:
+								Remove((float)instruction
+									.GetValues(typeof(SaveInstruction.Remove.Type), typeof(float))[1]);
+								break;
+							default:
+								Logger.LogError($"[ModiBuff] Loaded remove instruction with unknown type {removeType}");
+								break;
+						}
 #endif
 						break;
 					case SaveInstruction.Refresh.Id:
@@ -71,6 +87,11 @@ namespace ModiBuff.Core
 							SaveInstruction.Tag.Type.Set => SetTag((TagType)tagValues[1]),
 							_ => throw new ArgumentOutOfRangeException()
 						};
+#endif
+						break;
+					case SaveInstruction.CallbackUnit.Id:
+#if MODIBUFF_SYSTEM_TEXT_JSON
+						CallbackUnit(instruction.Values.GetDataFromJsonObject<TUnitCallback>());
 #endif
 						break;
 					case SaveInstruction.Effect.Id:
@@ -222,10 +243,22 @@ namespace ModiBuff.Core
 			{
 				public const int Id = Duration.Id + 1;
 
+				public enum Type
+				{
+					RemoveOn,
+					Duration,
+				}
+
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Remove(RemoveEffectOn effectOn) : base(effectOn, Id)
+				public Remove(Type type, EffectOn effectOn, float duration = 0)
+					: base(type switch
+					{
+						Type.RemoveOn => (type, effectOn),
+						Type.Duration => (type, duration),
+						_ => throw new ArgumentOutOfRangeException()
+					}, Id)
 				{
 				}
 			}
@@ -287,9 +320,21 @@ namespace ModiBuff.Core
 				}
 			}
 
-			public sealed record Effect : SaveInstruction
+			public sealed record CallbackUnit : SaveInstruction
 			{
 				public const int Id = Tag.Id + 1;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+				[System.Text.Json.Serialization.JsonConstructor]
+#endif
+				public CallbackUnit(int callbackUnit) : base(callbackUnit, Id)
+				{
+				}
+			}
+
+			public sealed record Effect : SaveInstruction
+			{
+				public const int Id = CallbackUnit.Id + 1;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]

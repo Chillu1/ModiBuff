@@ -203,7 +203,7 @@ namespace ModiBuff.Core
 			return new SaveData(recipesSaveData);
 		}
 
-		public void LoadState(SaveData saveData)
+		public void LoadState<TUnitCallback>(SaveData saveData)
 		{
 			foreach (var recipeSaveData in saveData.RecipesSaveData)
 			{
@@ -236,7 +236,7 @@ namespace ModiBuff.Core
 					continue;
 				}
 
-				recipe.LoadState(recipeSaveData);
+				recipe.LoadState<TUnitCallback>(recipeSaveData);
 			}
 		}
 
