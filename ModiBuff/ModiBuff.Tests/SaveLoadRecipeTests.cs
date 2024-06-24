@@ -196,6 +196,7 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("RemoveStack");
 			Assert.True(Unit.ContainsModifier("RemoveStack"));
 			Unit.AddModifierSelf("RemoveStack");
+			Unit.Update(0);
 			Assert.False(Unit.ContainsModifier("RemoveStack"));
 		}
 

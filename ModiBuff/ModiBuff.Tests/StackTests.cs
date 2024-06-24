@@ -291,6 +291,22 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("RemoveStack");
 			Assert.True(Unit.ContainsModifier("RemoveStack"));
 			Unit.AddModifierSelf("RemoveStack");
+			Unit.Update(0);
+			Assert.False(Unit.ContainsModifier("RemoveStack"));
+		}
+
+		[Test]
+		public void RemoveOnMaxStacksEffect()
+		{
+			AddRecipe("RemoveStack")
+				.Effect(new RemoveEffect(), EffectOn.Stack)
+				.Stack(WhenStackEffect.OnMaxStacks, 2);
+			Setup();
+
+			Unit.AddModifierSelf("RemoveStack");
+			Assert.True(Unit.ContainsModifier("RemoveStack"));
+			Unit.AddModifierSelf("RemoveStack");
+			Unit.Update(0);
 			Assert.False(Unit.ContainsModifier("RemoveStack"));
 		}
 	}
