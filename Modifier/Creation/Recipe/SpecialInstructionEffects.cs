@@ -10,6 +10,7 @@ namespace ModiBuff.Core
 	public static class SpecialInstructionEffects //TODO Rename
 	{
 		private static readonly HashSet<Type> effectTypes;
+		private static readonly HashSet<Type> unsupportedEffectTypes;
 
 		static SpecialInstructionEffects()
 		{
@@ -20,6 +21,15 @@ namespace ModiBuff.Core
 				typeof(DispelRegisterEffect),
 				typeof(CallbackUnitRegisterEffect<>),
 			};
+
+			unsupportedEffectTypes = new HashSet<Type>(new TypeEqualityComparer())
+			{
+				typeof(CallbackRegisterEffect<>),
+				typeof(CallbackStateSaveRegisterEffect<,>),
+				typeof(CallbackEffectRegisterEffect<>),
+				typeof(CallbackStateEffectRegisterEffect<,>),
+				typeof(CallbackEffectRegisterEffectUnits<>),
+			};
 		}
 
 		public static bool AddSpecialInstructionEffect(Type effectType) => effectTypes.Add(effectType);
@@ -27,6 +37,10 @@ namespace ModiBuff.Core
 		public static bool IsSpecialInstructionEffect(Type effectType) => effectTypes.Contains(effectType);
 		public static bool IsSpecialInstructionEffect<T>() where T : IEffect => IsSpecialInstructionEffect(typeof(T));
 		public static bool IsSpecialInstructionEffect(IEffect effect) => IsSpecialInstructionEffect(effect.GetType());
+
+		public static bool IsUnsupportedEffectType(Type effectType) => unsupportedEffectTypes.Contains(effectType);
+		public static bool IsUnsupportedEffectType<T>() where T : IEffect => IsUnsupportedEffectType(typeof(T));
+		public static bool IsUnsupportedEffectType(IEffect effect) => IsUnsupportedEffectType(effect.GetType());
 
 		/// <summary>
 		///		Checks that the types are of same type, if both types are generic, only checks the top level type.
