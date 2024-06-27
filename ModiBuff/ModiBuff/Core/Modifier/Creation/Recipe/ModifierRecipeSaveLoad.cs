@@ -10,8 +10,15 @@ namespace ModiBuff.Core
 		{
 			if (_unsavableEffects.Count > 0)
 			{
+				var unsupportedInstructionEffects = _unsavableEffects
+					.Where(SpecialInstructionEffects.IsUnsupportedEffectType).ToArray();
 				var nonSpecialInstructionEffects = _unsavableEffects
 					.Where(e => !SpecialInstructionEffects.IsSpecialInstructionEffect(e)).ToArray();
+
+				if (unsupportedInstructionEffects.Length > 0)
+					Logger.LogError("[ModiBuff] Saving recipe with unsupported effects: " +
+					                string.Join(", ", unsupportedInstructionEffects.Select(e => e.Name)));
+
 				if (nonSpecialInstructionEffects.Length > 0)
 					Logger.LogWarning("[ModiBuff] Saving recipe with unsavable effects, please implement " +
 					                  $"{nameof(ISaveableRecipeEffect)} for the following effects: " +

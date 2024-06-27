@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using ModiBuff.Core.Units;
 
 namespace ModiBuff.Extensions.Serialization.Json
@@ -14,7 +15,11 @@ namespace ModiBuff.Extensions.Serialization.Json
 		{
 			Path = Environment.CurrentDirectory;
 
-			_options = new JsonSerializerOptions { WriteIndented = true, IncludeFields = true };
+			_options = new JsonSerializerOptions
+			{
+				WriteIndented = true, IncludeFields = true,
+				//DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+			};
 		}
 
 		public string Save<T>(T obj) => JsonSerializer.Serialize(obj, _options);
