@@ -103,5 +103,39 @@ namespace ModiBuff.Tests
 			Unit.TryCast(generator.Id, Enemy); //5 * 2f
 			Assert.AreEqual(EnemyHealth - 5 - 10f, Enemy.Health);
 		}
+
+		[Test]
+		public void ConditionalEffectsBasedOnManaUsage()
+		{
+			AddRecipe("InitDamageDynamicEffectValueOnManaSpentMeta")
+				.Effect(
+					new DamageEffect(0).SetMetaEffects(
+						new DynamicEffectBasedOnManaSpentMetaEffect(new[] { (1, 1), (2, 1.5f), (3f, 2f) })),
+					EffectOn.Init);
+			Setup();
+
+			var generator = Recipes.GetGenerator("InitDamageDynamicEffectValueOnManaSpentMeta");
+			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			Unit.UseMana(UnitMana);
+
+			Unit.UseMana(-3);
+			Unit.TryCast(generator.Id, Enemy);
+			Assert.AreEqual(EnemyHealth - 2, Enemy.Health);
+			Assert.AreEqual(0, Unit.Mana);
+
+			Unit.UseMana(-2);
+			Unit.TryCast(generator.Id, Enemy);
+			Assert.AreEqual(EnemyHealth - 2 - 1.5, Enemy.Health);
+			Assert.AreEqual(0, Unit.Mana);
+
+			Unit.UseMana(-1);
+			Unit.TryCast(generator.Id, Enemy);
+			Assert.AreEqual(EnemyHealth - 2 - 1.5 - 1, Enemy.Health);
+			Assert.AreEqual(0, Unit.Mana);
+
+			Unit.TryCast(generator.Id, Enemy);
+			Assert.AreEqual(EnemyHealth - 2 - 1.5 - 1, Enemy.Health);
+			Assert.AreEqual(0, Unit.Mana);
+		}
 	}
 }
