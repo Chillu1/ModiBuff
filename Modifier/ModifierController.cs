@@ -267,7 +267,13 @@ namespace ModiBuff.Core
 					if (modifier.Id == modifierReference.Id && modifier.GenId == modifierReference.GenId)
 					{
 						ModifierPool.Instance.Return(modifier);
-						_modifiers[i] = _modifiers[--_modifiersTop]; //TODO This switching might cause some order issues
+						if (i == --_modifiersTop)
+						{
+							_modifiers[i] = null;
+							return;
+						}
+
+						_modifiers[i] = _modifiers[_modifiersTop]; //TODO This switching might cause some order issues
 						_modifiers[_modifiersTop] = null;
 						break;
 					}
@@ -302,8 +308,20 @@ namespace ModiBuff.Core
 			}
 
 			ModifierPool.Instance.Return(_modifiers[modifierIndex]);
-			_modifiers[modifierIndex] = _modifiers[--_modifiersTop];
+			if (modifierIndex == --_modifiersTop)
+			{
+				_modifiers[modifierIndex] = null;
+				return;
+			}
+
+			var topModifier = _modifiers[_modifiersTop];
+			_modifiers[modifierIndex] = topModifier;
 			_modifiers[_modifiersTop] = null;
+			if (Config.UseDictionaryIndexes)
+				_modifierIndexesDict[topModifier.Id] = modifierIndex;
+			else
+				//TODO Make a unit test that checks that this is implemented
+				_modifierIndexes[topModifier.Id] = modifierIndex;
 		}
 
 		/// <summary>
