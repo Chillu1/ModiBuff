@@ -214,9 +214,9 @@ namespace ModiBuff.Core
 						continue;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
-					object[] values = instruction.GetValues(typeof(string), typeof(string), typeof(string));
+					var init = instruction as ModifierRecipe.SaveInstruction.Initialize;
 
-					if (values[0] == null)
+					if (init == null || init.Name == null)
 					{
 						//TODO Identification
 						Logger.LogError(
@@ -224,7 +224,7 @@ namespace ModiBuff.Core
 						break;
 					}
 
-					recipe = Add((string)values[0], (string)values[1], (string)values[2]);
+					recipe = Add(init.Name, init.DisplayName, init.Description);
 #endif
 					break;
 				}

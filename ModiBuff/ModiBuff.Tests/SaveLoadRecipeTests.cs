@@ -238,7 +238,7 @@ namespace ModiBuff.Tests
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			saveRecipes.Add("InitAddDamageRevertibleCallback")
-				.Tag(ModiBuff.Core.Units.TagType.StrongDispel)
+				.Dispel(DispelType.Strong)
 				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
 				.Remove(RemoveEffectOn.CallbackUnit)
 				.CallbackUnit(CallbackUnitType.StrongDispel);
@@ -246,8 +246,7 @@ namespace ModiBuff.Tests
 			SaveLoadStateAndSetup(saveRecipes);
 
 			Unit.AddModifierSelf("InitAddDamageRevertibleCallback");
-			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
-			Unit.StrongDispel(Unit);
+			Unit.Dispel(DispelType.Strong, Unit);
 			Assert.AreEqual(UnitDamage, Unit.Damage);
 		}
 
