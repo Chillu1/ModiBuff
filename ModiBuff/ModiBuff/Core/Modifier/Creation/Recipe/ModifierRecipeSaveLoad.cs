@@ -117,6 +117,7 @@ namespace ModiBuff.Core
 				}
 			}
 
+#if MODIBUFF_SYSTEM_TEXT_JSON
 			(IEffect, EffectOn) HandleEffect(SaveInstruction instruction)
 			{
 				var effect = (SaveInstruction.Effect)instruction;
@@ -151,6 +152,7 @@ namespace ModiBuff.Core
 
 				return ((IEffect)constructor.Invoke(effectStates), effectOn);
 			}
+#endif
 		}
 
 		[System.Text.Json.Serialization.JsonPolymorphic]
@@ -179,7 +181,7 @@ namespace ModiBuff.Core
 				InstructionId = instructionId;
 			}
 
-			public record Initialize : SaveInstruction
+			public sealed record Initialize : SaveInstruction
 			{
 				public const int Id = BaseId;
 
