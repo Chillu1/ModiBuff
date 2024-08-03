@@ -31,7 +31,7 @@ namespace ModiBuff.Core
 		private EffectWrapper _dispelRegisterWrapper;
 		private EffectWrapper _eventRegisterWrapper;
 		private EffectWrapper _callbackUnitRegisterWrapper;
-		private EffectWrapper _callbackEffectRegisterWrapper;
+		private readonly List<EffectWrapper> _callbackEffectRegisterWrappers;
 		private EffectWrapper _callbackEffectUnitsRegisterWrapper;
 
 		private readonly List<EffectWrapper> _effectWrappers;
@@ -70,6 +70,7 @@ namespace ModiBuff.Core
 			_tag = (TagType)Config.DefaultTag;
 
 			_effectWrappers = new List<EffectWrapper>(3);
+			_callbackEffectRegisterWrappers = new List<EffectWrapper>();
 
 			_saveInstructions = new List<SaveInstruction>
 				{ new SaveInstruction.Initialize(name, displayName, description) };
@@ -236,7 +237,7 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Adds a basic remove effect, that should be triggered on either stack, or callback
 		/// </summary>
-		public ModifierRecipe Remove(RemoveEffectOn removeEffectOn = RemoveEffectOn.CallbackUnit)
+		public ModifierRecipe Remove(RemoveEffectOn removeEffectOn)
 		{
 			AddRemoveEffect(removeEffectOn.ToEffectOn());
 			_saveInstructions.Add(new SaveInstruction.Remove(SaveInstruction.Remove.Type.RemoveOn,
@@ -485,21 +486,15 @@ namespace ModiBuff.Core
 		///		Special callbacks, all EffectOn.<see cref="EffectOn.CallbackEffect"/> effects will
 		///		trigger when <see cref="callbackType"/> is triggered.
 		///		Supports custom callback signatures (beside <see cref="UnitCallback"/>.
-		///		Only ONE CallbackEffect can be registered per modifier.
+		///		Callback effects now have to be in order
 		/// </summary>
 		public ModifierRecipe CallbackEffect<TCallbackEffect>(TCallbackEffect callbackType,
 			Func<IEffect, object> @event)
 		{
-			if (_callbackEffectRegisterWrapper != null)
-			{
-				Logger.LogError("[ModiBuff] Multiple CallbackEffect effects registered, " +
-				                "only one is allowed per modifier, ignoring.");
-				return this;
-			}
-
 			var effect = new CallbackEffectRegisterEffect<TCallbackEffect>(callbackType, @event);
-			_callbackEffectRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
-			_effectWrappers.Add(_callbackEffectRegisterWrapper);
+			var wrapper = new EffectWrapper(effect, EffectOn.Init);
+			_callbackEffectRegisterWrappers.Add(wrapper);
+			_effectWrappers.Add(wrapper);
 			return this;
 		}
 
@@ -507,22 +502,15 @@ namespace ModiBuff.Core
 		///		Special callbacks, all EffectOn.<see cref="EffectOn.CallbackEffect"/> effects will
 		///		trigger when <see cref="callbackType"/> is triggered.
 		///		Supports custom callback signatures (beside <see cref="UnitCallback"/>.
-		///		Only ONE CallbackEffect can be registered per modifier.
 		///		Allows to save state through state context.
 		/// </summary>
 		public ModifierRecipe CallbackEffect<TCallbackEffect, TStateData>(TCallbackEffect callbackType,
 			Func<IEffect, CallbackStateContext<TStateData>> @event)
 		{
-			if (_callbackEffectRegisterWrapper != null)
-			{
-				Logger.LogError("[ModiBuff] Multiple CallbackEffect effects registered, " +
-				                "only one is allowed per modifier, ignoring.");
-				return this;
-			}
-
 			var effect = new CallbackStateEffectRegisterEffect<TCallbackEffect, TStateData>(callbackType, @event);
-			_callbackEffectRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
-			_effectWrappers.Add(_callbackEffectRegisterWrapper);
+			var wrapper = new EffectWrapper(effect, EffectOn.Init);
+			_callbackEffectRegisterWrappers.Add(wrapper);
+			_effectWrappers.Add(wrapper);
 			return this;
 		}
 
@@ -591,10 +579,10 @@ namespace ModiBuff.Core
 
 			var data = new ModifierRecipeData(Id, Name, _effectWrappers, finalRemoveEffectWrapper,
 				_dispelRegisterWrapper, _eventRegisterWrapper, _callbackUnitRegisterWrapper,
-				_callbackEffectRegisterWrapper, _callbackEffectUnitsRegisterWrapper, _hasApplyChecks, _applyCheckList,
-				_hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura, _tag,
-				_oneTimeInit, _interval, _duration, _refreshDuration, _refreshInterval, _whenStackEffect, _maxStacks,
-				_everyXStacks, _singleStackTime, _independentStackTime);
+				_callbackEffectRegisterWrappers.ToArray(), _callbackEffectUnitsRegisterWrapper, _hasApplyChecks,
+				_applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura,
+				_tag, _oneTimeInit, _interval, _duration, _refreshDuration, _refreshInterval, _whenStackEffect,
+				_maxStacks, _everyXStacks, _singleStackTime, _independentStackTime);
 			return new ModifierGenerator(in data);
 		}
 
@@ -673,7 +661,9 @@ namespace ModiBuff.Core
 
 			ValidateCallbacks(EffectOn.Event, _eventRegisterWrapper);
 			ValidateCallbacks(EffectOn.CallbackUnit, _callbackUnitRegisterWrapper);
-			ValidateCallbacks(EffectOn.CallbackEffect, _callbackEffectRegisterWrapper);
+			for (int i = 0; i < _callbackEffectRegisterWrappers.Count; i++)
+				ValidateCallbacks(EffectOnCallbackEffectData.AllCallbackEffectData[i],
+					_callbackEffectRegisterWrappers[i]);
 			ValidateCallbacks(EffectOn.CallbackEffectUnits, _callbackEffectUnitsRegisterWrapper);
 
 			if (_effectWrappers.Exists(w =>

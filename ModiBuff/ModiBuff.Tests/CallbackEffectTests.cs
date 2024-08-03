@@ -302,5 +302,42 @@ namespace ModiBuff.Tests
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Freeze));
 			Assert.False(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Stun));
 		}
+
+		[Test]
+		public void DamageOnStun_HealOnAnyNotStunStatusEffectRemoved()
+		{
+			AddRecipe("DamageOnStun_HealOnAnyNotStunStatusEffectRemoved")
+				.Effect(new DamageEffect(5), EffectOn.CallbackEffect)
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+					new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+							((ICallbackEffect)effect).CallbackEffect(target, source);
+					}))
+				.Effect(new HealEffect(5), EffectOn.CallbackEffect2)
+				.CallbackEffect(CallbackType.StatusEffectRemoved, effect =>
+					new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (!appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+							((ICallbackEffect)effect).CallbackEffect(target, source);
+					}));
+			AddRecipe("Stun")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 1), EffectOn.Init)
+				.Remove(1).Refresh();
+			AddRecipe("Freeze")
+				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 1), EffectOn.Init)
+				.Remove(1).Refresh();
+			Setup();
+
+			Unit.AddModifierSelf("DamageOnStun_HealOnAnyNotStunStatusEffectRemoved");
+			Unit.AddModifierSelf("Stun");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.AddModifierSelf("Freeze");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
 	}
 }

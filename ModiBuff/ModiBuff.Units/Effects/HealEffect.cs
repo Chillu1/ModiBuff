@@ -119,6 +119,7 @@ namespace ModiBuff.Core.Units
 				Effect(target, source);
 		}
 
+		//TODO Should callback effects use stack logic?
 		public void CallbackEffect(IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Set) != 0)

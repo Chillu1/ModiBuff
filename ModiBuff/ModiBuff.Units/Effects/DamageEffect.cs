@@ -1,6 +1,6 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class DamageEffect : IStackEffect, IMutableStateEffect, IEffect,
+	public sealed class DamageEffect : IStackEffect, IMutableStateEffect, IEffect, ICallbackEffect,
 		IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
 		IEffectStateInfo<DamageEffect.Data>, ISavableEffect<DamageEffect.SaveData>,
 		ISaveableRecipeEffect<DamageEffect.RecipeSaveData>
@@ -89,6 +89,19 @@ namespace ModiBuff.Core.Units
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
 				_extraDamage += _stackValue * stacks;
+
+			if ((_stackEffect & StackEffectType.Effect) != 0)
+				Effect(target, source);
+		}
+
+		//TODO Should callback effects use stack logic?
+		public void CallbackEffect(IUnit target, IUnit source)
+		{
+			if ((_stackEffect & StackEffectType.Set) != 0)
+				_extraDamage = _stackValue;
+
+			if ((_stackEffect & StackEffectType.Add) != 0)
+				_extraDamage += _stackValue;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
