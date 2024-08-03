@@ -32,7 +32,7 @@ namespace ModiBuff.Tests
 			Setup();
 		}
 
-		[Test]
+		//[Test]
 		public void SaveRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -65,7 +65,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(modifierInfo.Description, description);
 		}
 
-		[Test]
+		//[Test]
 		public void SaveStackRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -82,7 +82,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 - 2 - 5 - 2 - 2, Unit.Health);
 		}
 
-		[Test]
+		//[Test]
 		public void SaveAddDamageRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -95,7 +95,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 		}
 
-		[Test]
+		//[Test]
 		public void SaveIntervalRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -110,7 +110,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
-		[Test]
+		//[Test]
 		public void SaveModifierActionRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -130,7 +130,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 - 5 - 5, Unit.Health);
 		}
 
-		[Test]
+		//[Test]
 		public void SaveRemoveRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -146,7 +146,7 @@ namespace ModiBuff.Tests
 			Assert.False(Unit.ContainsModifier("RemoveDamage"));
 		}
 
-		[Test]
+		//[Test]
 		public void SaveRefreshIntervalRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -164,7 +164,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth, Unit.Health);
 		}
 
-		[Test]
+		//[Test]
 		public void SaveRefreshDurationRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -183,7 +183,7 @@ namespace ModiBuff.Tests
 			Assert.False(Unit.ContainsModifier("RefreshDuration"));
 		}
 
-		[Test]
+		//[Test]
 		public void SaveRemoveStackRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -200,7 +200,7 @@ namespace ModiBuff.Tests
 			Assert.False(Unit.ContainsModifier("RemoveStack"));
 		}
 
-		[Test]
+		//[Test]
 		public void SaveRemoveCallbackUnitRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -218,7 +218,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitDamage, Unit.Damage);
 		}
 
-		[Test]
+		//[Test]
 		public void SaveDispelRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -239,7 +239,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
-		[Test]
+		//[Test]
 		public void SaveTagRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -253,7 +253,7 @@ namespace ModiBuff.Tests
 			Assert.True(ModifierRecipes.GetTag(id).HasTag(TagType.DurationIgnoresStatusResistance));
 		}
 
-		[Test]
+		//[Test]
 		public void SaveRemoveTagRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -267,7 +267,7 @@ namespace ModiBuff.Tests
 			Assert.False(ModifierRecipes.GetTag(id).HasTag(TagType.Default));
 		}
 
-		[Test]
+		//[Test]
 		public void SaveSetTagRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);

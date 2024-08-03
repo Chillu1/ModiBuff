@@ -38,7 +38,7 @@ namespace ModiBuff.Core
 						break;
 					case SaveInstruction.Interval.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
-						Interval(instruction.Values.GetDataFromJsonObject<float>());
+						Interval(((SaveInstruction.Interval)instruction).Value);
 #endif
 						break;
 					case SaveInstruction.Duration.Id:
@@ -122,47 +122,29 @@ namespace ModiBuff.Core
 
 			(IEffect, EffectOn) HandleEffect(SaveInstruction instruction)
 			{
-				var values = ((System.Text.Json.JsonElement)instruction.Values).EnumerateObject();
+				var effect = (SaveInstruction.Effect)instruction;
 				bool failed = false;
-				int? effectId = null;
 				ConstructorInfo constructor = null;
 				object[] effectStates = null;
-				EffectOn? effectOn = null;
-				foreach (var value in values)
+
+				int? effectId = effect.EffectId;
+
+				EffectOn? effectOn = effect.EffectOn;
+
 				{
-					//TODO Not hardcode/dynamic order?
-					if (value.NameEquals("Item1"))
-					{
-						effectId = value.Value.GetInt32();
-					}
+					var effectType = _effectTypeIdManager.GetEffectType(effectId.Value);
+					//TODO Find constructor by saved types? Prob not worth
+					constructor = effectType.GetConstructors()[0];
 
-					if (value.NameEquals("Item2"))
-					{
-						if (effectId == null)
-						{
-							Logger.LogWarning(
-								$"[ModiBuff] Couldn't extract recipe save data because of missing effect id for {Name}");
-							continue;
-						}
-
-						var effectType = _effectTypeIdManager.GetEffectType(effectId.Value);
-						//TODO Find constructor by saved types? Prob not worth
-						constructor = effectType.GetConstructors()[0];
-
-						var parameters = constructor.GetParameters();
-						effectStates = new object[parameters.Length];
-						int i = 0;
-						foreach (var property in value.Value.EnumerateObject())
-						{
-							effectStates[i] = property.Value.GetDataFromJsonObject(parameters[i].ParameterType);
-							i++;
-						}
-					}
-
-					if (value.NameEquals("Item3"))
-					{
-						effectOn = (EffectOn)value.Value.GetInt32();
-					}
+					var parameters = constructor.GetParameters();
+					effectStates = new object[parameters.Length];
+					int i = 0;
+					;
+					//foreach (var property in (effect.SaveData as JsonDocument).EnumerateObject())
+					//{
+					//	effectStates[i] = property.Value.GetDataFromJsonObject(parameters[i].ParameterType);
+					//	i++;
+					//}
 				}
 
 				if (effectStates == null)
@@ -191,6 +173,14 @@ namespace ModiBuff.Core
 			}
 		}
 
+		[System.Text.Json.Serialization.JsonPolymorphic]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(Initialize), Initialize.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(Interval), Interval.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(Duration), Duration.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(Remove), Remove.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(Refresh), Refresh.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(Stack), Stack.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(Effect), Effect.Id)]
 		public record SaveInstruction
 		{
 			public readonly object Values;
@@ -209,9 +199,13 @@ namespace ModiBuff.Core
 
 			public object[] GetValues(params Type[] types) => ((System.Text.Json.JsonElement)Values).GetValues(types);
 
-			public sealed record Initialize : SaveInstruction
+			public record Initialize : SaveInstruction
 			{
 				public const int Id = BaseId;
+
+				public readonly string Name;
+				public readonly string DisplayName;
+				public readonly string Description;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
@@ -219,6 +213,9 @@ namespace ModiBuff.Core
 				public Initialize(string name, string displayName, string description)
 					: base((name, displayName, description), Id)
 				{
+					Name = name;
+					DisplayName = displayName;
+					Description = description;
 				}
 			}
 
@@ -226,11 +223,14 @@ namespace ModiBuff.Core
 			{
 				public const int Id = Initialize.Id + 1;
 
+				public readonly float Value;
+
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Interval(float interval) : base(interval, Id)
+				public Interval(float value) : base(value, Id)
 				{
+					Value = value;
 				}
 			}
 
@@ -238,17 +238,24 @@ namespace ModiBuff.Core
 			{
 				public const int Id = Interval.Id + 1;
 
+				public readonly float Value;
+
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Duration(float duration) : base(duration, Id)
+				public Duration(float value) : base(value, Id)
 				{
+					Value = value;
 				}
 			}
 
 			public sealed record Remove : SaveInstruction
 			{
-				public const int Id = Duration.Id + 1;
+				public const int Id = SaveInstruction.Duration.Id + 1;
+
+				public readonly Type RemoveType;
+				public readonly EffectOn EffectOn;
+				public readonly float Duration;
 
 				public enum Type
 				{
@@ -259,14 +266,17 @@ namespace ModiBuff.Core
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Remove(Type type, EffectOn effectOn, float duration = 0)
-					: base(type switch
+				public Remove(Type removeType, EffectOn effectOn, float duration = 0)
+					: base(removeType switch
 					{
-						Type.RemoveOn => (type, effectOn),
-						Type.Duration => (type, duration),
+						Type.RemoveOn => (removeType, effectOn),
+						Type.Duration => (removeType, duration),
 						_ => throw new ArgumentOutOfRangeException()
 					}, Id)
 				{
+					RemoveType = removeType;
+					EffectOn = effectOn;
+					Duration = duration;
 				}
 			}
 
@@ -274,11 +284,14 @@ namespace ModiBuff.Core
 			{
 				public const int Id = Remove.Id + 1;
 
+				public readonly RefreshType RefreshType;
+
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Refresh(RefreshType type) : base(type, Id)
+				public Refresh(RefreshType refreshType) : base(refreshType, Id)
 				{
+					RefreshType = refreshType;
 				}
 			}
 
@@ -339,9 +352,13 @@ namespace ModiBuff.Core
 				}
 			}
 
-			public sealed record Effect : SaveInstruction
+			public record Effect : SaveInstruction
 			{
 				public const int Id = CallbackUnit.Id + 1;
+
+				public readonly int EffectId;
+				public readonly object SaveData;
+				public readonly EffectOn EffectOn;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
@@ -349,6 +366,9 @@ namespace ModiBuff.Core
 				public Effect(int effectId, object saveData, EffectOn effectOn)
 					: base((effectId, saveData, effectOn), Id)
 				{
+					EffectId = effectId;
+					SaveData = saveData;
+					EffectOn = effectOn;
 				}
 			}
 
