@@ -22,8 +22,8 @@ namespace ModiBuff.Extensions.Serialization.Json
 			};
 		}
 
-		public string Save<T>(T obj) => JsonSerializer.Serialize(obj, obj.GetType(), _options);
-		public string Save(GameState.SaveData obj) => JsonSerializer.Serialize(obj, obj.GetType(), _options);
+		public string Save<T>(T obj) => JsonSerializer.Serialize(obj, _options);
+		public string Save(GameState.SaveData obj) => JsonSerializer.Serialize(obj, _options);
 
 		public void SaveToPath(string json, string fileName) =>
 			File.WriteAllText(System.IO.Path.Combine(Path, fileName), json);
