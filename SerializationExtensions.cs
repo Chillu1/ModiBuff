@@ -62,11 +62,6 @@ namespace ModiBuff.Core
 			return TryGetDataFromJsonObject(fromLoad, out T data) ? data : default;
 		}
 
-		public static object GetDataFromJsonObject(this object fromLoad, Type type)
-		{
-			return fromLoad is not System.Text.Json.JsonElement jsonElement ? null : jsonElement.ToValue(type);
-		}
-
 		private static readonly List<object> valuesHolder = new List<object>();
 
 		public static object[] GetValues(this System.Text.Json.JsonElement element, params Type[] types)
@@ -95,7 +90,7 @@ namespace ModiBuff.Core
 			return values;
 		}
 
-		private static object ToValue(this System.Text.Json.JsonElement element, Type type)
+		public static object ToValue(this System.Text.Json.JsonElement element, Type type)
 		{
 			if (type == typeof(int))
 				return element.GetInt32();
