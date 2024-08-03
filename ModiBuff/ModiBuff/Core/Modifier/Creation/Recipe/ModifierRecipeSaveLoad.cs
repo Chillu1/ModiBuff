@@ -155,6 +155,7 @@ namespace ModiBuff.Core
 #endif
 		}
 
+#if MODIBUFF_SYSTEM_TEXT_JSON
 		[System.Text.Json.Serialization.JsonPolymorphic]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Initialize), Initialize.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Interval), Interval.Id)]
@@ -167,6 +168,7 @@ namespace ModiBuff.Core
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(CallbackUnit), CallbackUnit.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Effect), Effect.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(ModifierAction), ModifierAction.Id)]
+#endif
 		public record SaveInstruction
 		{
 			public readonly int InstructionId;
