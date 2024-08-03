@@ -60,6 +60,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveUnitLoad()
 		{
 			AddRecipe("AddDamageExtraState")
@@ -86,6 +89,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveEffectCooldownCheckLoad()
 		{
 			AddRecipe("AddDamageExtraState")
@@ -111,6 +117,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveLoadStatusEffect()
 		{
 			AddRecipe("InitStun")
@@ -133,6 +142,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveLoadEventCallbackState()
 		{
 			AddRecipe("InitCallbackState")
@@ -161,6 +173,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveLoadApplierState()
 		{
 			AddRecipe("InitDamageChecks")
@@ -184,6 +199,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveLoadTargetId()
 		{
 			AddRecipe("DoT")
@@ -209,6 +227,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveNewModifierIdLoad()
 		{
 			AddRecipe("DoT")
@@ -234,6 +255,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveNewModifierApplierIdLoad()
 		{
 			AddRecipe("DoT")
@@ -266,6 +290,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveNewEffectIdLoad()
 		{
 			AddEffect("InitDamage", new DamageEffect(5));
@@ -288,6 +315,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveModifierNewEffectLoad()
 		{
 			AddRecipe("InitHeal")
@@ -338,6 +368,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveCallbackLocalVarState()
 		{
 			AddRecipe("InitTakeFiveDamageOnTenDamageTaken")
@@ -372,6 +405,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void SavePoisonEffectLoad()
 		{
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+			Setup();
+			Assert.Ignore("MODIBUFF_SYSTEM_TEXT_JSON not defined. Skipping test.");
+#else
 			SerializationExtensions.AddCustomValueType<IReadOnlyDictionary<int, int>>(element =>
 			{
 				var dictionary = new Dictionary<int, int>();
@@ -379,6 +416,7 @@ namespace ModiBuff.Tests
 					dictionary.Add(int.Parse(kvp.Name), kvp.Value.GetInt32());
 				return dictionary;
 			});
+#endif
 
 			AddRecipe(CentralizedCustomLogicTests.PoisonRecipe);
 			AddRecipe("PoisonThorns")
@@ -418,6 +456,10 @@ namespace ModiBuff.Tests
 		[Test]
 		public void SaveCallbackLocalTupleVarState()
 		{
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+			Setup();
+			Assert.Ignore("MODIBUFF_SYSTEM_TEXT_JSON not defined. Skipping test.");
+#else
 			SerializationExtensions.AddCustomValueType<Tuple<float, float>>(element =>
 			{
 				float[] array = new float[2];
@@ -426,6 +468,7 @@ namespace ModiBuff.Tests
 					array[i++] = kvp.Value.GetSingle();
 				return new Tuple<float, float>(array[0], array[1]);
 			});
+#endif
 
 			AddRecipe("InitTakeFiveDamageOnTenDamageTaken")
 				.Callback(CallbackType.CurrentHealthChanged, () =>
@@ -473,6 +516,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveCallbackEffectLocalFloatVarState()
 		{
 			AddRecipe("StunnedFourTimesDispelAllStatusEffects")

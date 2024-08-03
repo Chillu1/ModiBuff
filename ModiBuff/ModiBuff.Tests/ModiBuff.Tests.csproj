@@ -2,15 +2,10 @@
 
     <PropertyGroup>
         <Nullable>disable</Nullable>
-
         <IsPackable>false</IsPackable>
-
         <LangVersion>7.2</LangVersion>
-
         <OutputType>Library</OutputType>
-
         <TargetFramework>net6.0</TargetFramework>
-
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     </PropertyGroup>
 

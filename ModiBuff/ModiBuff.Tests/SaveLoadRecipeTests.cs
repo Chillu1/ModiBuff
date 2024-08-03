@@ -33,6 +33,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -46,6 +49,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveNamesRecipeLoad()
 		{
 			const string name = "InitDamage";
@@ -66,6 +72,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveStackRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -83,6 +92,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveAddDamageRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -96,6 +108,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveIntervalRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -111,6 +126,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveModifierActionRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -131,6 +149,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveRemoveRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -147,6 +168,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveRefreshIntervalRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -165,6 +189,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveRefreshDurationRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -184,6 +211,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveRemoveStackRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -201,6 +231,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveRemoveCallbackUnitRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -219,6 +252,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveDispelRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -240,6 +276,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveTagRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -254,6 +293,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveRemoveTagRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
@@ -268,6 +310,9 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
 		public void SaveSetTagRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
