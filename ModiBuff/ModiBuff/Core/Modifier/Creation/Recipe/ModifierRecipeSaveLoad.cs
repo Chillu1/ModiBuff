@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Reflection;
 
 namespace ModiBuff.Core
 {
@@ -43,62 +42,60 @@ namespace ModiBuff.Core
 						break;
 					case SaveInstruction.Duration.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
-						Duration(instruction.Values.GetDataFromJsonObject<float>());
+						Duration(((SaveInstruction.Duration)instruction).Value);
 #endif
 						break;
 					case SaveInstruction.Remove.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
-						var removeType =
-							(SaveInstruction.Remove.Type)instruction.GetValues(typeof(SaveInstruction.Remove.Type))[0];
-						switch (removeType)
+						var remove = (SaveInstruction.Remove)instruction;
+						switch (remove.RemoveType)
 						{
 							case SaveInstruction.Remove.Type.RemoveOn:
-								Remove(((EffectOn)instruction.GetValues(typeof(SaveInstruction.Remove.Type),
-									typeof(EffectOn))[1]).ToRemoveEffectOn());
+								Remove(remove.EffectOn.ToRemoveEffectOn());
 								break;
 							case SaveInstruction.Remove.Type.Duration:
-								Remove((float)instruction
-									.GetValues(typeof(SaveInstruction.Remove.Type), typeof(float))[1]);
+								Remove(remove.Duration);
 								break;
 							default:
-								Logger.LogError($"[ModiBuff] Loaded remove instruction with unknown type {removeType}");
+								Logger.LogError(
+									$"[ModiBuff] Loaded remove instruction with unknown type {remove.RemoveType}");
 								break;
 						}
 #endif
 						break;
 					case SaveInstruction.Refresh.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
-						Refresh(instruction.Values.GetDataFromJsonObject<RefreshType>());
+						Refresh(((SaveInstruction.Refresh)instruction).RefreshType);
 #endif
 						break;
 					case SaveInstruction.Stack.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
-						object[] stackValues = instruction.GetValues(typeof(WhenStackEffect), typeof(int), typeof(int),
-							typeof(float), typeof(float));
-						Stack((WhenStackEffect)stackValues[0], (int)stackValues[1], (int)stackValues[2],
-							(float)stackValues[3], (float)stackValues[4]);
+						var stack = (SaveInstruction.Stack)instruction;
+						Stack(stack.WhenStackEffect, stack.MaxStacks, stack.EveryXStacks, stack.SingleStackTime,
+							stack.IndependentStackTime);
 #endif
 						break;
 					case SaveInstruction.Dispel.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
-						Dispel(instruction.Values.GetDataFromJsonObject<DispelType>());
+						Dispel(((SaveInstruction.Dispel)instruction).Type);
 #endif
 						break;
 					case SaveInstruction.Tag.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
-						object[] tagValues = instruction.GetValues(typeof(SaveInstruction.Tag.Type), typeof(TagType));
-						_ = (SaveInstruction.Tag.Type)tagValues[0] switch
+						var tag = (SaveInstruction.Tag)instruction;
+						_ = tag.InstructionTagType switch
 						{
-							SaveInstruction.Tag.Type.Add => Tag((TagType)tagValues[1]),
-							SaveInstruction.Tag.Type.Remove => RemoveTag((TagType)tagValues[1]),
-							SaveInstruction.Tag.Type.Set => SetTag((TagType)tagValues[1]),
+							SaveInstruction.Tag.Type.Add => Tag(tag.TagType),
+							SaveInstruction.Tag.Type.Remove => RemoveTag(tag.TagType),
+							SaveInstruction.Tag.Type.Set => SetTag(tag.TagType),
 							_ => throw new ArgumentOutOfRangeException()
 						};
 #endif
 						break;
 					case SaveInstruction.CallbackUnit.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
-						CallbackUnit(instruction.Values.GetDataFromJsonObject<TUnitCallback>());
+						CallbackUnit(
+							(TUnitCallback)(object)((SaveInstruction.CallbackUnit)instruction).CallbackUnitType);
 #endif
 						break;
 					case SaveInstruction.Effect.Id:
@@ -110,8 +107,8 @@ namespace ModiBuff.Core
 						break;
 					case SaveInstruction.ModifierAction.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
-						object[] actionValues = instruction.GetValues(typeof(ModifierAction), typeof(EffectOn));
-						ModifierAction((ModifierAction)actionValues[0], (EffectOn)actionValues[1]);
+						var action = (SaveInstruction.ModifierAction)instruction;
+						ModifierAction(action.ModifierActionFlags, action.EffectOn);
 #endif
 						break;
 					default:
@@ -124,52 +121,35 @@ namespace ModiBuff.Core
 			{
 				var effect = (SaveInstruction.Effect)instruction;
 				bool failed = false;
-				ConstructorInfo constructor = null;
-				object[] effectStates = null;
 
-				int? effectId = effect.EffectId;
+				int effectId = effect.EffectId;
+				EffectOn effectOn = effect.EffectOn;
 
-				EffectOn? effectOn = effect.EffectOn;
+				var effectType = _effectTypeIdManager.GetEffectType(effectId);
+				//TODO Find constructor by saved types? Prob not worth
+				var constructor = effectType.GetConstructors()[0];
 
+				var parameters = constructor.GetParameters();
+				object[] effectStates = new object[parameters.Length];
+				int i = 0;
+				foreach (var property in ((System.Text.Json.JsonElement)effect.SaveData).EnumerateObject())
 				{
-					var effectType = _effectTypeIdManager.GetEffectType(effectId.Value);
-					//TODO Find constructor by saved types? Prob not worth
-					constructor = effectType.GetConstructors()[0];
+					object value = property.Value.ToValue(parameters[i].ParameterType);
+					if (value == null)
+					{
+						Logger.LogError(
+							$"[ModiBuff] Failed to load effect state from save data by {Name} for effect {effectId}");
+						failed = true;
+					}
 
-					var parameters = constructor.GetParameters();
-					effectStates = new object[parameters.Length];
-					int i = 0;
-					;
-					//foreach (var property in (effect.SaveData as JsonDocument).EnumerateObject())
-					//{
-					//	effectStates[i] = property.Value.GetDataFromJsonObject(parameters[i].ParameterType);
-					//	i++;
-					//}
-				}
-
-				if (effectStates == null)
-				{
-					Logger.LogError(
-						$"[ModiBuff] Failed to load effect state from save data by {Name} {(effectId != -1 ? $"for effect {effectId}" : "")}");
-					failed = true;
-				}
-
-				if (effectOn == null)
-				{
-					Logger.LogError($"[ModiBuff] Failed to load effect on from save data by {Name}");
-					failed = true;
-				}
-
-				if (effectId == null)
-				{
-					Logger.LogError($"[ModiBuff] Failed to load effect id from save data by {Name}");
-					failed = true;
+					effectStates[i] = value;
+					i++;
 				}
 
 				if (failed)
 					return (null, EffectOn.None);
 
-				return ((IEffect)constructor.Invoke(effectStates), effectOn.Value);
+				return ((IEffect)constructor.Invoke(effectStates), effectOn);
 			}
 		}
 
@@ -180,10 +160,13 @@ namespace ModiBuff.Core
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Remove), Remove.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Refresh), Refresh.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Stack), Stack.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(Dispel), Dispel.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(Tag), Tag.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(CallbackUnit), CallbackUnit.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Effect), Effect.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(ModifierAction), ModifierAction.Id)]
 		public record SaveInstruction
 		{
-			public readonly object Values;
 			public readonly int InstructionId;
 
 			private const int BaseId = 0;
@@ -191,13 +174,10 @@ namespace ModiBuff.Core
 #if MODIBUFF_SYSTEM_TEXT_JSON
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public SaveInstruction(object values, int instructionId)
+			public SaveInstruction(int instructionId)
 			{
-				Values = values;
 				InstructionId = instructionId;
 			}
-
-			public object[] GetValues(params Type[] types) => ((System.Text.Json.JsonElement)Values).GetValues(types);
 
 			public record Initialize : SaveInstruction
 			{
@@ -210,8 +190,7 @@ namespace ModiBuff.Core
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Initialize(string name, string displayName, string description)
-					: base((name, displayName, description), Id)
+				public Initialize(string name, string displayName, string description) : base(Id)
 				{
 					Name = name;
 					DisplayName = displayName;
@@ -228,7 +207,7 @@ namespace ModiBuff.Core
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Interval(float value) : base(value, Id)
+				public Interval(float value) : base(Id)
 				{
 					Value = value;
 				}
@@ -243,7 +222,7 @@ namespace ModiBuff.Core
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Duration(float value) : base(value, Id)
+				public Duration(float value) : base(Id)
 				{
 					Value = value;
 				}
@@ -266,13 +245,7 @@ namespace ModiBuff.Core
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Remove(Type removeType, EffectOn effectOn, float duration = 0)
-					: base(removeType switch
-					{
-						Type.RemoveOn => (removeType, effectOn),
-						Type.Duration => (removeType, duration),
-						_ => throw new ArgumentOutOfRangeException()
-					}, Id)
+				public Remove(Type removeType, EffectOn effectOn, float duration = 0) : base(Id)
 				{
 					RemoveType = removeType;
 					EffectOn = effectOn;
@@ -289,7 +262,7 @@ namespace ModiBuff.Core
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Refresh(RefreshType refreshType) : base(refreshType, Id)
+				public Refresh(RefreshType refreshType) : base(Id)
 				{
 					RefreshType = refreshType;
 				}
@@ -299,13 +272,23 @@ namespace ModiBuff.Core
 			{
 				public const int Id = Refresh.Id + 1;
 
+				public readonly WhenStackEffect WhenStackEffect;
+				public readonly int MaxStacks;
+				public readonly int EveryXStacks;
+				public readonly float SingleStackTime;
+				public readonly float IndependentStackTime;
+
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Stack(WhenStackEffect when, int maxStacks, int everyXStacks,
-					float singleStackTime, float independentStackTime)
-					: base((when, maxStacks, everyXStacks, singleStackTime, independentStackTime), Id)
+				public Stack(WhenStackEffect whenStackEffect, int maxStacks, int everyXStacks, float singleStackTime,
+					float independentStackTime) : base(Id)
 				{
+					WhenStackEffect = whenStackEffect;
+					MaxStacks = maxStacks;
+					EveryXStacks = everyXStacks;
+					SingleStackTime = singleStackTime;
+					IndependentStackTime = independentStackTime;
 				}
 			}
 
@@ -313,12 +296,12 @@ namespace ModiBuff.Core
 			{
 				public const int Id = Stack.Id + 1;
 
+				public readonly DispelType Type;
+
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Dispel(DispelType type) : base(type, Id)
-				{
-				}
+				public Dispel(DispelType type) : base(Id) => Type = type;
 			}
 
 			public sealed record Tag : SaveInstruction
@@ -332,11 +315,16 @@ namespace ModiBuff.Core
 					Set,
 				}
 
+				public readonly Type InstructionTagType;
+				public readonly TagType TagType;
+
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Tag(Type type, TagType tagType) : base((type, tagType), Id)
+				public Tag(Type instructionTagType, TagType tagType) : base(Id)
 				{
+					InstructionTagType = instructionTagType;
+					TagType = tagType;
 				}
 			}
 
@@ -344,15 +332,18 @@ namespace ModiBuff.Core
 			{
 				public const int Id = Tag.Id + 1;
 
+				public readonly int CallbackUnitType;
+
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public CallbackUnit(int callbackUnit) : base(callbackUnit, Id)
+				public CallbackUnit(int callbackUnitType) : base(Id)
 				{
+					CallbackUnitType = callbackUnitType;
 				}
 			}
 
-			public record Effect : SaveInstruction
+			public sealed record Effect : SaveInstruction
 			{
 				public const int Id = CallbackUnit.Id + 1;
 
@@ -363,8 +354,7 @@ namespace ModiBuff.Core
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Effect(int effectId, object saveData, EffectOn effectOn)
-					: base((effectId, saveData, effectOn), Id)
+				public Effect(int effectId, object saveData, EffectOn effectOn) : base(Id)
 				{
 					EffectId = effectId;
 					SaveData = saveData;
@@ -376,12 +366,16 @@ namespace ModiBuff.Core
 			{
 				public const int Id = Effect.Id + 1;
 
+				public readonly ModiBuff.Core.ModifierAction ModifierActionFlags;
+				public readonly EffectOn EffectOn;
+
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public ModifierAction(ModiBuff.Core.ModifierAction modifierAction, EffectOn effectOn)
-					: base((modifierAction, effectOn), Id)
+				public ModifierAction(ModiBuff.Core.ModifierAction modifierActionFlags, EffectOn effectOn) : base(Id)
 				{
+					ModifierActionFlags = modifierActionFlags;
+					EffectOn = effectOn;
 				}
 			}
 		}
