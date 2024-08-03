@@ -120,6 +120,7 @@ namespace ModiBuff.Core
 				}
 			}
 
+#if MODIBUFF_SYSTEM_TEXT_JSON
 			(IEffect, EffectOn) HandleEffect(SaveInstruction instruction)
 			{
 				var values = ((System.Text.Json.JsonElement)instruction.Values).EnumerateObject();
@@ -189,6 +190,7 @@ namespace ModiBuff.Core
 
 				return ((IEffect)constructor.Invoke(effectStates), effectOn.Value);
 			}
+#endif
 		}
 
 		public record SaveInstruction
@@ -206,8 +208,9 @@ namespace ModiBuff.Core
 				Values = values;
 				InstructionId = instructionId;
 			}
-
+#if MODIBUFF_SYSTEM_TEXT_JSON
 			public object[] GetValues(params Type[] types) => ((System.Text.Json.JsonElement)Values).GetValues(types);
+#endif
 
 			public sealed record Initialize : SaveInstruction
 			{
