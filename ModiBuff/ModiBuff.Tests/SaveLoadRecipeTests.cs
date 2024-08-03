@@ -325,5 +325,24 @@ namespace ModiBuff.Tests
 			Assert.True(ModifierRecipes.GetTag(id).HasTag(TagType.DurationIgnoresStatusResistance));
 			Assert.False(ModifierRecipes.GetTag(id).HasTag(TagType.Default));
 		}
+
+		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
+		public void SaveOneTimeInitRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("OneTimeDamage")
+				.OneTimeInit()
+				.Effect(new DamageEffect(5), EffectOn.Init);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("OneTimeDamage");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.AddModifierSelf("OneTimeDamage");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
 	}
 }

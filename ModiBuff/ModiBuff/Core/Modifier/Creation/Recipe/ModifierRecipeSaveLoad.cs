@@ -35,6 +35,15 @@ namespace ModiBuff.Core
 				{
 					case SaveInstruction.Initialize.Id:
 						break;
+					case SaveInstruction.InstanceStackable.Id:
+						InstanceStackable();
+						break;
+					case SaveInstruction.Aura.Id:
+						Aura();
+						break;
+					case SaveInstruction.OneTimeInit.Id:
+						OneTimeInit();
+						break;
 					case SaveInstruction.Interval.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
 						Interval(((SaveInstruction.Interval)instruction).Value);
@@ -111,6 +120,10 @@ namespace ModiBuff.Core
 						ModifierAction(action.ModifierActionFlags, action.EffectOn);
 #endif
 						break;
+//					case SaveInstruction.Event.Id:
+//#if MODIBUFF_SYSTEM_TEXT_JSON
+//#endif
+//						break;
 					default:
 						Logger.LogError($"Unknown instruction with id {instruction.InstructionId}");
 						break;
@@ -158,6 +171,9 @@ namespace ModiBuff.Core
 #if MODIBUFF_SYSTEM_TEXT_JSON
 		[System.Text.Json.Serialization.JsonPolymorphic]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Initialize), Initialize.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(InstanceStackable), InstanceStackable.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(Aura), Aura.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(OneTimeInit), OneTimeInit.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Interval), Interval.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Duration), Duration.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Remove), Remove.Id)]
@@ -202,9 +218,24 @@ namespace ModiBuff.Core
 				}
 			}
 
-			public sealed record Interval : SaveInstruction
+			public sealed record InstanceStackable() : SaveInstruction(Id)
 			{
 				public const int Id = Initialize.Id + 1;
+			}
+
+			public sealed record Aura() : SaveInstruction(Id)
+			{
+				public const int Id = InstanceStackable.Id + 1;
+			}
+
+			public sealed record OneTimeInit() : SaveInstruction(Id)
+			{
+				public const int Id = Aura.Id + 1;
+			}
+
+			public sealed record Interval : SaveInstruction
+			{
+				public const int Id = OneTimeInit.Id + 1;
 
 				public readonly float Value;
 

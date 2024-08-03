@@ -84,6 +84,7 @@ namespace ModiBuff.Core
 		public ModifierRecipe InstanceStackable()
 		{
 			_isInstanceStackable = true;
+			_saveInstructions.Add(new SaveInstruction.InstanceStackable());
 			return this;
 		}
 
@@ -93,6 +94,7 @@ namespace ModiBuff.Core
 		public ModifierRecipe Aura()
 		{
 			_isAura = true;
+			_saveInstructions.Add(new SaveInstruction.Aura());
 			return this;
 		}
 
@@ -181,6 +183,7 @@ namespace ModiBuff.Core
 		public ModifierRecipe OneTimeInit()
 		{
 			_oneTimeInit = true;
+			_saveInstructions.Add(new SaveInstruction.OneTimeInit());
 			return this;
 		}
 
@@ -411,6 +414,7 @@ namespace ModiBuff.Core
 		{
 			_eventRegisterWrapper = new EffectWrapper(new EventRegisterEffect<TEvent>(@event), EffectOn.Init);
 			_effectWrappers.Add(_eventRegisterWrapper);
+			//_saveInstructions.Add(new SaveInstruction.Event((int)(object)@event));
 			return this;
 		}
 
