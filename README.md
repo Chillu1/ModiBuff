@@ -606,8 +606,7 @@ Add("InitTakeFiveDamageOnTenDamageTaken")
 These callbacks get the effect fed as a parameter, this allows for condtional effect invoking, or custom effect use,
 like manual stack trigger. Supports custom callback signatures.
 
-> Important: there can only be one callback `CallbackEffect` per modifier, but there can be
-> multiple effects that trigger on that callback.
+> Important: all versions before 0.4/latest mater can only have one callback `CallbackEffect` per modifier.
 
 ```csharp
 Add("SilenceSourceWhenSilenced")
@@ -642,6 +641,29 @@ Add("StunnedFourTimesDispelAllStatusEffects")
                 }
             }), () => totalTimesStunned, value => totalTimesStunned = value);
     })
+```
+
+As of commit [3398675](https://github.com/Chillu1/ModiBuff/commit/339867518dc86eae704b447ac8f112b61d5b17c6)
+the recipe system supports up to 4 different callback effects.
+
+Ex. Damage whenever target get's stunned, and heal whenever a status effect expires/gets removed that's not a stun.
+
+```csharp
+Add("DamageOnStun_HealOnAnyNotStunStatusEffectRemoved")
+    .Effect(new DamageEffect(5), EffectOn.CallbackEffect)
+    .CallbackEffect(CallbackType.StatusEffectAdded, effect =>
+        new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+        {
+            if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+                ((ICallbackEffect)effect).CallbackEffect(target, source);
+        }))
+    .Effect(new HealEffect(5), EffectOn.CallbackEffect2)
+    .CallbackEffect(CallbackType.StatusEffectRemoved, effect =>
+        new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+        {
+            if (!appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+                ((ICallbackEffect)effect).CallbackEffect(target, source);
+        }));
 ```
 
 ### Modifier Actions
@@ -830,7 +852,7 @@ a future release.
 The most usual usage of this is to trigger the stack action on a custom case.
 It's a way to glue callback/event logic to stacking behaviour.
 
-Here we dispell all status effects if the unit has been stunned 4 times.
+Here we dispel all status effects if the unit has been stunned 4 times.
 
 ```csharp
 Add("StunnedFourTimesDispelAllStatusEffects")
