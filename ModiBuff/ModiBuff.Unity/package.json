@@ -1,7 +1,7 @@
 {
   "name": "com.chillu.modibuff",
   "displayName": "ModiBuff",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Buff/Debuff/Modifier library focused on feature set and performance, while maintaining 0 GC",
   "keywords": ["ModiBuff", "unity", "buff", "modifier"],
   "license": "MPL-2.0",
