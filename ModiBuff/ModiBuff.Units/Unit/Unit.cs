@@ -17,7 +17,7 @@ namespace ModiBuff.Core.Units
 	//Or the manual generic one:
 	public partial class Unit : IUpdatable, IModifierOwner, IModifierApplierOwner, IAttacker<float, float>,
 		IDamagable<float, float, float, float>, IHealable<float, float>, IHealer<float, float>,
-		IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker, IEventOwner<EffectOnEvent>,
+		IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker, ICallbackCounter,
 		IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance, IKillable,
 		ICallbackUnitRegistrable<CallbackUnitType>, IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
@@ -170,7 +170,7 @@ namespace ModiBuff.Core.Units
 			if (_preAttackCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
-				(target as IEventOwner)?.ResetEventCounters();
+				(target as ICallbackCounter)?.ResetEventCounters();
 			}
 		}
 
@@ -224,7 +224,7 @@ namespace ModiBuff.Core.Units
 			    _onKillCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
-				(target as IEventOwner)?.ResetEventCounters();
+				(target as ICallbackCounter)?.ResetEventCounters();
 			}
 
 			return dealtDamage;
@@ -259,7 +259,7 @@ namespace ModiBuff.Core.Units
 			}
 
 			//if damage was bigger than half health, trigger strong attack callbacks
-			if (dealtDamage > MaxHealth * 0.5f)
+			if (dealtDamage > MaxHealth * 0.5f && ++_strongHitCounter <= MaxEventCount)
 			{
 				for (int i = 0; i < _strongHitCallbacks.Count; i++)
 					_strongHitCallbacks[i].Effect(this, source);
@@ -279,10 +279,11 @@ namespace ModiBuff.Core.Units
 
 			if (_whenAttackedCounter <= MaxEventCount &&
 			    _afterAttackedCounter <= MaxEventCount &&
-			    _healthChangedCounter <= MaxEventCount)
+			    _healthChangedCounter <= MaxEventCount &&
+			    _strongHitCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
-				(source as IEventOwner)?.ResetEventCounters();
+				(source as ICallbackCounter)?.ResetEventCounters();
 			}
 
 			return dealtDamage;
@@ -300,7 +301,7 @@ namespace ModiBuff.Core.Units
 			if (_healCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
-				(source as IEventOwner)?.ResetEventCounters();
+				(source as ICallbackCounter)?.ResetEventCounters();
 			}
 
 			Health += heal;
@@ -327,7 +328,7 @@ namespace ModiBuff.Core.Units
 			if (_healTargetCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
-				(target as IEventOwner)?.ResetEventCounters();
+				(target as ICallbackCounter)?.ResetEventCounters();
 			}
 
 			return valueHealed;
@@ -357,7 +358,7 @@ namespace ModiBuff.Core.Units
 			if (_onCastCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
-				(target as IEventOwner)?.ResetEventCounters();
+				(target as ICallbackCounter)?.ResetEventCounters();
 			}
 		}
 
@@ -404,7 +405,7 @@ namespace ModiBuff.Core.Units
 			if (_poisonDamageCounter <= MaxEventCount)
 			{
 				ResetEventCounters();
-				(source as IEventOwner)?.ResetEventCounters();
+				(source as ICallbackCounter)?.ResetEventCounters();
 			}
 
 			return dealtDamage + oldHealth - Health;
@@ -438,10 +439,16 @@ namespace ModiBuff.Core.Units
 		/// </summary>
 		public void StrongDispel(IUnit source)
 		{
-			for (int i = 0; i < _strongDispelCallbacks.Count; i++)
-				_strongDispelCallbacks[i].Effect(this, source);
-			for (int i = 0; i < _strongDispelEvents.Count; i++)
-				_strongDispelEvents[i](this, source);
+			if (++_strongDispelCounter <= MaxEventCount)
+			{
+				for (int i = 0; i < _strongDispelCallbacks.Count; i++)
+					_strongDispelCallbacks[i].Effect(this, source);
+				for (int i = 0; i < _strongDispelEvents.Count; i++)
+					_strongDispelEvents[i](this, source);
+			}
+
+			if (_strongDispelCounter <= MaxEventCount)
+				ResetEventCounters();
 		}
 
 		//---Aura---

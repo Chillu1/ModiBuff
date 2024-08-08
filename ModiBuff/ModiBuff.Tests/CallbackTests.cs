@@ -146,5 +146,44 @@ namespace ModiBuff.Tests
 			Enemy.Update(Unit.CallbackTimerCooldown);
 			Assert.AreEqual(EnemyDamage + 5, Enemy.Damage);
 		}
+
+		[Test]
+		public void MultipleEffectUnitCallbacks()
+		{
+			AddRecipe("DamageEffectUnitCallbacks")
+				.Effect(new DamageEffect(1), EffectOn.CallbackEffectUnits)
+				.CallbackEffectUnits(CallbackType.StatusEffectAdded, effect => (origTarget, origSource) =>
+					new StatusEffectEvent(
+						(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+						{
+							if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+								((ICallbackEffect)effect).CallbackEffect(origTarget, origSource);
+						}))
+				.Effect(new DamageEffect(2), EffectOn.CallbackEffectUnits2)
+				.CallbackEffectUnits(CallbackType.StatusEffectAdded, effect => (origTarget, origSource) =>
+					new StatusEffectEvent(
+						(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+						{
+							if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Freeze))
+								((ICallbackEffect)effect).CallbackEffect(origTarget, origSource);
+						}))
+				.Effect(new DamageEffect(3), EffectOn.CallbackEffectUnits3)
+				.CallbackEffectUnits(CallbackType.StatusEffectAdded, effect => (origTarget, origSource) =>
+					new StatusEffectEvent(
+						(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+						{
+							if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Root))
+								((ICallbackEffect)effect).CallbackEffect(origTarget, origSource);
+						}));
+			Setup();
+
+			Unit.AddModifierSelf("DamageEffectUnitCallbacks");
+			Unit.StatusEffectController.ChangeStatusEffect(0, 0, StatusEffectType.Stun, 1f, Unit);
+			Assert.AreEqual(UnitHealth - 1, Unit.Health);
+			Unit.StatusEffectController.ChangeStatusEffect(1, 0, StatusEffectType.Freeze, 1f, Unit);
+			Assert.AreEqual(UnitHealth - 1 - 2, Unit.Health);
+			Unit.StatusEffectController.ChangeStatusEffect(2, 0, StatusEffectType.Root, 1f, Unit);
+			Assert.AreEqual(UnitHealth - 1 - 2 - 3, Unit.Health);
+		}
 	}
 }

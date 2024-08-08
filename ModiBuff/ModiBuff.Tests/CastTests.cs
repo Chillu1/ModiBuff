@@ -96,8 +96,8 @@ namespace ModiBuff.Tests
 		public void CastOnCastEventRecursion()
 		{
 			AddRecipe("CastInitDamageEvent")
-				.Effect(new CastActionEffect("InitDamage"), EffectOn.Event)
-				.Event(EffectOnEvent.OnCast);
+				.Effect(new CastActionEffect("InitDamage"), EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.OnCast);
 			Setup();
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Cast);

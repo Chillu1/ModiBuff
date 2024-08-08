@@ -46,7 +46,6 @@ namespace ModiBuff.Tests
 
 		private IStackEffect[] _stackEffects;
 
-		private Unit _eventUnit;
 		private EmptyUnit _emptyUnit;
 
 		private bool _condition, _conditionTwo;
@@ -111,7 +110,6 @@ namespace ModiBuff.Tests
 				new AddDamageEffect(5), new AddDamageEffect(5, true)
 			};
 
-			_eventUnit = new Unit();
 			_emptyUnit = new EmptyUnit();*/
 
 			_condition = false;
@@ -410,36 +408,6 @@ namespace ModiBuff.Tests
 
 			var revertEffects = revertEffectsTemp.AsSpan(0, revertEffectIndex).ToArray();
 			ArrayPool<IStackRevertEffect>.Shared.Return(revertEffectsTemp);
-		}
-
-		//[Benchmark]
-		public void NullCheckAsCast()
-		{
-			IUnit inUnit = _eventUnit;
-			(inUnit as IEventOwner<EffectOnEvent>)?.ResetEventCounters();
-		}
-
-		//[Benchmark]
-		public void NullCheckIfIsCast()
-		{
-			IUnit inUnit = _eventUnit;
-			if (inUnit is IEventOwner<EffectOnEvent> eventTarget)
-				eventTarget.ResetEventCounters();
-		}
-
-		//[Benchmark]
-		public void NullCheckAsCastEmptyUnit()
-		{
-			IUnit inUnit = _emptyUnit;
-			(inUnit as IEventOwner<EffectOnEvent>)?.ResetEventCounters();
-		}
-
-		//[Benchmark]
-		public void NullCheckIfIsCastEmptyUnit()
-		{
-			IUnit inUnit = _emptyUnit;
-			if (inUnit is IEventOwner<EffectOnEvent> eventTarget)
-				eventTarget.ResetEventCounters();
 		}
 
 		[Benchmark]

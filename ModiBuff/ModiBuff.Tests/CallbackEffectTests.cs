@@ -339,5 +339,52 @@ namespace ModiBuff.Tests
 			Unit.Update(1);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 		}
+
+		[Test]
+		public void MultipleEffectCallbacks()
+		{
+			AddRecipe("DamageEffectCallbacksRemoveOnDisarm")
+				.Effect(new DamageEffect(1), EffectOn.CallbackEffect)
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new StatusEffectEvent(
+					(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+							((ICallbackEffect)effect).CallbackEffect(target, source);
+					}))
+				.Effect(new DamageEffect(2), EffectOn.CallbackEffect2)
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new StatusEffectEvent(
+					(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Freeze))
+							((ICallbackEffect)effect).CallbackEffect(target, source);
+					}))
+				.Effect(new DamageEffect(3), EffectOn.CallbackEffect3)
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new StatusEffectEvent(
+					(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Root))
+							((ICallbackEffect)effect).CallbackEffect(target, source);
+					}))
+				.Remove(RemoveEffectOn.CallbackEffect4)
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new StatusEffectEvent(
+					(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Disarm))
+							effect.Effect(target, source);
+					}));
+			Setup();
+
+			Unit.AddModifierSelf("DamageEffectCallbacksRemoveOnDisarm");
+			Unit.StatusEffectController.ChangeStatusEffect(0, 0, StatusEffectType.Stun, 1f, Unit);
+			Assert.AreEqual(UnitHealth - 1, Unit.Health);
+			Unit.StatusEffectController.ChangeStatusEffect(1, 0, StatusEffectType.Freeze, 1f, Unit);
+			Assert.AreEqual(UnitHealth - 1 - 2, Unit.Health);
+			Unit.StatusEffectController.ChangeStatusEffect(2, 0, StatusEffectType.Root, 1f, Unit);
+			Assert.AreEqual(UnitHealth - 1 - 2 - 3, Unit.Health);
+			Unit.StatusEffectController.ChangeStatusEffect(3, 0, StatusEffectType.Disarm, 1f, Unit);
+			Unit.Update(0);
+			Assert.AreEqual(UnitHealth - 1 - 2 - 3, Unit.Health);
+			Assert.False(Unit.ContainsModifier("DamageEffectCallbacksRemoveOnDisarm"));
+		}
 	}
 }

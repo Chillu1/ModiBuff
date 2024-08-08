@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
-using IEventOwner = ModiBuff.Core.IEventOwner;
 
 namespace ModiBuff.Tests
 {

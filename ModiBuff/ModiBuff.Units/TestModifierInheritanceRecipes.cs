@@ -48,8 +48,8 @@ namespace ModiBuff.Core.Units
 			}
 
 			Add("ThornsOnHitEvent")
-				.Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
-				.Event(EffectOnEvent.WhenAttacked);
+				.Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.WhenAttacked);
 		}
 	}
 }
