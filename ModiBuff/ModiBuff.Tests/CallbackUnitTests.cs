@@ -149,5 +149,31 @@ namespace ModiBuff.Tests
 			Unit.TakeDamage(UnitHealth * 0.6f, Unit);
 			Assert.AreEqual(UnitDamage, Unit.Damage);
 		}
+
+		[Test]
+		public void MultipleUnitCallbacks()
+		{
+			AddRecipe("AddDamageUnitCallbacksRemoveOnStrongDispel")
+				.Effect(new AddDamageEffect(1, EffectState.IsRevertible), EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.WhenAttacked)
+				.Effect(new AddDamageEffect(2, EffectState.IsRevertible), EffectOn.CallbackUnit2)
+				.CallbackUnit(CallbackUnitType.WhenHealed)
+				.Effect(new AddDamageEffect(3, EffectState.IsRevertible, targeting: Targeting.SourceTarget),
+					EffectOn.CallbackUnit3)
+				.CallbackUnit(CallbackUnitType.OnAttack)
+				.Remove(RemoveEffectOn.CallbackUnit4)
+				.CallbackUnit(CallbackUnitType.StrongDispel);
+			Setup();
+
+			Unit.AddModifierSelf("AddDamageUnitCallbacksRemoveOnStrongDispel");
+			Enemy.Attack(Unit);
+			Assert.AreEqual(UnitDamage + 1, Unit.Damage);
+			Unit.Heal(0, Unit);
+			Assert.AreEqual(UnitDamage + 1 + 2, Unit.Damage);
+			Unit.Attack(Enemy);
+			Assert.AreEqual(UnitDamage + 1 + 2 + 3, Unit.Damage);
+			Unit.StrongDispel(Unit);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+		}
 	}
 }

@@ -415,6 +415,7 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Registers a callback register effect to a unit, will trigger all <see cref="EffectOn.CallbackUnit"/>
 		///		effects when <see cref="callbackType"/> is triggered.
+		///		When using multiple CallbackUnits, the order matters.
 		/// </summary>
 		public ModifierRecipe CallbackUnit<TCallbackUnit>(TCallbackUnit callbackType)
 		{
@@ -472,7 +473,7 @@ namespace ModiBuff.Core
 		///		Special callbacks, all EffectOn.<see cref="EffectOn.CallbackEffect"/> effects will
 		///		trigger when <see cref="callbackType"/> is triggered.
 		///		Supports custom callback signatures (beside <see cref="UnitCallback"/>.
-		///		Callback effects now have to be in order
+		///		When using multiple CallbackEffects, the order matters.
 		/// </summary>
 		public ModifierRecipe CallbackEffect<TCallbackEffect>(TCallbackEffect callbackType,
 			Func<IEffect, object> @event)
@@ -489,6 +490,7 @@ namespace ModiBuff.Core
 		///		trigger when <see cref="callbackType"/> is triggered.
 		///		Supports custom callback signatures (beside <see cref="UnitCallback"/>.
 		///		Allows to save state through state context.
+		///		When using multiple CallbackEffects, the order matters.
 		/// </summary>
 		public ModifierRecipe CallbackEffect<TCallbackEffect, TStateData>(TCallbackEffect callbackType,
 			Func<IEffect, CallbackStateContext<TStateData>> @event)
@@ -505,6 +507,7 @@ namespace ModiBuff.Core
 		///		trigger when <see cref="callbackType"/> is triggered.
 		///		Supports custom callback signatures (beside <see cref="UnitCallback"/>.
 		///		Allows to store the target and source when registering the callback, for further access.
+		///		When using multiple CallbackEffectUnits, the order matters.
 		/// </summary>
 		public ModifierRecipe CallbackEffectUnits<TCallbackEffect>(TCallbackEffect callbackType,
 			Func<IEffect, Func<IUnit, IUnit, object>> @event)
