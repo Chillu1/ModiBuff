@@ -12,7 +12,6 @@ namespace ModiBuff.Core
 		private readonly EffectWrapper[] _savableEffectsWrappers;
 		private readonly EffectWrapper _removeEffectWrapper;
 		private readonly EffectWrapper _dispelRegisterWrapper;
-		private readonly EffectWrapper _eventRegisterWrapper;
 		private readonly EffectWrapper _callbackUnitRegisterWrapper;
 		private readonly EffectWrapper[] _callbackEffectRegisterWrappers;
 		private readonly EffectWrapper _callbackEffectUnitsRegisterWrapper;
@@ -22,7 +21,6 @@ namespace ModiBuff.Core
 		private IEffect[] _intervalEffects;
 		private IEffect[] _durationEffects;
 		private IStackEffect[] _stackEffects;
-		private IEffect[] _eventEffects;
 		private IEffect[] _callbackUnitEffects;
 		private IEffect[][] _callbackEffectEffects;
 		private IEffect[] _callbackEffectUnitsEffects;
@@ -32,7 +30,6 @@ namespace ModiBuff.Core
 			_intervalEffectsIndex,
 			_durationEffectsIndex,
 			_stackEffectsIndex,
-			_eventEffectsIndex,
 			_callbackUnitEffectsIndex,
 			_callbackEffectEffectsIndex,
 			_callbackEffectUnitsEffectsIndex,
@@ -41,16 +38,14 @@ namespace ModiBuff.Core
 			_callbackEffectEffectsIndex4;
 
 		public ModifierEffectsCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper,
-			EffectWrapper dispelRegisterWrapper, EffectWrapper eventRegisterWrapper,
-			EffectWrapper callbackUnitRegisterWrapper, EffectWrapper[] callbackEffectRegisterWrappers,
-			EffectWrapper callbackEffectUnitsRegisterWrapper)
+			EffectWrapper dispelRegisterWrapper, EffectWrapper callbackUnitRegisterWrapper,
+			EffectWrapper[] callbackEffectRegisterWrappers, EffectWrapper callbackEffectUnitsRegisterWrapper)
 		{
 			var effectsWithModifierInfoWrappers = new List<EffectWrapper>();
 			var savableEffectsWrappers = new List<EffectWrapper>();
 			_effectWrappers = effectWrappers.ToArray();
 			_removeEffectWrapper = removeEffectWrapper;
 			_dispelRegisterWrapper = dispelRegisterWrapper;
-			_eventRegisterWrapper = eventRegisterWrapper;
 			_callbackUnitRegisterWrapper = callbackUnitRegisterWrapper;
 			_callbackEffectRegisterWrappers = callbackEffectRegisterWrappers;
 			_callbackEffectUnitsRegisterWrapper = callbackEffectUnitsRegisterWrapper;
@@ -75,8 +70,6 @@ namespace ModiBuff.Core
 					_durationEffectsIndex++;
 				if ((effectWrapper.EffectOn & EffectOn.Stack) != 0)
 					_stackEffectsIndex++;
-				if ((effectWrapper.EffectOn & EffectOn.Event) != 0)
-					_eventEffectsIndex++;
 				if ((effectWrapper.EffectOn & EffectOn.CallbackUnit) != 0)
 					_callbackUnitEffectsIndex++;
 				if ((effectWrapper.EffectOn & EffectOn.CallbackEffect) != 0)
@@ -120,12 +113,6 @@ namespace ModiBuff.Core
 			{
 				_stackEffects = new IStackEffect[_stackEffectsIndex];
 				_stackEffectsIndex = 0;
-			}
-
-			if (_eventEffectsIndex > 0)
-			{
-				_eventEffects = new IEffect[_eventEffectsIndex];
-				_eventEffectsIndex = 0;
 			}
 
 			if (_callbackUnitEffectsIndex > 0)
@@ -195,8 +182,6 @@ namespace ModiBuff.Core
 					_durationEffects[_durationEffectsIndex++] = effect;
 				if ((effectOn & EffectOn.Stack) != 0)
 					_stackEffects[_stackEffectsIndex++] = (IStackEffect)effect;
-				if ((effectOn & EffectOn.Event) != 0)
-					_eventEffects[_eventEffectsIndex++] = effect;
 				if ((effectOn & EffectOn.CallbackUnit) != 0)
 					_callbackUnitEffects[_callbackUnitEffectsIndex++] = effect;
 				if ((effectOn & EffectOn.CallbackEffect) != 0)
@@ -232,7 +217,6 @@ namespace ModiBuff.Core
 			//Set the effects arrays on our special effects (callback, event, remove-revert)
 			//No need to reset manually special wrappers manually
 			//Since they're always fed to effectWrappers, that we reset at the end
-			_eventRegisterWrapper?.GetEffectAs<IRecipeFeedEffects>().SetEffects(_eventEffects);
 			_callbackUnitRegisterWrapper?.GetEffectAs<IRecipeFeedEffects>().SetEffects(_callbackUnitEffects);
 			for (int i = 0; i < _callbackEffectRegisterWrappers?.Length; i++)
 				_callbackEffectRegisterWrappers[i].GetEffectAs<IRecipeFeedEffects>()

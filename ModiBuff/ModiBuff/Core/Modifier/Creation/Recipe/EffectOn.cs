@@ -10,13 +10,12 @@ namespace ModiBuff.Core
 		Interval = 2,
 		Duration = 4,
 		Stack = 8,
-		Event = 16,
-		CallbackUnit = 32,
-		CallbackEffect = 64,
-		CallbackEffectUnits = 128,
-		CallbackEffect2 = 256,
-		CallbackEffect3 = 512,
-		CallbackEffect4 = 1024,
+		CallbackUnit = 16,
+		CallbackEffect = 32,
+		CallbackEffectUnits = 64,
+		CallbackEffect2 = 128,
+		CallbackEffect3 = 256,
+		CallbackEffect4 = 512,
 	}
 
 	public static class EffectOnExtensions

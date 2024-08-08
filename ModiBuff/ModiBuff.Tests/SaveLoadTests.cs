@@ -148,8 +148,9 @@ namespace ModiBuff.Tests
 		public void SaveLoadEventCallbackState()
 		{
 			AddRecipe("InitCallbackState")
-				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Event | EffectOn.CallbackEffect)
-				.Event(EffectOnEvent.WhenAttacked)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible),
+					EffectOn.CallbackUnit | EffectOn.CallbackEffect)
+				.CallbackUnit(CallbackUnitType.WhenAttacked)
 				.CallbackEffect(CallbackType.CurrentHealthChanged,
 					effect => new HealthChangedEvent((target, source, health, deltaHealth) =>
 					{

@@ -10,7 +10,6 @@ namespace ModiBuff.Core
 		public readonly List<EffectWrapper> EffectWrappers;
 		public readonly EffectWrapper RemoveEffectWrapper;
 		public readonly EffectWrapper DispelRegisterWrapper;
-		public readonly EffectWrapper EventRegisterWrapper;
 		public readonly EffectWrapper CallbackUnitRegisterWrapper;
 		public readonly EffectWrapper[] CallbackEffectRegisterWrappers;
 		public readonly EffectWrapper CallbackEffectUnitsRegisterWrapper;
@@ -34,7 +33,7 @@ namespace ModiBuff.Core
 		public readonly float IndependentStackTime;
 
 		public ModifierRecipeData(int id, string name, List<EffectWrapper> effectWrappers,
-			EffectWrapper removeEffectWrapper, EffectWrapper dispelRegisterWrapper, EffectWrapper eventRegisterWrapper,
+			EffectWrapper removeEffectWrapper, EffectWrapper dispelRegisterWrapper,
 			EffectWrapper callbackUnitRegisterWrapper, EffectWrapper[] callbackEffectRegisterWrappers,
 			EffectWrapper callbackEffectUnitsRegisterWrapper, bool hasApplyChecks, List<ICheck> applyCheckList,
 			bool hasEffectChecks, List<ICheck> effectCheckList, List<Func<IUnit, bool>> applyFuncCheckList,
@@ -47,7 +46,6 @@ namespace ModiBuff.Core
 			EffectWrappers = effectWrappers;
 			RemoveEffectWrapper = removeEffectWrapper;
 			DispelRegisterWrapper = dispelRegisterWrapper;
-			EventRegisterWrapper = eventRegisterWrapper;
 			CallbackUnitRegisterWrapper = callbackUnitRegisterWrapper;
 			CallbackEffectRegisterWrappers = callbackEffectRegisterWrappers;
 			CallbackEffectUnitsRegisterWrapper = callbackEffectUnitsRegisterWrapper;

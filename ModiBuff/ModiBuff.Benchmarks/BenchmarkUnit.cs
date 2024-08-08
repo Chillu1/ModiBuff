@@ -13,7 +13,7 @@ namespace ModiBuff.Tests
 
 		public ModifierController ModifierController { get; }
 
-		private const int MaxRecursionEventCount = 1;
+		private const int MaxRecursionCallbackCount = 1;
 
 		public BenchmarkUnit(float health, UnitType unitType = UnitType.Good)
 		{

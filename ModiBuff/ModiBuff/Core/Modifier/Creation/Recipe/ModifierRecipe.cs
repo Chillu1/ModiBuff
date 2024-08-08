@@ -29,7 +29,6 @@ namespace ModiBuff.Core
 
 		private RemoveEffectWrapper _removeEffectWrapper;
 		private EffectWrapper _dispelRegisterWrapper;
-		private EffectWrapper _eventRegisterWrapper;
 		private EffectWrapper _callbackUnitRegisterWrapper;
 		private readonly List<EffectWrapper> _callbackEffectRegisterWrappers;
 		private EffectWrapper _callbackEffectUnitsRegisterWrapper;
@@ -411,14 +410,6 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		public ModifierRecipe Event<TEvent>(TEvent @event)
-		{
-			_eventRegisterWrapper = new EffectWrapper(new EventRegisterEffect<TEvent>(@event), EffectOn.Init);
-			_effectWrappers.Add(_eventRegisterWrapper);
-			//_saveInstructions.Add(new SaveInstruction.Event((int)(object)@event));
-			return this;
-		}
-
 		/// <summary>
 		///		Registers a callback register effect to a unit, will trigger all <see cref="EffectOn.CallbackUnit"/>
 		///		effects when <see cref="callbackType"/> is triggered.
@@ -578,11 +569,11 @@ namespace ModiBuff.Core
 			_dispelRegisterWrapper?.GetEffectAs<DispelRegisterEffect>().UpdateDispelType(dispel);
 
 			var data = new ModifierRecipeData(Id, Name, _effectWrappers, finalRemoveEffectWrapper,
-				_dispelRegisterWrapper, _eventRegisterWrapper, _callbackUnitRegisterWrapper,
-				_callbackEffectRegisterWrappers.ToArray(), _callbackEffectUnitsRegisterWrapper, _hasApplyChecks,
-				_applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura,
-				_tag, _oneTimeInit, _interval, _duration, _refreshDuration, _refreshInterval, _whenStackEffect,
-				_maxStacks, _everyXStacks, _singleStackTime, _independentStackTime);
+				_dispelRegisterWrapper, _callbackUnitRegisterWrapper, _callbackEffectRegisterWrappers.ToArray(),
+				_callbackEffectUnitsRegisterWrapper, _hasApplyChecks, _applyCheckList, _hasEffectChecks,
+				_effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura, _tag, _oneTimeInit, _interval,
+				_duration, _refreshDuration, _refreshInterval, _whenStackEffect, _maxStacks, _everyXStacks,
+				_singleStackTime, _independentStackTime);
 			return new ModifierGenerator(in data);
 		}
 
@@ -659,7 +650,6 @@ namespace ModiBuff.Core
 				                + Name + " id: " + Id);
 			}
 
-			ValidateCallbacks(EffectOn.Event, _eventRegisterWrapper);
 			ValidateCallbacks(EffectOn.CallbackUnit, _callbackUnitRegisterWrapper);
 			for (int i = 0; i < _callbackEffectRegisterWrappers.Count; i++)
 				ValidateCallbacks(EffectOnCallbackEffectData.AllCallbackEffectData[i],

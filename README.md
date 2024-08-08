@@ -519,8 +519,8 @@ In this example we deal 5 damage to a unit that attacks us.
 
 ```csharp
 Add("ThornsOnHitEvent")
-    .Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
-    .Event(EffectOnEvent.WhenAttacked);
+    .Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.WhenAttacked);
 ```
 
 ### Callback
@@ -606,7 +606,7 @@ Add("InitTakeFiveDamageOnTenDamageTaken")
 These callbacks get the effect fed as a parameter, this allows for condtional effect invoking, or custom effect use,
 like manual stack trigger. Supports custom callback signatures.
 
-> Important: all versions before 0.4/latest mater can only have one callback `CallbackEffect` per modifier.
+> Important: all versions before 0.4/latest master can only have one callback `CallbackEffect` per modifier.
 
 ```csharp
 Add("SilenceSourceWhenSilenced")
@@ -1273,8 +1273,8 @@ This can create some very sophisticated modifiers:
 ```csharp
 //WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^ rupture modifier
 Add("ComplexApplier_OnHit_Event")
-    .Effect(new ApplierEffect("ComplexApplier_Rupture", Targeting.SourceTarget), EffectOn.Event)
-    .Event(EffectOnEvent.WhenAttacked);
+    .Effect(new ApplierEffect("ComplexApplier_Rupture", Targeting.SourceTarget), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.WhenAttacked);
 
 //rupture modifier, that does DoT. When this gets to 5 stacks, apply the disarm effect.
 Add("ComplexApplier_Rupture")
@@ -1303,8 +1303,8 @@ To clarify:
 ```csharp            
 //Apply the modifier to source (healer) WhenHealed                                   
 Add("ComplexApplier2_WhenHealed_Event")               
-    .Effect(new ApplierEffect("ComplexApplier2_WhenHealed", Targeting.SourceTarget), EffectOn.Event)
-    .Event(EffectOnEvent.WhenHealed);
+    .Effect(new ApplierEffect("ComplexApplier2_WhenHealed", Targeting.SourceTarget), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.WhenHealed);
 
 //On 5 stacks, apply the modifier to self.
 Add("ComplexApplier2_WhenHealed")                                                    
@@ -1314,13 +1314,13 @@ Add("ComplexApplier2_WhenHealed")
 
 //Long main buff. Apply the modifier OnAttack.
 Add("ComplexApplier2_OnAttack_Event")
-    .Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"), EffectOn.Event)
-    .Event(EffectOnEvent.OnAttack)
+    .Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.OnAttack)
     .Remove(60).Refresh();
 
 Add("ComplexApplier2_WhenAttacked_Event")
-    .Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd", Targeting.SourceTarget), EffectOn.Event)
-    .Event(EffectOnEvent.WhenAttacked)
+    .Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd", Targeting.SourceTarget), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.WhenAttacked)
     .Remove(5).Refresh();
 
 //On 4 stacks, Add Damage to Unit source (attacker).

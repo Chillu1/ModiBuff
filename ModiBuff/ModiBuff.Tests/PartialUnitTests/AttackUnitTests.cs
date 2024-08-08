@@ -74,8 +74,8 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("AttackAction_AddDamageBasedOnDamageDealt")
 				.Effect(new DamageEffect(5, targeting: Targeting.SourceTarget)
-					.SetPostEffects(new AddDamageOnValuePostEffect(Targeting.TargetSource)), EffectOn.Event)
-				.Event(EffectOnEvent.WhenAttacked);
+					.SetPostEffects(new AddDamageOnValuePostEffect(Targeting.TargetSource)), EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.WhenAttacked);
 			Setup();
 
 			Enemy.AddModifierSelf("AttackAction_AddDamageBasedOnDamageDealt");
