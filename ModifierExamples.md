@@ -1,20 +1,23 @@
 # Modifier Examples
 
-> Important: If you're not using the master branch, it might be smart to go to the correct versions, they'll have the most accurate modifier recipes.
+> Important: If you're not using the master branch, it might be smart to go to the correct versions, they'll have the
+> most accurate modifier recipes.
 > [V0.2.0](https://github.com/Chillu1/ModiBuff/blob/0.2.0/ModifierExamples.md)
 > [V0.1.2](https://github.com/Chillu1/ModiBuff/blob/0.1.2/ModifierExamples.md)
 
 - [Basic Recipes](#basic-recipes)
 - [Conditional Recipes](#conditional-recipes)
-- [Event Recipes](#event-recipes)
 - [Callback Recipes](#callback-recipes)
 - [Modifier Action Recipes](#modifier-action-recipes)
 - [Advanced Recipes](#advanced-recipes)
 - [Centralized Effect](#centralized-effect)
 
 [//]: # (TODO Recipe examples for usual game mechanics)
+
 [//]: # (DoT, InitDoTSeparateDmg, OnXStacks, StackableDamage, StunEverySecondFor0.2Seconds)
+
 [//]: # ("Absoultely crazy modifiers": applying appliers on events, X stacks, etc)
+
 [//]: # (Meta, Post, Stack modifiers)
 
 > Important: Damage being the default effect is just an example, it makes it easier to understand.
@@ -125,7 +128,8 @@ Add("StunEveryTwoStacks")
     .Stack(WhenStackEffect.EveryXStacks, value: -1, maxStacks: -1, everyXStacks: 2);
 ```
 
-Init Damage. With 1 second linger. Won't work again if applied within 1 second, aka "global cooldown", shared between all X modifier
+Init Damage. With 1 second linger. Won't work again if applied within 1 second, aka "global cooldown", shared between
+all X modifier
 instaces.
 
 ```csharp
@@ -314,38 +318,38 @@ Add("InitDamage_CostMana")
     .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
-## Event Recipes
+## Callback Recipes
 
 Thorns on hit (deal 5 damage to attacker)
 
 ```csharp
 Add("ThornsOnHitEvent")
-    .Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
-    .Event(EffectOnEvent.WhenAttacked);
+    .Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.WhenAttacked);
 ```
 
 Add damage on kill
 
 ```csharp
 Add("AddDamage_OnKill_Event")
-    .Effect(new AddDamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
-    .Event(EffectOnEvent.OnKill);
+    .Effect(new AddDamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.OnKill);
 ```
 
 Damage attacker on death
 
 ```csharp
 Add("Damage_OnDeath_Event")
-    .Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
-    .Event(EffectOnEvent.WhenKilled);
+    .Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.WhenKilled);
 ```
 
 Attack self when attacked
 
 ```csharp
 Add("AttackSelf_OnHit_Event")
-    .Effect(new SelfAttackActionEffect(), EffectOn.Event)
-    .Event(EffectOnEvent.WhenAttacked);
+    .Effect(new SelfAttackActionEffect(), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.WhenAttacked);
 ```
 
 When attacked, add damage to all attackers, for 1 second (refreshes)
@@ -356,11 +360,9 @@ Add("AddDamage")
     .Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
     .Remove(1).Refresh();
 Add("AddDamageToAllAttackers_OnHit_Event")
-    .Effect(new ApplierEffect("AddDamage", targeting: Targeting.SourceTarget), EffectOn.Event)
-    .Event(EffectOnEvent.WhenAttacked);
+    .Effect(new ApplierEffect("AddDamage", targeting: Targeting.SourceTarget), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.WhenAttacked);
 ```
-
-## Callback Recipes
 
 Add damage on init, remove and revert it if we take a strong hit (damage >= 50% max hp)
 
@@ -660,7 +662,8 @@ Add("Poison")
     .Remove(5).Refresh();
 ```
 
-Heal per poison stack on poison damage tick effect. There's two ways to achieve this, first is by manually using the stack effect.
+Heal per poison stack on poison damage tick effect. There's two ways to achieve this, first is by manually using the
+stack effect.
 The second is by setting up custom stack logic with modifier action based on when the poison damage effect is triggered.
 
 ```csharp

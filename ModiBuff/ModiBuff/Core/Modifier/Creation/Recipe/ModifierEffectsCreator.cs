@@ -12,18 +12,18 @@ namespace ModiBuff.Core
 		private readonly EffectWrapper[] _savableEffectsWrappers;
 		private readonly EffectWrapper _removeEffectWrapper;
 		private readonly EffectWrapper _dispelRegisterWrapper;
-		private readonly EffectWrapper _callbackUnitRegisterWrapper;
+		private readonly EffectWrapper[] _callbackUnitRegisterWrappers;
 		private readonly EffectWrapper[] _callbackEffectRegisterWrappers;
-		private readonly EffectWrapper _callbackEffectUnitsRegisterWrapper;
+		private readonly EffectWrapper[] _callbackEffectUnitsRegisterWrappers;
 
 		private IRevertEffect[] _revertEffects;
 		private IEffect[] _initEffects;
 		private IEffect[] _intervalEffects;
 		private IEffect[] _durationEffects;
 		private IStackEffect[] _stackEffects;
-		private IEffect[] _callbackUnitEffects;
+		private IEffect[][] _callbackUnitEffects;
 		private IEffect[][] _callbackEffectEffects;
-		private IEffect[] _callbackEffectUnitsEffects;
+		private IEffect[][] _callbackEffectUnitsEffects;
 
 		private int _revertEffectsIndex,
 			_initEffectsIndex,
@@ -33,22 +33,28 @@ namespace ModiBuff.Core
 			_callbackUnitEffectsIndex,
 			_callbackEffectEffectsIndex,
 			_callbackEffectUnitsEffectsIndex,
+			_callbackUnitEffectsIndex2,
+			_callbackUnitEffectsIndex3,
+			_callbackUnitEffectsIndex4,
 			_callbackEffectEffectsIndex2,
 			_callbackEffectEffectsIndex3,
-			_callbackEffectEffectsIndex4;
+			_callbackEffectEffectsIndex4,
+			_callbackEffectUnitsEffectsIndex2,
+			_callbackEffectUnitsEffectsIndex3,
+			_callbackEffectUnitsEffectsIndex4;
 
 		public ModifierEffectsCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper,
-			EffectWrapper dispelRegisterWrapper, EffectWrapper callbackUnitRegisterWrapper,
-			EffectWrapper[] callbackEffectRegisterWrappers, EffectWrapper callbackEffectUnitsRegisterWrapper)
+			EffectWrapper dispelRegisterWrapper, EffectWrapper[] callbackUnitRegisterWrappers,
+			EffectWrapper[] callbackEffectRegisterWrappers, EffectWrapper[] callbackEffectUnitsRegisterWrappers)
 		{
 			var effectsWithModifierInfoWrappers = new List<EffectWrapper>();
 			var savableEffectsWrappers = new List<EffectWrapper>();
 			_effectWrappers = effectWrappers.ToArray();
 			_removeEffectWrapper = removeEffectWrapper;
 			_dispelRegisterWrapper = dispelRegisterWrapper;
-			_callbackUnitRegisterWrapper = callbackUnitRegisterWrapper;
+			_callbackUnitRegisterWrappers = callbackUnitRegisterWrappers;
 			_callbackEffectRegisterWrappers = callbackEffectRegisterWrappers;
-			_callbackEffectUnitsRegisterWrapper = callbackEffectUnitsRegisterWrapper;
+			_callbackEffectUnitsRegisterWrappers = callbackEffectUnitsRegisterWrappers;
 
 			for (int i = 0; i < _effectWrappers.Length; i++)
 			{
@@ -76,12 +82,24 @@ namespace ModiBuff.Core
 					_callbackEffectEffectsIndex++;
 				if ((effectWrapper.EffectOn & EffectOn.CallbackEffectUnits) != 0)
 					_callbackEffectUnitsEffectsIndex++;
+				if ((effectWrapper.EffectOn & EffectOn.CallbackUnit2) != 0)
+					_callbackUnitEffectsIndex2++;
+				if ((effectWrapper.EffectOn & EffectOn.CallbackUnit3) != 0)
+					_callbackUnitEffectsIndex3++;
+				if ((effectWrapper.EffectOn & EffectOn.CallbackUnit4) != 0)
+					_callbackUnitEffectsIndex4++;
 				if ((effectWrapper.EffectOn & EffectOn.CallbackEffect2) != 0)
 					_callbackEffectEffectsIndex2++;
 				if ((effectWrapper.EffectOn & EffectOn.CallbackEffect3) != 0)
 					_callbackEffectEffectsIndex3++;
 				if ((effectWrapper.EffectOn & EffectOn.CallbackEffect4) != 0)
 					_callbackEffectEffectsIndex4++;
+				if ((effectWrapper.EffectOn & EffectOn.CallbackEffectUnits2) != 0)
+					_callbackEffectUnitsEffectsIndex2++;
+				if ((effectWrapper.EffectOn & EffectOn.CallbackEffectUnits3) != 0)
+					_callbackEffectUnitsEffectsIndex3++;
+				if ((effectWrapper.EffectOn & EffectOn.CallbackEffectUnits4) != 0)
+					_callbackEffectUnitsEffectsIndex4++;
 			}
 
 			_effectsWithModifierInfoWrappers = effectsWithModifierInfoWrappers.ToArray();
@@ -115,15 +133,23 @@ namespace ModiBuff.Core
 				_stackEffectsIndex = 0;
 			}
 
-			if (_callbackUnitEffectsIndex > 0)
-			{
-				_callbackUnitEffects = new IEffect[_callbackUnitEffectsIndex];
-				_callbackUnitEffectsIndex = 0;
-			}
+			if (_callbackUnitEffectsIndex > 0 || _callbackUnitEffectsIndex2 > 0 ||
+			    _callbackUnitEffectsIndex3 > 0 || _callbackUnitEffectsIndex4 > 0)
+				_callbackUnitEffects = new IEffect[4][];
 
 			if (_callbackEffectEffectsIndex > 0 || _callbackEffectEffectsIndex2 > 0 ||
 			    _callbackEffectEffectsIndex3 > 0 || _callbackEffectEffectsIndex4 > 0)
 				_callbackEffectEffects = new IEffect[4][];
+
+			if (_callbackEffectUnitsEffectsIndex > 0 || _callbackEffectUnitsEffectsIndex2 > 0 ||
+			    _callbackEffectUnitsEffectsIndex3 > 0 || _callbackEffectUnitsEffectsIndex4 > 0)
+				_callbackEffectUnitsEffects = new IEffect[4][];
+
+			if (_callbackUnitEffectsIndex > 0)
+			{
+				_callbackUnitEffects[0] = new IEffect[_callbackUnitEffectsIndex];
+				_callbackUnitEffectsIndex = 0;
+			}
 
 			if (_callbackEffectEffectsIndex > 0)
 			{
@@ -133,8 +159,26 @@ namespace ModiBuff.Core
 
 			if (_callbackEffectUnitsEffectsIndex > 0)
 			{
-				_callbackEffectUnitsEffects = new IEffect[_callbackEffectUnitsEffectsIndex];
+				_callbackEffectUnitsEffects[0] = new IEffect[_callbackEffectUnitsEffectsIndex];
 				_callbackEffectUnitsEffectsIndex = 0;
+			}
+
+			if (_callbackUnitEffectsIndex2 > 0)
+			{
+				_callbackUnitEffects[1] = new IEffect[_callbackUnitEffectsIndex2];
+				_callbackUnitEffectsIndex2 = 0;
+			}
+
+			if (_callbackUnitEffectsIndex3 > 0)
+			{
+				_callbackUnitEffects[2] = new IEffect[_callbackUnitEffectsIndex3];
+				_callbackUnitEffectsIndex3 = 0;
+			}
+
+			if (_callbackUnitEffectsIndex4 > 0)
+			{
+				_callbackUnitEffects[3] = new IEffect[_callbackUnitEffectsIndex4];
+				_callbackUnitEffectsIndex4 = 0;
 			}
 
 			if (_callbackEffectEffectsIndex2 > 0)
@@ -153,6 +197,24 @@ namespace ModiBuff.Core
 			{
 				_callbackEffectEffects[3] = new IEffect[_callbackEffectEffectsIndex4];
 				_callbackEffectEffectsIndex4 = 0;
+			}
+
+			if (_callbackEffectUnitsEffectsIndex2 > 0)
+			{
+				_callbackEffectUnitsEffects[1] = new IEffect[_callbackEffectUnitsEffectsIndex2];
+				_callbackEffectUnitsEffectsIndex2 = 0;
+			}
+
+			if (_callbackEffectUnitsEffectsIndex3 > 0)
+			{
+				_callbackEffectUnitsEffects[2] = new IEffect[_callbackEffectUnitsEffectsIndex3];
+				_callbackEffectUnitsEffectsIndex3 = 0;
+			}
+
+			if (_callbackEffectUnitsEffectsIndex4 > 0)
+			{
+				_callbackEffectUnitsEffects[3] = new IEffect[_callbackEffectUnitsEffectsIndex4];
+				_callbackEffectUnitsEffectsIndex4 = 0;
 			}
 
 			if (_revertEffectsIndex > 0)
@@ -183,17 +245,29 @@ namespace ModiBuff.Core
 				if ((effectOn & EffectOn.Stack) != 0)
 					_stackEffects[_stackEffectsIndex++] = (IStackEffect)effect;
 				if ((effectOn & EffectOn.CallbackUnit) != 0)
-					_callbackUnitEffects[_callbackUnitEffectsIndex++] = effect;
+					_callbackUnitEffects[0][_callbackUnitEffectsIndex++] = effect;
 				if ((effectOn & EffectOn.CallbackEffect) != 0)
 					_callbackEffectEffects[0][_callbackEffectEffectsIndex++] = effect;
 				if ((effectOn & EffectOn.CallbackEffectUnits) != 0)
-					_callbackEffectUnitsEffects[_callbackEffectUnitsEffectsIndex++] = effect;
+					_callbackEffectUnitsEffects[0][_callbackEffectUnitsEffectsIndex++] = effect;
+				if ((effectOn & EffectOn.CallbackUnit2) != 0)
+					_callbackUnitEffects[1][_callbackUnitEffectsIndex2++] = effect;
+				if ((effectOn & EffectOn.CallbackUnit3) != 0)
+					_callbackUnitEffects[2][_callbackUnitEffectsIndex3++] = effect;
+				if ((effectOn & EffectOn.CallbackUnit4) != 0)
+					_callbackUnitEffects[3][_callbackUnitEffectsIndex4++] = effect;
 				if ((effectOn & EffectOn.CallbackEffect2) != 0)
 					_callbackEffectEffects[1][_callbackEffectEffectsIndex2++] = effect;
 				if ((effectOn & EffectOn.CallbackEffect3) != 0)
 					_callbackEffectEffects[2][_callbackEffectEffectsIndex3++] = effect;
 				if ((effectOn & EffectOn.CallbackEffect4) != 0)
 					_callbackEffectEffects[3][_callbackEffectEffectsIndex4++] = effect;
+				if ((effectOn & EffectOn.CallbackEffectUnits2) != 0)
+					_callbackEffectUnitsEffects[1][_callbackEffectUnitsEffectsIndex2++] = effect;
+				if ((effectOn & EffectOn.CallbackEffectUnits3) != 0)
+					_callbackEffectUnitsEffects[2][_callbackEffectUnitsEffectsIndex3++] = effect;
+				if ((effectOn & EffectOn.CallbackEffectUnits4) != 0)
+					_callbackEffectUnitsEffects[3][_callbackEffectUnitsEffectsIndex4++] = effect;
 			}
 
 			EffectStateInfo effectStateInfo = default;
@@ -217,13 +291,14 @@ namespace ModiBuff.Core
 			//Set the effects arrays on our special effects (callback, event, remove-revert)
 			//No need to reset manually special wrappers manually
 			//Since they're always fed to effectWrappers, that we reset at the end
-			_callbackUnitRegisterWrapper?.GetEffectAs<IRecipeFeedEffects>().SetEffects(_callbackUnitEffects);
+			for (int i = 0; i < _callbackUnitRegisterWrappers?.Length; i++)
+				_callbackUnitRegisterWrappers[i].GetEffectAs<IRecipeFeedEffects>().SetEffects(_callbackUnitEffects[i]);
 			for (int i = 0; i < _callbackEffectRegisterWrappers?.Length; i++)
 				_callbackEffectRegisterWrappers[i].GetEffectAs<IRecipeFeedEffects>()
 					.SetEffects(_callbackEffectEffects[i]);
-
-			_callbackEffectUnitsRegisterWrapper?.GetEffectAs<IRecipeFeedEffects>()
-				.SetEffects(_callbackEffectUnitsEffects);
+			for (int i = 0; i < _callbackEffectUnitsRegisterWrappers?.Length; i++)
+				_callbackEffectUnitsRegisterWrappers[i].GetEffectAs<IRecipeFeedEffects>()
+					.SetEffects(_callbackEffectUnitsEffects[i]);
 
 			if (_removeEffectWrapper != null && _revertEffects != null)
 				_removeEffectWrapper.GetEffectAs<RemoveEffect>().SetRevertibleEffects(_revertEffects);
