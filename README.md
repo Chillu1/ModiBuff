@@ -509,8 +509,8 @@ Add("InitDamage_ChargesCooldown")
 
 ### Callback
 
-> After commit [259cb86](https://github.com/Chillu1/ModiBuff/commit/259cb86a59b4bbd81da55b5a24c79b1ea6e3be1a), events
-> were removed, and replaced entirely with callbacks. They're entirely the same.
+> As of commit [a8ad4a6](https://github.com/Chillu1/ModiBuff/commit/a8ad4a6e962d21061b4beca4533f5581f6289106)
+> (after V0.3.0), events were removed, and replaced entirely with callbacks. They're entirely the same.
 
 Callbacks are a way to call effects on certain unit events.
 Examples of some are: When Attacked, When Killed, On Attack, On Kill, On Cast, etc.
@@ -637,8 +637,8 @@ Add("StunnedFourTimesDispelAllStatusEffects")
 
 ### Multiple callbacks
 
-After commit [259cb86](https://github.com/Chillu1/ModiBuff/commit/259cb86a59b4bbd81da55b5a24c79b1ea6e3be1a)
-the recipe system supports up to 4 different callbacks for each `EffectOn.Callback` type.
+As of commit [a8ad4a6](https://github.com/Chillu1/ModiBuff/commit/a8ad4a6e962d21061b4beca4533f5581f6289106)
+(after V0.3.0) the recipe system supports up to 4 different callbacks for each `EffectOn.Callback` type.
 
 The signature becomes `EffectOn.Callback`, `EffectOn.Callback2`, etc.
 Note that the callback order matters, callbacks are sequential, first registered callback will be marked as first.
