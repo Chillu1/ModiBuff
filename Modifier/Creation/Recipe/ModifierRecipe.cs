@@ -29,10 +29,9 @@ namespace ModiBuff.Core
 
 		private RemoveEffectWrapper _removeEffectWrapper;
 		private EffectWrapper _dispelRegisterWrapper;
-		private EffectWrapper _eventRegisterWrapper;
-		private EffectWrapper _callbackUnitRegisterWrapper;
+		private readonly List<EffectWrapper> _callbackUnitRegisterWrappers;
 		private readonly List<EffectWrapper> _callbackEffectRegisterWrappers;
-		private EffectWrapper _callbackEffectUnitsRegisterWrapper;
+		private readonly List<EffectWrapper> _callbackEffectUnitsRegisterWrappers;
 
 		private readonly List<EffectWrapper> _effectWrappers;
 
@@ -70,7 +69,9 @@ namespace ModiBuff.Core
 			_tag = (TagType)Config.DefaultTag;
 
 			_effectWrappers = new List<EffectWrapper>(3);
+			_callbackUnitRegisterWrappers = new List<EffectWrapper>();
 			_callbackEffectRegisterWrappers = new List<EffectWrapper>();
+			_callbackEffectUnitsRegisterWrappers = new List<EffectWrapper>();
 
 			_saveInstructions = new List<SaveInstruction>
 				{ new SaveInstruction.Initialize(name, displayName, description) };
@@ -411,31 +412,17 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		public ModifierRecipe Event<TEvent>(TEvent @event)
-		{
-			_eventRegisterWrapper = new EffectWrapper(new EventRegisterEffect<TEvent>(@event), EffectOn.Init);
-			_effectWrappers.Add(_eventRegisterWrapper);
-			//_saveInstructions.Add(new SaveInstruction.Event((int)(object)@event));
-			return this;
-		}
-
 		/// <summary>
 		///		Registers a callback register effect to a unit, will trigger all <see cref="EffectOn.CallbackUnit"/>
 		///		effects when <see cref="callbackType"/> is triggered.
-		///		Only ONE CallbackUnit can be registered per modifier.
+		///		When using multiple CallbackUnits, the order matters.
 		/// </summary>
 		public ModifierRecipe CallbackUnit<TCallbackUnit>(TCallbackUnit callbackType)
 		{
-			if (_callbackUnitRegisterWrapper != null)
-			{
-				Logger.LogError("[ModiBuff] Multiple CallbackUnit effects registered, " +
-				                "only one is allowed per modifier, ignoring.");
-				return this;
-			}
-
 			var effect = new CallbackUnitRegisterEffect<TCallbackUnit>(callbackType);
-			_callbackUnitRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
-			_effectWrappers.Add(_callbackUnitRegisterWrapper);
+			var wrapper = new EffectWrapper(effect, EffectOn.Init);
+			_callbackUnitRegisterWrappers.Add(wrapper);
+			_effectWrappers.Add(wrapper);
 			_saveInstructions.Add(new SaveInstruction.CallbackUnit((int)(object)callbackType));
 			return this;
 		}
@@ -486,7 +473,7 @@ namespace ModiBuff.Core
 		///		Special callbacks, all EffectOn.<see cref="EffectOn.CallbackEffect"/> effects will
 		///		trigger when <see cref="callbackType"/> is triggered.
 		///		Supports custom callback signatures (beside <see cref="UnitCallback"/>.
-		///		Callback effects now have to be in order
+		///		When using multiple CallbackEffects, the order matters.
 		/// </summary>
 		public ModifierRecipe CallbackEffect<TCallbackEffect>(TCallbackEffect callbackType,
 			Func<IEffect, object> @event)
@@ -503,6 +490,7 @@ namespace ModiBuff.Core
 		///		trigger when <see cref="callbackType"/> is triggered.
 		///		Supports custom callback signatures (beside <see cref="UnitCallback"/>.
 		///		Allows to save state through state context.
+		///		When using multiple CallbackEffects, the order matters.
 		/// </summary>
 		public ModifierRecipe CallbackEffect<TCallbackEffect, TStateData>(TCallbackEffect callbackType,
 			Func<IEffect, CallbackStateContext<TStateData>> @event)
@@ -518,22 +506,16 @@ namespace ModiBuff.Core
 		///		Special callbacks, all EffectOn.<see cref="EffectOn.CallbackEffectUnits"/> effects will
 		///		trigger when <see cref="callbackType"/> is triggered.
 		///		Supports custom callback signatures (beside <see cref="UnitCallback"/>.
-		///		Only ONE CallbackEffect can be registered per modifier.
 		///		Allows to store the target and source when registering the callback, for further access.
+		///		When using multiple CallbackEffectUnits, the order matters.
 		/// </summary>
 		public ModifierRecipe CallbackEffectUnits<TCallbackEffect>(TCallbackEffect callbackType,
 			Func<IEffect, Func<IUnit, IUnit, object>> @event)
 		{
-			if (_callbackEffectUnitsRegisterWrapper != null)
-			{
-				Logger.LogError("[ModiBuff] Multiple CallbackEffectUnits effects registered, " +
-				                "only one is allowed per modifier, ignoring.");
-				return this;
-			}
-
 			var effect = new CallbackEffectRegisterEffectUnits<TCallbackEffect>(callbackType, @event);
-			_callbackEffectUnitsRegisterWrapper = new EffectWrapper(effect, EffectOn.Init);
-			_effectWrappers.Add(_callbackEffectUnitsRegisterWrapper);
+			var wrapper = new EffectWrapper(effect, EffectOn.Init);
+			_callbackEffectUnitsRegisterWrappers.Add(wrapper);
+			_effectWrappers.Add(wrapper);
 			return this;
 		}
 
@@ -578,11 +560,11 @@ namespace ModiBuff.Core
 			_dispelRegisterWrapper?.GetEffectAs<DispelRegisterEffect>().UpdateDispelType(dispel);
 
 			var data = new ModifierRecipeData(Id, Name, _effectWrappers, finalRemoveEffectWrapper,
-				_dispelRegisterWrapper, _eventRegisterWrapper, _callbackUnitRegisterWrapper,
-				_callbackEffectRegisterWrappers.ToArray(), _callbackEffectUnitsRegisterWrapper, _hasApplyChecks,
-				_applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList, _effectFuncCheckList, _isAura,
-				_tag, _oneTimeInit, _interval, _duration, _refreshDuration, _refreshInterval, _whenStackEffect,
-				_maxStacks, _everyXStacks, _singleStackTime, _independentStackTime);
+				_dispelRegisterWrapper, _callbackUnitRegisterWrappers.ToArray(),
+				_callbackEffectRegisterWrappers.ToArray(), _callbackEffectUnitsRegisterWrappers.ToArray(),
+				_hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList,
+				_effectFuncCheckList, _isAura, _tag, _oneTimeInit, _interval, _duration, _refreshDuration,
+				_refreshInterval, _whenStackEffect, _maxStacks, _everyXStacks, _singleStackTime, _independentStackTime);
 			return new ModifierGenerator(in data);
 		}
 
@@ -659,12 +641,10 @@ namespace ModiBuff.Core
 				                + Name + " id: " + Id);
 			}
 
-			ValidateCallbacks(EffectOn.Event, _eventRegisterWrapper);
-			ValidateCallbacks(EffectOn.CallbackUnit, _callbackUnitRegisterWrapper);
-			for (int i = 0; i < _callbackEffectRegisterWrappers.Count; i++)
-				ValidateCallbacks(EffectOnCallbackEffectData.AllCallbackEffectData[i],
-					_callbackEffectRegisterWrappers[i]);
-			ValidateCallbacks(EffectOn.CallbackEffectUnits, _callbackEffectUnitsRegisterWrapper);
+			ValidateCallbacks(EffectOnCallbackEffectData.AllCallbackUnitData, _callbackUnitRegisterWrappers);
+			ValidateCallbacks(EffectOnCallbackEffectData.AllCallbackEffectData, _callbackEffectRegisterWrappers);
+			ValidateCallbacks(EffectOnCallbackEffectData.AllCallbackEffectUnitsData,
+				_callbackEffectUnitsRegisterWrappers);
 
 			if (_effectWrappers.Exists(w =>
 				    w.GetEffect() is ApplierEffect applierEffect && applierEffect.HasApplierType))
@@ -722,22 +702,27 @@ namespace ModiBuff.Core
 				}
 			}
 
-			void ValidateCallbacks(EffectOn effectOn, EffectWrapper callbackWrapper)
+			void ValidateCallbacks(EffectOn[] effectOns, IList<EffectWrapper> callbackWrappers)
 			{
-				if (WrappersHaveFlag(effectOn) && callbackWrapper == null)
+				for (int i = 0; i < effectOns.Length; i++)
 				{
-					validRecipe = false;
-					Logger.LogError(
-						$"[ModiBuff] Effects on {effectOn.ToString()} set, but no callback registration type set, " +
-						"for modifier: " + Name + " id: " + Id);
-				}
+					var effectOn = effectOns[i];
+					var callbackWrapper = callbackWrappers.Count > i ? callbackWrappers[i] : null;
+					if (WrappersHaveFlag(effectOn) && callbackWrapper == null)
+					{
+						validRecipe = false;
+						Logger.LogError(
+							$"[ModiBuff] Effects on {effectOn.ToString()} set, but no callback registration type set, " +
+							"for modifier: " + Name + " id: " + Id);
+					}
 
-				if (callbackWrapper != null && NoWrappersHaveFlag(effectOn))
-				{
-					validRecipe = false;
-					Logger.LogError(
-						$"[ModiBuff] {effectOn.ToString()} registration type set, but no effects on callback set, " +
-						"for modifier: " + Name + " id: " + Id);
+					if (callbackWrapper != null && NoWrappersHaveFlag(effectOn))
+					{
+						validRecipe = false;
+						Logger.LogError(
+							$"[ModiBuff] {effectOn.ToString()} registration type set, but no effects on callback set, " +
+							"for modifier: " + Name + " id: " + Id);
+					}
 				}
 			}
 		}
