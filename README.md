@@ -635,10 +635,18 @@ Add("StunnedFourTimesDispelAllStatusEffects")
     })
 ```
 
-As of commit [3398675](https://github.com/Chillu1/ModiBuff/commit/339867518dc86eae704b447ac8f112b61d5b17c6)
-the recipe system supports up to 4 different callback effects.
+### Multiple callbacks
 
-Ex. Damage whenever target get's stunned, and heal whenever a status effect expires/gets removed that's not a stun.
+After commit [259cb86](https://github.com/Chillu1/ModiBuff/commit/259cb86a59b4bbd81da55b5a24c79b1ea6e3be1a)
+the recipe system supports up to 4 different callbacks for each `EffectOn.Callback` type.
+
+The signature becomes `EffectOn.Callback`, `EffectOn.Callback2`, etc.
+Note that the callback order matters, callbacks are sequential, first registered callback will be marked as first.
+Same callback type can be registered multiple times, with different event signatures.
+
+CallbackEffect example:
+
+Damage whenever target get's stunned, and heal whenever a status effect expires/gets removed that's not a stun.
 
 ```csharp
 Add("DamageOnStun_HealOnAnyNotStunStatusEffectRemoved")
