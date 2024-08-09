@@ -115,8 +115,9 @@ namespace ModiBuff.Tests
 				.Effect(new ApplierEffect("ComplexApplier_Disarm"), EffectOn.Stack)
 				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 5);
 			AddRecipe("ComplexApplier_OnHit_Event")
-				.Effect(new ApplierEffect("ComplexApplier_Rupture", targeting: Targeting.SourceTarget), EffectOn.Event)
-				.Event(EffectOnEvent.WhenAttacked);
+				.Effect(new ApplierEffect("ComplexApplier_Rupture", targeting: Targeting.SourceTarget),
+					EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.WhenAttacked);
 			Setup();
 
 			Unit.AddModifierSelf("ComplexApplier_OnHit_Event");
@@ -156,12 +157,12 @@ namespace ModiBuff.Tests
 				.Remove(5).Refresh();
 			AddRecipe("ComplexApplier2_WhenAttacked_Event")
 				.Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd", targeting: Targeting.SourceTarget),
-					EffectOn.Event)
-				.Event(EffectOnEvent.WhenAttacked)
+					EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.WhenAttacked)
 				.Remove(5).Refresh();
 			AddRecipe("ComplexApplier2_OnAttack_Event")
-				.Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"), EffectOn.Event)
-				.Event(EffectOnEvent.OnAttack)
+				.Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"), EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.OnAttack)
 				.Remove(60).Refresh();
 			AddRecipe("ComplexApplier2_WhenHealed")
 				.Effect(new ApplierEffect("ComplexApplier2_OnAttack_Event"), EffectOn.Stack)
@@ -169,8 +170,8 @@ namespace ModiBuff.Tests
 				.Remove(5).Refresh();
 			AddRecipe("ComplexApplier2_WhenHealed_Event")
 				.Effect(new ApplierEffect("ComplexApplier2_WhenHealed", targeting: Targeting.SourceTarget),
-					EffectOn.Event)
-				.Event(EffectOnEvent.WhenHealed);
+					EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.WhenHealed);
 			Setup();
 
 			//Add damage on 4 stacks buff, that you give someone when they heal you 5 times, for 60 seconds.

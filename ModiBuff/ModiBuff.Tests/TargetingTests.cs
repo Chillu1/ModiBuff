@@ -66,8 +66,8 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("ThornsDamage_PostEffectHealTarget")
 				.Effect(new DamageEffect(5, targeting: Targeting.SourceTarget)
-					.SetPostEffects(new LifeStealPostEffect(1f)), EffectOn.Event)
-				.Event(EffectOnEvent.AfterAttacked);
+					.SetPostEffects(new LifeStealPostEffect(1f)), EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.AfterAttacked);
 			Setup();
 
 			Unit.AddModifierSelf("ThornsDamage_PostEffectHealTarget");

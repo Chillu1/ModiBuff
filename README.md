@@ -69,11 +69,10 @@ This library solves that, but also allows for more complex and deeper modifiers 
 	* Interval
 	* Duration
 	* Stack
-	* Event (ex. When Attacked/Cast/Killed/Healed/Stunned/Silenced, On Attack/Cast/Kill/Heal)
 	* Callbacks (any user logic, support mutable and serializable state inside)
-		* Unit callbacks
+		* Unit callbacks/events (ex. When Attacked/Cast/Killed/Healed/Stunned/Silenced, On Attack/Cast/Kill/Heal)
 		* Effect callbacks
-		* Event/Custom signature callbacks
+		* Custom signature callbacks
 * Effect implementation examples
 	* Damage (& self damage)
 	* Heal
@@ -508,25 +507,18 @@ Add("InitDamage_ChargesCooldown")
     .Effect(new DamageEffect(5), EffectOn.Init);
 ```
 
-### Event
+### Callback
 
-Events are a way to call effects on certain unit events.
-Examples of this are: When Attacked, When Killed, On Attack, On Kill, On Cast, etc.
+> After commit [259cb86](https://github.com/Chillu1/ModiBuff/commit/259cb86a59b4bbd81da55b5a24c79b1ea6e3be1a), events
+> were removed, and replaced entirely with callbacks. They're entirely the same.
+
+Callbacks are a way to call effects on certain unit events.
+Examples of some are: When Attacked, When Killed, On Attack, On Kill, On Cast, etc.
 
 Some common examples of this are: thorns, restore health on cast, add damage on kill.
 
-In this example we deal 5 damage to a unit that attacks us.
-
-```csharp
-Add("ThornsOnHitEvent")
-    .Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Event)
-    .Event(EffectOnEvent.WhenAttacked);
-```
-
-### Callback
-
-Callbacks work like events, but have extra functionality, like being able to remove the modifier on callback,
-using data sent through the event, and having mutable serializable state inside it.
+Callbacks are the most powerful tool to use together with game logic, they can use data sent through the event,
+and have mutable serializable state inside it.
 
 Callbacks are a way to add logic that can be triggered on any user/game-based action.
 This is particularly useful for removing modifiers on certain non-standard cases.
@@ -606,7 +598,7 @@ Add("InitTakeFiveDamageOnTenDamageTaken")
 These callbacks get the effect fed as a parameter, this allows for condtional effect invoking, or custom effect use,
 like manual stack trigger. Supports custom callback signatures.
 
-> Important: all versions before 0.4/latest mater can only have one callback `CallbackEffect` per modifier.
+> Important: all versions before 0.4/latest master can only have one callback `CallbackEffect` per modifier.
 
 ```csharp
 Add("SilenceSourceWhenSilenced")
@@ -643,10 +635,18 @@ Add("StunnedFourTimesDispelAllStatusEffects")
     })
 ```
 
-As of commit [3398675](https://github.com/Chillu1/ModiBuff/commit/339867518dc86eae704b447ac8f112b61d5b17c6)
-the recipe system supports up to 4 different callback effects.
+### Multiple callbacks
 
-Ex. Damage whenever target get's stunned, and heal whenever a status effect expires/gets removed that's not a stun.
+After commit [259cb86](https://github.com/Chillu1/ModiBuff/commit/259cb86a59b4bbd81da55b5a24c79b1ea6e3be1a)
+the recipe system supports up to 4 different callbacks for each `EffectOn.Callback` type.
+
+The signature becomes `EffectOn.Callback`, `EffectOn.Callback2`, etc.
+Note that the callback order matters, callbacks are sequential, first registered callback will be marked as first.
+Same callback type can be registered multiple times, with different event signatures.
+
+CallbackEffect example:
+
+Damage whenever target get's stunned, and heal whenever a status effect expires/gets removed that's not a stun.
 
 ```csharp
 Add("DamageOnStun_HealOnAnyNotStunStatusEffectRemoved")
@@ -850,7 +850,7 @@ This behaviour can be changed by using CustomStack logic. Modifier stack action 
 a future release.
 
 The most usual usage of this is to trigger the stack action on a custom case.
-It's a way to glue callback/event logic to stacking behaviour.
+It's a way to glue callback logic to stacking behaviour.
 
 Here we dispel all status effects if the unit has been stunned 4 times.
 
@@ -946,8 +946,8 @@ should be used.
 Currently for aura modifiers it has to be implemented directly into the unit. An example of this can be found
 in `CoreUnits.Unit.AddAuraModifier(int)`.
 
-This is also the case for unit events, like `OnKill`, `OnAttack`, `WhenDeath`, etc.
-Through `IEventOwner.AddEffectEvent(IEffect, EffectOnEvent)`.
+This is also the case for unit callbacks, like `OnKill`, `OnAttack`, `WhenDeath`, etc.
+Through `ICallbackUnitRegistrable.RegisterCallbacks(TCallbackUnit, IEffect[])`.
 
 ## Effect
 
@@ -1273,8 +1273,8 @@ This can create some very sophisticated modifiers:
 ```csharp
 //WhenAttacked ApplyModifier. Every5Stacks this modifier adds a new ^ rupture modifier
 Add("ComplexApplier_OnHit_Event")
-    .Effect(new ApplierEffect("ComplexApplier_Rupture", Targeting.SourceTarget), EffectOn.Event)
-    .Event(EffectOnEvent.WhenAttacked);
+    .Effect(new ApplierEffect("ComplexApplier_Rupture", Targeting.SourceTarget), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.WhenAttacked);
 
 //rupture modifier, that does DoT. When this gets to 5 stacks, apply the disarm effect.
 Add("ComplexApplier_Rupture")
@@ -1303,8 +1303,8 @@ To clarify:
 ```csharp            
 //Apply the modifier to source (healer) WhenHealed                                   
 Add("ComplexApplier2_WhenHealed_Event")               
-    .Effect(new ApplierEffect("ComplexApplier2_WhenHealed", Targeting.SourceTarget), EffectOn.Event)
-    .Event(EffectOnEvent.WhenHealed);
+    .Effect(new ApplierEffect("ComplexApplier2_WhenHealed", Targeting.SourceTarget), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.WhenHealed);
 
 //On 5 stacks, apply the modifier to self.
 Add("ComplexApplier2_WhenHealed")                                                    
@@ -1314,13 +1314,13 @@ Add("ComplexApplier2_WhenHealed")
 
 //Long main buff. Apply the modifier OnAttack.
 Add("ComplexApplier2_OnAttack_Event")
-    .Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"), EffectOn.Event)
-    .Event(EffectOnEvent.OnAttack)
+    .Effect(new ApplierEffect("ComplexApplier2_WhenAttacked_Event"), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.OnAttack)
     .Remove(60).Refresh();
 
 Add("ComplexApplier2_WhenAttacked_Event")
-    .Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd", Targeting.SourceTarget), EffectOn.Event)
-    .Event(EffectOnEvent.WhenAttacked)
+    .Effect(new ApplierEffect("ComplexApplier2_AddDamageAdd", Targeting.SourceTarget), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackUnitType.WhenAttacked)
     .Remove(5).Refresh();
 
 //On 4 stacks, Add Damage to Unit source (attacker).

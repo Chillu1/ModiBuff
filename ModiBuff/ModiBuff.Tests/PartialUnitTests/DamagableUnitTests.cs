@@ -3,7 +3,6 @@ using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using ModiBuff.Core.Units.Interfaces.NonGeneric;
 using NUnit.Framework;
-using IEventOwner = ModiBuff.Core.IEventOwner;
 using IDamagable = ModiBuff.Core.Units.Interfaces.NonGeneric.IDamagable;
 
 namespace ModiBuff.Tests
@@ -161,8 +160,8 @@ namespace ModiBuff.Tests
 		public void InitDamageEventCallback_UnitWithoutEvents()
 		{
 			AddRecipe("InitDamageWhenAttacked")
-				.Effect(new DamageEffect(5), EffectOn.Event)
-				.Event(EffectOnEvent.WhenAttacked);
+				.Effect(new DamageEffect(5), EffectOn.CallbackUnit)
+				.CallbackUnit(CallbackUnitType.WhenAttacked);
 			Setup();
 
 			Unit.AddModifierSelf("InitDamageWhenAttacked");

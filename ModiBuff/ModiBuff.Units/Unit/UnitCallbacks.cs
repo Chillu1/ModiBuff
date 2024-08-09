@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
@@ -36,7 +37,9 @@ namespace ModiBuff.Core.Units
 			_onKillCounter,
 			_healCounter,
 			_healTargetCounter,
-			_addDamageCounter;
+			_addDamageCounter,
+			_strongDispelCounter,
+			_strongHitCounter;
 
 		private int _poisonDamageCounter;
 
@@ -79,96 +82,8 @@ namespace ModiBuff.Core.Units
 		public void ResetEventCounters()
 		{
 			_preAttackCounter = _onAttackCounter = _whenAttackedCounter = _afterAttackedCounter =
-				_healthChangedCounter = _onCastCounter = _onKillCounter = _healCounter =
-					_healTargetCounter = _addDamageCounter = _poisonDamageCounter = 0;
-		}
-
-		public void AddEffectEvent(IEffect effect, EffectOnEvent @event)
-		{
-			switch (@event)
-			{
-				case EffectOnEvent.WhenAttacked:
-					_whenAttackedEffects.Add(effect);
-					break;
-				case EffectOnEvent.AfterAttacked:
-					_afterAttackedEffects.Add(effect);
-					break;
-				case EffectOnEvent.WhenKilled:
-					_whenDeathEffects.Add(effect);
-					break;
-				case EffectOnEvent.WhenHealed:
-					_whenHealedEffects.Add(effect);
-					break;
-				case EffectOnEvent.BeforeAttack:
-					_beforeAttackEffects.Add(effect);
-					break;
-				case EffectOnEvent.OnAttack:
-					_onAttackEffects.Add(effect);
-					break;
-				case EffectOnEvent.OnCast:
-					_onCastEffects.Add(effect);
-					break;
-				case EffectOnEvent.OnKill:
-					_onKillEffects.Add(effect);
-					break;
-				case EffectOnEvent.OnHeal:
-					_onHealEffects.Add(effect);
-					break;
-				default:
-#if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError("[ModiBuff.Units] Unknown event type: " + @event);
-#endif
-					return;
-			}
-		}
-
-		public void RemoveEffectEvent(IEffect effect, EffectOnEvent @event)
-		{
-			switch (@event)
-			{
-				case EffectOnEvent.WhenAttacked:
-					Remove(_whenAttackedEffects, effect);
-					break;
-				case EffectOnEvent.AfterAttacked:
-					Remove(_afterAttackedEffects, effect);
-					break;
-				case EffectOnEvent.WhenKilled:
-					Remove(_whenDeathEffects, effect);
-					break;
-				case EffectOnEvent.WhenHealed:
-					Remove(_whenHealedEffects, effect);
-					break;
-				case EffectOnEvent.BeforeAttack:
-					Remove(_beforeAttackEffects, effect);
-					break;
-				case EffectOnEvent.OnAttack:
-					Remove(_onAttackEffects, effect);
-					break;
-				case EffectOnEvent.OnCast:
-					Remove(_onCastEffects, effect);
-					break;
-				case EffectOnEvent.OnKill:
-					Remove(_onKillEffects, effect);
-					break;
-				case EffectOnEvent.OnHeal:
-					Remove(_onHealEffects, effect);
-					break;
-				default:
-#if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError("[ModiBuff.Units] Unknown event type: " + @event);
-#endif
-					return;
-			}
-
-			void Remove(List<IEffect> effects, IEffect effectToRemove)
-			{
-				bool remove = effects.Remove(effectToRemove);
-
-#if DEBUG && !MODIBUFF_PROFILE
-				if (!remove)
-					Logger.LogError("[ModiBuff.Units] Could not remove event: " + effectToRemove.GetType());
-#endif
-			}
+				_healthChangedCounter = _onCastCounter = _onKillCounter = _healCounter = _healTargetCounter =
+					_addDamageCounter = _strongDispelCounter = _strongHitCounter = _poisonDamageCounter = 0;
 		}
 
 		//---Callbacks---
@@ -299,6 +214,34 @@ namespace ModiBuff.Core.Units
 		{
 			switch (callbackType)
 			{
+				case CallbackUnitType.WhenAttacked:
+					_whenAttackedEffects.AddRange(callbacks);
+					break;
+				case CallbackUnitType.AfterAttacked:
+					_afterAttackedEffects.AddRange(callbacks);
+					break;
+				case CallbackUnitType.WhenKilled:
+					_whenDeathEffects.AddRange(callbacks);
+					break;
+				case CallbackUnitType.WhenHealed:
+					_whenHealedEffects.AddRange(callbacks);
+					break;
+				case CallbackUnitType.BeforeAttack:
+					_beforeAttackEffects.AddRange(callbacks);
+					break;
+				case CallbackUnitType.OnAttack:
+					_onAttackEffects.AddRange(callbacks);
+					break;
+				case CallbackUnitType.OnCast:
+					_onCastEffects.AddRange(callbacks);
+					break;
+				case CallbackUnitType.OnKill:
+					_onKillEffects.AddRange(callbacks);
+					break;
+				case CallbackUnitType.OnHeal:
+					_onHealEffects.AddRange(callbacks);
+					break;
+
 				case CallbackUnitType.StrongDispel:
 					_strongDispelCallbacks.AddRange(callbacks);
 					break;
@@ -306,7 +249,10 @@ namespace ModiBuff.Core.Units
 					_strongHitCallbacks.AddRange(callbacks);
 					break;
 				default:
-					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+#if DEBUG && !MODIBUFF_PROFILE
+					Logger.LogError("[ModiBuff.Units] Unknown callback type: " + callbackType);
+#endif
+					return;
 			}
 		}
 
@@ -314,30 +260,58 @@ namespace ModiBuff.Core.Units
 		{
 			switch (callbackType)
 			{
-				case CallbackUnitType.StrongDispel:
-					for (int i = 0; i < callbacks.Length; i++)
-					{
-						bool removed = _strongDispelCallbacks.Remove(callbacks[i]);
-#if DEBUG && !MODIBUFF_PROFILE
-						if (!removed)
-							Logger.LogError("[ModiBuff.Units] Could not remove callback: " + callbacks[i]);
-#endif
-					}
+				case CallbackUnitType.WhenAttacked:
+					Remove(_whenAttackedEffects);
+					break;
+				case CallbackUnitType.AfterAttacked:
+					Remove(_afterAttackedEffects);
+					break;
+				case CallbackUnitType.WhenKilled:
+					Remove(_whenDeathEffects);
+					break;
+				case CallbackUnitType.WhenHealed:
+					Remove(_whenHealedEffects);
+					break;
+				case CallbackUnitType.BeforeAttack:
+					Remove(_beforeAttackEffects);
+					break;
+				case CallbackUnitType.OnAttack:
+					Remove(_onAttackEffects);
+					break;
+				case CallbackUnitType.OnCast:
+					Remove(_onCastEffects);
+					break;
+				case CallbackUnitType.OnKill:
+					Remove(_onKillEffects);
+					break;
+				case CallbackUnitType.OnHeal:
+					Remove(_onHealEffects);
+					break;
 
+				case CallbackUnitType.StrongDispel:
+					Remove(_strongDispelCallbacks);
 					break;
 				case CallbackUnitType.StrongHit:
-					for (int i = 0; i < callbacks.Length; i++)
-					{
-						bool removed = _strongHitCallbacks.Remove(callbacks[i]);
-#if DEBUG && !MODIBUFF_PROFILE
-						if (!removed)
-							Logger.LogError("[ModiBuff.Units] Could not remove callback: " + callbacks[i]);
-#endif
-					}
-
+					Remove(_strongHitCallbacks);
 					break;
 				default:
-					throw new ArgumentOutOfRangeException(nameof(callbackType), callbackType, null);
+#if DEBUG && !MODIBUFF_PROFILE
+					Logger.LogError("[ModiBuff.Units] Unknown callback type: " + callbackType);
+#endif
+					return;
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			void Remove(List<IEffect> effects)
+			{
+				for (int i = 0; i < callbacks.Length; i++)
+				{
+					bool removed = effects.Remove(callbacks[i]);
+#if DEBUG && !MODIBUFF_PROFILE
+					if (!removed)
+						Logger.LogError("[ModiBuff.Units] Could not remove callback: " + callbacks[i]);
+#endif
+				}
 			}
 		}
 	}

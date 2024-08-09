@@ -131,10 +131,5 @@ namespace ModiBuff.Core.Units
 		{
 			return recipe.CallbackUnit(callbackType);
 		}
-
-		public static ModifierRecipe Event(this ModifierRecipe recipe, EffectOnEvent @event)
-		{
-			return recipe.Event(@event);
-		}
 	}
 }
