@@ -90,6 +90,7 @@ namespace ModiBuff.Core
 		}
 
 		public static ref readonly TagType GetTag(int id) => ref _instance._tags[id];
+		public static int GetAuraId(int id) => 0; // _instance._idManager.GetAuraId(id);
 
 		public IModifierGenerator GetGenerator(string name) => _modifierGenerators[name];
 

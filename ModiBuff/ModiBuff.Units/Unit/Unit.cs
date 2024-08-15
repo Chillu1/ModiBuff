@@ -22,7 +22,8 @@ namespace ModiBuff.Core.Units
 		ICallbackUnitRegistrable<CallbackUnitType>, IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
 		ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>, ICallbackRegistrable<CallbackType>,
-		IAllNonGeneric, ICaster, IStateReset, IIdOwner, IDurationLessStatusEffectOwner<LegalAction, StatusEffectType>
+		IAllNonGeneric, ICaster, IStateReset, IIdOwner, IDurationLessStatusEffectOwner<LegalAction, StatusEffectType>,
+		IAuraOwner
 	{
 		public int Id { get; }
 		public UnitTag UnitTag { get; private set; }
@@ -463,6 +464,12 @@ namespace ModiBuff.Core.Units
 			var modifier = ModifierPool.Instance.Rent(id);
 			modifier.UpdateTargets(_targetsInRange, this);
 			_auraModifiers.Add(modifier);
+		}
+
+		public IList<IUnit> GetAuraTargets(int auraId)
+		{
+			//TODO Ids
+			return _targetsInRange;
 		}
 
 		public void ResetState()

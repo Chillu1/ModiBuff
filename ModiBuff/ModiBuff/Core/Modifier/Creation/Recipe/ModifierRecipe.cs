@@ -556,6 +556,8 @@ namespace ModiBuff.Core
 				_tag |= TagType.IsRefresh;
 			if (_isInstanceStackable)
 				_tag |= TagType.IsInstanceStackable;
+			if (_isAura)
+				_tag |= TagType.IsAura;
 
 			_dispelRegisterWrapper?.GetEffectAs<DispelRegisterEffect>().UpdateDispelType(dispel);
 

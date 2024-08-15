@@ -27,8 +27,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Unit.AddCloseTargets(Ally);
-			Unit.AddAuraModifier(IdManager.GetId("InitAddDamageBuff_Interval"));
-
+			Unit.AddModifierSelf("InitAddDamageBuff_Interval");
 			Assert.AreEqual(UnitDamage, Unit.Damage);
 
 			Unit.Update(1f);
@@ -46,7 +45,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Unit.AddCloseTargets(Ally);
-			Unit.AddAuraModifier(IdManager.GetId("InitAddDamageBuff_Interval"));
+			Unit.AddModifierSelf("InitAddDamageBuff_Interval");
 
 			Unit.Update(1f);
 
@@ -66,7 +65,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Unit.AddCloseTargets(Ally);
-			Unit.AddAuraModifier(IdManager.GetId("InitAddDamageBuff_Interval"));
+			Unit.AddModifierSelf("InitAddDamageBuff_Interval");
 
 			Unit.Update(1f);
 
@@ -87,7 +86,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Unit.AddCloseTargets(Ally);
-			Unit.AddAuraModifier(IdManager.GetId("InitAddDamageBuff_Interval"));
+			Unit.AddModifierSelf("InitAddDamageBuff_Interval");
 
 			Unit.Update(1f);
 
@@ -101,5 +100,8 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(AllyDamage + 5, Ally.Damage);
 		}
+
+		//TODO Pool aura test
+		//TODO Id test
 	}
 }
