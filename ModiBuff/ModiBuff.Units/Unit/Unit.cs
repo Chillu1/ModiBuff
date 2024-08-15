@@ -55,8 +55,7 @@ namespace ModiBuff.Core.Units
 			IDurationLessStatusEffectOwner<LegalAction, StatusEffectType>.StatusEffectController =>
 			_durationLessStatusEffectController;
 
-		private readonly List<IUnit> _targetsInRange;
-		private readonly List<Modifier> _auraModifiers;
+		private readonly List<IUnit>[] _auraTargets;
 
 		private readonly MultiInstanceStatusEffectController _statusEffectController;
 		private readonly StatusEffectController _singleInstanceStatusEffectController;
@@ -104,9 +103,9 @@ namespace ModiBuff.Core.Units
 
 			_updateTimerCallbacks = new List<UpdateTimerEvent>();
 
-			_targetsInRange = new List<IUnit>();
-			_targetsInRange.Add(this);
-			_auraModifiers = new List<Modifier>();
+			_auraTargets = new List<IUnit>[2];
+			for (int i = 0; i < _auraTargets.Length; i++)
+				_auraTargets[i] = new List<IUnit> { this };
 
 			ModifierController = ModifierControllerPool.Instance.Rent();
 			ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
@@ -137,8 +136,6 @@ namespace ModiBuff.Core.Units
 			_singleInstanceStatusEffectController.Update(deltaTime);
 			ModifierController.Update(deltaTime);
 			ModifierApplierController.Update(deltaTime);
-			for (int i = 0; i < _auraModifiers.Count; i++)
-				_auraModifiers[i].Update(deltaTime);
 
 			_callbackTimer += deltaTime;
 			if (_callbackTimer >= CallbackTimerCooldown)
@@ -454,23 +451,8 @@ namespace ModiBuff.Core.Units
 
 		//---Aura---
 
-		public void AddCloseTargets(params Unit[] targets)
-		{
-			_targetsInRange.AddRange(targets);
-		}
-
-		public void AddAuraModifier(int id)
-		{
-			var modifier = ModifierPool.Instance.Rent(id);
-			modifier.UpdateTargets(_targetsInRange, this);
-			_auraModifiers.Add(modifier);
-		}
-
-		public IList<IUnit> GetAuraTargets(int auraId)
-		{
-			//TODO Ids
-			return _targetsInRange;
-		}
+		public void AddAuraTargets(int id, params Unit[] targets) => _auraTargets[id].AddRange(targets);
+		public IList<IUnit> GetAuraTargets(int auraId) => _auraTargets[auraId];
 
 		public void ResetState()
 		{
@@ -481,10 +463,8 @@ namespace ModiBuff.Core.Units
 				_dispelEvents, _strongDispelEvents, _healthChangedEvents, _damageChangedEvents,
 				_statusEffectAddedEvents, _statusEffectRemovedEvents, _onCastEvents, _updateTimerCallbacks);
 
-			_targetsInRange.Clear();
-			for (int i = 0; i < _auraModifiers.Count; i++)
-				ModifierPool.Instance.Return(_auraModifiers[i]);
-			_auraModifiers.Clear();
+			for (int i = 0; i < _auraTargets.Length; i++)
+				_auraTargets[i].Clear();
 			_callbackTimer = 0;
 			_statusEffectController.ResetState();
 			_singleInstanceStatusEffectController.ResetState();

@@ -19,6 +19,7 @@ namespace ModiBuff.Core
 
 		private bool _isInstanceStackable;
 		private bool _isAura;
+		private int _auraId;
 		private TagType _tag;
 
 		private bool _oneTimeInit;
@@ -93,9 +94,10 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Determines if the modifier should use <see cref="SingleTargetComponent"/> or <see cref="MultiTargetComponent"/>.
 		/// </summary>
-		public ModifierRecipe Aura()
+		public ModifierRecipe Aura(int id = 0)
 		{
 			_isAura = true;
+			_auraId = id;
 			_saveInstructions.Add(new SaveInstruction.Aura());
 			return this;
 		}
@@ -576,6 +578,8 @@ namespace ModiBuff.Core
 		}
 
 		public TagType GetTag() => _tag;
+
+		public int GetAuraId() => _auraId;
 
 		private ModifierRecipe DurationInternal(float duration)
 		{

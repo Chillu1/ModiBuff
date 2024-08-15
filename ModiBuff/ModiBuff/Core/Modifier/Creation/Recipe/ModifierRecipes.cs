@@ -28,6 +28,7 @@ namespace ModiBuff.Core
 
 		private ModifierInfo[] _modifierInfos;
 		private TagType[] _tags;
+		private int[] _auraIds;
 
 		public ModifierRecipes(ModifierIdManager idManager, EffectTypeIdManager effectTypeIdManager)
 		{
@@ -57,12 +58,15 @@ namespace ModiBuff.Core
 
 			_modifierInfos = new ModifierInfo[_recipes.Count + _manualGenerators.Count];
 			_tags = new TagType[_recipes.Count + _manualGenerators.Count];
+			_auraIds = new int[_recipes.Count + _manualGenerators.Count];
+			_auraIds.AsSpan().Fill(-1);
 			foreach (var generator in _manualGenerators.Values)
 			{
 				_modifierGenerators.Add(generator.Name, generator);
 				_modifierInfos[generator.Id] = new ModifierInfo(generator.Id, generator.Name, generator.DisplayName,
 					generator.Description);
 				_tags[generator.Id] = generator.Tag;
+				//TODO Aura id on generators
 			}
 
 			foreach (var recipe in _recipes.Values)
@@ -70,6 +74,8 @@ namespace ModiBuff.Core
 				_modifierGenerators.Add(recipe.Name, recipe.CreateModifierGenerator());
 				_modifierInfos[recipe.Id] = recipe.CreateModifierInfo();
 				_tags[recipe.Id] = recipe.GetTag();
+				if (recipe.GetTag().HasFlag(TagType.IsAura))
+					_auraIds[recipe.Id] = recipe.GetAuraId();
 			}
 
 			GeneratorCount = _modifierGenerators.Count;
@@ -90,7 +96,7 @@ namespace ModiBuff.Core
 		}
 
 		public static ref readonly TagType GetTag(int id) => ref _instance._tags[id];
-		public static int GetAuraId(int id) => 0; // _instance._idManager.GetAuraId(id);
+		public static int GetAuraId(int id) => _instance._auraIds[id];
 
 		public IModifierGenerator GetGenerator(string name) => _modifierGenerators[name];
 
