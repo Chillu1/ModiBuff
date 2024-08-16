@@ -125,6 +125,31 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(AllyDamage + 5, Ally.Damage);
 			Assert.AreEqual(EnemyDamage + 5 + 5, Enemy.Damage);
 		}
-		//TODO Pool aura test
+
+		[Test]
+		public void Aura_Pool_ClearTargets()
+		{
+			SetupAuraTest();
+
+			int id = IdManager.GetId("InitAddDamageBuff_Interval");
+			Pool.Clear();
+			Pool.Allocate(id, 1);
+
+			Unit.AddAuraTargets(0, Ally);
+			Unit.AddModifierSelf("InitAddDamageBuff_Interval");
+			Unit.Update(1f);
+
+			Assert.AreEqual(AllyDamage + 5, Ally.Damage);
+
+			Unit.ModifierController.Remove(new ModifierReference(id, -1));
+			Enemy.AddModifierSelf("InitAddDamageBuff_Interval");
+			Enemy.Update(1f);
+			Unit.Update(1.05f);
+			Ally.Update(1.05f);
+
+			Assert.AreEqual(EnemyDamage + 5, Enemy.Damage);
+			Assert.AreEqual(AllyDamage, Ally.Damage);
+			Assert.AreEqual(UnitDamage, Unit.Damage);
+		}
 	}
 }
