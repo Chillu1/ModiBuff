@@ -104,14 +104,6 @@ namespace ModiBuff.Core
 		{
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);
 
-			if (tag.HasTag(TagType.IsAura))
-			{
-				//TODO Handling if target is not IAuraOwner?
-				var targetList = ((IAuraOwner)target).GetAuraTargets(ModifierRecipes.GetAuraId(id));
-				AddAuraModifier(id, tag, targetList, source);
-				return;
-			}
-
 			if (!tag.HasTag(TagType.IsInstanceStackable))
 			{
 				bool useDictionaryIndexes = Config.UseDictionaryIndexes;
@@ -154,62 +146,27 @@ namespace ModiBuff.Core
 
 			var modifier = ModifierPool.Instance.Rent(id);
 
-			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
-			modifier.UpdateSingleTargetSource(target, source);
-
-			_modifiers[_modifiersTop++] = modifier;
-			if (tag.HasTag(TagType.IsInit))
-				modifier.Init();
-			if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.CustomStack)
-			                                && !tag.HasTag(TagType.ZeroDefaultStacks))
-				modifier.Stack();
-
-			modifier.UseScheduledCheck();
-		}
-
-		//TODO Refactor
-		private void AddAuraModifier(int id, TagType tag, IList<IUnit> targetList, IUnit source)
-		{
-			bool useDictionaryIndexes = Config.UseDictionaryIndexes;
-
-			bool exists;
-			int index;
-			if (useDictionaryIndexes)
-				exists = _modifierIndexesDict.TryGetValue(id, out index);
+			if (tag.HasTag(TagType.IsAura))
+			{
+				if (target is IAuraOwner auraOwner)
+				{
+					var targetList = auraOwner.GetAuraTargets(ModifierRecipes.GetAuraId(id));
+					modifier.UpdateTargets(targetList, source);
+				}
+				else
+				{
+#if DEBUG && !MODIBUFF_PROFILE
+					Logger.LogError("[ModiBuff] Tried to add an aura to a target that doesn't implement IAuraOwner");
+#endif
+					ModifierPool.Instance.Return(modifier);
+					return;
+				}
+			}
 			else
 			{
-				index = _modifierIndexes[id];
-				exists = index != -1;
+				//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
+				modifier.UpdateSingleTargetSource(target, source);
 			}
-
-			if (exists)
-			{
-				var existingModifier = _modifiers[index];
-				//TODO should we update the modifier targets when init/refreshing/stacking?
-				existingModifier.UpdateSource(source);
-				if (tag.HasTag(TagType.IsInit))
-					existingModifier.Init();
-				if (tag.HasTag(TagType.IsRefresh))
-					existingModifier.Refresh();
-				if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.CustomStack))
-					existingModifier.Stack();
-
-				existingModifier.UseScheduledCheck();
-
-				return;
-			}
-
-			if (useDictionaryIndexes)
-				_modifierIndexesDict.Add(id, _modifiersTop);
-			else
-				_modifierIndexes[id] = _modifiersTop;
-
-			if (_modifiersTop == _modifiers.Length)
-				Array.Resize(ref _modifiers, _modifiers.Length << 1);
-
-			var modifier = ModifierPool.Instance.Rent(id);
-
-			modifier.UpdateTargets(targetList, source);
 
 			_modifiers[_modifiersTop++] = modifier;
 			if (tag.HasTag(TagType.IsInit))

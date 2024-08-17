@@ -591,8 +591,8 @@ namespace ModiBuff.Core
 		private static void ValidateTag(TagType tag)
 		{
 			if (tag.IsInternalRecipeTag())
-				Logger.LogWarning("[ModiBuff] Setting internal tags directly is not recommended for recipes, " +
-				                  "they're automatically set based on the recipe settings");
+				Logger.LogWarning($"[ModiBuff] Setting internal tags like {tag} directly is not recommended for " +
+				                  "recipes, they're automatically set based on the recipe settings");
 		}
 
 		private static void ValidateModifierAction(ModifierAction modifierAction, EffectOn effectOn)
