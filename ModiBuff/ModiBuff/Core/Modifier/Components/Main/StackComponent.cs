@@ -66,35 +66,36 @@ namespace ModiBuff.Core
 
 		public void Update(float delta)
 		{
-			for (int i = 0; i < _stackTimers?.Count;)
-			{
-				float stackTimer = _stackTimers[i] - delta;
-
-				if (stackTimer > 0)
+			if (_stackTimers != null)
+				for (int i = 0; i < _stackTimers.Count;)
 				{
-					_stackTimers[i] = stackTimer;
-					i++;
-					continue;
-				}
+					float stackTimer = _stackTimers[i] - delta;
 
-				switch (_targetComponent)
-				{
-					case SingleTargetComponent singleTargetComponent:
-						for (int j = 0; j < _revertEffects.Length; j++)
-							_revertEffects[j].RevertStack(_stacks, singleTargetComponent.Target,
-								singleTargetComponent.Source);
-						break;
-					case MultiTargetComponent multiTargetComponent:
-						for (int j = 0; j < _revertEffects.Length; j++)
-						for (int k = 0; k < multiTargetComponent.Targets.Count; k++)
-							_revertEffects[j].RevertStack(_stacks, multiTargetComponent.Targets[k],
-								multiTargetComponent.Source);
-						break;
-				}
+					if (stackTimer > 0)
+					{
+						_stackTimers[i] = stackTimer;
+						i++;
+						continue;
+					}
 
-				_stackTimers.RemoveAt(i);
-				_stacks--;
-			}
+					switch (_targetComponent)
+					{
+						case SingleTargetComponent singleTargetComponent:
+							for (int j = 0; j < _revertEffects.Length; j++)
+								_revertEffects[j].RevertStack(_stacks, singleTargetComponent.Target,
+									singleTargetComponent.Source);
+							break;
+						case MultiTargetComponent multiTargetComponent:
+							for (int j = 0; j < _revertEffects.Length; j++)
+							for (int k = 0; k < multiTargetComponent.Targets.Count; k++)
+								_revertEffects[j].RevertStack(_stacks, multiTargetComponent.Targets[k],
+									multiTargetComponent.Source);
+							break;
+					}
+
+					_stackTimers.RemoveAt(i);
+					_stacks--;
+				}
 
 			if (_stacks == 0 || _singleStackTimer <= 0)
 				return;

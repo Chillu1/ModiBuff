@@ -1,3 +1,4 @@
+using System;
 using BenchmarkDotNet.Attributes;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
@@ -32,25 +33,25 @@ namespace ModiBuff.Tests
 			_initStackDamageModifierId = IdManager.GetId("InitStackDamage");
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void BenchAddNoOpEffectBench()
 		{
 			_unit.ModifierController.Add(_noOpModifierId, _unit, _unit);
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void BenchAddInitDamageBench()
 		{
 			_unit.ModifierController.Add(_initDamageModifierId, _unit, _unit);
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void BenchAddInitDamageEffectBench()
 		{
 			_unit.ApplyEffect(_modifierLessInitDamageEffectId, _unit);
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void BenchAddInitDamageBenchmarkUnitBench()
 		{
 			_benchmarkUnit.ModifierController.Add(_initDamageBenchmarkModifierId, _unit, _unit);
@@ -60,6 +61,15 @@ namespace ModiBuff.Tests
 		public void BenchAddInitStackDamage()
 		{
 			_unit.ModifierController.Add(_initStackDamageModifierId, _unit, _unit);
+		}
+
+		[Benchmark]
+		public void BenchAddInitStackDamage3X()
+		{
+			_unit.ModifierController.AddWithData(_initStackDamageModifierId, _unit, _unit, new ModifierPostAddAction[]
+			{
+				new StackAction(3)
+			});
 		}
 	}
 }

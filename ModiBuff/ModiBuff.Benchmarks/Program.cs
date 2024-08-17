@@ -25,9 +25,9 @@ namespace ModiBuff.Tests
 			config.AddValidator(DefaultConfig.Instance.GetValidators().ToArray());
 			config.AddHardwareCounters(DefaultConfig.Instance.GetHardwareCounters().ToArray());
 			config.AddFilter(DefaultConfig.Instance.GetFilters().ToArray());*/
-			BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+			//BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 
-			//BenchmarkRunner.Run<BenchTempTests>(/*config*/);
+			BenchmarkRunner.Run<BenchAddModifier>( /*config*/);
 		}
 	}
 }

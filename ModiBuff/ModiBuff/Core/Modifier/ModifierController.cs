@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
@@ -176,6 +178,112 @@ namespace ModiBuff.Core
 				modifier.Stack();
 
 			modifier.UseScheduledCheck();
+		}
+
+		public void AddWithData(int id, IUnit target, IUnit source, IList<ModifierPostAddAction> postActions)
+		{
+			ref readonly var tag = ref ModifierRecipes.GetTag(id);
+
+			if (!tag.HasTag(TagType.IsInstanceStackable))
+			{
+				bool useDictionaryIndexes = Config.UseDictionaryIndexes;
+
+				bool exists;
+				int index;
+				if (useDictionaryIndexes)
+					exists = _modifierIndexesDict.TryGetValue(id, out index);
+				else
+				{
+					index = _modifierIndexes[id];
+					exists = index != -1;
+				}
+
+				if (exists)
+				{
+					var existingModifier = _modifiers[index];
+					//TODO should we update the modifier targets when init/refreshing/stacking?
+					existingModifier.UpdateSource(source);
+					if (tag.HasTag(TagType.IsInit))
+						existingModifier.Init();
+					if (tag.HasTag(TagType.IsRefresh))
+						existingModifier.Refresh();
+					if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.CustomStack))
+						existingModifier.Stack();
+
+					existingModifier.UseScheduledCheck();
+
+					return;
+				}
+
+				if (useDictionaryIndexes)
+					_modifierIndexesDict.Add(id, _modifiersTop);
+				else
+					_modifierIndexes[id] = _modifiersTop;
+			}
+
+			if (_modifiersTop == _modifiers.Length)
+				Array.Resize(ref _modifiers, _modifiers.Length << 1);
+
+			var modifier = ModifierPool.Instance.Rent(id);
+
+			if (tag.HasTag(TagType.IsAura))
+			{
+				if (target is IAuraOwner auraOwner)
+				{
+					var targetList = auraOwner.GetAuraTargets(ModifierRecipes.GetAuraId(id));
+					modifier.UpdateTargets(targetList, source);
+				}
+				else
+				{
+#if DEBUG && !MODIBUFF_PROFILE
+					Logger.LogError("[ModiBuff] Tried to add an aura to a target that doesn't implement IAuraOwner");
+#endif
+					ModifierPool.Instance.Return(modifier);
+					return;
+				}
+			}
+			else
+			{
+				//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
+				modifier.UpdateSingleTargetSource(target, source);
+			}
+
+			_modifiers[_modifiersTop++] = modifier;
+			if (tag.HasTag(TagType.IsInit))
+				modifier.Init();
+			if (tag.HasTag(TagType.IsStack))
+			{
+				if (!tag.HasTag(TagType.CustomStack) && !tag.HasTag(TagType.ZeroDefaultStacks))
+					modifier.Stack();
+				HandleStackAction();
+			}
+
+			modifier.UseScheduledCheck();
+
+			//for (int i = 0; i < postActions.Count; i++)
+			//{
+			//	switch (postActions[i])
+			//	{
+			//		case AddTimeAction addTimeAction:
+			//			modifier.AddTime(addTimeAction.TimeType, addTimeAction.Time);
+			//			break;
+			//	}
+			//}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			void HandleStackAction()
+			{
+				for (int i = 0; i < postActions.Count; i++)
+				{
+					switch (postActions[i])
+					{
+						case StackAction stackAction:
+							for (int j = 0; j < stackAction.StacksCount; j++)
+								modifier.Stack();
+							return;
+					}
+				}
+			}
 		}
 
 		public bool Contains(int id, int genId = -1)

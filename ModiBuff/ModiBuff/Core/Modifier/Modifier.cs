@@ -192,6 +192,23 @@ namespace ModiBuff.Core
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void UseScheduledCheck() => _effectCheck?.Use(_targetComponent.Source);
 
+		public void AddTime(TimeType timeType, float time)
+		{
+			//switch (timeType)
+			//{
+			//	case TimeType.Interval:
+			//		for (int i = 0; i < _timeComponents.Length; i++)
+			//			if (_timeComponents[i] is IntervalComponent intervalComponent)
+			//				intervalComponent.AddTime(time);
+			//		break;
+			//	case TimeType.Duration:
+			//		for (int i = 0; i < _timeComponents.Length; i++)
+			//			if (_timeComponents[i] is DurationComponent durationComponent)
+			//				durationComponent.AddTime(time);
+			//		break;
+			//}
+		}
+
 		public ITimeComponent[] GetTimers() => _timeComponents;
 
 		/// <summary>
