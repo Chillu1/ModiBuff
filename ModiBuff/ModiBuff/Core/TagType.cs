@@ -33,8 +33,8 @@ namespace ModiBuff.Core
 		///		One stack is always added and triggered on init, this tag nullifies that.
 		/// </summary>
 		ZeroDefaultStacks = CustomStack << 1,
-		Reserved3 = CustomStack << 1,
-		Reserved4 = Reserved3 << 1,
+		IsAura = CustomStack << 1,
+		Reserved4 = IsAura << 1,
 		Reserved5 = Reserved4 << 1,
 		Reserved6 = Reserved5 << 1,
 		Reserved7 = Reserved6 << 1,

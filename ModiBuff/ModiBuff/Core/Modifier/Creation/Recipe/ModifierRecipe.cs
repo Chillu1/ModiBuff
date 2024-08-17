@@ -19,6 +19,7 @@ namespace ModiBuff.Core
 
 		private bool _isInstanceStackable;
 		private bool _isAura;
+		private int _auraId;
 		private TagType _tag;
 
 		private bool _oneTimeInit;
@@ -93,9 +94,10 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Determines if the modifier should use <see cref="SingleTargetComponent"/> or <see cref="MultiTargetComponent"/>.
 		/// </summary>
-		public ModifierRecipe Aura()
+		public ModifierRecipe Aura(int id = 0)
 		{
 			_isAura = true;
+			_auraId = id;
 			_saveInstructions.Add(new SaveInstruction.Aura());
 			return this;
 		}
@@ -556,6 +558,8 @@ namespace ModiBuff.Core
 				_tag |= TagType.IsRefresh;
 			if (_isInstanceStackable)
 				_tag |= TagType.IsInstanceStackable;
+			if (_isAura)
+				_tag |= TagType.IsAura;
 
 			_dispelRegisterWrapper?.GetEffectAs<DispelRegisterEffect>().UpdateDispelType(dispel);
 
@@ -575,6 +579,8 @@ namespace ModiBuff.Core
 
 		public TagType GetTag() => _tag;
 
+		public int GetAuraId() => _auraId;
+
 		private ModifierRecipe DurationInternal(float duration)
 		{
 			_duration = duration;
@@ -585,8 +591,8 @@ namespace ModiBuff.Core
 		private static void ValidateTag(TagType tag)
 		{
 			if (tag.IsInternalRecipeTag())
-				Logger.LogWarning("[ModiBuff] Setting internal tags directly is not recommended for recipes, " +
-				                  "they're automatically set based on the recipe settings");
+				Logger.LogWarning($"[ModiBuff] Setting internal tags like {tag} directly is not recommended for " +
+				                  "recipes, they're automatically set based on the recipe settings");
 		}
 
 		private static void ValidateModifierAction(ModifierAction modifierAction, EffectOn effectOn)

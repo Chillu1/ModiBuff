@@ -146,8 +146,27 @@ namespace ModiBuff.Core
 
 			var modifier = ModifierPool.Instance.Rent(id);
 
-			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
-			modifier.UpdateSingleTargetSource(target, source);
+			if (tag.HasTag(TagType.IsAura))
+			{
+				if (target is IAuraOwner auraOwner)
+				{
+					var targetList = auraOwner.GetAuraTargets(ModifierRecipes.GetAuraId(id));
+					modifier.UpdateTargets(targetList, source);
+				}
+				else
+				{
+#if DEBUG && !MODIBUFF_PROFILE
+					Logger.LogError("[ModiBuff] Tried to add an aura to a target that doesn't implement IAuraOwner");
+#endif
+					ModifierPool.Instance.Return(modifier);
+					return;
+				}
+			}
+			else
+			{
+				//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
+				modifier.UpdateSingleTargetSource(target, source);
+			}
 
 			_modifiers[_modifiersTop++] = modifier;
 			if (tag.HasTag(TagType.IsInit))

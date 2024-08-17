@@ -414,12 +414,15 @@ Add("StackableDamage_DamageOverTime")
 Any subsequent adds will not trigger the init effects, but refresh and stack effects will still work as usual.
 This is very useful for aura modifiers, where we don't want to stack the aura effect.
 
-For partial aura functionality, we can tell the recipe that it will trigger effects on multiple units at once
-with `Aura()`.
+> After commit [d3cb4a6](https://github.com/Chillu1/ModiBuff/commit/d3cb4a6220ff0ea0260750b68f451bc06091332e)
+> aura handling was refactored and improved.
+
+We can tell the recipe that it will trigger effects on multiple units at once
+with `Aura()`. We can also specify multiple aura Ids, which can be used as range dictionaries instead.
 
 ```csharp
 Add("InitAddDamageBuff")
-    .OneTimeInit()
+    .OneTimeInit() // EffectState.IsRevertibleAndTogglable can be used instead of OneTimeInit
     .Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
     .Remove(1.05f).Refresh();
 Add("InitAddDamageBuff_Interval")
@@ -943,8 +946,8 @@ For applier (attack, cast, etc) modifiers,
 `IModifierApplierOwner.ModifierApplierController.TryAddApplier(int id, bool hasApplyChecks, ApplierType applierType)`
 should be used.
 
-Currently for aura modifiers it has to be implemented directly into the unit. An example of this can be found
-in `CoreUnits.Unit.AddAuraModifier(int)`.
+For aura modifiers, units need to store the aura collection of targets themselves.
+Then they need to implement `IAuraOwner` so the modifiers can access these targets.
 
 This is also the case for unit callbacks, like `OnKill`, `OnAttack`, `WhenDeath`, etc.
 Through `ICallbackUnitRegistrable.RegisterCallbacks(TCallbackUnit, IEffect[])`.

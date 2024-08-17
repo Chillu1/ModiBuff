@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("ModiBuff.Tests")]
@@ -65,7 +66,7 @@ namespace ModiBuff.Core
 				_effectSaveState = effectSaveState.Value;
 		}
 
-		public void UpdateTargets(List<IUnit> targetsInRange, IUnit source)
+		public void UpdateTargets(IList<IUnit> targetsInRange, IUnit source)
 		{
 			//In case the user switches from single to multi target, which shouldn't be done, cause it causes GC
 			if (!_multiTarget)
@@ -87,6 +88,8 @@ namespace ModiBuff.Core
 				_stackComponent?.SetupTarget(_targetComponent);
 			}
 
+			//TODO state needs to be reset on pool?
+			//There's no need to update targets, since it's a reference to the list that shouldn't change
 			_targetComponent.Source = source;
 			((MultiTargetComponent)_targetComponent).UpdateTargets(targetsInRange);
 			if (_timeComponents != null)
