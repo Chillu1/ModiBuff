@@ -65,7 +65,7 @@ namespace ModiBuff.Core
 				_effectSaveState = effectSaveState.Value;
 		}
 
-		public void UpdateTargets(List<IUnit> targetsInRange, IUnit source)
+		public void UpdateTargets(IList<IUnit> targetsInRange, IUnit source)
 		{
 			//In case the user switches from single to multi target, which shouldn't be done, cause it causes GC
 			if (!_multiTarget)

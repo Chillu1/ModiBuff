@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ModiBuff.Core
 {
@@ -100,7 +101,7 @@ namespace ModiBuff.Core
 			return default;
 		}
 
-		public void Add(int id, IUnit target, IUnit source)
+		public void Add(int id, IUnit target, IUnit source, IList<ModifierAddAction> actions = null)
 		{
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);
 
@@ -146,8 +147,16 @@ namespace ModiBuff.Core
 
 			var modifier = ModifierPool.Instance.Rent(id);
 
-			//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
-			modifier.UpdateSingleTargetSource(target, source);
+			var auraAction = actions?.FirstOrDefault(a => a is ModifierAuraAddAction);
+			if (auraAction != null)
+			{
+				modifier.UpdateTargets(((ModifierAuraAddAction)auraAction).Targets, source);
+			}
+			else
+			{
+				//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
+				modifier.UpdateSingleTargetSource(target, source);
+			}
 
 			_modifiers[_modifiersTop++] = modifier;
 			if (tag.HasTag(TagType.IsInit))

@@ -6,29 +6,25 @@ namespace ModiBuff.Core
 	public sealed class MultiTargetComponent : ITargetComponent, ISavable<MultiTargetComponent.SaveData>
 	{
 		public IUnit Source { get; set; }
-		public List<IUnit> Targets { get; }
+		public IList<IUnit> Targets { get; private set; }
 
 		public MultiTargetComponent()
 		{
 			Targets = new List<IUnit>(Config.MultiTargetComponentInitialCapacity);
 		}
 
-		public MultiTargetComponent(List<IUnit> targets, IUnit source)
+		public MultiTargetComponent(IList<IUnit> targets, IUnit source)
 		{
 			Source = source;
 			Targets = targets;
 		}
 
-		public void UpdateTargets(List<IUnit> targets)
-		{
-			Targets.Clear();
-			Targets.AddRange(targets);
-		}
+		public void UpdateTargets(IList<IUnit> targets) => Targets = targets;
 
 		public void ResetState()
 		{
 			Source = null;
-			Targets.Clear();
+			Targets = null;
 		}
 
 		public object SaveState() =>
