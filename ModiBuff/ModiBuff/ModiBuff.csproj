@@ -21,19 +21,21 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <DefineConstants>TRACE</DefineConstants>
+        <DefineConstants>TRACE MODIBUFF_SYSTEM_TEXT_JSON</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <DefineConstants>TRACE</DefineConstants>
+        <DefineConstants>TRACE MODIBUFF_SYSTEM_TEXT_JSON</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
         <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0"/>
+        <PackageReference Include="System.Text.Json" Version="8.0.4"/>
     </ItemGroup>
 
     <ItemGroup>
         <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\..\ModifierExamples.md" Pack="true" PackagePath="\"/>
         <None Include="..\..\Docs\ModiBuffSmallIcon.png" Pack="true" PackagePath="\"/>
     </ItemGroup>
 

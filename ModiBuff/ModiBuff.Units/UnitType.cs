@@ -11,6 +11,26 @@ namespace ModiBuff.Core.Units
 		Neutral = 3,
 	}
 
+	/// <summary>
+	///		Example of how to use custom modifier data for advanced tagging purposes
+	/// </summary>
+	public enum AllyUnitType
+	{
+		Warrior,
+		Archer,
+		Mage,
+	}
+
+	/// <summary>
+	///		Example of how to use custom modifier data for advanced tagging purposes
+	/// </summary>
+	public enum EnemyUnitType
+	{
+		Slime,
+		Goblin,
+		Orc,
+	}
+
 	public static class UnitTypeExtensions
 	{
 		public static bool IsLegalTarget(this UnitType unitType, UnitType target)

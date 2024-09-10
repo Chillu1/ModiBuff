@@ -7,6 +7,7 @@
         <OutputType>Library</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <DefineConstants>MODIBUFF_SYSTEM_TEXT_JSON</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>

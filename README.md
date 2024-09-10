@@ -846,6 +846,47 @@ Add("InitDamageEnemyOnly")
     .Effect(new DamageEffect(5f), EffectOn.Init);
 ```
 
+### Custom Data
+
+Sometimes the tag system is too limited for our needs. That's why every recipe stores a custom object, that can be
+accessed from anywhere like the tag.
+It is mostly designed to store basic information about the modifier, one example of this is adding a modifier to every
+unit of type X (ex. Goblin).
+Instead of storing that information on the goblin unit data itself, we delegate it to the modifiers, also no need for
+arbitrary naming conventions this way.
+
+```csharp
+public enum EnemyUnitType
+{
+    Slime,
+    Goblin,
+    Orc,
+}
+
+public enum ModifierAddType
+{
+    Self = 1,
+    Applier,
+}
+
+public record AddModifierCommonData<TUnit>(ModifierAddType ModifierType, TUnit UnitType);
+
+Add("Damage")
+    .Data(new AddModifierCommonData<EnemyUnitType>(ModifierAddType.Self, EnemyUnitType.Goblin))
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+It also allows for a more standardized recipe creation, by unit types, modifier types, etc, reducing code duplication.
+
+```csharp
+AddEnemySelfBuff("Damage", EnemyUnitType.Goblin)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+
+ModifierRecipe AddEnemySelfBuff(string name, EnemyUnitType enemyUnitType, string displayName = "", string description = "") =>
+    Add(name + enemyUnitType, displayName, description)
+        .Data(new AddModifierCommonData<EnemyUnitType>(ModifierAddType.Self, enemyUnitType));
+```
+
 ### Custom Stack
 
 Stack is always triggered when we try to add the same type of modifier again.
