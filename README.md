@@ -530,8 +530,7 @@ In this example we add 5 damage to unit on Init, and the modifier can only be re
 StrongHit".
 Essentially a hit that deals more than half units health in damage (ex. game logic).
 
-> Important: there can only be one callback `CallbackUnit` per modifier, but there can be
-> multiple effects that trigger on that callback.
+> Important: all versions before 0.4/latest master can only have one callback `CallbackUnit` per modifier.
 
 ```csharp
 Add("InitAddDamageRevertibleHalfHealthCallback")
@@ -844,6 +843,47 @@ public static ModifierRecipe LegalTarget(this ModifierRecipe recipe, LegalTarget
 Add("InitDamageEnemyOnly")
     .LegalTarget(LegalTarget.Enemy)
     .Effect(new DamageEffect(5f), EffectOn.Init);
+```
+
+### Custom Data
+
+Sometimes the tag system is too limited for our needs. That's why every recipe stores a custom object, that can be
+accessed from anywhere like the tag.
+It is mostly designed to store basic information about the modifier, one example of this is adding a modifier to every
+unit of type X (ex. Goblin).
+Instead of storing that information on the goblin unit data itself, we delegate it to the modifiers, also no need for
+arbitrary naming conventions this way.
+
+```csharp
+public enum EnemyUnitType
+{
+    Slime,
+    Goblin,
+    Orc,
+}
+
+public enum ModifierAddType
+{
+    Self = 1,
+    Applier,
+}
+
+public record AddModifierCommonData<TUnit>(ModifierAddType ModifierType, TUnit UnitType);
+
+Add("Damage")
+    .Data(new AddModifierCommonData<EnemyUnitType>(ModifierAddType.Self, EnemyUnitType.Goblin))
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+It also allows for a more standardized recipe creation, by unit types, modifier types, etc, reducing code duplication.
+
+```csharp
+AddEnemySelfBuff("Damage", EnemyUnitType.Goblin)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+
+ModifierRecipe AddEnemySelfBuff(string name, EnemyUnitType enemyUnitType, string displayName = "", string description = "") =>
+    Add(name + enemyUnitType, displayName, description)
+        .Data(new AddModifierCommonData<EnemyUnitType>(ModifierAddType.Self, enemyUnitType));
 ```
 
 ### Custom Stack
