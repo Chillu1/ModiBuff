@@ -530,8 +530,7 @@ In this example we add 5 damage to unit on Init, and the modifier can only be re
 StrongHit".
 Essentially a hit that deals more than half units health in damage (ex. game logic).
 
-> Important: there can only be one callback `CallbackUnit` per modifier, but there can be
-> multiple effects that trigger on that callback.
+> Important: all versions before 0.4/latest master can only have one callback `CallbackUnit` per modifier.
 
 ```csharp
 Add("InitAddDamageRevertibleHalfHealthCallback")

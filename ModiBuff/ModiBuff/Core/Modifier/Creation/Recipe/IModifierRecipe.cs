@@ -9,6 +9,7 @@ namespace ModiBuff.Core
 		ModifierInfo CreateModifierInfo();
 		TagType GetTag();
 		int GetAuraId();
+		object GetData();
 
 		//TODO Move/refactor
 		ModifierRecipe.SaveData SaveState();
