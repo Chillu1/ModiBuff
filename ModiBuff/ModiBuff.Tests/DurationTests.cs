@@ -53,5 +53,23 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
+
+		[Test]
+		public void TwoModifiersSameDurationRemove()
+		{
+			AddRecipe("DurationRemove")
+				.Remove(5);
+			AddRecipe("DurationRemove2")
+				.Remove(5);
+			Setup();
+
+			Unit.AddModifierSelf("DurationRemove");
+			Unit.AddModifierSelf("DurationRemove2");
+
+			Unit.Update(5f);
+
+			Assert.False(Unit.ContainsModifier("DurationRemove"));
+			Assert.False(Unit.ContainsModifier("DurationRemove2"));
+		}
 	}
 }

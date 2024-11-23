@@ -59,7 +59,8 @@ namespace ModiBuff.Core
 			_modifierInfos = new ModifierInfo[_recipes.Count + _manualGenerators.Count];
 			_tags = new TagType[_recipes.Count + _manualGenerators.Count];
 			_auraIds = new int[_recipes.Count + _manualGenerators.Count];
-			_auraIds.AsSpan().Fill(-1);
+			for (int i = 0; i < _auraIds.Length; i++)
+				_auraIds[i] = -1;
 			foreach (var generator in _manualGenerators.Values)
 			{
 				_modifierGenerators.Add(generator.Name, generator);
