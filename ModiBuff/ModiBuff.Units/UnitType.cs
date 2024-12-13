@@ -31,6 +31,15 @@ namespace ModiBuff.Core.Units
 		Orc,
 	}
 
+	public enum GoblinModifierActionType
+	{
+		/// <summary>
+		///		Example special goblin mechanic, that says that these modifiers should be triggered on goblins event "OnSurrender"
+		/// </summary>
+		OnSurrender,
+		OnRetreat,
+	}
+
 	public static class UnitTypeExtensions
 	{
 		public static bool IsLegalTarget(this UnitType unitType, UnitType target)

@@ -31,5 +31,32 @@ namespace ModiBuff.Tests
 				AddRecipe(name + enemyUnitType)
 					.Data(new AddModifierCommonData<EnemyUnitType>(ModifierAddType.Self, enemyUnitType));
 		}
+
+		[Test]
+		public void SpecialUnitEvent()
+		{
+			const EnemyUnitType enemyType = EnemyUnitType.Goblin;
+			AddGoblinModifier("RemoveDamage", GoblinModifierActionType.OnSurrender)
+				.Effect(new AddDamageEffect(-5), EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("RemoveDamage" + enemyType);
+
+			Assert.AreEqual(UnitDamage - 5, Unit.Damage);
+
+			var goblinSurrenderModifiers = new List<int>();
+			foreach ((int id, var data) in ModifierRecipes
+				         .GetModifierData<AddModifierCommonData<GoblinModifierActionType, EnemyUnitType>>())
+				if (data.UnitType == enemyType && data.ModifierType == GoblinModifierActionType.OnSurrender)
+					goblinSurrenderModifiers.Add(id);
+
+			Assert.AreEqual(goblinSurrenderModifiers.Count, 1);
+			Assert.AreEqual(goblinSurrenderModifiers[0], IdManager.GetId("RemoveDamage" + enemyType));
+
+			ModifierRecipe AddGoblinModifier(string name, GoblinModifierActionType modifierActionType) =>
+				AddRecipe(name + EnemyUnitType.Goblin)
+					.Data(new AddModifierCommonData<GoblinModifierActionType, EnemyUnitType>(modifierActionType,
+						EnemyUnitType.Goblin));
+		}
 	}
 }
