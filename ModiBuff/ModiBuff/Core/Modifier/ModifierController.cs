@@ -339,7 +339,6 @@ namespace ModiBuff.Core
 			if (Config.UseDictionaryIndexes)
 				_modifierIndexesDict[topModifier.Id] = modifierIndex;
 			else
-				//TODO Make a unit test that checks that this is implemented
 				_modifierIndexes[topModifier.Id] = modifierIndex;
 		}
 
