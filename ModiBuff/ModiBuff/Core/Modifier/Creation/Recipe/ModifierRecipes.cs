@@ -74,7 +74,7 @@ namespace ModiBuff.Core
 				_tags[generator.Id] = generator.Tag;
 				if (generator.Tag.HasFlag(TagType.IsAura))
 					_auraIds[generator.Id] = generator.AuraId;
-				//TODO Generator data
+				_modifierData[generator.Id] = generator.Data;
 			}
 
 			foreach (var recipe in _recipes.Values)
@@ -157,8 +157,8 @@ namespace ModiBuff.Core
 			return recipe;
 		}
 
-		public void Add(string name, string displayName, string description,
-			in ModifierGeneratorFunc createFunc, TagType tag = TagType.Default, int auraId = -1)
+		public void Add(string name, string displayName, string description, in ModifierGeneratorFunc createFunc,
+			TagType tag = TagType.Default, int auraId = -1, object customModifierData = null)
 		{
 			if (_recipes.ContainsKey(name))
 			{
@@ -191,7 +191,7 @@ namespace ModiBuff.Core
 				id = _idManager.GetFreeId(name);
 
 			var modifierGenerator = new ManualModifierGenerator(id, name, displayName, description,
-				in createFunc, tag, auraId);
+				in createFunc, tag, auraId, customModifierData);
 			_manualGenerators.Add(name, modifierGenerator);
 		}
 

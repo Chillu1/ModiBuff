@@ -58,5 +58,33 @@ namespace ModiBuff.Tests
 					.Data(new AddModifierCommonData<GoblinModifierActionType, EnemyUnitType>(modifierActionType,
 						EnemyUnitType.Goblin));
 		}
+
+		[Test]
+		public void LegalActionUnitTypeGenerator()
+		{
+			const EnemyUnitType enemyType = EnemyUnitType.Goblin;
+			AddGenerator("AddDamage" + enemyType, (id, genId, name, tag) =>
+				{
+					var addDamageEffect = new AddDamageEffect(5);
+					var initComponent = new InitComponent(false, new IEffect[] { addDamageEffect }, null);
+
+					return new Modifier(id, genId, name, initComponent, null, null, null,
+						new SingleTargetComponent(), new EffectStateInfo(addDamageEffect), null);
+				}, Core.Units.TagType.Default,
+				customModifierData: new AddModifierCommonData<EnemyUnitType>(ModifierAddType.Self, enemyType));
+			Setup();
+
+			Unit.AddModifierSelf("AddDamage" + enemyType);
+
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+
+			var enemySelfModifiers = new List<int>();
+			foreach ((int id, var data) in ModifierRecipes.GetModifierData<AddModifierCommonData<EnemyUnitType>>())
+				if (data.UnitType == enemyType && data.ModifierType == ModifierAddType.Self)
+					enemySelfModifiers.Add(id);
+
+			Assert.AreEqual(enemySelfModifiers.Count, 1);
+			Assert.AreEqual(enemySelfModifiers[0], IdManager.GetId("AddDamage" + enemyType));
+		}
 	}
 }
