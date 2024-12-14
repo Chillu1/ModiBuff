@@ -193,12 +193,11 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+#if !DEBUG
+		[Ignore("This test is only for debug mode. Skipping test")]
+#endif
 		public void ApplierDoesntExist()
 		{
-#if !DEBUG
-			Setup();
-			Assert.Ignore("This test is only for debug mode");
-#endif
 			Setup();
 
 			Assert.Throws<AssertionException>(() => _ = new ApplierEffect("NonExistentApplier"));
