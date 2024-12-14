@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
@@ -13,6 +14,15 @@ namespace ModiBuff.Tests
 			const EnemyUnitType enemyType = EnemyUnitType.Goblin;
 			AddEnemySelfBuff("AddDamage", enemyType)
 				.Effect(new AddDamageEffect(5), EffectOn.Init);
+			AddRecipe("AddDamageApplier" + enemyType)
+				.Effect(new AddDamageEffect(5), EffectOn.Init)
+				.Data(new AddModifierCommonData<EnemyUnitType>(ModifierAddType.Applier, enemyType));
+			AddEnemySelfBuff("AddDamage", EnemyUnitType.Slime)
+				.Effect(new AddDamageEffect(5), EffectOn.Init);
+			AddRecipe("AddDamageAdvanced" + enemyType)
+				.Effect(new AddDamageEffect(5), EffectOn.Init)
+				.Data(new AddModifierCommonData<GoblinModifierActionType, EnemyUnitType>(
+					GoblinModifierActionType.OnSurrender, EnemyUnitType.Goblin));
 			Setup();
 
 			Unit.AddModifierSelf("AddDamage" + enemyType);
@@ -20,7 +30,10 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 
 			var enemySelfModifiers = new List<int>();
-			foreach ((int id, var data) in ModifierRecipes.GetModifierData<AddModifierCommonData<EnemyUnitType>>())
+			var addModifierCommonData = ModifierRecipes.GetModifierData<AddModifierCommonData<EnemyUnitType>>();
+			Assert.AreEqual(addModifierCommonData.Length, 3);
+			Assert.AreEqual(addModifierCommonData.Count(d => d.Data.UnitType == enemyType), 2);
+			foreach ((int id, var data) in addModifierCommonData)
 				if (data.UnitType == enemyType && data.ModifierType == ModifierAddType.Self)
 					enemySelfModifiers.Add(id);
 
