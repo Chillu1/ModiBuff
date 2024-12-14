@@ -74,9 +74,10 @@ namespace ModiBuff.Tests
 
 		protected void AddEffect(string name, params IEffect[] effects) => Effects.Add(name, effects);
 
-		protected void AddGenerator(string name, in ModifierGeneratorFunc createFunc, TagType tag = TagType.Default)
+		protected void AddGenerator(string name, in ModifierGeneratorFunc createFunc, TagType tag = TagType.Default,
+			int auraId = -1, object customModifierData = null)
 		{
-			Recipes.Add(name, name, "", in createFunc, tag.ToInternalTag());
+			Recipes.Add(name, name, "", in createFunc, tag.ToInternalTag(), auraId, customModifierData);
 		}
 
 		/// <summary>

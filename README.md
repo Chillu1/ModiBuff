@@ -530,8 +530,7 @@ In this example we add 5 damage to unit on Init, and the modifier can only be re
 StrongHit".
 Essentially a hit that deals more than half units health in damage (ex. game logic).
 
-> Important: there can only be one callback `CallbackUnit` per modifier, but there can be
-> multiple effects that trigger on that callback.
+> Important: all versions before 0.4/latest master can only have one callback `CallbackUnit` per modifier.
 
 ```csharp
 Add("InitAddDamageRevertibleHalfHealthCallback")
@@ -846,6 +845,86 @@ Add("InitDamageEnemyOnly")
     .Effect(new DamageEffect(5f), EffectOn.Init);
 ```
 
+### Custom Data
+
+Sometimes the tag system is too limited for our needs, and we want to store custom modifier identification with data.
+That's why every recipe stores a custom object, that can be accessed from anywhere like the tag.
+It is mostly designed to store basic information about the modifier, one example of this is adding a modifier to every
+unit of type X (ex. Goblin).
+Instead of storing that information on the goblin unit data itself, we delegate it to the modifiers, also it makes it so
+we don't need arbitrary naming conventions for our modifiers.
+
+```csharp
+public enum EnemyUnitType
+{
+    Slime,
+    Goblin,
+    Orc,
+}
+
+public enum ModifierAddType
+{
+    Self = 1,
+    Applier,
+}
+
+public record AddModifierCommonData<TUnit>(ModifierAddType ModifierType, TUnit UnitType);
+
+Add("Damage")
+    .Data(new AddModifierCommonData<EnemyUnitType>(ModifierAddType.Self, EnemyUnitType.Goblin))
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+It also allows for a more standardized recipe creation, by unit types, modifier types, etc, reducing code duplication.
+And allowing for a set of standards, making the modifier creation less prone to errors.
+
+```csharp
+AddEnemySelfBuff("Damage", EnemyUnitType.Goblin)
+    .Effect(new DamageEffect(5), EffectOn.Init);
+
+ModifierRecipe AddEnemySelfBuff(string name, EnemyUnitType enemyUnitType, string displayName = "", string description = "") =>
+    Add(name + enemyUnitType, displayName, description)
+        .Data(new AddModifierCommonData<EnemyUnitType>(ModifierAddType.Self, enemyUnitType));
+```
+
+Then to apply all the modifiers to the units, we filter through them.
+
+```csharp
+var goblinSelfModifiers = new List<int>();
+foreach ((int id, var data) in ModifierRecipes.GetModifierData<AddModifierCommonData<EnemyUnitType>>())
+    if (data.UnitType == EnemyType.Goblin && data.ModifierType == ModifierAddType.Self)
+        goblinSelfModifiers.Add(id);
+```
+
+It's also possible to create `ModifierRecipe` extensions instead, for ease of use.
+This is recommended if you have multiple different entity type combinations, and actions.
+
+```csharp
+public static ModifierRecipe Data(this ModifierRecipe recipe, ModifierAddType modifierAddType, EnemyUnitType enemyUnitType) => 
+    recipe.Data(new AddModifierCommonData<EnemyUnitType>(modifierAddType, enemyUnitType));
+
+ModifierRecipe AddEnemySelfBuffExtension(string name, EnemyUnitType enemyUnitType, string displayName = "", string description = "") =>
+    AddRecipe(name + enemyUnitType, displayName, description)
+        .Data(ModifierAddType.Self, enemyUnitType);
+```
+
+> Note: That modifier appliers should still be two separate modifiers, the applier and the applied modifier.
+> Then we just add the appliers based on what we get from `ModifierRecipes.GetModifierData`, and apply them on
+> actions/events.
+
+#### Advanced Custom Data
+
+It's possible to use custom action types as well, possibly for non-generic actions tied to a unit type.
+Ex. goblins having a special event to surrender, and us wanting to trigger some modifiers on certain goblin types.
+
+```csharp
+public record AddModifierCommonData<TModifier, TUnit>(TModifier ModifierType, TUnit UnitType);
+
+Add("RemoveDamageOnSurrender")
+    .Data(new AddModifierCommonData<GoblinModifierActionType, EnemyUnitType>(GoblinModifierActionType.OnSurrender, EnemyUnitType.Goblin)
+    .Effect(new DamageEffect(-5), EffectOn.Init);
+```
+
 ### Custom Stack
 
 Stack is always triggered when we try to add the same type of modifier again.
@@ -918,6 +997,34 @@ Add("Full")
 ```
 
 Each modifier should have at least one effect, unless it's used as a flag.
+
+### Encapsulating same code in method extensions
+
+When a game has many modifiers that share the same core logic, it's recommended to encapsulate the logic in method
+through method extensions.
+An example of this from Chillu's test game, where whenever an enemy drops a resource their carrying, they lose that
+resources buff/debuff.
+
+```csharp
+public static ModifierRecipe RemoveOnResourceDrop(this ModifierRecipe recipe, ResourceType resourceType) =>
+    recipe.Remove(RemoveEffectOn.CallbackEffect)
+        .CallbackEffect(CallbackType.EnemyDropResource, effect =>
+            new ResourceDroppedEvent((target, resource) =>
+            {
+                if (effect is RemoveEffect removeEffect && resource.IsPrimary(resourceType))
+                    removeEffect.Effect(target, null);
+            }));
+
+AddResourceModifier(ResourceType.Red, ResourceModifierAction.OnDigested, "Curse", "Resource eating curse",
+        "Deal damage with every resource eaten")
+    .Effect(new DamageEffect(new MutableDamageStatData(10)), EffectOn.CallbackUnit)
+    .CallbackUnit(CallbackType.EnemyEatResource)
+    .Remove(15).Refresh()
+    .RemoveOnResourceDrop(ResourceType.Red); //Then we just call the method extension each time we we need to add the modifier of this type
+```
+
+This allows for lower cognitive load, since it's easier to understand what "RemoveOnResourceDrop(ResourceType.Red)"
+does.
 
 ## Recipe Limitations
 

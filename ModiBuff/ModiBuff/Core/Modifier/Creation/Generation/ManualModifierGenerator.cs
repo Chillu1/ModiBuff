@@ -8,12 +8,13 @@ namespace ModiBuff.Core
 		public string Description { get; }
 		public TagType Tag { get; }
 		public int AuraId { get; }
+		public object Data { get; }
 		private readonly ModifierGeneratorFunc _createFunc;
 
 		private int _genId;
 
 		public ManualModifierGenerator(int id, string name, string displayName, string description,
-			in ModifierGeneratorFunc createFunc, TagType tag, int auraId)
+			in ModifierGeneratorFunc createFunc, TagType tag, int auraId, object customModifierData)
 		{
 			Id = id;
 			Name = name;
@@ -27,6 +28,8 @@ namespace ModiBuff.Core
 			if (auraId != -1)
 				tag |= TagType.IsAura;
 			Tag = tag;
+			AuraId = auraId;
+			Data = customModifierData;
 		}
 
 		public Modifier Create() => _createFunc(Id, _genId++, Name, Tag);
