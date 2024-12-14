@@ -22,6 +22,8 @@ namespace ModiBuff.Core
 		private int _auraId;
 		private TagType _tag;
 
+		private object _data;
+
 		private bool _oneTimeInit;
 
 		private bool _currentIsInterval;
@@ -339,6 +341,13 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		public ModifierRecipe Data<T>(T data)
+		{
+			_data = data;
+			//_saveInstructions.Add(new SaveInstruction.Data(@object));
+			return this;
+		}
+
 		private void AddRemoveEffect(EffectOn effectOn)
 		{
 			if (_removeEffectWrapper != null)
@@ -580,6 +589,8 @@ namespace ModiBuff.Core
 		public TagType GetTag() => _tag;
 
 		public int GetAuraId() => _auraId;
+
+		public object GetData() => _data;
 
 		private ModifierRecipe DurationInternal(float duration)
 		{

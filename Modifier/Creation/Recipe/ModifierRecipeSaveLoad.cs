@@ -120,10 +120,12 @@ namespace ModiBuff.Core
 						ModifierAction(action.ModifierActionFlags, action.EffectOn);
 #endif
 						break;
-//					case SaveInstruction.Event.Id:
-//#if MODIBUFF_SYSTEM_TEXT_JSON
-//#endif
-//						break;
+					case SaveInstruction.Data.Id:
+#if MODIBUFF_SYSTEM_TEXT_JSON
+						var data = (SaveInstruction.Data)instruction;
+						Data(data.SaveData);
+#endif
+						break;
 					default:
 						Logger.LogError($"Unknown instruction with id {instruction.InstructionId}");
 						break;
@@ -184,6 +186,7 @@ namespace ModiBuff.Core
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(CallbackUnit), CallbackUnit.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Effect), Effect.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(ModifierAction), ModifierAction.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(Data), Data.Id)]
 #endif
 		public record SaveInstruction
 		{
@@ -412,6 +415,18 @@ namespace ModiBuff.Core
 					ModifierActionFlags = modifierActionFlags;
 					EffectOn = effectOn;
 				}
+			}
+
+			public sealed record Data : SaveInstruction
+			{
+				public const int Id = ModifierAction.Id + 1;
+
+				public readonly object SaveData;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+				[System.Text.Json.Serialization.JsonConstructor]
+#endif
+				public Data(object saveData) : base(Id) => SaveData = saveData;
 			}
 		}
 
