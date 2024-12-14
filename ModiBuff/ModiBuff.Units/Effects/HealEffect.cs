@@ -70,7 +70,9 @@ namespace ModiBuff.Core.Units
 
 				if (_metaEffects != null)
 					foreach (var metaEffect in _metaEffects)
-						heal = metaEffect.Effect(heal, target, source);
+						if (metaEffect is ConditionMetaEffect conditionMetaEffect &&
+						    conditionMetaEffect.Check(heal, target, source))
+							heal = metaEffect.Effect(heal, target, source);
 
 				heal += _extraHeal;
 
