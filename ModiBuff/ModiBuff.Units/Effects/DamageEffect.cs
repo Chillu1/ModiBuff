@@ -66,7 +66,9 @@ namespace ModiBuff.Core.Units
 
 				if (_metaEffects != null)
 					foreach (var metaEffect in _metaEffects)
-						damage = metaEffect.Effect(damage, target, source);
+						if (metaEffect is not ConditionEffect conditionMetaEffect ||
+						    conditionMetaEffect.Check(damage, target, source))
+							damage = metaEffect.Effect(damage, target, source);
 
 				damage += _extraDamage;
 
@@ -79,7 +81,9 @@ namespace ModiBuff.Core.Units
 
 			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)
-					postEffect.Effect(returnDamageInfo, target, source);
+					if (postEffect is not ConditionEffect conditionEffect ||
+					    conditionEffect.Check(returnDamageInfo, target, source))
+						postEffect.Effect(returnDamageInfo, target, source);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)

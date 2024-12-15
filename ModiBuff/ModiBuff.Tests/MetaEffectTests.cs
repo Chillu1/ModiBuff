@@ -137,5 +137,79 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - 2 - 1.5 - 1, Enemy.Health);
 			Assert.AreEqual(0, Unit.Mana);
 		}
+
+		[Test]
+		public void ReverseValueOnFullHealthMetaEffectCondition()
+		{
+			AddRecipe("InitHealValueBasedOnStatMeta")
+				.Effect(new HealEffect(5)
+						.SetMetaEffects(new ReverseValueMetaEffect()
+							.Condition<ReverseValueMetaEffect>(new ValueFull(StatTypeCondition.Health))),
+					EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("InitHealValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.AddModifierSelf("InitHealValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
+
+		[Test]
+		public void ReverseValueOnNotFullHealthMetaEffectCondition()
+		{
+			AddRecipe("InitDamageValueBasedOnStatMeta")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(new ReverseValueMetaEffect()
+							.Condition<ReverseValueMetaEffect>(new ValueFull(StatTypeCondition.Health, true))),
+					EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("InitDamageValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.AddModifierSelf("InitDamageValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
+
+		[Test]
+		public void ReverseValueOnNotFullHealthAndHigherThanHalfMetaEffectCondition()
+		{
+			AddRecipe("InitDamageValueBasedOnStatMeta")
+				.Effect(new HealEffect(5)
+						.SetMetaEffects(new ReverseValueMetaEffect().Condition<ReverseValueMetaEffect>(
+							new ValueFull(StatTypeCondition.Health, true),
+							new ValueComparisonPercent(StatType.Health, ComparisonType.GreaterOrEqual, 0.5f))),
+					EffectOn.Init);
+			Setup();
+
+			Unit.TakeDamage(5, Unit);
+
+			Unit.AddModifierSelf("InitDamageValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+
+			Unit.TakeDamage(UnitHealth / 2f, Unit);
+			Unit.AddModifierSelf("InitDamageValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth - 5 - 5 - UnitHealth / 2f + 5, Unit.Health);
+		}
+
+		[Test]
+		public void ReversePoisonDamageValueOnNotFullHealthMetaEffectCondition()
+		{
+			AddRecipe("PoisonValueBasedOnNotFullHealthMeta")
+				.Stack(WhenStackEffect.Always)
+				.Effect(new PoisonDamageEffect().SetMetaEffects(new ReverseValueMetaEffect()
+						.Condition<ReverseValueMetaEffect>(new ValueFull(StatTypeCondition.Health, true))),
+					EffectOn.Interval | EffectOn.Stack)
+				.Interval(1)
+				.Remove(5).Refresh();
+			Setup();
+
+
+			Unit.AddModifierSelf("PoisonValueBasedOnNotFullHealthMeta");
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
 	}
 }
