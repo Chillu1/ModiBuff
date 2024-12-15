@@ -143,21 +143,30 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("InitHealValueBasedOnStatMeta")
 				.Effect(new HealEffect(5)
-						.SetMetaEffects(
-							new ReverseValueMetaEffect().Condition<ReverseValueMetaEffect>(
-								new ValueFull(StatTypeCondition.Health))),
+						.SetMetaEffects(new ReverseValueMetaEffect()
+							.Condition<ReverseValueMetaEffect>(new ValueFull(StatTypeCondition.Health))),
 					EffectOn.Init);
 			Setup();
-
-			//TODO ModifierId, MetaId, Enable
-			//Unit.ToggleMetaEffectState(0, 0, false);
-			//TODO Stacking conditional meta & post effects, or feeding conditions?
-			//Ex. Reverse the value if target is on full health
-			//Conditional straight up better than toggling/adding, since no state han
 
 			Unit.AddModifierSelf("InitHealValueBasedOnStatMeta");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 			Unit.AddModifierSelf("InitHealValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
+
+		[Test]
+		public void ReverseValueOnNotFullHealthMetaEffectCondition()
+		{
+			AddRecipe("InitDamageValueBasedOnStatMeta")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(new ReverseValueMetaEffect()
+							.Condition<ReverseValueMetaEffect>(new ValueFull(StatTypeCondition.Health, true))),
+					EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("InitDamageValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.AddModifierSelf("InitDamageValueBasedOnStatMeta");
 			Assert.AreEqual(UnitHealth, Unit.Health);
 		}
 	}

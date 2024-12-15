@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
@@ -16,6 +17,7 @@ namespace ModiBuff.Core
 
 	public static class ComparisonTypeExtensions
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool Check(this ComparisonType comparisonType, float valueOne, float valueTwo)
 		{
 			switch (comparisonType)

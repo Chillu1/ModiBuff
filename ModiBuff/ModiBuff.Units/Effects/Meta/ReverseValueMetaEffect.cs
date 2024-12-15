@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
@@ -19,25 +20,26 @@ namespace ModiBuff.Core.Units
 	//TODO Targeting
 	public abstract record Condition;
 
-	public sealed record ValueFull(StatTypeCondition StatType) : Condition;
+	public sealed record ValueFull(StatTypeCondition StatType, bool Invert = false) : Condition;
 
 	public sealed record ValueLow(StatTypeCondition StatType) : Condition
 	{
 		public const float Threshold = 0.3f; //Arbitrary, 30%
 	}
 
-	public sealed record ValueHigher(ValueType ValueType, float Value) : Condition;
+	public sealed record ValueComparison(ValueType ValueType, ComparisonType ComparisonType, float Value) : Condition;
 
-	public sealed record ValueHigherPercent(StatTypeCondition ValueType, float Value) : Condition;
+	public sealed record ValueComparisonPercent(StatType StatType, ComparisonType ComparisonType, float Value)
+		: Condition;
 
 	public abstract class ConditionMetaEffect
 	{
-		protected Condition[] Conditions { get; private set; }
+		protected Condition[] Conditions { get; private set; } = Array.Empty<Condition>();
 
-		public T Condition<T>(Condition condition)
+		public T Condition<T>(Condition condition) where T : ConditionMetaEffect
 		{
-			Conditions = new[] { condition };
-			return (T)(object)this;
+			Conditions = Conditions.Append(condition).ToArray();
+			return (T)this;
 		}
 
 		public bool Check(float value, IUnit target, IUnit source)
@@ -56,8 +58,8 @@ namespace ModiBuff.Core.Units
 		{
 			ValueFull full => full.StatType switch
 			{
-				StatTypeCondition.Health => ((IDamagable<float, float>)target).FullHealth(),
-				StatTypeCondition.Mana => ((IManaOwner<float, float>)target).FullMana(),
+				StatTypeCondition.Health => ((IDamagable<float, float>)target).FullHealth() != full.Invert,
+				StatTypeCondition.Mana => ((IManaOwner<float, float>)target).FullMana() != full.Invert,
 				_ => false
 			},
 			ValueLow low => low.StatType switch
@@ -66,17 +68,21 @@ namespace ModiBuff.Core.Units
 				StatTypeCondition.Mana => ((IManaOwner<float, float>)target).PercentageMana() < ValueLow.Threshold,
 				_ => false
 			},
-			ValueHigher higher => higher.ValueType switch
+			ValueComparison comparison => comparison.ValueType switch
 			{
-				ValueType.Fed => value > higher.Value,
-				ValueType.Health => ((IDamagable<float, float>)target).Health > higher.Value,
-				ValueType.Mana => ((IManaOwner<float, float>)target).Mana > higher.Value,
+				ValueType.Fed => comparison.ComparisonType.Check(value, comparison.Value),
+				ValueType.Health => comparison.ComparisonType.Check(((IDamagable<float, float>)target).Health,
+					comparison.Value),
+				ValueType.Mana => comparison.ComparisonType.Check(((IManaOwner<float, float>)target).Mana,
+					comparison.Value),
 				_ => false
 			},
-			ValueHigherPercent higherPercent => higherPercent.ValueType switch
+			ValueComparisonPercent comparisonPercent => comparisonPercent.StatType switch
 			{
-				StatTypeCondition.Health => ((IDamagable<float, float>)target).PercentageHealth() > higherPercent.Value,
-				StatTypeCondition.Mana => ((IManaOwner<float, float>)target).PercentageMana() > higherPercent.Value,
+				StatType.Health => comparisonPercent.ComparisonType.Check(
+					((IDamagable<float, float>)target).PercentageHealth(), comparisonPercent.Value),
+				StatType.Mana => comparisonPercent.ComparisonType.Check(
+					((IManaOwner<float, float>)target).PercentageMana(), comparisonPercent.Value),
 				_ => false
 			},
 			_ => throw new ArgumentOutOfRangeException(nameof(condition))
