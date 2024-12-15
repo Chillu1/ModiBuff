@@ -69,7 +69,9 @@ namespace ModiBuff.Core.Units
 
 				if (_metaEffects != null)
 					foreach (var metaEffect in _metaEffects)
-						damage = metaEffect.Effect(damage, stacks, target, stackSource);
+						if (metaEffect is not ConditionMetaEffect conditionMetaEffect ||
+						    conditionMetaEffect.Check(damage, stacks, target, source))
+							damage = metaEffect.Effect(damage, stacks, target, stackSource);
 
 				damage += _extraDamage;
 

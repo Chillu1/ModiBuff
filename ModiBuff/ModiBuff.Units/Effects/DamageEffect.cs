@@ -81,7 +81,9 @@ namespace ModiBuff.Core.Units
 
 			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)
-					postEffect.Effect(returnDamageInfo, target, source);
+					if (postEffect is not ConditionPostEffect conditionMetaEffect ||
+					    conditionMetaEffect.Check(returnDamageInfo, target, source))
+						postEffect.Effect(returnDamageInfo, target, source);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)

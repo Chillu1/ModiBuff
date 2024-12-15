@@ -62,5 +62,22 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
+
+		[Test]
+		public void ReverseValueOnFullHealthPostEffectCondition()
+		{
+			AddRecipe("InitDamageLifestealOnNotFullMana")
+				.Effect(new DamageEffect(5)
+						.SetPostEffects(new LifeStealPostEffect(2f)
+							.Condition<LifeStealPostEffect>(new ValueFull(StatTypeCondition.Mana, true))),
+					EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("InitDamageLifestealOnNotFullMana");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.UseMana(5);
+			Unit.AddModifierSelf("InitDamageLifestealOnNotFullMana");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
 	}
 }
