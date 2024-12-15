@@ -22,7 +22,7 @@ namespace ModiBuff.Core.Units
 
 	public sealed record ValueFull(StatTypeCondition StatType, bool Invert = false) : Condition;
 
-	public sealed record ValueLow(StatTypeCondition StatType) : Condition
+	public sealed record ValueLow(StatTypeCondition StatType, bool Invert = false) : Condition
 	{
 		public const float Threshold = 0.3f; //Arbitrary, 30%
 	}
@@ -42,13 +42,17 @@ namespace ModiBuff.Core.Units
 			return (T)this;
 		}
 
+		public T Condition<T>(params Condition[] conditions) where T : ConditionMetaEffect
+		{
+			Conditions = Conditions.Concat(conditions).ToArray();
+			return (T)this;
+		}
+
 		public bool Check(float value, IUnit target, IUnit source)
 		{
 			for (int i = 0; i < Conditions.Length; i++)
-			{
 				if (!Check(value, target, source, Conditions[i]))
 					return false;
-			}
 
 			return true;
 		}
@@ -64,8 +68,10 @@ namespace ModiBuff.Core.Units
 			},
 			ValueLow low => low.StatType switch
 			{
-				StatTypeCondition.Health => ((IDamagable<float, float>)target).PercentageHealth() < ValueLow.Threshold,
-				StatTypeCondition.Mana => ((IManaOwner<float, float>)target).PercentageMana() < ValueLow.Threshold,
+				StatTypeCondition.Health =>
+					((IDamagable<float, float>)target).PercentageHealth() < ValueLow.Threshold != low.Invert,
+				StatTypeCondition.Mana =>
+					((IManaOwner<float, float>)target).PercentageMana() < ValueLow.Threshold != low.Invert,
 				_ => false
 			},
 			ValueComparison comparison => comparison.ValueType switch

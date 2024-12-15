@@ -169,5 +169,26 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("InitDamageValueBasedOnStatMeta");
 			Assert.AreEqual(UnitHealth, Unit.Health);
 		}
+
+		[Test]
+		public void ReverseValueOnNotFullHealthAndHigherThanHalfMetaEffectCondition()
+		{
+			AddRecipe("InitDamageValueBasedOnStatMeta")
+				.Effect(new HealEffect(5)
+						.SetMetaEffects(new ReverseValueMetaEffect().Condition<ReverseValueMetaEffect>(
+							new ValueFull(StatTypeCondition.Health, true),
+							new ValueComparisonPercent(StatType.Health, ComparisonType.GreaterOrEqual, 0.5f))),
+					EffectOn.Init);
+			Setup();
+
+			Unit.TakeDamage(5, Unit);
+
+			Unit.AddModifierSelf("InitDamageValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+
+			Unit.TakeDamage(UnitHealth / 2f, Unit);
+			Unit.AddModifierSelf("InitDamageValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth - 5 - 5 - UnitHealth / 2f + 5, Unit.Health);
+		}
 	}
 }
