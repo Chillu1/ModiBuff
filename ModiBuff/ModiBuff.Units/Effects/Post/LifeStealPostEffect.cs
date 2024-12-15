@@ -1,6 +1,6 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class LifeStealPostEffect : ConditionPostEffect, IPostEffect<float>
+	public sealed class LifeStealPostEffect : ConditionEffect, IPostEffect<float>
 	{
 		private readonly float _lifeStealPercent;
 		private readonly Targeting _targeting;

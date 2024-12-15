@@ -66,7 +66,7 @@ namespace ModiBuff.Core.Units
 
 				if (_metaEffects != null)
 					foreach (var metaEffect in _metaEffects)
-						if (metaEffect is not ConditionMetaEffect conditionMetaEffect ||
+						if (metaEffect is not ConditionEffect conditionMetaEffect ||
 						    conditionMetaEffect.Check(damage, target, source))
 							damage = metaEffect.Effect(damage, target, source);
 
@@ -81,8 +81,8 @@ namespace ModiBuff.Core.Units
 
 			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)
-					if (postEffect is not ConditionPostEffect conditionMetaEffect ||
-					    conditionMetaEffect.Check(returnDamageInfo, target, source))
+					if (postEffect is not ConditionEffect conditionEffect ||
+					    conditionEffect.Check(returnDamageInfo, target, source))
 						postEffect.Effect(returnDamageInfo, target, source);
 		}
 

@@ -3,17 +3,17 @@ using System.Linq;
 
 namespace ModiBuff.Core.Units
 {
-	public abstract class ConditionPostEffect
+	public abstract class ConditionEffect
 	{
 		private Condition[] _conditions = Array.Empty<Condition>();
 
-		public T Condition<T>(Condition condition) where T : ConditionPostEffect
+		public T Condition<T>(Condition condition) where T : ConditionEffect
 		{
 			_conditions = _conditions.Append(condition).ToArray();
 			return (T)this;
 		}
 
-		public T Condition<T>(params Condition[] conditions) where T : ConditionPostEffect
+		public T Condition<T>(params Condition[] conditions) where T : ConditionEffect
 		{
 			_conditions = _conditions.Concat(conditions).ToArray();
 			return (T)this;
