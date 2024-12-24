@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -23,7 +24,7 @@ namespace ModiBuff.Core.Units
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
 		ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>, ICallbackRegistrable<CallbackType>,
 		IAllNonGeneric, ICaster, IStateReset, IIdOwner, IDurationLessStatusEffectOwner<LegalAction, StatusEffectType>,
-		IAuraOwner
+		IAuraOwner, IDebuffable
 	{
 		public int Id { get; }
 		public UnitTag UnitTag { get; private set; }
@@ -56,6 +57,8 @@ namespace ModiBuff.Core.Units
 			_durationLessStatusEffectController;
 
 		private readonly List<IUnit>[] _auraTargets;
+
+		private readonly DebuffType[] _debuffs;
 
 		private readonly MultiInstanceStatusEffectController _statusEffectController;
 		private readonly StatusEffectController _singleInstanceStatusEffectController;
@@ -106,6 +109,8 @@ namespace ModiBuff.Core.Units
 			_auraTargets = new List<IUnit>[2];
 			for (int i = 0; i < _auraTargets.Length; i++)
 				_auraTargets[i] = new List<IUnit> { this };
+
+			_debuffs = new DebuffType[Enum.GetValues(typeof(DebuffType)).Length];
 
 			ModifierController = ModifierControllerPool.Instance.Rent();
 			ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
@@ -453,6 +458,18 @@ namespace ModiBuff.Core.Units
 
 		public void AddAuraTargets(int id, params Unit[] targets) => _auraTargets[id].AddRange(targets);
 		public IList<IUnit> GetAuraTargets(int auraId) => _auraTargets[auraId];
+
+		public void AddDebuff(DebuffType debuffType, IUnit source)
+		{
+			_debuffs[(int)debuffType]++;
+			//TODO Event
+		}
+
+		public void RemoveDebuff(DebuffType debuffType, IUnit source)
+		{
+			_debuffs[(int)debuffType]--;
+			//TODO Event
+		}
 
 		public void ResetState()
 		{
