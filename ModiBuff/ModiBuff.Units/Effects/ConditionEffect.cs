@@ -19,6 +19,18 @@ namespace ModiBuff.Core.Units
 			return (T)this;
 		}
 
+		public IMetaEffect<float, float> ConditionMeta(Condition condition)
+		{
+			_conditions = _conditions.Append(condition).ToArray();
+			return (IMetaEffect<float, float>)this;
+		}
+
+		public IPostEffect<float> ConditionPost(Condition condition)
+		{
+			_conditions = _conditions.Append(condition).ToArray();
+			return (IPostEffect<float>)this;
+		}
+
 		public bool Check(float value, IUnit target, IUnit source)
 		{
 			for (int i = 0; i < _conditions.Length; i++)

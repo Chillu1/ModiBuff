@@ -32,6 +32,8 @@ namespace ModiBuff.Core.Units
 					return comparison.Check(value, target);
 				case ValueComparisonPercent comparisonPercent:
 					return comparisonPercent.Check(target);
+				case StatusEffect statusEffect:
+					return statusEffect.Check(target);
 				default:
 					Logger.LogError("[ModiBuff] Invalid condition: " + this);
 					return false;
@@ -51,6 +53,8 @@ namespace ModiBuff.Core.Units
 					return comparison.Check(stacks, target);
 				case ValueComparisonPercent comparisonPercent:
 					return comparisonPercent.Check(target);
+				case StatusEffect statusEffect:
+					return statusEffect.Check(target);
 				default:
 					Logger.LogError("[ModiBuff] Invalid condition: " + this);
 					return false;
@@ -113,5 +117,12 @@ namespace ModiBuff.Core.Units
 			StatType.Mana => ComparisonType.Check(((IManaOwner<float, float>)target).PercentageMana(), Value),
 			_ => false
 		};
+	}
+
+	public sealed record StatusEffect(StatusEffectType StatusEffectType, bool Invert = false) : Condition
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool Check(IUnit target) => ((IStatusEffectOwner<LegalAction, StatusEffectType>)target)
+			.StatusEffectController.HasStatusEffect(StatusEffectType) != Invert;
 	}
 }

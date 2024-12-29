@@ -142,8 +142,11 @@ namespace ModiBuff.Core.Units
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool HasLegalAction(LegalAction legalAction) => (_legalActions & legalAction) != 0;
 
+		//Note: Currently if target is stunned, this will return true on all other status effects, because stun affects them all, not ideal implementation in most scenarios TODO
 		public bool HasStatusEffect(StatusEffectType statusEffectType)
 		{
+			//return _legalActionsTimers.Any(kvp => kvp.Key.StatusEffectTypeInt == (int)statusEffectType);//Slow alternative, better to instead have a separate array for which status effect types are held
+
 			//Get all indexes of the status effect type
 			LegalAction[] legalActions = StatusEffectTypeHelper.LegalActions[(int)statusEffectType];
 			//Check if all of them are bigger than 0

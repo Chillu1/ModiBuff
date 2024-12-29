@@ -1,6 +1,6 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class ReverseValueMetaEffect : ConditionEffect, IMetaEffect<float, float>,
+	public sealed class ReverseValueMetaEffect : ConditionEffect, IMetaEffect<float, float>, IMetaEffect<int, int>,
 		IMetaEffect<float, int, float>
 	{
 		public float Effect(float value, IUnit target, IUnit source) => -value;
