@@ -2,6 +2,6 @@ namespace ModiBuff.Core.Units
 {
 	public enum DebuffType
 	{
-		Flammable = 1,
+		Flammable = 0,
 	}
 }

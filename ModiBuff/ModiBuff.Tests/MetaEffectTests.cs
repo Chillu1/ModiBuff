@@ -144,7 +144,7 @@ namespace ModiBuff.Tests
 			AddRecipe("InitHealValueBasedOnStatMeta")
 				.Effect(new HealEffect(5)
 						.SetMetaEffects(new ReverseValueMetaEffect()
-							.Condition<ReverseValueMetaEffect>(new ValueFull(StatTypeCondition.Health))),
+							.Condition(new ValueFull(StatTypeCondition.Health))),
 					EffectOn.Init);
 			Setup();
 
@@ -160,7 +160,7 @@ namespace ModiBuff.Tests
 			AddRecipe("InitDamageValueBasedOnStatMeta")
 				.Effect(new DamageEffect(5)
 						.SetMetaEffects(new ReverseValueMetaEffect()
-							.Condition<ReverseValueMetaEffect>(new ValueFull(StatTypeCondition.Health, true))),
+							.Condition(new ValueFull(StatTypeCondition.Health, true))),
 					EffectOn.Init);
 			Setup();
 
@@ -197,7 +197,7 @@ namespace ModiBuff.Tests
 			AddRecipe("PoisonValueBasedOnNotFullHealthMeta")
 				.Stack(WhenStackEffect.Always)
 				.Effect(new PoisonDamageEffect().SetMetaEffects(new ReverseValueMetaEffect()
-						.Condition<ReverseValueMetaEffect>(new ValueFull(StatTypeCondition.Health, true))),
+						.Condition(new ValueFull(StatTypeCondition.Health, true))),
 					EffectOn.Interval | EffectOn.Stack)
 				.Interval(1)
 				.Remove(5).Refresh();
@@ -219,7 +219,7 @@ namespace ModiBuff.Tests
 			AddRecipe("DamageAddFlatOnRooted")
 				.Effect(new DamageEffect(5)
 						.SetMetaEffects(
-							new AddValueMetaEffect(5).Condition(new StatusEffect(StatusEffectType.Root))
+							new AddValueMetaEffect(5).Condition(new StatusEffectCond(StatusEffectType.Root))
 						),
 					EffectOn.Init);
 			Setup();
@@ -243,15 +243,15 @@ namespace ModiBuff.Tests
 		{
 			var metaEffects = new IMetaEffect<float, float>[]
 			{
-				new AddValueMetaEffect(5).Condition(new StatusEffect(StatusEffectType.Root)),
-				new MultiplyValueMetaEffect(2).Condition(new StatusEffect(StatusEffectType.Silence))
+				new AddValueMetaEffect(5).Condition(new StatusEffectCond(StatusEffectType.Root)),
+				new MultiplyValueMetaEffect(2).Condition(new StatusEffectCond(StatusEffectType.Silence))
 			};
 			AddRecipe("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed")
 				.Effect(new DamageEffect(5)
-					.Condition(new StatusEffect(StatusEffectType.Disarm, true))
+					.Condition(new StatusEffectCond(StatusEffectType.Disarm, true))
 					.SetMetaEffects(metaEffects), EffectOn.Init)
 				.Effect(new HealEffect(5)
-					.Condition(new StatusEffect(StatusEffectType.Disarm))
+					.Condition(new StatusEffectCond(StatusEffectType.Disarm))
 					.SetMetaEffects(metaEffects), EffectOn.Init);
 			Setup();
 

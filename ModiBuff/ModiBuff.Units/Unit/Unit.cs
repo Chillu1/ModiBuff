@@ -465,11 +465,13 @@ namespace ModiBuff.Core.Units
 			//TODO Event
 		}
 
-		public void RemoveDebuff(DebuffType debuffType, IUnit source)
+		public void RemoveDebuff(DebuffType debuffType, int stacksApplied, IUnit source)
 		{
-			_debuffs[(int)debuffType]--;
+			_debuffs[(int)debuffType] -= stacksApplied;
 			//TODO Event
 		}
+
+		public bool ContainsDebuff(DebuffType debuffType) => _debuffs[(int)debuffType] > 0;
 
 		public void ResetState()
 		{

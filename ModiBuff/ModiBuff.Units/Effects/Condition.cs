@@ -17,7 +17,7 @@ namespace ModiBuff.Core.Units
 
 	public abstract record Condition(Targeting Targeting = Targeting.TargetSource)
 	{
-		//public abstract bool Check(float value, IUnit target, IUnit source);
+		//We don't use an abstract method because then every condition would need to implement stack logic, of which not all can make sense
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Check(float value, IUnit target, IUnit source)
@@ -32,10 +32,12 @@ namespace ModiBuff.Core.Units
 					return comparison.Check(value, target);
 				case ValueComparisonPercent comparisonPercent:
 					return comparisonPercent.Check(target);
-				case StatusEffect statusEffect:
+				case StatusEffectCond statusEffect:
 					return statusEffect.Check(target);
+				case DebuffEffectCond debuffEffectCond:
+					return debuffEffectCond.Check(target);
 				default:
-					Logger.LogError("[ModiBuff] Invalid condition: " + this);
+					Logger.LogError("[ModiBuff.Units] Invalid/unknown condition: " + GetType());
 					return false;
 			}
 		}
@@ -53,10 +55,12 @@ namespace ModiBuff.Core.Units
 					return comparison.Check(stacks, target);
 				case ValueComparisonPercent comparisonPercent:
 					return comparisonPercent.Check(target);
-				case StatusEffect statusEffect:
+				case StatusEffectCond statusEffect:
 					return statusEffect.Check(target);
+				case DebuffEffectCond debuffEffectCond:
+					return debuffEffectCond.Check(target);
 				default:
-					Logger.LogError("[ModiBuff] Invalid condition: " + this);
+					Logger.LogError("[ModiBuff.Units] Invalid/unknown condition: " + GetType());
 					return false;
 			}
 		}
@@ -119,10 +123,16 @@ namespace ModiBuff.Core.Units
 		};
 	}
 
-	public sealed record StatusEffect(StatusEffectType StatusEffectType, bool Invert = false) : Condition
+	public sealed record StatusEffectCond(StatusEffectType StatusEffectType, bool Invert = false) : Condition
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Check(IUnit target) => ((IStatusEffectOwner<LegalAction, StatusEffectType>)target)
 			.StatusEffectController.HasStatusEffect(StatusEffectType) != Invert;
+	}
+
+	public sealed record DebuffEffectCond(DebuffType DebuffType, bool Invert = false) : Condition
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool Check(IUnit target) => ((IDebuffable)target).ContainsDebuff(DebuffType) != Invert;
 	}
 }

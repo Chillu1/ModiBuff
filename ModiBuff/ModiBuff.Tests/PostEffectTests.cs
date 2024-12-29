@@ -69,7 +69,7 @@ namespace ModiBuff.Tests
 			AddRecipe("InitDamageLifestealOnNotFullMana")
 				.Effect(new DamageEffect(5)
 						.SetPostEffects(new LifeStealPostEffect(2f)
-							.Condition<LifeStealPostEffect>(new ValueFull(StatTypeCondition.Mana, true))),
+							.Condition(new ValueFull(StatTypeCondition.Mana, true))),
 					EffectOn.Init);
 			Setup();
 
@@ -80,42 +80,27 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth, Unit.Health);
 		}
 
-		//[Test]//TODO
+		[Test]
 		public void ApplyDoTIfTargetIsFlammablePostEffectCondition()
 		{
-			//TODO
-			//A way to make modifiers react/do stuff based on other unit state, aka a replacment for addable post/meta modifiers
-			// So ex. using target tags, or getting some other state, activating post/meta effects on an effect. So we dont have have to have stateful post/meta modifiers with either adding or enabling them
-			AddRecipe("DoT")
-				.Effect(new DamageEffect(5), EffectOn.Interval)
-				.Interval(1)
-				.Remove(5).Refresh();
-
-			/*AddRecipe("FlammableDebuff")
+			AddRecipe("FlammableDebuff")
 				.Effect(new DebuffEffect(DebuffType.Flammable), EffectOn.Init)
 				.Remove(5).Refresh();
 			AddRecipe("FlamingAttack")
 				.Effect(new DamageEffect(5), EffectOn.Init)
-				.Effect(new DamageEffect(2)
-						//.Condition<ApplyPostEffect>(new Debuff(DebuffType.Flammable, true))
-						//Or
-						.SetPostEffects(new ApplyPostEffect("DoT")
-							.Condition<ApplyPostEffect>(new Debuff(DebuffType.Flammable, true))),
-					EffectOn.Interval)
+				.Effect(new DamageEffect(2).Condition(new DebuffEffectCond(DebuffType.Flammable)), EffectOn.Interval)
 				.Interval(1)
 				.Remove(5).Refresh();
-
-			AddRecipe("FlamingAttack2")
-				.Effect(new ApplierEffect("FireDmg"), EffectOn.Init)
-				.EffectCondition(ConditionType.Flammable) //Or like this? Whats better?
-				.Effect(new ApplierEffect("FireDoT"), EffectOn.Init);
 			Setup();
 
 			Unit.AddModifierSelf("FlamingAttack");
 			Unit.Update(5);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
-			Unit.AddModifierSelf("FlammableDebuff");*/
+			Unit.AddModifierSelf("FlammableDebuff");
+			Unit.AddModifierSelf("FlamingAttack");
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5 - 5 - 2, Unit.Health);
 		}
 	}
 }
