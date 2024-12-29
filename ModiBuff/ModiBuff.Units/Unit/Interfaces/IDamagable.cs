@@ -1,3 +1,5 @@
+using System;
+
 namespace ModiBuff.Core.Units
 {
 	public interface IDamagable
@@ -25,6 +27,11 @@ namespace ModiBuff.Core.Units
 		public static float PercentageHealth(this IDamagable<float, float> damagable)
 		{
 			return damagable.Health / damagable.MaxHealth;
+		}
+
+		public static bool FullHealth(this IDamagable<float, float> damagable)
+		{
+			return Math.Abs(damagable.Health - damagable.MaxHealth) < 0.001f;
 		}
 	}
 }

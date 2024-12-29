@@ -1,12 +1,15 @@
+using System;
+
 namespace ModiBuff.Core.Units
 {
-	public sealed class HealEffect : IMutableStateEffect, IStackEffect, IRevertEffect, IEffect, ICallbackEffect,
-		IStackRevertEffect, IMetaEffectOwner<HealEffect, float, float>, IPostEffectOwner<HealEffect, float>,
-		IEffectStateInfo<HealEffect.Data>, ISavableEffect<HealEffect.SaveData>
+	public sealed class HealEffect : IMutableStateEffect, IStackEffect, IRevertEffect, IEffect,
+		ICallbackEffect, IConditionEffect, IStackRevertEffect, IMetaEffectOwner<HealEffect, float, float>,
+		IPostEffectOwner<HealEffect, float>, IEffectStateInfo<HealEffect.Data>, ISavableEffect<HealEffect.SaveData>
 	{
 		public bool IsRevertible => _effectState != 0;
 		public bool UsesMutableState => IsRevertible || _stackEffect.UsesMutableState();
 		public bool UsesMutableStackEffect => _stackEffect.UsesMutableState();
+		public Condition[] Conditions { get; set; }
 
 		private readonly float _heal;
 		private readonly EffectState _effectState;
@@ -22,7 +25,7 @@ namespace ModiBuff.Core.Units
 		public HealEffect(float heal, EffectState effectState = EffectState.None,
 			StackEffectType stack = StackEffectType.Effect, float stackValue = -1,
 			Targeting targeting = Targeting.TargetSource)
-			: this(heal, effectState, stack, stackValue, targeting, null, null)
+			: this(heal, effectState, stack, stackValue, targeting, null, null, null)
 		{
 		}
 
@@ -32,11 +35,12 @@ namespace ModiBuff.Core.Units
 		public static HealEffect Create(float heal, EffectState effectState = EffectState.None,
 			StackEffectType stack = StackEffectType.Effect, float stackValue = -1,
 			Targeting targeting = Targeting.TargetSource, IMetaEffect<float, float>[] metaEffects = null,
-			IPostEffect<float>[] postEffects = null) =>
-			new HealEffect(heal, effectState, stack, stackValue, targeting, metaEffects, postEffects);
+			IPostEffect<float>[] postEffects = null, Condition[] conditions = null) =>
+			new HealEffect(heal, effectState, stack, stackValue, targeting, metaEffects, postEffects, conditions);
 
 		private HealEffect(float heal, EffectState effectState, StackEffectType stack, float stackValue,
-			Targeting targeting, IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
+			Targeting targeting, IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects,
+			Condition[] conditions)
 		{
 			_heal = heal;
 			_effectState = effectState;
@@ -45,6 +49,8 @@ namespace ModiBuff.Core.Units
 			_targeting = targeting;
 			_metaEffects = metaEffects;
 			_postEffects = postEffects;
+
+			Conditions = conditions ?? Array.Empty<Condition>();
 		}
 
 		public HealEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
@@ -61,6 +67,9 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
+			if (!this.Check(_heal, target, source))
+				return;
+
 			float returnHeal = 0;
 
 			_targeting.UpdateTargetSource(target, source, out var effectTarget, out var effectSource);
@@ -70,7 +79,9 @@ namespace ModiBuff.Core.Units
 
 				if (_metaEffects != null)
 					foreach (var metaEffect in _metaEffects)
-						heal = metaEffect.Effect(heal, target, source);
+						if (metaEffect is not IConditionEffect conditionEffect ||
+						    conditionEffect.Check(heal, target, source))
+							heal = metaEffect.Effect(heal, target, source);
 
 				heal += _extraHeal;
 
@@ -88,7 +99,9 @@ namespace ModiBuff.Core.Units
 
 			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)
-					postEffect.Effect(returnHeal, target, source);
+					if (postEffect is not IConditionEffect conditionEffect ||
+					    conditionEffect.Check(returnHeal, target, source))
+						postEffect.Effect(returnHeal, target, source);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
@@ -166,8 +179,8 @@ namespace ModiBuff.Core.Units
 			_totalHeal = 0;
 		}
 
-		public IEffect ShallowClone() =>
-			new HealEffect(_heal, _effectState, _stackEffect, _stackValue, _targeting, _metaEffects, _postEffects);
+		public IEffect ShallowClone() => new HealEffect(_heal, _effectState, _stackEffect, _stackValue, _targeting,
+			_metaEffects, _postEffects, Conditions);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 

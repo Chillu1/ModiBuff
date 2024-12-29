@@ -1,12 +1,15 @@
+using System;
+
 namespace ModiBuff.Core.Units
 {
-	public sealed class DamageEffect : IStackEffect, IMutableStateEffect, IEffect, ICallbackEffect,
+	public sealed class DamageEffect : IStackEffect, IMutableStateEffect, IEffect, ICallbackEffect, IConditionEffect,
 		IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
 		IEffectStateInfo<DamageEffect.Data>, ISavableEffect<DamageEffect.SaveData>,
 		ISaveableRecipeEffect<DamageEffect.RecipeSaveData>
 	{
 		public bool UsesMutableState => _stackEffect.UsesMutableState();
 		public bool UsesMutableStackEffect => _stackEffect.UsesMutableState();
+		public Condition[] Conditions { get; set; }
 
 		private readonly float _baseDamage;
 		private readonly StackEffectType _stackEffect;
@@ -19,7 +22,7 @@ namespace ModiBuff.Core.Units
 
 		public DamageEffect(float damage, StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
 			Targeting targeting = Targeting.TargetSource)
-			: this(damage, stackEffect, stackValue, targeting, null, null)
+			: this(damage, stackEffect, stackValue, targeting, null, null, null)
 		{
 		}
 
@@ -28,11 +31,12 @@ namespace ModiBuff.Core.Units
 		/// </summary>
 		public static DamageEffect Create(float damage, StackEffectType stackEffect = StackEffectType.Effect,
 			float stackValue = -1, Targeting targeting = Targeting.TargetSource,
-			IMetaEffect<float, float>[] metaEffects = null, IPostEffect<float>[] postEffects = null) =>
-			new DamageEffect(damage, stackEffect, stackValue, targeting, metaEffects, postEffects);
+			IMetaEffect<float, float>[] metaEffects = null, IPostEffect<float>[] postEffects = null,
+			Condition[] conditions = null) =>
+			new DamageEffect(damage, stackEffect, stackValue, targeting, metaEffects, postEffects, conditions);
 
 		private DamageEffect(float damage, StackEffectType stackEffect, float stackValue, Targeting targeting,
-			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects)
+			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects, Condition[] conditions)
 		{
 			_baseDamage = damage;
 			_stackEffect = stackEffect;
@@ -40,6 +44,7 @@ namespace ModiBuff.Core.Units
 			_targeting = targeting;
 			_metaEffects = metaEffects;
 			_postEffects = postEffects;
+			Conditions = conditions ?? Array.Empty<Condition>();
 		}
 
 		public DamageEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
@@ -56,6 +61,10 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
+			//TODO Moved outside the effects? Less code, more type checking
+			if (!this.Check(_baseDamage, target, source))
+				return;
+
 			_targeting.UpdateTargetSource(target, source, out var effectTarget, out var effectSource);
 			float returnDamageInfo = 0;
 
@@ -66,7 +75,9 @@ namespace ModiBuff.Core.Units
 
 				if (_metaEffects != null)
 					foreach (var metaEffect in _metaEffects)
-						damage = metaEffect.Effect(damage, target, source);
+						if (metaEffect is not IConditionEffect conditionEffect ||
+						    conditionEffect.Check(damage, target, source))
+							damage = metaEffect.Effect(damage, target, source);
 
 				damage += _extraDamage;
 
@@ -79,7 +90,9 @@ namespace ModiBuff.Core.Units
 
 			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)
-					postEffect.Effect(returnDamageInfo, target, source);
+					if (postEffect is not IConditionEffect conditionEffect ||
+					    conditionEffect.Check(returnDamageInfo, target, source))
+						postEffect.Effect(returnDamageInfo, target, source);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)
@@ -112,7 +125,8 @@ namespace ModiBuff.Core.Units
 		public void ResetState() => _extraDamage = 0;
 
 		public IEffect ShallowClone() =>
-			new DamageEffect(_baseDamage, _stackEffect, _stackValue, _targeting, _metaEffects, _postEffects);
+			new DamageEffect(_baseDamage, _stackEffect, _stackValue, _targeting, _metaEffects, _postEffects,
+				Conditions);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 

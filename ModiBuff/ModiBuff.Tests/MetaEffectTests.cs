@@ -137,5 +137,178 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - 2 - 1.5 - 1, Enemy.Health);
 			Assert.AreEqual(0, Unit.Mana);
 		}
+
+		[Test]
+		public void ReverseValueOnFullHealthMetaEffectCondition()
+		{
+			AddRecipe("InitHealValueBasedOnStatMeta")
+				.Effect(new HealEffect(5)
+						.SetMetaEffects(new ReverseValueMetaEffect()
+							.Condition(new ValueFull(StatTypeCondition.Health))),
+					EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("InitHealValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.AddModifierSelf("InitHealValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
+
+		[Test]
+		public void ReverseValueOnNotFullHealthMetaEffectCondition()
+		{
+			AddRecipe("InitDamageValueBasedOnStatMeta")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(new ReverseValueMetaEffect()
+							.Condition(new ValueFull(StatTypeCondition.Health, true))),
+					EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("InitDamageValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.AddModifierSelf("InitDamageValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
+
+		[Test]
+		public void ReverseValueOnNotFullHealthAndHigherThanHalfMetaEffectCondition()
+		{
+			AddRecipe("InitDamageValueBasedOnStatMeta")
+				.Effect(new HealEffect(5)
+						.SetMetaEffects(new ReverseValueMetaEffect().Condition(
+							new ValueFull(StatTypeCondition.Health, true),
+							new ValueComparisonPercent(StatType.Health, ComparisonType.GreaterOrEqual, 0.5f))),
+					EffectOn.Init);
+			Setup();
+
+			Unit.TakeDamage(5, Unit);
+
+			Unit.AddModifierSelf("InitDamageValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+
+			Unit.TakeDamage(UnitHealth / 2f, Unit);
+			Unit.AddModifierSelf("InitDamageValueBasedOnStatMeta");
+			Assert.AreEqual(UnitHealth - 5 - 5 - UnitHealth / 2f + 5, Unit.Health);
+		}
+
+		[Test]
+		public void ReversePoisonDamageValueOnNotFullHealthMetaEffectCondition()
+		{
+			AddRecipe("PoisonValueBasedOnNotFullHealthMeta")
+				.Stack(WhenStackEffect.Always)
+				.Effect(new PoisonDamageEffect().SetMetaEffects(new ReverseValueMetaEffect()
+						.Condition(new ValueFull(StatTypeCondition.Health, true))),
+					EffectOn.Interval | EffectOn.Stack)
+				.Interval(1)
+				.Remove(5).Refresh();
+			Setup();
+
+
+			Unit.AddModifierSelf("PoisonValueBasedOnNotFullHealthMeta");
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
+
+
+		[Test]
+		public void MetaEffectWithConditionalEffect()
+		{
+			AddRecipe("DamageAddFlatOnRooted")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(
+							new AddValueMetaEffect(5).Condition(new StatusEffectCond(StatusEffectType.Root))
+						),
+					EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("DamageAddFlatOnRooted");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Root, 1, Unit);
+			Unit.AddModifierSelf("DamageAddFlatOnRooted");
+			Assert.AreEqual(UnitHealth - 5 - 10, Unit.Health);
+
+			Unit.Update(1);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Disarm, 1, Unit);
+			Unit.AddModifierSelf("DamageAddFlatOnRooted");
+			Assert.AreEqual(UnitHealth - 5 - 10 - 5, Unit.Health);
+		}
+
+		[Test]
+		public void MultipleConditionalMetaEffectsWithTwoConditionalEffects()
+		{
+			var metaEffects = new IMetaEffect<float, float>[]
+			{
+				new AddValueMetaEffect(5).Condition(new StatusEffectCond(StatusEffectType.Root)),
+				new MultiplyValueMetaEffect(2).Condition(new StatusEffectCond(StatusEffectType.Silence))
+			};
+			AddRecipe("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed")
+				.Effect(new DamageEffect(5)
+					.Condition(new StatusEffectCond(StatusEffectType.Disarm, true))
+					.SetMetaEffects(metaEffects), EffectOn.Init)
+				.Effect(new HealEffect(5)
+					.Condition(new StatusEffectCond(StatusEffectType.Disarm))
+					.SetMetaEffects(metaEffects), EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Root, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed");
+			Assert.AreEqual(UnitHealth - 5 - 10, Unit.Health);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Silence, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed");
+			Assert.AreEqual(UnitHealth - 5 - 10 - 20, Unit.Health);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Disarm, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed");
+			Assert.AreEqual(UnitHealth - 5 - 10 - 20 + 20, Unit.Health);
+
+			Unit.Update(1);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Disarm, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed");
+			Assert.AreEqual(UnitHealth - 5 - 10 - 20 + 20 + 5, Unit.Health);
+		}
+
+		[Test]
+		public void MultipleConditionalMetaEffectsWithAndOr()
+		{
+			AddRecipe("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(
+							new AddValueMetaEffect(5).Condition(new AndCondition(
+								new StatusEffectCond(StatusEffectType.Root),
+								new StatusEffectCond(StatusEffectType.Silence)))
+							, new MultiplyValueMetaEffect(2).Condition(new OrCondition(
+								new StatusEffectCond(StatusEffectType.Disarm),
+								new StatusEffectCond(StatusEffectType.Freeze)
+							))),
+					EffectOn.Init)
+				.Remove(1).Refresh();
+			Setup();
+
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Root, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+			Unit.ChangeStatusEffect(StatusEffectType.Silence, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5 - 5 - 10, Unit.Health);
+
+			Unit.Update(1);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Freeze, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5 - 5 - 10 - 10, Unit.Health);
+		}
 	}
 }

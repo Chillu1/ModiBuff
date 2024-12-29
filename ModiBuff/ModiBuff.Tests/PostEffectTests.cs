@@ -62,5 +62,45 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
+
+		[Test]
+		public void ReverseValueOnFullHealthPostEffectCondition()
+		{
+			AddRecipe("InitDamageLifestealOnNotFullMana")
+				.Effect(new DamageEffect(5)
+						.SetPostEffects(new LifeStealPostEffect(2f)
+							.Condition(new ValueFull(StatTypeCondition.Mana, true))),
+					EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("InitDamageLifestealOnNotFullMana");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.UseMana(5);
+			Unit.AddModifierSelf("InitDamageLifestealOnNotFullMana");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
+
+		[Test]
+		public void ApplyDoTIfTargetIsFlammablePostEffectCondition()
+		{
+			AddRecipe("FlammableDebuff")
+				.Effect(new DebuffEffect(DebuffType.Flammable), EffectOn.Init)
+				.Remove(5).Refresh();
+			AddRecipe("FlamingAttack")
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Effect(new DamageEffect(2).Condition(new DebuffEffectCond(DebuffType.Flammable)), EffectOn.Interval)
+				.Interval(1)
+				.Remove(5).Refresh();
+			Setup();
+
+			Unit.AddModifierSelf("FlamingAttack");
+			Unit.Update(5);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.AddModifierSelf("FlammableDebuff");
+			Unit.AddModifierSelf("FlamingAttack");
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5 - 5 - 2, Unit.Health);
+		}
 	}
 }

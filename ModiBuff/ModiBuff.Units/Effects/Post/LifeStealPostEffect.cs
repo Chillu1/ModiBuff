@@ -1,7 +1,11 @@
+using System;
+
 namespace ModiBuff.Core.Units
 {
-	public sealed class LifeStealPostEffect : IPostEffect<float>
+	public sealed class LifeStealPostEffect : IConditionEffect, IPostEffect<float>
 	{
+		public Condition[] Conditions { get; set; } = Array.Empty<Condition>();
+
 		private readonly float _lifeStealPercent;
 		private readonly Targeting _targeting;
 
