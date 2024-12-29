@@ -80,46 +80,6 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth, Unit.Health);
 		}
 
-		[Test]
-		public void MultipleConditionalMetaEffectsWithTwoConditionalEffects()
-		{
-			var metaEffects = new[]
-			{
-				//new AddValueMetaEffect2(5).Condition(new StatusEffect(StatusEffectType.Root)),
-				new AddValueMetaEffect(5).ConditionMeta(new StatusEffect(StatusEffectType.Root)),
-				new MultiplyValueMetaEffect(2).ConditionMeta(new StatusEffect(StatusEffectType.Silence))
-			};
-			AddRecipe("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed")
-				.Effect(new DamageEffect(5)
-					.Condition(new StatusEffect(StatusEffectType.Disarm, true))
-					.SetMetaEffects(metaEffects), EffectOn.Init)
-				.Effect(new HealEffect(5)
-					.Condition(new StatusEffect(StatusEffectType.Disarm))
-					.SetMetaEffects(metaEffects), EffectOn.Init);
-			Setup();
-
-			Unit.AddModifierSelf("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed");
-			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-
-			Unit.ChangeStatusEffect(StatusEffectType.Root, 1, Unit);
-			Unit.AddModifierSelf("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed");
-			Assert.AreEqual(UnitHealth - 5 - 10, Unit.Health);
-
-			Unit.ChangeStatusEffect(StatusEffectType.Silence, 1, Unit);
-			Unit.AddModifierSelf("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed");
-			Assert.AreEqual(UnitHealth - 5 - 10 - 20, Unit.Health);
-
-			Unit.ChangeStatusEffect(StatusEffectType.Disarm, 1, Unit);
-			Unit.AddModifierSelf("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed");
-			Assert.AreEqual(UnitHealth - 5 - 10 - 20 + 20, Unit.Health);
-
-			Unit.Update(1);
-
-			Unit.ChangeStatusEffect(StatusEffectType.Disarm, 1, Unit);
-			Unit.AddModifierSelf("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed");
-			Assert.AreEqual(UnitHealth - 5 - 10 - 20 + 20 + 5, Unit.Health);
-		}
-
 		//[Test]//TODO
 		public void ApplyDoTIfTargetIsFlammablePostEffectCondition()
 		{

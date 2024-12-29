@@ -79,10 +79,8 @@ namespace ModiBuff.Core.Units
 
 				if (_metaEffects != null)
 					foreach (var metaEffect in _metaEffects)
-						if (metaEffect is not ConditionEffect conditionMetaEffect ||
-						    conditionMetaEffect.Check(heal, target, source) ||
-						    (metaEffect is IConditionEffect conditionEffect &&
-						     conditionEffect.Check(heal, target, source)))
+						if (metaEffect is not IConditionEffect conditionEffect ||
+						    conditionEffect.Check(heal, target, source))
 							heal = metaEffect.Effect(heal, target, source);
 
 				heal += _extraHeal;
@@ -101,7 +99,9 @@ namespace ModiBuff.Core.Units
 
 			if (_postEffects != null)
 				foreach (var postEffect in _postEffects)
-					postEffect.Effect(returnHeal, target, source);
+					if (postEffect is not IConditionEffect conditionEffect ||
+					    conditionEffect.Check(returnHeal, target, source))
+						postEffect.Effect(returnHeal, target, source);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
