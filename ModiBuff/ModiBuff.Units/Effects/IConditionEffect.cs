@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core.Units
 {
@@ -22,6 +23,7 @@ namespace ModiBuff.Core.Units
 			return conditionEffect;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool Check(this IConditionEffect conditionEffect, float value, IUnit target, IUnit source)
 		{
 			for (int i = 0; i < conditionEffect.Conditions.Length; i++)
@@ -35,6 +37,7 @@ namespace ModiBuff.Core.Units
 			return true;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool Check(this IConditionEffect conditionEffect, float value, int stacks, IUnit target,
 			IUnit source)
 		{

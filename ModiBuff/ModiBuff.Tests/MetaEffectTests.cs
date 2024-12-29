@@ -276,5 +276,39 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed");
 			Assert.AreEqual(UnitHealth - 5 - 10 - 20 + 20 + 5, Unit.Health);
 		}
+
+		[Test]
+		public void MultipleConditionalMetaEffectsWithAndOr()
+		{
+			AddRecipe("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(
+							new AddValueMetaEffect(5).Condition(new AndCondition(
+								new StatusEffectCond(StatusEffectType.Root),
+								new StatusEffectCond(StatusEffectType.Silence)))
+							, new MultiplyValueMetaEffect(2).Condition(new OrCondition(
+								new StatusEffectCond(StatusEffectType.Disarm),
+								new StatusEffectCond(StatusEffectType.Freeze)
+							))),
+					EffectOn.Init)
+				.Remove(1).Refresh();
+			Setup();
+
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Root, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+			Unit.ChangeStatusEffect(StatusEffectType.Silence, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5 - 5 - 10, Unit.Health);
+
+			Unit.Update(1);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Freeze, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5 - 5 - 10 - 10, Unit.Health);
+		}
 	}
 }

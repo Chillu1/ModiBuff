@@ -24,6 +24,11 @@ namespace ModiBuff.Core.Units
 		{
 			switch (this)
 			{
+				case AndCondition and:
+					return and.Check(value, target, source);
+				case OrCondition or:
+					return or.Check(value, target, source);
+
 				case ValueFull full:
 					return full.Check(target);
 				case ValueLow low:
@@ -47,6 +52,11 @@ namespace ModiBuff.Core.Units
 		{
 			switch (this)
 			{
+				case AndCondition and:
+					return and.Check(value, target, source);
+				case OrCondition or:
+					return or.Check(value, target, source);
+
 				case ValueFull full:
 					return full.Check(target);
 				case ValueLow low:
@@ -63,6 +73,52 @@ namespace ModiBuff.Core.Units
 					Logger.LogError("[ModiBuff.Units] Invalid/unknown condition: " + GetType());
 					return false;
 			}
+		}
+	}
+
+	public sealed record AndCondition(params Condition[] Conditions) : Condition
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public new bool Check(float value, IUnit target, IUnit source)
+		{
+			for (int i = 0; i < Conditions.Length; i++)
+				if (!Conditions[i].Check(value, target, source))
+					return false;
+
+			return true;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public new bool Check(float value, int stacks, IUnit target, IUnit source)
+		{
+			for (int i = 0; i < Conditions.Length; i++)
+				if (!Conditions[i].Check(value, stacks, target, source))
+					return false;
+
+			return true;
+		}
+	}
+
+	public sealed record OrCondition(params Condition[] Conditions) : Condition
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public new bool Check(float value, IUnit target, IUnit source)
+		{
+			for (int i = 0; i < Conditions.Length; i++)
+				if (Conditions[i].Check(value, target, source))
+					return true;
+
+			return false;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public new bool Check(float value, int stacks, IUnit target, IUnit source)
+		{
+			for (int i = 0; i < Conditions.Length; i++)
+				if (Conditions[i].Check(value, stacks, target, source))
+					return true;
+
+			return false;
 		}
 	}
 
