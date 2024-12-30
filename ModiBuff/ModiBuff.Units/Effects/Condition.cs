@@ -17,7 +17,8 @@ namespace ModiBuff.Core.Units
 
 	public abstract record Condition(Targeting Targeting = Targeting.TargetSource)
 	{
-		//We don't use an abstract method because then every condition would need to implement stack logic, of which not all can make sense
+		//We don't use an abstract method because then every condition would need to implement stack logic
+		//Of which not all can make sense, instead we can pick and choose which conditions should support stacks, and how
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Check(float value, IUnit target, IUnit source)

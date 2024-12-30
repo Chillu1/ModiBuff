@@ -1061,7 +1061,7 @@ Through `ICallbackUnitRegistrable.RegisterCallbacks(TCallbackUnit, IEffect[])`.
 
 ## Effect
 
-[Skip effect creation](#applier-effect)
+[Skip effect creation](#conditions-in-effects)
 
 ### Making New Effects
 
@@ -1355,6 +1355,47 @@ public class DamageEffect : IEffect, IStateEffect, IStackEffect, IRevertEffect,
         public SaveData(float extraDamage) => ExtraDamage = extraDamage;
     }
 ```
+
+### Conditions in Effects
+
+Currently `ModiBuff.Core` doesn't have any idea of effect conditions, these are instead implemented directly in
+user-made effects.
+
+These conditions currently need to be state-free, unless you handle the reset of state itself, and cloning them, rather
+than the references.
+
+Examples of his can be found in
+[HealEffect](https://github.com/Chillu1/ModiBuff/blob/299760c23d8070e602a496c893c6aa98cb6ea684/ModiBuff/ModiBuff.Units/Effects/HealEffect.cs#L70)
+and
+[Condition effect tests](https://github.com/Chillu1/ModiBuff/blob/299760c23d8070e602a496c893c6aa98cb6ea684/ModiBuff/ModiBuff.Tests/MetaEffectTests.cs#L242)
+
+Meta and post effects support conditions in the same exact way as effects.
+So condition logic can reused across all of them. This can be seen in the link above.
+
+An example of a recipe that uses multiple conditions in both effects and meta effects:
+
+```csharp
+var metaEffects = new IMetaEffect<float, float>[]
+{
+    new AddValueMetaEffect(5).Condition(new StatusEffectCond(StatusEffectType.Root)),
+    new MultiplyValueMetaEffect(2).Condition(new StatusEffectCond(StatusEffectType.Silence))
+};
+Add("AddFlatOnRooted_MultiplyOnSilenced_HealOnDisarmed")
+    .Effect(new DamageEffect(5)
+        .Condition(new StatusEffectCond(StatusEffectType.Disarm, true)) 
+        .SetMetaEffects(metaEffects), EffectOn.Init)
+    .Effect(new HealEffect(5)
+        .Condition(new StatusEffectCond(StatusEffectType.Disarm)) 
+        .SetMetaEffects(metaEffects), EffectOn.Init);
+```
+
+To use conditions effects, copy over or take a look at
+[IConditionEffect](https://github.com/Chillu1/ModiBuff/blob/299760c23d8070e602a496c893c6aa98cb6ea684/ModiBuff/ModiBuff.Units/Effects/IConditionEffect.cs#L6)
+and
+[Condition](https://github.com/Chillu1/ModiBuff/blob/299760c23d8070e602a496c893c6aa98cb6ea684/ModiBuff/ModiBuff.Units/Effects/Condition.cs#L18)
+
+Currently these conditions can't use "consumption" logic (like mana), this can be done by separating the process into
+two parts. Once all checks have passed, then we can consume the resources in the check.
 
 ### Unit logic implementation check
 
