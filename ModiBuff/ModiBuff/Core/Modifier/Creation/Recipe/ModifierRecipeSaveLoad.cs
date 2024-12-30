@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace ModiBuff.Core
 {
@@ -143,19 +144,64 @@ namespace ModiBuff.Core
 
 				var effectType = _effectTypeIdManager.GetEffectType(effectId);
 				//TODO Find constructor by saved types? Prob not worth
-				var constructor = effectType.GetConstructors()[0];
+				var privateConstructor = effectType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
+				var constructor = privateConstructor.Length > 0
+					? privateConstructor[0]
+					: effectType.GetConstructors()[0];
 
 				var parameters = constructor.GetParameters();
 				object[] effectStates = new object[parameters.Length];
 				int i = 0;
 				foreach (var property in ((System.Text.Json.JsonElement)effect.SaveData).EnumerateObject())
 				{
-					object value = property.Value.ToValue(parameters[i].ParameterType);
-					if (value == null)
+					object value = null;
+
+					if (parameters[i].ParameterType.IsArray)
 					{
-						Logger.LogError(
-							$"[ModiBuff] Failed to load effect state from save data by {Name} for effect {effectId}");
-						failed = true;
+						if (typeof(IMetaEffect[]).IsAssignableFrom(parameters[i].ParameterType))
+						{
+							bool metaFail = false;
+
+							object[] metaEffects = new object[property.Value.GetArrayLength()];
+							int metaEffectCount = 0;
+
+							foreach (var metaEffect in property.Value.EnumerateArray())
+							{
+								ConstructorInfo
+									metaConstructor = null; //typeof(AddValueMetaEffect).GetConstructors()[0];//TODO
+								var metaParameters = metaConstructor.GetParameters();
+								object[] metaEffectStates = new object[metaParameters.Length];
+								int j = 0;
+								foreach (var metaProperty in metaEffect.EnumerateObject())
+								{
+									object metaValue = metaProperty.Value.ToValue(parameters[j].ParameterType);
+									if (metaValue == null)
+									{
+										Logger.LogError(
+											$"[ModiBuff] Failed to load effect state from save data by {Name} for effect {effectId}");
+										metaFail = true;
+									}
+
+									metaEffectStates[j] = metaValue;
+									j++;
+								}
+
+								metaEffects[metaEffectCount] = metaConstructor.Invoke(metaEffectStates);
+								metaEffectCount++;
+							}
+
+							value = metaEffects;
+						}
+					}
+					else
+					{
+						value = property.Value.ToValue(parameters[i].ParameterType);
+						if (value == null)
+						{
+							Logger.LogError(
+								$"[ModiBuff] Failed to load effect state from save data by {Name} for effect {effectId}");
+							failed = true;
+						}
 					}
 
 					effectStates[i] = value;
