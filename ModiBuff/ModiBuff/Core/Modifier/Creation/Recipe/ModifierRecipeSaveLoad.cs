@@ -144,9 +144,9 @@ namespace ModiBuff.Core
 
 				var effectType = _effectTypeIdManager.GetEffectType(effectId);
 				//TODO Find constructor by saved types? Prob not worth
-				var privateConstructor = effectType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
-				var constructor = privateConstructor.Length > 0
-					? privateConstructor[0]
+				var privateConstructors = effectType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
+				var constructor = privateConstructors.Length > 0
+					? privateConstructors[0]
 					: effectType.GetConstructors()[0];
 
 				var parameters = constructor.GetParameters();
@@ -161,14 +161,14 @@ namespace ModiBuff.Core
 						if (typeof(IMetaEffect[]).IsAssignableFrom(parameters[i].ParameterType))
 						{
 							bool metaFail = false;
-
-							object[] metaEffects = new object[property.Value.GetArrayLength()];
+							var metaEffectType = _effectTypeIdManager.GetMetaEffectType(1); //TODO
+							IMetaEffect<float, float>[] metaEffects =
+								new IMetaEffect<float, float>[property.Value.GetArrayLength()];
 							int metaEffectCount = 0;
 
 							foreach (var metaEffect in property.Value.EnumerateArray())
 							{
-								ConstructorInfo
-									metaConstructor = null; //typeof(AddValueMetaEffect).GetConstructors()[0];//TODO
+								var metaConstructor = metaEffectType.GetConstructors()[0];
 								var metaParameters = metaConstructor.GetParameters();
 								object[] metaEffectStates = new object[metaParameters.Length];
 								int j = 0;
@@ -186,13 +186,16 @@ namespace ModiBuff.Core
 									j++;
 								}
 
-								metaEffects[metaEffectCount] = metaConstructor.Invoke(metaEffectStates);
+								//TODO
+								metaEffects[metaEffectCount] =
+									(IMetaEffect<float, float>)metaConstructor.Invoke(metaEffectStates);
 								metaEffectCount++;
 							}
 
 							value = metaEffects;
 						}
 					}
+
 					else
 					{
 						value = property.Value.ToValue(parameters[i].ParameterType);

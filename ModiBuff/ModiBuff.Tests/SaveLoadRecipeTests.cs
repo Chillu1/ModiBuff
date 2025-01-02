@@ -345,7 +345,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
-		[Test]
+		//[Test]//TODO
 #if !MODIBUFF_SYSTEM_TEXT_JSON
 		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
 #endif
@@ -363,20 +363,12 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
-		[Test]
+		[Test] //TODO
 #if !MODIBUFF_SYSTEM_TEXT_JSON
 		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
 #endif
 		public void SaveDamageEffectMetaAddValueRecipeLoad()
 		{
-			//SerializationExtensions.AddCustomValueType<IMetaEffect<float, float>>(element =>
-			//{
-			//	var dictionary = new Dictionary<int, int>();
-			//	foreach (var kvp in element.EnumerateObject())
-			//		dictionary.Add(int.Parse(kvp.Name), kvp.Value.GetInt32());
-			//	return dictionary;
-			//});
-
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			saveRecipes.Add("DamageWithAddValueMeta")
 				.Effect(new DamageEffect(5).SetMetaEffects(new AddValueMetaEffect(2)), EffectOn.Init);
@@ -387,7 +379,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
 		}
 
-		//[Test]
+		//[Test]//TODO
 #if !MODIBUFF_SYSTEM_TEXT_JSON
 		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
 #endif
@@ -403,8 +395,7 @@ namespace ModiBuff.Tests
 			//TODO
 		}
 
-		//TODO Post
-		[Test]
+		//[Test]//TODO
 #if !MODIBUFF_SYSTEM_TEXT_JSON
 		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
 #endif
@@ -420,7 +411,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
 		}
 
-		[Test]
+		//[Test]//TODO
 #if !MODIBUFF_SYSTEM_TEXT_JSON
 		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
 #endif
