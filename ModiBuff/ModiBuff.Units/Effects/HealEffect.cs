@@ -4,7 +4,8 @@ namespace ModiBuff.Core.Units
 {
 	public sealed class HealEffect : IMutableStateEffect, IStackEffect, IRevertEffect, IEffect,
 		ICallbackEffect, IConditionEffect, IStackRevertEffect, IMetaEffectOwner<HealEffect, float, float>,
-		IPostEffectOwner<HealEffect, float>, IEffectStateInfo<HealEffect.Data>, ISavableEffect<HealEffect.SaveData>
+		IPostEffectOwner<HealEffect, float>, IEffectStateInfo<HealEffect.Data>, ISavableEffect<HealEffect.SaveData>,
+		ISaveableRecipeEffect<DamageEffect.RecipeSaveData>
 	{
 		public bool IsRevertible => _effectState != 0;
 		public bool UsesMutableState => IsRevertible || _stackEffect.UsesMutableState();
@@ -193,6 +194,9 @@ namespace ModiBuff.Core.Units
 			_totalHeal = saveData.TotalHeal;
 		}
 
+		public object SaveRecipeState() => new RecipeSaveData(_heal, _effectState, _stackEffect, _stackValue,
+			_targeting, this.GetMetaSaveData(_metaEffects));
+
 		public readonly struct Data
 		{
 			public readonly float BaseHeal;
@@ -214,6 +218,27 @@ namespace ModiBuff.Core.Units
 			{
 				ExtraHeal = extraHeal;
 				TotalHeal = totalHeal;
+			}
+		}
+
+		public readonly struct RecipeSaveData
+		{
+			public readonly float BaseHeal;
+			public readonly EffectState EffectState;
+			public readonly StackEffectType StackEffect;
+			public readonly float StackValue;
+			public readonly Targeting Targeting;
+			public readonly object[] MetaEffects;
+
+			public RecipeSaveData(float baseHeal, EffectState effectState, StackEffectType stackEffect,
+				float stackValue, Targeting targeting, object[] metaEffects)
+			{
+				BaseHeal = baseHeal;
+				EffectState = effectState;
+				StackEffect = stackEffect;
+				StackValue = stackValue;
+				Targeting = targeting;
+				MetaEffects = metaEffects;
 			}
 		}
 
