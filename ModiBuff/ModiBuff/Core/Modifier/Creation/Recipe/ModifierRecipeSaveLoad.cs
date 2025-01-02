@@ -161,7 +161,8 @@ namespace ModiBuff.Core
 						if (typeof(IMetaEffect[]).IsAssignableFrom(parameters[i].ParameterType))
 						{
 							bool metaFail = false;
-							var metaEffectType = _effectTypeIdManager.GetMetaEffectType(1); //TODO
+							//TODO save meta effect id together with meta effect data, a separate struct for saving?
+							var metaEffectType = _effectTypeIdManager.GetMetaEffectType(8);
 							IMetaEffect<float, float>[] metaEffects =
 								new IMetaEffect<float, float>[property.Value.GetArrayLength()];
 							int metaEffectCount = 0;

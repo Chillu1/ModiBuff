@@ -133,14 +133,8 @@ namespace ModiBuff.Core.Units
 		public object SaveState() => new SaveData(_extraDamage);
 		public void LoadState(object saveData) => _extraDamage = ((SaveData)saveData).ExtraDamage;
 
-		public object SaveRecipeState()
-		{
-			object[] metaEffectSaveData = new object[_metaEffects.Length];
-			for (int i = 0; i < _metaEffects.Length; i++)
-				metaEffectSaveData[i] = ((ISaveableRecipeEffect)_metaEffects[i]).SaveRecipeState();
-
-			return new RecipeSaveData(_baseDamage, _stackEffect, _stackValue, _targeting, metaEffectSaveData);
-		}
+		public object SaveRecipeState() => new RecipeSaveData(_baseDamage, _stackEffect, _stackValue, _targeting,
+			this.GetMetaSaveData(_metaEffects));
 
 		public readonly struct Data
 		{

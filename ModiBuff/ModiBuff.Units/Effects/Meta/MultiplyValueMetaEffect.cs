@@ -3,7 +3,7 @@ using System;
 namespace ModiBuff.Core.Units
 {
 	public sealed class MultiplyValueMetaEffect : IConditionEffect, IMetaEffect<float, float>, IMetaEffect<int, int>,
-		IMetaEffect<float, int, float>
+		IMetaEffect<float, int, float>, ISaveableRecipeEffect<MultiplyValueMetaEffect.RecipeSaveData>
 	{
 		public Condition[] Conditions { get; set; } = Array.Empty<Condition>();
 
@@ -16,5 +16,14 @@ namespace ModiBuff.Core.Units
 		public int Effect(int value, IUnit target, IUnit source) => (int)(value * _value);
 
 		public float Effect(float value, int value2, IUnit target, IUnit source) => value * _value;
+
+		public object SaveRecipeState() => new RecipeSaveData(_value);
+
+		public readonly struct RecipeSaveData
+		{
+			public readonly float Value;
+
+			public RecipeSaveData(float value) => Value = value;
+		}
 	}
 }
