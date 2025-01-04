@@ -412,7 +412,7 @@ namespace ModiBuff.Tests
 			//TODO
 		}
 
-		//[Test]//TODO
+		[Test]
 #if !MODIBUFF_SYSTEM_TEXT_JSON
 		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
 #endif
@@ -428,20 +428,20 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
 		}
 
-		//[Test]///TODO
+		[Test]
 #if !MODIBUFF_SYSTEM_TEXT_JSON
 		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
 #endif
 		public void SaveDamageEffectStatefullAddDamageRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
-			saveRecipes.Add("DoubleDamagePost")
+			saveRecipes.Add("DamageLifsteal")
 				.Effect(new DamageEffect(5).SetPostEffects(new LifeStealPostEffect(0.5f)), EffectOn.Init);
 
 			SaveLoadStateAndSetup(saveRecipes);
 
-			Unit.AddModifierSelf("DoubleDamagePost");
-			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+			Unit.AddModifierSelf("DamageLifsteal");
+			Assert.AreEqual(UnitHealth - 5 + 5 * 0.5f, Unit.Health);
 		}
 
 		//[Test]//TODO

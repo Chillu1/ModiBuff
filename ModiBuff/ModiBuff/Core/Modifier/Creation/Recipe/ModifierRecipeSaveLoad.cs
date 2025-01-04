@@ -152,6 +152,7 @@ namespace ModiBuff.Core
 				var parameters = constructor.GetParameters();
 				object[] effectStates = new object[parameters.Length];
 				int i = 0;
+				//TODO Refactor entire approach
 				foreach (var property in ((System.Text.Json.JsonElement)effect.SaveData).EnumerateObject())
 				{
 					object value = null;
@@ -173,6 +174,19 @@ namespace ModiBuff.Core
 
 					if (!typeof(IMetaEffect[]).IsAssignableFrom(parameters[i].ParameterType))
 					{
+						if (typeof(IPostEffect[]).IsAssignableFrom(parameters[i].ParameterType))
+						{
+							//TODO Refactor
+							if (property.Value.ValueKind == System.Text.Json.JsonValueKind.Null)
+							{
+								effectStates[i] = value;
+								i++;
+								continue;
+							}
+
+							value = HandlePost(property);
+						}
+
 						effectStates[i] = value;
 						i++;
 						continue;
@@ -186,6 +200,19 @@ namespace ModiBuff.Core
 						continue;
 					}
 
+					value = HandleMeta(property);
+
+					effectStates[i] = value;
+					i++;
+				}
+
+				if (failed)
+					return (null, EffectOn.None);
+
+				return ((IEffect)constructor.Invoke(effectStates), effectOn);
+
+				IMetaEffect<float, float>[] HandleMeta(System.Text.Json.JsonProperty property)
+				{
 					IMetaEffect<float, float>[] metaEffects =
 						new IMetaEffect<float, float>[property.Value.GetArrayLength()];
 					int metaEffectCount = 0;
@@ -220,16 +247,46 @@ namespace ModiBuff.Core
 						metaEffectCount++;
 					}
 
-					value = metaEffects;
-
-					effectStates[i] = value;
-					i++;
+					return metaEffects;
 				}
 
-				if (failed)
-					return (null, EffectOn.None);
+				IPostEffect<float>[] HandlePost(System.Text.Json.JsonProperty property)
+				{
+					IPostEffect<float>[] postEffects =
+						new IPostEffect<float>[property.Value.GetArrayLength()];
+					int postEffectCount = 0;
 
-				return ((IEffect)constructor.Invoke(effectStates), effectOn);
+					foreach (var postEffect in property.Value.EnumerateArray())
+					{
+						//TODO
+						var postEffectType = _effectTypeIdManager.GetPostEffectType(postEffect
+							.EnumerateObject()
+							.First().Value.GetInt32());
+						//TODO
+						var postEffectRecipeSaveData = postEffect.EnumerateObject().ElementAt(1).Value;
+
+						var postConstructor = postEffectType.GetConstructors()[0];
+						var postParameters = postConstructor.GetParameters();
+						object[] postEffectStates = new object[postParameters.Length];
+						int j = 0;
+						foreach (var postProperty in postEffectRecipeSaveData.EnumerateObject())
+						{
+							object postValue = postProperty.Value.ToValue(postParameters[j].ParameterType);
+							if (postValue == null)
+								Logger.LogError(
+									$"[ModiBuff] Failed to load effect state from save data by {Name} for effect {effectId}");
+
+							postEffectStates[j] = postValue;
+							j++;
+						}
+
+						//TODO
+						postEffects[postEffectCount] = (IPostEffect<float>)postConstructor.Invoke(postEffectStates);
+						postEffectCount++;
+					}
+
+					return postEffects;
+				}
 			}
 #endif
 		}

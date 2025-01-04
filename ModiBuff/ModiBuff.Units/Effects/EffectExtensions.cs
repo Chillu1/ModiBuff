@@ -46,7 +46,7 @@ namespace ModiBuff.Core.Units
 					continue;
 				}
 
-				postEffectSaveData[i] = new MetaRecipeSaveData(id, recipeEffect.SaveRecipeState());
+				postEffectSaveData[i] = new PostRecipeSaveData(id, recipeEffect.SaveRecipeState());
 			}
 
 			return postEffectSaveData;
