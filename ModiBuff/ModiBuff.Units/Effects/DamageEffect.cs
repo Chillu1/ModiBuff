@@ -134,7 +134,7 @@ namespace ModiBuff.Core.Units
 		public void LoadState(object saveData) => _extraDamage = ((SaveData)saveData).ExtraDamage;
 
 		public object SaveRecipeState() => new RecipeSaveData(_baseDamage, _stackEffect, _stackValue, _targeting,
-			this.GetMetaSaveData(_metaEffects));
+			this.GetMetaSaveData(_metaEffects), this.GetPostSaveData(_postEffects));
 
 		public readonly struct Data
 		{
@@ -162,15 +162,17 @@ namespace ModiBuff.Core.Units
 			public readonly float StackValue;
 			public readonly Targeting Targeting;
 			public readonly object[] MetaEffects;
+			public readonly object[] PostEffects;
 
 			public RecipeSaveData(float baseDamage, StackEffectType stackEffect, float stackValue, Targeting targeting,
-				object[] metaEffects)
+				object[] metaEffects, object[] postEffects)
 			{
 				BaseDamage = baseDamage;
 				StackEffect = stackEffect;
 				StackValue = stackValue;
 				Targeting = targeting;
 				MetaEffects = metaEffects;
+				PostEffects = postEffects;
 			}
 		}
 	}

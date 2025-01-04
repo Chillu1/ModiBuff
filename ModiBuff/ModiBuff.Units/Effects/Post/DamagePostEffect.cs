@@ -1,6 +1,6 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class DamagePostEffect : IPostEffect<float>
+	public sealed class DamagePostEffect : IPostEffect<float>, ISaveableRecipeEffect
 	{
 		private readonly Targeting _targeting;
 
@@ -22,5 +22,8 @@ namespace ModiBuff.Core.Units
 
 			attackableTarget.TakeDamage(value, source);
 		}
+
+		//TODO
+		public object SaveRecipeState() => new object();
 	}
 }

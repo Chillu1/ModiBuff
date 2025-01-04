@@ -156,52 +156,7 @@ namespace ModiBuff.Core
 				{
 					object value = null;
 
-					if (parameters[i].ParameterType.IsArray)
-					{
-						if (typeof(IMetaEffect[]).IsAssignableFrom(parameters[i].ParameterType))
-						{
-							bool metaFail = false;
-							IMetaEffect<float, float>[] metaEffects =
-								new IMetaEffect<float, float>[property.Value.GetArrayLength()];
-							int metaEffectCount = 0;
-
-							foreach (var metaEffect in property.Value.EnumerateArray())
-							{
-								//TODO
-								var metaEffectType = _effectTypeIdManager.GetMetaEffectType(metaEffect.EnumerateObject()
-									.First().Value.GetInt32());
-								//TODO
-								var metaEffectRecipeSaveData = metaEffect.EnumerateObject().ElementAt(1).Value;
-
-								var metaConstructor = metaEffectType.GetConstructors()[0];
-								var metaParameters = metaConstructor.GetParameters();
-								object[] metaEffectStates = new object[metaParameters.Length];
-								int j = 0;
-								foreach (var metaProperty in metaEffectRecipeSaveData.EnumerateObject())
-								{
-									object metaValue = metaProperty.Value.ToValue(metaParameters[j].ParameterType);
-									if (metaValue == null)
-									{
-										Logger.LogError(
-											$"[ModiBuff] Failed to load effect state from save data by {Name} for effect {effectId}");
-										metaFail = true;
-									}
-
-									metaEffectStates[j] = metaValue;
-									j++;
-								}
-
-								//TODO
-								metaEffects[metaEffectCount] =
-									(IMetaEffect<float, float>)metaConstructor.Invoke(metaEffectStates);
-								metaEffectCount++;
-							}
-
-							value = metaEffects;
-						}
-					}
-
-					else
+					if (!parameters[i].ParameterType.IsArray)
 					{
 						value = property.Value.ToValue(parameters[i].ParameterType);
 						if (value == null)
@@ -210,7 +165,62 @@ namespace ModiBuff.Core
 								$"[ModiBuff] Failed to load effect state from save data by {Name} for effect {effectId}");
 							failed = true;
 						}
+
+						effectStates[i] = value;
+						i++;
+						continue;
 					}
+
+					if (!typeof(IMetaEffect[]).IsAssignableFrom(parameters[i].ParameterType))
+					{
+						effectStates[i] = value;
+						i++;
+						continue;
+					}
+
+					//TODO Refactor
+					if (property.Value.ValueKind == System.Text.Json.JsonValueKind.Null)
+					{
+						effectStates[i] = value;
+						i++;
+						continue;
+					}
+
+					IMetaEffect<float, float>[] metaEffects =
+						new IMetaEffect<float, float>[property.Value.GetArrayLength()];
+					int metaEffectCount = 0;
+
+					foreach (var metaEffect in property.Value.EnumerateArray())
+					{
+						//TODO
+						var metaEffectType = _effectTypeIdManager.GetMetaEffectType(metaEffect
+							.EnumerateObject()
+							.First().Value.GetInt32());
+						//TODO
+						var metaEffectRecipeSaveData = metaEffect.EnumerateObject().ElementAt(1).Value;
+
+						var metaConstructor = metaEffectType.GetConstructors()[0];
+						var metaParameters = metaConstructor.GetParameters();
+						object[] metaEffectStates = new object[metaParameters.Length];
+						int j = 0;
+						foreach (var metaProperty in metaEffectRecipeSaveData.EnumerateObject())
+						{
+							object metaValue = metaProperty.Value.ToValue(metaParameters[j].ParameterType);
+							if (metaValue == null)
+								Logger.LogError(
+									$"[ModiBuff] Failed to load effect state from save data by {Name} for effect {effectId}");
+
+							metaEffectStates[j] = metaValue;
+							j++;
+						}
+
+						//TODO
+						metaEffects[metaEffectCount] =
+							(IMetaEffect<float, float>)metaConstructor.Invoke(metaEffectStates);
+						metaEffectCount++;
+					}
+
+					value = metaEffects;
 
 					effectStates[i] = value;
 					i++;

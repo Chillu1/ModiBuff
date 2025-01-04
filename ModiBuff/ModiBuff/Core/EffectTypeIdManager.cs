@@ -7,10 +7,11 @@ namespace ModiBuff.Core
 	{
 		private readonly Dictionary<Type, int> _effectTypeIds;
 		private readonly Dictionary<Type, int> _metaEffectTypeIds;
+		private readonly Dictionary<Type, int> _postEffectTypeIds;
 
 		public static EffectTypeIdManager Instance { get; private set; } //TODO TEMP
 
-		private int _currentId, _metaCurrentId;
+		private int _currentId, _metaCurrentId, _postCurrentId;
 
 		public EffectTypeIdManager()
 		{
@@ -21,6 +22,7 @@ namespace ModiBuff.Core
 
 			_effectTypeIds = new Dictionary<Type, int>();
 			_metaEffectTypeIds = new Dictionary<Type, int>();
+			_postEffectTypeIds = new Dictionary<Type, int>();
 		}
 
 		public void RegisterEffectTypes(params Type[] types)
@@ -33,6 +35,12 @@ namespace ModiBuff.Core
 		{
 			foreach (var type in types)
 				RegisterMetaEffectType(type);
+		}
+
+		public void RegisterPostEffectTypes(params Type[] types)
+		{
+			foreach (var type in types)
+				RegisterPostEffectType(type);
 		}
 
 		public void RegisterEffectType(Type type)
@@ -57,6 +65,17 @@ namespace ModiBuff.Core
 			_metaEffectTypeIds.Add(type, _metaCurrentId++);
 		}
 
+		public void RegisterPostEffectType(Type type)
+		{
+			if (_postEffectTypeIds.ContainsKey(type))
+			{
+				Logger.LogError($"[ModiBuff] Post effect type {type} already registered");
+				return;
+			}
+
+			_postEffectTypeIds.Add(type, _postCurrentId++);
+		}
+
 		public void RegisterAllEffectTypesInAssemblies()
 		{
 			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -69,6 +88,8 @@ namespace ModiBuff.Core
 					RegisterEffectType(type);
 				if (typeof(IMetaEffect).IsAssignableFrom(type))
 					RegisterMetaEffectType(type);
+				if (typeof(IPostEffect).IsAssignableFrom(type))
+					RegisterPostEffectType(type);
 			}
 		}
 
@@ -87,6 +108,15 @@ namespace ModiBuff.Core
 				return id;
 
 			Logger.LogError($"[ModiBuff] Meta effect type {type} not registered");
+			return -1;
+		}
+
+		public int GetPostId(Type type)
+		{
+			if (_postEffectTypeIds.TryGetValue(type, out int id))
+				return id;
+
+			Logger.LogError($"[ModiBuff] Post effect type {type} not registered");
 			return -1;
 		}
 
@@ -114,6 +144,18 @@ namespace ModiBuff.Core
 			return null;
 		}
 
+		public Type GetPostEffectType(int id)
+		{
+			foreach (var pair in _postEffectTypeIds)
+			{
+				if (pair.Value == id)
+					return pair.Key;
+			}
+
+			Logger.LogError($"[ModiBuff] Post effect type with id {id} not registered");
+			return null;
+		}
+
 		public bool MatchesId(Type type, int id)
 		{
 			if (_effectTypeIds.TryGetValue(type, out int typeId))
@@ -132,10 +174,21 @@ namespace ModiBuff.Core
 			return false;
 		}
 
+		public bool MatchesPostId(Type type, int id)
+		{
+			if (_postEffectTypeIds.TryGetValue(type, out int typeId))
+				return typeId == id;
+
+			Logger.LogError($"[ModiBuff] Post effect type {type} not registered");
+			return false;
+		}
+
 		public void Reset()
 		{
+			Instance = null;
 			_effectTypeIds.Clear();
 			_metaEffectTypeIds.Clear();
+			_postEffectTypeIds.Clear();
 		}
 	}
 }

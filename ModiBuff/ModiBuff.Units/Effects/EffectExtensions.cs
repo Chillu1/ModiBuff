@@ -11,9 +11,17 @@ namespace ModiBuff.Core.Units
 			object[] metaEffectSaveData = new object[metaEffects.Length];
 			for (int i = 0; i < metaEffects.Length; i++)
 			{
-				int id = EffectTypeIdManager.Instance.GetMetaId(metaEffects[i].GetType());
-				metaEffectSaveData[i] =
-					new MetaRecipeSaveData(id, ((ISaveableRecipeEffect)metaEffects[i]).SaveRecipeState());
+				var metaEffect = metaEffects[i];
+				int id = EffectTypeIdManager.Instance.GetMetaId(metaEffect.GetType());
+				if (metaEffect is not ISaveableRecipeEffect recipeEffect)
+				{
+					//TODO
+					//Logger.Log($"[ModiBuff] Tried to save meta effect recipe data for {metaEffect.GetType()}, " +
+					//           "which doesn't implement ISaveableRecipeEffect");
+					continue;
+				}
+
+				metaEffectSaveData[i] = new MetaRecipeSaveData(id, recipeEffect.SaveRecipeState());
 			}
 
 			return metaEffectSaveData;
@@ -25,11 +33,23 @@ namespace ModiBuff.Core.Units
 			if (postEffects == null)
 				return null;
 
-			object[] metaEffectSaveData = new object[postEffects.Length];
+			object[] postEffectSaveData = new object[postEffects.Length];
 			for (int i = 0; i < postEffects.Length; i++)
-				metaEffectSaveData[i] = ((ISaveableRecipeEffect)postEffects[i]).SaveRecipeState();
+			{
+				var postEffect = postEffects[i];
+				int id = EffectTypeIdManager.Instance.GetPostId(postEffect.GetType());
+				if (postEffect is not ISaveableRecipeEffect recipeEffect)
+				{
+					//TODO
+					//Logger.Log($"[ModiBuff] Tried to save post effect recipe data for {metaEffect.GetType()}, " +
+					//           "which doesn't implement ISaveableRecipeEffect");
+					continue;
+				}
 
-			return metaEffectSaveData;
+				postEffectSaveData[i] = new MetaRecipeSaveData(id, recipeEffect.SaveRecipeState());
+			}
+
+			return postEffectSaveData;
 		}
 	}
 }

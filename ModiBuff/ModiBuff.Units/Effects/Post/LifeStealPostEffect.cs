@@ -2,7 +2,8 @@ using System;
 
 namespace ModiBuff.Core.Units
 {
-	public sealed class LifeStealPostEffect : IConditionEffect, IPostEffect<float>
+	public sealed class LifeStealPostEffect : IConditionEffect, IPostEffect<float>,
+		ISaveableRecipeEffect<LifeStealPostEffect.RecipeSaveData>
 	{
 		public Condition[] Conditions { get; set; } = Array.Empty<Condition>();
 
@@ -30,6 +31,20 @@ namespace ModiBuff.Core.Units
 			}
 
 			healableTarget.Heal(value * _lifeStealPercent, source);
+		}
+
+		public object SaveRecipeState() => new RecipeSaveData(_lifeStealPercent, _targeting);
+
+		public readonly struct RecipeSaveData
+		{
+			public readonly float Value;
+			public readonly Targeting Targeting;
+
+			public RecipeSaveData(float value, Targeting targeting)
+			{
+				Value = value;
+				Targeting = targeting;
+			}
 		}
 	}
 }
