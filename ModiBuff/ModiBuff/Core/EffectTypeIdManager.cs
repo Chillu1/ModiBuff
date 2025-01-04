@@ -8,10 +8,17 @@ namespace ModiBuff.Core
 		private readonly Dictionary<Type, int> _effectTypeIds;
 		private readonly Dictionary<Type, int> _metaEffectTypeIds;
 
+		public static EffectTypeIdManager Instance { get; private set; } //TODO TEMP
+
 		private int _currentId, _metaCurrentId;
 
 		public EffectTypeIdManager()
 		{
+			if (Instance != null)
+				return;
+
+			Instance = this;
+
 			_effectTypeIds = new Dictionary<Type, int>();
 			_metaEffectTypeIds = new Dictionary<Type, int>();
 		}

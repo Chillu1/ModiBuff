@@ -161,21 +161,25 @@ namespace ModiBuff.Core
 						if (typeof(IMetaEffect[]).IsAssignableFrom(parameters[i].ParameterType))
 						{
 							bool metaFail = false;
-							//TODO save meta effect id together with meta effect data, a separate struct for saving?
-							var metaEffectType = _effectTypeIdManager.GetMetaEffectType(8);
 							IMetaEffect<float, float>[] metaEffects =
 								new IMetaEffect<float, float>[property.Value.GetArrayLength()];
 							int metaEffectCount = 0;
 
 							foreach (var metaEffect in property.Value.EnumerateArray())
 							{
+								//TODO
+								var metaEffectType = _effectTypeIdManager.GetMetaEffectType(metaEffect.EnumerateObject()
+									.First().Value.GetInt32());
+								//TODO
+								var metaEffectRecipeSaveData = metaEffect.EnumerateObject().ElementAt(1).Value;
+
 								var metaConstructor = metaEffectType.GetConstructors()[0];
 								var metaParameters = metaConstructor.GetParameters();
 								object[] metaEffectStates = new object[metaParameters.Length];
 								int j = 0;
-								foreach (var metaProperty in metaEffect.EnumerateObject())
+								foreach (var metaProperty in metaEffectRecipeSaveData.EnumerateObject())
 								{
-									object metaValue = metaProperty.Value.ToValue(parameters[j].ParameterType);
+									object metaValue = metaProperty.Value.ToValue(metaParameters[j].ParameterType);
 									if (metaValue == null)
 									{
 										Logger.LogError(
