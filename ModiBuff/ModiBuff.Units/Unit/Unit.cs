@@ -100,8 +100,8 @@ namespace ModiBuff.Core.Units
 			_strongDispelEvents = new List<StrongDispelEvent>();
 			_healthChangedEvents = new List<HealthChangedEvent>();
 			_damageChangedEvents = new List<DamageChangedEvent>();
-			_statusEffectAddedEvents = new List<StatusEffectEvent>();
-			_statusEffectRemovedEvents = new List<StatusEffectEvent>();
+			_statusEffectAddedEvents = new List<AddStatusEffectEvent>();
+			_statusEffectRemovedEvents = new List<RemoveStatusEffectEvent>();
 			_onCastEvents = new List<CastEvent>();
 
 			_updateTimerCallbacks = new List<UpdateTimerEvent>();

@@ -17,11 +17,14 @@ namespace ModiBuff.Core.Units
 
 	public delegate void PoisonEvent(IUnit target, IUnit source, int poisonStacks, int totalStacks, float dealtDamage);
 
-	public delegate void StatusEffectEvent(IUnit target, IUnit source, StatusEffectType statusEffect,
+	public delegate void AddStatusEffectEvent(IUnit target, IUnit source, float duration, StatusEffectType statusEffect,
+		LegalAction oldLegalAction, LegalAction newLegalAction);
+
+	public delegate void RemoveStatusEffectEvent(IUnit target, IUnit source, StatusEffectType statusEffect,
 		LegalAction oldLegalAction, LegalAction newLegalAction);
 
 	//Rarely updated delegates
-	public delegate void DamageChangedEvent(IUnit unit, float newDamage, float deltaDamage);
+	public delegate void DamageChangedEvent(IUnit source, float newDamage, float deltaDamage);
 
 	public partial class Unit
 	{
@@ -66,8 +69,8 @@ namespace ModiBuff.Core.Units
 		private readonly List<StrongDispelEvent> _strongDispelEvents;
 		private readonly List<HealthChangedEvent> _healthChangedEvents;
 		private readonly List<DamageChangedEvent> _damageChangedEvents;
-		private readonly List<StatusEffectEvent> _statusEffectAddedEvents;
-		private readonly List<StatusEffectEvent> _statusEffectRemovedEvents;
+		private readonly List<AddStatusEffectEvent> _statusEffectAddedEvents;
+		private readonly List<RemoveStatusEffectEvent> _statusEffectRemovedEvents;
 		private readonly List<CastEvent> _onCastEvents;
 
 		private readonly List<UpdateTimerEvent> _updateTimerCallbacks;
@@ -129,7 +132,7 @@ namespace ModiBuff.Core.Units
 						_strongHitUnitCallbacks.Add(unitCallback);
 					break;
 				case CallbackType.StatusEffectAdded:
-					if (callback.CheckCallback(out StatusEffectEvent statusEffectEvent))
+					if (callback.CheckCallback(out AddStatusEffectEvent statusEffectEvent))
 					{
 						_statusEffectController.TriggerEvent(statusEffectEvent);
 						_statusEffectAddedEvents.Add(statusEffectEvent);
@@ -137,7 +140,7 @@ namespace ModiBuff.Core.Units
 
 					break;
 				case CallbackType.StatusEffectRemoved:
-					if (callback.CheckCallback(out StatusEffectEvent statusEffectRemovedEvent))
+					if (callback.CheckCallback(out RemoveStatusEffectEvent statusEffectRemovedEvent))
 					{
 						_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
 						_statusEffectRemovedEvents.Add(statusEffectRemovedEvent);
@@ -188,12 +191,12 @@ namespace ModiBuff.Core.Units
 					_strongHitUnitCallbacks.Remove((UnitCallback)callback);
 					break;
 				case CallbackType.StatusEffectAdded:
-					var statusEffectEvent = (StatusEffectEvent)callback;
+					var statusEffectEvent = (AddStatusEffectEvent)callback;
 					if (_statusEffectAddedEvents.Remove(statusEffectEvent))
 						_statusEffectController.TriggerEvent(statusEffectEvent);
 					break;
 				case CallbackType.StatusEffectRemoved:
-					var statusEffectRemovedEvent = (StatusEffectEvent)callback;
+					var statusEffectRemovedEvent = (RemoveStatusEffectEvent)callback;
 					if (_statusEffectRemovedEvents.Remove(statusEffectRemovedEvent))
 						_statusEffectController.TriggerEvent(statusEffectRemovedEvent);
 					break;

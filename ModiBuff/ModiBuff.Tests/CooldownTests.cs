@@ -81,19 +81,19 @@ namespace ModiBuff.Tests
 
 				bool multiplierApplied = false;
 				var callback = new CallbackRegisterEffect<CallbackType>(
-					new Callback<CallbackType>(CallbackType.StatusEffectAdded, new StatusEffectEvent(
-						(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+					new Callback<CallbackType>(CallbackType.StatusEffectAdded, new AddStatusEffectEvent(
+						(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
 						{
-							if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun) && !multiplierApplied)
+							if (statusEffect.HasStatusEffect(StatusEffectType.Stun) && !multiplierApplied)
 							{
 								multiplierApplied = true;
 								cooldownCheck.SetMultiplier(2f);
 							}
 						})),
-					new Callback<CallbackType>(CallbackType.StatusEffectRemoved, new StatusEffectEvent(
-						(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+					new Callback<CallbackType>(CallbackType.StatusEffectRemoved, new RemoveStatusEffectEvent(
+						(target, source, statusEffect, oldLegalAction, newLegalAction) =>
 						{
-							if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun) && multiplierApplied)
+							if (statusEffect.HasStatusEffect(StatusEffectType.Stun) && multiplierApplied)
 							{
 								multiplierApplied = false;
 								cooldownCheck.SetMultiplier(1f);

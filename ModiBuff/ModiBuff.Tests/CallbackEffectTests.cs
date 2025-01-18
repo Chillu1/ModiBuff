@@ -138,8 +138,8 @@ namespace ModiBuff.Tests
 				.Stack(WhenStackEffect.Always)
 				.Effect(new HealEffect(0, HealEffect.EffectState.ValueIsRevertible,
 					StackEffectType.Effect | StackEffectType.Add, 5), EffectOn.Stack)
-				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
-					new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
+					(target, source, duration, appliedStatusEffect, oldLegalAction, newLegalAction) =>
 					{
 						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
 							effect.Effect(target, source);
@@ -153,8 +153,8 @@ namespace ModiBuff.Tests
 				.Stack(WhenStackEffect.OnMaxStacks, 10000)
 				.Effect(new HealEffect(0, HealEffect.EffectState.ValueIsRevertible,
 					StackEffectType.Effect | StackEffectType.Add, 5), EffectOn.Stack | EffectOn.CallbackEffect)
-				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
-					new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
+					(target, source, duration, appliedStatusEffect, oldLegalAction, newLegalAction) =>
 					{
 						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
 							((ICallbackEffect)effect).CallbackEffect(target, source);
@@ -200,8 +200,8 @@ namespace ModiBuff.Tests
 				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 5), EffectOn.Init);
 			AddRecipe("SilenceSourceWhenSilenced")
 				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2f), EffectOn.CallbackEffect)
-				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
-					new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
+					(target, source, duration, appliedStatusEffect, oldLegalAction, newLegalAction) =>
 					{
 						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Silence))
 							effect.Effect(source, target);
@@ -230,8 +230,8 @@ namespace ModiBuff.Tests
 				.Callback(CallbackType.StatusEffectAdded, () =>
 				{
 					float totalTimesStunned = 0f;
-					return new CallbackStateContext<float>(new StatusEffectEvent(
-						(target, source, statusEffect, oldLegalAction, newLegalAction) =>
+					return new CallbackStateContext<float>(new AddStatusEffectEvent(
+						(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
 						{
 							if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
 							{
@@ -252,8 +252,8 @@ namespace ModiBuff.Tests
 				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
 				{
 					float totalTimesStunned = 0f;
-					return new CallbackStateContext<float>(
-						new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
+					return new CallbackStateContext<float>(new AddStatusEffectEvent(
+						(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
 						{
 							if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
 							{
@@ -272,8 +272,8 @@ namespace ModiBuff.Tests
 				.Stack(WhenStackEffect.EveryXStacks, everyXStacks: 4)
 				.Effect(new DispelStatusEffectEffect(StatusEffectType.All), EffectOn.Stack)
 				.ModifierAction(ModifierAction.Stack, EffectOn.CallbackEffect)
-				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
-					new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
+					(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
 					{
 						if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
 							effect.Effect(target, source);
@@ -308,17 +308,17 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("DamageOnStun_HealOnAnyNotStunStatusEffectRemoved")
 				.Effect(new DamageEffect(5), EffectOn.CallbackEffect)
-				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
-					new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
+					(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
 					{
-						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+						if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
 							((ICallbackEffect)effect).CallbackEffect(target, source);
 					}))
 				.Effect(new HealEffect(5), EffectOn.CallbackEffect2)
-				.CallbackEffect(CallbackType.StatusEffectRemoved, effect =>
-					new StatusEffectEvent((target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+				.CallbackEffect(CallbackType.StatusEffectRemoved, effect => new RemoveStatusEffectEvent(
+					(target, source, statusEffect, oldLegalAction, newLegalAction) =>
 					{
-						if (!appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+						if (!statusEffect.HasStatusEffect(StatusEffectType.Stun))
 							((ICallbackEffect)effect).CallbackEffect(target, source);
 					}));
 			AddRecipe("Stun")
@@ -341,35 +341,94 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+		public void DamageOnStun_HealOnAnyNotStunStatusEffectRemoved_StackDamageWhenLongStunned()
+		{
+			AddRecipe("DamageOnStun_HealOnAnyNotStunStatusEffectRemoved_StackDamageWhenLongStunned")
+				.Stack(WhenStackEffect.Always)
+				.CustomStack(CustomStackEffectOn.CallbackEffect)
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
+					(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (statusEffect.HasStatusEffect(StatusEffectType.Stun) && duration >= 5f)
+							effect.Effect(target, source);
+					}))
+				.Effect(new DamageEffect(5, StackEffectType.Add, 2), EffectOn.Stack | EffectOn.CallbackEffect2)
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
+					(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+							effect.Effect(target, source);
+					}))
+				.Effect(new HealEffect(5, HealEffect.EffectState.None, StackEffectType.Add, 2),
+					EffectOn.Stack | EffectOn.CallbackEffect3)
+				.CallbackEffect(CallbackType.StatusEffectRemoved, effect => new RemoveStatusEffectEvent(
+					(target, source, statusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (!statusEffect.HasStatusEffect(StatusEffectType.Stun))
+							effect.Effect(target, source);
+					}));
+
+			AddRecipe("Stun")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 1), EffectOn.Init)
+				.Remove(1).Refresh();
+			AddRecipe("LongStun")
+				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 5), EffectOn.Init)
+				.Remove(5).Refresh();
+			AddRecipe("Freeze")
+				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 1), EffectOn.Init)
+				.Remove(1).Refresh();
+			Setup();
+
+			Unit.AddModifierSelf("DamageOnStun_HealOnAnyNotStunStatusEffectRemoved_StackDamageWhenLongStunned");
+			Unit.AddModifierSelf("Stun");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.AddModifierSelf("Freeze");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.AddModifierSelf("LongStun");
+			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
+			Unit.Update(5);
+			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
+			Unit.AddModifierSelf("Freeze");
+			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
+
+		[Test]
 		public void MultipleEffectCallbacks()
 		{
 			AddRecipe("DamageEffectCallbacksRemoveOnDisarm")
 				.Effect(new DamageEffect(1), EffectOn.CallbackEffect)
-				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new StatusEffectEvent(
-					(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
+					(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
 					{
-						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
+						if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
 							((ICallbackEffect)effect).CallbackEffect(target, source);
 					}))
 				.Effect(new DamageEffect(2), EffectOn.CallbackEffect2)
-				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new StatusEffectEvent(
-					(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
+					(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
 					{
-						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Freeze))
+						if (statusEffect.HasStatusEffect(StatusEffectType.Freeze))
 							((ICallbackEffect)effect).CallbackEffect(target, source);
 					}))
 				.Effect(new DamageEffect(3), EffectOn.CallbackEffect3)
-				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new StatusEffectEvent(
-					(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
+					(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
 					{
-						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Root))
+						if (statusEffect.HasStatusEffect(StatusEffectType.Root))
 							((ICallbackEffect)effect).CallbackEffect(target, source);
 					}))
 				.Remove(RemoveEffectOn.CallbackEffect4)
-				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new StatusEffectEvent(
-					(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
+				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
+					(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
 					{
-						if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Disarm))
+						if (statusEffect.HasStatusEffect(StatusEffectType.Disarm))
 							effect.Effect(target, source);
 					}));
 			Setup();

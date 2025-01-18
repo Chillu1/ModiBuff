@@ -527,8 +527,8 @@ namespace ModiBuff.Tests
 				.CallbackEffect(CallbackType.StatusEffectAdded, effect =>
 				{
 					float totalTimesStunned = 0f;
-					return new CallbackStateContext<float>(
-						new StatusEffectEvent((target, source, statusEffect, oldLegalAction, newLegalAction) =>
+					return new CallbackStateContext<float>(new AddStatusEffectEvent(
+						(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
 						{
 							if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
 							{
