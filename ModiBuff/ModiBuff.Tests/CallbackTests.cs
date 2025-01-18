@@ -117,7 +117,8 @@ namespace ModiBuff.Tests
 		public void Init_RegisterTimerCallback_TogglableState()
 		{
 			AddRecipe("AddDamageTogglableBasedOnDistance")
-				.Effect(new AddDamageEffect(5, EffectState.IsRevertibleAndTogglable), EffectOn.CallbackEffectUnits)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible | EffectState.IsTogglable),
+					EffectOn.CallbackEffectUnits)
 				.CallbackEffectUnits(CallbackType.Update, effect => (target, source) =>
 				{
 					var positionTarget = (IPosition<Vector2>)target;

@@ -7,8 +7,7 @@ namespace ModiBuff.Core.Units
 		IEffectStateInfo<DamageEffect.Data>, ISavableEffect<DamageEffect.SaveData>,
 		ISaveableRecipeEffect<DamageEffect.RecipeSaveData>
 	{
-		public bool IsRevertible => false; //TODO
-
+		public bool IsStackRevertible => _valueIsRevertible;
 		public bool UsesMutableState => _stackEffect.UsesMutableState();
 		public bool UsesMutableStackEffect => _stackEffect.UsesMutableState();
 		public Condition[] Conditions { get; set; }
@@ -125,11 +124,6 @@ namespace ModiBuff.Core.Units
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
-		}
-
-		public void RevertEffect(IUnit target, IUnit source)
-		{
-			//TODO Refactor
 		}
 
 		public void RevertStack(int stacks, IUnit target, IUnit source)

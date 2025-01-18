@@ -11,7 +11,8 @@ namespace ModiBuff.Tests
 		public void AddDamageAbove5RemoveDamageBelow5React()
 		{
 			AddRecipe("AddDamageAbove5RemoveDamageBelow5React")
-				.Effect(new AddDamageEffect(5, EffectState.IsRevertibleAndTogglable), EffectOn.CallbackEffect)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible | EffectState.IsTogglable),
+					EffectOn.CallbackEffect)
 				.CallbackEffect(CallbackType.DamageChanged, effect =>
 					new DamageChangedEvent((unit, damage, deltaDamage) =>
 					{
@@ -344,11 +345,11 @@ namespace ModiBuff.Tests
 		public void DamageOnStun_HealOnAnyNotStunStatusEffectRemoved_StackDamageWhenLongStunned()
 		{
 			AddRecipe("DamageOnStun_HealOnAnyNotStunStatusEffectRemoved_StackDamageWhenLongStunned")
+				.Tag(TagType.CustomStack | TagType.CustomRefresh)
 				.Interval(2f).Refresh()
 				.ModifierAction(ModifierAction.ResetStacks, EffectOn.Interval)
 				.Stack(WhenStackEffect.Always)
 				.ModifierAction(ModifierAction.Stack | ModifierAction.Refresh, EffectOn.CallbackEffect)
-				.Tag(Core.TagType.CustomStack | Core.TagType.CustomRefresh)
 				.CallbackEffect(CallbackType.DamageChanged, effect => new DamageChangedEvent(
 					(source, newDamage, deltaDamage) =>
 					{
@@ -394,8 +395,18 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
 			Unit.AddModifierSelf("Freeze");
 			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
-			Unit.Update(1);
+			Unit.Update(2);
 			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.AddDamage(1f);
+			Unit.AddModifierSelf("Stun");
+			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
+			Unit.Update(1);
+			Unit.AddModifierSelf("Stun");
+			Assert.AreEqual(UnitHealth - 5 - 2 - 5 - 2, Unit.Health);
+			Unit.Update(1);
+			Unit.AddModifierSelf("Stun");
+			Assert.AreEqual(UnitHealth - 5 - 2 - 5 - 2 - 5, Unit.Health);
 		}
 
 		[Test]
