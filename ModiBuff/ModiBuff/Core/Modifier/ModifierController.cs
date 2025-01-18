@@ -125,7 +125,7 @@ namespace ModiBuff.Core
 					existingModifier.UpdateSource(source);
 					if (tag.HasTag(TagType.IsInit))
 						existingModifier.Init();
-					if (tag.HasTag(TagType.IsRefresh))
+					if (tag.HasTag(TagType.IsRefresh) && !tag.HasTag(TagType.CustomRefresh))
 						existingModifier.Refresh();
 					if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.CustomStack))
 						existingModifier.Stack();

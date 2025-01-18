@@ -344,22 +344,25 @@ namespace ModiBuff.Tests
 		public void DamageOnStun_HealOnAnyNotStunStatusEffectRemoved_StackDamageWhenLongStunned()
 		{
 			AddRecipe("DamageOnStun_HealOnAnyNotStunStatusEffectRemoved_StackDamageWhenLongStunned")
+				.Interval(2f).Refresh()
+				.ModifierAction(ModifierAction.ResetStacks, EffectOn.Interval)
 				.Stack(WhenStackEffect.Always)
-				.CustomStack(CustomStackEffectOn.CallbackEffect)
-				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
-					(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
+				.ModifierAction(ModifierAction.Stack | ModifierAction.Refresh, EffectOn.CallbackEffect)
+				.Tag(Core.TagType.CustomStack | Core.TagType.CustomRefresh)
+				.CallbackEffect(CallbackType.DamageChanged, effect => new DamageChangedEvent(
+					(source, newDamage, deltaDamage) =>
 					{
-						if (statusEffect.HasStatusEffect(StatusEffectType.Stun) && duration >= 5f)
-							effect.Effect(target, source);
+						if (deltaDamage >= 1f)
+							effect.Effect(source, source);
 					}))
-				.Effect(new DamageEffect(5, StackEffectType.Add, 2), EffectOn.Stack | EffectOn.CallbackEffect2)
+				.Effect(new DamageEffect(5, true, StackEffectType.Add, 2), EffectOn.Stack | EffectOn.CallbackEffect2)
 				.CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
 					(target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
 					{
 						if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
 							effect.Effect(target, source);
 					}))
-				.Effect(new HealEffect(5, HealEffect.EffectState.None, StackEffectType.Add, 2),
+				.Effect(new HealEffect(5, HealEffect.EffectState.ValueIsRevertible, StackEffectType.Add, 2),
 					EffectOn.Stack | EffectOn.CallbackEffect3)
 				.CallbackEffect(CallbackType.StatusEffectRemoved, effect => new RemoveStatusEffectEvent(
 					(target, source, statusEffect, oldLegalAction, newLegalAction) =>
@@ -371,9 +374,6 @@ namespace ModiBuff.Tests
 			AddRecipe("Stun")
 				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 1), EffectOn.Init)
 				.Remove(1).Refresh();
-			AddRecipe("LongStun")
-				.Effect(new StatusEffectEffect(StatusEffectType.Stun, 5), EffectOn.Init)
-				.Remove(5).Refresh();
 			AddRecipe("Freeze")
 				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 1), EffectOn.Init)
 				.Remove(1).Refresh();
@@ -389,9 +389,8 @@ namespace ModiBuff.Tests
 			Unit.Update(1);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
-			Unit.AddModifierSelf("LongStun");
-			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
-			Unit.Update(5);
+			Unit.AddDamage(1f);
+			Unit.AddModifierSelf("Stun");
 			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
 			Unit.AddModifierSelf("Freeze");
 			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);

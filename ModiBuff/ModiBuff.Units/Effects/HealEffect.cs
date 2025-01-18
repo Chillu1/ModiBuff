@@ -147,6 +147,7 @@ namespace ModiBuff.Core.Units
 
 		public void RevertStack(int stacks, IUnit target, IUnit source)
 		{
+			//TODO Is revertible?
 			if ((_stackEffect & StackEffectType.Effect) != 0 && _effectState != EffectState.ValueIsRevertible)
 			{
 				_targeting.UpdateTargetSource(ref target, ref source);

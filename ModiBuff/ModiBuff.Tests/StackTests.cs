@@ -10,7 +10,7 @@ namespace ModiBuff.Tests
 		public void Stack_Damage()
 		{
 			AddRecipe("StackDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
+				.Effect(new DamageEffect(5, false, StackEffectType.Effect), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 			Setup();
 
@@ -74,7 +74,7 @@ namespace ModiBuff.Tests
 		public void Stack_DamageStackBased()
 		{
 			AddRecipe("StackBasedDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
+				.Effect(new DamageEffect(5, false, StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 			Setup();
 

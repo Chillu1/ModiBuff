@@ -134,7 +134,7 @@ namespace ModiBuff.Tests
 		public void Stack_DamageStackBased()
 		{
 			AddRecipe("StackBasedDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
+				.Effect(new DamageEffect(5, false, StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 			Setup();
 
@@ -154,7 +154,7 @@ namespace ModiBuff.Tests
 		public void IntervalDamage_AddDamageOnStack()
 		{
 			AddRecipe("IntervalDamage_StackAddDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Add, 2), EffectOn.Interval | EffectOn.Stack)
+				.Effect(new DamageEffect(5, false, StackEffectType.Add, 2), EffectOn.Interval | EffectOn.Stack)
 				.Interval(1)
 				.Stack(WhenStackEffect.Always);
 			Setup();

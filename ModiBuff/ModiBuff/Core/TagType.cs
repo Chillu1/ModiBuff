@@ -34,8 +34,8 @@ namespace ModiBuff.Core
 		/// </summary>
 		ZeroDefaultStacks = CustomStack << 1,
 		IsAura = CustomStack << 1,
-		Reserved4 = IsAura << 1,
-		Reserved5 = Reserved4 << 1,
+		CustomRefresh = IsAura << 1,
+		Reserved5 = CustomRefresh << 1,
 		Reserved6 = Reserved5 << 1,
 		Reserved7 = Reserved6 << 1,
 		Reserved8 = Reserved7 << 1,
