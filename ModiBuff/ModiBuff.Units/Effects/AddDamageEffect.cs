@@ -4,8 +4,13 @@ namespace ModiBuff.Core.Units
 		IStackRevertEffect, IEffect, IEffectStateInfo<AddDamageEffect.Data>,
 		ISavableEffect<AddDamageEffect.SaveData>, ISaveableRecipeEffect<AddDamageEffect.RecipeSaveData>
 	{
-		public bool IsRevertible => _effectState.IsRevertible();
-		public bool UsesMutableState => _effectState.IsRevertibleOrTogglable() || _stackEffect.UsesMutableState();
+		public bool IsRevertible => EffectStateExtensions.HasFlag(_effectState, EffectState.IsRevertible);
+		public bool IsStackRevertible => EffectStateExtensions.HasFlag(_effectState, EffectState.ValueIsRevertible);
+
+		public bool UsesMutableState => EffectStateExtensions.HasFlag(_effectState, EffectState.IsRevertible) ||
+		                                EffectStateExtensions.HasFlag(_effectState, EffectState.IsTogglable) ||
+		                                _stackEffect.UsesMutableState();
+
 		public bool UsesMutableStackEffect => _stackEffect.UsesMutableState();
 
 		private readonly float _damage;
@@ -48,7 +53,7 @@ namespace ModiBuff.Core.Units
 				return;
 			}
 
-			if (_effectState.IsTogglable())
+			if (EffectStateExtensions.HasFlag(_effectState, EffectState.IsTogglable))
 			{
 				if (_isEnabled)
 					return;
@@ -70,7 +75,7 @@ namespace ModiBuff.Core.Units
 			if (target is not IAddDamage<float> addDamage)
 				return;
 
-			if (_effectState.IsTogglable())
+			if (EffectStateExtensions.HasFlag(_effectState, EffectState.IsTogglable))
 			{
 				if (!_isEnabled)
 					return;

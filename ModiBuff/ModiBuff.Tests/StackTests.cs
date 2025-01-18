@@ -10,7 +10,7 @@ namespace ModiBuff.Tests
 		public void Stack_Damage()
 		{
 			AddRecipe("StackDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Stack)
+				.Effect(new DamageEffect(5, false, StackEffectType.Effect), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 			Setup();
 
@@ -74,7 +74,7 @@ namespace ModiBuff.Tests
 		public void Stack_DamageStackBased()
 		{
 			AddRecipe("StackBasedDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
+				.Effect(new DamageEffect(5, false, StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 			Setup();
 
@@ -150,7 +150,8 @@ namespace ModiBuff.Tests
 		public void IndependentStackTimerRevert()
 		{
 			AddRecipe("AddDamageStackTimer")
-				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Stack)
+				.Effect(new AddDamageEffect(5, EffectState.ValueIsRevertible | EffectState.IsRevertible),
+					EffectOn.Stack)
 				.Stack(WhenStackEffect.Always, independentStackTime: 5);
 			Setup();
 
@@ -173,9 +174,8 @@ namespace ModiBuff.Tests
 		public void IndependentStackTimerAddValueEffectRevert()
 		{
 			AddRecipe("AddDamageStackTimer")
-				.Effect(
-					new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Effect | StackEffectType.Add, 2),
-					EffectOn.Stack)
+				.Effect(new AddDamageEffect(5, EffectState.ValueIsRevertible | EffectState.IsRevertible,
+					StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always, independentStackTime: 5);
 			Setup();
 
@@ -198,9 +198,8 @@ namespace ModiBuff.Tests
 		public void SingleStackTimerAddDamageAddEffectRevert()
 		{
 			AddRecipe("AddDamageSingleStackTimer")
-				.Effect(
-					new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Effect | StackEffectType.Add, 2),
-					EffectOn.Stack)
+				.Effect(new AddDamageEffect(5, EffectState.ValueIsRevertible | EffectState.IsRevertible,
+					StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always, singleStackTime: 5);
 			Setup();
 
@@ -224,7 +223,8 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("AddDamageStackTimer")
 				.Effect(
-					new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Effect | StackEffectType.Add, 2),
+					new AddDamageEffect(5, EffectState.ValueIsRevertible | EffectState.IsRevertible,
+						StackEffectType.Effect | StackEffectType.Add, 2),
 					EffectOn.Stack)
 				.Stack(WhenStackEffect.Always, independentStackTime: 2, singleStackTime: 5);
 			Setup();
@@ -253,7 +253,8 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("AddDamageStackTimer")
 				.Effect(
-					new AddDamageEffect(5, EffectState.IsRevertible, StackEffectType.Effect | StackEffectType.Add, 2),
+					new AddDamageEffect(5, EffectState.ValueIsRevertible | EffectState.IsRevertible,
+						StackEffectType.Effect | StackEffectType.Add, 2),
 					EffectOn.Stack)
 				.Stack(WhenStackEffect.Always, independentStackTime: 4, singleStackTime: 3);
 			Setup();

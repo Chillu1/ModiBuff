@@ -1,22 +1,21 @@
+using System;
+using System.Runtime.CompilerServices;
+
 namespace ModiBuff.Core
 {
+	[Flags]
 	public enum EffectState //TODO Rename, EffectOption(s)?
 	{
 		None,
-		IsRevertible,
-		IsRevertibleAndTogglable,
+		ValueIsRevertible = 1,
+		IsRevertible = 2,
+		IsTogglable = 4,
 	}
 
 	public static class EffectStateExtensions
 	{
-		//Looks confusing
-		public static bool IsRevertible(this EffectState effectState) =>
-			effectState == EffectState.IsRevertible || effectState == EffectState.IsRevertibleAndTogglable;
-
-		public static bool IsTogglable(this EffectState effectState) =>
-			effectState == EffectState.IsRevertibleAndTogglable;
-
-		public static bool IsRevertibleOrTogglable(this EffectState effectState) =>
-			effectState == EffectState.IsRevertible || effectState == EffectState.IsRevertibleAndTogglable;
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool HasFlag(this EffectState effectState, EffectState flag) =>
+			(effectState & flag) == flag;
 	}
 }

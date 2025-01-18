@@ -9,7 +9,7 @@ namespace ModiBuff.Tests
 		private readonly RecipeAddFunc[] _defaultAuraRecipeAddFuncs =
 		{
 			add => add("InitAddDamageBuff")
-				.Effect(new AddDamageEffect(5, EffectState.IsRevertibleAndTogglable), EffectOn.Init)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible | EffectState.IsTogglable), EffectOn.Init)
 				//TODO standardized aura time & aura effects should always be refreshable
 				.Remove(1.05f).Refresh(),
 			add => add("InitAddDamageBuff_Interval")
@@ -17,7 +17,7 @@ namespace ModiBuff.Tests
 				.Interval(1)
 				.Effect(new ApplierEffect("InitAddDamageBuff"), EffectOn.Interval),
 			add => add("InitAddDamageBuff_2")
-				.Effect(new AddDamageEffect(5, EffectState.IsRevertibleAndTogglable), EffectOn.Init)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible | EffectState.IsTogglable), EffectOn.Init)
 				//TODO standardized aura time & aura effects should always be refreshable
 				.Remove(1.05f).Refresh(),
 			add => add("InitAddDamageBuff_Interval_2")
