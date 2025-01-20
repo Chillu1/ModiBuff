@@ -179,12 +179,24 @@ namespace ModiBuff.Core
 							//TODO Refactor
 							if (property.Value.ValueKind == System.Text.Json.JsonValueKind.Null)
 							{
-								effectStates[i] = value;
+								effectStates[i] = null;
 								i++;
 								continue;
 							}
 
 							value = HandlePost(property);
+						}
+						else if (typeof(ICondition[]).IsAssignableFrom(parameters[i].ParameterType))
+						{
+							//TODO Refactor
+							if (property.Value.ValueKind == System.Text.Json.JsonValueKind.Null)
+							{
+								effectStates[i] = null;
+								i++;
+								continue;
+							}
+
+							value = HandleCondition(property);
 						}
 
 						effectStates[i] = value;
@@ -195,7 +207,7 @@ namespace ModiBuff.Core
 					//TODO Refactor
 					if (property.Value.ValueKind == System.Text.Json.JsonValueKind.Null)
 					{
-						effectStates[i] = value;
+						effectStates[i] = null;
 						i++;
 						continue;
 					}
@@ -252,8 +264,7 @@ namespace ModiBuff.Core
 
 				IPostEffect<float>[] HandlePost(System.Text.Json.JsonProperty property)
 				{
-					IPostEffect<float>[] postEffects =
-						new IPostEffect<float>[property.Value.GetArrayLength()];
+					IPostEffect<float>[] postEffects = new IPostEffect<float>[property.Value.GetArrayLength()];
 					int postEffectCount = 0;
 
 					foreach (var postEffect in property.Value.EnumerateArray())
@@ -286,6 +297,44 @@ namespace ModiBuff.Core
 					}
 
 					return postEffects;
+				}
+
+				ICondition[] HandleCondition(System.Text.Json.JsonProperty property)
+				{
+					ICondition[] conditions = new ICondition[property.Value.GetArrayLength()];
+					int conditionCount = 0;
+
+					foreach (var condition in property.Value.EnumerateArray())
+					{
+						//TODO
+						var conditionType = _effectTypeIdManager.GetConditionType(condition
+							.EnumerateObject()
+							.First().Value.GetInt32());
+						//TODO
+						var conditionRecipeSaveData = condition.EnumerateObject().ElementAt(1).Value;
+
+						var conditionConstructor = conditionType.GetConstructors()[0];
+						var conditionParameters = conditionConstructor.GetParameters();
+						object[] conditionStates = new object[conditionParameters.Length];
+						int j = 0;
+						foreach (var conditionProperty in conditionRecipeSaveData.EnumerateObject())
+						{
+							object conditionValue =
+								conditionProperty.Value.ToValue(conditionParameters[j].ParameterType);
+							if (conditionValue == null)
+								Logger.LogError(
+									$"[ModiBuff] Failed to load condition state from save data by {Name} for effect {effectId}");
+
+							conditionStates[j] = conditionValue;
+							j++;
+						}
+
+						//TODO
+						conditions[conditionCount] = (ICondition)conditionConstructor.Invoke(conditionStates);
+						conditionCount++;
+					}
+
+					return conditions;
 				}
 			}
 #endif

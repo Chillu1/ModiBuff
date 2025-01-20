@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace ModiBuff.Core.Units
 {
@@ -32,11 +33,11 @@ namespace ModiBuff.Core.Units
 		public static DamageEffect Create(float damage, StackEffectType stackEffect = StackEffectType.Effect,
 			float stackValue = -1, Targeting targeting = Targeting.TargetSource,
 			IMetaEffect<float, float>[] metaEffects = null, IPostEffect<float>[] postEffects = null,
-			Condition[] conditions = null) =>
+			ICondition[] conditions = null) =>
 			new DamageEffect(damage, stackEffect, stackValue, targeting, metaEffects, postEffects, conditions);
 
 		private DamageEffect(float damage, StackEffectType stackEffect, float stackValue, Targeting targeting,
-			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects, Condition[] conditions)
+			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects, ICondition[] conditions)
 		{
 			_baseDamage = damage;
 			_stackEffect = stackEffect;
@@ -44,7 +45,7 @@ namespace ModiBuff.Core.Units
 			_targeting = targeting;
 			_metaEffects = metaEffects;
 			_postEffects = postEffects;
-			Conditions = conditions ?? Array.Empty<Condition>();
+			Conditions = conditions?.Cast<Condition>().ToArray() ?? Array.Empty<Condition>();
 		}
 
 		public DamageEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
@@ -134,7 +135,8 @@ namespace ModiBuff.Core.Units
 		public void LoadState(object saveData) => _extraDamage = ((SaveData)saveData).ExtraDamage;
 
 		public object SaveRecipeState() => new RecipeSaveData(_baseDamage, _stackEffect, _stackValue, _targeting,
-			this.GetMetaSaveData(_metaEffects), this.GetPostSaveData(_postEffects));
+			this.GetMetaSaveData(_metaEffects), this.GetPostSaveData(_postEffects),
+			this.GetConditionSaveData(Conditions));
 
 		public readonly struct Data
 		{
@@ -163,9 +165,10 @@ namespace ModiBuff.Core.Units
 			public readonly Targeting Targeting;
 			public readonly object[] MetaEffects;
 			public readonly object[] PostEffects;
+			public readonly object[] Conditions;
 
 			public RecipeSaveData(float baseDamage, StackEffectType stackEffect, float stackValue, Targeting targeting,
-				object[] metaEffects, object[] postEffects)
+				object[] metaEffects, object[] postEffects, object[] conditions)
 			{
 				BaseDamage = baseDamage;
 				StackEffect = stackEffect;
@@ -173,6 +176,7 @@ namespace ModiBuff.Core.Units
 				Targeting = targeting;
 				MetaEffects = metaEffects;
 				PostEffects = postEffects;
+				Conditions = conditions;
 			}
 		}
 	}

@@ -51,5 +51,22 @@ namespace ModiBuff.Core.Units
 
 			return true;
 		}
+
+		public static object[] GetConditionSaveData(this ISaveableRecipeEffect effect, Condition[] conditions)
+		{
+			if (conditions == null)
+				return null;
+
+			object[] conditionsSaveData = new object[conditions.Length];
+			for (int i = 0; i < conditions.Length; i++)
+			{
+				var condition = conditions[i];
+				int id = EffectTypeIdManager.Instance.GetConditionId(condition.GetType());
+
+				conditionsSaveData[i] = new ConditionRecipeSaveData(id, condition.SaveRecipeState());
+			}
+
+			return conditionsSaveData;
+		}
 	}
 }

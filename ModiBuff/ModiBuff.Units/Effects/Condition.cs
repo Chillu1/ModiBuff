@@ -15,7 +15,19 @@ namespace ModiBuff.Core.Units
 		Mana,
 	}
 
-	public abstract record Condition(Targeting Targeting = Targeting.TargetSource)
+	public readonly struct ConditionRecipeSaveData
+	{
+		public readonly int Id;
+		public readonly object SaveData;
+
+		public ConditionRecipeSaveData(int id, object saveData)
+		{
+			Id = id;
+			SaveData = saveData;
+		}
+	}
+
+	public abstract record Condition(Targeting Targeting = Targeting.TargetSource) : ICondition
 	{
 		//We don't use an abstract method because then every condition would need to implement stack logic
 		//Of which not all can make sense, instead we can pick and choose which conditions should support stacks, and how
@@ -75,6 +87,8 @@ namespace ModiBuff.Core.Units
 					return false;
 			}
 		}
+
+		public abstract object SaveRecipeState();
 	}
 
 	public sealed record AndCondition(params Condition[] Conditions) : Condition
@@ -98,6 +112,8 @@ namespace ModiBuff.Core.Units
 
 			return true;
 		}
+
+		public override object SaveRecipeState() => null;
 	}
 
 	public sealed record OrCondition(params Condition[] Conditions) : Condition
@@ -121,6 +137,8 @@ namespace ModiBuff.Core.Units
 
 			return false;
 		}
+
+		public override object SaveRecipeState() => null;
 	}
 
 	public sealed record ValueFull(StatTypeCondition StatType, bool Invert = false) : Condition
@@ -132,6 +150,20 @@ namespace ModiBuff.Core.Units
 			StatTypeCondition.Mana => ((IManaOwner<float, float>)target).FullMana() != Invert,
 			_ => false
 		};
+
+		public override object SaveRecipeState() => new ConditionRecipeSaveData(StatType, Invert);
+
+		public readonly struct ConditionRecipeSaveData
+		{
+			public readonly StatTypeCondition StatTypeCondition;
+			public readonly bool Invert;
+
+			public ConditionRecipeSaveData(StatTypeCondition statTypeCondition, bool invert)
+			{
+				StatTypeCondition = statTypeCondition;
+				Invert = invert;
+			}
+		}
 	}
 
 	public sealed record ValueLow(StatTypeCondition StatType, bool Invert = false) : Condition
@@ -145,6 +177,8 @@ namespace ModiBuff.Core.Units
 			StatTypeCondition.Mana => ((IManaOwner<float, float>)target).PercentageMana() < Threshold != Invert,
 			_ => false
 		};
+
+		public override object SaveRecipeState() => null;
 	}
 
 	public sealed record ValueComparison(ValueType ValueType, ComparisonType ComparisonType, float Value) : Condition
@@ -166,6 +200,8 @@ namespace ModiBuff.Core.Units
 			ValueType.Mana => ComparisonType.Check(((IManaOwner<float, float>)target).Mana, Value),
 			_ => false
 		};
+
+		public override object SaveRecipeState() => null;
 	}
 
 	public sealed record ValueComparisonPercent(StatType StatType, ComparisonType ComparisonType, float Value)
@@ -178,6 +214,8 @@ namespace ModiBuff.Core.Units
 			StatType.Mana => ComparisonType.Check(((IManaOwner<float, float>)target).PercentageMana(), Value),
 			_ => false
 		};
+
+		public override object SaveRecipeState() => null;
 	}
 
 	public sealed record StatusEffectCond(StatusEffectType StatusEffectType, bool Invert = false) : Condition
@@ -185,11 +223,15 @@ namespace ModiBuff.Core.Units
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Check(IUnit target) => ((IStatusEffectOwner<LegalAction, StatusEffectType>)target)
 			.StatusEffectController.HasStatusEffect(StatusEffectType) != Invert;
+
+		public override object SaveRecipeState() => null;
 	}
 
 	public sealed record DebuffEffectCond(DebuffType DebuffType, bool Invert = false) : Condition
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Check(IUnit target) => ((IDebuffable)target).ContainsDebuff(DebuffType) != Invert;
+
+		public override object SaveRecipeState() => null;
 	}
 }
