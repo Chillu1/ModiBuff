@@ -61,7 +61,7 @@ namespace ModiBuff.Core.Units
 			for (int i = 0; i < conditions.Length; i++)
 			{
 				var condition = conditions[i];
-				int id = EffectTypeIdManager.Instance.GetConditionId(condition.GetType());
+				int id = EffectTypeIdManager<ICondition>.Instance.GetId(condition.GetType());
 
 				conditionsSaveData[i] = new ConditionRecipeSaveData(id, condition.SaveRecipeState());
 			}

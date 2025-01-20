@@ -12,7 +12,6 @@ namespace ModiBuff.Core.Units
 			for (int i = 0; i < metaEffects.Length; i++)
 			{
 				var metaEffect = metaEffects[i];
-				int id = EffectTypeIdManager.Instance.GetMetaId(metaEffect.GetType());
 				if (metaEffect is not ISaveableRecipeEffect recipeEffect)
 				{
 					//TODO
@@ -21,6 +20,7 @@ namespace ModiBuff.Core.Units
 					continue;
 				}
 
+				int id = EffectTypeIdManager<IMetaEffect>.Instance.GetId(metaEffect.GetType());
 				metaEffectSaveData[i] = new MetaRecipeSaveData(id, recipeEffect.SaveRecipeState());
 			}
 
@@ -37,7 +37,6 @@ namespace ModiBuff.Core.Units
 			for (int i = 0; i < postEffects.Length; i++)
 			{
 				var postEffect = postEffects[i];
-				int id = EffectTypeIdManager.Instance.GetPostId(postEffect.GetType());
 				if (postEffect is not ISaveableRecipeEffect recipeEffect)
 				{
 					//TODO
@@ -46,6 +45,7 @@ namespace ModiBuff.Core.Units
 					continue;
 				}
 
+				int id = EffectTypeIdManager<IPostEffect>.Instance.GetId(postEffect.GetType());
 				postEffectSaveData[i] = new PostRecipeSaveData(id, recipeEffect.SaveRecipeState());
 			}
 
