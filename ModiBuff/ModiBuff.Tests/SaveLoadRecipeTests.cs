@@ -79,8 +79,8 @@ namespace ModiBuff.Tests
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			saveRecipes.Add("StackDamage")
-				.Effect(new DamageEffect(5, false, StackEffectType.Effect | StackEffectType.Add, 2f, Targeting.TargetSource),
-					EffectOn.Stack)
+				.Effect(new DamageEffect(5, false, StackEffectType.Effect | StackEffectType.Add, 2f,
+					Targeting.TargetSource), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 
 			SaveLoadStateAndSetup(saveRecipes);
@@ -503,6 +503,45 @@ namespace ModiBuff.Tests
 
 			Unit.AddModifierSelf("DamageWithAddValueMetaMultiplyMeta");
 			Assert.AreEqual(UnitHealth - 5 - 4, Unit.Health);
+		}
+
+		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
+		public void SaveDamageMetaEffectAndOrConditionsRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(
+							new AddValueMetaEffect(5).Condition(new AndCondition(
+								new StatusEffectCond(StatusEffectType.Root),
+								new StatusEffectCond(StatusEffectType.Silence)))
+							, new MultiplyValueMetaEffect(2).Condition(new OrCondition(
+								new StatusEffectCond(StatusEffectType.Disarm),
+								new StatusEffectCond(StatusEffectType.Freeze)
+							))),
+					EffectOn.Init)
+				.Remove(1).Refresh();
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Root, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+			Unit.ChangeStatusEffect(StatusEffectType.Silence, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5 - 5 - 10, Unit.Health);
+
+			Unit.Update(1);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Freeze, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5 - 5 - 10 - 10, Unit.Health);
 		}
 	}
 }

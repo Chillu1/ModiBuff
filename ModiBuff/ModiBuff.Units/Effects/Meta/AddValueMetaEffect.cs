@@ -4,7 +4,8 @@ using System.Linq;
 namespace ModiBuff.Core.Units
 {
 	public sealed class AddValueMetaEffect : IConditionEffect, IMetaEffect<float, float>, IMetaEffect<int, int>,
-		IMetaEffect<float, int, float>, ISaveableRecipeEffect<AddValueMetaEffect.RecipeSaveData>
+		IMetaEffect<float, int, float>, ISaveableRecipeEffect<AddValueMetaEffect.RecipeSaveData>,
+		IMetaEffectOwner<AddValueMetaEffect, float, float>
 	{
 		public Condition[] Conditions { get; set; }
 

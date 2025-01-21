@@ -26,14 +26,14 @@ namespace ModiBuff.Core.Units
 
 		public float Effect(float value, int value2, IUnit target, IUnit source) => value * _value;
 
-		public object SaveRecipeState() => new RecipeSaveData(_value, Conditions);
+		public object SaveRecipeState() => new RecipeSaveData(_value, this.GetConditionSaveData(Conditions));
 
 		public readonly struct RecipeSaveData
 		{
 			public readonly float Value;
-			public readonly Condition[] Conditions;
+			public readonly object[] Conditions;
 
-			public RecipeSaveData(float value, Condition[] conditions)
+			public RecipeSaveData(float value, object[] conditions)
 			{
 				Value = value;
 				Conditions = conditions;
