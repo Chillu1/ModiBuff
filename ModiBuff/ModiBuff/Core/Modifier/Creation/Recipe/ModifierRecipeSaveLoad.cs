@@ -203,6 +203,8 @@ namespace ModiBuff.Core
 
 				return ((IEffect)constructor.Invoke(effectStates), effectOn);
 
+				//TODO Shit's kinda wack, but I'm not bothered refactoring this approach right now
+				//Should be restructured/have a better and easier standard than relying on constructors, if possible
 				(IMetaEffect<float, float>[], IPostEffect<float>[], ICondition[]) HandleStates(
 					Type parameterType, System.Text.Json.JsonProperty property)
 				{
@@ -217,6 +219,7 @@ namespace ModiBuff.Core
 					foreach (var element in property.Value.EnumerateArray())
 					{
 						Type conditionType;
+						//TODO Add failsafe for missing id, graceful exit
 						if (typeof(IMetaEffect[]).IsAssignableFrom(parameterType))
 						{
 							conditionType = _effectTypeIdManager.GetMetaEffectType(element
@@ -268,13 +271,13 @@ namespace ModiBuff.Core
 									continue;
 								}
 
-								var test = HandleStates(parameters[j].ParameterType, recipeProperty);
-								if (test.Item1 != null)
-									states[j] = test.Item1;
-								else if (test.Item2 != null)
-									states[j] = test.Item2;
-								else if (test.Item3 != null)
-									states[j] = test.Item3;
+								var innerState = HandleStates(parameters[j].ParameterType, recipeProperty);
+								if (innerState.Item1 != null)
+									states[j] = innerState.Item1;
+								else if (innerState.Item2 != null)
+									states[j] = innerState.Item2;
+								else if (innerState.Item3 != null)
+									states[j] = innerState.Item3;
 								else
 									states[j] = null;
 								j++;
@@ -290,7 +293,6 @@ namespace ModiBuff.Core
 							j++;
 						}
 
-						//TODO
 						if (typeof(IMetaEffect[]).IsAssignableFrom(parameterType))
 						{
 							objects[count] = (IMetaEffect)constructor.Invoke(states);
