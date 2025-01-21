@@ -34,11 +34,7 @@ namespace ModiBuff.Core.Units
 				return;
 			}
 
-			if (_metaEffects != null)
-				foreach (var metaEffect in _metaEffects)
-					if (metaEffect is not IConditionEffect conditionEffect ||
-					    conditionEffect.Check(value, target, source))
-						value = metaEffect.Effect(value, target, source);
+			value = _metaEffects.TryApply(value, target, source);
 
 			attackableTarget.TakeDamage(value, source);
 		}

@@ -72,15 +72,7 @@ namespace ModiBuff.Core.Units
 			//if(effectTarget is IDamagable)
 			if (effectTarget is IAttackable<float, float> damagableTarget)
 			{
-				float damage = _baseDamage;
-
-				if (_metaEffects != null)
-					foreach (var metaEffect in _metaEffects)
-						if (metaEffect is not IConditionEffect conditionEffect ||
-						    conditionEffect.Check(damage, target, source))
-							damage = metaEffect.Effect(damage, target, source);
-
-				damage += _extraDamage;
+				float damage = _metaEffects.TryApply(_baseDamage, target, source) + _extraDamage;
 
 				returnDamageInfo = damagableTarget.TakeDamage(damage, effectSource);
 			}
@@ -89,11 +81,7 @@ namespace ModiBuff.Core.Units
 				EffectHelper.LogImplError(effectTarget, nameof(IAttackable<float, float>));
 #endif
 
-			if (_postEffects != null)
-				foreach (var postEffect in _postEffects)
-					if (postEffect is not IConditionEffect conditionEffect ||
-					    conditionEffect.Check(returnDamageInfo, target, source))
-						postEffect.Effect(returnDamageInfo, target, source);
+			_postEffects.TryEffect(returnDamageInfo, target, source);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)

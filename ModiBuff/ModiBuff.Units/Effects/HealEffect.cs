@@ -76,15 +76,7 @@ namespace ModiBuff.Core.Units
 			_targeting.UpdateTargetSource(target, source, out var effectTarget, out var effectSource);
 			if (effectTarget is IHealable<float, float> healableTarget)
 			{
-				float heal = _heal;
-
-				if (_metaEffects != null)
-					foreach (var metaEffect in _metaEffects)
-						if (metaEffect is not IConditionEffect conditionEffect ||
-						    conditionEffect.Check(heal, target, source))
-							heal = metaEffect.Effect(heal, target, source);
-
-				heal += _extraHeal;
+				float heal = _metaEffects.TryApply(_heal, target, source) + _extraHeal;
 
 				//TODO Design choice, do we want to revert overheal? Or only applied heals?
 
@@ -98,11 +90,7 @@ namespace ModiBuff.Core.Units
 				EffectHelper.LogImplError(effectTarget, nameof(IHealable<float, float>));
 #endif
 
-			if (_postEffects != null)
-				foreach (var postEffect in _postEffects)
-					if (postEffect is not IConditionEffect conditionEffect ||
-					    conditionEffect.Check(returnHeal, target, source))
-						postEffect.Effect(returnHeal, target, source);
+			_postEffects.TryEffect(returnHeal, target, source);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
