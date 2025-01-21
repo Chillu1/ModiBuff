@@ -1,19 +1,26 @@
 using System;
+using System.Linq;
 
 namespace ModiBuff.Core.Units
 {
 	public sealed class LifeStealPostEffect : IConditionEffect, IPostEffect<float>,
 		ISaveableRecipeEffect<LifeStealPostEffect.RecipeSaveData>
 	{
-		public Condition[] Conditions { get; set; } = Array.Empty<Condition>();
+		public Condition[] Conditions { get; set; }
 
 		private readonly float _lifeStealPercent;
 		private readonly Targeting _targeting;
 
 		public LifeStealPostEffect(float lifeStealPercent, Targeting targeting = Targeting.TargetSource)
+			: this(lifeStealPercent, targeting, null)
+		{
+		}
+
+		private LifeStealPostEffect(float lifeStealPercent, Targeting targeting, ICondition[] conditions)
 		{
 			_lifeStealPercent = lifeStealPercent;
 			_targeting = targeting;
+			Conditions = conditions?.Cast<Condition>().ToArray() ?? Array.Empty<Condition>();
 		}
 
 		public void Effect(float value, IUnit target, IUnit source)
@@ -33,17 +40,20 @@ namespace ModiBuff.Core.Units
 			healableTarget.Heal(value * _lifeStealPercent, source);
 		}
 
-		public object SaveRecipeState() => new RecipeSaveData(_lifeStealPercent, _targeting);
+		public object SaveRecipeState() =>
+			new RecipeSaveData(_lifeStealPercent, _targeting, this.GetConditionSaveData(Conditions));
 
 		public readonly struct RecipeSaveData
 		{
 			public readonly float Value;
 			public readonly Targeting Targeting;
+			public readonly object[] Conditions;
 
-			public RecipeSaveData(float value, Targeting targeting)
+			public RecipeSaveData(float value, Targeting targeting, object[] conditions)
 			{
 				Value = value;
 				Targeting = targeting;
+				Conditions = conditions;
 			}
 		}
 	}

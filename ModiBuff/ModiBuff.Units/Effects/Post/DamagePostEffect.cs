@@ -1,15 +1,20 @@
 namespace ModiBuff.Core.Units
 {
-	public sealed class DamagePostEffect : IPostEffect<float>, ISaveableRecipeEffect,
-		IMetaEffectOwner<DamagePostEffect, float, float>
+	public sealed class DamagePostEffect : IPostEffect<float>, IMetaEffectOwner<DamagePostEffect, float, float>,
+		ISaveableRecipeEffect<DamagePostEffect.RecipeSaveData>
 	{
 		private readonly Targeting _targeting;
 
-		private IMetaEffect<float, float>[] _metaEffects; //TODO Serialize
+		private IMetaEffect<float, float>[] _metaEffects;
 
-		public DamagePostEffect(Targeting targeting = Targeting.TargetSource)
+		public DamagePostEffect(Targeting targeting = Targeting.TargetSource) : this(targeting, null)
+		{
+		}
+
+		private DamagePostEffect(Targeting targeting, IMetaEffect<float, float>[] metaEffects)
 		{
 			_targeting = targeting;
+			_metaEffects = metaEffects;
 		}
 
 		public DamagePostEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
@@ -38,7 +43,18 @@ namespace ModiBuff.Core.Units
 			attackableTarget.TakeDamage(value, source);
 		}
 
-		//TODO
-		public object SaveRecipeState() => new object();
+		public object SaveRecipeState() => new RecipeSaveData(_targeting, this.GetMetaSaveData(_metaEffects));
+
+		public readonly struct RecipeSaveData
+		{
+			public readonly Targeting Targeting;
+			public readonly object[] MetaEffects;
+
+			public RecipeSaveData(Targeting targeting, object[] metaEffects)
+			{
+				Targeting = targeting;
+				MetaEffects = metaEffects;
+			}
+		}
 	}
 }

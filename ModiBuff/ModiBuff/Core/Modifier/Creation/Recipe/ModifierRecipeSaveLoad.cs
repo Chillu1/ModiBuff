@@ -172,6 +172,7 @@ namespace ModiBuff.Core
 						continue;
 					}
 
+					//TODO Recursive meta/post and conditions
 					if (!typeof(IMetaEffect[]).IsAssignableFrom(parameters[i].ParameterType))
 					{
 						if (typeof(IPostEffect[]).IsAssignableFrom(parameters[i].ParameterType))
@@ -297,12 +298,46 @@ namespace ModiBuff.Core
 						//TODO
 						var postEffectRecipeSaveData = postEffect.EnumerateObject().ElementAt(1).Value;
 
-						var postConstructor = postEffectType.GetConstructors()[0];
+						var postPrivateConstructors =
+							postEffectType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
+						var postConstructor = postPrivateConstructors.Length > 0
+							? postPrivateConstructors[0]
+							: effectType.GetConstructors()[0];
 						var postParameters = postConstructor.GetParameters();
 						object[] postEffectStates = new object[postParameters.Length];
 						int j = 0;
 						foreach (var postProperty in postEffectRecipeSaveData.EnumerateObject())
 						{
+							if (typeof(IMetaEffect[]).IsAssignableFrom(postParameters[j].ParameterType))
+							{
+								//TODO Refactor
+								if (postProperty.Value.ValueKind == System.Text.Json.JsonValueKind.Null)
+								{
+									postEffectStates[j] = null;
+									j++;
+									continue;
+								}
+
+								postEffectStates[j] = HandleMeta(postProperty);
+								j++;
+								continue;
+							}
+
+							if (typeof(ICondition[]).IsAssignableFrom(postParameters[j].ParameterType))
+							{
+								//TODO Refactor
+								if (postProperty.Value.ValueKind == System.Text.Json.JsonValueKind.Null)
+								{
+									postEffectStates[j] = null;
+									j++;
+									continue;
+								}
+
+								postEffectStates[j] = HandleCondition(postProperty);
+								j++;
+								continue;
+							}
+
 							object postValue = postProperty.Value.ToValue(postParameters[j].ParameterType);
 							if (postValue == null)
 								Logger.LogError(
