@@ -117,7 +117,8 @@ namespace ModiBuff.Tests
 		public void Init_RegisterTimerCallback_TogglableState()
 		{
 			AddRecipe("AddDamageTogglableBasedOnDistance")
-				.Effect(new AddDamageEffect(5, EffectState.IsRevertibleAndTogglable), EffectOn.CallbackEffectUnits)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible | EffectState.IsTogglable),
+					EffectOn.CallbackEffectUnits)
 				.CallbackEffectUnits(CallbackType.Update, effect => (target, source) =>
 				{
 					var positionTarget = (IPosition<Vector2>)target;
@@ -153,28 +154,25 @@ namespace ModiBuff.Tests
 			AddRecipe("DamageEffectUnitCallbacks")
 				.Effect(new DamageEffect(1), EffectOn.CallbackEffectUnits)
 				.CallbackEffectUnits(CallbackType.StatusEffectAdded, effect => (origTarget, origSource) =>
-					new StatusEffectEvent(
-						(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
-						{
-							if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Stun))
-								((ICallbackEffect)effect).CallbackEffect(origTarget, origSource);
-						}))
+					new AddStatusEffectEvent((target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+							((ICallbackEffect)effect).CallbackEffect(origTarget, origSource);
+					}))
 				.Effect(new DamageEffect(2), EffectOn.CallbackEffectUnits2)
 				.CallbackEffectUnits(CallbackType.StatusEffectAdded, effect => (origTarget, origSource) =>
-					new StatusEffectEvent(
-						(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
-						{
-							if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Freeze))
-								((ICallbackEffect)effect).CallbackEffect(origTarget, origSource);
-						}))
+					new AddStatusEffectEvent((target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (statusEffect.HasStatusEffect(StatusEffectType.Freeze))
+							((ICallbackEffect)effect).CallbackEffect(origTarget, origSource);
+					}))
 				.Effect(new DamageEffect(3), EffectOn.CallbackEffectUnits3)
 				.CallbackEffectUnits(CallbackType.StatusEffectAdded, effect => (origTarget, origSource) =>
-					new StatusEffectEvent(
-						(target, source, appliedStatusEffect, oldLegalAction, newLegalAction) =>
-						{
-							if (appliedStatusEffect.HasStatusEffect(StatusEffectType.Root))
-								((ICallbackEffect)effect).CallbackEffect(origTarget, origSource);
-						}));
+					new AddStatusEffectEvent((target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
+					{
+						if (statusEffect.HasStatusEffect(StatusEffectType.Root))
+							((ICallbackEffect)effect).CallbackEffect(origTarget, origSource);
+					}));
 			Setup();
 
 			Unit.AddModifierSelf("DamageEffectUnitCallbacks");

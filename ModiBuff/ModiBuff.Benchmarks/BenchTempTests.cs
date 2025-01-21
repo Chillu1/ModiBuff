@@ -378,7 +378,7 @@ namespace ModiBuff.Tests
 		public void LinqWhere()
 		{
 			var revertEffects = _stackEffects
-				.Where(x => x is IStackRevertEffect stackRevertEffect && stackRevertEffect.IsRevertible)
+				.Where(x => x is IStackRevertEffect stackRevertEffect && stackRevertEffect.IsStackRevertible)
 				.Cast<IStackRevertEffect>().ToArray();
 		}
 
@@ -388,7 +388,7 @@ namespace ModiBuff.Tests
 			var revertEffectsList = new List<IStackRevertEffect>();
 			for (int i = 0; i < _stackEffects.Length; i++)
 			{
-				if (_stackEffects[i] is IStackRevertEffect stackRevertEffect && stackRevertEffect.IsRevertible)
+				if (_stackEffects[i] is IStackRevertEffect stackRevertEffect && stackRevertEffect.IsStackRevertible)
 					revertEffectsList.Add(stackRevertEffect);
 			}
 
@@ -402,7 +402,7 @@ namespace ModiBuff.Tests
 			int revertEffectIndex = 0;
 			for (int i = 0; i < _stackEffects.Length; i++)
 			{
-				if (_stackEffects[i] is IStackRevertEffect stackRevertEffect && stackRevertEffect.IsRevertible)
+				if (_stackEffects[i] is IStackRevertEffect stackRevertEffect && stackRevertEffect.IsStackRevertible)
 					revertEffectsTemp[revertEffectIndex++] = stackRevertEffect;
 			}
 

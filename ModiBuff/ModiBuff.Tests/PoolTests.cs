@@ -37,7 +37,7 @@ namespace ModiBuff.Tests
 		public void StackStateReset()
 		{
 			AddRecipe("StackBasedDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
+				.Effect(new DamageEffect(5, false, StackEffectType.Effect | StackEffectType.Add, 2), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 			Setup();
 

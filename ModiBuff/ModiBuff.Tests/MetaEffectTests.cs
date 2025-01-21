@@ -310,5 +310,55 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
 			Assert.AreEqual(UnitHealth - 5 - 5 - 10 - 10, Unit.Health);
 		}
+
+		[Test]
+		public void LevelSystemThroughMetaEffects()
+		{
+			var recipe = AddRecipe("LevelingDamage");
+			int id = recipe.Id;
+
+			recipe
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(
+							new AddValueMetaEffect(5).Condition(new LevelCond(id, 2)),
+							new MultiplyValueMetaEffect(2).Condition(new LevelCond(id, 1)))
+						.SetPostEffects(new LifeStealPostEffect(0.5f)
+							.SetMetaEffects(new AddValueMetaEffect(0.5f).Condition(new LevelCond(id, 5)))
+							.Condition(new LevelCond(id, 4)))
+					, EffectOn.Init)
+				.Effect(new HealEffect(5).Condition(new LevelCond(id, 3)), EffectOn.Init);
+			Setup();
+
+			void Action()
+			{
+				Unit.Heal(Unit.MaxHealth, Unit);
+				Unit.AddModifierLevel(id);
+				Unit.AddModifierSelf("LevelingDamage");
+			}
+
+			Unit.AddModifierSelf("LevelingDamage");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Action();
+			Assert.AreEqual(UnitHealth - 10, Unit.Health);
+
+			Action();
+			Assert.AreEqual(UnitHealth - 20, Unit.Health);
+
+			Action();
+			Assert.AreEqual(UnitHealth - 20 + 5, Unit.Health);
+
+			Unit.Heal(Unit.MaxHealth, Unit);
+			Unit.TakeDamage(100, Unit);
+			Unit.AddModifierLevel(id);
+			Unit.AddModifierSelf("LevelingDamage");
+			Assert.AreEqual(UnitHealth - 100 - 20 + 5 + 20 * 0.5f, Unit.Health);
+
+			Unit.Heal(Unit.MaxHealth, Unit);
+			Unit.TakeDamage(100, Unit);
+			Unit.AddModifierLevel(id);
+			Unit.AddModifierSelf("LevelingDamage");
+			Assert.AreEqual(UnitHealth - 100 - 20 + 5 + 20 * 1f, Unit.Health);
+		}
 	}
 }

@@ -8,6 +8,7 @@ namespace ModiBuff.Core.Units
 		ISaveableRecipeEffect<DamageEffect.RecipeSaveData>
 	{
 		public bool IsRevertible => _effectState != 0;
+		public bool IsStackRevertible => _effectState.HasFlag(EffectState.ValueIsRevertible);
 		public bool UsesMutableState => IsRevertible || _stackEffect.UsesMutableState();
 		public bool UsesMutableStackEffect => _stackEffect.UsesMutableState();
 		public Condition[] Conditions { get; set; }
@@ -136,7 +137,7 @@ namespace ModiBuff.Core.Units
 
 		public void RevertStack(int stacks, IUnit target, IUnit source)
 		{
-			if ((_stackEffect & StackEffectType.Effect) != 0 && _effectState != EffectState.ValueIsRevertible)
+			if ((_stackEffect & StackEffectType.Effect) != 0 && _effectState == EffectState.IsRevertible)
 			{
 				_targeting.UpdateTargetSource(ref target, ref source);
 				//TODO Do we want a custom negative heal method?

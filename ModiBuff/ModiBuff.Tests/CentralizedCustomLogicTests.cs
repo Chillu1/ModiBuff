@@ -41,8 +41,8 @@ namespace ModiBuff.Tests
 					})),
 			//ModifierAction.Stack version
 			add => add("HealPerPoisonStack")
-				.Tag(Core.TagType.CustomStack)
 				.Stack(WhenStackEffect.Always)
+				.CustomStack(CustomStackEffectOn.CallbackEffect)
 				.Effect(new HealEffect(0, HealEffect.EffectState.None,
 					StackEffectType.Effect | StackEffectType.SetStacksBased, 1), EffectOn.Stack)
 				.CallbackEffect(CallbackType.PoisonDamage, effect =>
@@ -50,7 +50,6 @@ namespace ModiBuff.Tests
 					{
 						effect.Effect(target, source);
 					}))
-				.ModifierAction(ModifierAction.Stack, EffectOn.CallbackEffect)
 		};
 
 		[TestCaseSource(nameof(healBasedOnPoisonStacksEventRecipes))]

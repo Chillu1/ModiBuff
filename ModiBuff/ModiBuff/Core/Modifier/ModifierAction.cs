@@ -9,7 +9,7 @@ namespace ModiBuff.Core
 		ResetStacks = 2,
 
 		/// <summary>
-		///		This modifier action might get removed
+		///		Often used with Core.TagType.CustomStack, so the modifier won't be stacked when added to a unit.
 		/// </summary>
 		Stack = 4,
 		//Enable

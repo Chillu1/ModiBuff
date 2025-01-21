@@ -4,12 +4,14 @@ using System.Linq;
 namespace ModiBuff.Core.Units
 {
 	public sealed class LifeStealPostEffect : IConditionEffect, IPostEffect<float>,
-		ISaveableRecipeEffect<LifeStealPostEffect.RecipeSaveData>
+		ISaveableRecipeEffect<LifeStealPostEffect.RecipeSaveData>, IMetaEffectOwner<LifeStealPostEffect, float, float>
 	{
 		public Condition[] Conditions { get; set; }
 
 		private readonly float _lifeStealPercent;
 		private readonly Targeting _targeting;
+
+		private IMetaEffect<float, float>[] _metaEffects;
 
 		public LifeStealPostEffect(float lifeStealPercent, Targeting targeting = Targeting.TargetSource)
 			: this(lifeStealPercent, targeting, null)
@@ -21,6 +23,12 @@ namespace ModiBuff.Core.Units
 			_lifeStealPercent = lifeStealPercent;
 			_targeting = targeting;
 			Conditions = conditions?.Cast<Condition>().ToArray() ?? Array.Empty<Condition>();
+		}
+
+		public LifeStealPostEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
+		{
+			_metaEffects = metaEffects;
+			return this;
 		}
 
 		public void Effect(float value, IUnit target, IUnit source)
@@ -37,7 +45,15 @@ namespace ModiBuff.Core.Units
 				return;
 			}
 
-			healableTarget.Heal(value * _lifeStealPercent, source);
+			float lifeStealPercent = _lifeStealPercent;
+
+			if (_metaEffects != null)
+				foreach (var metaEffect in _metaEffects)
+					if (metaEffect is not IConditionEffect conditionEffect ||
+					    conditionEffect.Check(lifeStealPercent, target, source))
+						lifeStealPercent = metaEffect.Effect(lifeStealPercent, target, source);
+
+			healableTarget.Heal(value * lifeStealPercent, source);
 		}
 
 		public object SaveRecipeState() =>

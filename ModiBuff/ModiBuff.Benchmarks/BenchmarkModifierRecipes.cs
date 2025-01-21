@@ -54,11 +54,11 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("StackAddDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Add), EffectOn.Stack)
+				.Effect(new DamageEffect(5, false, StackEffectType.Add), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 
 			Add("InitStackDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Effect), EffectOn.Init | EffectOn.Stack)
+				.Effect(new DamageEffect(5, false, StackEffectType.Effect), EffectOn.Init | EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 
 			Add("InstanceStackableDoTNoRemove")
@@ -67,7 +67,7 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5), EffectOn.Interval);
 
 			Add("IntervalDamage_StackAddDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Add, 2), EffectOn.Interval | EffectOn.Stack)
+				.Effect(new DamageEffect(5, false, StackEffectType.Add, 2), EffectOn.Interval | EffectOn.Stack)
 				.Interval(1)
 				.Stack(WhenStackEffect.Always);
 

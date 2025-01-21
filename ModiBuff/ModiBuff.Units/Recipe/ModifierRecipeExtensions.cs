@@ -13,6 +13,12 @@ namespace ModiBuff.Core.Units
 			return recipe.Tag(target.ToTagType());
 		}
 
+		public static ModifierRecipe CustomStack(this ModifierRecipe recipe, CustomStackEffectOn customStackEffectOn)
+		{
+			recipe.Tag(Core.TagType.CustomStack);
+			return recipe.ModifierAction(ModifierAction.Stack, customStackEffectOn.ToEffectOn());
+		}
+
 		public static ModifierRecipe ApplyCondition(this ModifierRecipe recipe, ConditionType conditionType)
 		{
 			return recipe.ApplyCheck(unit => conditionType.CheckConditionType(unit));

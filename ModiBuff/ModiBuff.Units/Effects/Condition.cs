@@ -54,6 +54,8 @@ namespace ModiBuff.Core.Units
 					return statusEffect.Check(target);
 				case DebuffEffectCond debuffEffectCond:
 					return debuffEffectCond.Check(target);
+				case LevelCond levelCond:
+					return levelCond.Check(target);
 				default:
 					Logger.LogError("[ModiBuff.Units] Invalid/unknown condition: " + GetType());
 					return false;
@@ -82,6 +84,8 @@ namespace ModiBuff.Core.Units
 					return statusEffect.Check(target);
 				case DebuffEffectCond debuffEffectCond:
 					return debuffEffectCond.Check(target);
+				case LevelCond levelCond:
+					return levelCond.Check(target);
 				default:
 					Logger.LogError("[ModiBuff.Units] Invalid/unknown condition: " + GetType());
 					return false;
@@ -245,5 +249,11 @@ namespace ModiBuff.Core.Units
 		public bool Check(IUnit target) => ((IDebuffable)target).ContainsDebuff(DebuffType) != Invert;
 
 		public override object SaveRecipeState() => null;
+	}
+
+	public sealed record LevelCond(int ModifierId, int Value) : Condition
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool Check(IUnit target) => ((ILevelOwner)target).IsLevel(ModifierId, Value);
 	}
 }

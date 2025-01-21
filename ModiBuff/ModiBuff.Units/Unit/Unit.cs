@@ -24,7 +24,7 @@ namespace ModiBuff.Core.Units
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
 		ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>, ICallbackRegistrable<CallbackType>,
 		IAllNonGeneric, ICaster, IStateReset, IIdOwner, IDurationLessStatusEffectOwner<LegalAction, StatusEffectType>,
-		IAuraOwner, IDebuffable
+		IAuraOwner, IDebuffable, ILevelOwner
 	{
 		public int Id { get; }
 		public UnitTag UnitTag { get; private set; }
@@ -64,6 +64,8 @@ namespace ModiBuff.Core.Units
 		private readonly StatusEffectController _singleInstanceStatusEffectController;
 		private readonly DurationLessStatusEffectController _durationLessStatusEffectController;
 
+		private readonly Dictionary<int, int> _modifierLevels;
+
 		private static int _idCounter;
 
 		public Unit(float health = 500, float damage = 10, float healValue = 5, float mana = 1000,
@@ -100,8 +102,8 @@ namespace ModiBuff.Core.Units
 			_strongDispelEvents = new List<StrongDispelEvent>();
 			_healthChangedEvents = new List<HealthChangedEvent>();
 			_damageChangedEvents = new List<DamageChangedEvent>();
-			_statusEffectAddedEvents = new List<StatusEffectEvent>();
-			_statusEffectRemovedEvents = new List<StatusEffectEvent>();
+			_statusEffectAddedEvents = new List<AddStatusEffectEvent>();
+			_statusEffectRemovedEvents = new List<RemoveStatusEffectEvent>();
 			_onCastEvents = new List<CastEvent>();
 
 			_updateTimerCallbacks = new List<UpdateTimerEvent>();
@@ -118,6 +120,8 @@ namespace ModiBuff.Core.Units
 				(this, StatusEffectType.None, _statusEffectAddedEvents, _statusEffectRemovedEvents);
 			_singleInstanceStatusEffectController = new StatusEffectController();
 			_durationLessStatusEffectController = new DurationLessStatusEffectController();
+
+			_modifierLevels = new Dictionary<int, int>();
 		}
 
 		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences,
@@ -472,6 +476,21 @@ namespace ModiBuff.Core.Units
 		}
 
 		public bool ContainsDebuff(DebuffType debuffType) => _debuffs[(int)debuffType] > 0;
+
+		public void AddModifierLevel(int modifierId, int level = 1)
+		{
+			if (_modifierLevels.TryGetValue(modifierId, out int currentLevel))
+				_modifierLevels[modifierId] = currentLevel + level;
+			else
+				_modifierLevels.Add(modifierId, level);
+		}
+
+		public void SetModifierLevel(int modifierId, int level) => _modifierLevels[modifierId] = level;
+
+		public bool IsLevel(int modifierId, int level)
+		{
+			return _modifierLevels.TryGetValue(modifierId, out int currentLevel) && currentLevel >= level;
+		}
 
 		public void ResetState()
 		{

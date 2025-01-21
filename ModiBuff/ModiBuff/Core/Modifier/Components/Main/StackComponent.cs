@@ -46,7 +46,7 @@ namespace ModiBuff.Core
 			var stateEffectsList = new List<IStateReset>();
 			for (int i = 0; i < effects.Length; i++)
 			{
-				if (effects[i] is IStackRevertEffect stackRevertEffect && stackRevertEffect.IsRevertible)
+				if (effects[i] is IStackRevertEffect stackRevertEffect && stackRevertEffect.IsStackRevertible)
 					revertEffectsList.Add(stackRevertEffect);
 				if (effects[i] is IStateReset stateResetEffect)
 				{

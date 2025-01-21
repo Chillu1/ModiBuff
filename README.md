@@ -117,6 +117,59 @@ This library solves that, but also allows for more complex and deeper modifiers 
 * Open generic serialization (of all mutable state and id's)
 	* System.Text.Json
 
+# Short showcase
+
+We'll start off super basic, this is a modifier that deals 5 damage on target unit when added.
+Recipe explanations are down in the [Usage](#usage) section.
+
+```csharp
+Add("InitDamage")
+    .Effect(new DamageEffect(5), EffectOn.Init);
+```
+
+Let's bring out the heavy stuff. These will be very complex, but will show the capabilities of the library.
+So **don't** be scared off by the code complexity, this is (almost) as complex as it gets. Only limited by imagination.
+
+```csharp
+Add("DamageOnStun_HealOnAnyNotStunStatusEffectRemoved_StackDamageWhenLongStunned")
+    .Tag(TagType.CustomStack | TagType.CustomRefresh)
+    .Interval(2f).Refresh()
+    .ModifierAction(ModifierAction.ResetStacks, EffectOn.Interval)
+    .Stack(WhenStackEffect.Always)
+    .ModifierAction(ModifierAction.Stack | ModifierAction.Refresh, EffectOn.CallbackEffect)
+    .CallbackEffect(CallbackType.DamageChanged, effect => new DamageChangedEvent(
+        (source, newDamage, deltaDamage) =>
+        {
+            if (deltaDamage >= 1f)
+                effect.Effect(source, source);
+        }))
+    .Effect(new DamageEffect(5, true, StackEffectType.Add, 2), EffectOn.Stack | EffectOn.CallbackEffect2)
+    .CallbackEffect(CallbackType.StatusEffectAdded, effect => new AddStatusEffectEvent(
+        (target, source, duration, statusEffect, oldLegalAction, newLegalAction) =>
+        {
+            if (statusEffect.HasStatusEffect(StatusEffectType.Stun))
+                effect.Effect(target, source);
+        }))
+    .Effect(new HealEffect(5, HealEffect.EffectState.ValueIsRevertible, StackEffectType.Add, 2),
+        EffectOn.Stack | EffectOn.CallbackEffect3)
+    .CallbackEffect(CallbackType.StatusEffectRemoved, effect => new RemoveStatusEffectEvent(
+        (target, source, statusEffect, oldLegalAction, newLegalAction) =>
+        {
+            if (!statusEffect.HasStatusEffect(StatusEffectType.Stun))
+                effect.Effect(target, source);
+        }));
+```
+
+It's a mouthful, but if we split up the effects it's easy to understand.
+
+1. Every time a stun status effect gets **added**, we deal 5 damage to the unit.
+2. Every time a non-stun status effect (ex. freeze, root) gets **removed** (either by dispel, or duration), we heal the
+   unit for 5.
+3. Every time the source unit changes its damage value, we add 2 damage and heal value stacks to effects above, each
+   time.
+4. Every 2 seconds, we reset the stacks on above damage and heal effects
+5. If the unit gets extra damage, it refreshes the 2 seconds stack timer (so the stacks don't get removed)
+
 # RoadMap
 
 | V0.4.0-V0.?.0                                   | V1.0.0                                                         |
@@ -203,6 +256,9 @@ at some point.
 > useful logging/debugging features.
 
 ## Unity
+
+> Important: Unity installation is currently not maintained, you will be missing new files and their meta files.
+> Ideally, download the source code manually.
 
 Install package from git url: https://github.com/Chillu1/ModiBuff.git#upm
 
@@ -1364,7 +1420,7 @@ user-made effects.
 These conditions currently need to be state-free, unless you handle the reset of state itself, and cloning them, rather
 than the references.
 
-Examples of his can be found in
+Examples of this can be found in
 [HealEffect](https://github.com/Chillu1/ModiBuff/blob/299760c23d8070e602a496c893c6aa98cb6ea684/ModiBuff/ModiBuff.Units/Effects/HealEffect.cs#L70)
 and
 [Condition effect tests](https://github.com/Chillu1/ModiBuff/blob/299760c23d8070e602a496c893c6aa98cb6ea684/ModiBuff/ModiBuff.Tests/MetaEffectTests.cs#L242)

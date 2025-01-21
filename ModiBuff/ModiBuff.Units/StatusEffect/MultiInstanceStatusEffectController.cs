@@ -15,8 +15,8 @@ namespace ModiBuff.Core.Units
 	{
 		private readonly IUnit _owner;
 		private readonly StatusEffectType _immuneToStatusEffects;
-		private readonly List<StatusEffectEvent> _statusEffectAddedEvents;
-		private readonly List<StatusEffectEvent> _statusEffectRemovedEvents;
+		private readonly List<AddStatusEffectEvent> _statusEffectAddedEvents;
+		private readonly List<RemoveStatusEffectEvent> _statusEffectRemovedEvents;
 
 		//TODO Instead of dict we could preload all the possible status effect instances, and have an array instead
 		//But then we'll have a problem with genIds, but then we can have arrays of arrays
@@ -32,8 +32,8 @@ namespace ModiBuff.Core.Units
 
 		public MultiInstanceStatusEffectController(IUnit owner,
 			StatusEffectType immuneToStatusEffects = StatusEffectType.None,
-			List<StatusEffectEvent> statusEffectAddedEvents = null,
-			List<StatusEffectEvent> statusEffectRemovedEvents = null)
+			List<AddStatusEffectEvent> statusEffectAddedEvents = null,
+			List<RemoveStatusEffectEvent> statusEffectRemovedEvents = null)
 		{
 			_owner = owner;
 			_immuneToStatusEffects = immuneToStatusEffects;
@@ -179,7 +179,7 @@ namespace ModiBuff.Core.Units
 			{
 				if (currentDuration < duration)
 					_legalActionsTimers[statusEffectInstance] = duration;
-				CallAddEvents(statusEffectType, _legalActions, source);
+				CallAddEvents(_legalActionsTimers[statusEffectInstance], statusEffectType, _legalActions, source);
 				return;
 			}
 
@@ -195,7 +195,7 @@ namespace ModiBuff.Core.Units
 				_legalActions &= ~legalAction;
 			}
 
-			CallAddEvents(statusEffectType, oldLegalAction, source);
+			CallAddEvents(duration, statusEffectType, oldLegalAction, source);
 		}
 
 		public void DecreaseStatusEffect(int id, int genId, StatusEffectType statusEffectType, float duration,
@@ -236,16 +236,21 @@ namespace ModiBuff.Core.Units
 			CallRemoveEvents(statusEffectType, oldLegalAction, source);
 		}
 
-		public void TriggerEvent(StatusEffectEvent @event) =>
+		public void TriggerEvent(AddStatusEffectEvent @event) =>
+			@event.Invoke(_owner, _owner, 0f, StatusEffectType.None, _legalActions, _legalActions);
+
+		public void TriggerEvent(RemoveStatusEffectEvent @event) =>
 			@event.Invoke(_owner, _owner, StatusEffectType.None, _legalActions, _legalActions);
 
-		private void CallAddEvents(StatusEffectType statusEffectType, LegalAction oldLegalAction, IUnit source)
+		private void CallAddEvents(float duration, StatusEffectType statusEffectType, LegalAction oldLegalAction,
+			IUnit source)
 		{
 			if (_statusEffectAddedEvents == null)
 				return;
 
 			for (int i = 0; i < _statusEffectAddedEvents.Count; i++)
-				_statusEffectAddedEvents[i].Invoke(_owner, source, statusEffectType, oldLegalAction, _legalActions);
+				_statusEffectAddedEvents[i]
+					.Invoke(_owner, source, duration, statusEffectType, oldLegalAction, _legalActions);
 		}
 
 		private void CallRemoveEvents(StatusEffectType statusEffectType, LegalAction oldLegalAction, IUnit source)

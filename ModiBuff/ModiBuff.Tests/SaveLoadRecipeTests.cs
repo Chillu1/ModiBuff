@@ -79,7 +79,7 @@ namespace ModiBuff.Tests
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			saveRecipes.Add("StackDamage")
-				.Effect(new DamageEffect(5, StackEffectType.Effect | StackEffectType.Add, 2f, Targeting.TargetSource),
+				.Effect(new DamageEffect(5, false, StackEffectType.Effect | StackEffectType.Add, 2f, Targeting.TargetSource),
 					EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 
