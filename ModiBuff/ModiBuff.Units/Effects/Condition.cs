@@ -224,7 +224,19 @@ namespace ModiBuff.Core.Units
 		public bool Check(IUnit target) => ((IStatusEffectOwner<LegalAction, StatusEffectType>)target)
 			.StatusEffectController.HasStatusEffect(StatusEffectType) != Invert;
 
-		public override object SaveRecipeState() => null;
+		public override object SaveRecipeState() => new ConditionRecipeSaveData(StatusEffectType, Invert);
+
+		public readonly struct ConditionRecipeSaveData
+		{
+			public readonly StatusEffectType StatusEffectType;
+			public readonly bool Invert;
+
+			public ConditionRecipeSaveData(StatusEffectType statusEffectType, bool invert)
+			{
+				StatusEffectType = statusEffectType;
+				Invert = invert;
+			}
+		}
 	}
 
 	public sealed record DebuffEffectCond(DebuffType DebuffType, bool Invert = false) : Condition

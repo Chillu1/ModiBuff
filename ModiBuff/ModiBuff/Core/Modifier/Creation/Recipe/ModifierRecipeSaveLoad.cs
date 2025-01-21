@@ -256,6 +256,7 @@ namespace ModiBuff.Core
 
 						object[] states = new object[parameters.Length];
 						int j = 0;
+						//TODO recipeSaveData is null if SaveRecipeState() returns null
 						foreach (var recipeProperty in recipeSaveData.EnumerateObject())
 						{
 							if (parameters[j].ParameterType.IsArray)

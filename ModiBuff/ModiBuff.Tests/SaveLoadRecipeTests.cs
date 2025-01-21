@@ -464,7 +464,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5 - 5 - 2, Unit.Health);
 		}
 
-		//[Test] //TODO
+		[Test]
 #if !MODIBUFF_SYSTEM_TEXT_JSON
 		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
 #endif
@@ -472,16 +472,19 @@ namespace ModiBuff.Tests
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			saveRecipes.Add("DamageWithPostAddValueMetaWithCondition")
-				.Effect(new DamageEffect(5).SetPostEffects(new DamagePostEffect()
-						.SetMetaEffects(new AddValueMetaEffect(2).Condition(new ValueFull(StatTypeCondition.Health)))),
+				.Effect(new DamageEffect(5)
+						.SetPostEffects(new DamagePostEffect()
+							.SetMetaEffects(new AddValueMetaEffect(2)
+								.Condition(new StatusEffectCond(StatusEffectType.Stun)))),
 					EffectOn.Init);
 
 			SaveLoadStateAndSetup(saveRecipes);
 
 			Unit.AddModifierSelf("DamageWithPostAddValueMetaWithCondition");
-			Assert.AreEqual(UnitHealth - 5 - 5 - 2, Unit.Health);
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+			Unit.ChangeStatusEffect(StatusEffectType.Stun, 1f, Unit);
 			Unit.AddModifierSelf("DamageWithPostAddValueMetaWithCondition");
-			Assert.AreEqual(UnitHealth - 5 - 5 - 2 - 5 - 5, Unit.Health);
+			Assert.AreEqual(UnitHealth - 5 - 5 - 5 - 5 - 2, Unit.Health);
 		}
 	}
 }
