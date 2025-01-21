@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace ModiBuff.Core
 {
@@ -143,14 +144,49 @@ namespace ModiBuff.Core
 
 				var effectType = _effectTypeIdManager.GetEffectType(effectId);
 				//TODO Find constructor by saved types? Prob not worth
-				var constructor = effectType.GetConstructors()[0];
+				var privateConstructors = effectType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
+				var constructor = privateConstructors.Length > 0
+					? privateConstructors[0]
+					: effectType.GetConstructors()[0];
 
 				var parameters = constructor.GetParameters();
 				object[] effectStates = new object[parameters.Length];
 				int i = 0;
+				//TODO Refactor entire approach
 				foreach (var property in ((System.Text.Json.JsonElement)effect.SaveData).EnumerateObject())
 				{
-					object value = property.Value.ToValue(parameters[i].ParameterType);
+					object value = null;
+
+					if (!parameters[i].ParameterType.IsArray)
+					{
+						value = property.Value.ToValue(parameters[i].ParameterType);
+						if (value == null)
+						{
+							Logger.LogError(
+								$"[ModiBuff] Failed to load effect state from save data by {Name} for effect {effectId}");
+							failed = true;
+						}
+
+						effectStates[i] = value;
+						i++;
+						continue;
+					}
+
+					//TODO Refactor
+					if (property.Value.ValueKind == System.Text.Json.JsonValueKind.Null)
+					{
+						effectStates[i] = null;
+						i++;
+						continue;
+					}
+
+					var states = HandleStates(parameters[i].ParameterType, property);
+					if (states.Item1 != null)
+						value = states.Item1;
+					if (states.Item2 != null)
+						value = states.Item2;
+					if (states.Item3 != null)
+						value = states.Item3;
 					if (value == null)
 					{
 						Logger.LogError(
@@ -166,6 +202,150 @@ namespace ModiBuff.Core
 					return (null, EffectOn.None);
 
 				return ((IEffect)constructor.Invoke(effectStates), effectOn);
+
+				//TODO Shit's kinda wack, but I'm not bothered refactoring this approach right now
+				//Should be restructured/have a better and easier standard than relying on constructors, if possible
+				(IMetaEffect<float, float>[], IPostEffect<float>[], ICondition[]) HandleStates(
+					Type parameterType, System.Text.Json.JsonProperty property)
+				{
+					//TODO Refactor
+
+					if (property.Value.ValueKind == System.Text.Json.JsonValueKind.Null)
+						return (null, null, null);
+
+					object[] objects = new object[property.Value.GetArrayLength()];
+					int count = 0;
+
+					foreach (var element in property.Value.EnumerateArray())
+					{
+						Type conditionType;
+						//TODO Add failsafe for missing id, graceful exit
+						if (typeof(IMetaEffect[]).IsAssignableFrom(parameterType))
+						{
+							conditionType = _effectTypeIdManager.GetMetaEffectType(element
+								.EnumerateObject()
+								.First().Value.GetInt32());
+						}
+						else if (typeof(IPostEffect[]).IsAssignableFrom(parameterType))
+						{
+							conditionType = _effectTypeIdManager.GetPostEffectType(element
+								.EnumerateObject()
+								.First().Value.GetInt32());
+						}
+						else if (typeof(ICondition[]).IsAssignableFrom(parameterType))
+						{
+							conditionType = _effectTypeIdManager.GetConditionType(element
+								.EnumerateObject()
+								.First().Value.GetInt32());
+						}
+						else
+						{
+							Logger.LogError(
+								$"[ModiBuff] Unknown parameter type {parameterType} for recursive test by {Name} for effect {effectId}");
+							continue;
+						}
+
+						//TODO
+						var recipeSaveData = element.EnumerateObject().ElementAt(1).Value;
+
+						var privateConstructors =
+							conditionType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
+						var constructor = privateConstructors.Length > 0 &&
+						                  //TODO Records have a hidden private constructor?
+						                  conditionType.GetMethods().All(m => m.Name != "<Clone>$")
+							? privateConstructors[0]
+							: conditionType.GetConstructors()[0];
+						var parameters = constructor.GetParameters();
+
+						object[] states = new object[parameters.Length];
+						int j = 0;
+						//TODO recipeSaveData is null if SaveRecipeState() returns null
+						foreach (var recipeProperty in recipeSaveData.EnumerateObject())
+						{
+							if (parameters[j].ParameterType.IsArray)
+							{
+								if (property.Value.ValueKind == System.Text.Json.JsonValueKind.Null)
+								{
+									states[j] = null;
+									j++;
+									continue;
+								}
+
+								var innerState = HandleStates(parameters[j].ParameterType, recipeProperty);
+								if (innerState.Item1 != null)
+									states[j] = innerState.Item1;
+								else if (innerState.Item2 != null)
+									states[j] = innerState.Item2;
+								else if (innerState.Item3 != null)
+									states[j] = innerState.Item3;
+								else
+									states[j] = null;
+								j++;
+								continue;
+							}
+
+							object value = recipeProperty.Value.ToValue(parameters[j].ParameterType);
+							if (value == null)
+								Logger.LogError(
+									$"[ModiBuff] Failed to load condition state from save data by {Name} for effect {effectId}");
+
+							states[j] = value;
+							j++;
+						}
+
+						if (typeof(IMetaEffect[]).IsAssignableFrom(parameterType))
+						{
+							objects[count] = (IMetaEffect)constructor.Invoke(states);
+						}
+						else if (typeof(IPostEffect[]).IsAssignableFrom(parameterType))
+						{
+							objects[count] = (IPostEffect)constructor.Invoke(states);
+						}
+						else if (typeof(ICondition[]).IsAssignableFrom(parameterType))
+						{
+							objects[count] = (ICondition)constructor.Invoke(states);
+						}
+
+						count++;
+					}
+
+					if (typeof(IMetaEffect[]).IsAssignableFrom(parameterType))
+					{
+						IMetaEffect<float, float>[] metaEffects = new IMetaEffect<float, float>[count];
+						for (int k = 0; k < count; k++)
+						{
+							metaEffects[k] = (IMetaEffect<float, float>)objects[k];
+						}
+
+						return (metaEffects, null, null);
+					}
+
+					if (typeof(IPostEffect[]).IsAssignableFrom(parameterType))
+					{
+						IPostEffect<float>[] postEffects = new IPostEffect<float>[count];
+						for (int k = 0; k < count; k++)
+						{
+							postEffects[k] = (IPostEffect<float>)objects[k];
+						}
+
+						return (null, postEffects, null);
+					}
+
+					if (typeof(ICondition[]).IsAssignableFrom(parameterType))
+					{
+						ICondition[] conditions = new ICondition[count];
+						for (int k = 0; k < count; k++)
+						{
+							conditions[k] = (ICondition)objects[k];
+						}
+
+						return (null, null, conditions);
+					}
+
+					Logger.LogError(
+						$"[ModiBuff] Unknown parameter type {parameterType} for recursive test by {Name} for effect {effectId}");
+					return (null, null, null);
+				}
 			}
 #endif
 		}

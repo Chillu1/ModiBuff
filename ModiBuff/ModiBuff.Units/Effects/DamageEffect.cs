@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace ModiBuff.Core.Units
 {
@@ -32,16 +33,14 @@ namespace ModiBuff.Core.Units
 		/// <summary>
 		///		Manual modifier generation constructor
 		/// </summary>
-		public static DamageEffect Create(float damage, bool valueIsRevertible = false,
-			StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
-			Targeting targeting = Targeting.TargetSource, IMetaEffect<float, float>[] metaEffects = null,
-			IPostEffect<float>[] postEffects = null, Condition[] conditions = null) =>
-			new DamageEffect(damage, valueIsRevertible, stackEffect, stackValue, targeting, metaEffects, postEffects,
-				conditions);
+		public static DamageEffect Create(float damage, bool valueIsRevertible = false, StackEffectType stackEffect = StackEffectType.Effect,
+			float stackValue = -1, Targeting targeting = Targeting.TargetSource,
+			IMetaEffect<float, float>[] metaEffects = null, IPostEffect<float>[] postEffects = null,
+			ICondition[] conditions = null) =>
+			new DamageEffect(damage, valueIsRevertible, stackEffect, stackValue, targeting, metaEffects, postEffects, conditions);
 
-		private DamageEffect(float damage, bool valueIsRevertible, StackEffectType stackEffect, float stackValue,
-			Targeting targeting, IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects,
-			Condition[] conditions)
+		private DamageEffect(float damage, bool valueIsRevertible, StackEffectType stackEffect, float stackValue, Targeting targeting,
+			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects, ICondition[] conditions)
 		{
 			_baseDamage = damage;
 			_valueIsRevertible = valueIsRevertible;
@@ -50,7 +49,7 @@ namespace ModiBuff.Core.Units
 			_targeting = targeting;
 			_metaEffects = metaEffects;
 			_postEffects = postEffects;
-			Conditions = conditions ?? Array.Empty<Condition>();
+			Conditions = conditions?.Cast<Condition>().ToArray() ?? Array.Empty<Condition>();
 		}
 
 		public DamageEffect SetMetaEffects(params IMetaEffect<float, float>[] metaEffects)
@@ -77,15 +76,7 @@ namespace ModiBuff.Core.Units
 			//if(effectTarget is IDamagable)
 			if (effectTarget is IAttackable<float, float> damagableTarget)
 			{
-				float damage = _baseDamage;
-
-				if (_metaEffects != null)
-					foreach (var metaEffect in _metaEffects)
-						if (metaEffect is not IConditionEffect conditionEffect ||
-						    conditionEffect.Check(damage, target, source))
-							damage = metaEffect.Effect(damage, target, source);
-
-				damage += _extraDamage;
+				float damage = _metaEffects.TryApply(_baseDamage, target, source) + _extraDamage;
 
 				returnDamageInfo = damagableTarget.TakeDamage(damage, effectSource);
 			}
@@ -94,11 +85,7 @@ namespace ModiBuff.Core.Units
 				EffectHelper.LogImplError(effectTarget, nameof(IAttackable<float, float>));
 #endif
 
-			if (_postEffects != null)
-				foreach (var postEffect in _postEffects)
-					if (postEffect is not IConditionEffect conditionEffect ||
-					    conditionEffect.Check(returnDamageInfo, target, source))
-						postEffect.Effect(returnDamageInfo, target, source);
+			_postEffects.TryEffect(returnDamageInfo, target, source);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source)
@@ -146,15 +133,16 @@ namespace ModiBuff.Core.Units
 		public void ResetState() => _extraDamage = 0;
 
 		public IEffect ShallowClone() => new DamageEffect(_baseDamage, _valueIsRevertible, _stackEffect, _stackValue,
-			_targeting, _metaEffects, _postEffects, Conditions);
+      _targeting, _metaEffects, _postEffects, Conditions);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 
 		public object SaveState() => new SaveData(_extraDamage);
 		public void LoadState(object saveData) => _extraDamage = ((SaveData)saveData).ExtraDamage;
 
-		public object SaveRecipeState() =>
-			new RecipeSaveData(_baseDamage, _valueIsRevertible, _stackEffect, _stackValue, _targeting);
+		public object SaveRecipeState() => new RecipeSaveData(_baseDamage, _valueIsRevertible, _stackEffect, _stackValue,
+      _targeting, this.GetMetaSaveData(_metaEffects), this.GetPostSaveData(_postEffects),
+			this.GetConditionSaveData(Conditions));
 
 		public readonly struct Data
 		{
@@ -182,15 +170,21 @@ namespace ModiBuff.Core.Units
 			public readonly StackEffectType StackEffect;
 			public readonly float StackValue;
 			public readonly Targeting Targeting;
+			public readonly object[] MetaEffects;
+			public readonly object[] PostEffects;
+			public readonly object[] Conditions;
 
-			public RecipeSaveData(float baseDamage, bool valueIsRevertible, StackEffectType stackEffect,
-				float stackValue, Targeting targeting)
+			public RecipeSaveData(float baseDamage, bool valueIsRevertible, StackEffectType stackEffect, float stackValue,
+        Targeting targeting, object[] metaEffects, object[] postEffects, object[] conditions)
 			{
 				BaseDamage = baseDamage;
 				ValueIsRevertible = valueIsRevertible;
 				StackEffect = stackEffect;
 				StackValue = stackValue;
 				Targeting = targeting;
+				MetaEffects = metaEffects;
+				PostEffects = postEffects;
+				Conditions = conditions;
 			}
 		}
 	}

@@ -4,7 +4,8 @@ namespace ModiBuff.Core.Units
 {
 	public sealed class HealEffect : IMutableStateEffect, IStackEffect, IRevertEffect, IEffect,
 		ICallbackEffect, IConditionEffect, IStackRevertEffect, IMetaEffectOwner<HealEffect, float, float>,
-		IPostEffectOwner<HealEffect, float>, IEffectStateInfo<HealEffect.Data>, ISavableEffect<HealEffect.SaveData>
+		IPostEffectOwner<HealEffect, float>, IEffectStateInfo<HealEffect.Data>, ISavableEffect<HealEffect.SaveData>,
+		ISaveableRecipeEffect<DamageEffect.RecipeSaveData>
 	{
 		public bool IsRevertible => _effectState != 0;
 		public bool IsStackRevertible => _effectState.HasFlag(EffectState.ValueIsRevertible);
@@ -76,15 +77,7 @@ namespace ModiBuff.Core.Units
 			_targeting.UpdateTargetSource(target, source, out var effectTarget, out var effectSource);
 			if (effectTarget is IHealable<float, float> healableTarget)
 			{
-				float heal = _heal;
-
-				if (_metaEffects != null)
-					foreach (var metaEffect in _metaEffects)
-						if (metaEffect is not IConditionEffect conditionEffect ||
-						    conditionEffect.Check(heal, target, source))
-							heal = metaEffect.Effect(heal, target, source);
-
-				heal += _extraHeal;
+				float heal = _metaEffects.TryApply(_heal, target, source) + _extraHeal;
 
 				//TODO Design choice, do we want to revert overheal? Or only applied heals?
 
@@ -98,11 +91,7 @@ namespace ModiBuff.Core.Units
 				EffectHelper.LogImplError(effectTarget, nameof(IHealable<float, float>));
 #endif
 
-			if (_postEffects != null)
-				foreach (var postEffect in _postEffects)
-					if (postEffect is not IConditionEffect conditionEffect ||
-					    conditionEffect.Check(returnHeal, target, source))
-						postEffect.Effect(returnHeal, target, source);
+			_postEffects.TryEffect(returnHeal, target, source);
 		}
 
 		public void RevertEffect(IUnit target, IUnit source)
@@ -194,6 +183,9 @@ namespace ModiBuff.Core.Units
 			_totalHeal = saveData.TotalHeal;
 		}
 
+		public object SaveRecipeState() => new RecipeSaveData(_heal, _effectState, _stackEffect, _stackValue,
+			_targeting, this.GetMetaSaveData(_metaEffects), this.GetPostSaveData(_postEffects));
+
 		public readonly struct Data
 		{
 			public readonly float BaseHeal;
@@ -215,6 +207,29 @@ namespace ModiBuff.Core.Units
 			{
 				ExtraHeal = extraHeal;
 				TotalHeal = totalHeal;
+			}
+		}
+
+		public readonly struct RecipeSaveData
+		{
+			public readonly float BaseHeal;
+			public readonly EffectState EffectState;
+			public readonly StackEffectType StackEffect;
+			public readonly float StackValue;
+			public readonly Targeting Targeting;
+			public readonly object[] MetaEffects;
+			public readonly object[] PostEffects;
+
+			public RecipeSaveData(float baseHeal, EffectState effectState, StackEffectType stackEffect,
+				float stackValue, Targeting targeting, object[] metaEffects, object[] postEffects)
+			{
+				BaseHeal = baseHeal;
+				EffectState = effectState;
+				StackEffect = stackEffect;
+				StackValue = stackValue;
+				Targeting = targeting;
+				MetaEffects = metaEffects;
+				PostEffects = postEffects;
 			}
 		}
 

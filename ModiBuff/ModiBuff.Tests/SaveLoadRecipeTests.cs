@@ -79,8 +79,8 @@ namespace ModiBuff.Tests
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			saveRecipes.Add("StackDamage")
-				.Effect(new DamageEffect(5, false, StackEffectType.Effect | StackEffectType.Add, 2f, Targeting.TargetSource),
-					EffectOn.Stack)
+				.Effect(new DamageEffect(5, false, StackEffectType.Effect | StackEffectType.Add, 2f,
+					Targeting.TargetSource), EffectOn.Stack)
 				.Stack(WhenStackEffect.Always);
 
 			SaveLoadStateAndSetup(saveRecipes);
@@ -343,6 +343,205 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 			Unit.AddModifierSelf("OneTimeDamage");
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
+		public void SaveDamageEffectConditionRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("DamageOnFullHealth")
+				.Effect(new DamageEffect(5).Condition(new ValueFull(StatTypeCondition.Health)), EffectOn.Init);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("DamageOnFullHealth");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.AddModifierSelf("DamageOnFullHealth");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
+		public void SaveDamageEffectStatelessMetaAddValueRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("DamageWithAddValueMeta")
+				.Effect(new DamageEffect(5).SetMetaEffects(new ReverseValueMetaEffect()), EffectOn.Init);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.TakeDamage(5, Unit);
+			Unit.AddModifierSelf("DamageWithAddValueMeta");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+		}
+
+		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
+		public void SaveDamageEffectStatefulMetaAddValueRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("DamageWithAddValueMeta")
+				.Effect(new DamageEffect(5).SetMetaEffects(new AddValueMetaEffect(2)), EffectOn.Init);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("DamageWithAddValueMeta");
+			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
+		}
+
+		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
+		public void SaveDamageEffectMetaConditionRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("DamageWithAddValueMetaWithCondition")
+				.Effect(new DamageEffect(5).SetMetaEffects(
+					new AddValueMetaEffect(2).Condition(new ValueFull(StatTypeCondition.Health))), EffectOn.Init);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("DamageWithAddValueMetaWithCondition");
+			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
+			Unit.AddModifierSelf("DamageWithAddValueMetaWithCondition");
+			Assert.AreEqual(UnitHealth - 5 - 2 - 5, Unit.Health);
+		}
+
+		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
+		public void SaveDamageEffectStatelessPostDamageRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("DoubleDamagePost")
+				.Effect(new DamageEffect(5).SetPostEffects(new DamagePostEffect()), EffectOn.Init);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("DoubleDamagePost");
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+		}
+
+		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
+		public void SaveDamageEffectStatefullAddDamageRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("DamageLifsteal")
+				.Effect(new DamageEffect(5).SetPostEffects(new LifeStealPostEffect(0.5f)), EffectOn.Init);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("DamageLifsteal");
+			Assert.AreEqual(UnitHealth - 5 + 5 * 0.5f, Unit.Health);
+		}
+
+		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
+		public void SaveDamageEffectPostMetaEffectRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("DamageAddValueMetaInPostEffect")
+				.Effect(new DamageEffect(5)
+					.SetPostEffects(new DamagePostEffect().SetMetaEffects(new AddValueMetaEffect(2))), EffectOn.Init);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("DamageAddValueMetaInPostEffect");
+			Assert.AreEqual(UnitHealth - 5 - 5 - 2, Unit.Health);
+		}
+
+		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
+		public void SaveDamageEffectPostMetaConditionRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("DamageWithPostAddValueMetaWithCondition")
+				.Effect(new DamageEffect(5)
+						.SetPostEffects(new DamagePostEffect()
+							.SetMetaEffects(new AddValueMetaEffect(2)
+								.Condition(new StatusEffectCond(StatusEffectType.Stun)))),
+					EffectOn.Init);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("DamageWithPostAddValueMetaWithCondition");
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+			Unit.ChangeStatusEffect(StatusEffectType.Stun, 1f, Unit);
+			Unit.AddModifierSelf("DamageWithPostAddValueMetaWithCondition");
+			Assert.AreEqual(UnitHealth - 5 - 5 - 5 - 5 - 2, Unit.Health);
+		}
+
+		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
+		public void SaveDamageEffectMetaMetaRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("DamageWithAddValueMetaMultiplyMeta")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(new AddValueMetaEffect(2f).SetMetaEffects(new MultiplyValueMetaEffect(2f))),
+					EffectOn.Init);
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("DamageWithAddValueMetaMultiplyMeta");
+			Assert.AreEqual(UnitHealth - 5 - 4, Unit.Health);
+		}
+
+		[Test]
+#if !MODIBUFF_SYSTEM_TEXT_JSON
+		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+#endif
+		public void SaveDamageMetaEffectAndOrConditionsRecipeLoad()
+		{
+			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
+			saveRecipes.Add("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen")
+				.Effect(new DamageEffect(5)
+						.SetMetaEffects(
+							new AddValueMetaEffect(5).Condition(new AndCondition(
+								new StatusEffectCond(StatusEffectType.Root),
+								new StatusEffectCond(StatusEffectType.Silence)))
+							, new MultiplyValueMetaEffect(2).Condition(new OrCondition(
+								new StatusEffectCond(StatusEffectType.Disarm),
+								new StatusEffectCond(StatusEffectType.Freeze)
+							))),
+					EffectOn.Init)
+				.Remove(1).Refresh();
+
+			SaveLoadStateAndSetup(saveRecipes);
+
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Root, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+			Unit.ChangeStatusEffect(StatusEffectType.Silence, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5 - 5 - 10, Unit.Health);
+
+			Unit.Update(1);
+
+			Unit.ChangeStatusEffect(StatusEffectType.Freeze, 1, Unit);
+			Unit.AddModifierSelf("AddFlatOnRootedAndSilenced_MultiplyOnDisarmedOrFrozen");
+			Assert.AreEqual(UnitHealth - 5 - 5 - 10 - 10, Unit.Health);
 		}
 	}
 }
