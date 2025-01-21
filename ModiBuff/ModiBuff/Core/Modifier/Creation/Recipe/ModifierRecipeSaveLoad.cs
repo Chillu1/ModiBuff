@@ -238,12 +238,33 @@ namespace ModiBuff.Core
 						//TODO
 						var metaEffectRecipeSaveData = metaEffect.EnumerateObject().ElementAt(1).Value;
 
-						var metaConstructor = metaEffectType.GetConstructors()[0];
+						var metaPrivateConstructors =
+							metaEffectType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
+						var metaConstructor = metaPrivateConstructors.Length > 0
+							? metaPrivateConstructors[0]
+							: effectType.GetConstructors()[0];
 						var metaParameters = metaConstructor.GetParameters();
 						object[] metaEffectStates = new object[metaParameters.Length];
 						int j = 0;
 						foreach (var metaProperty in metaEffectRecipeSaveData.EnumerateObject())
 						{
+							if (typeof(ICondition[]).IsAssignableFrom(metaParameters[j].ParameterType))
+							{
+								//TODO Refactor
+								if (metaProperty.Value.ValueKind == System.Text.Json.JsonValueKind.Null)
+								{
+									metaEffectStates[j] = null;
+									j++;
+									continue;
+								}
+
+								metaEffectStates[j] = HandleCondition(metaProperty);
+								j++;
+								continue;
+							}
+
+							//TODO Add missing constructor warning? Or refactor, or use IConditionEffect to set conditions
+
 							object metaValue = metaProperty.Value.ToValue(metaParameters[j].ParameterType);
 							if (metaValue == null)
 								Logger.LogError(
