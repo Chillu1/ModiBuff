@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 
@@ -15,6 +16,12 @@ namespace ModiBuff.Tests
 		{
 			CheckForSetup(unit);
 			unit.ModifierController.Add(ModifierIdManager.GetIdByName(name), unit, unit);
+		}
+
+		internal static void AddModifierSelfWithData(this IModifierOwner unit, string name, IList<IData> data)
+		{
+			CheckForSetup(unit);
+			unit.ModifierController.AddWithData(ModifierIdManager.GetIdByName(name), unit, unit, data);
 		}
 
 		internal static void ApplyEffectSelf(this IUnit unit, string name)

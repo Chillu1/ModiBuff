@@ -4,9 +4,9 @@ using System.Linq;
 namespace ModiBuff.Core.Units
 {
 	public sealed class DamageEffect : IStackEffect, IMutableStateEffect, IEffect, ICallbackEffect, IConditionEffect,
-		IStackRevertEffect, IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
-		IEffectStateInfo<DamageEffect.Data>, ISavableEffect<DamageEffect.SaveData>,
-		ISaveableRecipeEffect<DamageEffect.RecipeSaveData>
+		IStackRevertEffect, ISetDataEffect, IMetaEffectOwner<DamageEffect, float, float>,
+		IPostEffectOwner<DamageEffect, float>, IEffectStateInfo<DamageEffect.Data>,
+		ISavableEffect<DamageEffect.SaveData>, ISaveableRecipeEffect<DamageEffect.RecipeSaveData>
 	{
 		public bool IsStackRevertible => _valueIsRevertible;
 		public bool UsesMutableState => _stackEffect.UsesMutableState();
@@ -33,14 +33,17 @@ namespace ModiBuff.Core.Units
 		/// <summary>
 		///		Manual modifier generation constructor
 		/// </summary>
-		public static DamageEffect Create(float damage, bool valueIsRevertible = false, StackEffectType stackEffect = StackEffectType.Effect,
+		public static DamageEffect Create(float damage, bool valueIsRevertible = false,
+			StackEffectType stackEffect = StackEffectType.Effect,
 			float stackValue = -1, Targeting targeting = Targeting.TargetSource,
 			IMetaEffect<float, float>[] metaEffects = null, IPostEffect<float>[] postEffects = null,
 			ICondition[] conditions = null) =>
-			new DamageEffect(damage, valueIsRevertible, stackEffect, stackValue, targeting, metaEffects, postEffects, conditions);
+			new DamageEffect(damage, valueIsRevertible, stackEffect, stackValue, targeting, metaEffects, postEffects,
+				conditions);
 
-		private DamageEffect(float damage, bool valueIsRevertible, StackEffectType stackEffect, float stackValue, Targeting targeting,
-			IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects, ICondition[] conditions)
+		private DamageEffect(float damage, bool valueIsRevertible, StackEffectType stackEffect, float stackValue,
+			Targeting targeting, IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects,
+			ICondition[] conditions)
 		{
 			_baseDamage = damage;
 			_valueIsRevertible = valueIsRevertible;
@@ -113,6 +116,24 @@ namespace ModiBuff.Core.Units
 				Effect(target, source);
 		}
 
+		public void SetData(IData data)
+		{
+			switch (data)
+			{
+				case EffectData<int> effectData:
+					_extraDamage = effectData.Value;
+					break;
+				case EffectData<float> effectData:
+					_extraDamage = effectData.Value;
+					break;
+				case ModifierData:
+					break;
+				default:
+					Logger.LogError($"[ModiBuff] Unsupported data type: {data.GetType()}");
+					break;
+			}
+		}
+
 		public void RevertStack(int stacks, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
@@ -133,15 +154,15 @@ namespace ModiBuff.Core.Units
 		public void ResetState() => _extraDamage = 0;
 
 		public IEffect ShallowClone() => new DamageEffect(_baseDamage, _valueIsRevertible, _stackEffect, _stackValue,
-      _targeting, _metaEffects, _postEffects, Conditions);
+			_targeting, _metaEffects, _postEffects, Conditions);
 
 		object IShallowClone.ShallowClone() => ShallowClone();
 
 		public object SaveState() => new SaveData(_extraDamage);
 		public void LoadState(object saveData) => _extraDamage = ((SaveData)saveData).ExtraDamage;
 
-		public object SaveRecipeState() => new RecipeSaveData(_baseDamage, _valueIsRevertible, _stackEffect, _stackValue,
-      _targeting, this.GetMetaSaveData(_metaEffects), this.GetPostSaveData(_postEffects),
+		public object SaveRecipeState() => new RecipeSaveData(_baseDamage, _valueIsRevertible, _stackEffect,
+			_stackValue, _targeting, this.GetMetaSaveData(_metaEffects), this.GetPostSaveData(_postEffects),
 			this.GetConditionSaveData(Conditions));
 
 		public readonly struct Data
@@ -174,8 +195,8 @@ namespace ModiBuff.Core.Units
 			public readonly object[] PostEffects;
 			public readonly object[] Conditions;
 
-			public RecipeSaveData(float baseDamage, bool valueIsRevertible, StackEffectType stackEffect, float stackValue,
-        Targeting targeting, object[] metaEffects, object[] postEffects, object[] conditions)
+			public RecipeSaveData(float baseDamage, bool valueIsRevertible, StackEffectType stackEffect,
+				float stackValue, Targeting targeting, object[] metaEffects, object[] postEffects, object[] conditions)
 			{
 				BaseDamage = baseDamage;
 				ValueIsRevertible = valueIsRevertible;
