@@ -225,7 +225,14 @@ namespace ModiBuff.Core
 
 		public void PrepareRemove(int id, int genId)
 		{
-			_modifiersToRemove.Add(new ModifierReference(id, genId));
+			var reference = new ModifierReference(id, genId);
+			if (_modifiersToRemove.Contains(reference))
+			{
+				Logger.LogWarning("[ModiBuff] Tried to remove a modifier that is already scheduled for removal");
+				return;
+			}
+
+			_modifiersToRemove.Add(reference);
 		}
 
 		public void ModifierAction(int id, int genId, ModifierAction action)
@@ -301,7 +308,6 @@ namespace ModiBuff.Core
 				return;
 			}
 
-#if DEBUG && !MODIBUFF_PROFILE
 			bool modifierExists = Config.UseDictionaryIndexes
 				? _modifierIndexesDict.ContainsKey(modifierReference.Id)
 				: _modifierIndexes[modifierReference.Id] != -1;
@@ -312,7 +318,6 @@ namespace ModiBuff.Core
 				                $"{modifierReference.Id}, genId: {modifierReference.GenId}");
 				return;
 			}
-#endif
 
 			int modifierIndex;
 			if (Config.UseDictionaryIndexes)

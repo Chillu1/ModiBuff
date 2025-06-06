@@ -557,5 +557,6 @@ namespace ModiBuff.Tests
 
 		//TODO GenIds will be wrong in some places (StatusEffect), how to fix, feed correct id & genId somehow?
 		//TODO add damage is enabled check
+		//TODO Missing modifier (deleted in previous version), handle correctly
 	}
 }
