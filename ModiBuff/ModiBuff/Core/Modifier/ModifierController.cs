@@ -100,7 +100,7 @@ namespace ModiBuff.Core
 			return default;
 		}
 
-		public void Add(int id, IUnit target, IUnit source)
+		public void Add(int id, IUnit target, IUnit source, IList<IData> data = null)
 		{
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);
 
@@ -123,6 +123,8 @@ namespace ModiBuff.Core
 					var existingModifier = _modifiers[index];
 					//TODO should we update the modifier targets when init/refreshing/stacking?
 					existingModifier.UpdateSource(source);
+					if (data != null)
+						existingModifier.SetData(data);
 					if (tag.HasTag(TagType.IsInit))
 						existingModifier.Init();
 					if (tag.HasTag(TagType.IsRefresh) && !tag.HasTag(TagType.CustomRefresh))
@@ -169,86 +171,8 @@ namespace ModiBuff.Core
 			}
 
 			_modifiers[_modifiersTop++] = modifier;
-			if (tag.HasTag(TagType.IsInit))
-				modifier.Init();
-			if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.CustomStack)
-			                                && !tag.HasTag(TagType.ZeroDefaultStacks))
-				modifier.Stack();
-
-			modifier.UseScheduledCheck();
-		}
-
-		public void AddWithData(int id, IUnit target, IUnit source, IList<IData> data)
-		{
-			ref readonly var tag = ref ModifierRecipes.GetTag(id);
-
-			if (!tag.HasTag(TagType.IsInstanceStackable))
-			{
-				bool useDictionaryIndexes = Config.UseDictionaryIndexes;
-
-				bool exists;
-				int index;
-				if (useDictionaryIndexes)
-					exists = _modifierIndexesDict.TryGetValue(id, out index);
-				else
-				{
-					index = _modifierIndexes[id];
-					exists = index != -1;
-				}
-
-				if (exists)
-				{
-					var existingModifier = _modifiers[index];
-					//TODO should we update the modifier targets when init/refreshing/stacking?
-					existingModifier.UpdateSource(source);
-					existingModifier.SetData(data);
-					if (tag.HasTag(TagType.IsInit))
-						existingModifier.Init();
-					if (tag.HasTag(TagType.IsRefresh) && !tag.HasTag(TagType.CustomRefresh))
-						existingModifier.Refresh();
-					if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.CustomStack))
-						existingModifier.Stack();
-
-					existingModifier.UseScheduledCheck();
-
-					return;
-				}
-
-				if (useDictionaryIndexes)
-					_modifierIndexesDict.Add(id, _modifiersTop);
-				else
-					_modifierIndexes[id] = _modifiersTop;
-			}
-
-			if (_modifiersTop == _modifiers.Length)
-				Array.Resize(ref _modifiers, _modifiers.Length << 1);
-
-			var modifier = ModifierPool.Instance.Rent(id);
-
-			if (tag.HasTag(TagType.IsAura))
-			{
-				if (target is IAuraOwner auraOwner)
-				{
-					var targetList = auraOwner.GetAuraTargets(ModifierRecipes.GetAuraId(id));
-					modifier.UpdateTargets(targetList, source);
-				}
-				else
-				{
-#if DEBUG && !MODIBUFF_PROFILE
-					Logger.LogError("[ModiBuff] Tried to add an aura to a target that doesn't implement IAuraOwner");
-#endif
-					ModifierPool.Instance.Return(modifier);
-					return;
-				}
-			}
-			else
-			{
-				//TODO Do we want to save the sender of the original modifier? Ex. for thorns. Because owner is always the owner of the modifier instance
-				modifier.UpdateSingleTargetSource(target, source);
-			}
-
-			_modifiers[_modifiersTop++] = modifier;
-			modifier.SetData(data);
+			if (data != null)
+				modifier.SetData(data);
 			if (tag.HasTag(TagType.IsInit))
 				modifier.Init();
 			if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.CustomStack)
