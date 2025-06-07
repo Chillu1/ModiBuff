@@ -100,7 +100,7 @@ namespace ModiBuff.Core
 			return default;
 		}
 
-		public void Add(int id, IUnit target, IUnit source)
+		public void Add(int id, IUnit target, IUnit source, IList<IData> data = null)
 		{
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);
 
@@ -123,6 +123,8 @@ namespace ModiBuff.Core
 					var existingModifier = _modifiers[index];
 					//TODO should we update the modifier targets when init/refreshing/stacking?
 					existingModifier.UpdateSource(source);
+					if (data != null)
+						existingModifier.SetData(data);
 					if (tag.HasTag(TagType.IsInit))
 						existingModifier.Init();
 					if (tag.HasTag(TagType.IsRefresh) && !tag.HasTag(TagType.CustomRefresh))
@@ -169,6 +171,8 @@ namespace ModiBuff.Core
 			}
 
 			_modifiers[_modifiersTop++] = modifier;
+			if (data != null)
+				modifier.SetData(data);
 			if (tag.HasTag(TagType.IsInit))
 				modifier.Init();
 			if (tag.HasTag(TagType.IsStack) && !tag.HasTag(TagType.CustomStack)

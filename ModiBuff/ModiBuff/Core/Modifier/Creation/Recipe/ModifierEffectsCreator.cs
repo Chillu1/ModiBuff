@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ModiBuff.Core
 {
@@ -17,6 +18,7 @@ namespace ModiBuff.Core
 		private readonly EffectWrapper[] _callbackEffectUnitsRegisterWrappers;
 
 		private IRevertEffect[] _revertEffects;
+		private ISetDataEffect[] _setDataEffects;
 		private IEffect[] _initEffects;
 		private IEffect[] _intervalEffects;
 		private IEffect[] _durationEffects;
@@ -270,6 +272,9 @@ namespace ModiBuff.Core
 					_callbackEffectUnitsEffects[3][_callbackEffectUnitsEffectsIndex4++] = effect;
 			}
 
+			_setDataEffects = _effectWrappers.Select(x => x.GetEffect() as ISetDataEffect).Where(x => x != null)
+				.ToArray(); //TODO
+
 			EffectStateInfo effectStateInfo = default;
 			if (_effectsWithModifierInfoWrappers.Length > 0)
 			{
@@ -310,13 +315,14 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _effectWrappers.Length; i++)
 				_effectWrappers[i].Reset();
 
-			return new SyncedModifierEffects(_initEffects, _intervalEffects, _durationEffects, _stackEffects,
-				effectStateInfo, effectSaveState);
+			return new SyncedModifierEffects(_setDataEffects, _initEffects, _intervalEffects, _durationEffects,
+				_stackEffects, effectStateInfo, effectSaveState);
 		}
 	}
 
 	public readonly ref struct SyncedModifierEffects
 	{
+		public readonly ISetDataEffect[] SetDataEffects;
 		public readonly IEffect[] InitEffects;
 		public readonly IEffect[] IntervalEffects;
 		public readonly IEffect[] DurationEffects;
@@ -324,10 +330,11 @@ namespace ModiBuff.Core
 		public readonly EffectStateInfo EffectStateInfo;
 		public readonly EffectSaveState EffectSaveState;
 
-		public SyncedModifierEffects(IEffect[] initEffectsArray, IEffect[] intervalEffectsArray,
-			IEffect[] durationEffectsArray, IStackEffect[] stackEffectsArray,
+		public SyncedModifierEffects(ISetDataEffect[] dataEffects, IEffect[] initEffectsArray,
+			IEffect[] intervalEffectsArray, IEffect[] durationEffectsArray, IStackEffect[] stackEffectsArray,
 			EffectStateInfo effectStateInfo, EffectSaveState effectSaveState)
 		{
+			SetDataEffects = dataEffects;
 			InitEffects = initEffectsArray;
 			IntervalEffects = intervalEffectsArray;
 			DurationEffects = durationEffectsArray;

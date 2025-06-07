@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 
@@ -11,10 +12,10 @@ namespace ModiBuff.Tests
 				Logger.LogError("Unit is null, you most likely forgot to call Setup() in your test");
 		}
 
-		internal static void AddModifierSelf(this IModifierOwner unit, string name)
+		internal static void AddModifierSelf(this IModifierOwner unit, string name, IList<IData> data = null)
 		{
 			CheckForSetup(unit);
-			unit.ModifierController.Add(ModifierIdManager.GetIdByName(name), unit, unit);
+			unit.ModifierController.Add(ModifierIdManager.GetIdByName(name), unit, unit, data);
 		}
 
 		internal static void ApplyEffectSelf(this IUnit unit, string name)
