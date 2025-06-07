@@ -10,8 +10,11 @@ namespace ModiBuff.Core
 
 	public sealed record ModifierDurationData(float Duration) : ModifierData;
 
+	public abstract record EffectData(Type EffectType, int EffectNumber = 0) : Data;
+
 	//TODO EffectId/EffectType, EffectId 
-	public sealed record EffectData<TValue>(TValue Value, Type EffectType, int EffectNumber = 0) : Data;
+	public sealed record EffectData<TValue>(TValue Value, Type EffectType, int EffectNumber = 0)
+		: EffectData(EffectType, EffectNumber);
 
 	public interface IData
 	{

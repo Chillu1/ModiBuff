@@ -13,11 +13,31 @@ namespace ModiBuff.Tests
 
 			IData[] data =
 			{
-				new EffectData<int>(12, typeof(DamageEffect), 0),
+				new EffectData<int>(3, typeof(DamageEffect), 0),
 			};
 			Unit.AddModifierSelfWithData("InitDamage", data);
 
-			Assert.AreEqual(UnitHealth - 5 - 12, Unit.Health);
+			Assert.AreEqual(UnitHealth - 5 - 3, Unit.Health);
+		}
+
+		[Test]
+		public void AddWithData_SecondEffect()
+		{
+			AddRecipe("InitDamageTwo")
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Interval(1)
+				.Effect(new DamageEffect(0), EffectOn.Interval);
+			Setup();
+
+			IData[] data =
+			{
+				new EffectData<int>(3, typeof(DamageEffect), 1),
+			};
+			Unit.AddModifierSelfWithData("InitDamageTwo", data);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.Update(1f);
+			Assert.AreEqual(UnitHealth - 5 - 3, Unit.Health);
 		}
 
 		[Test]
@@ -27,11 +47,11 @@ namespace ModiBuff.Tests
 
 			IData[] data =
 			{
-				new EffectData<float>(12f, typeof(DamageEffect), 0),
+				new EffectData<float>(3f, typeof(DamageEffect), 0),
 			};
 
 			Unit.AddModifierSelfWithData("InitDamage", data);
-			Assert.AreEqual(UnitHealth - 5 - 12f, Unit.Health);
+			Assert.AreEqual(UnitHealth - 5 - 3f, Unit.Health);
 		}
 
 		[Test]
@@ -42,11 +62,11 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("InitDamage");
 			IData[] data =
 			{
-				new EffectData<int>(12, typeof(DamageEffect), 0),
+				new EffectData<int>(3, typeof(DamageEffect), 0),
 			};
 			Unit.AddModifierSelfWithData("InitDamage", data);
 
-			Assert.AreEqual(UnitHealth - 5 - 5 - 12, Unit.Health);
+			Assert.AreEqual(UnitHealth - 5 - 5 - 3, Unit.Health);
 		}
 
 		[Test]

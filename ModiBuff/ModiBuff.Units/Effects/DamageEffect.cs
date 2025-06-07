@@ -129,7 +129,7 @@ namespace ModiBuff.Core.Units
 				case ModifierData:
 					break;
 				default:
-					Logger.LogError($"[ModiBuff] Unsupported data type: {data.GetType()}");
+					Logger.LogError($"Unsupported data type: {data.GetType()}");
 					break;
 			}
 		}

@@ -207,15 +207,12 @@ namespace ModiBuff.Core
 
 			foreach (var d in data)
 			{
-				int currentCount;
-				bool success = false;
 				switch (d)
 				{
 					case ModifierData modifierData:
 						if (_timeComponents == null || _timeComponents.Length == 0)
 						{
-							Logger.LogError(
-								"[ModiBuff] Trying to set interval data on modifier with no time components.");
+							Logger.LogError("[ModiBuff] Trying to set time data on modifier with no time components.");
 							continue;
 						}
 
@@ -223,50 +220,26 @@ namespace ModiBuff.Core
 							_timeComponents[i].SetData(modifierData);
 
 						break;
-					case EffectData<int> effectData:
-						currentCount = 0;
+					case EffectData effectData:
+						int currentCount = 0;
+						bool success = false;
 						for (int i = 0; i < _dataEffects.Length; i++)
 						{
 							var effect = _dataEffects[i];
 							if (!(effect.GetType() == effectData.EffectType))
 								continue;
 
-							currentCount++;
-							if (effectData.EffectNumber > 0 && currentCount != effectData.EffectNumber)
+							if (effectData.EffectNumber > 0 && currentCount++ != effectData.EffectNumber)
 								continue;
 
 							effect.SetData(effectData);
 							success = true;
+							break;
 						}
 
 						if (!success)
-						{
 							Logger.LogError($"[ModiBuff] Couldn't find effect {effectData.EffectType} " +
 							                $"at number {effectData.EffectNumber}");
-						}
-
-						break;
-					case EffectData<float> effectData:
-						currentCount = 0;
-						for (int i = 0; i < _dataEffects.Length; i++)
-						{
-							var effect = _dataEffects[i];
-							if (!(effect.GetType() == effectData.EffectType))
-								continue;
-
-							currentCount++;
-							if (effectData.EffectNumber > 0 && currentCount != effectData.EffectNumber)
-								continue;
-
-							effect.SetData(effectData);
-							success = true;
-						}
-
-						if (!success)
-						{
-							Logger.LogError($"[ModiBuff] Couldn't find effect {effectData.EffectType} " +
-							                $"at number {effectData.EffectNumber}");
-						}
 
 						break;
 					default:
