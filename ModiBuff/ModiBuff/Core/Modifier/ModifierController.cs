@@ -201,6 +201,7 @@ namespace ModiBuff.Core
 					var existingModifier = _modifiers[index];
 					//TODO should we update the modifier targets when init/refreshing/stacking?
 					existingModifier.UpdateSource(source);
+					existingModifier.SetData(data);
 					if (tag.HasTag(TagType.IsInit))
 						existingModifier.Init();
 					if (tag.HasTag(TagType.IsRefresh) && !tag.HasTag(TagType.CustomRefresh))

@@ -3,7 +3,7 @@ namespace ModiBuff.Core
 	public sealed class IntervalComponent : ITimeComponent
 	{
 		public float Timer => _timer;
-		public float Time => _interval;
+		public float Time => _customInterval ?? _interval;
 
 		private readonly float _interval;
 		private readonly bool _isRefreshable;
@@ -19,6 +19,7 @@ namespace ModiBuff.Core
 
 		private readonly ModifierCheck _modifierCheck;
 
+		private float? _customInterval;
 		//private int _intervalCount;
 		//private float _totalTime;
 
@@ -55,13 +56,14 @@ namespace ModiBuff.Core
 				? deltaTime / _statusResistanceTarget.StatusResistance
 				: deltaTime;
 
-			if (_timer < _interval)
+			float interval = _customInterval ?? _interval;
+			if (_timer < interval)
 				return;
 
 			//_intervalCount++;
 			//_totalTime += _timer;
 
-			_timer -= _interval;
+			_timer -= interval;
 
 			if (_modifierCheck != null && !_modifierCheck.CheckUse(_targetComponent.Source))
 				return;
@@ -85,19 +87,28 @@ namespace ModiBuff.Core
 				_timer = 0;
 		}
 
+		public void SetData(ModifierData data)
+		{
+			if (data is ModifierIntervalData intervalData)
+				_customInterval = intervalData.Interval;
+		}
+
 		public void ResetState()
 		{
 			_timer = 0;
 			_statusResistanceImplemented = false;
 			_statusResistanceTarget = null;
+			_customInterval = null;
 		}
 
-		public TimeComponentSaveData SaveState() => new TimeComponentSaveData(_timer, _statusResistanceImplemented);
+		public TimeComponentSaveData SaveState() =>
+			new TimeComponentSaveData(_timer, _statusResistanceImplemented, _customInterval);
 
 		public void LoadState(TimeComponentSaveData saveData)
 		{
 			_timer = saveData.Timer;
 			_statusResistanceImplemented = saveData.StatusResistanceImplemented;
+			_customInterval = saveData.CustomTime;
 		}
 	}
 }

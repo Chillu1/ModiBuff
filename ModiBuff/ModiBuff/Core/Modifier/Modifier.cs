@@ -211,7 +211,17 @@ namespace ModiBuff.Core
 				bool success = false;
 				switch (d)
 				{
-					case ModifierData:
+					case ModifierData modifierData:
+						if (_timeComponents == null || _timeComponents.Length == 0)
+						{
+							Logger.LogError(
+								"[ModiBuff] Trying to set interval data on modifier with no time components.");
+							continue;
+						}
+
+						for (int i = 0; i < _timeComponents.Length; i++)
+							_timeComponents[i].SetData(modifierData);
+
 						break;
 					case EffectData<int> effectData:
 						currentCount = 0;
