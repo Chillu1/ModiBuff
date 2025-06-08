@@ -32,7 +32,7 @@ namespace ModiBuff.Core
 		private bool _isTargetSetup;
 		private bool _multiTarget;
 
-		private readonly ISetDataEffect[] _dataEffects; //TODO TEMP
+		private readonly ISetDataEffect[] _setDataEffects;
 
 		//TODO ideally this would be outside of the modifier, but renting (returning) a tuple/wrapper is kinda meh
 		private readonly EffectStateInfo _effectStateInfo;
@@ -40,8 +40,8 @@ namespace ModiBuff.Core
 
 		public Modifier(int id, int genId, string name, InitComponent? initComponent,
 			ITimeComponent[] timeComponents, StackComponent stackComponent, ModifierCheck effectCheck,
-			ITargetComponent targetComponent, EffectStateInfo? effectStateInfo, EffectSaveState? effectSaveState,
-			ISetDataEffect[] dataEffects = null)
+			ITargetComponent targetComponent, ISetDataEffect[] setDataEffects, EffectStateInfo? effectStateInfo,
+			EffectSaveState? effectSaveState)
 		{
 			Id = id;
 			GenId = genId;
@@ -63,12 +63,12 @@ namespace ModiBuff.Core
 			if (targetComponent is MultiTargetComponent)
 				_multiTarget = true;
 
+			_setDataEffects = setDataEffects;
+
 			if (effectStateInfo != null)
 				_effectStateInfo = effectStateInfo.Value;
 			if (effectSaveState != null)
 				_effectSaveState = effectSaveState.Value;
-
-			_dataEffects = dataEffects;
 		}
 
 		public void UpdateTargets(IList<IUnit> targetsInRange, IUnit source)
@@ -210,22 +210,18 @@ namespace ModiBuff.Core
 				switch (d)
 				{
 					case ModifierData modifierData:
-						if (_timeComponents == null || _timeComponents.Length == 0)
-						{
-							Logger.LogError("[ModiBuff] Trying to set time data on modifier with no time components.");
-							continue;
-						}
-
-						for (int i = 0; i < _timeComponents.Length; i++)
+						for (int i = 0; i < _timeComponents?.Length; i++)
 							_timeComponents[i].SetData(modifierData);
+
+						_stackComponent?.SetData(modifierData);
 
 						break;
 					case EffectData effectData:
 						int currentCount = 0;
 						bool success = false;
-						for (int i = 0; i < _dataEffects.Length; i++)
+						for (int i = 0; i < _setDataEffects.Length; i++)
 						{
-							var effect = _dataEffects[i];
+							var effect = _setDataEffects[i];
 							if (!(effect.GetType() == effectData.EffectType))
 								continue;
 

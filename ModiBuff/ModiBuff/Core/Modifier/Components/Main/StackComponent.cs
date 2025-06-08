@@ -145,6 +145,18 @@ namespace ModiBuff.Core
 			}
 		}
 
+		public void SetData(ModifierData data)
+		{
+			if (data is ModifierStartingStacksData stacksData)
+			{
+				if (_independentStackTime > 0)
+					for (int i = 0; i < stacksData.Stacks; i++)
+						_stackTimers.Add(_independentStackTime);
+
+				_stacks = stacksData.Stacks;
+			}
+		}
+
 		public void ResetStacks()
 		{
 			if (_independentStackTime > 0)

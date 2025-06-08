@@ -113,5 +113,23 @@ namespace ModiBuff.Tests
 			Unit.Update(1f);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
+
+		[Test]
+		public void AddWithData_StartingStacks()
+		{
+			AddRecipe("StackedDamage")
+				.Stack(WhenStackEffect.Always)
+				.Effect(new DamageEffect(5, true, StackEffectType.Effect | StackEffectType.AddStacksBased, 5),
+					EffectOn.Stack);
+			Setup();
+
+			IData[] data =
+			{
+				new ModifierStartingStacksData(3)
+			};
+			Unit.AddModifierWithDataSelf("StackedDamage", data);
+
+			Assert.AreEqual(UnitHealth - 5 - 5 * 4, Unit.Health);
+		}
 	}
 }

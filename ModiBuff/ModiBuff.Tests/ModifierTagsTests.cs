@@ -106,7 +106,7 @@ namespace ModiBuff.Tests
 				};
 
 				return new Modifier(id, genId, name, null, timeComponents, null, null, new SingleTargetComponent(),
-					null, null);
+					null, null, null);
 			});
 			AddGenerator("DurationRefreshDamage", (id, genId, name, tag) =>
 			{
@@ -116,7 +116,7 @@ namespace ModiBuff.Tests
 				};
 
 				return new Modifier(id, genId, name, null, timeComponents, null, null, new SingleTargetComponent(),
-					null, null);
+					null, null, null);
 			});
 			Setup();
 
