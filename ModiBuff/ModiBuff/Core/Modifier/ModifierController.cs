@@ -100,7 +100,11 @@ namespace ModiBuff.Core
 			return default;
 		}
 
-		public void Add(int id, IUnit target, IUnit source, IList<IData> data = null)
+		public void Add(int id, IUnit target, IUnit source) => Add(id, target, source, null);
+
+		public void AddWithData(int id, IUnit target, IUnit source, IList<IData> data) => Add(id, target, source, data);
+
+		private void Add(int id, IUnit target, IUnit source, IList<IData> data)
 		{
 			ref readonly var tag = ref ModifierRecipes.GetTag(id);
 

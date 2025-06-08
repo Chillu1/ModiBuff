@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ModiBuff.Core
 {
@@ -28,6 +27,7 @@ namespace ModiBuff.Core
 		private IEffect[][] _callbackEffectUnitsEffects;
 
 		private int _revertEffectsIndex,
+			_setDataEffectsIndex,
 			_initEffectsIndex,
 			_intervalEffectsIndex,
 			_durationEffectsIndex,
@@ -69,6 +69,9 @@ namespace ModiBuff.Core
 
 				if (effectWrapper.GetEffect() is IRevertEffect revertEffect && revertEffect.IsRevertible)
 					_revertEffectsIndex++;
+
+				if (effectWrapper.GetEffect() is ISetDataEffect)
+					_setDataEffectsIndex++;
 
 				if ((effectWrapper.EffectOn & EffectOn.Init) != 0)
 					_initEffectsIndex++;
@@ -225,6 +228,12 @@ namespace ModiBuff.Core
 				_revertEffectsIndex = 0;
 			}
 
+			if (_setDataEffectsIndex > 0)
+			{
+				_setDataEffects = new ISetDataEffect[_setDataEffectsIndex];
+				_setDataEffectsIndex = 0;
+			}
+
 			//Go over all of the effects, and put them into the correct arrays
 			//Here we're also responsible for cloning, and feeding them the correct genId
 			for (int i = 0; i < _effectWrappers.Length; i++)
@@ -237,6 +246,8 @@ namespace ModiBuff.Core
 					modifierGenIdOwner.SetGenId(genId);
 				if (effect is IRevertEffect revertEffect && revertEffect.IsRevertible)
 					_revertEffects[_revertEffectsIndex++] = revertEffect;
+				if (effect is ISetDataEffect setDataEffect)
+					_setDataEffects[_setDataEffectsIndex++] = setDataEffect;
 
 				if ((effectOn & EffectOn.Init) != 0)
 					_initEffects[_initEffectsIndex++] = effect;
@@ -271,9 +282,6 @@ namespace ModiBuff.Core
 				if ((effectOn & EffectOn.CallbackEffectUnits4) != 0)
 					_callbackEffectUnitsEffects[3][_callbackEffectUnitsEffectsIndex4++] = effect;
 			}
-
-			_setDataEffects = _effectWrappers.Select(x => x.GetEffect() as ISetDataEffect).Where(x => x != null)
-				.ToArray(); //TODO
 
 			EffectStateInfo effectStateInfo = default;
 			if (_effectsWithModifierInfoWrappers.Length > 0)
@@ -315,23 +323,23 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _effectWrappers.Length; i++)
 				_effectWrappers[i].Reset();
 
-			return new SyncedModifierEffects(_setDataEffects, _initEffects, _intervalEffects, _durationEffects,
-				_stackEffects, effectStateInfo, effectSaveState);
+			return new SyncedModifierEffects(_initEffects, _intervalEffects, _durationEffects, _stackEffects,
+				_setDataEffects, effectStateInfo, effectSaveState);
 		}
 	}
 
 	public readonly ref struct SyncedModifierEffects
 	{
-		public readonly ISetDataEffect[] SetDataEffects;
 		public readonly IEffect[] InitEffects;
 		public readonly IEffect[] IntervalEffects;
 		public readonly IEffect[] DurationEffects;
 		public readonly IStackEffect[] StackEffects;
+		public readonly ISetDataEffect[] SetDataEffects;
 		public readonly EffectStateInfo EffectStateInfo;
 		public readonly EffectSaveState EffectSaveState;
 
-		public SyncedModifierEffects(ISetDataEffect[] dataEffects, IEffect[] initEffectsArray,
-			IEffect[] intervalEffectsArray, IEffect[] durationEffectsArray, IStackEffect[] stackEffectsArray,
+		public SyncedModifierEffects(IEffect[] initEffectsArray, IEffect[] intervalEffectsArray,
+			IEffect[] durationEffectsArray, IStackEffect[] stackEffectsArray, ISetDataEffect[] dataEffects,
 			EffectStateInfo effectStateInfo, EffectSaveState effectSaveState)
 		{
 			SetDataEffects = dataEffects;

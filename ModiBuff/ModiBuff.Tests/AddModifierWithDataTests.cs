@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace ModiBuff.Tests
 {
-	public sealed class AddWithDataTests : ModifierTests
+	public sealed class AddModifierWithDataTests : ModifierTests
 	{
 		[Test]
 		public void AddWithData()
@@ -15,7 +15,7 @@ namespace ModiBuff.Tests
 			{
 				new EffectData<int>(3, typeof(DamageEffect), 0),
 			};
-			Unit.AddModifierSelf("InitDamage", data);
+			Unit.AddModifierWithDataSelf("InitDamage", data);
 
 			Assert.AreEqual(UnitHealth - 5 - 3, Unit.Health);
 		}
@@ -33,7 +33,7 @@ namespace ModiBuff.Tests
 			{
 				new EffectData<int>(3, typeof(DamageEffect), 1),
 			};
-			Unit.AddModifierSelf("InitDamageTwo", data);
+			Unit.AddModifierWithDataSelf("InitDamageTwo", data);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
 			Unit.Update(1f);
@@ -50,7 +50,7 @@ namespace ModiBuff.Tests
 				new EffectData<float>(3f, typeof(DamageEffect), 0),
 			};
 
-			Unit.AddModifierSelf("InitDamage", data);
+			Unit.AddModifierWithDataSelf("InitDamage", data);
 			Assert.AreEqual(UnitHealth - 5 - 3f, Unit.Health);
 		}
 
@@ -64,7 +64,7 @@ namespace ModiBuff.Tests
 			{
 				new EffectData<int>(3, typeof(DamageEffect), 0),
 			};
-			Unit.AddModifierSelf("InitDamage", data);
+			Unit.AddModifierWithDataSelf("InitDamage", data);
 
 			Assert.AreEqual(UnitHealth - 5 - 5 - 3, Unit.Health);
 		}
@@ -81,7 +81,7 @@ namespace ModiBuff.Tests
 			{
 				new ModifierIntervalData(2f)
 			};
-			Unit.AddModifierSelf("IntervalDamage", data);
+			Unit.AddModifierWithDataSelf("IntervalDamage", data);
 
 			Unit.Update(1f);
 			Assert.AreEqual(UnitHealth, Unit.Health);
@@ -105,7 +105,7 @@ namespace ModiBuff.Tests
 			{
 				new ModifierDurationData(3f)
 			};
-			Unit.AddModifierSelf("DurationDamage", data);
+			Unit.AddModifierWithDataSelf("DurationDamage", data);
 
 			Unit.Update(2f);
 			Assert.AreEqual(UnitHealth, Unit.Health);
