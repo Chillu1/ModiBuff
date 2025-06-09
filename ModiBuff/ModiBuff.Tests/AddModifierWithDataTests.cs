@@ -131,5 +131,25 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(UnitHealth - 5 - 5 * 4, Unit.Health);
 		}
+
+		[Test]
+		public void AddWithData_WrongEffect()
+		{
+			Setup();
+
+			IData[] data = { new EffectData<int>(3, typeof(HealEffect), 0), };
+
+			Assert.Throws<AssertionException>(() => Unit.AddModifierWithDataSelf("InitDamage", data));
+		}
+
+		[Test]
+		public void AddWithData_WrongEffectNumber()
+		{
+			Setup();
+
+			IData[] data = { new EffectData<int>(3, typeof(DamageEffect), 1), };
+
+			Assert.Throws<AssertionException>(() => Unit.AddModifierWithDataSelf("InitDamage", data));
+		}
 	}
 }
