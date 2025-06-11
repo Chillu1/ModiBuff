@@ -5,8 +5,6 @@ namespace ModiBuff.Core
 	/// </summary>
 	public readonly struct EffectStateInfo
 	{
-		public bool Valid => _effects != null;
-
 		private readonly IEffectStateInfo[] _effects;
 
 		public EffectStateInfo(params IEffectStateInfo[] effects) => _effects = effects;

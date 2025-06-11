@@ -152,7 +152,7 @@ namespace ModiBuff.Core
 		{
 			int genId = GenId++;
 
-			ModifierCheck effectCheck = null;
+			ModifierCheck? effectCheck = null;
 			if (_hasEffectChecks)
 			{
 				effectCheck = CreateCheck(_stateEffectChecks, _effectFuncChecks, _updatableEffectChecks,
@@ -161,8 +161,8 @@ namespace ModiBuff.Core
 			}
 
 			InitComponent? initComponent = null;
-			ITimeComponent[] timeComponents = null;
-			StackComponent stackComponent = null;
+			ITimeComponent[]? timeComponents = null;
+			StackComponent? stackComponent = null;
 			if (_timeComponentCount > 0)
 			{
 				_timeComponentIndex = 0;

@@ -16,7 +16,7 @@ namespace ModiBuff.Core
 		private readonly int _everyXStacks;
 		private readonly IStackEffect[] _effects;
 		private readonly IStackRevertEffect[] _revertEffects;
-		private readonly ModifierCheck _modifierCheck;
+		private readonly ModifierCheck? _modifierCheck;
 		private readonly IStateReset[] _stateResetEffects;
 
 		private float _singleStackTimer;
@@ -27,7 +27,7 @@ namespace ModiBuff.Core
 		private int _stacks;
 
 		public StackComponent(WhenStackEffect whenStackEffect, int maxStacks, int everyXStacks,
-			float singleStackTime, float independentStackTime, IStackEffect[] effects, ModifierCheck check)
+			float singleStackTime, float independentStackTime, IStackEffect[] effects, ModifierCheck? check)
 		{
 			_whenStackEffect = whenStackEffect;
 			_singleStackTime = singleStackTime;
@@ -117,7 +117,7 @@ namespace ModiBuff.Core
 				return;
 
 			//TODO Should effect check guard stacks as well? Maybe enum configurable?
-			if (_modifierCheck != null && !_modifierCheck.Check(_targetComponent.Source))
+			if (_modifierCheck?.Check(_targetComponent.Source) == false)
 				return;
 
 			_stacks++;

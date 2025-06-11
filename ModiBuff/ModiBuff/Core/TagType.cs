@@ -62,7 +62,9 @@ namespace ModiBuff.Core
 	public static class TagTypeUtils
 	{
 		private static readonly FieldInfo[] modifierFields = typeof(Modifier).GetRuntimeFields().ToArray();
-		private static readonly FieldInfo hasInitField = modifierFields.First(field => field.Name == "_hasInit");
+
+		private static readonly FieldInfo hasInitComponentField =
+			modifierFields.First(field => field.Name == "_initComponent");
 
 		private static readonly FieldInfo hasStackComponentField =
 			modifierFields.First(field => field.Name == "_stackComponent");
@@ -78,7 +80,7 @@ namespace ModiBuff.Core
 
 		public static void UpdateTagBasedOnModifierComponents(ref TagType tag, Modifier modifier)
 		{
-			if ((bool)hasInitField.GetValue(modifier))
+			if (hasInitComponentField.GetValue(modifier) != null)
 				tag |= TagType.IsInit;
 			if (hasStackComponentField.GetValue(modifier) != null)
 				tag |= TagType.IsStack;

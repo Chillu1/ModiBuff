@@ -17,12 +17,12 @@ namespace ModiBuff.Core
 
 		private readonly IEffect[] _effects;
 
-		private readonly ModifierCheck _modifierCheck;
+		private readonly ModifierCheck? _modifierCheck;
 
 		//private int _intervalCount;
 		//private float _totalTime;
 
-		public IntervalComponent(float interval, bool refreshable, IEffect[] effects, ModifierCheck check,
+		public IntervalComponent(float interval, bool refreshable, IEffect[] effects, ModifierCheck? check,
 			bool affectedByStatusResistance)
 		{
 			_interval = interval;
@@ -63,7 +63,7 @@ namespace ModiBuff.Core
 
 			_timer -= _interval;
 
-			if (_modifierCheck != null && !_modifierCheck.CheckUse(_targetComponent.Source))
+			if (_modifierCheck?.CheckUse(_targetComponent.Source) == false)
 				return;
 
 			switch (_targetComponent)

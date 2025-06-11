@@ -11,9 +11,9 @@ namespace ModiBuff.Core
 		private readonly EffectWrapper[] _effectsWithModifierInfoWrappers;
 		private readonly EffectWrapper[] _savableEffectsWrappers;
 		private readonly EffectWrapper _removeEffectWrapper;
-		private readonly EffectWrapper _dispelRegisterWrapper;
-		private readonly EffectWrapper[] _callbackUnitRegisterWrappers;
-		private readonly EffectWrapper[] _callbackEffectRegisterWrappers;
+		private readonly EffectWrapper? _dispelRegisterWrapper;
+		private readonly EffectWrapper[]? _callbackUnitRegisterWrappers;
+		private readonly EffectWrapper[]? _callbackEffectRegisterWrappers;
 		private readonly EffectWrapper[] _callbackEffectUnitsRegisterWrappers;
 
 		private IRevertEffect[] _revertEffects;
@@ -270,7 +270,7 @@ namespace ModiBuff.Core
 					_callbackEffectUnitsEffects[3][_callbackEffectUnitsEffectsIndex4++] = effect;
 			}
 
-			EffectStateInfo effectStateInfo = default;
+			EffectStateInfo? effectStateInfo = null;
 			if (_effectsWithModifierInfoWrappers.Length > 0)
 			{
 				var modifierStateInfoEffects = new IEffectStateInfo[_effectsWithModifierInfoWrappers.Length];
@@ -279,7 +279,7 @@ namespace ModiBuff.Core
 				effectStateInfo = new EffectStateInfo(modifierStateInfoEffects);
 			}
 
-			EffectSaveState effectSaveState = default;
+			EffectSaveState? effectSaveState = null;
 			if (_savableEffectsWrappers.Length > 0)
 			{
 				var savableEffects = new ISavable[_savableEffectsWrappers.Length];
@@ -317,16 +317,16 @@ namespace ModiBuff.Core
 
 	public readonly ref struct SyncedModifierEffects
 	{
-		public readonly IEffect[] InitEffects;
-		public readonly IEffect[] IntervalEffects;
-		public readonly IEffect[] DurationEffects;
-		public readonly IStackEffect[] StackEffects;
-		public readonly EffectStateInfo EffectStateInfo;
-		public readonly EffectSaveState EffectSaveState;
+		public readonly IEffect[]? InitEffects;
+		public readonly IEffect[]? IntervalEffects;
+		public readonly IEffect[]? DurationEffects;
+		public readonly IStackEffect[]? StackEffects;
+		public readonly EffectStateInfo? EffectStateInfo;
+		public readonly EffectSaveState? EffectSaveState;
 
-		public SyncedModifierEffects(IEffect[] initEffectsArray, IEffect[] intervalEffectsArray,
-			IEffect[] durationEffectsArray, IStackEffect[] stackEffectsArray,
-			EffectStateInfo effectStateInfo, EffectSaveState effectSaveState)
+		public SyncedModifierEffects(IEffect[]? initEffectsArray, IEffect[]? intervalEffectsArray,
+			IEffect[]? durationEffectsArray, IStackEffect[]? stackEffectsArray,
+			EffectStateInfo? effectStateInfo, EffectSaveState? effectSaveState)
 		{
 			InitEffects = initEffectsArray;
 			IntervalEffects = intervalEffectsArray;
