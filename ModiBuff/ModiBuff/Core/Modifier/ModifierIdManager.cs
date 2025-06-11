@@ -54,13 +54,13 @@ namespace ModiBuff.Core
 			return _idMap[name];
 		}
 
-		public static int GetNewId(int oldId)
+		public static int? GetNewId(int oldId)
 		{
 			if (_instance._oldIdToNewIdMap.TryGetValue(oldId, out int newId))
 				return newId;
 
 			Logger.LogError($"Modifier with id {oldId} not found");
-			return -1;
+			return null;
 		}
 
 		public void Clear()

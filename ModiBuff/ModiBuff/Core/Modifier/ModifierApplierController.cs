@@ -188,12 +188,12 @@ namespace ModiBuff.Core
 		public void LoadState(SaveData saveData)
 		{
 			for (int i = 0; i < saveData.ModifierAttackAppliers.Count; i++)
-				_modifierAttackAppliers.Add(ModifierIdManager.GetNewId(saveData.ModifierAttackAppliers[i]));
+				_modifierAttackAppliers.Add(ModifierIdManager.GetNewId(saveData.ModifierAttackAppliers[i])!.Value);
 			for (int i = 0; i < saveData.ModifierCastAppliers.Count; i++)
-				_modifierCastAppliers.Add(ModifierIdManager.GetNewId(saveData.ModifierCastAppliers[i]));
+				_modifierCastAppliers.Add(ModifierIdManager.GetNewId(saveData.ModifierCastAppliers[i])!.Value);
 			foreach (var kvp in saveData.ModifierCastChecksAppliers)
 			{
-				int newId = ModifierIdManager.GetNewId(kvp.Key);
+				int newId = ModifierIdManager.GetNewId(kvp.Key)!.Value;
 				var check = ModifierPool.Instance.RentModifierCheck(newId);
 				check.LoadState(kvp.Value);
 				_modifierCastChecksAppliers.Add(newId, check);
@@ -201,14 +201,14 @@ namespace ModiBuff.Core
 
 			foreach (var kvp in saveData.ModifierAttackChecksAppliers)
 			{
-				int newId = ModifierIdManager.GetNewId(kvp.Key);
+				int newId = ModifierIdManager.GetNewId(kvp.Key)!.Value;
 				var check = ModifierPool.Instance.RentModifierCheck(newId);
 				check.LoadState(kvp.Value);
 				_modifierAttackChecksAppliers.Add(newId, check);
 			}
 
 			for (int i = 0; i < saveData.EffectCasts.Count; i++)
-				_effectCasts.Add(EffectIdManager.GetNewId(saveData.EffectCasts[i]).Value);
+				_effectCasts.Add(EffectIdManager.GetNewId(saveData.EffectCasts[i])!.Value);
 		}
 
 		public readonly struct SaveData

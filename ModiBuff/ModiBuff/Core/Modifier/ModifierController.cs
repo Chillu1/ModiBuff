@@ -388,7 +388,7 @@ namespace ModiBuff.Core
 			for (int i = 0; i < saveData.ModifiersSaveData.Count; i++)
 			{
 				var modifierSaveData = saveData.ModifiersSaveData[i];
-				int id = ModifierIdManager.GetNewId(modifierSaveData.Id);
+				int id = ModifierIdManager.GetNewId(modifierSaveData.Id)!.Value;
 
 				ref readonly var tag = ref ModifierRecipes.GetTag(id);
 
