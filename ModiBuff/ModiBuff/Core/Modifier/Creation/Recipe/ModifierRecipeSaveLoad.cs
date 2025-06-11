@@ -491,16 +491,16 @@ namespace ModiBuff.Core
 				public const int Id = Refresh.Id + 1;
 
 				public readonly WhenStackEffect WhenStackEffect;
-				public readonly int MaxStacks;
-				public readonly int EveryXStacks;
-				public readonly float SingleStackTime;
-				public readonly float IndependentStackTime;
+				public readonly int? MaxStacks;
+				public readonly int? EveryXStacks;
+				public readonly float? SingleStackTime;
+				public readonly float? IndependentStackTime;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Stack(WhenStackEffect whenStackEffect, int maxStacks, int everyXStacks, float singleStackTime,
-					float independentStackTime) : base(Id)
+				public Stack(WhenStackEffect whenStackEffect, int? maxStacks, int? everyXStacks, float? singleStackTime,
+					float? independentStackTime) : base(Id)
 				{
 					WhenStackEffect = whenStackEffect;
 					MaxStacks = maxStacks;

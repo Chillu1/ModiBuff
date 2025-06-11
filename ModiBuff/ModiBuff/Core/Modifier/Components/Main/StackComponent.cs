@@ -6,35 +6,35 @@ namespace ModiBuff.Core
 	public sealed class StackComponent : IStackComponent, IUpdatable
 	{
 		public int Stacks => _stacks;
-		public int MaxStacks => _maxStacks;
-		public bool UsesStackTime => _singleStackTime > 0 || _independentStackTime > 0;
+		public int? MaxStacks => _maxStacks;
+		public bool UsesStackTime => _singleStackTime != null || _independentStackTime != null;
 
 		private readonly WhenStackEffect _whenStackEffect;
-		private readonly float _singleStackTime;
-		private readonly float _independentStackTime;
-		private readonly int _maxStacks;
-		private readonly int _everyXStacks;
+		private readonly float? _singleStackTime;
+		private readonly float? _independentStackTime;
+		private readonly int? _maxStacks;
+		private readonly int? _everyXStacks;
 		private readonly IStackEffect[] _effects;
 		private readonly IStackRevertEffect[] _revertEffects;
 		private readonly ModifierCheck? _modifierCheck;
 		private readonly IStateReset[] _stateResetEffects;
 
 		private float _singleStackTimer;
-		private readonly List<float> _stackTimers;
+		private readonly List<float>? _stackTimers;
 
 		private ITargetComponent _targetComponent;
 
 		private int _stacks;
 
-		public StackComponent(WhenStackEffect whenStackEffect, int maxStacks, int everyXStacks,
-			float singleStackTime, float independentStackTime, IStackEffect[] effects, ModifierCheck? check)
+		public StackComponent(WhenStackEffect whenStackEffect, int? maxStacks, int? everyXStacks,
+			float? singleStackTime, float? independentStackTime, IStackEffect[] effects, ModifierCheck? check)
 		{
 			_whenStackEffect = whenStackEffect;
 			_singleStackTime = singleStackTime;
-			if (singleStackTime > 0)
-				_singleStackTimer = singleStackTime;
+			if (singleStackTime != null)
+				_singleStackTimer = singleStackTime.Value;
 			_independentStackTime = independentStackTime;
-			if (_independentStackTime > 0)
+			if (independentStackTime != null)
 				_stackTimers = new List<float>();
 			_maxStacks = maxStacks;
 			_everyXStacks = everyXStacks;
@@ -96,13 +96,13 @@ namespace ModiBuff.Core
 				_stacks--;
 			}
 
-			if (_stacks == 0 || _singleStackTimer <= 0)
+			if (_stacks == 0 || _singleStackTimer <= 0 || _singleStackTime == null)
 				return;
 
 			_singleStackTimer -= delta;
 			if (_singleStackTimer <= 0)
 			{
-				_singleStackTimer = _singleStackTime;
+				_singleStackTimer = _singleStackTime.Value;
 				ResetStacks();
 			}
 		}
@@ -110,8 +110,8 @@ namespace ModiBuff.Core
 		public void Stack()
 		{
 			//TODO Do we want to always reset the timer, or only on successful stack? Maybe enum configurable?
-			if (_singleStackTime > 0)
-				_singleStackTimer = _singleStackTime;
+			if (_singleStackTime != null)
+				_singleStackTimer = _singleStackTime.Value;
 
 			if (_maxStacks != -1 && _stacks >= _maxStacks)
 				return;
@@ -121,8 +121,8 @@ namespace ModiBuff.Core
 				return;
 
 			_stacks++;
-			if (_independentStackTime > 0)
-				_stackTimers.Add(_independentStackTime);
+			if (_independentStackTime != null)
+				_stackTimers!.Add(_independentStackTime.Value);
 
 			switch (_whenStackEffect)
 			{
@@ -147,7 +147,7 @@ namespace ModiBuff.Core
 
 		public void ResetStacks()
 		{
-			if (_independentStackTime > 0)
+			if (_independentStackTime != null)
 			{
 				RevertStacks(_stackTimers.Count);
 				_stackTimers.Clear();
@@ -204,7 +204,7 @@ namespace ModiBuff.Core
 
 		public void ResetState()
 		{
-			_singleStackTimer = _singleStackTime;
+			_singleStackTimer = _singleStackTime ?? 0f;
 			_stackTimers?.Clear();
 			_stacks = 0;
 			//We reset effect state in stack component only because Stack() is the only method

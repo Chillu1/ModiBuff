@@ -23,10 +23,10 @@ namespace ModiBuff.Core
 		private readonly bool _refreshInterval;
 
 		private readonly WhenStackEffect _whenStackEffect;
-		private readonly int _maxStacks;
-		private readonly int _everyXStacks;
-		private readonly float _singleStackTime;
-		private readonly float _independentStackTime;
+		private readonly int? _maxStacks;
+		private readonly int? _everyXStacks;
+		private readonly float? _singleStackTime;
+		private readonly float? _independentStackTime;
 
 		private readonly int _timeComponentCount;
 		private int _timeComponentIndex;

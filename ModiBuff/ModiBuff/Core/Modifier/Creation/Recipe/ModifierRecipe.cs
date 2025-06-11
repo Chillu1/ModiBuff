@@ -41,10 +41,10 @@ namespace ModiBuff.Core
 		private bool _refreshDuration, _refreshInterval;
 
 		private WhenStackEffect _whenStackEffect;
-		private int _maxStacks;
-		private int _everyXStacks;
-		private float _singleStackTime;
-		private float _independentStackTime;
+		private int? _maxStacks;
+		private int? _everyXStacks;
+		private float? _singleStackTime;
+		private float? _independentStackTime;
 
 		private bool _hasApplyChecks;
 		private List<ICheck> _applyCheckList;
@@ -317,8 +317,8 @@ namespace ModiBuff.Core
 		/// <see cref="whenStackEffect.EveryXStacks"/>, this value will be used to determine when the stack effects should be triggered.</param>
 		/// <param name="singleStackTime">Adds a single timer, and removes and reverts all stacks after the timer expires</param>
 		/// <param name="independentStackTime">Adds a timer for each stack, and removes a stack after a timer expires</param>
-		public ModifierRecipe Stack(WhenStackEffect whenStackEffect, int maxStacks = -1,
-			int everyXStacks = -1, float singleStackTime = -1, float independentStackTime = -1)
+		public ModifierRecipe Stack(WhenStackEffect whenStackEffect, int? maxStacks = null,
+			int? everyXStacks = null, float? singleStackTime = null, float? independentStackTime = null)
 		{
 			_whenStackEffect = whenStackEffect;
 			_maxStacks = maxStacks;

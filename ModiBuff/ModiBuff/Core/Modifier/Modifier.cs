@@ -35,7 +35,7 @@ namespace ModiBuff.Core
 		private readonly EffectSaveState? _effectSaveState;
 
 		public Modifier(int id, int genId, string name, InitComponent? initComponent,
-			ITimeComponent[]? timeComponents, StackComponent? stackComponent, ModifierCheck effectCheck,
+			ITimeComponent[]? timeComponents, StackComponent? stackComponent, ModifierCheck? effectCheck,
 			ITargetComponent targetComponent, EffectStateInfo? effectStateInfo, EffectSaveState? effectSaveState)
 		{
 			Id = id;
@@ -173,26 +173,26 @@ namespace ModiBuff.Core
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Refresh()
 		{
-			for (int i = 0; i < _timeComponents.Length; i++)
+			for (int i = 0; i < _timeComponents!.Length; i++)
 				_timeComponents[i].Refresh();
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void Stack() => _stackComponent.Stack();
+		public void Stack() => _stackComponent!.Stack();
 
-		public void ResetStacks() => _stackComponent.ResetStacks();
+		public void ResetStacks() => _stackComponent!.ResetStacks();
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void UseScheduledCheck() => _effectCheck?.Use(_targetComponent.Source);
 
-		public ITimeComponent[] GetTimers() => _timeComponents;
+		public ITimeComponent[] GetTimers() => _timeComponents!;
 
 		/// <summary>
 		///		Gets a timer reference, used to update UI/UX
 		/// </summary>
 		/// <param name="timeComponentNumber">Which timer should be returned, first = 0</param>'
 		//TODO Any way to make sure that references get invalidated when the modifier is pooled?
-		public ITimeReference GetTimer<TTimeComponent>(int timeComponentNumber = 0)
+		public ITimeReference? GetTimer<TTimeComponent>(int timeComponentNumber = 0)
 			where TTimeComponent : ITimeComponent
 		{
 			if (_timeComponents == null)
@@ -228,7 +228,7 @@ namespace ModiBuff.Core
 			return null;
 		}
 
-		public IStackReference GetStackReference()
+		public IStackReference? GetStackReference()
 		{
 			if (_stackComponent == null)
 			{
@@ -307,7 +307,7 @@ namespace ModiBuff.Core
 				_stackComponent!.LoadState(data.StackSaveData.Value);
 
 			for (int i = 0; i < _timeComponents?.Length; i++)
-				_timeComponents[i].LoadState(data.TimeComponentsSaveData[i]);
+				_timeComponents[i].LoadState(data.TimeComponentsSaveData![i]);
 
 			if (data.EffectCheckSaveData != null)
 				_effectCheck?.LoadState(data.EffectCheckSaveData.Value);
@@ -364,16 +364,16 @@ namespace ModiBuff.Core
 			public readonly ModifierCheck.SaveData? EffectCheckSaveData;
 			public readonly InitComponent.SaveData? InitSaveData;
 			public readonly StackComponent.SaveData? StackSaveData;
-			public readonly IReadOnlyList<TimeComponentSaveData> TimeComponentsSaveData;
-			public readonly IReadOnlyList<EffectSaveState.EffectSaveData> EffectsSaveData;
+			public readonly IReadOnlyList<TimeComponentSaveData>? TimeComponentsSaveData;
+			public readonly IReadOnlyList<EffectSaveState.EffectSaveData>? EffectsSaveData;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(int id, object targetSaveData, bool isMultiTarget,
 				ModifierCheck.SaveData? effectCheckSaveData, InitComponent.SaveData? initSaveData,
-				StackComponent.SaveData? stackSaveData, IReadOnlyList<TimeComponentSaveData> timeComponentsSaveData,
-				IReadOnlyList<EffectSaveState.EffectSaveData> effectsSaveData)
+				StackComponent.SaveData? stackSaveData, IReadOnlyList<TimeComponentSaveData>? timeComponentsSaveData,
+				IReadOnlyList<EffectSaveState.EffectSaveData>? effectsSaveData)
 			{
 				Id = id;
 				TargetSaveData = targetSaveData;

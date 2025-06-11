@@ -10,6 +10,6 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		The max stacks
 		/// </summary>
-		int MaxStacks { get; }
+		int? MaxStacks { get; }
 	}
 }
