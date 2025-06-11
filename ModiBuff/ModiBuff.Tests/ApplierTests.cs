@@ -257,8 +257,8 @@ namespace ModiBuff.Tests
 				.Effect(new ApplierEffect("InitDamage").SetMetaEffects(new ModifierIdBasedOnUnitTypeMetaEffect(
 						new Dictionary<UnitType, int>()
 						{
-							{ UnitType.Bad, IdManager.GetId("InitDamage") },
-							{ UnitType.Good, IdManager.GetId("InitHeal") }
+							{ UnitType.Bad, IdManager.GetId("InitDamage").Value },
+							{ UnitType.Good, IdManager.GetId("InitHeal").Value }
 						})),
 					EffectOn.Init)
 				.Remove(5).Refresh();

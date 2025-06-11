@@ -28,7 +28,7 @@ namespace ModiBuff.Core
 
 		private ModifierInfo[] _modifierInfos;
 		private TagType[] _tags;
-		private int[] _auraIds;
+		private int?[] _auraIds;
 		private object[] _modifierData;
 
 		private readonly List<(int, object)> _modifierDataList;
@@ -62,9 +62,7 @@ namespace ModiBuff.Core
 
 			_modifierInfos = new ModifierInfo[_recipes.Count + _manualGenerators.Count];
 			_tags = new TagType[_recipes.Count + _manualGenerators.Count];
-			_auraIds = new int[_recipes.Count + _manualGenerators.Count];
-			for (int i = 0; i < _auraIds.Length; i++)
-				_auraIds[i] = -1;
+			_auraIds = new int?[_recipes.Count + _manualGenerators.Count];
 			_modifierData = new object[_recipes.Count + _manualGenerators.Count];
 			foreach (var generator in _manualGenerators.Values)
 			{
@@ -73,7 +71,7 @@ namespace ModiBuff.Core
 					generator.Description);
 				_tags[generator.Id] = generator.Tag;
 				if (generator.Tag.HasFlag(TagType.IsAura))
-					_auraIds[generator.Id] = generator.AuraId;
+					_auraIds[generator.Id] = generator.AuraId!.Value;
 				_modifierData[generator.Id] = generator.Data;
 			}
 
@@ -105,7 +103,7 @@ namespace ModiBuff.Core
 		}
 
 		public static ref readonly TagType GetTag(int id) => ref _instance._tags[id];
-		public static int GetAuraId(int id) => _instance._auraIds[id];
+		public static int? GetAuraId(int id) => _instance._auraIds[id];
 
 		public static T GetModifierData<T>(int id) => (T)_instance._modifierData[id];
 
@@ -136,7 +134,7 @@ namespace ModiBuff.Core
 				return (ModifierRecipe)localRecipe;
 			}
 
-			int id = -1;
+			int? id = null;
 
 			foreach (var registerData in _registeredNames)
 			{
@@ -147,18 +145,17 @@ namespace ModiBuff.Core
 				}
 			}
 
-			if (id == -1)
-				id = _idManager.GetFreeId(name);
+			id ??= _idManager.GetFreeId(name);
 
 			if (string.IsNullOrEmpty(displayName))
 				displayName = name;
-			var recipe = new ModifierRecipe(id, name, displayName, description, _idManager, _effectTypeIdManager);
+			var recipe = new ModifierRecipe(id.Value, name, displayName, description, _idManager, _effectTypeIdManager);
 			_recipes.Add(name, recipe);
 			return recipe;
 		}
 
 		public void Add(string name, string displayName, string description, in ModifierGeneratorFunc createFunc,
-			TagType tag = TagType.Default, int auraId = -1, object customModifierData = null)
+			TagType tag = TagType.Default, int? auraId = null, object customModifierData = null)
 		{
 			if (_recipes.ContainsKey(name))
 			{
@@ -176,7 +173,7 @@ namespace ModiBuff.Core
 				return;
 			}
 
-			int id = -1;
+			int? id = null;
 
 			foreach (var registerData in _registeredNames)
 			{
@@ -187,10 +184,9 @@ namespace ModiBuff.Core
 				}
 			}
 
-			if (id == -1)
-				id = _idManager.GetFreeId(name);
+			id ??= _idManager.GetFreeId(name);
 
-			var modifierGenerator = new ManualModifierGenerator(id, name, displayName, description,
+			var modifierGenerator = new ManualModifierGenerator(id.Value, name, displayName, description,
 				in createFunc, tag, auraId, customModifierData);
 			_manualGenerators.Add(name, modifierGenerator);
 		}

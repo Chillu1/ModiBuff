@@ -33,12 +33,12 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Lazy implementation for ease of use.
 		/// </summary>
-		internal static int GetIdOld(string name) => _instance.GetId(name);
+		internal static int? GetIdOld(string name) => _instance.GetId(name);
 
 		internal static bool HasIdOld(string name) => _instance.HasId(name);
 		internal bool HasId(string name) => _idMap.ContainsKey(name);
 
-		public int GetId(string name)
+		public int? GetId(string name)
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (!_idMap.ContainsKey(name))
@@ -48,20 +48,20 @@ namespace ModiBuff.Core
 				else
 					Logger.LogError("[ModiBuff] No effect with name " + name + " found. " +
 					                "But there is a modifier with that name. Did you mean to use ModifierIdManager?");
-				return -1;
+				return null;
 			}
 #endif
 
 			return _idMap[name];
 		}
 
-		public static int GetNewId(int oldId)
+		public static int? GetNewId(int oldId)
 		{
 			if (_instance._oldIdToNewIdMap.TryGetValue(oldId, out int newId))
 				return newId;
 
 			Logger.LogError($"[ModiBuff] Modifier with id {oldId} not found");
-			return -1;
+			return null;
 		}
 
 		public void Clear()

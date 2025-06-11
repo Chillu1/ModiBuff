@@ -6,8 +6,8 @@ namespace ModiBuff.Core
 		private readonly ApplierType _applierType;
 		private readonly bool _hasApplyChecks;
 		private IRevertEffect[] _revertibleEffects;
-		private int _id = -1;
-		private int _genId = -1;
+		private int? _id;
+		private int? _genId;
 
 		public RemoveEffect()
 		{
@@ -32,7 +32,7 @@ namespace ModiBuff.Core
 			return effect;
 		}
 
-		private RemoveEffect(int id, int genId, ApplierType applierType, bool hasApplyChecks)
+		private RemoveEffect(int id, int? genId, ApplierType applierType, bool hasApplyChecks)
 		{
 			_id = id;
 			_genId = genId;
@@ -51,27 +51,27 @@ namespace ModiBuff.Core
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			for (int i = 0; i < _revertibleEffects?.Length; i++)
-				_revertibleEffects[i].RevertEffect(target, source);
-
 #if DEBUG && !MODIBUFF_PROFILE
-			if (_genId == -1) //This probably wont matter for not instance stackable modifiers
+			if (_genId == null) //This probably wont matter for not instance stackable modifiers
 				Logger.LogWarning("[ModiBuff] RemoveEffect.Effect: genId wasn't set");
 #endif
 
+			for (int i = 0; i < _revertibleEffects?.Length; i++)
+				_revertibleEffects[i].RevertEffect(target, source);
+
 			if (_applierType != ApplierType.None)
 			{
-				((IModifierApplierOwner)target).ModifierApplierController.RemoveApplier(_id /*, _genId*/, _applierType,
-					_hasApplyChecks);
+				((IModifierApplierOwner)target).ModifierApplierController.RemoveApplier(_id!.Value /*, _genId*/,
+					_applierType, _hasApplyChecks);
 				//return;
 			}
 
-			((IModifierOwner)target).ModifierController.PrepareRemove(_id, _genId);
+			((IModifierOwner)target).ModifierController.PrepareRemove(_id!.Value, _genId!.Value);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source) => Effect(target, source);
 
-		public IEffect ShallowClone() => new RemoveEffect(_id, _genId, _applierType, _hasApplyChecks);
+		public IEffect ShallowClone() => new RemoveEffect(_id!.Value, _genId, _applierType, _hasApplyChecks);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

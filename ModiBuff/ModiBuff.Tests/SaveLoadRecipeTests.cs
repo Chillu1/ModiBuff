@@ -64,7 +64,7 @@ namespace ModiBuff.Tests
 			SaveLoadStateAndSetup(saveRecipes);
 
 			Unit.AddModifierSelf("InitDamage");
-			int id = IdManager.GetId(name);
+			int id = IdManager.GetId(name).Value;
 			var modifierInfo = Recipes.GetModifierInfo(id);
 			Assert.AreEqual(modifierInfo.InternalName, name);
 			Assert.AreEqual(modifierInfo.DisplayName, displayName);
@@ -287,7 +287,7 @@ namespace ModiBuff.Tests
 
 			SaveLoadStateAndSetup(saveRecipes);
 
-			int id = IdManager.GetId("TagDamage");
+			int id = IdManager.GetId("TagDamage").Value;
 			Assert.True(ModifierRecipes.GetTag(id).HasTag(TagType.DurationIgnoresStatusResistance));
 		}
 
@@ -304,7 +304,7 @@ namespace ModiBuff.Tests
 
 			SaveLoadStateAndSetup(saveRecipes);
 
-			int id = IdManager.GetId("RemoveTagDamage");
+			int id = IdManager.GetId("RemoveTagDamage").Value;
 			Assert.False(ModifierRecipes.GetTag(id).HasTag(TagType.Default));
 		}
 
@@ -321,7 +321,7 @@ namespace ModiBuff.Tests
 
 			SaveLoadStateAndSetup(saveRecipes);
 
-			int id = IdManager.GetId("SetTagDamage");
+			int id = IdManager.GetId("SetTagDamage").Value;
 			Assert.True(ModifierRecipes.GetTag(id).HasTag(TagType.DurationIgnoresStatusResistance));
 			Assert.False(ModifierRecipes.GetTag(id).HasTag(TagType.Default));
 		}

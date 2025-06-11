@@ -244,7 +244,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Pool.Clear();
-			int recipeId = IdManager.GetId("OneTimeInitDamage");
+			int recipeId = IdManager.GetId("OneTimeInitDamage").Value;
 			Pool.Allocate(recipeId, 1);
 
 			Unit.AddModifierSelf("OneTimeInitDamage"); //Init
@@ -302,7 +302,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Enemy.Move(10, 0);
-			var projectile = new Projectile(Vector2.Zero, Unit, IdManager.GetId("InitDamageDistanceMultiplier"));
+			var projectile = new Projectile(Vector2.Zero, Unit, IdManager.GetId("InitDamageDistanceMultiplier").Value);
 			projectile.Move(10, 0);
 			projectile.Hit(Enemy);
 
@@ -317,7 +317,7 @@ namespace ModiBuff.Tests
 					EffectOn.Init);
 			Setup();
 
-			var projectile = new Projectile(Vector2.Zero, Unit, IdManager.GetId("InitDamageDistanceMultiplier"));
+			var projectile = new Projectile(Vector2.Zero, Unit, IdManager.GetId("InitDamageDistanceMultiplier").Value);
 			projectile.Move(5, 0);
 			projectile.Move(-5, 0);
 			projectile.Hit(Enemy);

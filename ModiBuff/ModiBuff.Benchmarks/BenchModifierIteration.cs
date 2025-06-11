@@ -26,7 +26,7 @@ namespace ModiBuff.Tests
 			Pool.SetMaxPoolSize(20_000);
 
 			_dotUnits = new Unit[UnitCount];
-			int dotId = IdManager.GetId("DoT");
+			int dotId = IdManager.GetId("DoT").Value;
 			for (int i = 0; i < _dotUnits.Length; i++)
 			{
 				var unit = new Unit();
@@ -36,11 +36,11 @@ namespace ModiBuff.Tests
 
 			_unit = new Unit(int.MaxValue);
 			_instanceUnit = new Unit(int.MaxValue);
-			int instanceDoTId = IdManager.GetId("InstanceStackableDoTNoRemove");
+			int instanceDoTId = IdManager.GetId("InstanceStackableDoTNoRemove").Value;
 			for (int i = 0; i < UnitCount; i++)
 				_instanceUnit.ModifierController.Add(instanceDoTId, _instanceUnit, _instanceUnit);
 
-			_initDamageId = IdManager.GetId("InitDamage");
+			_initDamageId = IdManager.GetId("InitDamage").Value;
 			Pool.Allocate(_initDamageId, UnitCount);
 
 			_initDamageUnits = new Unit[UnitCount];

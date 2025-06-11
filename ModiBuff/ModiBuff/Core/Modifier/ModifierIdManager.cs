@@ -33,11 +33,11 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Lazy implementation for ease of use.
 		/// </summary>
-		internal static int GetIdByName(string name) => _instance.GetId(name);
+		internal static int? GetIdByName(string name) => _instance.GetId(name);
 
 		internal static bool HasIdByName(string name) => _instance._idMap.ContainsKey(name);
 
-		public int GetId(string name)
+		public int? GetId(string name)
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (!_idMap.ContainsKey(name))
@@ -47,7 +47,7 @@ namespace ModiBuff.Core
 				else
 					Logger.LogError("[ModiBuff] No modifier with name " + name + " found. " +
 					                "But there is an effect with that name. Did you mean to use EffectIdManager?");
-				return -1;
+				return null;
 			}
 #endif
 

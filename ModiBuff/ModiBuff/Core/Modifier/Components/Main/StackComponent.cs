@@ -113,7 +113,7 @@ namespace ModiBuff.Core
 			if (_singleStackTime != null)
 				_singleStackTimer = _singleStackTime.Value;
 
-			if (_maxStacks != -1 && _stacks >= _maxStacks)
+			if (_stacks >= _maxStacks)
 				return;
 
 			//TODO Should effect check guard stacks as well? Maybe enum configurable?

@@ -208,7 +208,7 @@ namespace ModiBuff.Core
 			}
 
 			for (int i = 0; i < saveData.EffectCasts.Count; i++)
-				_effectCasts.Add(EffectIdManager.GetNewId(saveData.EffectCasts[i]));
+				_effectCasts.Add(EffectIdManager.GetNewId(saveData.EffectCasts[i]).Value);
 		}
 
 		public readonly struct SaveData

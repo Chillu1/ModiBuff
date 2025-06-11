@@ -135,7 +135,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			//One of a kind setup, usually source and owner are the same
-			Enemy.ModifierController.Add(IdManager.GetId("AddDamageTogglableBasedOnDistance"), Enemy, Unit);
+			Enemy.ModifierController.Add(IdManager.GetId("AddDamageTogglableBasedOnDistance").Value, Enemy, Unit);
 			Enemy.Update(Unit.CallbackTimerCooldown);
 			Assert.AreEqual(EnemyDamage + 5, Enemy.Damage);
 

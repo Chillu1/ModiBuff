@@ -42,7 +42,7 @@ namespace ModiBuff.Core.Units
 
 		public static ModifierRecipe ApplyCondition(this ModifierRecipe recipe, string modifierName)
 		{
-			int modifierId = recipe.IdManager.GetId(modifierName);
+			int modifierId = recipe.IdManager.GetId(modifierName).Value;
 			return recipe.ApplyCheck(unit => modifierId.CheckModifierId(unit));
 		}
 
@@ -110,7 +110,7 @@ namespace ModiBuff.Core.Units
 
 		public static ModifierRecipe EffectCondition(this ModifierRecipe recipe, string modifierName)
 		{
-			int modifierId = recipe.IdManager.GetId(modifierName);
+			int modifierId = recipe.IdManager.GetId(modifierName).Value;
 			return recipe.EffectCheck(unit => modifierId.CheckModifierId(unit));
 		}
 

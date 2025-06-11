@@ -9,7 +9,7 @@ namespace ModiBuff.Core.Units
 		private readonly StatusEffectType _statusEffectType;
 		private readonly float _duration;
 		private readonly StackEffectType _stackEffect;
-		private readonly float _stackValue;
+		private readonly float? _stackValue;
 		private int _id;
 		private int _genId;
 
@@ -17,7 +17,7 @@ namespace ModiBuff.Core.Units
 		private float _totalDuration;
 
 		public StatusEffectEffect(StatusEffectType statusEffectType, float duration, bool revertible = false,
-			StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1) :
+			StackEffectType stackEffect = StackEffectType.Effect, float? stackValue = null) :
 			this(statusEffectType, duration, revertible, stackEffect, stackValue, -1, -1)
 		{
 		}
@@ -26,11 +26,11 @@ namespace ModiBuff.Core.Units
 		///		Manual modifier generation constructor
 		/// </summary>
 		public static StatusEffectEffect Create(int id, int genId, StatusEffectType statusEffectType, float duration,
-			bool revertible = false, StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1) =>
+			bool revertible = false, StackEffectType stackEffect = StackEffectType.Effect, float? stackValue = null) =>
 			new StatusEffectEffect(statusEffectType, duration, revertible, stackEffect, stackValue, id, genId);
 
 		private StatusEffectEffect(StatusEffectType statusEffectType, float duration, bool revertible,
-			StackEffectType stackEffect, float stackValue, int id, int genId)
+			StackEffectType stackEffect, float? stackValue, int id, int genId)
 		{
 			_statusEffectType = statusEffectType;
 			_duration = duration;
@@ -82,10 +82,10 @@ namespace ModiBuff.Core.Units
 		public void StackEffect(int stacks, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraDuration += _stackValue;
+				_extraDuration += _stackValue!.Value;
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_extraDuration += _stackValue * stacks;
+				_extraDuration += _stackValue!.Value * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);

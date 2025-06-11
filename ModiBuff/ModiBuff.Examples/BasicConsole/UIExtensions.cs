@@ -119,7 +119,7 @@ namespace ModiBuff.Examples.BasicConsole
 					var modifierInfo = modifierRecipes.GetModifierInfo(reference.Id);
 					Console.GameMessage($"{i + 1} - {modifierInfo.DisplayName} - {modifierInfo.Description}");
 					var modifierDataReference =
-						modifierController.GetModifierDataReference(reference.Id, reference.GenId);
+						modifierController.GetModifierDataReference(reference.Id, reference.GenId.Value);
 					var timers = modifierDataReference.GetTimers();
 					for (int j = 0; j < timers?.Length; j++)
 					{

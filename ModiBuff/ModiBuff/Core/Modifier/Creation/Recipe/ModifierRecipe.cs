@@ -382,8 +382,10 @@ namespace ModiBuff.Core
 					Logger.LogWarning("[ModiBuff] Saving recipe for a special instruction effect, " +
 					                  $"remove {nameof(ISaveableRecipeEffect)} implementation from the effect");
 
-				_saveInstructions.Add(new SaveInstruction.Effect(_effectTypeIdManager.GetId(effect.GetType()),
-					savableRecipe.SaveRecipeState(), effectOn));
+				int? id = _effectTypeIdManager.GetId(effect.GetType());
+				if (id != null)
+					_saveInstructions.Add(new SaveInstruction.Effect(id.Value, savableRecipe.SaveRecipeState(),
+						effectOn));
 			}
 			else
 			{

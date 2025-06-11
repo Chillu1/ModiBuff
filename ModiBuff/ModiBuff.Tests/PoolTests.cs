@@ -14,7 +14,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Pool.Clear();
-			Pool.Allocate(IdManager.GetId("DurationRemove"), 1);
+			Pool.Allocate(IdManager.GetId("DurationRemove").Value, 1);
 
 			Unit.AddModifierSelf("DurationRemove");
 
@@ -42,7 +42,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Pool.Clear();
-			Pool.Allocate(IdManager.GetId("StackBasedDamage"), 1);
+			Pool.Allocate(IdManager.GetId("StackBasedDamage").Value, 1);
 
 			Unit.AddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health); //1 stack = +2 damage == 2
@@ -50,8 +50,8 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("StackBasedDamage");
 			Assert.AreEqual(UnitHealth - 10 - 6, Unit.Health); //2 stacks = +4 damage == 4
 
-			Unit.ModifierController.Remove(new ModifierReference(IdManager.GetId("StackBasedDamage"),
-				0)); //Return to pool
+			//Return to pool
+			Unit.ModifierController.Remove(new ModifierReference(IdManager.GetId("StackBasedDamage").Value, 0));
 
 			Enemy.AddModifierSelf("StackBasedDamage"); //State should be reset
 			Assert.AreEqual(EnemyHealth - 5 - 2, Enemy.Health);
@@ -106,7 +106,7 @@ namespace ModiBuff.Tests
 				.Remove(5);
 			Setup();
 			Pool.Clear();
-			Pool.Allocate(IdManager.GetId("AddDamageStackTimer"), 1);
+			Pool.Allocate(IdManager.GetId("AddDamageStackTimer").Value, 1);
 
 			Unit.AddModifierSelf("AddDamageStackTimer");
 			Assert.AreEqual(UnitDamage + 5 + 2, Unit.Damage);
@@ -132,7 +132,7 @@ namespace ModiBuff.Tests
 				.Remove(5);
 			Setup();
 			Pool.Clear();
-			Pool.Allocate(IdManager.GetId("AddDamageRevertible"), 1);
+			Pool.Allocate(IdManager.GetId("AddDamageRevertible").Value, 1);
 
 			Unit.AddModifierSelf("AddDamageRevertible");
 			Unit.AddModifierSelf("AddDamageRevertible");

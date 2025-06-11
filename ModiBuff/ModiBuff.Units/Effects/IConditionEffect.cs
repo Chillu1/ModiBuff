@@ -61,9 +61,11 @@ namespace ModiBuff.Core.Units
 			for (int i = 0; i < conditions.Length; i++)
 			{
 				var condition = conditions[i];
-				int id = EffectTypeIdManager<ICondition>.Instance.GetId(condition.GetType());
+				int? id = EffectTypeIdManager<ICondition>.Instance.GetId(condition.GetType());
+				if (id == null)
+					continue;
 
-				conditionsSaveData[i] = new ConditionRecipeSaveData(id, condition.SaveRecipeState());
+				conditionsSaveData[i] = new ConditionRecipeSaveData(id.Value, condition.SaveRecipeState());
 			}
 
 			return conditionsSaveData;
@@ -78,9 +80,11 @@ namespace ModiBuff.Core.Units
 			for (int i = 0; i < conditions.Length; i++)
 			{
 				var condition = conditions[i];
-				int id = EffectTypeIdManager<ICondition>.Instance.GetId(condition.GetType());
+				int? id = EffectTypeIdManager<ICondition>.Instance.GetId(condition.GetType());
+				if (id == null)
+					continue;
 
-				conditionsSaveData[i] = new ConditionRecipeSaveData(id, condition.SaveRecipeState());
+				conditionsSaveData[i] = new ConditionRecipeSaveData(id.Value, condition.SaveRecipeState());
 			}
 
 			return conditionsSaveData;

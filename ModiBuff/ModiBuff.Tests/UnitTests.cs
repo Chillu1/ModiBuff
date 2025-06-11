@@ -29,8 +29,8 @@ namespace ModiBuff.Tests
 
 			Pool.Clear();
 			Pool.SetMaxPoolSize(3);
-			Pool.Allocate(IdManager.GetId("InitDamage"), 3);
-			Pool.Allocate(IdManager.GetId("InitDamage_ApplyCondition_HealthAbove100"), 1);
+			Pool.Allocate(IdManager.GetId("InitDamage").Value, 3);
+			Pool.Allocate(IdManager.GetId("InitDamage_ApplyCondition_HealthAbove100").Value, 1);
 
 			var unit = new Unit();
 
@@ -42,7 +42,7 @@ namespace ModiBuff.Tests
 
 			unit.TakeDamage(unit.Health, unit); //Unit dies, all modifiers should be returned to pool
 
-			Assert.Throws<Exception>(() => Pool.Allocate(IdManager.GetId("InitDamage"), 1));
+			Assert.Throws<Exception>(() => Pool.Allocate(IdManager.GetId("InitDamage").Value, 1));
 
 			Pool.SetMaxPoolSize(Config.MaxPoolSize);
 		}

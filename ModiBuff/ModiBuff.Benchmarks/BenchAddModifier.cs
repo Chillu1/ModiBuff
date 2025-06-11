@@ -25,11 +25,11 @@ namespace ModiBuff.Tests
 			_unit = new Unit(1_000_000_000, 5);
 			_benchmarkUnit = new BenchmarkUnit(1_000_000_000);
 
-			_noOpModifierId = IdManager.GetId("NoOpEffect");
-			_initDamageModifierId = IdManager.GetId("InitDamage");
-			_initDamageBenchmarkModifierId = IdManager.GetId("BenchmarkInitDamage");
-			_modifierLessInitDamageEffectId = EffectIdManager.GetId("InitDamage");
-			_initStackDamageModifierId = IdManager.GetId("InitStackDamage");
+			_noOpModifierId = IdManager.GetId("NoOpEffect").Value;
+			_initDamageModifierId = IdManager.GetId("InitDamage").Value;
+			_initDamageBenchmarkModifierId = IdManager.GetId("BenchmarkInitDamage").Value;
+			_modifierLessInitDamageEffectId = EffectIdManager.GetId("InitDamage").Value;
+			_initStackDamageModifierId = IdManager.GetId("InitStackDamage").Value;
 		}
 
 		[Benchmark]

@@ -19,7 +19,7 @@ namespace ModiBuff.Core
 			try
 			{
 				//Could ask the user to instead supply the id, but that isn't ideal
-				_modifierId = ModifierIdManager.GetIdByName(modifierName);
+				_modifierId = ModifierIdManager.GetIdByName(modifierName).Value;
 			}
 			catch (KeyNotFoundException)
 			{

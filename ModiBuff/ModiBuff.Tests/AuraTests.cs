@@ -131,7 +131,7 @@ namespace ModiBuff.Tests
 		{
 			SetupAuraTest();
 
-			int id = IdManager.GetId("InitAddDamageBuff_Interval");
+			int id = IdManager.GetId("InitAddDamageBuff_Interval").Value;
 			Pool.Clear();
 			Pool.Allocate(id, 1);
 
@@ -141,7 +141,7 @@ namespace ModiBuff.Tests
 
 			Assert.AreEqual(AllyDamage + 5, Ally.Damage);
 
-			Unit.ModifierController.Remove(new ModifierReference(id, -1));
+			Unit.ModifierController.Remove(new ModifierReference(id));
 			Enemy.AddModifierSelf("InitAddDamageBuff_Interval");
 			Enemy.Update(1f);
 			Unit.Update(1.05f);

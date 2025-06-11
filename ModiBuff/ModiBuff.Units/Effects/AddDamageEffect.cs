@@ -16,7 +16,7 @@ namespace ModiBuff.Core.Units
 		private readonly float _damage;
 		private readonly EffectState _effectState;
 		private readonly StackEffectType _stackEffect;
-		private readonly float _stackValue;
+		private readonly float? _stackValue;
 		private readonly Targeting _targeting;
 
 		private bool _isEnabled;
@@ -24,7 +24,7 @@ namespace ModiBuff.Core.Units
 		private float _totalAddedDamage;
 
 		public AddDamageEffect(float damage, EffectState effectState = EffectState.None,
-			StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
+			StackEffectType stackEffect = StackEffectType.Effect, float? stackValue = null,
 			Targeting targeting = Targeting.TargetSource)
 		{
 			_damage = damage;
@@ -38,7 +38,7 @@ namespace ModiBuff.Core.Units
 		///		Manual modifier generation constructor
 		/// </summary>
 		public static AddDamageEffect Create(float damage, EffectState effectState = EffectState.None,
-			StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
+			StackEffectType stackEffect = StackEffectType.Effect, float? stackValue = null,
 			Targeting targeting = Targeting.TargetSource) =>
 			new AddDamageEffect(damage, effectState, stackEffect, stackValue, targeting);
 
@@ -91,10 +91,10 @@ namespace ModiBuff.Core.Units
 		public void StackEffect(int stacks, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraDamage += _stackValue;
+				_extraDamage += _stackValue!.Value;
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_extraDamage += _stackValue * stacks;
+				_extraDamage += _stackValue!.Value * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
@@ -113,10 +113,10 @@ namespace ModiBuff.Core.Units
 			}
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_extraDamage -= _stackValue * stacks;
+				_extraDamage -= _stackValue!.Value * stacks;
 
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraDamage -= _stackValue;
+				_extraDamage -= _stackValue!.Value;
 		}
 
 		public Data GetEffectData() => new Data(_damage, _extraDamage);
@@ -177,11 +177,11 @@ namespace ModiBuff.Core.Units
 			public readonly float Damage;
 			public readonly EffectState EffectState;
 			public readonly StackEffectType StackEffect;
-			public readonly float StackValue;
+			public readonly float? StackValue;
 			public readonly Targeting Targeting;
 
 			public RecipeSaveData(float damage, EffectState effectState, StackEffectType stackEffect,
-				float stackValue, Targeting targeting)
+				float? stackValue, Targeting targeting)
 			{
 				Damage = damage;
 				EffectState = effectState;
