@@ -134,7 +134,7 @@ namespace ModiBuff.Core
 			}
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
-			(IEffect, EffectOn) HandleEffect(SaveInstruction instruction)
+			(IEffect?, EffectOn) HandleEffect(SaveInstruction instruction)
 			{
 				var effect = (SaveInstruction.Effect)instruction;
 				bool failed = false;
@@ -155,12 +155,13 @@ namespace ModiBuff.Core
 				//TODO Refactor entire approach
 				foreach (var property in ((System.Text.Json.JsonElement)effect.SaveData).EnumerateObject())
 				{
-					object value = null;
+					object? value = null;
 
 					if (!parameters[i].ParameterType.IsArray)
 					{
-						value = property.Value.ToValue(parameters[i].ParameterType);
-						if (value == null)
+						bool success;
+						(success, value) = property.Value.ToValue(parameters[i].ParameterType);
+						if (!success)
 						{
 							Logger.LogError(
 								$"[ModiBuff] Failed to load effect state from save data by {Name} for effect {effectId}");
@@ -284,8 +285,10 @@ namespace ModiBuff.Core
 								continue;
 							}
 
-							object value = recipeProperty.Value.ToValue(parameters[j].ParameterType);
-							if (value == null)
+							bool success;
+							object? value;
+							(success, value) = recipeProperty.Value.ToValue(parameters[j].ParameterType);
+							if (!success)
 								Logger.LogError(
 									$"[ModiBuff] Failed to load condition state from save data by {Name} for effect {effectId}");
 

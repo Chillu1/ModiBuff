@@ -37,8 +37,8 @@ namespace ModiBuff.Core
 			var constructorParameterTypes = constructor.GetParameters().Select(x => x.ParameterType).ToArray();
 
 			int i = 0;
-			object[] parameters = jsonElement.EnumerateObject()
-				.Select(j => j.Value.ToValue(constructorParameterTypes[i++]))
+			object?[] parameters = jsonElement.EnumerateObject()
+				.Select(j => j.Value.ToValue(constructorParameterTypes[i++]).Value)
 				.ToArray();
 
 			toLoad.LoadState(constructor.Invoke(parameters));
@@ -53,7 +53,7 @@ namespace ModiBuff.Core
 				return false;
 			}
 
-			data = (T)jsonElement.ToValue(typeof(T));
+			data = (T)jsonElement.ToValue(typeof(T)).Value!;
 			return true;
 		}
 
@@ -90,56 +90,68 @@ namespace ModiBuff.Core
 			return values;
 		}
 
-		public static object ToValue(this System.Text.Json.JsonElement element, Type type)
+		public static (bool Success, object? Value) ToValue(this System.Text.Json.JsonElement element, Type type)
 		{
 			if (type == typeof(int))
-				return element.GetInt32();
+				return (true, element.GetInt32());
 			if (type == typeof(float))
-				return element.GetSingle();
+				return (true, element.GetSingle());
 			if (type == typeof(bool))
-				return element.GetBoolean();
+				return (true, element.GetBoolean());
 			if (type == typeof(double))
-				return element.GetDouble();
+				return (true, element.GetDouble());
 			if (type == typeof(long))
-				return element.GetInt64();
+				return (true, element.GetInt64());
 			if (type == typeof(byte))
-				return element.GetByte();
+				return (true, element.GetByte());
 			if (type == typeof(string))
-				return element.GetString();
+				return (true, element.GetString());
 			if (type == typeof(uint))
-				return element.GetUInt32();
+				return (true, element.GetUInt32());
 			if (type == typeof(ushort))
-				return element.GetUInt16();
+				return (true, element.GetUInt16());
 			if (type == typeof(ulong))
-				return element.GetUInt64();
+				return (true, element.GetUInt64());
 			if (type == typeof(sbyte))
-				return element.GetSByte();
+				return (true, element.GetSByte());
 			if (type == typeof(short))
-				return element.GetInt16();
+				return (true, element.GetInt16());
 			if (type == typeof(decimal))
-				return element.GetDecimal();
+				return (true, element.GetDecimal());
+			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+			{
+				var underlyingType = Nullable.GetUnderlyingType(type);
+				if (underlyingType == null)
+					return (true, null);
+
+				if (element.ValueKind == System.Text.Json.JsonValueKind.Null)
+					return (true, null);
+
+				return element.ToValue(underlyingType);
+			}
+
 			if (type == typeof(IReadOnlyDictionary<int, int>))
 			{
 				var dictionary = new Dictionary<int, int>();
 				foreach (var kvp in element.EnumerateObject())
 					dictionary.Add(int.Parse(kvp.Name), kvp.Value.GetInt32());
-				return dictionary;
+				return (true, dictionary);
 			}
 
 			foreach (var kvp in customValueTypes)
 			{
 				if (type == kvp.Key)
-					return kvp.Value(element);
+					return (true, kvp.Value(element));
 			}
 
 			if (type.IsEnum)
 				return element.ToValue(Enum.GetUnderlyingType(type));
 
 			if (type == typeof(object))
-				return element.GetRawText();
+				return (true, element.GetRawText());
 
 			Logger.LogWarning($"[ModiBuff] Unknown ValueType {type}");
-			return null;
+			return (false, null);
 		}
 #endif
 	}
