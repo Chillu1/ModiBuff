@@ -189,7 +189,7 @@ namespace ModiBuff.Core
 			var targetComponent = !_isAura ? (ITargetComponent)new SingleTargetComponent() : new MultiTargetComponent();
 
 			return new Modifier(Id, genId, Name, initComponent, timeComponents, stackComponent,
-				effectCheck, targetComponent, effects.EffectStateInfo, effects.EffectSaveState);
+				effectCheck, targetComponent, effects.SetDataEffects, effects.EffectStateInfo, effects.EffectSaveState);
 		}
 
 		ModifierCheck IModifierApplyCheckGenerator.CreateApplyCheck()

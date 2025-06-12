@@ -17,6 +17,7 @@ namespace ModiBuff.Core
 		private readonly EffectWrapper[] _callbackEffectUnitsRegisterWrappers;
 
 		private IRevertEffect[] _revertEffects;
+		private ISetDataEffect[] _setDataEffects;
 		private IEffect[] _initEffects;
 		private IEffect[] _intervalEffects;
 		private IEffect[] _durationEffects;
@@ -26,6 +27,7 @@ namespace ModiBuff.Core
 		private IEffect[][] _callbackEffectUnitsEffects;
 
 		private int _revertEffectsIndex,
+			_setDataEffectsIndex,
 			_initEffectsIndex,
 			_intervalEffectsIndex,
 			_durationEffectsIndex,
@@ -67,6 +69,9 @@ namespace ModiBuff.Core
 
 				if (effectWrapper.GetEffect() is IRevertEffect revertEffect && revertEffect.IsRevertible)
 					_revertEffectsIndex++;
+
+				if (effectWrapper.GetEffect() is ISetDataEffect)
+					_setDataEffectsIndex++;
 
 				if ((effectWrapper.EffectOn & EffectOn.Init) != 0)
 					_initEffectsIndex++;
@@ -223,6 +228,12 @@ namespace ModiBuff.Core
 				_revertEffectsIndex = 0;
 			}
 
+			if (_setDataEffectsIndex > 0)
+			{
+				_setDataEffects = new ISetDataEffect[_setDataEffectsIndex];
+				_setDataEffectsIndex = 0;
+			}
+
 			//Go over all of the effects, and put them into the correct arrays
 			//Here we're also responsible for cloning, and feeding them the correct genId
 			for (int i = 0; i < _effectWrappers.Length; i++)
@@ -235,6 +246,8 @@ namespace ModiBuff.Core
 					modifierGenIdOwner.SetGenId(genId);
 				if (effect is IRevertEffect revertEffect && revertEffect.IsRevertible)
 					_revertEffects[_revertEffectsIndex++] = revertEffect;
+				if (effect is ISetDataEffect setDataEffect)
+					_setDataEffects[_setDataEffectsIndex++] = setDataEffect;
 
 				if ((effectOn & EffectOn.Init) != 0)
 					_initEffects[_initEffectsIndex++] = effect;
@@ -311,7 +324,7 @@ namespace ModiBuff.Core
 				_effectWrappers[i].Reset();
 
 			return new SyncedModifierEffects(_initEffects, _intervalEffects, _durationEffects, _stackEffects,
-				effectStateInfo, effectSaveState);
+				_setDataEffects, effectStateInfo, effectSaveState);
 		}
 	}
 
@@ -321,13 +334,15 @@ namespace ModiBuff.Core
 		public readonly IEffect[] IntervalEffects;
 		public readonly IEffect[] DurationEffects;
 		public readonly IStackEffect[] StackEffects;
+		public readonly ISetDataEffect[] SetDataEffects;
 		public readonly EffectStateInfo EffectStateInfo;
 		public readonly EffectSaveState EffectSaveState;
 
 		public SyncedModifierEffects(IEffect[] initEffectsArray, IEffect[] intervalEffectsArray,
-			IEffect[] durationEffectsArray, IStackEffect[] stackEffectsArray,
+			IEffect[] durationEffectsArray, IStackEffect[] stackEffectsArray, ISetDataEffect[] dataEffects,
 			EffectStateInfo effectStateInfo, EffectSaveState effectSaveState)
 		{
+			SetDataEffects = dataEffects;
 			InitEffects = initEffectsArray;
 			IntervalEffects = intervalEffectsArray;
 			DurationEffects = durationEffectsArray;

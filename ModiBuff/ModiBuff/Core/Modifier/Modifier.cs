@@ -32,13 +32,16 @@ namespace ModiBuff.Core
 		private bool _isTargetSetup;
 		private bool _multiTarget;
 
+		private readonly ISetDataEffect[] _setDataEffects;
+
 		//TODO ideally this would be outside of the modifier, but renting (returning) a tuple/wrapper is kinda meh
 		private readonly EffectStateInfo _effectStateInfo;
 		private readonly EffectSaveState _effectSaveState;
 
 		public Modifier(int id, int genId, string name, InitComponent? initComponent,
 			ITimeComponent[] timeComponents, StackComponent stackComponent, ModifierCheck effectCheck,
-			ITargetComponent targetComponent, EffectStateInfo? effectStateInfo, EffectSaveState? effectSaveState)
+			ITargetComponent targetComponent, ISetDataEffect[] setDataEffects, EffectStateInfo? effectStateInfo,
+			EffectSaveState? effectSaveState)
 		{
 			Id = id;
 			GenId = genId;
@@ -59,6 +62,8 @@ namespace ModiBuff.Core
 			_targetComponent = targetComponent;
 			if (targetComponent is MultiTargetComponent)
 				_multiTarget = true;
+
+			_setDataEffects = setDataEffects;
 
 			if (effectStateInfo != null)
 				_effectStateInfo = effectStateInfo.Value;
@@ -191,6 +196,54 @@ namespace ModiBuff.Core
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void UseScheduledCheck() => _effectCheck?.Use(_targetComponent.Source);
+
+		public void SetData(IList<IData> data)
+		{
+			if (data == null || data.Count == 0)
+			{
+				Logger.LogError("[ModiBuff] Trying to set data on modifier with no data.");
+				return;
+			}
+
+			foreach (var d in data)
+			{
+				switch (d)
+				{
+					case ModifierData modifierData:
+						for (int i = 0; i < _timeComponents?.Length; i++)
+							_timeComponents[i].SetData(modifierData);
+
+						_stackComponent?.SetData(modifierData);
+
+						break;
+					case EffectData effectData:
+						int currentCount = 0;
+						bool success = false;
+						for (int i = 0; i < _setDataEffects.Length; i++)
+						{
+							var effect = _setDataEffects[i];
+							if (!(effect.GetType() == effectData.EffectType))
+								continue;
+
+							if (effectData.EffectNumber > 0 && currentCount++ != effectData.EffectNumber)
+								continue;
+
+							effect.SetData(effectData);
+							success = true;
+							break;
+						}
+
+						if (!success)
+							Logger.LogError($"[ModiBuff] Couldn't find effect {effectData.EffectType} " +
+							                $"at number {effectData.EffectNumber}");
+
+						break;
+					default:
+						Logger.LogError($"[ModiBuff] Unsupported data type: {d.GetType()}");
+						break;
+				}
+			}
+		}
 
 		public ITimeComponent[] GetTimers() => _timeComponents;
 
