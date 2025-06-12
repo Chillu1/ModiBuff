@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace ModiBuff.Core.Units
 {
 	public sealed class CastActionEffect : IEffect
@@ -8,18 +6,15 @@ namespace ModiBuff.Core.Units
 
 		public CastActionEffect(string modifierName)
 		{
-			try
+			//Could ask the user to instead supply the id, but that isn't ideal
+			int? id = ModifierIdManager.GetIdByName(modifierName);
+			if (id == null)
 			{
-				//Could ask the user to instead supply the id, but that isn't ideal
-				_modifierId = ModifierIdManager.GetIdByName(modifierName).Value;
-			}
-			catch (KeyNotFoundException)
-			{
-#if DEBUG && !MODIBUFF_PROFILE
 				Logger.LogError("[ModiBuff.Units] Can't find modifier with name " + modifierName +
 				                ". Either wrong order of effect initialization or wrong modifier name.");
-#endif
 			}
+
+			_modifierId = id ?? -1;
 		}
 
 		public void Effect(IUnit target, IUnit source)

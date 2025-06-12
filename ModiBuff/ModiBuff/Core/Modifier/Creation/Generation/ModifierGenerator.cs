@@ -33,7 +33,7 @@ namespace ModiBuff.Core
 
 		private readonly ModifierEffectsCreator _modifierEffectsCreator;
 
-		private readonly Func<IUnit, bool>[] _applyFuncChecks;
+		private readonly Func<IUnit, bool>[]? _applyFuncChecks;
 		private readonly List<IUpdatableCheck> _updatableApplyChecksList;
 		private readonly List<INoUnitCheck> _noUnitApplyChecksList;
 		private readonly List<IUnitCheck> _unitApplyChecksList;
@@ -44,7 +44,7 @@ namespace ModiBuff.Core
 		private readonly IUsableCheck[] _usableApplyChecks;
 		private readonly IStateCheck[] _stateApplyChecks;
 
-		private readonly Func<IUnit, bool>[] _effectFuncChecks;
+		private readonly Func<IUnit, bool>[]? _effectFuncChecks;
 		private readonly List<IUpdatableCheck> _updatableEffectChecksList;
 		private readonly List<INoUnitCheck> _noUnitEffectChecksList;
 		private readonly List<IUnitCheck> _unitEffectChecksList;

@@ -5,7 +5,7 @@ namespace ModiBuff.Core
 	{
 		private readonly ApplierType _applierType;
 		private readonly bool _hasApplyChecks;
-		private IRevertEffect[] _revertibleEffects;
+		private IRevertEffect[]? _revertibleEffects;
 		private int _id;
 		private int _genId;
 

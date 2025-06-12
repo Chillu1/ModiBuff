@@ -39,17 +39,17 @@ namespace ModiBuff.Core
 
 		public int? GetId(string name)
 		{
-#if DEBUG && !MODIBUFF_PROFILE
 			if (!_idMap.ContainsKey(name))
 			{
+#if DEBUG && !MODIBUFF_PROFILE
 				if (!EffectIdManager.HasIdOld(name))
 					Logger.LogError("[ModiBuff] No modifier with name " + name + " found.");
 				else
 					Logger.LogError("[ModiBuff] No modifier with name " + name + " found. " +
 					                "But there is an effect with that name. Did you mean to use EffectIdManager?");
+#endif
 				return null;
 			}
-#endif
 
 			return _idMap[name];
 		}

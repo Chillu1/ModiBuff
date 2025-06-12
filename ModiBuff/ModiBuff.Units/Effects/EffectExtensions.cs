@@ -20,7 +20,7 @@ namespace ModiBuff.Core.Units
 					continue;
 				}
 
-				int? id = EffectTypeIdManager<IMetaEffect>.Instance.GetId(metaEffect.GetType());
+				int? id = EffectTypeIdManager<IMetaEffect>.Instance!.GetId(metaEffect.GetType());
 				if (id == null)
 					continue;
 
@@ -48,7 +48,7 @@ namespace ModiBuff.Core.Units
 					continue;
 				}
 
-				int? id = EffectTypeIdManager<IPostEffect>.Instance.GetId(postEffect.GetType());
+				int? id = EffectTypeIdManager<IPostEffect>.Instance!.GetId(postEffect.GetType());
 				if (id == null)
 					continue;
 

@@ -193,9 +193,6 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-#if !DEBUG
-		[Ignore("This test is only for debug mode. Skipping test")]
-#endif
 		public void ApplierDoesntExist()
 		{
 			Setup();
