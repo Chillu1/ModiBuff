@@ -4,7 +4,7 @@ namespace ModiBuff.Core
 {
 	public sealed class ModifierPool
 	{
-		public static ModifierPool Instance { get; private set; }
+		public static ModifierPool? Instance { get; private set; }
 
 		public static int MaxPoolSize = Config.MaxPoolSize;
 

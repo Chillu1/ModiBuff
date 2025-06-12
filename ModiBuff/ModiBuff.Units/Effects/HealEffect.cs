@@ -16,7 +16,7 @@ namespace ModiBuff.Core.Units
 		private readonly float _heal;
 		private readonly EffectState _effectState;
 		private readonly StackEffectType _stackEffect;
-		private readonly float _stackValue;
+		private readonly float? _stackValue;
 		private readonly Targeting _targeting;
 		private IMetaEffect<float, float>[] _metaEffects;
 		private IPostEffect<float>[] _postEffects;
@@ -25,7 +25,7 @@ namespace ModiBuff.Core.Units
 		private float _totalHeal;
 
 		public HealEffect(float heal, EffectState effectState = EffectState.None,
-			StackEffectType stack = StackEffectType.Effect, float stackValue = -1,
+			StackEffectType stack = StackEffectType.Effect, float? stackValue = null,
 			Targeting targeting = Targeting.TargetSource)
 			: this(heal, effectState, stack, stackValue, targeting, null, null, null)
 		{
@@ -35,12 +35,12 @@ namespace ModiBuff.Core.Units
 		///		Manual modifier generation constructor
 		/// </summary>
 		public static HealEffect Create(float heal, EffectState effectState = EffectState.None,
-			StackEffectType stack = StackEffectType.Effect, float stackValue = -1,
+			StackEffectType stack = StackEffectType.Effect, float? stackValue = null,
 			Targeting targeting = Targeting.TargetSource, IMetaEffect<float, float>[] metaEffects = null,
 			IPostEffect<float>[] postEffects = null, Condition[] conditions = null) =>
 			new HealEffect(heal, effectState, stack, stackValue, targeting, metaEffects, postEffects, conditions);
 
-		private HealEffect(float heal, EffectState effectState, StackEffectType stack, float stackValue,
+		private HealEffect(float heal, EffectState effectState, StackEffectType stack, float? stackValue,
 			Targeting targeting, IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects,
 			Condition[] conditions)
 		{
@@ -107,16 +107,16 @@ namespace ModiBuff.Core.Units
 		public void StackEffect(int stacks, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Set) != 0)
-				_extraHeal = _stackValue;
+				_extraHeal = _stackValue!.Value;
 
 			if ((_stackEffect & StackEffectType.SetStacksBased) != 0)
-				_extraHeal = _stackValue * stacks;
+				_extraHeal = _stackValue!.Value * stacks;
 
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraHeal += _stackValue;
+				_extraHeal += _stackValue!.Value;
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_extraHeal += _stackValue * stacks;
+				_extraHeal += _stackValue!.Value * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
@@ -126,10 +126,10 @@ namespace ModiBuff.Core.Units
 		public void CallbackEffect(IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Set) != 0)
-				_extraHeal = _stackValue;
+				_extraHeal = _stackValue!.Value;
 
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraHeal += _stackValue;
+				_extraHeal += _stackValue!.Value;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
@@ -149,10 +149,10 @@ namespace ModiBuff.Core.Units
 			}
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_extraHeal -= _stackValue * stacks;
+				_extraHeal -= _stackValue!.Value * stacks;
 
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraHeal -= _stackValue;
+				_extraHeal -= _stackValue!.Value;
 
 			if ((_stackEffect & StackEffectType.SetStacksBased) != 0)
 				_extraHeal = 0;
@@ -215,13 +215,13 @@ namespace ModiBuff.Core.Units
 			public readonly float BaseHeal;
 			public readonly EffectState EffectState;
 			public readonly StackEffectType StackEffect;
-			public readonly float StackValue;
+			public readonly float? StackValue;
 			public readonly Targeting Targeting;
 			public readonly object[] MetaEffects;
 			public readonly object[] PostEffects;
 
 			public RecipeSaveData(float baseHeal, EffectState effectState, StackEffectType stackEffect,
-				float stackValue, Targeting targeting, object[] metaEffects, object[] postEffects)
+				float? stackValue, Targeting targeting, object[] metaEffects, object[] postEffects)
 			{
 				BaseHeal = baseHeal;
 				EffectState = effectState;

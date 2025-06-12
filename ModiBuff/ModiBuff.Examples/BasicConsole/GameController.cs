@@ -47,8 +47,9 @@ namespace ModiBuff.Examples.BasicConsole
 			//But we're adding it as an applier, and not as a normal modifier
 			//This means that instead of it being applier to the player
 			//it will be applied to a unit that the player attacks
-			_player.ModifierApplierController.TryAddApplier(_idManager.GetId("DoT"), false, ApplierType.Attack);
-			_player.ModifierApplierController.TryAddApplier(_idManager.GetId("InitHeal"), false, ApplierType.Cast);
+			_player.ModifierApplierController.TryAddApplier(_idManager.GetId("DoT")!.Value, false, ApplierType.Attack);
+			_player.ModifierApplierController.TryAddApplier(_idManager.GetId("InitHeal")!.Value, false,
+				ApplierType.Cast);
 			//_player.ModifierController.TryAddApplier(_idManager.GetId("DisarmChance"), true, ApplierType.Cast);
 		}
 

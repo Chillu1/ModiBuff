@@ -4,8 +4,6 @@ namespace ModiBuff.Core
 {
 	public readonly struct EffectSaveState
 	{
-		public bool Valid => _savableEffects != null;
-
 		private readonly ISavable[] _savableEffects;
 
 		public EffectSaveState(params ISavable[] savableEffects) => _savableEffects = savableEffects;

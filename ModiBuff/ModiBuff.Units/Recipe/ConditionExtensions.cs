@@ -40,10 +40,8 @@ namespace ModiBuff.Core.Units
 			return true;
 		}
 
-		public static bool CheckModifierId(this int modifierId, IUnit unit)
-		{
-			return modifierId == -1 || ((IModifierOwner)unit).ModifierController.Contains(modifierId);
-		}
+		public static bool CheckModifierId(this int? modifierId, IUnit unit) =>
+			modifierId == null || ((IModifierOwner)unit).ModifierController.Contains(modifierId.Value);
 
 		public static bool CheckConditionType(this ConditionType conditionType, IUnit unit)
 		{

@@ -23,17 +23,17 @@ namespace ModiBuff.Core
 		private readonly bool _refreshInterval;
 
 		private readonly WhenStackEffect _whenStackEffect;
-		private readonly int _maxStacks;
-		private readonly int _everyXStacks;
-		private readonly float _singleStackTime;
-		private readonly float _independentStackTime;
+		private readonly int? _maxStacks;
+		private readonly int? _everyXStacks;
+		private readonly float? _singleStackTime;
+		private readonly float? _independentStackTime;
 
 		private readonly int _timeComponentCount;
 		private int _timeComponentIndex;
 
 		private readonly ModifierEffectsCreator _modifierEffectsCreator;
 
-		private readonly Func<IUnit, bool>[] _applyFuncChecks;
+		private readonly Func<IUnit, bool>[]? _applyFuncChecks;
 		private readonly List<IUpdatableCheck> _updatableApplyChecksList;
 		private readonly List<INoUnitCheck> _noUnitApplyChecksList;
 		private readonly List<IUnitCheck> _unitApplyChecksList;
@@ -44,7 +44,7 @@ namespace ModiBuff.Core
 		private readonly IUsableCheck[] _usableApplyChecks;
 		private readonly IStateCheck[] _stateApplyChecks;
 
-		private readonly Func<IUnit, bool>[] _effectFuncChecks;
+		private readonly Func<IUnit, bool>[]? _effectFuncChecks;
 		private readonly List<IUpdatableCheck> _updatableEffectChecksList;
 		private readonly List<INoUnitCheck> _noUnitEffectChecksList;
 		private readonly List<IUnitCheck> _unitEffectChecksList;
@@ -109,7 +109,7 @@ namespace ModiBuff.Core
 
 			return;
 
-			void SetupChecks(in List<ICheck> checksList, out List<IUpdatableCheck> updatableChecksList,
+			void SetupChecks(in List<ICheck>? checksList, out List<IUpdatableCheck> updatableChecksList,
 				out List<INoUnitCheck> noUnitChecksList, out List<IUnitCheck> unitChecksList,
 				out List<IUsableCheck> usableChecksList, out IUpdatableCheck[] updatableChecks,
 				out INoUnitCheck[] noUnitChecks, out IUnitCheck[] unitChecks, out IUsableCheck[] usableChecks,
@@ -152,7 +152,7 @@ namespace ModiBuff.Core
 		{
 			int genId = GenId++;
 
-			ModifierCheck effectCheck = null;
+			ModifierCheck? effectCheck = null;
 			if (_hasEffectChecks)
 			{
 				effectCheck = CreateCheck(_stateEffectChecks, _effectFuncChecks, _updatableEffectChecks,
@@ -161,8 +161,8 @@ namespace ModiBuff.Core
 			}
 
 			InitComponent? initComponent = null;
-			ITimeComponent[] timeComponents = null;
-			StackComponent stackComponent = null;
+			ITimeComponent[]? timeComponents = null;
+			StackComponent? stackComponent = null;
 			if (_timeComponentCount > 0)
 			{
 				_timeComponentIndex = 0;
@@ -209,7 +209,7 @@ namespace ModiBuff.Core
 				stateNoUnitChecksCount = 0,
 				stateUnitChecksCount = 0,
 				stateUsableChecksCount = 0;
-			IStateCheck[] clonedStateChecks = null;
+			IStateCheck[]? clonedStateChecks = null;
 			if (stateChecks != null && stateChecks.Length > 0)
 			{
 				clonedStateChecks = new IStateCheck[stateChecks.Length];

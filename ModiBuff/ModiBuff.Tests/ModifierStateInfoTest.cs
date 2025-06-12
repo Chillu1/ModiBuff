@@ -12,7 +12,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Unit.AddModifierSelf("InitDamage");
-			var state = Unit.ModifierController.GetEffectState<DamageEffect.Data>(IdManager.GetId("InitDamage"));
+			var state = Unit.ModifierController.GetEffectState<DamageEffect.Data>(IdManager.GetId("InitDamage").Value);
 			Assert.AreEqual(5, state.BaseDamage);
 			Assert.AreEqual(0, state.ExtraDamage);
 		}
@@ -32,7 +32,8 @@ namespace ModiBuff.Tests
 
 			Unit.AddModifierSelf("InitDamageManual");
 
-			var state = Unit.ModifierController.GetEffectState<DamageEffect.Data>(IdManager.GetId("InitDamageManual"));
+			var state = Unit.ModifierController.GetEffectState<DamageEffect.Data>(IdManager.GetId("InitDamageManual")
+				.Value);
 			Assert.AreEqual(5, state.BaseDamage);
 			Assert.AreEqual(0, state.ExtraDamage);
 		}
@@ -47,7 +48,7 @@ namespace ModiBuff.Tests
 				.Stack(WhenStackEffect.Always);
 			Setup();
 
-			int id = IdManager.GetId("DoubleStackDamage");
+			int id = IdManager.GetId("DoubleStackDamage").Value;
 			Unit.AddModifierSelf("DoubleStackDamage");
 
 			var firstDamageState = Unit.ModifierController.GetEffectState<DamageEffect.Data>(id);
@@ -75,7 +76,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Unit.AddModifierSelf("IntervalDurationDamage");
-			int id = IdManager.GetId("IntervalDurationDamage");
+			int id = IdManager.GetId("IntervalDurationDamage").Value;
 
 			var intervalReference = Unit.ModifierController.GetTimer<IntervalComponent>(id);
 			var durationReference = Unit.ModifierController.GetTimer<DurationComponent>(id);
@@ -99,7 +100,7 @@ namespace ModiBuff.Tests
 				.Stack(WhenStackEffect.Always, maxStacks: 5);
 			Setup();
 
-			int id = IdManager.GetId("StackDamage");
+			int id = IdManager.GetId("StackDamage").Value;
 			Unit.AddModifierSelf("StackDamage");
 
 			var stackReference = Unit.ModifierController.GetStackReference(id);
@@ -139,13 +140,13 @@ namespace ModiBuff.Tests
 
 			var state = Unit.ModifierController
 				.GetEffectState<CallbackStateSaveRegisterEffect<CallbackType, float>.Data>(
-					IdManager.GetId("InitTakeTwoDamageOnTenDamageTaken"));
+					IdManager.GetId("InitTakeTwoDamageOnTenDamageTaken").Value);
 			Assert.AreEqual(5, state.State);
 
 			Unit.TakeDamage(5, Unit);
 			var state2 = Unit.ModifierController
 				.GetEffectState<CallbackStateSaveRegisterEffect<CallbackType, float>.Data>(
-					IdManager.GetId("InitTakeTwoDamageOnTenDamageTaken"));
+					IdManager.GetId("InitTakeTwoDamageOnTenDamageTaken").Value);
 			Assert.AreEqual(2, state2.State);
 		}
 	}

@@ -16,7 +16,7 @@ namespace ModiBuff.Core.Units
 		private readonly float _baseDamage;
 		private readonly bool _valueIsRevertible;
 		private readonly StackEffectType _stackEffect;
-		private readonly float _stackValue;
+		private readonly float? _stackValue;
 		private readonly Targeting _targeting;
 		private IMetaEffect<float, float>[] _metaEffects;
 		private IPostEffect<float>[] _postEffects;
@@ -24,7 +24,7 @@ namespace ModiBuff.Core.Units
 		private float _extraDamage;
 
 		public DamageEffect(float damage, bool valueIsRevertible = false,
-			StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1,
+			StackEffectType stackEffect = StackEffectType.Effect, float? stackValue = null,
 			Targeting targeting = Targeting.TargetSource)
 			: this(damage, valueIsRevertible, stackEffect, stackValue, targeting, null, null, null)
 		{
@@ -34,14 +34,13 @@ namespace ModiBuff.Core.Units
 		///		Manual modifier generation constructor
 		/// </summary>
 		public static DamageEffect Create(float damage, bool valueIsRevertible = false,
-			StackEffectType stackEffect = StackEffectType.Effect,
-			float stackValue = -1, Targeting targeting = Targeting.TargetSource,
-			IMetaEffect<float, float>[] metaEffects = null, IPostEffect<float>[] postEffects = null,
-			ICondition[] conditions = null) =>
+			StackEffectType stackEffect = StackEffectType.Effect, float? stackValue = null,
+			Targeting targeting = Targeting.TargetSource, IMetaEffect<float, float>[] metaEffects = null,
+			IPostEffect<float>[] postEffects = null, ICondition[] conditions = null) =>
 			new DamageEffect(damage, valueIsRevertible, stackEffect, stackValue, targeting, metaEffects, postEffects,
 				conditions);
 
-		private DamageEffect(float damage, bool valueIsRevertible, StackEffectType stackEffect, float stackValue,
+		private DamageEffect(float damage, bool valueIsRevertible, StackEffectType stackEffect, float? stackValue,
 			Targeting targeting, IMetaEffect<float, float>[] metaEffects, IPostEffect<float>[] postEffects,
 			ICondition[] conditions)
 		{
@@ -94,10 +93,10 @@ namespace ModiBuff.Core.Units
 		public void StackEffect(int stacks, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraDamage += _stackValue;
+				_extraDamage += _stackValue!.Value;
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_extraDamage += _stackValue * stacks;
+				_extraDamage += _stackValue!.Value * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
@@ -107,10 +106,10 @@ namespace ModiBuff.Core.Units
 		public void CallbackEffect(IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Set) != 0)
-				_extraDamage = _stackValue;
+				_extraDamage = _stackValue!.Value;
 
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraDamage += _stackValue;
+				_extraDamage += _stackValue!.Value;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
@@ -137,10 +136,10 @@ namespace ModiBuff.Core.Units
 		public void RevertStack(int stacks, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_extraDamage -= _stackValue * stacks;
+				_extraDamage -= _stackValue!.Value * stacks;
 
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraDamage -= _stackValue;
+				_extraDamage -= _stackValue!.Value;
 
 			if ((_stackEffect & StackEffectType.SetStacksBased) != 0)
 				_extraDamage = 0;
@@ -189,14 +188,14 @@ namespace ModiBuff.Core.Units
 			public readonly float BaseDamage;
 			public readonly bool ValueIsRevertible;
 			public readonly StackEffectType StackEffect;
-			public readonly float StackValue;
+			public readonly float? StackValue;
 			public readonly Targeting Targeting;
 			public readonly object[] MetaEffects;
 			public readonly object[] PostEffects;
 			public readonly object[] Conditions;
 
 			public RecipeSaveData(float baseDamage, bool valueIsRevertible, StackEffectType stackEffect,
-				float stackValue, Targeting targeting, object[] metaEffects, object[] postEffects, object[] conditions)
+				float? stackValue, Targeting targeting, object[] metaEffects, object[] postEffects, object[] conditions)
 			{
 				BaseDamage = baseDamage;
 				ValueIsRevertible = valueIsRevertible;

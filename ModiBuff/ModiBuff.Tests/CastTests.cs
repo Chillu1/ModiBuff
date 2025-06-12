@@ -13,7 +13,7 @@ namespace ModiBuff.Tests
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Cast);
 
-			Unit.TryCast(IdManager.GetId("InitDamage"), Enemy);
+			Unit.TryCast(IdManager.GetId("InitDamage").Value, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
@@ -28,13 +28,13 @@ namespace ModiBuff.Tests
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageFullHealth"), ApplierType.Cast);
 
-			Unit.TryCast(IdManager.GetId("InitDamageFullHealth"), Enemy);
+			Unit.TryCast(IdManager.GetId("InitDamageFullHealth").Value, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
 			Unit.TakeDamage(5, Enemy);
 
-			Unit.TryCast(IdManager.GetId("InitDamageFullHealth"), Enemy);
+			Unit.TryCast(IdManager.GetId("InitDamageFullHealth").Value, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
@@ -80,7 +80,7 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			int id = IdManager.GetId("InitDamageFullHealth");
+			int id = IdManager.GetId("InitDamageFullHealth").Value;
 
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageFullHealth"), ApplierType.Cast);
 
@@ -103,7 +103,7 @@ namespace ModiBuff.Tests
 			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Cast);
 			Unit.AddModifierSelf("CastInitDamageEvent");
 
-			Unit.TryCast(IdManager.GetId("InitDamage"), Enemy);
+			Unit.TryCast(IdManager.GetId("InitDamage").Value, Enemy);
 			Assert.AreEqual(EnemyHealth - 5 - 5 * Unit.MaxEventCount, Enemy.Health);
 		}
 
@@ -114,7 +114,7 @@ namespace ModiBuff.Tests
 			//If we cast this modifier, remove the debuff modifier of us, and apply the damage effect to the enemy 
 
 			Recipes.Register("DurationDamageSelfCast");
-			int modId = IdManager.GetId("DurationDamageSelfCast");
+			int modId = IdManager.GetId("DurationDamageSelfCast").Value;
 
 			AddRecipe("DurationDamageSelfCast")
 				.Effect(new ApplierEffect("InitDamage"), EffectOn.Duration | EffectOn.CallbackEffect)

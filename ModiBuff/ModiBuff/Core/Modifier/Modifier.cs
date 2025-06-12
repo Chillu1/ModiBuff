@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("ModiBuff.Tests")]
@@ -19,14 +18,12 @@ namespace ModiBuff.Core
 		public int GenId { get; }
 		public string Name { get; }
 
-		private readonly bool _hasInit;
-		private InitComponent _initComponent;
+		private readonly InitComponent? _initComponent;
 
-		private readonly ITimeComponent[] _timeComponents;
-		private readonly StackComponent _stackComponent;
-		private readonly IUpdatable _stackTimerComponent;
+		private readonly ITimeComponent[]? _timeComponents;
+		private readonly StackComponent? _stackComponent;
 
-		private readonly ModifierCheck _effectCheck;
+		private readonly ModifierCheck? _effectCheck;
 
 		private ITargetComponent _targetComponent;
 		private bool _isTargetSetup;
@@ -35,11 +32,11 @@ namespace ModiBuff.Core
 		private readonly ISetDataEffect[] _setDataEffects;
 
 		//TODO ideally this would be outside of the modifier, but renting (returning) a tuple/wrapper is kinda meh
-		private readonly EffectStateInfo _effectStateInfo;
-		private readonly EffectSaveState _effectSaveState;
+		private readonly EffectStateInfo? _effectStateInfo;
+		private readonly EffectSaveState? _effectSaveState;
 
 		public Modifier(int id, int genId, string name, InitComponent? initComponent,
-			ITimeComponent[] timeComponents, StackComponent stackComponent, ModifierCheck effectCheck,
+			ITimeComponent[]? timeComponents, StackComponent? stackComponent, ModifierCheck? effectCheck,
 			ITargetComponent targetComponent, ISetDataEffect[] setDataEffects, EffectStateInfo? effectStateInfo,
 			EffectSaveState? effectSaveState)
 		{
@@ -47,16 +44,10 @@ namespace ModiBuff.Core
 			GenId = genId;
 			Name = name;
 
-			if (initComponent != null)
-			{
-				_initComponent = initComponent.Value;
-				_hasInit = true;
-			}
+			_initComponent = initComponent;
 
 			_timeComponents = timeComponents;
 			_stackComponent = stackComponent;
-			if (stackComponent != null && stackComponent.UsesStackTime)
-				_stackTimerComponent = stackComponent;
 			_effectCheck = effectCheck;
 
 			_targetComponent = targetComponent;
@@ -65,10 +56,8 @@ namespace ModiBuff.Core
 
 			_setDataEffects = setDataEffects;
 
-			if (effectStateInfo != null)
-				_effectStateInfo = effectStateInfo.Value;
-			if (effectSaveState != null)
-				_effectSaveState = effectSaveState.Value;
+			_effectStateInfo = effectStateInfo;
+			_effectSaveState = effectSaveState;
 		}
 
 		public void UpdateTargets(IList<IUnit> targetsInRange, IUnit source)
@@ -138,9 +127,11 @@ namespace ModiBuff.Core
 		{
 #if UNSAFE
 			if (_multiTarget)
-				_initComponent.Init(Unsafe.As<MultiTargetComponent>(_targetComponent).Targets, _targetComponent.Source);
+				_initComponent!.Init(Unsafe.As<MultiTargetComponent>(_targetComponent).Targets,
+					_targetComponent.Source);
 			else
-				_initComponent.Init(Unsafe.As<SingleTargetComponent>(_targetComponent).Target, _targetComponent.Source);
+				_initComponent!.Init(Unsafe.As<SingleTargetComponent>(_targetComponent).Target,
+					_targetComponent.Source);
 #else
 			if (_multiTarget)
 				_initComponent.Init(((MultiTargetComponent)_targetComponent).Targets, _targetComponent.Source);
@@ -157,10 +148,10 @@ namespace ModiBuff.Core
 		{
 #if UNSAFE
 			if (_multiTarget)
-				_initComponent.InitLoad(Unsafe.As<MultiTargetComponent>(_targetComponent).Targets,
+				_initComponent!.InitLoad(Unsafe.As<MultiTargetComponent>(_targetComponent).Targets,
 					_targetComponent.Source);
 			else
-				_initComponent.InitLoad(Unsafe.As<SingleTargetComponent>(_targetComponent).Target,
+				_initComponent!.InitLoad(Unsafe.As<SingleTargetComponent>(_targetComponent).Target,
 					_targetComponent.Source);
 #else
 			if (_multiTarget)
@@ -173,7 +164,8 @@ namespace ModiBuff.Core
 		public void Update(float deltaTime)
 		{
 			_effectCheck?.Update(deltaTime);
-			_stackTimerComponent?.Update(deltaTime);
+			if (_stackComponent is { UsesStackTime: true })
+				_stackComponent.Update(deltaTime);
 
 			if (_timeComponents == null)
 				return;
@@ -185,14 +177,14 @@ namespace ModiBuff.Core
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Refresh()
 		{
-			for (int i = 0; i < _timeComponents.Length; i++)
+			for (int i = 0; i < _timeComponents!.Length; i++)
 				_timeComponents[i].Refresh();
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void Stack() => _stackComponent.Stack();
+		public void Stack() => _stackComponent!.Stack();
 
-		public void ResetStacks() => _stackComponent.ResetStacks();
+		public void ResetStacks() => _stackComponent!.ResetStacks();
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void UseScheduledCheck() => _effectCheck?.Use(_targetComponent.Source);
@@ -245,14 +237,14 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public ITimeComponent[] GetTimers() => _timeComponents;
+		public ITimeComponent[] GetTimers() => _timeComponents!;
 
 		/// <summary>
 		///		Gets a timer reference, used to update UI/UX
 		/// </summary>
 		/// <param name="timeComponentNumber">Which timer should be returned, first = 0</param>'
 		//TODO Any way to make sure that references get invalidated when the modifier is pooled?
-		public ITimeReference GetTimer<TTimeComponent>(int timeComponentNumber = 0)
+		public ITimeReference? GetTimer<TTimeComponent>(int timeComponentNumber = 0)
 			where TTimeComponent : ITimeComponent
 		{
 			if (_timeComponents == null)
@@ -288,7 +280,7 @@ namespace ModiBuff.Core
 			return null;
 		}
 
-		public IStackReference GetStackReference()
+		public IStackReference? GetStackReference()
 		{
 			if (_stackComponent == null)
 			{
@@ -305,22 +297,22 @@ namespace ModiBuff.Core
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
 		public TData GetEffectState<TData>(int stateNumber = 0) where TData : struct
 		{
-			if (!_effectStateInfo.Valid)
+			if (_effectStateInfo == null)
 			{
 				Logger.LogWarning("[ModiBuff] Trying to get state info from a modifier that doesn't have any.");
 				return default;
 			}
 
-			return _effectStateInfo.GetEffectState<TData>(stateNumber);
+			return _effectStateInfo.Value.GetEffectState<TData>(stateNumber);
 		}
 
 		public SaveData SaveState()
 		{
 			var targetSaveData = _targetComponent.SaveState();
-			var initSaveData = _hasInit ? (InitComponent.SaveData?)_initComponent.SaveState() : null;
+			var initSaveData = _initComponent?.SaveState();
 			var stackSaveData = _stackComponent?.SaveState();
 
-			TimeComponentSaveData[] timeComponentsSaveData = null;
+			TimeComponentSaveData[]? timeComponentsSaveData = null;
 			if (_timeComponents != null && _timeComponents.Length > 0)
 			{
 				timeComponentsSaveData = new TimeComponentSaveData[_timeComponents.Length];
@@ -329,10 +321,7 @@ namespace ModiBuff.Core
 			}
 
 			var effectCheckSaveData = _effectCheck?.SaveState();
-
-			EffectSaveState.EffectSaveData[] effectSaveState = null;
-			if (_effectSaveState.Valid)
-				effectSaveState = _effectSaveState.SaveState();
+			var effectSaveState = _effectSaveState?.SaveState();
 
 			return new SaveData(Id, targetSaveData, _multiTarget, effectCheckSaveData, initSaveData, stackSaveData,
 				timeComponentsSaveData, effectSaveState);
@@ -364,25 +353,24 @@ namespace ModiBuff.Core
 			}
 
 			if (data.InitSaveData != null)
-				_initComponent.LoadState(data.InitSaveData.Value);
+				_initComponent!.LoadState(data.InitSaveData.Value);
 
 			if (data.StackSaveData != null)
-				_stackComponent.LoadState(data.StackSaveData.Value);
+				_stackComponent!.LoadState(data.StackSaveData.Value);
 
 			for (int i = 0; i < _timeComponents?.Length; i++)
-				_timeComponents[i].LoadState(data.TimeComponentsSaveData[i]);
+				_timeComponents[i].LoadState(data.TimeComponentsSaveData![i]);
 
 			if (data.EffectCheckSaveData != null)
 				_effectCheck?.LoadState(data.EffectCheckSaveData.Value);
 
 			if (data.EffectsSaveData != null)
-				_effectSaveState.LoadState(data.EffectsSaveData);
+				_effectSaveState!.Value.LoadState(data.EffectsSaveData);
 		}
 
 		public void ResetState()
 		{
-			if (_hasInit)
-				_initComponent.ResetState();
+			_initComponent?.ResetState();
 			if (_timeComponents != null)
 				for (int i = 0; i < _timeComponents.Length; i++)
 					_timeComponents[i].ResetState();
@@ -398,7 +386,7 @@ namespace ModiBuff.Core
 			return Id == other.Id && GenId == other.GenId;
 		}
 
-		public override bool Equals(object obj)
+		public override bool Equals(object? obj)
 		{
 			return ReferenceEquals(this, obj) || obj is Modifier other && Equals(other);
 		}
@@ -428,16 +416,16 @@ namespace ModiBuff.Core
 			public readonly ModifierCheck.SaveData? EffectCheckSaveData;
 			public readonly InitComponent.SaveData? InitSaveData;
 			public readonly StackComponent.SaveData? StackSaveData;
-			public readonly IReadOnlyList<TimeComponentSaveData> TimeComponentsSaveData;
-			public readonly IReadOnlyList<EffectSaveState.EffectSaveData> EffectsSaveData;
+			public readonly IReadOnlyList<TimeComponentSaveData>? TimeComponentsSaveData;
+			public readonly IReadOnlyList<EffectSaveState.EffectSaveData>? EffectsSaveData;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(int id, object targetSaveData, bool isMultiTarget,
 				ModifierCheck.SaveData? effectCheckSaveData, InitComponent.SaveData? initSaveData,
-				StackComponent.SaveData? stackSaveData, IReadOnlyList<TimeComponentSaveData> timeComponentsSaveData,
-				IReadOnlyList<EffectSaveState.EffectSaveData> effectsSaveData)
+				StackComponent.SaveData? stackSaveData, IReadOnlyList<TimeComponentSaveData>? timeComponentsSaveData,
+				IReadOnlyList<EffectSaveState.EffectSaveData>? effectsSaveData)
 			{
 				Id = id;
 				TargetSaveData = targetSaveData;

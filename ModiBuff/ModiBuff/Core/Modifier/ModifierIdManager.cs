@@ -4,7 +4,7 @@ namespace ModiBuff.Core
 {
 	public sealed class ModifierIdManager
 	{
-		private static ModifierIdManager _instance;
+		private static ModifierIdManager? _instance;
 		private int _nextId;
 
 		private readonly Dictionary<string, int> _idMap;
@@ -33,34 +33,34 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Lazy implementation for ease of use.
 		/// </summary>
-		internal static int GetIdByName(string name) => _instance.GetId(name);
+		internal static int? GetIdByName(string name) => _instance!.GetId(name);
 
-		internal static bool HasIdByName(string name) => _instance._idMap.ContainsKey(name);
+		internal static bool HasIdByName(string name) => _instance!._idMap.ContainsKey(name);
 
-		public int GetId(string name)
+		public int? GetId(string name)
 		{
-#if DEBUG && !MODIBUFF_PROFILE
 			if (!_idMap.ContainsKey(name))
 			{
+#if DEBUG && !MODIBUFF_PROFILE
 				if (!EffectIdManager.HasIdOld(name))
 					Logger.LogError("[ModiBuff] No modifier with name " + name + " found.");
 				else
 					Logger.LogError("[ModiBuff] No modifier with name " + name + " found. " +
 					                "But there is an effect with that name. Did you mean to use EffectIdManager?");
-				return -1;
-			}
 #endif
+				return null;
+			}
 
 			return _idMap[name];
 		}
 
-		public static int GetNewId(int oldId)
+		public static int? GetNewId(int oldId)
 		{
-			if (_instance._oldIdToNewIdMap.TryGetValue(oldId, out int newId))
+			if (_instance!._oldIdToNewIdMap.TryGetValue(oldId, out int newId))
 				return newId;
 
 			Logger.LogError($"Modifier with id {oldId} not found");
-			return -1;
+			return null;
 		}
 
 		public void Clear()

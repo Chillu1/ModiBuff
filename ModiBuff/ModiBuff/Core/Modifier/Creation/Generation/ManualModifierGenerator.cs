@@ -7,14 +7,14 @@ namespace ModiBuff.Core
 		public string DisplayName { get; }
 		public string Description { get; }
 		public TagType Tag { get; }
-		public int AuraId { get; }
+		public int? AuraId { get; }
 		public object Data { get; }
 		private readonly ModifierGeneratorFunc _createFunc;
 
 		private int _genId;
 
 		public ManualModifierGenerator(int id, string name, string displayName, string description,
-			in ModifierGeneratorFunc createFunc, TagType tag, int auraId, object customModifierData)
+			in ModifierGeneratorFunc createFunc, TagType tag, int? auraId, object customModifierData)
 		{
 			Id = id;
 			Name = name;
@@ -25,7 +25,7 @@ namespace ModiBuff.Core
 			//Updates tags based on modifier state
 			//Generates a dummy modifier, to check for state
 			tag.UpdateTagBasedOnModifierComponents(createFunc(Id, _genId, Name, tag));
-			if (auraId != -1)
+			if (auraId != null)
 				tag |= TagType.IsAura;
 			Tag = tag;
 			AuraId = auraId;

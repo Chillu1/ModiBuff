@@ -11,7 +11,7 @@ namespace ModiBuff.Core.Units
 		private const float PoisonDamage = 5f;
 
 		private readonly StackEffectType _stackEffect;
-		private readonly float _stackValue;
+		private readonly float? _stackValue;
 		private readonly Targeting _targeting;
 		private IMetaEffect<float, int, float>[] _metaEffects;
 		private IPostEffect<float, int>[] _postEffects;
@@ -20,7 +20,7 @@ namespace ModiBuff.Core.Units
 		private int _totalStacks;
 		private readonly Dictionary<IUnit, int> _poisonStacksPerUnit;
 
-		public PoisonDamageEffect(StackEffectType stackEffect = StackEffectType.None, float stackValue = -1,
+		public PoisonDamageEffect(StackEffectType stackEffect = StackEffectType.None, float? stackValue = null,
 			Targeting targeting = Targeting.TargetSource) : this(stackEffect, stackValue, targeting, null, null)
 		{
 		}
@@ -29,11 +29,11 @@ namespace ModiBuff.Core.Units
 		///		Manual modifier generation constructor
 		/// </summary>
 		public static PoisonDamageEffect Create(StackEffectType stackEffect = StackEffectType.Effect,
-			float stackValue = -1, Targeting targeting = Targeting.TargetSource,
+			float? stackValue = null, Targeting targeting = Targeting.TargetSource,
 			IMetaEffect<float, int, float>[] metaEffects = null, IPostEffect<float, int>[] postEffects = null) =>
 			new PoisonDamageEffect(stackEffect, stackValue, targeting, metaEffects, postEffects);
 
-		private PoisonDamageEffect(StackEffectType stackEffect, float stackValue, Targeting targeting,
+		private PoisonDamageEffect(StackEffectType stackEffect, float? stackValue, Targeting targeting,
 			IMetaEffect<float, int, float>[] metaEffects, IPostEffect<float, int>[] postEffects)
 		{
 			_stackEffect = stackEffect;
@@ -101,10 +101,10 @@ namespace ModiBuff.Core.Units
 				_poisonStacksPerUnit.Add(source, 1);
 
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraDamage += _stackValue;
+				_extraDamage += _stackValue!.Value;
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_extraDamage += _stackValue * stacks;
+				_extraDamage += _stackValue!.Value * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
@@ -130,7 +130,7 @@ namespace ModiBuff.Core.Units
 			var poisonSaveData = (SaveData)saveData;
 			_extraDamage = poisonSaveData.ExtraDamage;
 			foreach (var kvp in poisonSaveData.PoisonStacksPerUnitId)
-				_poisonStacksPerUnit.Add(UnitHelper.GetUnit(kvp.Key), kvp.Value);
+				_poisonStacksPerUnit.Add(UnitHelper.GetUnit(kvp.Key)!, kvp.Value);
 		}
 
 		public readonly struct SaveData

@@ -14,7 +14,7 @@ namespace ModiBuff.Core
 		private readonly INoUnitCheck[] _noUnitChecks;
 		private readonly IUnitCheck[] _unitChecks;
 		private readonly IUsableCheck[] _usableChecks;
-		private readonly IStateCheck[] _stateResetChecks;
+		private readonly IStateCheck[]? _stateResetChecks;
 
 		private readonly ICheck[] _checks; //TODO Probably rethink this
 
@@ -22,7 +22,7 @@ namespace ModiBuff.Core
 
 		public ModifierCheck(int id, Func<IUnit, bool>[] funcChecks, IUpdatableCheck[] updatableChecks,
 			INoUnitCheck[] noUnitChecks, IUnitCheck[] unitChecks, IUsableCheck[] usableChecks,
-			IStateCheck[] stateResetChecks)
+			IStateCheck[]? stateResetChecks)
 		{
 			Id = id;
 
@@ -43,7 +43,7 @@ namespace ModiBuff.Core
 			AddChecks(_stateResetChecks);
 			_checks = checkList.ToArray();
 
-			void AddChecks(ICheck[] checks)
+			void AddChecks(ICheck[]? checks)
 			{
 				for (int i = 0; i < checks?.Length; i++)
 				{

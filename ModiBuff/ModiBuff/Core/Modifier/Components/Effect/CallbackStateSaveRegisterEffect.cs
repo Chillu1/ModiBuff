@@ -10,7 +10,7 @@ namespace ModiBuff.Core
 		public readonly TObjectSaveData DefaultState;
 
 		public CallbackStateContext(object callback, Func<TObjectSaveData> stateGetter,
-			Action<TObjectSaveData> stateSetter, TObjectSaveData defaultState = default)
+			Action<TObjectSaveData> stateSetter, TObjectSaveData defaultState = default!)
 		{
 			Callback = callback;
 			StateGetter = stateGetter;

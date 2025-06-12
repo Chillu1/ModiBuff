@@ -17,8 +17,8 @@ namespace ModiBuff.Tests
 		{
 			base.GlobalSetup();
 
-			_instanceStackableDoTModifierId = IdManager.GetId("InstanceStackableDoT");
-			_instanceStackableInitDamageId = IdManager.GetId("InstanceStackableInitDamage");
+			_instanceStackableDoTModifierId = IdManager.GetId("InstanceStackableDoT").Value;
+			_instanceStackableInitDamageId = IdManager.GetId("InstanceStackableInitDamage").Value;
 
 			Pool.SetMaxPoolSize((int)1e5);
 		}

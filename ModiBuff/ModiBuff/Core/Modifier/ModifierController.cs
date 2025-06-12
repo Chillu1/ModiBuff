@@ -11,7 +11,7 @@ namespace ModiBuff.Core
 	public sealed class ModifierController
 	{
 		//A dict with multikey can be used, but we run into problems with modifiers that don't use instance stacking
-		private Modifier[] _modifiers;
+		private Modifier?[] _modifiers;
 		private readonly int[] _modifierIndexes;
 		private readonly Dictionary<int, int> _modifierIndexesDict;
 		private int _modifiersTop;
@@ -41,7 +41,7 @@ namespace ModiBuff.Core
 		{
 			int modifiersTop = _modifiersTop;
 			for (int i = 0; i < modifiersTop; i++)
-				_modifiers[i].Update(delta);
+				_modifiers[i]!.Update(delta);
 
 			int removeCount = _modifiersToRemove.Count;
 			if (removeCount == 0)
@@ -57,21 +57,18 @@ namespace ModiBuff.Core
 		{
 			var modifierReferences = new ModifierReference[_modifiersTop];
 			for (int i = 0; i < _modifiersTop; i++)
-				modifierReferences[i] = new ModifierReference(_modifiers[i].Id, _modifiers[i].GenId);
+				modifierReferences[i] = new ModifierReference(_modifiers[i]!.Id, _modifiers[i]!.GenId);
 
 			return modifierReferences;
 		}
 
-		public IModifierDataReference GetModifierDataReference(int id, int genId)
-		{
-			return GetModifier(id, genId);
-		}
+		public IModifierDataReference? GetModifierDataReference(int id, int genId) => GetModifier(id, genId);
 
 		/// <summary>
 		///		Gets timer reference, used to update UI/UX
 		/// </summary>
 		/// <param name="timeComponentNumber">Which timer should be returned, first = 0</param>
-		public ITimeReference GetTimer<TTimeComponent>(int id, int genId = 0, int timeComponentNumber = 0)
+		public ITimeReference? GetTimer<TTimeComponent>(int id, int genId = 0, int timeComponentNumber = 0)
 			where TTimeComponent : ITimeComponent
 		{
 			return GetModifier(id, genId)?.GetTimer<TTimeComponent>(timeComponentNumber);
@@ -80,7 +77,7 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Get stack reference, used to update UI/UX
 		/// </summary>
-		public IStackReference GetStackReference(int id, int genId = 0)
+		public IStackReference? GetStackReference(int id, int genId = 0)
 		{
 			return GetModifier(id, genId)?.GetStackReference();
 		}
@@ -126,7 +123,7 @@ namespace ModiBuff.Core
 				{
 					var existingModifier = _modifiers[index];
 					//TODO should we update the modifier targets when init/refreshing/stacking?
-					existingModifier.UpdateSource(source);
+					existingModifier!.UpdateSource(source);
 					if (data != null)
 						existingModifier.SetData(data);
 					if (tag.HasTag(TagType.IsInit))
@@ -150,13 +147,14 @@ namespace ModiBuff.Core
 			if (_modifiersTop == _modifiers.Length)
 				Array.Resize(ref _modifiers, _modifiers.Length << 1);
 
-			var modifier = ModifierPool.Instance.Rent(id);
+			var modifier = ModifierPool.Instance!.Rent(id);
 
 			if (tag.HasTag(TagType.IsAura))
 			{
 				if (target is IAuraOwner auraOwner)
 				{
-					var targetList = auraOwner.GetAuraTargets(ModifierRecipes.GetAuraId(id));
+					int? auraId = ModifierRecipes.GetAuraId(id);
+					var targetList = auraOwner.GetAuraTargets(auraId!.Value);
 					modifier.UpdateTargets(targetList, source);
 				}
 				else
@@ -186,22 +184,22 @@ namespace ModiBuff.Core
 			modifier.UseScheduledCheck();
 		}
 
-		public bool Contains(int id, int genId = -1)
+		public bool Contains(int id, int? genId = null)
 		{
 			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
 				return Config.UseDictionaryIndexes ? _modifierIndexesDict.ContainsKey(id) : _modifierIndexes[id] != -1;
 
-			if (genId == -1)
+			if (genId == null)
 			{
 				for (int i = 0; i < _modifiersTop; i++)
-					if (_modifiers[i].Id == id)
+					if (_modifiers[i]!.Id == id)
 						return true;
 			}
 			else
 			{
 				for (int i = 0; i < _modifiersTop; i++)
 				{
-					var modifier = _modifiers[i];
+					var modifier = _modifiers[i]!;
 					if (modifier.Id == id && modifier.GenId == genId)
 						return true;
 				}
@@ -298,9 +296,9 @@ namespace ModiBuff.Core
 				for (int i = 0; i < _modifiersTop; i++)
 				{
 					var modifier = _modifiers[i];
-					if (modifier.Id == modifierReference.Id && modifier.GenId == modifierReference.GenId)
+					if (modifier!.Id == modifierReference.Id && modifier.GenId == modifierReference.GenId)
 					{
-						ModifierPool.Instance.Return(modifier);
+						ModifierPool.Instance!.Return(modifier);
 						if (i == --_modifiersTop)
 						{
 							_modifiers[i] = null;
@@ -339,14 +337,14 @@ namespace ModiBuff.Core
 				_modifierIndexes[modifierReference.Id] = -1;
 			}
 
-			ModifierPool.Instance.Return(_modifiers[modifierIndex]);
+			ModifierPool.Instance!.Return(_modifiers[modifierIndex]!);
 			if (modifierIndex == --_modifiersTop)
 			{
 				_modifiers[modifierIndex] = null;
 				return;
 			}
 
-			var topModifier = _modifiers[_modifiersTop];
+			var topModifier = _modifiers[_modifiersTop]!;
 			_modifiers[modifierIndex] = topModifier;
 			_modifiers[_modifiersTop] = null;
 			if (Config.UseDictionaryIndexes)
@@ -362,7 +360,7 @@ namespace ModiBuff.Core
 		{
 			for (int i = 0; i < _modifiersTop; i++)
 			{
-				ModifierPool.Instance.Return(_modifiers[i]);
+				ModifierPool.Instance!.Return(_modifiers[i]!);
 				_modifiers[i] = null;
 			}
 
@@ -389,7 +387,7 @@ namespace ModiBuff.Core
 
 			Modifier.SaveData[] modifiersSaveData = new Modifier.SaveData[_modifiersTop];
 			for (int i = 0; i < _modifiersTop; i++)
-				modifiersSaveData[i] = _modifiers[i].SaveState();
+				modifiersSaveData[i] = _modifiers[i]!.SaveState();
 			return new SaveData(modifiersSaveData);
 		}
 
@@ -398,7 +396,7 @@ namespace ModiBuff.Core
 			for (int i = 0; i < saveData.ModifiersSaveData.Count; i++)
 			{
 				var modifierSaveData = saveData.ModifiersSaveData[i];
-				int id = ModifierIdManager.GetNewId(modifierSaveData.Id);
+				int id = ModifierIdManager.GetNewId(modifierSaveData.Id)!.Value;
 
 				ref readonly var tag = ref ModifierRecipes.GetTag(id);
 
@@ -410,7 +408,7 @@ namespace ModiBuff.Core
 						_modifierIndexes[id] = _modifiersTop;
 				}
 
-				var modifier = ModifierPool.Instance.Rent(id);
+				var modifier = ModifierPool.Instance!.Rent(id);
 				modifier.LoadState(modifierSaveData, owner);
 				_modifiers[_modifiersTop++] = modifier;
 				if (tag.HasTag(TagType.IsInit))
@@ -418,7 +416,7 @@ namespace ModiBuff.Core
 			}
 		}
 
-		private Modifier GetModifier(int id, int genId)
+		private Modifier? GetModifier(int id, int genId)
 		{
 			if (!ModifierRecipes.GetTag(id).HasTag(TagType.IsInstanceStackable))
 			{
@@ -435,7 +433,7 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _modifiersTop; i++)
 			{
 				var modifier = _modifiers[i];
-				if (modifier.Id == id && modifier.GenId == genId)
+				if (modifier!.Id == id && modifier.GenId == genId)
 					return modifier;
 			}
 

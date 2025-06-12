@@ -2,17 +2,17 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
-	public struct InitComponent : IStateReset
+	public sealed class InitComponent : IStateReset
 	{
 		private readonly IEffect[] _effects;
-		private readonly IEffect[] _registerEffects;
-		private readonly IStateReset[] _stateResetEffects;
+		private readonly IEffect[]? _registerEffects;
+		private readonly IStateReset[]? _stateResetEffects;
 		private readonly bool _oneTime;
-		private readonly ModifierCheck _modifierCheck;
+		private readonly ModifierCheck? _modifierCheck;
 
 		private bool _isInitialized;
 
-		public InitComponent(bool oneTimeInit, IEffect[] effects, ModifierCheck check)
+		public InitComponent(bool oneTimeInit, IEffect[] effects, ModifierCheck? check)
 		{
 			_oneTime = oneTimeInit;
 			_effects = effects;
@@ -69,7 +69,7 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _registerEffects?.Length; i++)
 				_registerEffects[i].Effect(target, owner);
 
-			if (_modifierCheck != null && !_modifierCheck.Check(owner))
+			if (_modifierCheck?.Check(owner) == false)
 				return;
 
 			for (int i = 0; i < _effects.Length; i++)

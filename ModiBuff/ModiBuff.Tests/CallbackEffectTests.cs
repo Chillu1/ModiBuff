@@ -66,7 +66,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Pool.Clear();
-			Pool.Allocate(IdManager.GetId("InitStatusEffectSleep_RemoveOnTenDamageTaken"), 1);
+			Pool.Allocate(IdManager.GetId("InitStatusEffectSleep_RemoveOnTenDamageTaken").Value, 1);
 
 			//Starts with 10 baseDmg, adds 5 from effect
 			Unit.AddModifierSelf("InitStatusEffectSleep_RemoveOnTenDamageTaken");

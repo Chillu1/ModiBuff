@@ -4,7 +4,7 @@ namespace ModiBuff.Core
 {
 	public sealed class UnitHelper
 	{
-		private static UnitHelper _instance;
+		private static UnitHelper? _instance;
 
 		private readonly Dictionary<int, int> _oldUnitIdToNewUnitIdMap;
 		private readonly Dictionary<int, IUnit> _idToUnitMap;
@@ -29,7 +29,7 @@ namespace ModiBuff.Core
 
 		public static void LoadUnit(IUnit unit, int oldId, int newId)
 		{
-			if (_instance._oldUnitIdToNewUnitIdMap.ContainsKey(oldId))
+			if (_instance!._oldUnitIdToNewUnitIdMap.ContainsKey(oldId))
 			{
 				Logger.LogError($"[ModiBuff] Unit with id {oldId} already exists");
 				return;
@@ -39,9 +39,9 @@ namespace ModiBuff.Core
 			_instance._idToUnitMap.Add(newId, unit);
 		}
 
-		public static IUnit GetUnit(int oldId)
+		public static IUnit? GetUnit(int oldId)
 		{
-			if (_instance._oldUnitIdToNewUnitIdMap.TryGetValue(oldId, out int newId))
+			if (_instance!._oldUnitIdToNewUnitIdMap.TryGetValue(oldId, out int newId))
 				return _instance._idToUnitMap[newId];
 
 			Logger.LogError($"[ModiBuff] Unit with id {oldId} not found");

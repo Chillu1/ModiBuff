@@ -10,7 +10,7 @@ namespace ModiBuff.Core
 		private readonly bool _effectUsesMutableState;
 		private readonly IShallowClone<IEffect> _effectShallowClone;
 
-		private IEffect _effectClone;
+		private IEffect? _effectClone;
 
 		public EffectWrapper(IEffect effect, EffectOn effectOn)
 		{

@@ -30,8 +30,8 @@ namespace ModiBuff.Core
 		private float _interval;
 		private float _duration;
 
-		private RemoveEffectWrapper _removeEffectWrapper;
-		private EffectWrapper _dispelRegisterWrapper;
+		private RemoveEffectWrapper? _removeEffectWrapper;
+		private EffectWrapper? _dispelRegisterWrapper;
 		private readonly List<EffectWrapper> _callbackUnitRegisterWrappers;
 		private readonly List<EffectWrapper> _callbackEffectRegisterWrappers;
 		private readonly List<EffectWrapper> _callbackEffectUnitsRegisterWrappers;
@@ -41,18 +41,18 @@ namespace ModiBuff.Core
 		private bool _refreshDuration, _refreshInterval;
 
 		private WhenStackEffect _whenStackEffect;
-		private int _maxStacks;
-		private int _everyXStacks;
-		private float _singleStackTime;
-		private float _independentStackTime;
+		private int? _maxStacks;
+		private int? _everyXStacks;
+		private float? _singleStackTime;
+		private float? _independentStackTime;
 
 		private bool _hasApplyChecks;
-		private List<ICheck> _applyCheckList;
-		private List<Func<IUnit, bool>> _applyFuncCheckList;
+		private List<ICheck>? _applyCheckList;
+		private List<Func<IUnit, bool>>? _applyFuncCheckList;
 
 		private bool _hasEffectChecks;
-		private List<ICheck> _effectCheckList;
-		private List<Func<IUnit, bool>> _effectFuncCheckList;
+		private List<ICheck>? _effectCheckList;
+		private List<Func<IUnit, bool>>? _effectFuncCheckList;
 
 		private ModifierAction _modifierActions;
 
@@ -144,8 +144,7 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe ApplyCheck(Func<IUnit, bool> check)
 		{
-			if (_applyFuncCheckList == null)
-				_applyFuncCheckList = new List<Func<IUnit, bool>>();
+			_applyFuncCheckList ??= new List<Func<IUnit, bool>>();
 			_applyFuncCheckList.Add(check);
 			_hasApplyChecks = true;
 			return this;
@@ -153,8 +152,7 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe ApplyCheck(ICheck check)
 		{
-			if (_applyCheckList == null)
-				_applyCheckList = new List<ICheck>();
+			_applyCheckList ??= new List<ICheck>();
 			_applyCheckList.Add(check);
 			_hasApplyChecks = true;
 			return this;
@@ -164,8 +162,7 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe EffectCheck(Func<IUnit, bool> check)
 		{
-			if (_effectFuncCheckList == null)
-				_effectFuncCheckList = new List<Func<IUnit, bool>>();
+			_effectFuncCheckList ??= new List<Func<IUnit, bool>>();
 			_effectFuncCheckList.Add(check);
 			_hasEffectChecks = true;
 			return this;
@@ -173,8 +170,7 @@ namespace ModiBuff.Core
 
 		public ModifierRecipe EffectCheck(ICheck check)
 		{
-			if (_effectCheckList == null)
-				_effectCheckList = new List<ICheck>();
+			_effectCheckList ??= new List<ICheck>();
 			_effectCheckList.Add(check);
 			_hasEffectChecks = true;
 			return this;
@@ -317,8 +313,8 @@ namespace ModiBuff.Core
 		/// <see cref="whenStackEffect.EveryXStacks"/>, this value will be used to determine when the stack effects should be triggered.</param>
 		/// <param name="singleStackTime">Adds a single timer, and removes and reverts all stacks after the timer expires</param>
 		/// <param name="independentStackTime">Adds a timer for each stack, and removes a stack after a timer expires</param>
-		public ModifierRecipe Stack(WhenStackEffect whenStackEffect, int maxStacks = -1,
-			int everyXStacks = -1, float singleStackTime = -1, float independentStackTime = -1)
+		public ModifierRecipe Stack(WhenStackEffect whenStackEffect, int? maxStacks = null,
+			int? everyXStacks = null, float? singleStackTime = null, float? independentStackTime = null)
 		{
 			_whenStackEffect = whenStackEffect;
 			_maxStacks = maxStacks;
@@ -341,7 +337,7 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		public ModifierRecipe Data<T>(T data)
+		public ModifierRecipe Data<T>(T data) where T : notnull
 		{
 			_data = data;
 			//_saveInstructions.Add(new SaveInstruction.Data(@object));
@@ -382,8 +378,10 @@ namespace ModiBuff.Core
 					Logger.LogWarning("[ModiBuff] Saving recipe for a special instruction effect, " +
 					                  $"remove {nameof(ISaveableRecipeEffect)} implementation from the effect");
 
-				_saveInstructions.Add(new SaveInstruction.Effect(_effectTypeIdManager.GetId(effect.GetType()),
-					savableRecipe.SaveRecipeState(), effectOn));
+				int? id = _effectTypeIdManager.GetId(effect.GetType());
+				if (id != null)
+					_saveInstructions.Add(new SaveInstruction.Effect(id.Value, savableRecipe.SaveRecipeState(),
+						effectOn));
 			}
 			else
 			{
@@ -428,7 +426,7 @@ namespace ModiBuff.Core
 		///		effects when <see cref="callbackType"/> is triggered.
 		///		When using multiple CallbackUnits, the order matters.
 		/// </summary>
-		public ModifierRecipe CallbackUnit<TCallbackUnit>(TCallbackUnit callbackType)
+		public ModifierRecipe CallbackUnit<TCallbackUnit>(TCallbackUnit callbackType) where TCallbackUnit : notnull
 		{
 			var effect = new CallbackUnitRegisterEffect<TCallbackUnit>(callbackType);
 			var wrapper = new EffectWrapper(effect, EffectOn.Init);
@@ -537,7 +535,7 @@ namespace ModiBuff.Core
 #if DEBUG && !MODIBUFF_PROFILE
 			Validate();
 #endif
-			EffectWrapper finalRemoveEffectWrapper = null;
+			EffectWrapper? finalRemoveEffectWrapper = null;
 			if (_removeEffectWrapper != null)
 			{
 				finalRemoveEffectWrapper =
@@ -753,7 +751,7 @@ namespace ModiBuff.Core
 			return Id == other.Id;
 		}
 
-		public override bool Equals(object obj)
+		public override bool Equals(object? obj)
 		{
 			return ReferenceEquals(this, obj) || obj is ModifierRecipe other && Equals(other);
 		}

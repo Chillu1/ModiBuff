@@ -4,7 +4,7 @@ namespace ModiBuff.Core
 {
 	public sealed class ModifierLessEffects
 	{
-		public static ModifierLessEffects Instance { get; private set; }
+		public static ModifierLessEffects? Instance { get; private set; }
 
 		private readonly EffectIdManager _idManager;
 		private readonly List<ModifierLessEffect> _effectList;

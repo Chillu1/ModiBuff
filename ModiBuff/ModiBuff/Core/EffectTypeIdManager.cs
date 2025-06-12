@@ -8,7 +8,7 @@ namespace ModiBuff.Core
 		private readonly string _name;
 		private readonly Dictionary<Type, int> _typeIds;
 
-		public static EffectTypeIdManager<T> Instance { get; private set; } //TODO TEMP
+		public static EffectTypeIdManager<T>? Instance { get; private set; } //TODO TEMP
 
 		private int _currentId;
 
@@ -46,16 +46,16 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public int GetId(Type type)
+		public int? GetId(Type type)
 		{
 			if (_typeIds.TryGetValue(type, out int id))
 				return id;
 
 			Logger.LogError($"[ModiBuff] {_name} type {type} not registered");
-			return -1;
+			return null;
 		}
 
-		public Type GetType(int id)
+		public Type? GetType(int id)
 		{
 			foreach (var pair in _typeIds)
 			{
@@ -111,15 +111,15 @@ namespace ModiBuff.Core
 			}
 		}
 
-		public int GetId(Type type) => _effects.GetId(type);
+		public int? GetId(Type type) => _effects.GetId(type);
 
-		public Type GetEffectType(int id) => _effects.GetType(id);
+		public Type? GetEffectType(int id) => _effects.GetType(id);
 
-		public Type GetMetaEffectType(int id) => _metaEffects.GetType(id);
+		public Type? GetMetaEffectType(int id) => _metaEffects.GetType(id);
 
-		public Type GetPostEffectType(int id) => _postEffects.GetType(id);
+		public Type? GetPostEffectType(int id) => _postEffects.GetType(id);
 
-		public Type GetConditionType(int id) => _conditions.GetType(id);
+		public Type? GetConditionType(int id) => _conditions.GetType(id);
 
 		public bool MatchesId(Type type, int id) => _effects.MatchesId(type, id);
 

@@ -4,7 +4,7 @@ namespace ModiBuff.Core
 	{
 		public static void ApplyEffect(this IUnit target, int id, IUnit source)
 		{
-			ModifierLessEffects.Instance.Apply(id, target, source);
+			ModifierLessEffects.Instance!.Apply(id, target, source);
 		}
 	}
 }

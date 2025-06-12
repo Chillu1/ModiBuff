@@ -5,9 +5,9 @@ namespace ModiBuff.Core
 	public readonly struct ModifierReference : IEquatable<ModifierReference>, IComparable<ModifierReference>
 	{
 		public readonly int Id;
-		public readonly int GenId;
+		public readonly int? GenId;
 
-		public ModifierReference(int id, int genId)
+		public ModifierReference(int id, int? genId = null)
 		{
 			Id = id;
 			GenId = genId;
@@ -18,7 +18,7 @@ namespace ModiBuff.Core
 			return Id == other.Id && GenId == other.GenId;
 		}
 
-		public override bool Equals(object obj)
+		public override bool Equals(object? obj)
 		{
 			return obj is ModifierReference other && Equals(other);
 		}
@@ -27,7 +27,10 @@ namespace ModiBuff.Core
 		{
 			unchecked
 			{
-				return (Id * 397) ^ GenId;
+				int hash = 17;
+				hash = hash * 23 + Id.GetHashCode();
+				hash = hash * 23 + (GenId?.GetHashCode() ?? 0);
+				return hash;
 			}
 		}
 
@@ -35,7 +38,7 @@ namespace ModiBuff.Core
 		{
 			int idComparison = Id.CompareTo(other.Id);
 			if (idComparison != 0) return idComparison;
-			return GenId.CompareTo(other.GenId);
+			return Nullable.Compare(GenId, other.GenId);
 		}
 	}
 }

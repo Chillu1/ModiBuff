@@ -134,7 +134,7 @@ namespace ModiBuff.Core
 			}
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
-			(IEffect, EffectOn) HandleEffect(SaveInstruction instruction)
+			(IEffect?, EffectOn) HandleEffect(SaveInstruction instruction)
 			{
 				var effect = (SaveInstruction.Effect)instruction;
 				bool failed = false;
@@ -144,7 +144,7 @@ namespace ModiBuff.Core
 
 				var effectType = _effectTypeIdManager.GetEffectType(effectId);
 				//TODO Find constructor by saved types? Prob not worth
-				var privateConstructors = effectType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
+				var privateConstructors = effectType!.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
 				var constructor = privateConstructors.Length > 0
 					? privateConstructors[0]
 					: effectType.GetConstructors()[0];
@@ -155,12 +155,13 @@ namespace ModiBuff.Core
 				//TODO Refactor entire approach
 				foreach (var property in ((System.Text.Json.JsonElement)effect.SaveData).EnumerateObject())
 				{
-					object value = null;
+					object? value = null;
 
 					if (!parameters[i].ParameterType.IsArray)
 					{
-						value = property.Value.ToValue(parameters[i].ParameterType);
-						if (value == null)
+						bool success;
+						(success, value) = property.Value.ToValue(parameters[i].ParameterType);
+						if (!success)
 						{
 							Logger.LogError(
 								$"[ModiBuff] Failed to load effect state from save data by {Name} for effect {effectId}");
@@ -205,7 +206,7 @@ namespace ModiBuff.Core
 
 				//TODO Shit's kinda wack, but I'm not bothered refactoring this approach right now
 				//Should be restructured/have a better and easier standard than relying on constructors, if possible
-				(IMetaEffect<float, float>[], IPostEffect<float>[], ICondition[]) HandleStates(
+				(IMetaEffect<float, float>[]?, IPostEffect<float>[]?, ICondition[]?) HandleStates(
 					Type parameterType, System.Text.Json.JsonProperty property)
 				{
 					//TODO Refactor
@@ -284,8 +285,10 @@ namespace ModiBuff.Core
 								continue;
 							}
 
-							object value = recipeProperty.Value.ToValue(parameters[j].ParameterType);
-							if (value == null)
+							bool success;
+							object? value;
+							(success, value) = recipeProperty.Value.ToValue(parameters[j].ParameterType);
+							if (!success)
 								Logger.LogError(
 									$"[ModiBuff] Failed to load condition state from save data by {Name} for effect {effectId}");
 
@@ -491,16 +494,16 @@ namespace ModiBuff.Core
 				public const int Id = Refresh.Id + 1;
 
 				public readonly WhenStackEffect WhenStackEffect;
-				public readonly int MaxStacks;
-				public readonly int EveryXStacks;
-				public readonly float SingleStackTime;
-				public readonly float IndependentStackTime;
+				public readonly int? MaxStacks;
+				public readonly int? EveryXStacks;
+				public readonly float? SingleStackTime;
+				public readonly float? IndependentStackTime;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Stack(WhenStackEffect whenStackEffect, int maxStacks, int everyXStacks, float singleStackTime,
-					float independentStackTime) : base(Id)
+				public Stack(WhenStackEffect whenStackEffect, int? maxStacks, int? everyXStacks, float? singleStackTime,
+					float? independentStackTime) : base(Id)
 				{
 					WhenStackEffect = whenStackEffect;
 					MaxStacks = maxStacks;

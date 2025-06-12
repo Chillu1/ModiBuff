@@ -5,8 +5,8 @@ namespace ModiBuff.Core
 	{
 		private readonly ModifierAction _modifierAction;
 
-		private int _id = -1;
-		private int _genId = -1;
+		private int? _id;
+		private int? _genId;
 
 		public ModifierActionEffect(ModifierAction modifierAction)
 		{
@@ -38,19 +38,19 @@ namespace ModiBuff.Core
 		public void Effect(IUnit target, IUnit source)
 		{
 #if DEBUG && !MODIBUFF_PROFILE
-			if (_id == -1)
+			if (_id == null)
 				Logger.LogError("[ModiBuff] ModifierActionEffect.Effect: id wasn't set");
-			if (_genId == -1) //This probably wont matter for not instance stackable modifiers
+			if (_genId == null) //This probably wont matter for not instance stackable modifiers
 				Logger.LogWarning("[ModiBuff] ModifierActionEffect.Effect: genId wasn't set");
 #endif
 
-			((IModifierOwner)target).ModifierController.ModifierAction(_id, _genId, _modifierAction);
+			((IModifierOwner)target).ModifierController.ModifierAction(_id!.Value, _genId!.Value, _modifierAction);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source) => Effect(target, source);
 		public void CallbackEffect(IUnit target, IUnit source) => Effect(target, source);
 
-		public IEffect ShallowClone() => new ModifierActionEffect(_modifierAction, _id);
+		public IEffect ShallowClone() => new ModifierActionEffect(_modifierAction, _id!.Value);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

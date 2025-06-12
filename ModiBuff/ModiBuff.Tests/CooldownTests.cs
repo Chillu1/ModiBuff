@@ -56,13 +56,13 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			int id = IdManager.GetId("InitDamage_Cooldown_Pool");
+			int id = IdManager.GetId("InitDamage_Cooldown_Pool").Value;
 			Pool.Clear();
 			Pool.Allocate(id, 1);
 
 			Unit.AddModifierSelf("InitDamage_Cooldown_Pool"); // 1 second cooldown
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-			Unit.ModifierController.Remove(new ModifierReference(id, -1)); //State reset, back in pool, no cooldown
+			Unit.ModifierController.Remove(new ModifierReference(id)); //State reset, back in pool, no cooldown
 
 			Unit.AddModifierSelf("InitDamage_Cooldown_Pool"); // No cooldown
 			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);

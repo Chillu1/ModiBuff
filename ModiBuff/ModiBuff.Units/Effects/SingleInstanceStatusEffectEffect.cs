@@ -11,13 +11,13 @@ namespace ModiBuff.Core.Units
 		private readonly StatusEffectType _statusEffectType;
 		private readonly float _duration;
 		private readonly StackEffectType _stackEffect;
-		private readonly float _stackValue;
+		private readonly float? _stackValue;
 
 		private float _extraDuration;
 		private float _totalDuration;
 
 		public SingleInstanceStatusEffectEffect(StatusEffectType statusEffectType, float duration,
-			bool revertible = false, StackEffectType stackEffect = StackEffectType.Effect, float stackValue = -1)
+			bool revertible = false, StackEffectType stackEffect = StackEffectType.Effect, float? stackValue = null)
 		{
 			_statusEffectType = statusEffectType;
 			_duration = duration;
@@ -56,10 +56,10 @@ namespace ModiBuff.Core.Units
 		public void StackEffect(int stacks, IUnit target, IUnit source)
 		{
 			if ((_stackEffect & StackEffectType.Add) != 0)
-				_extraDuration += _stackValue;
+				_extraDuration += _stackValue!.Value;
 
 			if ((_stackEffect & StackEffectType.AddStacksBased) != 0)
-				_extraDuration += _stackValue * stacks;
+				_extraDuration += _stackValue!.Value * stacks;
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);

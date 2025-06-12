@@ -11,23 +11,18 @@ namespace ModiBuff.Core
 		private readonly ApplierType _applierType;
 		private readonly bool _hasApplyChecks;
 		private readonly Targeting _targeting;
-		private IMetaEffect<int, int>[] _metaEffects;
+		private IMetaEffect<int, int>[]? _metaEffects;
 
 		public ApplierEffect(string modifierName, ApplierType applierType = ApplierType.None,
 			bool hasApplyChecks = false, Targeting targeting = Targeting.TargetSource)
 		{
-			try
-			{
-				//Could ask the user to instead supply the id, but that isn't ideal
-				_modifierId = ModifierIdManager.GetIdByName(modifierName);
-			}
-			catch (KeyNotFoundException)
-			{
-#if DEBUG && !MODIBUFF_PROFILE
+			//Could ask the user to instead supply the id, but that isn't ideal
+			int? id = ModifierIdManager.GetIdByName(modifierName);
+			if (id == null)
 				Logger.LogError("[ModiBuff] Can't find modifier with name " + modifierName +
 				                ". Either wrong order of effect initialization or wrong modifier name.");
-#endif
-			}
+
+			_modifierId = id ?? -1;
 
 			_applierType = applierType;
 			_hasApplyChecks = hasApplyChecks;
