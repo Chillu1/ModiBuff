@@ -134,8 +134,7 @@ instaces.
 
 ```csharp
 Add("OneTimeInitDamage_LingerDuration")
-    .OneTimeInit()
-    .Effect(new DamageEffect(5), EffectOn.Init)
+    .Effect(new AddDamageEffect(5, EffectState.IsRevertible | EffectState.IsTogglable), EffectOn.Init)
     .Remove(1);
 ```
 
@@ -356,8 +355,7 @@ When attacked, add damage to all attackers, for 1 second (refreshes)
 
 ```csharp
 Add("AddDamage")
-    .OneTimeInit()
-    .Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
+    .Effect(new AddDamageEffect(5, EffectState.IsRevertible | EffectState.IsTogglable), EffectOn.Init)
     .Remove(1).Refresh();
 Add("AddDamageToAllAttackers_OnHit_Event")
     .Effect(new ApplierEffect("AddDamage", targeting: Targeting.SourceTarget), EffectOn.CallbackUnit)

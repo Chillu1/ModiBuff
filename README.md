@@ -333,7 +333,7 @@ Add("Init_DoT_Remove_Refreshable")
 
 You're also able to create modifiers with same effect instance on multiple actions.  
 Ex. Same damage on Init and Interval.
-> Note: init will be triggered each time we try to add the modifier to the unit (unless we set `.OneTimeInit()`).
+> Note: init will be triggered each time we try to add the modifier to the unit (unless we setup `EffectState`).
 
 ```csharp
 Add("InitDoT")
@@ -464,11 +464,15 @@ Add("StackableDamage_DamageOverTime")
     .Stack(WhenStackEffect.Always);
 ```
 
-### OneTimeInit & Aura
+### Togglable & Aura
 
-`OneTimeInit()` makes the modifier only trigger the init effect once, when it's added to the unit.
-Any subsequent adds will not trigger the init effects, but refresh and stack effects will still work as usual.
-This is very useful for aura modifiers, where we don't want to stack the aura effect.
+`OneTimeInit()` was removed (after
+[d9577a1](https://github.com/Chillu1/ModiBuff/commit/d9577a1ba60a0f169c4eaeffefb9e348845558a9))
+, use an`EffectState` implementation like in
+[AddDamageEffect](https://github.com/Chillu1/ModiBuff/blob/d9577a1ba60a0f169c4eaeffefb9e348845558a9/ModiBuff/ModiBuff.Units/Effects/AddDamageEffect.cs#L78)
+for togglable functionality.
+Any subsequent adds will not trigger the effect.
+This is very useful for aura modifiers and non-stacking AoE buffs/debuffs, where we don't want to stack the aura effect.
 
 > After commit [d3cb4a6](https://github.com/Chillu1/ModiBuff/commit/d3cb4a6220ff0ea0260750b68f451bc06091332e)
 > aura handling was refactored and improved.
@@ -478,8 +482,7 @@ with `Aura()`. We can also specify multiple aura Ids, which can be used as range
 
 ```csharp
 Add("InitAddDamageBuff")
-    .OneTimeInit() // EffectState.IsRevertibleAndTogglable can be used instead of OneTimeInit
-    .Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
+    .Effect(new AddDamageEffect(5, EffectState.IsRevertible | EffectState.IsTogglable), EffectOn.Init)
     .Remove(1.05f).Refresh();
 Add("InitAddDamageBuff_Interval")
     .Aura()
@@ -1034,7 +1037,6 @@ This is optional, except for parameterless refresh functions, which should be ca
 
 ```csharp
 Add("Full")
-    .OneTimeInit()
     .ApplyCondition(ConditionType.HealthIsFull)
     .ApplyCooldown(1)
     .ApplyCost(CostType.Mana, 5)
@@ -1538,8 +1540,7 @@ Add("ComplexApplier2_AddDamageAdd")
 
 //AddDamage 5, one time init, remove in 10 seconds, refreshable.
 Add("ComplexApplier2_AddDamage")
-    .OneTimeInit()
-    .Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
+    .Effect(new AddDamageEffect(5, EffectState.IsRevertible | EffectState.IsTogglable), EffectOn.Init)
     .Remove(10).Refresh();
 ```
 

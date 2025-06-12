@@ -103,7 +103,7 @@ namespace ModiBuff.Tests
 				);
 
 				var damageEffect = new DamageEffect(5);
-				var initComponent = new InitComponent(false, new IEffect[] { callback, damageEffect }, check);
+				var initComponent = new InitComponent(new IEffect[] { callback, damageEffect }, check);
 
 				return new Modifier(id, genId, name, initComponent, null, null, check, new SingleTargetComponent(),
 					null, null, null);

@@ -175,8 +175,7 @@ namespace ModiBuff.Tests
 		public void BuffAttackers_WhenHit()
 		{
 			AddRecipe("AddDamage")
-				.OneTimeInit()
-				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible | EffectState.IsTogglable), EffectOn.Init)
 				.Remove(1).Refresh();
 			AddRecipe("BuffAttackers_WhenHit_Event")
 				.Effect(new ApplierEffect("AddDamage", targeting: Targeting.SourceTarget), EffectOn.CallbackUnit)

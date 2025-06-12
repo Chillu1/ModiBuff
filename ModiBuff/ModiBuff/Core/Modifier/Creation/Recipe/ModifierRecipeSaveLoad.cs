@@ -42,9 +42,6 @@ namespace ModiBuff.Core
 					case SaveInstruction.Aura.Id:
 						Aura();
 						break;
-					case SaveInstruction.OneTimeInit.Id:
-						OneTimeInit();
-						break;
 					case SaveInstruction.Interval.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
 						Interval(((SaveInstruction.Interval)instruction).Value);
@@ -358,7 +355,6 @@ namespace ModiBuff.Core
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Initialize), Initialize.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(InstanceStackable), InstanceStackable.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Aura), Aura.Id)]
-		[System.Text.Json.Serialization.JsonDerivedType(typeof(OneTimeInit), OneTimeInit.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Interval), Interval.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Duration), Duration.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Remove), Remove.Id)]
@@ -414,14 +410,9 @@ namespace ModiBuff.Core
 				public const int Id = InstanceStackable.Id + 1;
 			}
 
-			public sealed record OneTimeInit() : SaveInstruction(Id)
-			{
-				public const int Id = Aura.Id + 1;
-			}
-
 			public sealed record Interval : SaveInstruction
 			{
-				public const int Id = OneTimeInit.Id + 1;
+				public const int Id = Aura.Id + 1;
 
 				public readonly float Value;
 

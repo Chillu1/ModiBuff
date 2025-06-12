@@ -14,7 +14,6 @@ namespace ModiBuff.Core
 		private readonly bool _hasEffectChecks;
 
 		private readonly bool _isAura;
-		private readonly bool _oneTimeInit;
 
 		private readonly float _interval;
 		private readonly float _duration;
@@ -68,7 +67,6 @@ namespace ModiBuff.Core
 
 			_isAura = data.IsAura;
 			var tag = data.Tag;
-			_oneTimeInit = data.OneTimeInit;
 			_interval = data.Interval;
 			_duration = data.Duration;
 			_refreshDuration = data.RefreshDuration;
@@ -172,7 +170,7 @@ namespace ModiBuff.Core
 			var effects = _modifierEffectsCreator.Create(genId);
 
 			if (effects.InitEffects != null)
-				initComponent = new InitComponent(_oneTimeInit, effects.InitEffects, effectCheck);
+				initComponent = new InitComponent(effects.InitEffects, effectCheck);
 
 			if (effects.IntervalEffects != null)
 				timeComponents![_timeComponentIndex++] = new IntervalComponent(_interval, _refreshInterval,

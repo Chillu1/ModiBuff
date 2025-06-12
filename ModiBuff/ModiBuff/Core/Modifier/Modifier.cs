@@ -309,7 +309,6 @@ namespace ModiBuff.Core
 		public SaveData SaveState()
 		{
 			var targetSaveData = _targetComponent.SaveState();
-			var initSaveData = _initComponent?.SaveState();
 			var stackSaveData = _stackComponent?.SaveState();
 
 			TimeComponentSaveData[]? timeComponentsSaveData = null;
@@ -323,7 +322,7 @@ namespace ModiBuff.Core
 			var effectCheckSaveData = _effectCheck?.SaveState();
 			var effectSaveState = _effectSaveState?.SaveState();
 
-			return new SaveData(Id, targetSaveData, _multiTarget, effectCheckSaveData, initSaveData, stackSaveData,
+			return new SaveData(Id, targetSaveData, _multiTarget, effectCheckSaveData, stackSaveData,
 				timeComponentsSaveData, effectSaveState);
 		}
 
@@ -351,9 +350,6 @@ namespace ModiBuff.Core
 					Logger.LogError("[ModiBuff] Trying to load target component that isn't single or multi target");
 					break;
 			}
-
-			if (data.InitSaveData != null)
-				_initComponent!.LoadState(data.InitSaveData.Value);
 
 			if (data.StackSaveData != null)
 				_stackComponent!.LoadState(data.StackSaveData.Value);
@@ -414,7 +410,6 @@ namespace ModiBuff.Core
 			public readonly object TargetSaveData;
 			public readonly bool IsMultiTarget;
 			public readonly ModifierCheck.SaveData? EffectCheckSaveData;
-			public readonly InitComponent.SaveData? InitSaveData;
 			public readonly StackComponent.SaveData? StackSaveData;
 			public readonly IReadOnlyList<TimeComponentSaveData>? TimeComponentsSaveData;
 			public readonly IReadOnlyList<EffectSaveState.EffectSaveData>? EffectsSaveData;
@@ -423,15 +418,14 @@ namespace ModiBuff.Core
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(int id, object targetSaveData, bool isMultiTarget,
-				ModifierCheck.SaveData? effectCheckSaveData, InitComponent.SaveData? initSaveData,
-				StackComponent.SaveData? stackSaveData, IReadOnlyList<TimeComponentSaveData>? timeComponentsSaveData,
+				ModifierCheck.SaveData? effectCheckSaveData, StackComponent.SaveData? stackSaveData,
+				IReadOnlyList<TimeComponentSaveData>? timeComponentsSaveData,
 				IReadOnlyList<EffectSaveState.EffectSaveData>? effectsSaveData)
 			{
 				Id = id;
 				TargetSaveData = targetSaveData;
 				IsMultiTarget = isMultiTarget;
 				EffectCheckSaveData = effectCheckSaveData;
-				InitSaveData = initSaveData;
 				StackSaveData = stackSaveData;
 				TimeComponentsSaveData = timeComponentsSaveData;
 				EffectsSaveData = effectsSaveData;

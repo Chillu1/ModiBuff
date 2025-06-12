@@ -30,7 +30,7 @@ namespace ModiBuff.Core.Units
 
 			Add("InitDamageManual", (id, genId, name, tag) =>
 			{
-				var initComponent = new InitComponent(false, new IEffect[] { new DamageEffect(5) }, null);
+				var initComponent = new InitComponent(new IEffect[] { new DamageEffect(5) }, null);
 
 				var modifier = new Modifier(id, genId, name, initComponent, null, null, null,
 					new SingleTargetComponent(), null, null, null);

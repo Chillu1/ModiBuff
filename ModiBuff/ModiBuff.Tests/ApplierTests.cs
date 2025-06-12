@@ -148,8 +148,7 @@ namespace ModiBuff.Tests
 		public void AddDamageStacksEventsAppliers()
 		{
 			AddRecipe("ComplexApplier2_AddDamage")
-				.OneTimeInit()
-				.Effect(new AddDamageEffect(5, EffectState.IsRevertible), EffectOn.Init)
+				.Effect(new AddDamageEffect(5, EffectState.IsRevertible | EffectState.IsTogglable), EffectOn.Init)
 				.Remove(10).Refresh();
 			AddRecipe("ComplexApplier2_AddDamageAdd")
 				.Effect(new ApplierEffect("ComplexApplier2_AddDamage"), EffectOn.Stack)

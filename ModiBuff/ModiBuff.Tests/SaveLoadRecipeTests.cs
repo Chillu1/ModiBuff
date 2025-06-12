@@ -330,19 +330,18 @@ namespace ModiBuff.Tests
 #if !MODIBUFF_SYSTEM_TEXT_JSON
 		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
 #endif
-		public void SaveOneTimeInitRecipeLoad()
+		public void SaveTogglableAddDamageInitRecipeLoad()
 		{
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
-			saveRecipes.Add("OneTimeDamage")
-				.OneTimeInit()
-				.Effect(new DamageEffect(5), EffectOn.Init);
+			saveRecipes.Add("TogglableAddDamage")
+				.Effect(new AddDamageEffect(5, EffectState.IsTogglable), EffectOn.Init);
 
 			SaveLoadStateAndSetup(saveRecipes);
 
-			Unit.AddModifierSelf("OneTimeDamage");
-			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-			Unit.AddModifierSelf("OneTimeDamage");
-			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.AddModifierSelf("TogglableAddDamage");
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
+			Unit.AddModifierSelf("TogglableAddDamage");
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 		}
 
 		[Test]

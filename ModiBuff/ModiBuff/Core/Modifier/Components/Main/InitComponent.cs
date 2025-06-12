@@ -7,14 +7,10 @@ namespace ModiBuff.Core
 		private readonly IEffect[] _effects;
 		private readonly IEffect[]? _registerEffects;
 		private readonly IStateReset[]? _stateResetEffects;
-		private readonly bool _oneTime;
 		private readonly ModifierCheck? _modifierCheck;
 
-		private bool _isInitialized;
-
-		public InitComponent(bool oneTimeInit, IEffect[] effects, ModifierCheck? check)
+		public InitComponent(IEffect[] effects, ModifierCheck? check)
 		{
-			_oneTime = oneTimeInit;
 			_effects = effects;
 
 			//TEMP
@@ -48,23 +44,17 @@ namespace ModiBuff.Core
 			var stateResetEffectsList = new List<IStateReset>();
 			for (int i = 0; i < effects.Length; i++)
 			{
-				var effect = effects[i];
-				if (effect is IRegisterEffect && effect is IStateReset stateResetEffect)
+				if (effects[i] is IStateReset stateResetEffect)
 					stateResetEffectsList.Add(stateResetEffect);
 			}
 
 			_stateResetEffects = stateResetEffectsList.Count > 0 ? stateResetEffectsList.ToArray() : null;
 
 			_modifierCheck = check;
-
-			_isInitialized = false;
 		}
 
 		public void Init(IUnit target, IUnit owner)
 		{
-			if (_oneTime && _isInitialized)
-				return;
-
 			//TODO Not ideal, especially since init is called often
 			for (int i = 0; i < _registerEffects?.Length; i++)
 				_registerEffects[i].Effect(target, owner);
@@ -74,15 +64,10 @@ namespace ModiBuff.Core
 
 			for (int i = 0; i < _effects.Length; i++)
 				_effects[i].Effect(target, owner);
-
-			_isInitialized = true;
 		}
 
 		public void Init(IList<IUnit> targets, IUnit owner)
 		{
-			if (_oneTime && _isInitialized)
-				return;
-
 			for (int i = 0; i < _registerEffects?.Length; i++)
 				_registerEffects[i].Effect(targets, owner);
 
@@ -91,8 +76,6 @@ namespace ModiBuff.Core
 
 			for (int i = 0; i < _effects.Length; i++)
 				_effects[i].Effect(targets, owner);
-
-			_isInitialized = true;
 		}
 
 		public void InitLoad(IUnit target, IUnit owner)
@@ -109,22 +92,8 @@ namespace ModiBuff.Core
 
 		public void ResetState()
 		{
-			_isInitialized = false;
 			for (int i = 0; i < _stateResetEffects?.Length; i++)
 				_stateResetEffects[i].ResetState();
-		}
-
-		public SaveData SaveState() => new SaveData(_isInitialized);
-		public void LoadState(SaveData data) => _isInitialized = data.IsInitialized;
-
-		public readonly struct SaveData
-		{
-			public readonly bool IsInitialized;
-
-#if MODIBUFF_SYSTEM_TEXT_JSON
-			[System.Text.Json.Serialization.JsonConstructor]
-#endif
-			public SaveData(bool isInitialized) => IsInitialized = isInitialized;
 		}
 	}
 }

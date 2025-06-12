@@ -29,23 +29,22 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-		public void OneTimeInitDamage_LingerDuration()
+		public void TogglableInitAddDamage_LingerDuration()
 		{
-			AddRecipe("OneTimeInitDamage_LingerDuration")
-				.OneTimeInit()
-				.Effect(new DamageEffect(5), EffectOn.Init)
+			AddRecipe("TogglableInitAddDamage_LingerDuration")
+				.Effect(new AddDamageEffect(5, EffectState.IsTogglable), EffectOn.Init)
 				.Remove(1);
 			Setup();
 
-			Unit.AddModifierSelf("OneTimeInitDamage_LingerDuration");
-			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.AddModifierSelf("TogglableInitAddDamage_LingerDuration");
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 
-			Unit.AddModifierSelf("OneTimeInitDamage_LingerDuration");
-			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+			Unit.AddModifierSelf("TogglableInitAddDamage_LingerDuration");
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 
 			Unit.Update(1f);
-			Unit.AddModifierSelf("OneTimeInitDamage_LingerDuration");
-			Assert.AreEqual(UnitHealth - 10, Unit.Health);
+			Unit.AddModifierSelf("TogglableInitAddDamage_LingerDuration");
+			Assert.AreEqual(UnitDamage + 5 + 5, Unit.Damage);
 		}
 
 		[Test]

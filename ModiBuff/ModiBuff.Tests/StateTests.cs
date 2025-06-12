@@ -235,26 +235,24 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-		public void OneTimeInit_ResetState()
+		public void TogglableInitDamage_ResetState()
 		{
-			//InitDamageOneTime With1Seconds linger, to not work again (global effect cooldown)
-			AddRecipe("OneTimeInitDamage")
-				.OneTimeInit()
-				.Effect(new DamageEffect(5), EffectOn.Init);
+			AddRecipe("TogglableInitDamage")
+				.Effect(new AddDamageEffect(5, EffectState.IsTogglable), EffectOn.Init);
 			Setup();
 
 			Pool.Clear();
-			int recipeId = IdManager.GetId("OneTimeInitDamage").Value;
+			int recipeId = IdManager.GetId("TogglableInitDamage").Value;
 			Pool.Allocate(recipeId, 1);
 
-			Unit.AddModifierSelf("OneTimeInitDamage"); //Init
-			Unit.AddModifierSelf("OneTimeInitDamage"); //No init
+			Unit.AddModifierSelf("TogglableInitDamage"); //Init
+			Unit.AddModifierSelf("TogglableInitDamage"); //No init
 
 			Unit.ModifierController.Remove(new ModifierReference(recipeId, 0)); //Remove, back to pool, reset state
 
-			Unit.AddModifierSelf("OneTimeInitDamage"); //Use again, init
+			Unit.AddModifierSelf("TogglableInitDamage"); //Use again, init
 
-			Assert.AreEqual(UnitHealth - 10, Unit.Health);
+			Assert.AreEqual(UnitDamage + 5 + 5, Unit.Damage);
 		}
 
 		[Test]

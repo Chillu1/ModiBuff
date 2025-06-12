@@ -162,14 +162,6 @@ namespace ModiBuff.Extensions.Godot
 		//---Actions---
 
 		/// <summary>
-		///		When adding a modifier, trigger the Init effects only once (further adding of the same modifier will not trigger the init effects).
-		/// </summary>
-		/// <remarks>Works well for auras</remarks>
-		[ExportGroup("")] //[ExportGroup("Actions")]
-		[Export]
-		public bool OneTimeInit { get; set; }
-
-		/// <summary>
 		///		How many seconds should pass between the interval effects get applied.
 		/// </summary>
 		/// <example> 0.5 = two times per second </example>

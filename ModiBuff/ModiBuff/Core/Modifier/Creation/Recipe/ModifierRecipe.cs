@@ -24,8 +24,6 @@ namespace ModiBuff.Core
 
 		private object _data;
 
-		private bool _oneTimeInit;
-
 		private bool _currentIsInterval;
 		private float _interval;
 		private float _duration;
@@ -177,17 +175,6 @@ namespace ModiBuff.Core
 		}
 
 		//---Actions---
-
-		/// <summary>
-		///		Only trigger Init effects once. When adding modifier.
-		/// </summary>
-		/// <remarks>Works well for auras</remarks>
-		public ModifierRecipe OneTimeInit()
-		{
-			_oneTimeInit = true;
-			_saveInstructions.Add(new SaveInstruction.OneTimeInit());
-			return this;
-		}
 
 		/// <summary>
 		///		How many seconds should pass between the interval effects get applied.
@@ -574,8 +561,8 @@ namespace ModiBuff.Core
 				_dispelRegisterWrapper, _callbackUnitRegisterWrappers.ToArray(),
 				_callbackEffectRegisterWrappers.ToArray(), _callbackEffectUnitsRegisterWrappers.ToArray(),
 				_hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList,
-				_effectFuncCheckList, _isAura, _tag, _oneTimeInit, _interval, _duration, _refreshDuration,
-				_refreshInterval, _whenStackEffect, _maxStacks, _everyXStacks, _singleStackTime, _independentStackTime);
+				_effectFuncCheckList, _isAura, _tag, _interval, _duration, _refreshDuration, _refreshInterval,
+				_whenStackEffect, _maxStacks, _everyXStacks, _singleStackTime, _independentStackTime);
 			return new ModifierGenerator(in data);
 		}
 

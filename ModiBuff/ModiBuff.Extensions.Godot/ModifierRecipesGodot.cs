@@ -121,9 +121,6 @@ namespace ModiBuff.Extensions.Godot
 
 			//---Actions---
 
-			if (recipeResource.OneTimeInit)
-				recipe.OneTimeInit();
-
 			if (recipeResource.Interval > 0)
 				recipe.Interval(recipeResource.Interval);
 
@@ -186,9 +183,6 @@ namespace ModiBuff.Extensions.Godot
 					recipeResource.SetChanged();
 
 				//---Actions---
-
-				if (auraEffectModifierRecipeResource.OneTimeInit)
-					auraEffectRecipe.OneTimeInit();
 
 				if (auraEffectModifierRecipeResource.RemoveDuration > 0)
 					auraEffectRecipe.Remove(auraEffectModifierRecipeResource.RemoveDuration).Refresh();

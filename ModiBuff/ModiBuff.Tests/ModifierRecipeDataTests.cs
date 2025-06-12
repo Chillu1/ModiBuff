@@ -79,7 +79,7 @@ namespace ModiBuff.Tests
 			AddGenerator("AddDamage" + enemyType, (id, genId, name, tag) =>
 				{
 					var addDamageEffect = new AddDamageEffect(5);
-					var initComponent = new InitComponent(false, new IEffect[] { addDamageEffect }, null);
+					var initComponent = new InitComponent(new IEffect[] { addDamageEffect }, null);
 
 					return new Modifier(id, genId, name, initComponent, null, null, null,
 						new SingleTargetComponent(), null, new EffectStateInfo(addDamageEffect), null);

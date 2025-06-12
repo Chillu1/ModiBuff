@@ -23,7 +23,7 @@ namespace ModiBuff.Tests
 			AddGenerator("InitDamageManual", (id, genId, name, tag) =>
 			{
 				var damageEffect = new DamageEffect(5);
-				var initComponent = new InitComponent(false, new IEffect[] { damageEffect }, null);
+				var initComponent = new InitComponent(new IEffect[] { damageEffect }, null);
 
 				return new Modifier(id, genId, name, initComponent, null, null, null,
 					new SingleTargetComponent(), null, new EffectStateInfo(damageEffect), null);
