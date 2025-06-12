@@ -206,7 +206,7 @@ namespace ModiBuff.Core
 
 				//TODO Shit's kinda wack, but I'm not bothered refactoring this approach right now
 				//Should be restructured/have a better and easier standard than relying on constructors, if possible
-				(IMetaEffect<float, float>[], IPostEffect<float>[], ICondition[]) HandleStates(
+				(IMetaEffect<float, float>[]?, IPostEffect<float>[]?, ICondition[]?) HandleStates(
 					Type parameterType, System.Text.Json.JsonProperty property)
 				{
 					//TODO Refactor

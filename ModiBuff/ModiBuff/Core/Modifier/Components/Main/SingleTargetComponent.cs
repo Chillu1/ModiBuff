@@ -30,8 +30,8 @@ namespace ModiBuff.Core
 		public void LoadState(object saveData)
 		{
 			var data = (SaveData)saveData;
-			Target = UnitHelper.GetUnit(data.TargetId);
-			Source = UnitHelper.GetUnit(data.SourceId);
+			Target = UnitHelper.GetUnit(data.TargetId)!;
+			Source = UnitHelper.GetUnit(data.SourceId)!;
 		}
 
 		public readonly struct SaveData

@@ -426,7 +426,7 @@ namespace ModiBuff.Core
 		///		effects when <see cref="callbackType"/> is triggered.
 		///		When using multiple CallbackUnits, the order matters.
 		/// </summary>
-		public ModifierRecipe CallbackUnit<TCallbackUnit>(TCallbackUnit callbackType)
+		public ModifierRecipe CallbackUnit<TCallbackUnit>(TCallbackUnit callbackType) where TCallbackUnit : notnull
 		{
 			var effect = new CallbackUnitRegisterEffect<TCallbackUnit>(callbackType);
 			var wrapper = new EffectWrapper(effect, EffectOn.Init);

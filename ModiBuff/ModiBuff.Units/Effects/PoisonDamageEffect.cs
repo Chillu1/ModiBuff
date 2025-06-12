@@ -130,7 +130,7 @@ namespace ModiBuff.Core.Units
 			var poisonSaveData = (SaveData)saveData;
 			_extraDamage = poisonSaveData.ExtraDamage;
 			foreach (var kvp in poisonSaveData.PoisonStacksPerUnitId)
-				_poisonStacksPerUnit.Add(UnitHelper.GetUnit(kvp.Key), kvp.Value);
+				_poisonStacksPerUnit.Add(UnitHelper.GetUnit(kvp.Key)!, kvp.Value);
 		}
 
 		public readonly struct SaveData

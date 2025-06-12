@@ -141,7 +141,7 @@ namespace ModiBuff.Core
 			if (_modifiersTop == _modifiers.Length)
 				Array.Resize(ref _modifiers, _modifiers.Length << 1);
 
-			var modifier = ModifierPool.Instance.Rent(id);
+			var modifier = ModifierPool.Instance!.Rent(id);
 
 			if (tag.HasTag(TagType.IsAura))
 			{
@@ -290,7 +290,7 @@ namespace ModiBuff.Core
 					var modifier = _modifiers[i];
 					if (modifier!.Id == modifierReference.Id && modifier.GenId == modifierReference.GenId)
 					{
-						ModifierPool.Instance.Return(modifier);
+						ModifierPool.Instance!.Return(modifier);
 						if (i == --_modifiersTop)
 						{
 							_modifiers[i] = null;
@@ -329,7 +329,7 @@ namespace ModiBuff.Core
 				_modifierIndexes[modifierReference.Id] = -1;
 			}
 
-			ModifierPool.Instance.Return(_modifiers[modifierIndex]!);
+			ModifierPool.Instance!.Return(_modifiers[modifierIndex]!);
 			if (modifierIndex == --_modifiersTop)
 			{
 				_modifiers[modifierIndex] = null;
@@ -352,7 +352,7 @@ namespace ModiBuff.Core
 		{
 			for (int i = 0; i < _modifiersTop; i++)
 			{
-				ModifierPool.Instance.Return(_modifiers[i]!);
+				ModifierPool.Instance!.Return(_modifiers[i]!);
 				_modifiers[i] = null;
 			}
 
@@ -400,7 +400,7 @@ namespace ModiBuff.Core
 						_modifierIndexes[id] = _modifiersTop;
 				}
 
-				var modifier = ModifierPool.Instance.Rent(id);
+				var modifier = ModifierPool.Instance!.Rent(id);
 				modifier.LoadState(modifierSaveData, owner);
 				_modifiers[_modifiersTop++] = modifier;
 				if (tag.HasTag(TagType.IsInit))

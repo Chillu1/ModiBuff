@@ -38,8 +38,8 @@ namespace ModiBuff.Core
 
 			var data = (SaveData)saveData;
 			for (int i = 0; i < data.TargetsId.Count; i++)
-				Targets.Add(UnitHelper.GetUnit(data.TargetsId[i]));
-			Source = UnitHelper.GetUnit(data.SourceId);
+				Targets.Add(UnitHelper.GetUnit(data.TargetsId[i])!);
+			Source = UnitHelper.GetUnit(data.SourceId)!;
 		}
 
 		public readonly struct SaveData

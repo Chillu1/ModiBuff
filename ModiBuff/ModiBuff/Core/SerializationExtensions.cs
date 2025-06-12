@@ -49,7 +49,7 @@ namespace ModiBuff.Core
 		{
 			if (fromLoad is not System.Text.Json.JsonElement jsonElement)
 			{
-				data = default;
+				data = default!;
 				return false;
 			}
 
@@ -59,7 +59,7 @@ namespace ModiBuff.Core
 
 		public static T GetDataFromJsonObject<T>(this object fromLoad)
 		{
-			return TryGetDataFromJsonObject(fromLoad, out T data) ? data : default;
+			return TryGetDataFromJsonObject(fromLoad, out T data) ? data : default!;
 		}
 
 		private static readonly List<object> valuesHolder = new List<object>();

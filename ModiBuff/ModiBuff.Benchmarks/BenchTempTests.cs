@@ -50,6 +50,15 @@ namespace ModiBuff.Tests
 
 		private bool _condition, _conditionTwo;
 
+		private List<Dictionary<EnumTest, float>> _all;
+
+		private enum EnumTest
+		{
+			One,
+			Two,
+			Three,
+		}
+
 		public override void GlobalSetup()
 		{
 			base.GlobalSetup();
@@ -110,10 +119,20 @@ namespace ModiBuff.Tests
 				new AddDamageEffect(5), new AddDamageEffect(5, true)
 			};
 
-			_emptyUnit = new EmptyUnit();*/
+			_emptyUnit = new EmptyUnit();
 
 			_condition = false;
-			_conditionTwo = true;
+			_conditionTwo = true;*/
+
+			_all = new List<Dictionary<EnumTest, float>>();
+			for (int i = 0; i < (int)EnumTest.Three; i++)
+			{
+				var faction = new Dictionary<EnumTest, float>();
+				faction.Add(EnumTest.One, i);
+				faction.Add(EnumTest.Two, i + 1);
+				faction.Add(EnumTest.Three, i + 2);
+				_all.Add(faction);
+			}
 		}
 
 		//[Benchmark(Baseline = true)]
@@ -410,7 +429,7 @@ namespace ModiBuff.Tests
 			ArrayPool<IStackRevertEffect>.Shared.Return(revertEffectsTemp);
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void IfElse()
 		{
 			bool exists;
@@ -432,7 +451,7 @@ namespace ModiBuff.Tests
 			}
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void OverWriteIf()
 		{
 			int index;
@@ -443,6 +462,54 @@ namespace ModiBuff.Tests
 
 			if (index != -1)
 				return;
+		}
+
+		[Benchmark]
+		public void ForeachLoopDictCheck()
+		{
+			(Dictionary<EnumTest, float>, float)? factionWithHighestResource = null;
+			float highestResource = float.MinValue;
+			EnumTest enumTest = EnumTest.Three;
+
+			foreach (var dict in _all)
+			{
+				if (dict[enumTest] > highestResource)
+				{
+					highestResource = dict[enumTest];
+					factionWithHighestResource = (dict, highestResource);
+				}
+			}
+
+			var test = factionWithHighestResource;
+		}
+
+		[Benchmark]
+		public void ForLoopDictCheck()
+		{
+			(Dictionary<EnumTest, float>, float)? factionWithHighestResource = null;
+			float highestResource = float.MinValue;
+			EnumTest enumTest = EnumTest.Three;
+
+			for (int i = 0; i < _all.Count; i++)
+			{
+				Dictionary<EnumTest, float> dict = _all[i];
+				if (dict[enumTest] > highestResource)
+				{
+					highestResource = dict[enumTest];
+					factionWithHighestResource = (dict, highestResource);
+				}
+			}
+
+			var test = factionWithHighestResource;
+		}
+
+		[Benchmark]
+		public void AggregateDictCheck()
+		{
+			var factionWithHighestFood = _all.Aggregate((f1, f2) =>
+				f1[EnumTest.Three] > f2[EnumTest.Three] ? f1 : f2);
+
+			var test = factionWithHighestFood;
 		}
 	}
 }

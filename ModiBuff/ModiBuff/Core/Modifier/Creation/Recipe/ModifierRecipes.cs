@@ -10,7 +10,7 @@ namespace ModiBuff.Core
 	{
 		IModifierGenerator[] GetGenerators();
 		IModifierGenerator GetGenerator(string name);
-		ModifierInfo GetModifierInfo(int id);
+		ModifierInfo? GetModifierInfo(int id);
 	}
 
 	public class ModifierRecipes : IModifierRecipes
@@ -91,7 +91,7 @@ namespace ModiBuff.Core
 #endif
 		}
 
-		public ModifierInfo GetModifierInfo(int id)
+		public ModifierInfo? GetModifierInfo(int id)
 		{
 			if (id < 0 || id >= _modifierInfos.Length)
 			{
@@ -234,7 +234,7 @@ namespace ModiBuff.Core
 		{
 			foreach (var recipeSaveData in saveData.RecipesSaveData)
 			{
-				ModifierRecipe recipe = null;
+				ModifierRecipe? recipe = null;
 				foreach (var instruction in recipeSaveData.Instructions)
 				{
 					if (instruction.InstructionId != ModifierRecipe.SaveInstruction.Initialize.Id)
