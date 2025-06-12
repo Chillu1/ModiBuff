@@ -4,9 +4,9 @@ using System.Linq;
 namespace ModiBuff.Core.Units
 {
 	public sealed class DamageEffect : IStackEffect, IMutableStateEffect, IEffect, ICallbackEffect, IConditionEffect,
-		IStackRevertEffect, IMetaEffectOwner<DamageEffect, float, float>, IPostEffectOwner<DamageEffect, float>,
-		IEffectStateInfo<DamageEffect.Data>, ISavableEffect<DamageEffect.SaveData>,
-		ISaveableRecipeEffect<DamageEffect.RecipeSaveData>
+		IStackRevertEffect, ISetDataEffect, IMetaEffectOwner<DamageEffect, float, float>,
+		IPostEffectOwner<DamageEffect, float>, IEffectStateInfo<DamageEffect.Data>,
+		ISavableEffect<DamageEffect.SaveData>, ISaveableRecipeEffect<DamageEffect.RecipeSaveData>
 	{
 		public bool IsStackRevertible => _valueIsRevertible;
 		public bool UsesMutableState => _stackEffect.UsesMutableState();
@@ -113,6 +113,24 @@ namespace ModiBuff.Core.Units
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
+		}
+
+		public void SetData(IData data)
+		{
+			switch (data)
+			{
+				case EffectData<int> effectData:
+					_extraDamage = effectData.Value;
+					break;
+				case EffectData<float> effectData:
+					_extraDamage = effectData.Value;
+					break;
+				case ModifierData:
+					break;
+				default:
+					Logger.LogError($"Unsupported data type: {data.GetType()}");
+					break;
+			}
 		}
 
 		public void RevertStack(int stacks, IUnit target, IUnit source)

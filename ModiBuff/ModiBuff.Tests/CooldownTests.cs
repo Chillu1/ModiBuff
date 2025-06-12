@@ -106,7 +106,7 @@ namespace ModiBuff.Tests
 				var initComponent = new InitComponent(false, new IEffect[] { callback, damageEffect }, check);
 
 				return new Modifier(id, genId, name, initComponent, null, null, check, new SingleTargetComponent(),
-					null, null);
+					null, null, null);
 			});
 			Setup();
 

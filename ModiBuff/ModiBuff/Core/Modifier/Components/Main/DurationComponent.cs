@@ -3,7 +3,7 @@ namespace ModiBuff.Core
 	public sealed class DurationComponent : ITimeComponent
 	{
 		public float Timer => _timer;
-		public float Time => _duration;
+		public float Time => _customDuration ?? _duration;
 
 		private readonly float _duration;
 		private readonly bool _isRefreshable;
@@ -15,6 +15,8 @@ namespace ModiBuff.Core
 
 		private bool _statusResistanceImplemented;
 		private IStatusResistance _statusResistanceTarget;
+
+		private float? _customDuration;
 
 		public DurationComponent(float duration, bool refreshable, IEffect[] effects, bool affectedByStatusResistance)
 		{
@@ -42,7 +44,8 @@ namespace ModiBuff.Core
 
 		public void Update(float deltaTime)
 		{
-			if (_timer >= _duration)
+			float duration = _customDuration ?? _duration;
+			if (_timer >= duration)
 				return;
 
 			//Special calculation if target has status resistance functionality
@@ -50,7 +53,7 @@ namespace ModiBuff.Core
 				? deltaTime / _statusResistanceTarget.StatusResistance
 				: deltaTime;
 
-			if (_timer < _duration)
+			if (_timer < duration)
 				return;
 
 			switch (_targetComponent)
@@ -72,19 +75,28 @@ namespace ModiBuff.Core
 				_timer = 0;
 		}
 
+		public void SetData(ModifierData data)
+		{
+			if (data is ModifierDurationData durationData)
+				_customDuration = durationData.Duration;
+		}
+
 		public void ResetState()
 		{
 			_timer = 0;
 			_statusResistanceImplemented = false;
 			_statusResistanceTarget = null;
+			_customDuration = null;
 		}
 
-		public TimeComponentSaveData SaveState() => new TimeComponentSaveData(_timer, _statusResistanceImplemented);
+		public TimeComponentSaveData SaveState() =>
+			new TimeComponentSaveData(_timer, _statusResistanceImplemented, _customDuration);
 
 		public void LoadState(TimeComponentSaveData saveData)
 		{
 			_timer = saveData.Timer;
 			_statusResistanceImplemented = saveData.StatusResistanceImplemented;
+			_customDuration = saveData.CustomTime;
 		}
 	}
 }
