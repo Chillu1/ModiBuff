@@ -149,9 +149,9 @@ namespace ModiBuff.Core
 		{
 			if (data is ModifierStartingStacksData stacksData)
 			{
-				if (_independentStackTime > 0)
+				if (_independentStackTime != null)
 					for (int i = 0; i < stacksData.Stacks; i++)
-						_stackTimers.Add(_independentStackTime);
+						_stackTimers!.Add(_independentStackTime.Value);
 
 				_stacks = stacksData.Stacks;
 			}

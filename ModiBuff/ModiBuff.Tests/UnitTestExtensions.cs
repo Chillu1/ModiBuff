@@ -21,7 +21,7 @@ namespace ModiBuff.Tests
 		internal static void AddModifierWithDataSelf(this IModifierOwner unit, string name, IList<IData> data)
 		{
 			CheckForSetup(unit);
-			unit.ModifierController.AddWithData(ModifierIdManager.GetIdByName(name), unit, unit, data);
+			unit.ModifierController.AddWithData(ModifierIdManager.GetIdByName(name).Value, unit, unit, data);
 		}
 
 		internal static void ApplyEffectSelf(this IUnit unit, string name)
