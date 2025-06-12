@@ -144,7 +144,7 @@ namespace ModiBuff.Core
 
 				var effectType = _effectTypeIdManager.GetEffectType(effectId);
 				//TODO Find constructor by saved types? Prob not worth
-				var privateConstructors = effectType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
+				var privateConstructors = effectType!.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
 				var constructor = privateConstructors.Length > 0
 					? privateConstructors[0]
 					: effectType.GetConstructors()[0];

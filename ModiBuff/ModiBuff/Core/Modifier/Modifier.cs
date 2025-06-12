@@ -334,7 +334,7 @@ namespace ModiBuff.Core
 			return Id == other.Id && GenId == other.GenId;
 		}
 
-		public override bool Equals(object obj)
+		public override bool Equals(object? obj)
 		{
 			return ReferenceEquals(this, obj) || obj is Modifier other && Equals(other);
 		}

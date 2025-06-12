@@ -149,7 +149,7 @@ namespace ModiBuff.Core
 		{
 			if (_independentStackTime != null)
 			{
-				RevertStacks(_stackTimers.Count);
+				RevertStacks(_stackTimers!.Count);
 				_stackTimers.Clear();
 			}
 			else
@@ -238,19 +238,19 @@ namespace ModiBuff.Core
 			_stacks = saveData.Stacks;
 			_singleStackTimer = saveData.SingleStackTime;
 			if (saveData.StackTimers != null)
-				_stackTimers.AddRange(saveData.StackTimers);
+				_stackTimers!.AddRange(saveData.StackTimers);
 		}
 
 		public readonly struct SaveData
 		{
 			public readonly int Stacks;
 			public readonly float SingleStackTime;
-			public readonly IReadOnlyList<float> StackTimers;
+			public readonly IReadOnlyList<float>? StackTimers;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public SaveData(int stacks, float singleStackTime, IReadOnlyList<float> stackTimers)
+			public SaveData(int stacks, float singleStackTime, IReadOnlyList<float>? stackTimers)
 			{
 				Stacks = stacks;
 				SingleStackTime = singleStackTime;

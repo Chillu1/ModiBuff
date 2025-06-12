@@ -41,7 +41,7 @@ namespace ModiBuff.Core
 		{
 			int modifiersTop = _modifiersTop;
 			for (int i = 0; i < modifiersTop; i++)
-				_modifiers[i].Update(delta);
+				_modifiers[i]!.Update(delta);
 
 			int removeCount = _modifiersToRemove.Count;
 			if (removeCount == 0)
@@ -119,7 +119,7 @@ namespace ModiBuff.Core
 				{
 					var existingModifier = _modifiers[index];
 					//TODO should we update the modifier targets when init/refreshing/stacking?
-					existingModifier.UpdateSource(source);
+					existingModifier!.UpdateSource(source);
 					if (tag.HasTag(TagType.IsInit))
 						existingModifier.Init();
 					if (tag.HasTag(TagType.IsRefresh) && !tag.HasTag(TagType.CustomRefresh))
@@ -184,14 +184,14 @@ namespace ModiBuff.Core
 			if (genId == null)
 			{
 				for (int i = 0; i < _modifiersTop; i++)
-					if (_modifiers[i].Id == id)
+					if (_modifiers[i]!.Id == id)
 						return true;
 			}
 			else
 			{
 				for (int i = 0; i < _modifiersTop; i++)
 				{
-					var modifier = _modifiers[i];
+					var modifier = _modifiers[i]!;
 					if (modifier.Id == id && modifier.GenId == genId)
 						return true;
 				}
@@ -329,14 +329,14 @@ namespace ModiBuff.Core
 				_modifierIndexes[modifierReference.Id] = -1;
 			}
 
-			ModifierPool.Instance.Return(_modifiers[modifierIndex]);
+			ModifierPool.Instance.Return(_modifiers[modifierIndex]!);
 			if (modifierIndex == --_modifiersTop)
 			{
 				_modifiers[modifierIndex] = null;
 				return;
 			}
 
-			var topModifier = _modifiers[_modifiersTop];
+			var topModifier = _modifiers[_modifiersTop]!;
 			_modifiers[modifierIndex] = topModifier;
 			_modifiers[_modifiersTop] = null;
 			if (Config.UseDictionaryIndexes)
@@ -379,7 +379,7 @@ namespace ModiBuff.Core
 
 			Modifier.SaveData[] modifiersSaveData = new Modifier.SaveData[_modifiersTop];
 			for (int i = 0; i < _modifiersTop; i++)
-				modifiersSaveData[i] = _modifiers[i].SaveState();
+				modifiersSaveData[i] = _modifiers[i]!.SaveState();
 			return new SaveData(modifiersSaveData);
 		}
 

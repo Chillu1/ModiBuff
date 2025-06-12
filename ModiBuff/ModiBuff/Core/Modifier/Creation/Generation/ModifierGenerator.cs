@@ -109,7 +109,7 @@ namespace ModiBuff.Core
 
 			return;
 
-			void SetupChecks(in List<ICheck> checksList, out List<IUpdatableCheck> updatableChecksList,
+			void SetupChecks(in List<ICheck>? checksList, out List<IUpdatableCheck> updatableChecksList,
 				out List<INoUnitCheck> noUnitChecksList, out List<IUnitCheck> unitChecksList,
 				out List<IUsableCheck> usableChecksList, out IUpdatableCheck[] updatableChecks,
 				out INoUnitCheck[] noUnitChecks, out IUnitCheck[] unitChecks, out IUsableCheck[] usableChecks,
@@ -209,7 +209,7 @@ namespace ModiBuff.Core
 				stateNoUnitChecksCount = 0,
 				stateUnitChecksCount = 0,
 				stateUsableChecksCount = 0;
-			IStateCheck[] clonedStateChecks = null;
+			IStateCheck[]? clonedStateChecks = null;
 			if (stateChecks != null && stateChecks.Length > 0)
 			{
 				clonedStateChecks = new IStateCheck[stateChecks.Length];

@@ -10,13 +10,13 @@ namespace ModiBuff.Core
 		private readonly EffectWrapper[] _effectWrappers;
 		private readonly EffectWrapper[] _effectsWithModifierInfoWrappers;
 		private readonly EffectWrapper[] _savableEffectsWrappers;
-		private readonly EffectWrapper _removeEffectWrapper;
+		private readonly EffectWrapper? _removeEffectWrapper;
 		private readonly EffectWrapper? _dispelRegisterWrapper;
-		private readonly EffectWrapper[]? _callbackUnitRegisterWrappers;
-		private readonly EffectWrapper[]? _callbackEffectRegisterWrappers;
+		private readonly EffectWrapper[] _callbackUnitRegisterWrappers;
+		private readonly EffectWrapper[] _callbackEffectRegisterWrappers;
 		private readonly EffectWrapper[] _callbackEffectUnitsRegisterWrappers;
 
-		private IRevertEffect[] _revertEffects;
+		private IRevertEffect[]? _revertEffects;
 		private IEffect[] _initEffects;
 		private IEffect[] _intervalEffects;
 		private IEffect[] _durationEffects;
@@ -43,8 +43,8 @@ namespace ModiBuff.Core
 			_callbackEffectUnitsEffectsIndex3,
 			_callbackEffectUnitsEffectsIndex4;
 
-		public ModifierEffectsCreator(List<EffectWrapper> effectWrappers, EffectWrapper removeEffectWrapper,
-			EffectWrapper dispelRegisterWrapper, EffectWrapper[] callbackUnitRegisterWrappers,
+		public ModifierEffectsCreator(List<EffectWrapper> effectWrappers, EffectWrapper? removeEffectWrapper,
+			EffectWrapper? dispelRegisterWrapper, EffectWrapper[] callbackUnitRegisterWrappers,
 			EffectWrapper[] callbackEffectRegisterWrappers, EffectWrapper[] callbackEffectUnitsRegisterWrappers)
 		{
 			var effectsWithModifierInfoWrappers = new List<EffectWrapper>();
@@ -234,7 +234,7 @@ namespace ModiBuff.Core
 				if (effect is IModifierGenIdOwner modifierGenIdOwner)
 					modifierGenIdOwner.SetGenId(genId);
 				if (effect is IRevertEffect revertEffect && revertEffect.IsRevertible)
-					_revertEffects[_revertEffectsIndex++] = revertEffect;
+					_revertEffects![_revertEffectsIndex++] = revertEffect;
 
 				if ((effectOn & EffectOn.Init) != 0)
 					_initEffects[_initEffectsIndex++] = effect;
@@ -291,12 +291,12 @@ namespace ModiBuff.Core
 			//Set the effects arrays on our special effects (callback, event, remove-revert)
 			//No need to reset manually special wrappers manually
 			//Since they're always fed to effectWrappers, that we reset at the end
-			for (int i = 0; i < _callbackUnitRegisterWrappers?.Length; i++)
+			for (int i = 0; i < _callbackUnitRegisterWrappers.Length; i++)
 				_callbackUnitRegisterWrappers[i].GetEffectAs<IRecipeFeedEffects>().SetEffects(_callbackUnitEffects[i]);
-			for (int i = 0; i < _callbackEffectRegisterWrappers?.Length; i++)
+			for (int i = 0; i < _callbackEffectRegisterWrappers.Length; i++)
 				_callbackEffectRegisterWrappers[i].GetEffectAs<IRecipeFeedEffects>()
 					.SetEffects(_callbackEffectEffects[i]);
-			for (int i = 0; i < _callbackEffectUnitsRegisterWrappers?.Length; i++)
+			for (int i = 0; i < _callbackEffectUnitsRegisterWrappers.Length; i++)
 				_callbackEffectUnitsRegisterWrappers[i].GetEffectAs<IRecipeFeedEffects>()
 					.SetEffects(_callbackEffectUnitsEffects[i]);
 
@@ -304,7 +304,7 @@ namespace ModiBuff.Core
 				_removeEffectWrapper.GetEffectAs<RemoveEffect>().SetRevertibleEffects(_revertEffects);
 
 			_dispelRegisterWrapper?.GetEffectAs<DispelRegisterEffect>()
-				.SetRemoveEffect(_removeEffectWrapper.GetEffectAs<RemoveEffect>());
+				.SetRemoveEffect(_removeEffectWrapper!.GetEffectAs<RemoveEffect>());
 
 			//Reset all the clones in wrappers
 			for (int i = 0; i < _effectWrappers.Length; i++)
