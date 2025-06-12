@@ -18,7 +18,6 @@ namespace ModiBuff.Core
 
 	public abstract record EffectData(Type EffectType, int EffectNumber = 0) : Data;
 
-	//TODO EffectId/EffectType, EffectId 
 	public sealed record EffectData<TValue>(TValue Value, Type EffectType, int EffectNumber = 0)
 		: EffectData(EffectType, EffectNumber);
 }
