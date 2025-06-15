@@ -86,7 +86,7 @@ namespace ModiBuff.Core
 		///		Gets state from effect, used to display values in UI
 		/// </summary>
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
-		public TData GetEffectState<TData>(int id, int genId = 0, int stateNumber = 0) where TData : struct
+		public TData? GetEffectState<TData>(int id, int genId = 0, int stateNumber = 0) where TData : struct
 		{
 			var modifier = GetModifier(id, genId);
 			if (modifier != null)
@@ -94,7 +94,17 @@ namespace ModiBuff.Core
 
 			Logger.LogWarning($"[ModiBuff] Couldn't find state info, {typeof(TData)} at number {stateNumber}, " +
 			                  $"id: {id}, genId: {genId}");
-			return default;
+			return null;
+		}
+
+		public object[]? GetEffectStates(int id, int genId = 0)
+		{
+			var modifier = GetModifier(id, genId);
+			if (modifier != null)
+				return modifier.GetEffectStates();
+
+			Logger.LogWarning($"[ModiBuff] Couldn't find effect states, id: {id}, genId: {genId}");
+			return null;
 		}
 
 		public void Add(int id, IUnit target, IUnit source) => Add(id, target, source, null);

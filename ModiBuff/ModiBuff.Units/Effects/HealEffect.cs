@@ -162,6 +162,7 @@ namespace ModiBuff.Core.Units
 		}
 
 		public Data GetEffectData() => new Data(_heal, _extraHeal);
+		object IEffectStateInfo.GetEffectData() => GetEffectData();
 
 		public void ResetState()
 		{

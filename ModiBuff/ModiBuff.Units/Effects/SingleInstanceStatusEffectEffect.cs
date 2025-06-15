@@ -66,6 +66,7 @@ namespace ModiBuff.Core.Units
 		}
 
 		public Data GetEffectData() => new Data(_duration, _extraDuration);
+		object IEffectStateInfo.GetEffectData() => GetEffectData();
 
 		public void ResetState()
 		{

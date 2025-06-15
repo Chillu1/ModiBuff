@@ -13,13 +13,13 @@ namespace ModiBuff.Core
 		///		Gets state from effect
 		/// </summary>
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
-		public TData GetEffectState<TData>(int stateNumber = 0) where TData : struct
+		public TData? GetEffectState<TData>(int stateNumber = 0) where TData : struct
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (stateNumber < 0 || stateNumber >= _effects.Length)
 			{
 				Logger.LogError("[ModiBuff] State number can't be lower than 0 or higher than effects length");
-				return default;
+				return null;
 			}
 #endif
 
@@ -39,7 +39,16 @@ namespace ModiBuff.Core
 			}
 
 			Logger.LogError($"[ModiBuff] Couldn't find {typeof(TData)} at number {stateNumber}");
-			return default;
+			return null;
+		}
+
+		public object[] GetEffectStates()
+		{
+			object[] states = new object[_effects.Length];
+			for (int i = 0; i < _effects.Length; i++)
+				states[i] = _effects[i].GetEffectData();
+
+			return states;
 		}
 	}
 }

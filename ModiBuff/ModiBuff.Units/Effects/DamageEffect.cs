@@ -149,6 +149,7 @@ namespace ModiBuff.Core.Units
 		}
 
 		public Data GetEffectData() => new Data(_baseDamage, _extraDamage);
+		object IEffectStateInfo.GetEffectData() => GetEffectData();
 
 		public void ResetState() => _extraDamage = 0;
 

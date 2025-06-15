@@ -12,7 +12,8 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Unit.AddModifierSelf("InitDamage");
-			var state = Unit.ModifierController.GetEffectState<DamageEffect.Data>(IdManager.GetId("InitDamage").Value);
+			var state = Unit.ModifierController.GetEffectState<DamageEffect.Data>(IdManager.GetId("InitDamage").Value)
+				.Value;
 			Assert.AreEqual(5, state.BaseDamage);
 			Assert.AreEqual(0, state.ExtraDamage);
 		}
@@ -33,7 +34,7 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("InitDamageManual");
 
 			var state = Unit.ModifierController.GetEffectState<DamageEffect.Data>(IdManager.GetId("InitDamageManual")
-				.Value);
+				.Value).Value;
 			Assert.AreEqual(5, state.BaseDamage);
 			Assert.AreEqual(0, state.ExtraDamage);
 		}
@@ -51,17 +52,18 @@ namespace ModiBuff.Tests
 			int id = IdManager.GetId("DoubleStackDamage").Value;
 			Unit.AddModifierSelf("DoubleStackDamage");
 
-			var firstDamageState = Unit.ModifierController.GetEffectState<DamageEffect.Data>(id);
+			var firstDamageState = Unit.ModifierController.GetEffectState<DamageEffect.Data>(id).Value;
 			Assert.AreEqual(5, firstDamageState.BaseDamage);
 			Assert.AreEqual(0, firstDamageState.ExtraDamage);
-			var secondDamageState = Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, stateNumber: 1);
+			var secondDamageState =
+				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, stateNumber: 1).Value;
 			Assert.AreEqual(10, secondDamageState.BaseDamage);
 			Assert.AreEqual(2, secondDamageState.ExtraDamage);
 
 			Unit.AddModifierSelf("DoubleStackDamage");
 
 			var secondUpdatedDamageState =
-				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, stateNumber: 1);
+				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, stateNumber: 1).Value;
 			Assert.AreEqual(10, secondUpdatedDamageState.BaseDamage);
 			Assert.AreEqual(4, secondUpdatedDamageState.ExtraDamage);
 		}
@@ -140,14 +142,74 @@ namespace ModiBuff.Tests
 
 			var state = Unit.ModifierController
 				.GetEffectState<CallbackStateSaveRegisterEffect<CallbackType, float>.Data>(
-					IdManager.GetId("InitTakeTwoDamageOnTenDamageTaken").Value);
+					IdManager.GetId("InitTakeTwoDamageOnTenDamageTaken").Value).Value;
 			Assert.AreEqual(5, state.State);
 
 			Unit.TakeDamage(5, Unit);
 			var state2 = Unit.ModifierController
 				.GetEffectState<CallbackStateSaveRegisterEffect<CallbackType, float>.Data>(
-					IdManager.GetId("InitTakeTwoDamageOnTenDamageTaken").Value);
+					IdManager.GetId("InitTakeTwoDamageOnTenDamageTaken").Value).Value;
 			Assert.AreEqual(2, state2.State);
+		}
+
+		[Test]
+		public void InitDoubleStackDamage_GetAllStates()
+		{
+			AddRecipe("DoubleStackDamage")
+				.Interval(1)
+				.Effect(new DamageEffect(5), EffectOn.Init | EffectOn.Interval)
+				.Effect(new DamageEffect(10, false, StackEffectType.Add, 2), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always);
+			Setup();
+
+			int id = IdManager.GetId("DoubleStackDamage").Value;
+			Unit.AddModifierSelf("DoubleStackDamage");
+
+			var states = Unit.ModifierController.GetEffectStates(id);
+			for (int i = 0; i < states.Length; i++)
+			{
+				object state = states[i];
+				var data = (DamageEffect.Data)state;
+
+				if (i == 0)
+				{
+					Assert.AreEqual(5, data.BaseDamage);
+					Assert.AreEqual(0, data.ExtraDamage);
+				}
+				else if (i == 1)
+				{
+					Assert.AreEqual(10, data.BaseDamage);
+					Assert.AreEqual(2, data.ExtraDamage);
+				}
+				else
+				{
+					Assert.Fail($"Unexpected state index {i} for DamageEffect.Data");
+				}
+			}
+		}
+
+		[Test]
+		public void NoState_GetEffectState_Missing()
+		{
+			AddRecipe("NoOp")
+				.Effect(new NoOpEffect(), EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("NoOp");
+			var state = Unit.ModifierController.GetEffectState<DamageEffect.Data>(IdManager.GetId("NoOp").Value);
+			Assert.Null(state);
+		}
+
+		[Test]
+		public void NoState_GetEffectStates_Missing()
+		{
+			AddRecipe("NoOp")
+				.Effect(new NoOpEffect(), EffectOn.Init);
+			Setup();
+
+			Unit.AddModifierSelf("NoOp");
+			var state = Unit.ModifierController.GetEffectStates(IdManager.GetId("NoOp").Value);
+			Assert.Null(state);
 		}
 	}
 }

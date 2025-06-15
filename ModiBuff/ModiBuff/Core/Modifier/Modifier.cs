@@ -295,15 +295,26 @@ namespace ModiBuff.Core
 		///		Gets state from effect
 		/// </summary>
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
-		public TData GetEffectState<TData>(int stateNumber = 0) where TData : struct
+		public TData? GetEffectState<TData>(int stateNumber = 0) where TData : struct
 		{
 			if (_effectStateInfo == null)
 			{
 				Logger.LogWarning("[ModiBuff] Trying to get state info from a modifier that doesn't have any.");
-				return default;
+				return null;
 			}
 
 			return _effectStateInfo.Value.GetEffectState<TData>(stateNumber);
+		}
+
+		public object[]? GetEffectStates()
+		{
+			if (_effectStateInfo == null)
+			{
+				Logger.LogWarning("[ModiBuff] Trying to get effect states from a modifier that doesn't have any.");
+				return null;
+			}
+
+			return _effectStateInfo.Value.GetEffectStates();
 		}
 
 		public SaveData SaveState()

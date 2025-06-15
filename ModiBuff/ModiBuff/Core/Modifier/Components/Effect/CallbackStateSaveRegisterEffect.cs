@@ -81,6 +81,7 @@ namespace ModiBuff.Core
 		}
 
 		public Data GetEffectData() => new Data(_stateGetter());
+		object IEffectStateInfo.GetEffectData() => GetEffectData();
 
 		public void ResetState() => _stateSetter(_defaultState);
 
