@@ -15,7 +15,7 @@ namespace ModiBuff.Tests
 		protected ModifierPool Pool { get; private set; }
 		protected ModifierLessEffects Effects { get; private set; }
 		protected ModifierControllerPool ModifierControllerPool { get; private set; }
-		protected UnitHelper UnitHelper { get; private set; }
+		protected UnitHelper<int> UnitHelper { get; private set; }
 
 		protected Unit Unit { get; private set; }
 		protected float UnitHealth { get; private set; }
@@ -64,7 +64,7 @@ namespace ModiBuff.Tests
 			if (!SkipInitDamageRecipe)
 				Recipes.Add("InitDamage").Effect(new DamageEffect(5), EffectOn.Init);
 			Effects = new ModifierLessEffects(EffectIdManager);
-			UnitHelper = new UnitHelper();
+			UnitHelper = new UnitHelper<int>();
 		}
 
 		protected ModifierRecipe AddRecipe(string name) => Recipes.Add(name, "", "");

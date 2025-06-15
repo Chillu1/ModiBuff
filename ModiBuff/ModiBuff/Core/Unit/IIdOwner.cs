@@ -1,7 +1,7 @@
 namespace ModiBuff.Core
 {
-	public interface IIdOwner
+	public interface IIdOwner<out TId>
 	{
-		int Id { get; }
+		TId Id { get; }
 	}
 }

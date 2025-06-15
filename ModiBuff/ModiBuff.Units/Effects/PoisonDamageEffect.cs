@@ -123,7 +123,7 @@ namespace ModiBuff.Core.Units
 		object IShallowClone.ShallowClone() => ShallowClone();
 
 		public object SaveState() => new SaveData(_extraDamage,
-			_poisonStacksPerUnit.ToDictionary(k => ((IIdOwner)k.Key).Id, v => v.Value));
+			_poisonStacksPerUnit.ToDictionary(k => ((IIdOwner<int>)k.Key).Id, v => v.Value));
 
 		public void LoadState(object saveData)
 		{

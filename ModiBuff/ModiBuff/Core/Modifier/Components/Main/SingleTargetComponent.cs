@@ -25,7 +25,32 @@ namespace ModiBuff.Core
 			Target = null;
 		}
 
-		public object SaveState() => new SaveData(((IIdOwner)Target).Id, ((IIdOwner)Source).Id);
+		public object SaveState()
+		{
+			switch (Target, Source)
+			{
+				case (IIdOwner<ulong> target, IIdOwner<ulong> source):
+					return new SaveData(target.Id, source.Id);
+				case (IIdOwner<long> target, IIdOwner<long> source):
+					return new SaveData(target.Id, source.Id);
+				case (IIdOwner<uint> target, IIdOwner<uint> source):
+					return new SaveData(target.Id, source.Id);
+				case (IIdOwner<int> target, IIdOwner<int> source):
+					return new SaveData(target.Id, source.Id);
+				case (IIdOwner<short> target, IIdOwner<short> source):
+					return new SaveData(target.Id, source.Id);
+				case (IIdOwner<ushort> target, IIdOwner<ushort> source):
+					return new SaveData(target.Id, source.Id);
+				case (IIdOwner<sbyte> target, IIdOwner<sbyte> source):
+					return new SaveData(target.Id, source.Id);
+				case (IIdOwner<byte> target, IIdOwner<byte> source):
+					return new SaveData(target.Id, source.Id);
+			}
+
+			Logger.LogError(
+				"[ModiBuff] SingleTargetComponent.SaveState: Target and Source must implement IIdOwner<TId> where TId is int or long.");
+			return new SaveData(-1, -1);
+		}
 
 		public void LoadState(object saveData)
 		{
@@ -36,13 +61,13 @@ namespace ModiBuff.Core
 
 		public readonly struct SaveData
 		{
-			public readonly int TargetId;
-			public readonly int SourceId;
+			public readonly object TargetId;
+			public readonly object SourceId;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public SaveData(int targetId, int sourceId)
+			public SaveData(object targetId, object sourceId)
 			{
 				TargetId = targetId;
 				SourceId = sourceId;

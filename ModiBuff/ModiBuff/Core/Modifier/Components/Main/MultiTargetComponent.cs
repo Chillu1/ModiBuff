@@ -27,8 +27,32 @@ namespace ModiBuff.Core
 			Targets = null;
 		}
 
-		public object SaveState() =>
-			new SaveData(Targets.Select(t => ((IIdOwner)t).Id).ToArray(), ((IIdOwner)Source).Id);
+		public object SaveState() => new SaveData(
+			Targets.Select(t => t switch
+			{
+				IIdOwner<ulong> idOwner => (object)idOwner.Id,
+				IIdOwner<long> idOwner => idOwner.Id,
+				IIdOwner<uint> idOwner => idOwner.Id,
+				IIdOwner<int> idOwner => idOwner.Id,
+				IIdOwner<short> idOwner => idOwner.Id,
+				IIdOwner<ushort> idOwner => idOwner.Id,
+				IIdOwner<sbyte> idOwner => idOwner.Id,
+				IIdOwner<byte> idOwner => idOwner.Id,
+				_ => -1
+			}).ToArray(),
+			Source switch
+			{
+				IIdOwner<ulong> idOwner => idOwner.Id,
+				IIdOwner<long> idOwner => idOwner.Id,
+				IIdOwner<uint> idOwner => idOwner.Id,
+				IIdOwner<int> idOwner => idOwner.Id,
+				IIdOwner<short> idOwner => idOwner.Id,
+				IIdOwner<ushort> idOwner => idOwner.Id,
+				IIdOwner<sbyte> idOwner => idOwner.Id,
+				IIdOwner<byte> idOwner => idOwner.Id,
+				_ => -1
+			}
+		);
 
 		public void LoadState(object saveData)
 		{
@@ -37,23 +61,23 @@ namespace ModiBuff.Core
 			Targets.Clear();
 
 			var data = (SaveData)saveData;
-			for (int i = 0; i < data.TargetsId.Count; i++)
-				Targets.Add(UnitHelper.GetUnit(data.TargetsId[i])!);
-			Source = UnitHelper.GetUnit(data.SourceId)!;
+			for (int i = 0; i < data.targetIds.Count; i++)
+				Targets.Add(UnitHelper.GetUnit(data.targetIds[i])!);
+			Source = UnitHelper.GetUnit(data.sourceId)!;
 		}
 
 		public readonly struct SaveData
 		{
-			public readonly IReadOnlyList<int> TargetsId;
-			public readonly int SourceId;
+			public readonly IReadOnlyList<object> targetIds;
+			public readonly object sourceId;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
-			public SaveData(IReadOnlyList<int> targets, int source)
+			public SaveData(IReadOnlyList<object> targetIds, object sourceId)
 			{
-				TargetsId = targets;
-				SourceId = source;
+				this.targetIds = targetIds;
+				this.sourceId = sourceId;
 			}
 		}
 	}
