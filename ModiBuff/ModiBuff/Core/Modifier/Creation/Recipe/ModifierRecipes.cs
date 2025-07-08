@@ -155,7 +155,7 @@ namespace ModiBuff.Core
 		}
 
 		public void Add(string name, string displayName, string description, in ModifierGeneratorFunc createFunc,
-			TagType tag = TagType.Default, int? auraId = null, object customModifierData = null)
+			TagType tag = TagType.Default, int? auraId = null, object customModifierData = null!)
 		{
 			if (_recipes.ContainsKey(name))
 			{

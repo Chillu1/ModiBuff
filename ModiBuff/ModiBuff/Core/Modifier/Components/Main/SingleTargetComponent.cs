@@ -21,8 +21,8 @@ namespace ModiBuff.Core
 
 		public void ResetState()
 		{
-			Source = null;
-			Target = null;
+			Source = null!;
+			Target = null!;
 		}
 
 		public object SaveState()

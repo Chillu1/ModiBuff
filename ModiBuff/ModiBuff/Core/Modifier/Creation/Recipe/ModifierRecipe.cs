@@ -448,7 +448,7 @@ namespace ModiBuff.Core
 		///		It will NOT trigger any EffectOn.<see cref="EffectOn.CallbackUnit"/> or <see cref="EffectOn.CallbackEffect"/> effects, only the supplied callbacks.
 		///		Can be used with other signatures than <see cref="UnitCallback"/>.
 		/// </summary>
-		public ModifierRecipe Callback<TCallback>(TCallback callbackType, object callback)
+		public ModifierRecipe Callback<TCallback>(TCallback callbackType, Delegate callback)
 		{
 			return Callback(new Callback<TCallback>(callbackType, callback));
 		}
@@ -472,7 +472,7 @@ namespace ModiBuff.Core
 		///		When using multiple CallbackEffects, the order matters.
 		/// </summary>
 		public ModifierRecipe CallbackEffect<TCallbackEffect>(TCallbackEffect callbackType,
-			Func<IEffect, object> @event)
+			Func<IEffect, Delegate> @event)
 		{
 			var effect = new CallbackEffectRegisterEffect<TCallbackEffect>(callbackType, @event);
 			var wrapper = new EffectWrapper(effect, EffectOn.Init);
@@ -506,7 +506,7 @@ namespace ModiBuff.Core
 		///		When using multiple CallbackEffectUnits, the order matters.
 		/// </summary>
 		public ModifierRecipe CallbackEffectUnits<TCallbackEffect>(TCallbackEffect callbackType,
-			Func<IEffect, Func<IUnit, IUnit, object>> @event)
+			Func<IEffect, Func<IUnit, IUnit, Delegate>> @event)
 		{
 			var effect = new CallbackEffectRegisterEffectUnits<TCallbackEffect>(callbackType, @event);
 			var wrapper = new EffectWrapper(effect, EffectOn.Init);

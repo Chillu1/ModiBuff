@@ -28,7 +28,7 @@ namespace ModiBuff.Core
 			Logger.LogError($"[ModiBuff] Unit with id {oldId} not found in any UnitHelper instance");
 			return null;
 
-			bool TryGetUnit<T>(TryParse<T> parse, out IUnit? unit)
+			bool TryGetUnit<T>(TryParse<T> parse, out IUnit? unit) where T : notnull
 			{
 				if (UnitHelper<T>.IsInstanceCreated)
 				{
@@ -51,7 +51,7 @@ namespace ModiBuff.Core
 		}
 	}
 
-	public sealed class UnitHelper<TId>
+	public sealed class UnitHelper<TId> where TId : notnull
 	{
 		public static bool IsInstanceCreated => _instance != null;
 
@@ -92,7 +92,7 @@ namespace ModiBuff.Core
 
 		public static IUnit? GetUnit(TId oldId)
 		{
-			if (_instance!._oldUnitIdToNewUnitIdMap.TryGetValue(oldId, out TId newId))
+			if (_instance!._oldUnitIdToNewUnitIdMap.TryGetValue(oldId, out TId? newId))
 				return _instance._idToUnitMap[newId];
 
 			Logger.LogError($"[ModiBuff] Unit with id {oldId} not found");

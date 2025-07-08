@@ -95,7 +95,7 @@ namespace ModiBuff.Core.Units
 		//single delegates are 76% faster than arrays of IEffects with 1 subscriber/item
 		//But arrays are much faster when there are multiple subscribers/items, 58% faster with 2 items, 150% faster with 5 items.
 		//It's recommended to use the array version generally. But in cases where most modifiers have single callbacks, use delegates.
-		public void RegisterCallback(CallbackType callbackType, object callback)
+		public void RegisterCallback(CallbackType callbackType, Delegate callback)
 		{
 			switch (callbackType)
 			{
@@ -164,7 +164,7 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
-		public void UnRegisterCallback(CallbackType callbackType, object callback)
+		public void UnRegisterCallback(CallbackType callbackType, Delegate callback)
 		{
 			switch (callbackType)
 			{

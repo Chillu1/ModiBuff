@@ -4,7 +4,9 @@ namespace ModiBuff.Core.Units
 		IStackRevertEffect, IEffect, IEffectStateInfo<AddDamageEffect.Data>,
 		ISavableEffect<AddDamageEffect.SaveData>, ISaveableRecipeEffect<AddDamageEffect.RecipeSaveData>
 	{
-		public bool IsRevertible => EffectStateExtensions.HasFlag(_effectState, EffectState.IsRevertible);
+		public bool IsRevertible => EffectStateExtensions.HasFlag(_effectState, EffectState.IsRevertible) ||
+		                            EffectStateExtensions.HasFlag(_effectState, EffectState.IsTogglable);
+
 		public bool IsStackRevertible => EffectStateExtensions.HasFlag(_effectState, EffectState.ValueIsRevertible);
 
 		public bool UsesMutableState => EffectStateExtensions.HasFlag(_effectState, EffectState.IsRevertible) ||

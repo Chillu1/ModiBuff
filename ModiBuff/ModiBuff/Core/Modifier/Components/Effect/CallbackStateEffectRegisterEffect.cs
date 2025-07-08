@@ -15,7 +15,7 @@ namespace ModiBuff.Core
 		private Func<TEffectStateData> _stateGetter;
 		private Action<TEffectStateData> _stateSetter;
 		private TEffectStateData _defaultState;
-		private object[] _callbacks;
+		private Delegate[] _callbacks;
 
 		private bool _isRegistered;
 
@@ -28,7 +28,7 @@ namespace ModiBuff.Core
 
 		public void SetEffects(IEffect[] effects)
 		{
-			_callbacks = new object[effects.Length];
+			_callbacks = new Delegate[effects.Length];
 			for (int i = 0; i < effects.Length; i++)
 			{
 				var context = _event(effects[i]);

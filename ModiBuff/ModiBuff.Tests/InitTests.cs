@@ -44,7 +44,7 @@ namespace ModiBuff.Tests
 
 			Unit.Update(1f);
 			Unit.AddModifierSelf("TogglableInitAddDamage_LingerDuration");
-			Assert.AreEqual(UnitDamage + 5 + 5, Unit.Damage);
+			Assert.AreEqual(UnitDamage + 5, Unit.Damage);
 		}
 
 		[Test]

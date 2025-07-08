@@ -8,13 +8,13 @@ namespace ModiBuff.Core
 		public bool IsRevertible => true;
 
 		private readonly TCallback _callbackType;
-		private readonly Func<IEffect, object> _event;
+		private readonly Func<IEffect, Delegate> _event;
 
-		private object[] _callbacks;
+		private Delegate[] _callbacks;
 
 		private bool _isRegistered;
 
-		public CallbackEffectRegisterEffect(TCallback callbackType, Func<IEffect, object> @event)
+		public CallbackEffectRegisterEffect(TCallback callbackType, Func<IEffect, Delegate> @event)
 		{
 			_callbackType = callbackType;
 			_event = @event;
@@ -22,7 +22,7 @@ namespace ModiBuff.Core
 
 		public void SetEffects(IEffect[] effects)
 		{
-			_callbacks = new object[effects.Length];
+			_callbacks = new Delegate[effects.Length];
 			for (int i = 0; i < effects.Length; i++)
 				_callbacks[i] = _event(effects[i]);
 		}

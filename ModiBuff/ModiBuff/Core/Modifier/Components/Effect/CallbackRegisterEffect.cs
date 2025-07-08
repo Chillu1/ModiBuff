@@ -1,3 +1,5 @@
+using System;
+
 namespace ModiBuff.Core
 {
 	public sealed class CallbackRegisterEffect<TCallback> : IRevertEffect, IEffect, IRegisterEffect,
@@ -47,9 +49,9 @@ namespace ModiBuff.Core
 	public readonly struct Callback<TCallback>
 	{
 		public readonly TCallback CallbackType;
-		public readonly object Action;
+		public readonly Delegate Action;
 
-		public Callback(TCallback callbackType, object action)
+		public Callback(TCallback callbackType, Delegate action)
 		{
 			CallbackType = callbackType;
 			Action = action;

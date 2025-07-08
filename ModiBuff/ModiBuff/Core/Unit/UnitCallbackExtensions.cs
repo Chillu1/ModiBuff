@@ -1,16 +1,18 @@
+using System;
+
 namespace ModiBuff.Core
 {
 	public static class UnitCallbackExtensions
 	{
 		public static void RegisterCallbacks<TCallbackType>(this ICallbackRegistrable<TCallbackType> owner,
-			TCallbackType callbackType, object[] callbacks)
+			TCallbackType callbackType, Delegate[] callbacks)
 		{
 			for (int i = 0; i < callbacks.Length; i++)
 				owner.RegisterCallback(callbackType, callbacks[i]);
 		}
 
 		public static void UnRegisterCallbacks<TCallbackType>(this ICallbackRegistrable<TCallbackType> owner,
-			TCallbackType callbackType, object[] callbacks)
+			TCallbackType callbackType, Delegate[] callbacks)
 		{
 			for (int i = 0; i < callbacks.Length; i++)
 				owner.UnRegisterCallback(callbackType, callbacks[i]);

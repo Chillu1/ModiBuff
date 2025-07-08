@@ -4,12 +4,12 @@ namespace ModiBuff.Core
 {
 	public struct CallbackStateContext<TObjectSaveData>
 	{
-		public readonly object Callback;
+		public readonly Delegate Callback;
 		public readonly Func<TObjectSaveData> StateGetter;
 		public readonly Action<TObjectSaveData> StateSetter;
 		public readonly TObjectSaveData DefaultState;
 
-		public CallbackStateContext(object callback, Func<TObjectSaveData> stateGetter,
+		public CallbackStateContext(Delegate callback, Func<TObjectSaveData> stateGetter,
 			Action<TObjectSaveData> stateSetter, TObjectSaveData defaultState = default!)
 		{
 			Callback = callback;
@@ -28,7 +28,7 @@ namespace ModiBuff.Core
 
 		private readonly TCallback _callbackType;
 		private readonly Func<CallbackStateContext<TEffectStateData>> _event;
-		private readonly object _callback;
+		private readonly Delegate _callback;
 		private readonly TEffectStateData _defaultState;
 		private readonly Func<TEffectStateData> _stateGetter;
 		private readonly Action<TEffectStateData> _stateSetter;
