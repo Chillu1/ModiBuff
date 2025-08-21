@@ -16,10 +16,10 @@ namespace ModiBuff.Core
 
 	public sealed record ModifierStartingStacksData(int Stacks) : ModifierData;
 
-	public abstract record EffectData(Type EffectType, int EffectNumber = 0) : Data;
+	public abstract record EffectData((Type EffectType, int EffectNumber)? Data) : Data;
 
-	public sealed record EffectData<TValue>(TValue Value, Type EffectType, int EffectNumber = 0)
-		: EffectData(EffectType, EffectNumber);
+	public sealed record EffectData<TValue>(TValue Value, (Type EffectType, int EffectNumber)? Data = null)
+		: EffectData(Data);
 }
 
 namespace System.Runtime.CompilerServices

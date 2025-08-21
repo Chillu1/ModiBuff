@@ -208,16 +208,18 @@ namespace ModiBuff.Core
 						_stackComponent?.SetData(modifierData);
 
 						break;
-					case EffectData effectData:
+					case EffectData { Data: not null } effectData:
 						int currentCount = 0;
 						bool success = false;
 						for (int i = 0; i < _setDataEffects.Length; i++)
 						{
 							var effect = _setDataEffects[i];
-							if (!(effect.GetType() == effectData.EffectType))
+
+							if (!(effect.GetType() == effectData.Data.Value.EffectType))
 								continue;
 
-							if (effectData.EffectNumber > 0 && currentCount++ != effectData.EffectNumber)
+							if (effectData.Data.Value.EffectNumber > 0 &&
+							    currentCount++ != effectData.Data.Value.EffectNumber)
 								continue;
 
 							effect.SetData(effectData);
@@ -226,8 +228,12 @@ namespace ModiBuff.Core
 						}
 
 						if (!success)
-							Logger.LogError($"[ModiBuff] Couldn't find effect {effectData.EffectType} " +
-							                $"at number {effectData.EffectNumber}");
+							Logger.LogError($"[ModiBuff] Couldn't find effect {effectData.Data.Value.EffectType} " +
+							                $"at number {effectData.Data.Value.EffectNumber}");
+						break;
+					case EffectData effectData:
+						for (int i = 0; i < _setDataEffects.Length; i++)
+							_setDataEffects[i].SetData(effectData);
 
 						break;
 					default:

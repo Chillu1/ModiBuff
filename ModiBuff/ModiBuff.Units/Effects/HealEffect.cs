@@ -4,8 +4,8 @@ namespace ModiBuff.Core.Units
 {
 	public sealed class HealEffect : IMutableStateEffect, IStackEffect, IRevertEffect, IEffect,
 		ICallbackEffect, IConditionEffect, IStackRevertEffect, IMetaEffectOwner<HealEffect, float, float>,
-		IPostEffectOwner<HealEffect, float>, IEffectStateInfo<HealEffect.Data>, ISavableEffect<HealEffect.SaveData>,
-		ISaveableRecipeEffect<DamageEffect.RecipeSaveData>
+		IPostEffectOwner<HealEffect, float>, ISetDataEffect, IEffectStateInfo<HealEffect.Data>,
+		ISavableEffect<HealEffect.SaveData>, ISaveableRecipeEffect<DamageEffect.RecipeSaveData>
 	{
 		public bool IsRevertible => _effectState != 0;
 		public bool IsStackRevertible => _effectState.HasFlag(EffectState.ValueIsRevertible);
@@ -133,6 +133,24 @@ namespace ModiBuff.Core.Units
 
 			if ((_stackEffect & StackEffectType.Effect) != 0)
 				Effect(target, source);
+		}
+
+		public void SetData(IData data)
+		{
+			switch (data)
+			{
+				case EffectData<int> effectData:
+					_extraHeal = effectData.Value;
+					break;
+				case EffectData<float> effectData:
+					_extraHeal = effectData.Value;
+					break;
+				case ModifierData:
+					break;
+				default:
+					Logger.LogError($"Unsupported data type: {data.GetType()}");
+					break;
+			}
 		}
 
 		public void RevertStack(int stacks, IUnit target, IUnit source)

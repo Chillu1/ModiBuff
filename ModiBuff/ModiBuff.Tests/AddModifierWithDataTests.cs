@@ -1,3 +1,4 @@
+using System;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using NUnit.Framework;
@@ -13,7 +14,7 @@ namespace ModiBuff.Tests
 
 			IData[] data =
 			{
-				new EffectData<int>(3, typeof(DamageEffect), 0),
+				new EffectData<int>(3, new ValueTuple<Type, int>(typeof(DamageEffect), 0)),
 			};
 			Unit.AddModifierWithDataSelf("InitDamage", data);
 
@@ -31,7 +32,7 @@ namespace ModiBuff.Tests
 
 			IData[] data =
 			{
-				new EffectData<int>(3, typeof(DamageEffect), 1),
+				new EffectData<int>(3, new ValueTuple<Type, int>(typeof(DamageEffect), 1)),
 			};
 			Unit.AddModifierWithDataSelf("InitDamageTwo", data);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
@@ -47,7 +48,7 @@ namespace ModiBuff.Tests
 
 			IData[] data =
 			{
-				new EffectData<float>(3f, typeof(DamageEffect), 0),
+				new EffectData<float>(3f, new ValueTuple<Type, int>(typeof(DamageEffect), 0)),
 			};
 
 			Unit.AddModifierWithDataSelf("InitDamage", data);
@@ -62,11 +63,45 @@ namespace ModiBuff.Tests
 			Unit.AddModifierSelf("InitDamage");
 			IData[] data =
 			{
-				new EffectData<int>(3, typeof(DamageEffect), 0),
+				new EffectData<int>(3, new ValueTuple<Type, int>(typeof(DamageEffect), 0)),
 			};
 			Unit.AddModifierWithDataSelf("InitDamage", data);
 
 			Assert.AreEqual(UnitHealth - 5 - 5 - 3, Unit.Health);
+		}
+
+		[Test]
+		public void AddWithData_UnspecifiedEffect()
+		{
+			Setup();
+
+			IData[] data =
+			{
+				new EffectData<int>(3),
+			};
+			Unit.AddModifierWithDataSelf("InitDamage", data);
+
+			Assert.AreEqual(UnitHealth - 5 - 3, Unit.Health);
+		}
+
+		[Test]
+		public void AddWithData_UnspecifiedEffects()
+		{
+			AddRecipe("InitDamageIntervalHeal")
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Interval(1)
+				.Effect(new HealEffect(3), EffectOn.Interval);
+			Setup();
+
+			IData[] data =
+			{
+				new EffectData<int>(3),
+			};
+			Unit.AddModifierWithDataSelf("InitDamageIntervalHeal", data);
+			Assert.AreEqual(UnitHealth - 5 - 3, Unit.Health);
+
+			Unit.Update(1f);
+			Assert.AreEqual(UnitHealth - 5 - 3 + 3 + 3, Unit.Health);
 		}
 
 		[Test]
@@ -137,7 +172,7 @@ namespace ModiBuff.Tests
 		{
 			Setup();
 
-			IData[] data = { new EffectData<int>(3, typeof(HealEffect), 0), };
+			IData[] data = { new EffectData<int>(3, new ValueTuple<Type, int>(typeof(HealEffect), 0)), };
 
 			Assert.Throws<AssertionException>(() => Unit.AddModifierWithDataSelf("InitDamage", data));
 		}
@@ -147,7 +182,7 @@ namespace ModiBuff.Tests
 		{
 			Setup();
 
-			IData[] data = { new EffectData<int>(3, typeof(DamageEffect), 1), };
+			IData[] data = { new EffectData<int>(3, new ValueTuple<Type, int>(typeof(DamageEffect), 1)), };
 
 			Assert.Throws<AssertionException>(() => Unit.AddModifierWithDataSelf("InitDamage", data));
 		}

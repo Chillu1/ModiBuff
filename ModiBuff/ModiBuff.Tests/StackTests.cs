@@ -310,5 +310,25 @@ namespace ModiBuff.Tests
 			Unit.Update(0);
 			Assert.False(Unit.ContainsModifier("RemoveStack"));
 		}
+
+		[Test]
+		public void StackableIntervalDamage()
+		{
+			AddRecipe("StackableDamage_DamageOverTime")
+				.Interval(1)
+				.Effect(new DamageEffect(5, false, StackEffectType.Add, 2), EffectOn.Interval | EffectOn.Stack)
+				.Stack(WhenStackEffect.Always);
+			Setup();
+
+			Unit.AddModifierSelf("StackableDamage_DamageOverTime");
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5 - 2, Unit.Health);
+
+			Unit.AddModifierSelf("StackableDamage_DamageOverTime");
+			Unit.Update(1);
+			Assert.AreEqual(UnitHealth - 5 - 2 - 5 - 4, Unit.Health);
+		}
 	}
 }

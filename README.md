@@ -460,7 +460,7 @@ Resulting in 7 damage every 1 second with 1 stack. 9 with 2 stacks, etc.
 ```csharp
 Add("StackableDamage_DamageOverTime")
     .Interval(1)
-    .Effect(new DamageEffect(5, StackEffectType.Add, 2), EffectOn.Interval)
+    .Effect(new DamageEffect(5, StackEffectType.Add, 2), EffectOn.Interval | EffectOn.Stack)
     .Stack(WhenStackEffect.Always);
 ```
 
