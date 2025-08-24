@@ -25,7 +25,7 @@ namespace ModiBuff.Core
 		public readonly float Duration;
 		public readonly bool RefreshDuration;
 		public readonly bool RefreshInterval;
-		public readonly WhenStackEffect WhenStackEffect;
+		public readonly WhenStackEffect? WhenStackEffect;
 		public readonly int? MaxStacks;
 		public readonly int? EveryXStacks;
 		public readonly float? SingleStackTime;
@@ -37,8 +37,8 @@ namespace ModiBuff.Core
 			EffectWrapper[] callbackEffectUnitsRegisterWrappers, bool hasApplyChecks, List<ICheck>? applyCheckList,
 			bool hasEffectChecks, List<ICheck>? effectCheckList, List<Func<IUnit, bool>>? applyFuncCheckList,
 			List<Func<IUnit, bool>>? effectFuncCheckList, bool isAura, TagType tag, float interval,
-			float duration, bool refreshDuration, bool refreshInterval, WhenStackEffect whenStackEffect, int? maxStacks,
-			int? everyXStacks, float? singleStackTime, float? independentStackTime)
+			float duration, bool refreshDuration, bool refreshInterval, WhenStackEffect? whenStackEffect,
+			int? maxStacks, int? everyXStacks, float? singleStackTime, float? independentStackTime)
 		{
 			Id = id;
 			Name = name;

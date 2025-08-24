@@ -23,7 +23,7 @@ namespace ModiBuff.Core.Units
 				.Damage(5)
 				.Modifiers(
 					("DoT", ApplierType.Attack),
-					("FireSlimeSelfDoT", ApplierType.None)
+					("FireSlimeSelfDoT", null)
 				);
 		}
 	}

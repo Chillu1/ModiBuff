@@ -38,7 +38,7 @@ namespace ModiBuff.Core
 
 		private bool _refreshDuration, _refreshInterval;
 
-		private WhenStackEffect _whenStackEffect;
+		private WhenStackEffect? _whenStackEffect;
 		private int? _maxStacks;
 		private int? _everyXStacks;
 		private float? _singleStackTime;
@@ -615,14 +615,14 @@ namespace ModiBuff.Core
 			ValidateTimeAction(EffectOn.Interval, _interval);
 			ValidateTimeAction(EffectOn.Duration, _duration);
 
-			if (WrappersHaveFlag(EffectOn.Stack) && _whenStackEffect == WhenStackEffect.None)
+			if (WrappersHaveFlag(EffectOn.Stack) && _whenStackEffect == null)
 			{
 				validRecipe = false;
 				Logger.LogError("[ModiBuff] Stack effects set, but no stack effect type set, for modifier: "
 				                + Name + " id: " + Id);
 			}
 
-			if (NoWrappersHaveFlag(EffectOn.Stack) && _whenStackEffect != WhenStackEffect.None)
+			if (NoWrappersHaveFlag(EffectOn.Stack) && _whenStackEffect != null)
 			{
 				validRecipe = false;
 				Logger.LogWarning("[ModiBuff] Stack effect type set, but no stack effects set, for modifier: "

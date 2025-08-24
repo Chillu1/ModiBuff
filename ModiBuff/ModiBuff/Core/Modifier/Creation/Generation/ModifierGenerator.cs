@@ -21,7 +21,7 @@ namespace ModiBuff.Core
 		private readonly bool _refreshDuration;
 		private readonly bool _refreshInterval;
 
-		private readonly WhenStackEffect _whenStackEffect;
+		private readonly WhenStackEffect? _whenStackEffect;
 		private readonly int? _maxStacks;
 		private readonly int? _everyXStacks;
 		private readonly float? _singleStackTime;
@@ -181,7 +181,7 @@ namespace ModiBuff.Core
 					effects.DurationEffects, _durationAffectedByStatusResistance);
 
 			if (effects.StackEffects != null)
-				stackComponent = new StackComponent(_whenStackEffect, _maxStacks,
+				stackComponent = new StackComponent(_whenStackEffect!.Value, _maxStacks,
 					_everyXStacks, _singleStackTime, _independentStackTime, effects.StackEffects, effectCheck);
 
 			var targetComponent = !_isAura ? (ITargetComponent)new SingleTargetComponent() : new MultiTargetComponent();

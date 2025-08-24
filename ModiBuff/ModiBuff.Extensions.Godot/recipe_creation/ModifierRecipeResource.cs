@@ -37,7 +37,7 @@ namespace ModiBuff.Extensions.Godot
 		/// </summary>
 		[ExportSubgroup("")]
 		[Export]
-		public ConditionType ApplyCondition { get; set; }
+		public ConditionType? ApplyCondition { get; set; }
 
 		/// <summary>
 		///		For a modifier to be applied, the owner must be in a specific state (ex. full health).
@@ -61,7 +61,7 @@ namespace ModiBuff.Extensions.Godot
 		///		Cost for when we can trying to apply the modifier to a target, ex. through casting.
 		/// </summary>
 		[Export]
-		public ApplyCostResource ApplyCost { get; set; }
+		public ApplyCostResource? ApplyCost { get; set; }
 
 		/// <summary>
 		///		When trying to apply a modifier, what should the chance be of it being applied? Value between or equal to 0 and 1.
@@ -105,7 +105,7 @@ namespace ModiBuff.Extensions.Godot
 		/// </summary>
 		[ExportSubgroup("")]
 		[Export]
-		public ConditionType EffectCondition { get; set; }
+		public ConditionType? EffectCondition { get; set; }
 
 		/// <summary>
 		///		To trigger the modifier effects, the owner must be in a specific state (ex. full health).
@@ -133,7 +133,7 @@ namespace ModiBuff.Extensions.Godot
 		///		Can't work if the target doesn't have enough resources.
 		/// </summary>
 		[Export]
-		public ApplyCostResource EffectCost { get; set; }
+		public ApplyCostResource? EffectCost { get; set; }
 
 		/// <summary>
 		///		To trigger the modifier effects, what should the chance be of it being applied? Value between or equal to 0 and 1.

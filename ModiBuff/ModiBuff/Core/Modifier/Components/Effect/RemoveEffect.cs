@@ -3,11 +3,11 @@ namespace ModiBuff.Core
 	public sealed class RemoveEffect : IModifierGenIdOwner, IEffect, IStackEffect, IModifierIdOwner,
 		IShallowClone<IEffect>
 	{
-		private readonly ApplierType _applierType;
+		private readonly ApplierType? _applierType;
 		private readonly bool _hasApplyChecks;
 		private IRevertEffect[]? _revertibleEffects;
 		private int _id;
-		private int _genId;
+		private int? _genId;
 
 		public RemoveEffect()
 		{
@@ -15,7 +15,7 @@ namespace ModiBuff.Core
 
 		internal RemoveEffect(int id) => _id = id;
 
-		internal RemoveEffect(int id, ApplierType applierType = ApplierType.None, bool hasApplyChecks = false)
+		internal RemoveEffect(int id, ApplierType? applierType = null, bool hasApplyChecks = false)
 		{
 			_id = id;
 			_applierType = applierType;
@@ -25,14 +25,14 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Manual modifier generation constructor
 		/// </summary>
-		public static RemoveEffect Create(int id, int genId, params IRevertEffect[] revertibleEffects)
+		public static RemoveEffect Create(int id, int? genId, params IRevertEffect[] revertibleEffects)
 		{
-			var effect = new RemoveEffect(id, genId, ApplierType.None, false);
+			var effect = new RemoveEffect(id, genId, null, false);
 			effect.SetRevertibleEffects(revertibleEffects);
 			return effect;
 		}
 
-		private RemoveEffect(int id, int genId, ApplierType applierType, bool hasApplyChecks)
+		private RemoveEffect(int id, int? genId, ApplierType? applierType, bool hasApplyChecks)
 		{
 			_id = id;
 			_genId = genId;
@@ -59,14 +59,14 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _revertibleEffects?.Length; i++)
 				_revertibleEffects[i].RevertEffect(target, source);
 
-			if (_applierType != ApplierType.None)
+			if (_applierType != null)
 			{
 				((IModifierApplierOwner)target).ModifierApplierController.RemoveApplier(_id /*, _genId*/,
-					_applierType, _hasApplyChecks);
+					_applierType.Value, _hasApplyChecks);
 				//return;
 			}
 
-			((IModifierOwner)target).ModifierController.PrepareRemove(_id, _genId);
+			((IModifierOwner)target).ModifierController.PrepareRemove(_id, _genId!.Value);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source) => Effect(target, source);

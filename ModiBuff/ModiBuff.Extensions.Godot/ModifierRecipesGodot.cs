@@ -71,8 +71,8 @@ namespace ModiBuff.Extensions.Godot
 
 			//---ApplyConditions---
 
-			if (recipeResource.ApplyCondition != ConditionType.None)
-				recipe.ApplyCondition(recipeResource.ApplyCondition);
+			if (recipeResource.ApplyCondition != null)
+				recipe.ApplyCondition(recipeResource.ApplyCondition.Value);
 
 			if (recipeResource.StatApplyCondition != null)
 				recipe.ApplyCondition(recipeResource.StatApplyCondition.StatType,
@@ -88,7 +88,7 @@ namespace ModiBuff.Extensions.Godot
 			if (recipeResource.ApplyCooldown > 0)
 				recipe.ApplyCooldown(recipeResource.ApplyCooldown);
 
-			if (recipeResource.ApplyCost is { CostType: not CostType.None })
+			if (recipeResource.ApplyCost != null)
 				recipe.ApplyCost(recipeResource.ApplyCost.CostType, recipeResource.ApplyCost.Amount);
 
 			if (recipeResource.ApplyChance > 0)
@@ -96,8 +96,8 @@ namespace ModiBuff.Extensions.Godot
 
 			//---EffectConditions---
 
-			if (recipeResource.EffectCondition != ConditionType.None)
-				recipe.EffectCondition(recipeResource.EffectCondition);
+			if (recipeResource.EffectCondition != null)
+				recipe.EffectCondition(recipeResource.EffectCondition.Value);
 
 			if (recipeResource.StatEffectCondition != null)
 				recipe.EffectCondition(recipeResource.StatEffectCondition.StatType,
@@ -113,7 +113,7 @@ namespace ModiBuff.Extensions.Godot
 			if (recipeResource.EffectCooldown > 0)
 				recipe.EffectCooldown(recipeResource.EffectCooldown);
 
-			if (recipeResource.EffectCost is { CostType: not CostType.None })
+			if (recipeResource.EffectCost != null)
 				recipe.EffectCost(recipeResource.EffectCost.CostType, recipeResource.EffectCost.Amount);
 
 			if (recipeResource.EffectChance > 0)

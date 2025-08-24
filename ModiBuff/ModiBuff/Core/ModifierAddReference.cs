@@ -7,11 +7,11 @@ namespace ModiBuff.Core
 	{
 		public int Id { get; }
 
-		public bool IsApplierType => ApplierType != ApplierType.None;
+		public bool IsApplierType => ApplierType != null;
 		public bool HasApplyChecks { get; }
-		public ApplierType ApplierType { get; }
+		public ApplierType? ApplierType { get; }
 
-		public ModifierAddReference(IModifierGenerator generator, ApplierType applierType = ApplierType.None)
+		public ModifierAddReference(IModifierGenerator generator, ApplierType? applierType = null)
 		{
 			Id = generator.Id;
 			if (generator is IModifierApplyCheckGenerator applyCheckGenerator)
@@ -19,7 +19,7 @@ namespace ModiBuff.Core
 			ApplierType = applierType;
 		}
 
-		public ModifierAddReference(IModifierApplyCheckGenerator generator, ApplierType applierType = ApplierType.None)
+		public ModifierAddReference(IModifierApplyCheckGenerator generator, ApplierType? applierType = null)
 		{
 			Id = generator.Id;
 			HasApplyChecks = generator.HasApplyChecks;

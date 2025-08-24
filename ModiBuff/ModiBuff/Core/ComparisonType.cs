@@ -6,7 +6,6 @@ namespace ModiBuff.Core
 	[Flags]
 	public enum ComparisonType
 	{
-		None,
 		Greater = 1,
 		Equal = 2,
 		Less = 4,
@@ -22,8 +21,6 @@ namespace ModiBuff.Core
 		{
 			switch (comparisonType)
 			{
-				case ComparisonType.None:
-					return true;
 				case ComparisonType.Greater:
 					return valueOne > valueTwo;
 				case ComparisonType.Equal:

@@ -274,8 +274,6 @@ namespace ModiBuff.Core
 
 	public enum WhenStackEffect
 	{
-		None,
-
 		/// <summary>
 		///		Always trigger the stack effects.
 		/// </summary>

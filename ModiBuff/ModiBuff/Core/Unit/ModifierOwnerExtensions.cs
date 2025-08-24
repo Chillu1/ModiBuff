@@ -23,7 +23,7 @@ namespace ModiBuff.Core
 			{
 				if (owner is IModifierApplierOwner modifierApplierOwner)
 					modifierApplierOwner.ModifierApplierController.TryAddApplier(reference.Id,
-						reference.HasApplyChecks, reference.ApplierType);
+						reference.HasApplyChecks, reference.ApplierType!.Value);
 				else
 					Logger.LogError("[ModiBuff] Tried to add an applier to a unit that is not IModifierApplierOwner");
 			}

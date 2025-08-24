@@ -47,8 +47,6 @@ namespace ModiBuff.Core.Units
 		{
 			switch (conditionType)
 			{
-				case ConditionType.None:
-					break;
 				case ConditionType.HealthIsFull:
 					if (unit is IDamagable<float, float> damagable)
 					{
@@ -101,8 +99,6 @@ namespace ModiBuff.Core.Units
 		{
 			switch (statType)
 			{
-				case StatType.None:
-					break;
 				case StatType.Health:
 					if (unit is IDamagable<float, float> damagable)
 					{

@@ -37,7 +37,7 @@ namespace ModiBuff.Core.Units
 			return this;
 		}
 
-		public UnitRecipe Modifiers(params (string name, ApplierType applier)[] modifiers)
+		public UnitRecipe Modifiers(params (string name, ApplierType? applier)[] modifiers)
 		{
 			_modifierAddReferences = modifiers
 				.Select(r => new ModifierAddReference(_modifierRecipes.GetGenerator(r.Item1), r.Item2)).ToArray();

@@ -5,15 +5,15 @@ namespace ModiBuff.Core
 {
 	public sealed class ApplierEffect : IStackEffect, IEffect, IMetaEffectOwner<ApplierEffect, int, int>
 	{
-		public bool HasApplierType => _applierType != ApplierType.None;
+		public bool HasApplierType => _applierType != null;
 
 		private readonly int _modifierId;
-		private readonly ApplierType _applierType;
+		private readonly ApplierType? _applierType;
 		private readonly bool _hasApplyChecks;
 		private readonly Targeting _targeting;
 		private IMetaEffect<int, int>[]? _metaEffects;
 
-		public ApplierEffect(string modifierName, ApplierType applierType = ApplierType.None,
+		public ApplierEffect(string modifierName, ApplierType? applierType = null,
 			bool hasApplyChecks = false, Targeting targeting = Targeting.TargetSource)
 		{
 			//Could ask the user to instead supply the id, but that isn't ideal
@@ -32,11 +32,11 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		Manual modifier generation constructor
 		/// </summary>
-		public static ApplierEffect Create(int modifierId, ApplierType applierType = ApplierType.None,
+		public static ApplierEffect Create(int modifierId, ApplierType? applierType = null,
 			bool hasApplyChecks = false, Targeting targeting = Targeting.TargetSource) =>
 			new ApplierEffect(modifierId, applierType, hasApplyChecks, targeting);
 
-		private ApplierEffect(int modifierId, ApplierType applierType, bool hasApplyChecks, Targeting targeting)
+		private ApplierEffect(int modifierId, ApplierType? applierType, bool hasApplyChecks, Targeting targeting)
 		{
 			_modifierId = modifierId;
 			_applierType = applierType;
@@ -60,7 +60,7 @@ namespace ModiBuff.Core
 
 			switch (_applierType)
 			{
-				case ApplierType.None:
+				case null:
 					break;
 				case ApplierType.Cast:
 				case ApplierType.Attack:
@@ -73,7 +73,7 @@ namespace ModiBuff.Core
 					}
 
 					modifierApplierOwnerTarget.ModifierApplierController.TryAddApplier(modifierId, _hasApplyChecks,
-						_applierType);
+						_applierType.Value);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();

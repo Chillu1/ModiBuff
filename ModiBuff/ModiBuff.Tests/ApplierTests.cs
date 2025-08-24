@@ -7,6 +7,19 @@ namespace ModiBuff.Tests
 {
 	public sealed class ApplierTests : ModifierTests
 	{
+		/*[Test]
+		public void DamageApplier_Attack_Damage()
+		{
+			Setup();
+
+			int id = ModifierIdManager.GetIdByName("InitDamage").Value;
+			Unit.AddApplierModifier(id, ApplierType.Attack);
+
+			Unit.Attack(Enemy);
+
+			Assert.AreEqual(EnemyHealth - UnitDamage - 5, Enemy.Health);
+		}*/
+
 		[Test]
 		public void DamageApplier_Attack_Damage()
 		{
