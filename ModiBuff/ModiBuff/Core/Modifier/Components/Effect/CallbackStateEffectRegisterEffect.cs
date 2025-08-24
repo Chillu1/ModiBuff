@@ -3,7 +3,7 @@ using System;
 namespace ModiBuff.Core
 {
 	public sealed class CallbackStateEffectRegisterEffect<TCallback, TEffectStateData> :
-		IEffect, IRevertEffect, IRecipeFeedEffects, IMutableStateRegisterEffect, IShallowClone<IEffect>,
+		IEffect, IRevertEffect, IRecipeFeedEffects, IMutableStateRegisterEffect,
 		ISavable<CallbackStateEffectRegisterEffect<TCallback, TEffectStateData>.SaveData>,
 		IEffectStateInfo<CallbackStateEffectRegisterEffect<TCallback, TEffectStateData>.Data>
 	{

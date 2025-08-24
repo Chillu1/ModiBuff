@@ -1,9 +1,10 @@
 namespace ModiBuff.Core
 {
 	/// <summary>
-	///		Marker interface for save/load, so that we register the callback on load
+	///		Register effects that subscribe on init
+	///		Interface for save/load, to register the callback on load
 	/// </summary>
-	public interface IRegisterEffect
+	public interface IRegisterEffect : IShallowClone<IEffect>
 	{
 	}
 }

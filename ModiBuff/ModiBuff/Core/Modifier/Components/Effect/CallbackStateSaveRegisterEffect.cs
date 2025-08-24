@@ -20,8 +20,7 @@ namespace ModiBuff.Core
 	}
 
 	public sealed class CallbackStateSaveRegisterEffect<TCallback, TEffectStateData> : IRevertEffect, IEffect,
-		IMutableStateRegisterEffect, IShallowClone<IEffect>,
-		ISavable<CallbackStateSaveRegisterEffect<TCallback, TEffectStateData>.SaveData>,
+		IMutableStateRegisterEffect, ISavable<CallbackStateSaveRegisterEffect<TCallback, TEffectStateData>.SaveData>,
 		IEffectStateInfo<CallbackStateSaveRegisterEffect<TCallback, TEffectStateData>.Data>
 	{
 		public bool IsRevertible => true;
