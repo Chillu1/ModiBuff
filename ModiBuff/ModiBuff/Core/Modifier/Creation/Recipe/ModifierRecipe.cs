@@ -179,7 +179,6 @@ namespace ModiBuff.Core
 		/// <summary>
 		///		How many seconds should pass between the interval effects get applied.
 		/// </summary>
-		/// <param name="affectedByStatusResistance">Should the interval be affected by status resistance</param>
 		public ModifierRecipe Interval(float interval)
 		{
 			_interval = interval;

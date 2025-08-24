@@ -54,9 +54,6 @@ namespace ModiBuff.Core
 		private readonly IUsableCheck[] _usableEffectChecks;
 		private readonly IStateCheck[] _stateEffectChecks;
 
-		private readonly bool _intervalAffectedByStatusResistance;
-		private readonly bool _durationAffectedByStatusResistance;
-
 		public ModifierGenerator(in ModifierRecipeData data)
 		{
 			Id = data.Id;
@@ -101,9 +98,6 @@ namespace ModiBuff.Core
 					out _unitEffectChecksList, out _usableEffectChecksList, out _updatableEffectChecks,
 					out _noUnitEffectChecks, out _unitEffectChecks, out _usableEffectChecks, out _stateEffectChecks);
 			}
-
-			_intervalAffectedByStatusResistance = !tag.HasTag(TagType.IntervalIgnoresStatusResistance);
-			_durationAffectedByStatusResistance = !tag.HasTag(TagType.DurationIgnoresStatusResistance);
 
 			return;
 
@@ -174,11 +168,11 @@ namespace ModiBuff.Core
 
 			if (effects.IntervalEffects != null)
 				timeComponents![_timeComponentIndex++] = new IntervalComponent(_interval, _refreshInterval,
-					effects.IntervalEffects, effectCheck, _intervalAffectedByStatusResistance);
+					effects.IntervalEffects, effectCheck);
 
 			if (effects.DurationEffects != null)
 				timeComponents![_timeComponentIndex++] = new DurationComponent(_duration, _refreshDuration,
-					effects.DurationEffects, _durationAffectedByStatusResistance);
+					effects.DurationEffects);
 
 			if (effects.StackEffects != null)
 				stackComponent = new StackComponent(_whenStackEffect!.Value, _maxStacks,

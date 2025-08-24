@@ -818,11 +818,11 @@ Tags are a way to mark modifiers, there are a few internal tags that tell the `M
 should be handled. Tags are stored inside `ModifierRecipes` and can only be set on modifier generator creation.
 
 Then there's a few other internal tags that are there for the user:
-`IsInstanceStackable`, `IntervalIgnoresStatusResistance` and `DurationIgnoresStatusResistance`.
+`IsInstanceStackable`, `CustomStack`, `ZeroDefaultStacks`, `IsAura` and `CustomRefresh`.
 There's also automatic tagging for manual modifier generation of: `IsInit`, `IsStack`, and `IsRefresh`.
 
 There's also a `TagType.Default` which we can use in the beginning to define our default tags in the config.
-`Config.DefaultTag = /*Your*/TagType.Default;`
+`Config.DefaultTag = (ulong)/*Your*/TagType.Default;`
 
 But tagging also supports user-defined tags, that can be used for any purpose.
 

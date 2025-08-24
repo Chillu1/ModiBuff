@@ -7,23 +7,23 @@ namespace ModiBuff.Tests
 {
 	public sealed class ModifierTagsTests : ModifierTests
 	{
-		[Test]
+		[Test, Ignore("Skip until Status Resistance is reworked")]
 		public void StatusResistanceTag_DurationIgnores()
 		{
 			AddRecipe("DurationDamageIgnoresStatusResistance")
-				.Tag(Core.Units.TagType.DurationIgnoresStatusResistance)
+				//.Tag(Core.Units.TagType.DurationIgnoresStatusResistance)
 				.Effect(new DamageEffect(5f), EffectOn.Duration)
 				.Duration(1f);
 			Setup();
 
-			Unit.ChangeStatusResistance(0.5f);
+			//Unit.ChangeStatusResistance(0.5f);
 			Unit.AddModifierSelf("DurationDamageIgnoresStatusResistance");
 
 			Unit.Update(0.6f);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 		}
 
-		[Test]
+		[Test, Ignore("Skip until Status Resistance is reworked")]
 		public void StatusResistanceTag_Duration()
 		{
 			AddRecipe("DurationDamage")
@@ -31,24 +31,24 @@ namespace ModiBuff.Tests
 				.Duration(1f);
 			Setup();
 
-			Unit.ChangeStatusResistance(0.5f);
+			//Unit.ChangeStatusResistance(0.5f);
 			Unit.AddModifierSelf("DurationDamage");
 
 			Unit.Update(0.6f);
 			Assert.AreEqual(UnitHealth - 5f, Unit.Health);
 		}
 
-		[Test]
+		[Test, Ignore("Skip until Status Resistance is reworked")]
 		public void StatusResistanceTag_IntervalIgnores_DurationDoesnt()
 		{
 			AddRecipe("IntervalDamageDurationRemove")
-				.Tag(Core.Units.TagType.IntervalIgnoresStatusResistance)
+				//.Tag(Core.Units.TagType.IntervalIgnoresStatusResistance)
 				.Interval(1f)
 				.Effect(new DamageEffect(5f), EffectOn.Interval)
 				.Remove(5f);
 			Setup();
 
-			Unit.ChangeStatusResistance(0.5f);
+			//Unit.ChangeStatusResistance(0.5f);
 			Unit.AddModifierSelf("IntervalDamageDurationRemove");
 
 			Unit.Update(1f);
@@ -102,7 +102,7 @@ namespace ModiBuff.Tests
 			{
 				var timeComponents = new ITimeComponent[]
 				{
-					new IntervalComponent(1f, true, new IEffect[] { new NoOpEffect() }, null, false)
+					new IntervalComponent(1f, true, new IEffect[] { new NoOpEffect() }, null)
 				};
 
 				return new Modifier(id, genId, name, null, timeComponents, null, null, new SingleTargetComponent(),
@@ -112,7 +112,7 @@ namespace ModiBuff.Tests
 			{
 				var timeComponents = new ITimeComponent[]
 				{
-					new DurationComponent(1f, true, new IEffect[] { new NoOpEffect() }, false)
+					new DurationComponent(1f, true, new IEffect[] { new NoOpEffect() })
 				};
 
 				return new Modifier(id, genId, name, null, timeComponents, null, null, new SingleTargetComponent(),

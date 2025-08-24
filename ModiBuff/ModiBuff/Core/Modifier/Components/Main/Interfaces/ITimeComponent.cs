@@ -1,6 +1,6 @@
 namespace ModiBuff.Core
 {
-	public interface ITimeComponent : IStateReset, IUpdateOwner, ITarget, ITimeReference
+	public interface ITimeComponent : IStateReset, ITarget, ITimeReference
 	{
 		void Update(float deltaTime);
 		void Refresh();
@@ -13,16 +13,14 @@ namespace ModiBuff.Core
 	public readonly struct TimeComponentSaveData
 	{
 		public readonly float Timer;
-		public readonly bool StatusResistanceImplemented;
 		public readonly float? CustomTime;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 		[System.Text.Json.Serialization.JsonConstructor]
 #endif
-		public TimeComponentSaveData(float timer, bool statusResistanceImplemented, float? customTime)
+		public TimeComponentSaveData(float timer, float? customTime)
 		{
 			Timer = timer;
-			StatusResistanceImplemented = statusResistanceImplemented;
 			CustomTime = customTime;
 		}
 	}

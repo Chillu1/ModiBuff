@@ -15,8 +15,6 @@ namespace ModiBuff.Core.Units
 		IsInit = Core.TagType.IsInit,
 		IsRefresh = Core.TagType.IsRefresh,
 		IsStack = Core.TagType.IsStack,
-		IntervalIgnoresStatusResistance = Core.TagType.IntervalIgnoresStatusResistance,
-		DurationIgnoresStatusResistance = Core.TagType.DurationIgnoresStatusResistance,
 		CustomStack = Core.TagType.CustomStack,
 		ZeroDefaultStacks = Core.TagType.ZeroDefaultStacks,
 		CustomRefresh = Core.TagType.CustomRefresh,

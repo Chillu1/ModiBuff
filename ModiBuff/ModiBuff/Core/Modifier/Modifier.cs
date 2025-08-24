@@ -86,9 +86,6 @@ namespace ModiBuff.Core
 			//There's no need to update targets, since it's a reference to the list that shouldn't change
 			_targetComponent.Source = source;
 			((MultiTargetComponent)_targetComponent).UpdateTargets(targetsInRange);
-			if (_timeComponents != null)
-				for (int i = 0; i < _timeComponents.Length; i++)
-					_timeComponents[i].UpdateTargetStatusResistance();
 		}
 
 		public void UpdateSource(IUnit source) => _targetComponent.Source = source;
@@ -117,9 +114,6 @@ namespace ModiBuff.Core
 
 			_targetComponent.Source = source;
 			((SingleTargetComponent)_targetComponent).Target = target;
-			if (_timeComponents != null)
-				for (int i = 0; i < _timeComponents.Length; i++)
-					_timeComponents[i].UpdateTargetStatusResistance();
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

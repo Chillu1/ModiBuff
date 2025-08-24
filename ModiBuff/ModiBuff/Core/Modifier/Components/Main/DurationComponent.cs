@@ -8,38 +8,22 @@ namespace ModiBuff.Core
 		private readonly float _duration;
 		private readonly bool _isRefreshable;
 		private readonly IEffect[] _effects;
-		private readonly bool _affectedByStatusResistance;
 		private float _timer;
 
 		private ITargetComponent _targetComponent;
 
-		private bool _statusResistanceImplemented;
-		private IStatusResistance _statusResistanceTarget;
-
 		private float? _customDuration;
 
-		public DurationComponent(float duration, bool refreshable, IEffect[] effects, bool affectedByStatusResistance)
+		public DurationComponent(float duration, bool refreshable, IEffect[] effects)
 		{
 			_duration = duration;
 			_isRefreshable = refreshable;
 			_effects = effects;
-			_affectedByStatusResistance = affectedByStatusResistance;
 		}
 
 		public void SetupTarget(ITargetComponent targetComponent)
 		{
 			_targetComponent = targetComponent;
-			UpdateTargetStatusResistance();
-		}
-
-		public void UpdateTargetStatusResistance()
-		{
-			if (_affectedByStatusResistance && _targetComponent is SingleTargetComponent singleTargetComponent &&
-			    singleTargetComponent.Target is IStatusResistance statusResistance)
-			{
-				_statusResistanceImplemented = true;
-				_statusResistanceTarget = statusResistance;
-			}
 		}
 
 		public void Update(float deltaTime)
@@ -48,10 +32,7 @@ namespace ModiBuff.Core
 			if (_timer >= duration)
 				return;
 
-			//Special calculation if target has status resistance functionality
-			_timer += _affectedByStatusResistance && _statusResistanceImplemented
-				? deltaTime / _statusResistanceTarget.StatusResistance
-				: deltaTime;
+			_timer += deltaTime;
 
 			if (_timer < duration)
 				return;
@@ -84,18 +65,14 @@ namespace ModiBuff.Core
 		public void ResetState()
 		{
 			_timer = 0;
-			_statusResistanceImplemented = false;
-			_statusResistanceTarget = null;
 			_customDuration = null;
 		}
 
-		public TimeComponentSaveData SaveState() =>
-			new TimeComponentSaveData(_timer, _statusResistanceImplemented, _customDuration);
+		public TimeComponentSaveData SaveState() => new TimeComponentSaveData(_timer, _customDuration);
 
 		public void LoadState(TimeComponentSaveData saveData)
 		{
 			_timer = saveData.Timer;
-			_statusResistanceImplemented = saveData.StatusResistanceImplemented;
 			_customDuration = saveData.CustomTime;
 		}
 	}

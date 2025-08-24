@@ -19,8 +19,8 @@ namespace ModiBuff.Core.Units
 	public partial class Unit : IUpdatable, IModifierOwner, IModifierApplierOwner, IAttacker<float, float>,
 		IDamagable<float, float, float, float>, IHealable<float, float>, IHealer<float, float>,
 		IManaOwner<float, float>, IHealthCost<float>, IAddDamage<float>, IPreAttacker, ICallbackCounter,
-		IStatusEffectOwner<LegalAction, StatusEffectType>, IStatusResistance, IKillable,
-		ICallbackUnitRegistrable<CallbackUnitType>, IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
+		IStatusEffectOwner<LegalAction, StatusEffectType>, IKillable, ICallbackUnitRegistrable<CallbackUnitType>,
+		IPosition<Vector2>, IMovable<Vector2>, IUnitEntity,
 		IStatusEffectModifierOwnerLegalTarget<LegalAction, StatusEffectType>, IPoisonable,
 		ISingleInstanceStatusEffectOwner<LegalAction, StatusEffectType>, ICallbackRegistrable<CallbackType>,
 		IAllNonGeneric, ICaster, IStateReset, IIdOwner<int>,
@@ -35,7 +35,6 @@ namespace ModiBuff.Core.Units
 		public float HealValue { get; private set; }
 		public float Mana { get; private set; }
 		public float MaxMana { get; private set; }
-		public float StatusResistance { get; private set; } = 1f;
 		public UnitType UnitType { get; private set; }
 		public Vector2 Position { get; private set; }
 		public int PoisonStacks { get; private set; }
@@ -419,20 +418,6 @@ namespace ModiBuff.Core.Units
 			return dealtDamage + oldHealth - Health;
 		}
 
-		//---StatusResistances---
-
-		public void ChangeStatusResistance(float value)
-		{
-#if DEBUG && !MODIBUFF_PROFILE
-			if (value <= 0)
-			{
-				Logger.LogError("[ModiBuff.Units] StatusResistance can't be negative or zero.");
-				return;
-			}
-#endif
-			StatusResistance = value;
-		}
-
 		//---Modifier based---
 
 		public void Dispel(TagType tag, IUnit source)
@@ -520,7 +505,7 @@ namespace ModiBuff.Core.Units
 
 		public SaveData SaveState()
 		{
-			return new SaveData(Id, UnitTag, Health, MaxHealth, Damage, HealValue, Mana, MaxMana, StatusResistance,
+			return new SaveData(Id, UnitTag, Health, MaxHealth, Damage, HealValue, Mana, MaxMana,
 				UnitType, IsDead, ModifierController.SaveState(), ModifierApplierController.SaveState(),
 				_statusEffectController.SaveState(), _singleInstanceStatusEffectController.SaveState());
 		}
@@ -534,7 +519,6 @@ namespace ModiBuff.Core.Units
 			HealValue = data.HealValue;
 			Mana = data.Mana;
 			MaxMana = data.MaxMana;
-			StatusResistance = data.StatusResistance;
 			UnitType = data.UnitType;
 			IsDead = data.IsDead;
 			ModifierController.LoadState(data.ModifierControllerSaveData, this);
@@ -558,7 +542,6 @@ namespace ModiBuff.Core.Units
 			public readonly float HealValue;
 			public readonly float Mana;
 			public readonly float MaxMana;
-			public readonly float StatusResistance;
 			public readonly UnitType UnitType;
 			public readonly bool IsDead;
 
@@ -572,7 +555,7 @@ namespace ModiBuff.Core.Units
 			[System.Text.Json.Serialization.JsonConstructor]
 #endif
 			public SaveData(int id, UnitTag unitTag, float health, float maxHealth, float damage, float healValue,
-				float mana, float maxMana, float statusResistance, UnitType unitType, bool isDead,
+				float mana, float maxMana, UnitType unitType, bool isDead,
 				ModifierController.SaveData modifierControllerSaveData,
 				ModifierApplierController.SaveData modifierApplierControllerSaveData,
 				MultiInstanceStatusEffectController.SaveData multiInstanceStatusEffectControllerSaveData,
@@ -586,7 +569,6 @@ namespace ModiBuff.Core.Units
 				HealValue = healValue;
 				Mana = mana;
 				MaxMana = maxMana;
-				StatusResistance = statusResistance;
 				UnitType = unitType;
 				IsDead = isDead;
 				ModifierControllerSaveData = modifierControllerSaveData;

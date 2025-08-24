@@ -11,15 +11,13 @@ namespace ModiBuff.Core
 	[Flags]
 	public enum TagType : ulong
 	{
-		Default = IntervalIgnoresStatusResistance,
+		Default = None,
 
 		None = 0,
 		IsInit = 1ul << 0,
 		IsRefresh = 1ul << 1,
 		IsStack = 1ul << 2,
 		IsInstanceStackable = 1ul << 3,
-		IntervalIgnoresStatusResistance = 1ul << 4,
-		DurationIgnoresStatusResistance = 1ul << 5,
 
 		//Most likely need to reserve around 8-16 bits, or split internal and user tagging
 		//Will be decided/fixed on 1.0 release

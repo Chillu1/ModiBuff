@@ -283,12 +283,12 @@ namespace ModiBuff.Tests
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			saveRecipes.Add("TagDamage")
 				.Effect(new DamageEffect(5), EffectOn.Init)
-				.Tag(TagType.DurationIgnoresStatusResistance);
+				.Tag(TagType.ZeroDefaultStacks);
 
 			SaveLoadStateAndSetup(saveRecipes);
 
 			int id = IdManager.GetId("TagDamage").Value;
-			Assert.True(ModifierRecipes.GetTag(id).HasTag(TagType.DurationIgnoresStatusResistance));
+			Assert.True(ModifierRecipes.GetTag(id).HasTag(TagType.ZeroDefaultStacks));
 		}
 
 		[Test]
@@ -297,15 +297,17 @@ namespace ModiBuff.Tests
 #endif
 		public void SaveRemoveTagRecipeLoad()
 		{
+			Config.DefaultTag = (ulong)TagType.ZeroDefaultStacks;
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			saveRecipes.Add("RemoveTagDamage")
 				.Effect(new DamageEffect(5), EffectOn.Init)
-				.RemoveTag(TagType.Default);
+				.RemoveTag(TagType.ZeroDefaultStacks);
 
 			SaveLoadStateAndSetup(saveRecipes);
 
 			int id = IdManager.GetId("RemoveTagDamage").Value;
-			Assert.False(ModifierRecipes.GetTag(id).HasTag(TagType.Default));
+			Assert.False(ModifierRecipes.GetTag(id).HasTag(TagType.ZeroDefaultStacks));
+			Config.DefaultTag = (ulong)TagType.Default;
 		}
 
 		[Test]
@@ -314,16 +316,18 @@ namespace ModiBuff.Tests
 #endif
 		public void SaveSetTagRecipeLoad()
 		{
+			Config.DefaultTag = (ulong)TagType.CustomRefresh;
 			var saveRecipes = new ModifierRecipes(IdManager, EffectTypeIdManager);
 			saveRecipes.Add("SetTagDamage")
 				.Effect(new DamageEffect(5), EffectOn.Init)
-				.SetTag(TagType.DurationIgnoresStatusResistance);
+				.SetTag(TagType.ZeroDefaultStacks);
 
 			SaveLoadStateAndSetup(saveRecipes);
 
 			int id = IdManager.GetId("SetTagDamage").Value;
-			Assert.True(ModifierRecipes.GetTag(id).HasTag(TagType.DurationIgnoresStatusResistance));
-			Assert.False(ModifierRecipes.GetTag(id).HasTag(TagType.Default));
+			Assert.True(ModifierRecipes.GetTag(id).HasTag(TagType.ZeroDefaultStacks));
+			Assert.False(ModifierRecipes.GetTag(id).HasTag(TagType.CustomRefresh));
+			Config.DefaultTag = (ulong)TagType.Default;
 		}
 
 		[Test]
