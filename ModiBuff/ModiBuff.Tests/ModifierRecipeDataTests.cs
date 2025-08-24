@@ -82,7 +82,7 @@ namespace ModiBuff.Tests
 					var initComponent = new InitComponent(new IEffect[] { addDamageEffect }, null);
 
 					return new Modifier(id, genId, name, initComponent, null, null, null,
-						new SingleTargetComponent(), null, new EffectStateInfo(addDamageEffect), null);
+						new SingleTargetComponent(), null, new EffectStateInfo((EffectOn.Init, addDamageEffect)), null);
 				}, Core.Units.TagType.Default,
 				customModifierData: new AddModifierCommonData<EnemyUnitType>(ModifierAddType.Self, enemyType));
 			Setup();

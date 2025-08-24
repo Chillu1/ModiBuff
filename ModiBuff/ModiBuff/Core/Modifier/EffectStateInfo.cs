@@ -5,15 +5,15 @@ namespace ModiBuff.Core
 	/// </summary>
 	public readonly struct EffectStateInfo
 	{
-		private readonly IEffectStateInfo[] _effects;
+		private readonly (EffectOn On, IEffectStateInfo Info)[] _effects;
 
-		public EffectStateInfo(params IEffectStateInfo[] effects) => _effects = effects;
+		public EffectStateInfo(params (EffectOn, IEffectStateInfo)[] effects) => _effects = effects;
 
 		/// <summary>
 		///		Gets state from effect
 		/// </summary>
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
-		public TData? GetEffectState<TData>(int stateNumber = 0) where TData : struct
+		public (EffectOn EffectOn, TData Data)? GetEffectState<TData>(int stateNumber = 0) where TData : struct
 		{
 #if DEBUG && !MODIBUFF_PROFILE
 			if (stateNumber < 0 || stateNumber >= _effects.Length)
@@ -26,7 +26,8 @@ namespace ModiBuff.Core
 			int currentNumber = stateNumber;
 			for (int i = 0; i < _effects.Length; i++)
 			{
-				if (!(_effects[i] is IEffectStateInfo<TData> stateInfo))
+				var effect = _effects[i];
+				if (!(effect.Info is IEffectStateInfo<TData> stateInfo))
 					continue;
 
 				if (currentNumber > 0)
@@ -35,18 +36,21 @@ namespace ModiBuff.Core
 					continue;
 				}
 
-				return stateInfo.GetEffectData();
+				return (effect.On, stateInfo.GetEffectData());
 			}
 
 			Logger.LogError($"[ModiBuff] Couldn't find {typeof(TData)} at number {stateNumber}");
 			return null;
 		}
 
-		public object[] GetEffectStates()
+		public (EffectOn EffectOn, object Data)[] GetEffectStates()
 		{
-			object[] states = new object[_effects.Length];
+			var states = new (EffectOn EffectOn, object Data)[_effects.Length];
 			for (int i = 0; i < _effects.Length; i++)
-				states[i] = _effects[i].GetEffectData();
+			{
+				var effect = _effects[i];
+				states[i] = (effect.On, effect.Info.GetEffectData());
+			}
 
 			return states;
 		}

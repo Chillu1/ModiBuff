@@ -86,7 +86,8 @@ namespace ModiBuff.Core
 		///		Gets state from effect, used to display values in UI
 		/// </summary>
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
-		public TData? GetEffectState<TData>(int id, int genId = 0, int stateNumber = 0) where TData : struct
+		public (EffectOn EffectOn, TData Data)? GetEffectState<TData>(int id, int genId = 0, int stateNumber = 0)
+			where TData : struct
 		{
 			var modifier = GetModifier(id, genId);
 			if (modifier != null)
@@ -97,7 +98,7 @@ namespace ModiBuff.Core
 			return null;
 		}
 
-		public object[]? GetEffectStates(int id, int genId = 0)
+		public (EffectOn EffectOn, object Data)[]? GetEffectStates(int id, int genId = 0)
 		{
 			var modifier = GetModifier(id, genId);
 			if (modifier != null)

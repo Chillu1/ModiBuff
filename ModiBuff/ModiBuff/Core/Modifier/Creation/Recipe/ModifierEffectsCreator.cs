@@ -286,9 +286,14 @@ namespace ModiBuff.Core
 			EffectStateInfo? effectStateInfo = null;
 			if (_effectsWithModifierInfoWrappers.Length > 0)
 			{
-				var modifierStateInfoEffects = new IEffectStateInfo[_effectsWithModifierInfoWrappers.Length];
+				var modifierStateInfoEffects =
+					new (EffectOn, IEffectStateInfo)[_effectsWithModifierInfoWrappers.Length];
 				for (int i = 0; i < _effectsWithModifierInfoWrappers.Length; i++)
-					modifierStateInfoEffects[i] = (IEffectStateInfo)_effectsWithModifierInfoWrappers[i].GetEffect();
+				{
+					var info = _effectsWithModifierInfoWrappers[i];
+					modifierStateInfoEffects[i] = (info.EffectOn, (IEffectStateInfo)info.GetEffect());
+				}
+
 				effectStateInfo = new EffectStateInfo(modifierStateInfoEffects);
 			}
 

@@ -295,7 +295,7 @@ namespace ModiBuff.Core
 		///		Gets state from effect
 		/// </summary>
 		/// <param name="stateNumber">Which state should be returned, 0 = first</param>
-		public TData? GetEffectState<TData>(int stateNumber = 0) where TData : struct
+		public (EffectOn EffectOn, TData Data)? GetEffectState<TData>(int stateNumber = 0) where TData : struct
 		{
 			if (_effectStateInfo == null)
 			{
@@ -306,7 +306,7 @@ namespace ModiBuff.Core
 			return _effectStateInfo.Value.GetEffectState<TData>(stateNumber);
 		}
 
-		public object[]? GetEffectStates()
+		public (EffectOn EffectOn, object Data)[]? GetEffectStates()
 		{
 			if (_effectStateInfo == null)
 			{
