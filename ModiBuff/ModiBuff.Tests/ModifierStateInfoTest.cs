@@ -53,20 +53,20 @@ namespace ModiBuff.Tests
 			int id = IdManager.GetId("DoubleStackDamage").Value;
 			Unit.AddModifierSelf("DoubleStackDamage");
 
-			var firstDamageState = Unit.ModifierController.GetEffectState<DamageEffect.Data>(id).Value.Data;
-			Assert.AreEqual(5, firstDamageState.BaseDamage);
-			Assert.AreEqual(0, firstDamageState.ExtraDamage);
-			var secondDamageState =
+			var initDamageState = Unit.ModifierController.GetEffectState<DamageEffect.Data>(id).Value.Data;
+			Assert.AreEqual(5, initDamageState.BaseDamage);
+			Assert.AreEqual(0, initDamageState.ExtraDamage);
+			var stackDamageState =
 				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, stateNumber: 1).Value.Data;
-			Assert.AreEqual(10, secondDamageState.BaseDamage);
-			Assert.AreEqual(2, secondDamageState.ExtraDamage);
+			Assert.AreEqual(10, stackDamageState.BaseDamage);
+			Assert.AreEqual(2, stackDamageState.ExtraDamage);
 
 			Unit.AddModifierSelf("DoubleStackDamage");
 
-			var secondUpdatedDamageState =
+			var stackUpdatedDamageState =
 				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, stateNumber: 1).Value.Data;
-			Assert.AreEqual(10, secondUpdatedDamageState.BaseDamage);
-			Assert.AreEqual(4, secondUpdatedDamageState.ExtraDamage);
+			Assert.AreEqual(10, stackUpdatedDamageState.BaseDamage);
+			Assert.AreEqual(4, stackUpdatedDamageState.ExtraDamage);
 		}
 
 		[Test]
@@ -169,22 +169,90 @@ namespace ModiBuff.Tests
 			int id = IdManager.GetId("InitIntervalDurationStackStackDamage").Value;
 			Unit.AddModifierSelf("InitIntervalDurationStackStackDamage");
 
-			var firstDamage = Unit.ModifierController.GetEffectState<DamageEffect.Data>(id).Value;
-			Assert.AreEqual(EffectOn.Init, firstDamage.EffectOn);
-			Assert.AreEqual(5, firstDamage.Data.BaseDamage);
-			Assert.AreEqual(0, firstDamage.Data.ExtraDamage);
-			var fourthDamage =
+			var initDamage = Unit.ModifierController.GetEffectState<DamageEffect.Data>(id).Value;
+			Assert.AreEqual(EffectOn.Init, initDamage.EffectOn);
+			Assert.AreEqual(5, initDamage.Data.BaseDamage);
+			Assert.AreEqual(0, initDamage.Data.ExtraDamage);
+			var stackDamage =
 				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, stateNumber: 3).Value;
-			Assert.AreEqual(EffectOn.Stack, fourthDamage.EffectOn);
-			Assert.AreEqual(15, fourthDamage.Data.BaseDamage);
-			Assert.AreEqual(2, fourthDamage.Data.ExtraDamage);
+			Assert.AreEqual(EffectOn.Stack, stackDamage.EffectOn);
+			Assert.AreEqual(15, stackDamage.Data.BaseDamage);
+			Assert.AreEqual(2, stackDamage.Data.ExtraDamage);
 
 			Unit.AddModifierSelf("InitIntervalDurationStackStackDamage");
 
-			var fourthUpdatedDamageState =
+			var stackUpdatedDamageState =
 				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, stateNumber: 3).Value;
-			Assert.AreEqual(15, fourthUpdatedDamageState.Data.BaseDamage);
-			Assert.AreEqual(4, fourthUpdatedDamageState.Data.ExtraDamage);
+			Assert.AreEqual(15, stackUpdatedDamageState.Data.BaseDamage);
+			Assert.AreEqual(4, stackUpdatedDamageState.Data.ExtraDamage);
+		}
+
+		[Test]
+		public void SpecificEffectOn_CorrectState()
+		{
+			AddRecipe("InitIntervalDurationStackStackDamage")
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Interval(1)
+				.Effect(new DamageEffect(7.5f), EffectOn.Interval)
+				.Duration(5)
+				.Effect(new DamageEffect(10), EffectOn.Duration)
+				.Effect(new DamageEffect(15, false, StackEffectType.Add, 2), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always);
+			Setup();
+
+			int id = IdManager.GetId("InitIntervalDurationStackStackDamage").Value;
+			Unit.AddModifierSelf("InitIntervalDurationStackStackDamage");
+
+			var stackDamage =
+				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, effectOn: EffectOn.Stack).Value;
+			Assert.AreEqual(EffectOn.Stack, stackDamage.EffectOn);
+			Assert.AreEqual(15, stackDamage.Data.BaseDamage);
+			Assert.AreEqual(2, stackDamage.Data.ExtraDamage);
+
+			Unit.AddModifierSelf("InitIntervalDurationStackStackDamage");
+
+			var stackUpdatedDamageState =
+				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, effectOn: EffectOn.Stack).Value;
+			Assert.AreEqual(15, stackUpdatedDamageState.Data.BaseDamage);
+			Assert.AreEqual(4, stackUpdatedDamageState.Data.ExtraDamage);
+		}
+
+		[Test]
+		public void SpecificEffectOnMultipleEffects_CorrectStates()
+		{
+			AddRecipe("InitStackStackDamage")
+				.Effect(new DamageEffect(5), EffectOn.Init)
+				.Effect(new DamageEffect(15, false, StackEffectType.Add, 2), EffectOn.Stack)
+				.Effect(new DamageEffect(25, false, StackEffectType.Effect), EffectOn.Stack)
+				.Stack(WhenStackEffect.Always);
+			Setup();
+
+			int id = IdManager.GetId("InitStackStackDamage").Value;
+			Unit.AddModifierSelf("InitStackStackDamage");
+
+			var stackDamage =
+				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, effectOn: EffectOn.Stack).Value;
+			Assert.AreEqual(EffectOn.Stack, stackDamage.EffectOn);
+			Assert.AreEqual(15, stackDamage.Data.BaseDamage);
+			Assert.AreEqual(2, stackDamage.Data.ExtraDamage);
+			var secondStackDamage =
+				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, effectOn: EffectOn.Stack, stateNumber: 1)
+					.Value;
+			Assert.AreEqual(EffectOn.Stack, secondStackDamage.EffectOn);
+			Assert.AreEqual(25, secondStackDamage.Data.BaseDamage);
+			Assert.AreEqual(0, secondStackDamage.Data.ExtraDamage);
+
+			Unit.AddModifierSelf("InitStackStackDamage");
+
+			var stackUpdatedDamageState =
+				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, effectOn: EffectOn.Stack).Value;
+			Assert.AreEqual(15, stackUpdatedDamageState.Data.BaseDamage);
+			Assert.AreEqual(4, stackUpdatedDamageState.Data.ExtraDamage);
+			var secondStackUpdatedDamageState =
+				Unit.ModifierController.GetEffectState<DamageEffect.Data>(id, effectOn: EffectOn.Stack, stateNumber: 1)
+					.Value;
+			Assert.AreEqual(25, secondStackUpdatedDamageState.Data.BaseDamage);
+			Assert.AreEqual(0, secondStackUpdatedDamageState.Data.ExtraDamage);
 		}
 
 		[Test]
