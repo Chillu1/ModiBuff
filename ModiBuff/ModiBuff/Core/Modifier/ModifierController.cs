@@ -93,8 +93,7 @@ namespace ModiBuff.Core
 			if (modifier != null)
 				return modifier.GetEffectState<TData>(stateNumber, effectOn);
 
-			Logger.LogWarning($"[ModiBuff] Couldn't find state info, {typeof(TData)} at number {stateNumber}, " +
-			                  $"id: {id}, genId: {genId}");
+			Logger.LogWarning($"[ModiBuff] Couldn't find modifier to get effect state, id: {id}, genId: {genId}");
 			return null;
 		}
 

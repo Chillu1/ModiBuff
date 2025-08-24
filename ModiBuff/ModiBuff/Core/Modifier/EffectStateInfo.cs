@@ -43,7 +43,8 @@ namespace ModiBuff.Core
 				return (effect.On, stateInfo.GetEffectData());
 			}
 
-			Logger.LogError($"[ModiBuff] Couldn't find {typeof(TData)} at number {stateNumber}");
+			Logger.LogError(
+				$"[ModiBuff] Couldn't find {typeof(TData)} at number {stateNumber} {(effectOn == EffectOn.None ? "" : $"with EffectOn {effectOn}")}");
 			return null;
 		}
 

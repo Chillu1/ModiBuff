@@ -1594,6 +1594,15 @@ For example effects that hold instance info.
 var effect = StatusEffectEffect.Create(id, genId, StatusEffectType.Sleep, 5f, true);
 ```
 
+## Getting Effect State
+
+Getting effect state is done through
+`ModifierController.GetEffectState<TData>(int id, int genId, int stateNumber, EffectOn)`.
+It can be filtered by genId, which state (if there's duplicate of same effects), and the effect on.
+All filtering is optional, only id is needed.
+
+If needed, all effect states can be fetched through `ModifierController.GetEffectStates(int id, int genId)`
+
 ## Serialization
 
 To correctly serialize data, two things need to be serialized: The identification, and the mutable state.
@@ -1762,8 +1771,8 @@ with centralized effects.
 
 Q: How to handle UI?  
 A: There's two main ways of handling UI. The first general info is Modifier Name and Modifier Description,
-through `ModifierRecipes.GetModifierInfo()`. There's also `ModifierApplierController.GetApplier*()` methods for appliers
-info.
+through `ModifierRecipes.GetModifierInfo()`. `ModifierController.GetEffectState<TData>` for effect states.
+There's also `ModifierApplierController.GetApplier*()` methods for appliers info.
 And `ModifierController.GetModifierReferences()` for normal modifiers. Basic usage is shown in the
 [BasicConsole sample](https://github.com/Chillu1/ModiBuff/blob/905fff885dc45c4e31df03d8b995a82d40f24042/ModiBuff/ModiBuff.Examples/BasicConsole/UIExtensions.cs).
 
