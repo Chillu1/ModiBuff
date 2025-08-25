@@ -64,6 +64,8 @@ namespace ModiBuff.Core.Units
 		private readonly StatusEffectController _singleInstanceStatusEffectController;
 		private readonly DurationLessStatusEffectController _durationLessStatusEffectController;
 
+		private readonly Dictionary<ApplierType, List<(int Id, ICheck[]? Checks)>> _modifierAppliers;
+
 		private readonly Dictionary<int, int> _modifierLevels;
 
 		private static int _idCounter;
@@ -120,6 +122,12 @@ namespace ModiBuff.Core.Units
 				(this, StatusEffectType.None, _statusEffectAddedEvents, _statusEffectRemovedEvents);
 			_singleInstanceStatusEffectController = new StatusEffectController();
 			_durationLessStatusEffectController = new DurationLessStatusEffectController();
+
+			_modifierAppliers = new Dictionary<ApplierType, List<(int Id, ICheck[] Checks)>>()
+			{
+				{ ApplierType.Attack, new List<(int Id, ICheck[] Checks)>() },
+				{ ApplierType.Cast, new List<(int Id, ICheck[] Checks)>() },
+			};
 
 			_modifierLevels = new Dictionary<int, int>();
 		}
@@ -206,7 +214,28 @@ namespace ModiBuff.Core.Units
 			bool wasDead = killableTarget != null && killableTarget.IsDead;
 
 			if (target is IModifierOwner modifierOwner)
+			{
 				this.ApplyAllAttackModifier(modifierOwner);
+				foreach ((int id, var checks) in _modifierAppliers[ApplierType.Attack])
+				{
+					bool success = true;
+					for (int i = 0; i < checks?.Length; i++)
+					{
+						if (checks[i].Check(this))
+							continue;
+
+						success = false;
+						break;
+					}
+
+					if (success)
+					{
+						for (int i = 0; i < checks?.Length; i++)
+							checks[i].Use(this);
+						modifierOwner.ModifierController.Add(id, modifierOwner, this);
+					}
+				}
+			}
 
 			if (++_onAttackCounter <= MaxEventCount)
 			{
@@ -349,8 +378,10 @@ namespace ModiBuff.Core.Units
 				return;
 			if (!StatusEffectController.HasLegalAction(LegalAction.Cast))
 				return;
-			if (!this.CanCastModifier(modifierId))
+			if (!_modifierAppliers.TryGetValue(ApplierType.Cast, out var appliers) || !appliers.Contains(modifierId))
 				return;
+			//if (!this.CanCastModifier(modifierId))
+			//	return;
 
 			if (++_onCastCounter <= MaxEventCount)
 			{
@@ -443,6 +474,29 @@ namespace ModiBuff.Core.Units
 			if (_strongDispelCounter <= MaxEventCount)
 				ResetEventCounters();
 		}
+
+		//---Appliers---
+
+		public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
+		{
+			if (checks is { Length: > 0 })
+			{
+				if (_modifierAppliers.TryGetValue(applierType, out var list))
+				{
+					list.Add((modifierId, checks));
+					return;
+				}
+
+				_modifierAppliers[applierType] =
+					new List<(int Id, ICheck[] Checks)>(new[] { (modifierId, checks) });
+				return;
+			}
+
+			_modifierAppliers[applierType].Add(modifierId);
+		}
+
+		public void AddApplierModifierNew(ModifierApplierReference applierReference) =>
+			AddApplierModifierNew(applierReference.Id, applierReference.Type);
 
 		//---Aura---
 
