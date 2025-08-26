@@ -215,26 +215,8 @@ namespace ModiBuff.Core.Units
 
 			if (target is IModifierOwner modifierOwner)
 			{
-				this.ApplyAllAttackModifier(modifierOwner);
-				foreach ((int id, var checks) in _modifierAppliers[ApplierType.Attack])
-				{
-					bool success = true;
-					for (int i = 0; i < checks?.Length; i++)
-					{
-						if (checks[i].Check(this))
-							continue;
-
-						success = false;
-						break;
-					}
-
-					if (success)
-					{
-						for (int i = 0; i < checks?.Length; i++)
-							checks[i].Use(this);
-						modifierOwner.ModifierController.Add(id, modifierOwner, this);
-					}
-				}
+				//this.ApplyAllAttackModifier(modifierOwner);
+				DoChecks(modifierOwner, ApplierType.Attack);
 			}
 
 			if (++_onAttackCounter <= MaxEventCount)
@@ -378,10 +360,26 @@ namespace ModiBuff.Core.Units
 				return;
 			if (!StatusEffectController.HasLegalAction(LegalAction.Cast))
 				return;
-			if (!_modifierAppliers.TryGetValue(ApplierType.Cast, out var appliers) || !appliers.Contains(modifierId))
+			if (!_modifierAppliers.TryGetValue(ApplierType.Cast, out var appliers))
+				return;
+
+			(int Id, ICheck[] Checks)? applier = null;
+			for (int i = 0; i < appliers.Count; i++)
+			{
+				if (appliers[i].Id == modifierId)
+				{
+					applier = appliers[i];
+					break;
+				}
+			}
+
+			if (applier == null)
 				return;
 			//if (!this.CanCastModifier(modifierId))
 			//	return;
+
+			for (int i = 0; i < applier.Value.Checks?.Length; i++)
+				applier.Value.Checks[i].Use(this);
 
 			if (++_onCastCounter <= MaxEventCount)
 			{
@@ -477,7 +475,7 @@ namespace ModiBuff.Core.Units
 
 		//---Appliers---
 
-		public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
+		public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[]? checks = null)
 		{
 			if (checks is { Length: > 0 })
 			{
@@ -492,11 +490,31 @@ namespace ModiBuff.Core.Units
 				return;
 			}
 
-			_modifierAppliers[applierType].Add(modifierId);
+			_modifierAppliers[applierType].Add((modifierId, null));
 		}
 
-		public void AddApplierModifierNew(ModifierApplierReference applierReference) =>
-			AddApplierModifierNew(applierReference.Id, applierReference.Type);
+		private void DoChecks(IModifierOwner target, ApplierType applierType)
+		{
+			foreach ((int id, var checks) in _modifierAppliers[applierType])
+			{
+				bool success = true;
+				for (int i = 0; i < checks?.Length; i++)
+				{
+					if (checks[i].Check(this))
+						continue;
+
+					success = false;
+					break;
+				}
+
+				if (!success)
+					continue;
+
+				for (int i = 0; i < checks?.Length; i++)
+					checks[i].Use(this);
+				target.ModifierController.Add(id, target, this);
+			}
+		}
 
 		//---Aura---
 

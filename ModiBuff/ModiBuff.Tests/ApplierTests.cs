@@ -95,24 +95,6 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-		public void InitDamageCostManaOld()
-		{
-			AddRecipe("InitDamage_CostMana")
-				.ApplyCost(CostType.Mana, 5)
-				.Effect(new DamageEffect(5), EffectOn.Init);
-			Setup();
-
-			var generator = Recipes.GetGenerator("InitDamage_CostMana");
-
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
-
-			Unit.TryCast(generator.Id, Enemy);
-
-			Assert.AreEqual(UnitMana - 5, Unit.Mana);
-			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
-		}
-
-		[Test]
 		public void InitDamageCostMana()
 		{
 			AddRecipe("InitDamage_CostMana")
@@ -122,7 +104,6 @@ namespace ModiBuff.Tests
 
 			int id = IdManager.GetId("InitDamage_CostMana").Value;
 			Unit.AddApplierModifierNew(id, ApplierType.Cast, new ICheck[] { new CostCheck(CostType.Mana, 5) });
-			//TODO Needs to get fed apply cost state, or done entirely through MB.Units
 
 			Unit.TryCast(id, Enemy);
 

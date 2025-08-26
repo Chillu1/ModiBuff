@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace ModiBuff.Core
 {
@@ -8,6 +9,7 @@ namespace ModiBuff.Core
 
 	public static class CheckExtensions
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool Check(this ICheck check, IUnit source)
 		{
 			switch (check)
@@ -28,6 +30,7 @@ namespace ModiBuff.Core
 			return true;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Use(this ICheck check, IUnit source)
 		{
 			switch (check)

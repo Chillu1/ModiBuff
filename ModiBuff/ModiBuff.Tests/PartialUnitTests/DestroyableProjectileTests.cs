@@ -78,7 +78,7 @@ namespace ModiBuff.Tests
 		{
 			Setup();
 
-			Enemy.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Attack);
+			Enemy.AddApplierModifierNew(IdManager.GetId("InitDamage").Value, ApplierType.Attack);
 
 			Enemy.Attack(Unit);
 			Assert.AreEqual(HitsToDestroy - 2, Unit.Health);
