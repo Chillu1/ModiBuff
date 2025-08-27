@@ -10,11 +10,13 @@ namespace ModiBuff.Tests
 		public void CostHealth()
 		{
 			AddRecipe("InitDamage_CostHealth")
-				.ApplyCost(CostType.Health, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostHealth"), ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamage_CostHealth").Value, ApplierType.Attack, new ICheck[]
+			{
+				new CostCheck(CostType.Health, 5)
+			});
 
 			Unit.Attack(Unit);
 
@@ -41,11 +43,13 @@ namespace ModiBuff.Tests
 		public void CostMana()
 		{
 			AddRecipe("InitDamage_CostMana")
-				.ApplyCost(CostType.Mana, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostMana"), ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamage_CostMana").Value, ApplierType.Attack, new ICheck[]
+			{
+				new CostCheck(CostType.Mana, 5)
+			});
 
 			Unit.Attack(Unit);
 
@@ -87,16 +91,18 @@ namespace ModiBuff.Tests
 		public void CostHealth_HealSelf()
 		{
 			AddRecipe("InitDamage_CostHealth_HealSelf")
-				.ApplyCost(CostType.Health, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init)
 				.Effect(new HealEffect(5, targeting: Targeting.SourceSource), EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamage_CostHealth_HealSelf");
+			int id = IdManager.GetId("InitDamage_CostHealth_HealSelf").Value;
 
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			Unit.AddApplierModifierNew(id, ApplierType.Cast, new ICheck[]
+			{
+				new CostCheck(CostType.Health, 5)
+			});
 
-			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 			Assert.AreEqual(UnitHealth, Unit.Health);
@@ -110,13 +116,17 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostSixtyPercentHealth"), ApplierType.Cast);
+			int id = IdManager.GetId("InitDamage_CostSixtyPercentHealth").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast, new ICheck[]
+			{
+				new CostPercentCheck(CostType.Health, 0.6f)
+			});
 
-			Unit.TryCast("InitDamage_CostSixtyPercentHealth", Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 			Assert.AreEqual(UnitHealth - UnitHealth * 0.6f, Unit.Health);
 
-			Unit.TryCast("InitDamage_CostSixtyPercentHealth", Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 			Assert.AreEqual(UnitHealth - UnitHealth * 0.6f, Unit.Health);
 		}

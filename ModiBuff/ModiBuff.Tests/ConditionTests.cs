@@ -14,12 +14,15 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_HealthAbove100");
+			int id = IdManager.GetId("InitDamage_ApplyCondition_HealthAbove100").Value;
 
 			Unit.TakeDamage(UnitHealth - 6, Unit); //6hp left
 
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
-			Unit.TryCast(generator.Id, Unit);
+			Unit.AddApplierModifierNew(id, ApplierType.Cast, new ICheck[]
+			{
+				new StatCheck(StatType.Health, ComparisonType.GreaterOrEqual, 100)
+			});
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitHealth - UnitHealth + 6, Unit.Health);
 		}
 
@@ -27,20 +30,25 @@ namespace ModiBuff.Tests
 		public void ManaCondition_OnApply_InitDamage()
 		{
 			AddRecipe("InitDamage_ApplyCondition_ManaBelow100")
-				.ApplyCondition(StatType.Mana, 100, ComparisonType.LessOrEqual)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_ManaBelow100");
+			int id = IdManager.GetId("InitDamage_ApplyCondition_ManaBelow100").Value;
 
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
-			Unit.TryCast(generator.Id, Unit);
+			Unit.AddApplierModifierNew(id, ApplierType.Cast, new ICheck[]
+			{
+				new StatCheck(StatType.Mana, ComparisonType.LessOrEqual, 100)
+			});
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.UseMana(UnitMana - 100); //100 mana left
 
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
-			Unit.TryCast(generator.Id, Unit);
+			Unit.AddApplierModifierNew(id, ApplierType.Cast, new ICheck[]
+			{
+				new StatCheck(StatType.Mana, ComparisonType.LessOrEqual, 100)
+			});
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
@@ -111,20 +119,22 @@ namespace ModiBuff.Tests
 		[Test]
 		public void HasModifier_OnApply_InitDamage()
 		{
-			AddRecipe("FlagApply");
+			int flagId = AddRecipe("FlagApply").Id;
 			AddRecipe("InitDamage_ApplyCondition_ContainsModifier")
-				.ApplyCondition("FlagApply")
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_ContainsModifier");
+			int id = IdManager.GetId("InitDamage_ApplyCondition_ContainsModifier").Value;
 
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
-			Unit.TryCast(generator.Id, Unit);
+			Unit.AddApplierModifierNew(id, ApplierType.Cast, new ICheck[]
+			{
+				new ModifierIdCheck(flagId)
+			});
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.AddModifierSelf("FlagApply");
-			Unit.TryCast(generator.Id, Unit);
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
@@ -155,21 +165,21 @@ namespace ModiBuff.Tests
 			AddRecipe("InitFreeze")
 				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init);
 			AddRecipe("InitDamage_ApplyCondition_FreezeStatusEffect")
-				.ApplyCondition(StatusEffectType.Freeze)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			AddRecipe("InitDamage_ApplyCondition_ActLegalAction")
 				.ApplyCondition(LegalAction.Act)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_FreezeStatusEffect");
+			int id = IdManager.GetId("InitDamage_ApplyCondition_FreezeStatusEffect").Value;
 
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
-			Unit.TryCast(generator.Id, Unit);
+			Unit.AddApplierModifierNew(id, ApplierType.Cast,
+				new ICheck[] { new StatusEffectCheck(StatusEffectType.Freeze) });
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.AddModifierSelf("InitFreeze");
-			Unit.TryCast(generator.Id, Unit);
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
@@ -200,18 +210,18 @@ namespace ModiBuff.Tests
 			AddRecipe("InitFreeze")
 				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init);
 			AddRecipe("InitDamage_ApplyCondition_ActLegalAction")
-				.ApplyCondition(LegalAction.Act)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_ActLegalAction");
+			int id = IdManager.GetId("InitDamage_ApplyCondition_ActLegalAction").Value;
 
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
-			Unit.TryCast(generator.Id, Unit);
+			Unit.AddApplierModifierNew(id, ApplierType.Cast,
+				new ICheck[] { new LegalActionCheck(LegalAction.Act) });
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
 			Unit.AddModifierSelf("InitFreeze");
-			Unit.TryCast(generator.Id, Unit);
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
@@ -242,27 +252,29 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Combination_OnApply_InitDamage()
 		{
-			AddRecipe("FlagApply");
+			int flagId = AddRecipe("FlagApply").Id;
 			AddRecipe("InitFreeze")
 				.Effect(new StatusEffectEffect(StatusEffectType.Freeze, 2), EffectOn.Init);
 			AddRecipe("InitDamage_ApplyCondition_Combination")
-				.ApplyCondition("FlagApply")
-				.ApplyCondition(StatusEffectType.Freeze)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamage_ApplyCondition_Combination");
+			int id = IdManager.GetId("InitDamage_ApplyCondition_Combination").Value;
 
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
-			Unit.TryCast(generator.Id, Unit);
+			Unit.AddApplierModifierNew(id, ApplierType.Cast, new ICheck[]
+			{
+				new ModifierIdCheck(flagId),
+				new StatusEffectCheck(StatusEffectType.Freeze)
+			});
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.AddModifierSelf("InitFreeze");
-			Unit.TryCast(generator.Id, Unit);
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.AddModifierSelf("FlagApply");
-			Unit.TryCast(generator.Id, Unit);
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 

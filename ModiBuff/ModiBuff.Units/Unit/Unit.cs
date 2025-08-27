@@ -65,6 +65,7 @@ namespace ModiBuff.Core.Units
 		private readonly DurationLessStatusEffectController _durationLessStatusEffectController;
 
 		private readonly Dictionary<ApplierType, List<(int Id, ICheck[]? Checks)>> _modifierAppliers;
+		private readonly List<IUpdatableCheck> _updatableChecks;
 
 		private readonly Dictionary<int, int> _modifierLevels;
 
@@ -128,6 +129,7 @@ namespace ModiBuff.Core.Units
 				{ ApplierType.Attack, new List<(int Id, ICheck[] Checks)>() },
 				{ ApplierType.Cast, new List<(int Id, ICheck[] Checks)>() },
 			};
+			_updatableChecks = new List<IUpdatableCheck>();
 
 			_modifierLevels = new Dictionary<int, int>();
 		}
@@ -153,6 +155,8 @@ namespace ModiBuff.Core.Units
 			_singleInstanceStatusEffectController.Update(deltaTime);
 			ModifierController.Update(deltaTime);
 			ModifierApplierController.Update(deltaTime);
+			for (int i = 0; i < _updatableChecks.Count; i++)
+				_updatableChecks[i].Update(deltaTime);
 
 			_callbackTimer += deltaTime;
 			if (_callbackTimer >= CallbackTimerCooldown)
@@ -352,16 +356,16 @@ namespace ModiBuff.Core.Units
 			return valueHealed;
 		}
 
-		public void TryCast(int modifierId, IUnit target)
+		public bool TryCast(int modifierId, IUnit target)
 		{
 			if (!(target is IModifierOwner modifierTarget))
-				return;
+				return false;
 			if (!modifierId.IsLegalTarget((IUnitEntity)target, this))
-				return;
+				return false;
 			if (!StatusEffectController.HasLegalAction(LegalAction.Cast))
-				return;
+				return false;
 			if (!_modifierAppliers.TryGetValue(ApplierType.Cast, out var appliers))
-				return;
+				return false;
 
 			(int Id, ICheck[] Checks)? applier = null;
 			for (int i = 0; i < appliers.Count; i++)
@@ -374,12 +378,19 @@ namespace ModiBuff.Core.Units
 			}
 
 			if (applier == null)
-				return;
-			//if (!this.CanCastModifier(modifierId))
-			//	return;
+				return false;
 
-			for (int i = 0; i < applier.Value.Checks?.Length; i++)
-				applier.Value.Checks[i].Use(this);
+			if (applier.Value.Checks != null)
+			{
+				foreach (var check in applier.Value.Checks)
+					if (!check.Check(this))
+						return false;
+				//if (!this.CanCastModifier(modifierId))
+				//	return;
+
+				for (int i = 0; i < applier.Value.Checks.Length; i++)
+					applier.Value.Checks[i].Use(this);
+			}
 
 			if (++_onCastCounter <= MaxEventCount)
 			{
@@ -396,6 +407,8 @@ namespace ModiBuff.Core.Units
 				ResetEventCounters();
 				(target as ICallbackCounter)?.ResetEventCounters();
 			}
+
+			return true;
 		}
 
 		public void AddDamage(float damage)
@@ -482,11 +495,17 @@ namespace ModiBuff.Core.Units
 				if (_modifierAppliers.TryGetValue(applierType, out var list))
 				{
 					list.Add((modifierId, checks));
+					foreach (var check in checks)
+						if (check is IUpdatableCheck updatableCheck)
+							_updatableChecks.Add(updatableCheck);
 					return;
 				}
 
 				_modifierAppliers[applierType] =
 					new List<(int Id, ICheck[] Checks)>(new[] { (modifierId, checks) });
+				foreach (var check in checks)
+					if (check is IUpdatableCheck updatableCheck)
+						_updatableChecks.Add(updatableCheck);
 				return;
 			}
 

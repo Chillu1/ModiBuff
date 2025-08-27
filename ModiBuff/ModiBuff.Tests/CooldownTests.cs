@@ -10,11 +10,13 @@ namespace ModiBuff.Tests
 		public void InitDamage_Cooldown()
 		{
 			AddRecipe("InitDamage_Cooldown")
-				.ApplyCooldown(1)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_Cooldown"), ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamage_Cooldown").Value, ApplierType.Attack, new ICheck[]
+			{
+				new CooldownCheck(1)
+			});
 
 			Unit.Attack(Enemy);
 
@@ -153,28 +155,29 @@ namespace ModiBuff.Tests
 		public void InitDamage_ChargesCooldown()
 		{
 			AddRecipe("InitDamage_Cooldown")
-				.ApplyChargesCooldown(1, 2)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_Cooldown"), ApplierType.Cast);
+			int id = IdManager.GetId("InitDamage_Cooldown").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast,
+				new ICheck[] { new ChargesCooldownCheck(1, 2) });
 
-			Unit.TryCast("InitDamage_Cooldown", Enemy);
+			Unit.TryCast(id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
 			// 1 more charge
-			Unit.TryCast("InitDamage_Cooldown", Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5 - 5, Enemy.Health);
 
 			// 0 charges
-			Unit.TryCast("InitDamage_Cooldown", Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5 - 5, Enemy.Health);
 
 			Unit.Update(1);
 			Unit.Update(1);
-			Unit.TryCast("InitDamage_Cooldown", Enemy);
-			Unit.TryCast("InitDamage_Cooldown", Enemy);
+			Unit.TryCast(id, Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5 - 5 - 5 - 5, Enemy.Health);
 		}
 
@@ -186,21 +189,22 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_Cooldown"), ApplierType.Cast);
+			int id = IdManager.GetId("InitDamage_Cooldown").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast, new ICheck[] { new ChargesCooldownCheck(1, 2) });
 
-			Unit.TryCast("InitDamage_Cooldown", Enemy);
+			Unit.TryCast(id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
 			Unit.Update(1); // 2 charges
-			Unit.TryCast("InitDamage_Cooldown", Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5 - 5, Enemy.Health);
 
 			// 1 charge
-			Unit.TryCast("InitDamage_Cooldown", Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5 - 5 - 5, Enemy.Health);
 
-			Unit.TryCast("InitDamage_Cooldown", Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5 - 5 - 5, Enemy.Health);
 		}
 	}
