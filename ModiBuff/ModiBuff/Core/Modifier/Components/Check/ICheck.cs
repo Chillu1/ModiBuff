@@ -33,12 +33,11 @@ namespace ModiBuff.Core
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Use(this ICheck check, IUnit source)
 		{
-			switch (check)
-			{
-				case IUsableCheck usableCheck:
-					usableCheck.Use(source);
-					break;
-			}
+			if (check is IUsableCheck usableCheck)
+				usableCheck.Use(source);
+
+			if (check is IStateCheck stateCheck)
+				stateCheck.RestartState();
 		}
 	}
 }

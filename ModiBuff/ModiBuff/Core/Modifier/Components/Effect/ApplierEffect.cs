@@ -72,6 +72,7 @@ namespace ModiBuff.Core
 						return;
 					}
 
+					modifierApplierOwnerTarget.AddApplierModifierNew(modifierId, _applierType.Value);
 					modifierApplierOwnerTarget.ModifierApplierController.TryAddApplier(modifierId, _hasApplyChecks,
 						_applierType.Value);
 					break;

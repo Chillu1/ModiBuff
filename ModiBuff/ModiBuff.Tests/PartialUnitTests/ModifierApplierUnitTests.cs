@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using ModiBuff.Core.Units.Interfaces.NonGeneric;
@@ -22,6 +23,7 @@ namespace ModiBuff.Tests
 			public float Damage { get; }
 
 			public ModifierApplierController ModifierApplierController { get; }
+			private readonly Dictionary<ApplierType, List<(int Id, ICheck[] Checks)>> _modifierAppliers;
 
 			public ModifierApplierUnit(float health, float damage, UnitType unitType = UnitType.Good)
 			{
@@ -31,6 +33,11 @@ namespace ModiBuff.Tests
 				Damage = damage;
 
 				ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
+				_modifierAppliers = new Dictionary<ApplierType, List<(int, ICheck[])>>
+				{
+					{ ApplierType.Attack, new List<(int, ICheck[])>() },
+					{ ApplierType.Cast, new List<(int, ICheck[])>() }
+				};
 			}
 
 			public float Attack(IUnit target)
@@ -49,6 +56,24 @@ namespace ModiBuff.Tests
 				float dealtDamage = oldHealth - Health;
 
 				return dealtDamage;
+			}
+
+			public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
+			{
+				if (checks?.Length > 0)
+				{
+					if (_modifierAppliers.TryGetValue(applierType, out var list))
+					{
+						list.Add((modifierId, checks));
+						return;
+					}
+
+					_modifierAppliers[applierType] =
+						new List<(int Id, ICheck[] Checks)>(new[] { (modifierId, checks) });
+					return;
+				}
+
+				_modifierAppliers[applierType].Add((modifierId, null));
 			}
 		}
 

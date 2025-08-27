@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using ModiBuff.Core.Units.Interfaces.NonGeneric;
@@ -20,8 +21,10 @@ namespace ModiBuff.Examples.BasicConsole
 		//We simply add modifier ids to it, and it will handle the rest
 		public ModifierController ModifierController { get; }
 
-		//TODO Explain
 		public ModifierApplierController ModifierApplierController { get; }
+
+		//TODO Explain
+		private readonly Dictionary<ApplierType, List<(int Id, ICheck[] Checks)>> _modifierAppliers;
 
 		//Basic implementation of status effects, unit can't attack when it's disarmed
 		//Move when it's rooted/frozen/stunned, etc.
@@ -48,6 +51,11 @@ namespace ModiBuff.Examples.BasicConsole
 			//Remember to rent the modifier controllers in the constructor
 			ModifierController = ModifierControllerPool.Instance.Rent();
 			ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
+			_modifierAppliers = new Dictionary<ApplierType, List<(int, ICheck[])>>
+			{
+				{ ApplierType.Attack, new List<(int, ICheck[])>() },
+				{ ApplierType.Cast, new List<(int, ICheck[])>() }
+			};
 			StatusEffectController = new StatusEffectController();
 			_targetingSystem = new TargetingSystem();
 		}
@@ -139,6 +147,24 @@ namespace ModiBuff.Examples.BasicConsole
 			Console.GameMessage($"{this} healed {heal} from {source}. Health: {Health}/{MaxHealth}");
 
 			return Health - originalHealth;
+		}
+
+		public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
+		{
+			if (checks?.Length > 0)
+			{
+				if (_modifierAppliers.TryGetValue(applierType, out var list))
+				{
+					list.Add((modifierId, checks));
+					return;
+				}
+
+				_modifierAppliers[applierType] =
+					new List<(int Id, ICheck[] Checks)>(new[] { (modifierId, checks) });
+				return;
+			}
+
+			_modifierAppliers[applierType].Add((modifierId, null));
 		}
 
 		public string GetDebugString()

@@ -25,6 +25,8 @@ namespace ModiBuff.Tests
 			public ModifierController ModifierController { get; }
 			public ModifierApplierController ModifierApplierController { get; }
 
+			private readonly Dictionary<ApplierType, List<(int Id, ICheck[] Checks)>> _modifierAppliers;
+
 			public DamagableUnit(float health, UnitType unitType = UnitType.Good)
 			{
 				UnitType = unitType;
@@ -33,6 +35,11 @@ namespace ModiBuff.Tests
 
 				ModifierController = ModifierControllerPool.Instance.Rent();
 				ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
+				_modifierAppliers = new Dictionary<ApplierType, List<(int, ICheck[])>>
+				{
+					{ ApplierType.Attack, new List<(int, ICheck[])>() },
+					{ ApplierType.Cast, new List<(int, ICheck[])>() }
+				};
 			}
 
 			public void Update(float delta)
@@ -60,6 +67,24 @@ namespace ModiBuff.Tests
 			public void UseHealth(float value)
 			{
 				Health -= value;
+			}
+
+			public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
+			{
+				if (checks?.Length > 0)
+				{
+					if (_modifierAppliers.TryGetValue(applierType, out var list))
+					{
+						list.Add((modifierId, checks));
+						return;
+					}
+
+					_modifierAppliers[applierType] =
+						new List<(int Id, ICheck[] Checks)>(new[] { (modifierId, checks) });
+					return;
+				}
+
+				_modifierAppliers[applierType].Add((modifierId, null));
 			}
 		}
 

@@ -239,12 +239,13 @@ namespace ModiBuff.Tests
 			AddRecipe("AddApplier_Effect")
 				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init)
 				.RemoveApplier(5, ApplierType.Cast, false);
-			AddEffect("AddApplier_ApplierEffect", new ApplierEffect("AddApplier_Effect", ApplierType.Cast, false));
+			AddRecipe("AddApplier_ApplierEffect")
+				.Effect(new ApplierEffect("AddApplier_Effect", ApplierType.Cast, false), EffectOn.Init);
 			Setup();
 
-			Unit.AddEffectApplier("AddApplier_ApplierEffect");
 			Unit.TryCast("AddApplier_Effect", Enemy);
-			Unit.TryCastEffect("AddApplier_ApplierEffect", Unit);
+			Unit.AddModifierSelf("AddApplier_ApplierEffect");
+			Unit.TryCast("AddApplier_ApplierEffect", Unit);
 
 			Unit.TryCast("AddApplier_Effect", Enemy);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
@@ -270,7 +271,7 @@ namespace ModiBuff.Tests
 				.Remove(5).Refresh();
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("ConditionalApplierBasedOnUnitType"), ApplierType.Cast);
+			Unit.AddApplierModifierNew(IdManager.GetId("ConditionalApplierBasedOnUnitType").Value, ApplierType.Cast);
 
 			Enemy.TakeDamage(5, Enemy);
 			Ally.TakeDamage(5, Ally);

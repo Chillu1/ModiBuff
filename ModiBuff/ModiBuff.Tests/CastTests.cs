@@ -59,7 +59,8 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageFullHealth"), ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamageFullHealth").Value, ApplierType.Attack,
+				new ICheck[] { new ConditionCheck(ConditionType.HealthIsFull) });
 
 			Unit.Attack(Enemy);
 
