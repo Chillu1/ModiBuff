@@ -134,14 +134,6 @@ namespace ModiBuff.Core.Units
 			_modifierLevels = new Dictionary<int, int>();
 		}
 
-		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences,
-			UnitType unitType, UnitTag unitTag)
-			: this(health, damage, unitType: unitType, unitTag: unitTag)
-		{
-			foreach (var modifierAddReference in modifierAddReferences)
-				this.TryAddModifierReference(modifierAddReference);
-		}
-
 		public static Unit LoadUnit(int oldId)
 		{
 			var unit = new Unit(0, 0, 0, 0, UnitType.Neutral, UnitTag.None);
@@ -356,7 +348,11 @@ namespace ModiBuff.Core.Units
 			return valueHealed;
 		}
 
-		public bool TryCast(int modifierId, IUnit target)
+		public bool TryCast(int modifierId, IUnit target) => TryCastInternal(modifierId, target);
+
+		internal bool TryCastNoChecks(int modifierId, IUnit target) => TryCastInternal(modifierId, target, true);
+
+		private bool TryCastInternal(int modifierId, IUnit target, bool skipChecks = false)
 		{
 			if (!(target is IModifierOwner modifierTarget))
 				return false;
@@ -380,7 +376,7 @@ namespace ModiBuff.Core.Units
 			if (applier == null)
 				return false;
 
-			if (applier.Value.Checks != null)
+			if (applier.Value.Checks != null && !skipChecks)
 			{
 				foreach (var check in applier.Value.Checks)
 					if (!check.Check(this))

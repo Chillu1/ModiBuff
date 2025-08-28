@@ -180,22 +180,26 @@ namespace ModiBuff.Tests
 		public void SaveLoadApplierState()
 		{
 			AddRecipe("InitDamageChecks")
-				.ApplyCooldown(1)
-				.ApplyCost(CostType.Health, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageChecks"), ApplierType.Cast);
-			Unit.TryCast("InitDamageChecks", Unit);
+			int id = IdManager.GetId("InitDamageChecks").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast, new ICheck[]
+			{
+				new CooldownCheck(1), //TODO Serialialize state
+				new CostCheck(CostType.Health, 5)
+			});
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
 
 			SaveLoadGameState(Unit, out var loadedUnit);
 
-			loadedUnit.TryCast("InitDamageChecks", loadedUnit);
+			id = IdManager.GetId("InitDamageChecks").Value;
+			loadedUnit.TryCast(id, loadedUnit);
 			Assert.AreEqual(UnitHealth - 5 - 5, loadedUnit.Health);
 
 			loadedUnit.Update(1);
-			loadedUnit.TryCast("InitDamageChecks", loadedUnit);
+			loadedUnit.TryCast(id, loadedUnit);
 			Assert.AreEqual(UnitHealth - 5 - 5 - 5 - 5, loadedUnit.Health);
 		}
 

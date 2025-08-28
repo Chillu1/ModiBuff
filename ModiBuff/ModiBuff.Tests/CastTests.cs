@@ -89,7 +89,7 @@ namespace ModiBuff.Tests
 			Assert.True(Unit.TryCast(id, Unit));
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
 
-			Assert.True(Unit.TryCast(id, Enemy));
+			Assert.True(Unit.TryCastNoChecks(id, Enemy));
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}

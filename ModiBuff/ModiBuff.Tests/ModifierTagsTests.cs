@@ -69,11 +69,12 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5f), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageEnemyOnly"), ApplierType.Cast);
-			Unit.TryCast(IdManager.GetId("InitDamageEnemyOnly").Value, Enemy);
+			int id = IdManager.GetId("InitDamageEnemyOnly").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5f, Enemy.Health);
 
-			Unit.TryCast(IdManager.GetId("InitDamageEnemyOnly").Value, Ally);
+			Unit.TryCast(id, Ally);
 			Assert.AreEqual(AllyHealth, Ally.Health);
 		}
 
@@ -85,13 +86,14 @@ namespace ModiBuff.Tests
 				.Effect(new AddDamageEffect(5f), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitAddDamageSelfOnly"), ApplierType.Cast);
-			Unit.TryCast(IdManager.GetId("InitAddDamageSelfOnly").Value, Ally);
+			int id = IdManager.GetId("InitAddDamageSelfOnly").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
+			Unit.TryCast(id, Ally);
 			Assert.AreEqual(AllyDamage, Ally.Damage);
-			Unit.TryCast(IdManager.GetId("InitAddDamageSelfOnly").Value, Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyDamage, Enemy.Damage);
 
-			Unit.TryCast(IdManager.GetId("InitAddDamageSelfOnly").Value, Unit);
+			Unit.TryCast(id, Unit);
 			Assert.AreEqual(UnitDamage + 5f, Unit.Damage);
 		}
 

@@ -14,12 +14,13 @@ namespace ModiBuff.Tests
 					.SetPostEffects(new LifeStealPostEffect(1f, Targeting.SourceTarget)), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageLifesteal"), ApplierType.Cast);
+			int id = IdManager.GetId("InitDamageLifesteal").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 
 			Unit.TakeDamage(5, Unit);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
-			Unit.TryCast("InitDamageLifesteal", Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 		}
 
@@ -52,12 +53,13 @@ namespace ModiBuff.Tests
 			const float health = 100f, damage = 5f;
 			var nonLifeStealableUnit = new Unit(health, damage, unitTag: UnitTag.None);
 
-			nonLifeStealableUnit.AddApplierModifier(Recipes.GetGenerator("InitDamageLifesteal"), ApplierType.Cast);
+			int id = IdManager.GetId("InitDamageLifesteal").Value;
+			nonLifeStealableUnit.AddApplierModifierNew(id, ApplierType.Cast);
 
 			nonLifeStealableUnit.TakeDamage(damage, nonLifeStealableUnit);
 			Assert.AreEqual(health - damage, nonLifeStealableUnit.Health);
 
-			nonLifeStealableUnit.TryCast("InitDamageLifesteal", Unit);
+			nonLifeStealableUnit.TryCast(id, Unit);
 			Assert.AreEqual(health, nonLifeStealableUnit.Health);
 		}
 	}

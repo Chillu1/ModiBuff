@@ -12,30 +12,6 @@ namespace ModiBuff.Core
 			owner.ModifierController.Dispel(dispelType, owner, source);
 		}
 
-		public static void TryAddModifierReference(this IUnit owner, ModifierAddReference reference)
-		{
-			TryAddModifierReference(owner, reference, owner);
-		}
-
-		public static void TryAddModifierReference(this IUnit owner, ModifierAddReference reference, IUnit target)
-		{
-			if (reference.IsApplierType)
-			{
-				if (owner is IModifierApplierOwner modifierApplierOwner)
-					modifierApplierOwner.ModifierApplierController.TryAddApplier(reference.Id,
-						reference.HasApplyChecks, reference.ApplierType!.Value);
-				else
-					Logger.LogError("[ModiBuff] Tried to add an applier to a unit that is not IModifierApplierOwner");
-			}
-			else
-			{
-				if (owner is IModifierOwner modifierOwner)
-					modifierOwner.ModifierController.Add(reference.Id, target, owner);
-				else
-					Logger.LogError("[ModiBuff] Tried to add a modifier to a unit that is not IModifierOwner");
-			}
-		}
-
 		//TODO Remove
 		public static void TryCast(this IModifierApplierOwner owner, int modifierId, IModifierOwner target)
 		{
