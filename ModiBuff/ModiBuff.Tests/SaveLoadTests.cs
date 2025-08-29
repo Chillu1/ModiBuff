@@ -276,11 +276,15 @@ namespace ModiBuff.Tests
 
 			const string gameStateFile = "modifierApplierIdGameStateTest.json";
 
+			int id = IdManager.GetId("DoTHealthCost").Value;
 			//TODO save will not have modifier id redirection
 			if (!File.Exists(_saveController.Path + "/" + gameStateFile))
 			{
 				Unit.AddApplierModifier(Recipes.GetGenerator("DoT"), ApplierType.Cast);
-				Unit.AddApplierModifier(Recipes.GetGenerator("DoTHealthCost"), ApplierType.Cast);
+				Unit.AddApplierModifierNew(id, ApplierType.Cast, new ICheck[]
+				{
+					new CostCheck(CostType.Health, 5)
+				});
 				SaveGameState(gameStateFile, Unit);
 			}
 
