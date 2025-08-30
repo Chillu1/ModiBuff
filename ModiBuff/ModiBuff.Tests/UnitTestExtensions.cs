@@ -52,14 +52,6 @@ namespace ModiBuff.Tests
 			return unit.ModifierApplierController.ContainsApplier(ModifierIdManager.GetIdByName(name).Value);
 		}
 
-		internal static bool AddApplierModifier(this IModifierApplierOwner unit, IModifierGenerator generator,
-			ApplierType applierType)
-		{
-			CheckForSetup(unit);
-			return unit.ModifierApplierController.TryAddApplier(generator.Id,
-				((IModifierApplyCheckGenerator)generator).HasApplyChecks, applierType);
-		}
-
 		internal static bool AddEffectApplier(this IModifierApplierOwner unit, string name)
 		{
 			CheckForSetup(unit);
@@ -67,11 +59,6 @@ namespace ModiBuff.Tests
 		}
 
 		internal static void TryCast(this Unit unit, string name, IModifierOwner target)
-		{
-			unit.TryCast(ModifierIdManager.GetIdByName(name).Value, target);
-		}
-
-		internal static void TryCast(this IModifierApplierOwner unit, string name, IModifierOwner target)
 		{
 			unit.TryCast(ModifierIdManager.GetIdByName(name).Value, target);
 		}

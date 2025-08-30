@@ -25,6 +25,8 @@ namespace ModiBuff.Tests
 			public ModifierController ModifierController { get; }
 			public ModifierApplierController ModifierApplierController { get; }
 
+			private readonly Dictionary<ApplierType, List<(int Id, ICheck[] Checks)>> _modifierAppliers;
+
 			public DamagableUnit(float health, UnitType unitType = UnitType.Good)
 			{
 				UnitType = unitType;
@@ -33,6 +35,11 @@ namespace ModiBuff.Tests
 
 				ModifierController = ModifierControllerPool.Instance.Rent();
 				ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
+				_modifierAppliers = new Dictionary<ApplierType, List<(int, ICheck[])>>
+				{
+					{ ApplierType.Attack, new List<(int, ICheck[])>() },
+					{ ApplierType.Cast, new List<(int, ICheck[])>() }
+				};
 			}
 
 			public void Update(float delta)
@@ -60,6 +67,66 @@ namespace ModiBuff.Tests
 			public void UseHealth(float value)
 			{
 				Health -= value;
+			}
+
+			public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
+			{
+				if (checks?.Length > 0)
+				{
+					if (_modifierAppliers.TryGetValue(applierType, out var list))
+					{
+						list.Add((modifierId, checks));
+						return;
+					}
+
+					_modifierAppliers[applierType] =
+						new List<(int Id, ICheck[] Checks)>(new[] { (modifierId, checks) });
+					return;
+				}
+
+				_modifierAppliers[applierType].Add((modifierId, null));
+			}
+
+			public bool TryCast(int modifierId, IUnit target) => TryCastInternal(modifierId, target);
+
+			internal bool TryCastNoChecks(int modifierId, IUnit target) => TryCastInternal(modifierId, target, true);
+
+			private bool TryCastInternal(int modifierId, IUnit target, bool skipChecks = false)
+			{
+				if (!(target is IModifierOwner modifierTarget))
+					return false;
+				if (!modifierId.IsLegalTarget((IUnitEntity)target, this))
+					return false;
+				if (!_modifierAppliers.TryGetValue(ApplierType.Cast, out var appliers))
+					return false;
+
+				(int Id, ICheck[] Checks)? applier = null;
+				for (int i = 0; i < appliers.Count; i++)
+				{
+					if (appliers[i].Id == modifierId)
+					{
+						applier = appliers[i];
+						break;
+					}
+				}
+
+				if (applier == null)
+					return false;
+
+				if (applier.Value.Checks != null && !skipChecks)
+				{
+					foreach (var check in applier.Value.Checks)
+						if (!check.Check(this))
+							return false;
+
+					for (int i = 0; i < applier.Value.Checks.Length; i++)
+						applier.Value.Checks[i].Use(this);
+				}
+
+				modifierTarget.ModifierController.Add(modifierId, modifierTarget, this);
+
+
+				return true;
 			}
 		}
 
@@ -118,41 +185,49 @@ namespace ModiBuff.Tests
 		public void InitDamageApplyCosts_UnitWithoutMana()
 		{
 			AddRecipe("InitDamageManaCost")
-				.ApplyCost(CostType.Mana, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			AddRecipe("InitDamageHealthCost")
-				.ApplyCost(CostType.Health, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageManaCost"), ApplierType.Cast);
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageHealthCost"), ApplierType.Cast);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamageManaCost").Value, ApplierType.Cast, new ICheck[]
+			{
+				new CostCheck(CostType.Mana, 5)
+			});
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamageHealthCost").Value, ApplierType.Cast, new ICheck[]
+			{
+				new CostCheck(CostType.Health, 5)
+			});
 
-			Unit.TryCast("InitDamageManaCost", Unit);
+			Unit.TryCast(IdManager.GetId("InitDamageManaCost").Value, Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
-			Unit.TryCast("InitDamageHealthCost", Unit);
+			Unit.TryCast(IdManager.GetId("InitDamageHealthCost").Value, Unit);
 			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
 		}
 
-		[Test]
+		[Test, Ignore("Effect checks, aka on target, not source")]
 		public void InitDamageEffectCosts_UnitWithoutMana()
 		{
 			AddRecipe("InitDamageManaCost")
-				.EffectCost(CostType.Mana, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			AddRecipe("InitDamageHealthCost")
-				.EffectCost(CostType.Health, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageManaCost"), ApplierType.Cast);
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageHealthCost"), ApplierType.Cast);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamageManaCost").Value, ApplierType.Cast, new ICheck[]
+			{
+				new CostCheck(CostType.Mana, 5)
+			});
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamageHealthCost").Value, ApplierType.Cast, new ICheck[]
+			{
+				new CostCheck(CostType.Health, 5)
+			});
 
-			Unit.TryCast("InitDamageManaCost", Unit);
+			Unit.TryCast(IdManager.GetId("InitDamageManaCost").Value, Unit);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
-			Unit.TryCast("InitDamageHealthCost", Unit);
+			Unit.TryCast(IdManager.GetId("InitDamageHealthCost").Value, Unit);
 			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
 		}
 

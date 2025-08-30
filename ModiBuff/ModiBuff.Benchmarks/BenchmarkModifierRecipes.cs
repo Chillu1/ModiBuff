@@ -72,11 +72,9 @@ namespace ModiBuff.Tests
 				.Stack(WhenStackEffect.Always);
 
 			Add("InitDamage_CostMana")
-				.ApplyCost(CostType.Mana, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 
 			Add("InitDamage_ApplyCondition_HealthAbove100")
-				.ApplyCondition(StatType.Health, 100, ComparisonType.GreaterOrEqual)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 		}
 	}

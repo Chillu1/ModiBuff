@@ -72,8 +72,7 @@ namespace ModiBuff.Core
 						return;
 					}
 
-					modifierApplierOwnerTarget.ModifierApplierController.TryAddApplier(modifierId, _hasApplyChecks,
-						_applierType.Value);
+					modifierApplierOwnerTarget.AddApplierModifierNew(modifierId, _applierType.Value);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();

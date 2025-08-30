@@ -11,9 +11,6 @@ namespace ModiBuff.Core
 		private ModifierController[] _pool;
 		private int _poolTop;
 
-		private ModifierApplierController[] _applierPool;
-		private int _applierPoolTop;
-
 		public ModifierControllerPool()
 		{
 			if (Instance != null)
@@ -26,12 +23,6 @@ namespace ModiBuff.Core
 			for (int i = 0; i < initialSize; i++)
 				_pool[i] = new ModifierController();
 			_poolTop = initialSize;
-
-			int applierInitialSize = Math.Max(Config.ModifierApplierControllerPoolSize, 1);
-			_applierPool = new ModifierApplierController[applierInitialSize];
-			for (int i = 0; i < applierInitialSize; i++)
-				_applierPool[i] = new ModifierApplierController();
-			_applierPoolTop = applierInitialSize;
 		}
 
 		public ModifierController Rent()
@@ -42,14 +33,6 @@ namespace ModiBuff.Core
 			return _pool[--_poolTop];
 		}
 
-		public ModifierApplierController RentApplier()
-		{
-			if (_applierPoolTop == 0)
-				AllocateApplierDouble();
-
-			return _applierPool[--_applierPoolTop];
-		}
-
 		public void Return(ModifierController modifierController)
 		{
 			modifierController.Clear();
@@ -58,16 +41,6 @@ namespace ModiBuff.Core
 				Array.Resize(ref _pool, _pool.Length << 1);
 
 			_pool[_poolTop++] = modifierController;
-		}
-
-		public void ReturnApplier(ModifierApplierController modifierApplierController)
-		{
-			modifierApplierController.Clear();
-
-			if (_applierPoolTop == _applierPool.Length)
-				Array.Resize(ref _applierPool, _applierPool.Length << 1);
-
-			_applierPool[_applierPoolTop++] = modifierApplierController;
 		}
 
 		private void AllocateDouble()
@@ -83,25 +56,10 @@ namespace ModiBuff.Core
 				throw new Exception($"ModifierControllerPool reached max size of {MaxPoolSize}");
 		}
 
-		private void AllocateApplierDouble()
-		{
-			if (_applierPoolTop == _applierPool.Length)
-				Array.Resize(ref _applierPool, _applierPool.Length << 1);
-
-			for (int i = _applierPoolTop; i < _applierPool.Length; i++)
-				_applierPool[i] = new ModifierApplierController();
-			_applierPoolTop = _applierPool.Length;
-
-			if (_applierPoolTop > MaxPoolSize)
-				throw new Exception($"ModifierApplierControllerPool reached max size of {MaxPoolSize}");
-		}
-
 		internal void Clear()
 		{
 			Array.Clear(_pool, 0, _pool.Length);
 			_poolTop = 0;
-			Array.Clear(_applierPool, 0, _applierPool.Length);
-			_applierPoolTop = 0;
 		}
 
 		public void Reset()

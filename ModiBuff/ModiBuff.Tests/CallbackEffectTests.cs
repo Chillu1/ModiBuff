@@ -210,7 +210,7 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Unit.AddModifierSelf("SilenceSourceWhenSilenced");
-			Enemy.AddApplierModifier(Recipes.GetGenerator("Silence"), ApplierType.Cast);
+			Enemy.AddApplierModifierNew(IdManager.GetId("Silence").Value, ApplierType.Cast);
 			Enemy.TryCast("Silence", Unit);
 			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Silence));
 			Assert.True(Enemy.StatusEffectController.HasStatusEffect(StatusEffectType.Silence));
