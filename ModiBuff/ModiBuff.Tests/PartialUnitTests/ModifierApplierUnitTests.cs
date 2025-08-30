@@ -81,18 +81,23 @@ namespace ModiBuff.Tests
 		public void TryApplyDamageAppliers_ModifierAppliersUnit()
 		{
 			AddRecipe("InitDamageCooldown")
-				.ApplyCooldown(1)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Attack);
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageCooldown"), ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamage").Value, ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamageCooldown").Value, ApplierType.Attack, new ICheck[]
+			{
+				new CooldownCheck(1)
+			});
 
 			Unit.Attack(Unit);
 			Assert.AreEqual(UnitHealth - UnitDamage, Unit.Health);
 
-			Enemy.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Attack);
-			Enemy.AddApplierModifier(Recipes.GetGenerator("InitDamageCooldown"), ApplierType.Attack);
+			Enemy.AddApplierModifierNew(IdManager.GetId("InitDamage").Value, ApplierType.Attack);
+			Enemy.AddApplierModifierNew(IdManager.GetId("InitDamageCooldown").Value, ApplierType.Attack, new ICheck[]
+			{
+				new CooldownCheck(1)
+			});
 
 			Enemy.Attack(Unit);
 			Assert.AreEqual(UnitHealth - UnitDamage - EnemyDamage, Unit.Health);

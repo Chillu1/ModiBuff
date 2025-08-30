@@ -110,7 +110,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - 5 - 5 * Unit.MaxEventCount, Enemy.Health);
 		}
 
-		//[Test]
+		[Test, Ignore("Advanced applier logic needed")]
 		public void SelfApplyIfNotCast()
 		{
 			//Trigger duration timer, if duration timer ends, damages self
@@ -151,7 +151,7 @@ namespace ModiBuff.Tests
 
 			//Unit.AddEffectApplier("DurationDamageCast");
 			//Unit.TryCastEffect("DurationDamageCast", Unit); //Adds modifier, starts duration
-			Unit.AddApplierModifier(Recipes.GetGenerator("DurationDamageCast"), ApplierType.Cast);
+			Unit.AddApplierModifierNew(IdManager.GetId("DurationDamageCast").Value, ApplierType.Cast);
 			Unit.TryCast("DurationDamageCast", Unit); //Adds modifier, starts duration
 
 			Unit.TryCast("DurationDamageSelfCast", Enemy); //Removes modifier, applies damage to enemy

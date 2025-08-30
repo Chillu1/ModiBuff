@@ -56,14 +56,13 @@ namespace ModiBuff.Tests
 				.Effect(new StatusEffectEffect(StatusEffectType.Silence, 2), EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamage");
-
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			int id = IdManager.GetId("InitDamage").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 			Unit.AddModifierSelf("InitSilence");
 
 			Assert.True(Unit.StatusEffectController.HasStatusEffect(StatusEffectType.Silence));
 
-			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
 		}
 
@@ -310,7 +309,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - UnitDamage, Enemy.Health);
 		}
 
-		//[Test]
+		[Test, Ignore("Needs to sync remove timer with status effect timer")]
 		public void Stun_StackAddTime()
 		{
 			//TODO We need to sync remove timer with status effect timer

@@ -33,12 +33,13 @@ namespace ModiBuff.Tests
 			Setup();
 			var nonLifeStealableUnit = new Unit(unitTag: UnitTag.None);
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageLifesteal"), ApplierType.Cast);
+			int id = IdManager.GetId("InitDamageLifesteal").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 
 			Unit.TakeDamage(UnitDamage, Unit);
 			Assert.AreEqual(UnitHealth - UnitDamage, Unit.Health);
 
-			Unit.TryCast("InitDamageLifesteal", nonLifeStealableUnit);
+			Unit.TryCast(id, nonLifeStealableUnit);
 			Assert.AreEqual(UnitHealth - UnitDamage, Unit.Health);
 		}
 

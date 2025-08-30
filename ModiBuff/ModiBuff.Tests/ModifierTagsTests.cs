@@ -122,11 +122,11 @@ namespace ModiBuff.Tests
 			});
 			Setup();
 
-			var intervalGenerator = Recipes.GetGenerator("IntervalRefreshDamage");
-			Assert.True(ModifierRecipes.GetTag(intervalGenerator.Id).HasTag(TagType.IsRefresh));
+			int intervalId = IdManager.GetId("IntervalRefreshDamage").Value;
+			Assert.True(ModifierRecipes.GetTag(intervalId).HasTag(TagType.IsRefresh));
 
-			var durationGenerator = Recipes.GetGenerator("DurationRefreshDamage");
-			Assert.True(ModifierRecipes.GetTag(durationGenerator.Id).HasTag(TagType.IsRefresh));
+			int durationId = IdManager.GetId("DurationRefreshDamage").Value;
+			Assert.True(ModifierRecipes.GetTag(durationId).HasTag(TagType.IsRefresh));
 		}
 	}
 }

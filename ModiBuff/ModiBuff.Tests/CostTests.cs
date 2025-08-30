@@ -27,11 +27,13 @@ namespace ModiBuff.Tests
 		public void CostHealth_NotLethal()
 		{
 			AddRecipe("InitDamage_CostHealth")
-				.ApplyCost(CostType.Health, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostHealth"), ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamage_CostHealth").Value, ApplierType.Attack, new ICheck[]
+			{
+				new CostCheck(CostType.Health, 5)
+			});
 
 			Unit.TakeDamage(UnitHealth - 1, Unit);
 			Unit.Attack(Enemy); //Shouldn't activate, because the Unit would die
@@ -60,11 +62,13 @@ namespace ModiBuff.Tests
 		public void CostMana_NotEnough()
 		{
 			AddRecipe("InitDamage_CostMana")
-				.ApplyCost(CostType.Mana, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_CostMana"), ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamage_CostMana").Value, ApplierType.Attack, new ICheck[]
+			{
+				new CostCheck(CostType.Mana, 5)
+			});
 
 			Unit.UseMana(UnitMana - 1);
 			Unit.TakeDamage(UnitHealth - 1, Unit);

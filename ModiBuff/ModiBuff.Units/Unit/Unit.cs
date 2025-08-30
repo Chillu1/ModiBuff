@@ -614,33 +614,35 @@ namespace ModiBuff.Core.Units
 			IsDead = data.IsDead;
 			ModifierController.LoadState(data.ModifierControllerSaveData, this);
 			ModifierApplierController.LoadState(data.ModifierApplierControllerSaveData);
-			_modifierAppliers.Clear();
-			foreach (var kvp in data.Appliers)
-			{
-				var modifierApplier = new List<(int Id, ICheck[]? Checks)>();
-				List<ICheck> checks = new List<ICheck>();
-				foreach ((int id, var checkStates) in kvp.Value)
+			if (data.Appliers != null)
+				foreach (var loadPair in data.Appliers)
 				{
-					foreach (object state in checkStates)
+					foreach ((int id, var checkStates) in loadPair.Value)
 					{
-						IStateCheck? loadedCheck = null;
-#if MODIBUFF_SYSTEM_TEXT_JSON
-						if (state.FromAnonymousJsonObjectToSaveData(loadedCheck))
+						if (!_modifierAppliers[loadPair.Key].Exists(c => c.Id == id))
 						{
-							checks.Add(loadedCheck);
+							Logger.LogWarning(
+								$"Could not find modifier applier with id {id} for applier type {loadPair.Key} when loading unit {Id}");
 							continue;
 						}
+
+						var loadCheck = _modifierAppliers[loadPair.Key].First(c => c.Id == id); //TODO Nullable
+
+						int i = 0;
+						foreach (object state in checkStates)
+						{
+#if MODIBUFF_SYSTEM_TEXT_JSON
+							if (state.FromAnonymousJsonObjectToSaveData((IStateCheck)loadCheck.Checks[i]))
+							{
+								i++;
+								continue;
+							}
 #endif
-						loadedCheck.LoadState((IStateCheck)state);
-						checks.Add(loadedCheck);
+							((IStateCheck)loadCheck.Checks[i]).LoadState(state);
+							i++;
+						}
 					}
-
-					modifierApplier.Add((id, checks.Count > 0 ? checks.ToArray() : null));
-					checks.Clear();
 				}
-
-				_modifierAppliers[kvp.Key] = modifierApplier;
-			}
 
 			_statusEffectController.LoadState(data.MultiInstanceStatusEffectControllerSaveData);
 			_singleInstanceStatusEffectController.LoadState(data.SingleInstanceStatusEffectControllerSaveData);
@@ -666,7 +668,7 @@ namespace ModiBuff.Core.Units
 
 			public readonly ModifierController.SaveData ModifierControllerSaveData;
 			public readonly ModifierApplierController.SaveData ModifierApplierControllerSaveData;
-			public readonly IReadOnlyDictionary<ApplierType, IEnumerable<(int Id, IEnumerable<object>)>> Appliers;
+			public readonly IReadOnlyDictionary<ApplierType, IEnumerable<(int Id, IEnumerable<object>)>>? Appliers;
 			public readonly MultiInstanceStatusEffectController.SaveData MultiInstanceStatusEffectControllerSaveData;
 			public readonly StatusEffectController.SaveData SingleInstanceStatusEffectControllerSaveData;
 
@@ -677,7 +679,7 @@ namespace ModiBuff.Core.Units
 				float mana, float maxMana, UnitType unitType, bool isDead,
 				ModifierController.SaveData modifierControllerSaveData,
 				ModifierApplierController.SaveData modifierApplierControllerSaveData,
-				IReadOnlyDictionary<ApplierType, IEnumerable<(int Id, IEnumerable<object>)>> appliers,
+				IReadOnlyDictionary<ApplierType, IEnumerable<(int Id, IEnumerable<object>)>>? appliers,
 				MultiInstanceStatusEffectController.SaveData multiInstanceStatusEffectControllerSaveData,
 				StatusEffectController.SaveData singleInstanceStatusEffectControllerSaveData)
 			{
