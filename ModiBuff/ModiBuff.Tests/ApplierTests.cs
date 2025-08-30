@@ -98,7 +98,6 @@ namespace ModiBuff.Tests
 		public void InitDamageCostMana()
 		{
 			AddRecipe("InitDamage_CostMana")
-				.ApplyCost(CostType.Mana, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
@@ -238,7 +237,7 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("AddApplier_Effect")
 				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init)
-				.RemoveApplier(5, ApplierType.Cast, false);
+				.RemoveApplier(5, ApplierType.Cast);
 			AddRecipe("AddApplier_ApplierEffect")
 				.Effect(new ApplierEffect("AddApplier_Effect", ApplierType.Cast, false), EffectOn.Init);
 			Setup();

@@ -44,10 +44,6 @@ namespace ModiBuff.Core
 		private float? _singleStackTime;
 		private float? _independentStackTime;
 
-		private bool _hasApplyChecks;
-		private List<ICheck>? _applyCheckList;
-		private List<Func<IUnit, bool>>? _applyFuncCheckList;
-
 		private bool _hasEffectChecks;
 		private List<ICheck>? _effectCheckList;
 		private List<Func<IUnit, bool>>? _effectFuncCheckList;
@@ -138,24 +134,6 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		//---ApplyChecks---
-
-		public ModifierRecipe ApplyCheck(Func<IUnit, bool> check)
-		{
-			_applyFuncCheckList ??= new List<Func<IUnit, bool>>();
-			_applyFuncCheckList.Add(check);
-			_hasApplyChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe ApplyCheck(ICheck check)
-		{
-			_applyCheckList ??= new List<ICheck>();
-			_applyCheckList.Add(check);
-			_hasApplyChecks = true;
-			return this;
-		}
-
 		//---EffectChecks---
 
 		public ModifierRecipe EffectCheck(Func<IUnit, bool> check)
@@ -213,11 +191,10 @@ namespace ModiBuff.Core
 		///		How many seconds should pass before the modifier gets removed.
 		/// </summary>
 		/// <remarks>OVERWRITES all previous remove effects.</remarks>
-		public ModifierRecipe RemoveApplier(float duration, ApplierType applierType, bool hasApplyChecks)
+		public ModifierRecipe RemoveApplier(float duration, ApplierType applierType)
 		{
 			Duration(duration);
-			_removeEffectWrapper =
-				new RemoveEffectWrapper(new RemoveEffect(Id, applierType, hasApplyChecks), EffectOn.Duration);
+			_removeEffectWrapper = new RemoveEffectWrapper(new RemoveEffect(Id, applierType), EffectOn.Duration);
 			return this;
 		}
 
@@ -559,9 +536,9 @@ namespace ModiBuff.Core
 			var data = new ModifierRecipeData(Id, Name, _effectWrappers, finalRemoveEffectWrapper,
 				_dispelRegisterWrapper, _callbackUnitRegisterWrappers.ToArray(),
 				_callbackEffectRegisterWrappers.ToArray(), _callbackEffectUnitsRegisterWrappers.ToArray(),
-				_hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList,
-				_effectFuncCheckList, _isAura, _tag, _interval, _duration, _refreshDuration, _refreshInterval,
-				_whenStackEffect, _maxStacks, _everyXStacks, _singleStackTime, _independentStackTime);
+				_hasEffectChecks, _effectCheckList, _effectFuncCheckList, _isAura, _tag, _interval, _duration,
+				_refreshDuration, _refreshInterval, _whenStackEffect, _maxStacks, _everyXStacks, _singleStackTime,
+				_independentStackTime);
 			return new ModifierGenerator(in data);
 		}
 

@@ -2,7 +2,9 @@ namespace ModiBuff.Core
 {
 	public interface IModifierApplierOwner : IUnit
 	{
-		ModifierApplierController ModifierApplierController { get; }
+		bool TryApply(int modifierId, IUnit target);
+
 		void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[]? checks = null);
+		//void RemoveApplier(int id, ApplierType applierType);
 	}
 }

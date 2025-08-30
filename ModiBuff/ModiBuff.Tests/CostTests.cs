@@ -116,7 +116,6 @@ namespace ModiBuff.Tests
 		public void CostSixtyPercentHealth_Damage()
 		{
 			AddRecipe("InitDamage_CostSixtyPercentHealth")
-				.ApplyCostPercent(CostType.Health, 0.6f)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 

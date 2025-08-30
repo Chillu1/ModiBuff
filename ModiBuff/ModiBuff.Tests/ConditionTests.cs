@@ -10,7 +10,6 @@ namespace ModiBuff.Tests
 		public void HealthCondition_OnApply_InitDamage()
 		{
 			AddRecipe("InitDamage_ApplyCondition_HealthAbove100")
-				.ApplyCondition(StatType.Health, 100, ComparisonType.GreaterOrEqual)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
@@ -167,7 +166,6 @@ namespace ModiBuff.Tests
 			AddRecipe("InitDamage_ApplyCondition_FreezeStatusEffect")
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			AddRecipe("InitDamage_ApplyCondition_ActLegalAction")
-				.ApplyCondition(LegalAction.Act)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 

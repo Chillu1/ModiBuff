@@ -185,7 +185,6 @@ namespace ModiBuff.Tests
 		public void InitDamage_ChargesCooldownUseWait()
 		{
 			AddRecipe("InitDamage_Cooldown")
-				.ApplyChargesCooldown(1, 2)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 

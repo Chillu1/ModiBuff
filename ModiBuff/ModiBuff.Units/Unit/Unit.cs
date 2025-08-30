@@ -43,7 +43,6 @@ namespace ModiBuff.Core.Units
 		public bool IsDead { get; private set; }
 
 		public ModifierController ModifierController { get; }
-		public ModifierApplierController ModifierApplierController { get; }
 
 		//Note: use one of these, not both
 		public IMultiInstanceStatusEffectController<LegalAction, StatusEffectType> StatusEffectController =>
@@ -119,7 +118,6 @@ namespace ModiBuff.Core.Units
 			_debuffs = new DebuffType[Enum.GetValues(typeof(DebuffType)).Length];
 
 			ModifierController = ModifierControllerPool.Instance.Rent();
-			ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
 			_statusEffectController = new MultiInstanceStatusEffectController
 				(this, StatusEffectType.None, _statusEffectAddedEvents, _statusEffectRemovedEvents);
 			_singleInstanceStatusEffectController = new StatusEffectController();
@@ -147,7 +145,6 @@ namespace ModiBuff.Core.Units
 			_statusEffectController.Update(deltaTime);
 			_singleInstanceStatusEffectController.Update(deltaTime);
 			ModifierController.Update(deltaTime);
-			ModifierApplierController.Update(deltaTime);
 			for (int i = 0; i < _updatableChecks.Count; i++)
 				_updatableChecks[i].Update(deltaTime);
 
@@ -349,6 +346,7 @@ namespace ModiBuff.Core.Units
 			return valueHealed;
 		}
 
+		public bool TryApply(int modifierId, IUnit target) => TryCastInternal(modifierId, target);
 		public bool TryCast(int modifierId, IUnit target) => TryCastInternal(modifierId, target);
 
 		internal bool TryCastNoChecks(int modifierId, IUnit target) => TryCastInternal(modifierId, target, true);
@@ -582,7 +580,6 @@ namespace ModiBuff.Core.Units
 			_singleInstanceStatusEffectController.ResetState();
 			_durationLessStatusEffectController.ResetState();
 			ModifierControllerPool.Instance.Return(ModifierController);
-			ModifierControllerPool.Instance.ReturnApplier(ModifierApplierController);
 
 			void ClearEvents(params IList[] lists)
 			{
@@ -594,9 +591,9 @@ namespace ModiBuff.Core.Units
 		public SaveData SaveState()
 		{
 			return new SaveData(Id, UnitTag, Health, MaxHealth, Damage, HealValue, Mana, MaxMana,
-				UnitType, IsDead, ModifierController.SaveState(), ModifierApplierController.SaveState(),
-				_modifierAppliers.ToDictionary(a => a.Key, a => a.Value.Select(cs => (cs.Id, cs.Checks.Select(
-					c => (c as IStateCheck)?.SaveState())))),
+				UnitType, IsDead, ModifierController.SaveState(),
+				_modifierAppliers.ToDictionary(a => a.Key,
+					a => a.Value.Select(cs => (cs.Id, cs.Checks.Select(c => (c as IStateCheck)?.SaveState())))),
 				_statusEffectController.SaveState(),
 				_singleInstanceStatusEffectController.SaveState());
 		}
@@ -613,7 +610,6 @@ namespace ModiBuff.Core.Units
 			UnitType = data.UnitType;
 			IsDead = data.IsDead;
 			ModifierController.LoadState(data.ModifierControllerSaveData, this);
-			ModifierApplierController.LoadState(data.ModifierApplierControllerSaveData);
 			if (data.Appliers != null)
 				foreach (var loadPair in data.Appliers)
 				{
@@ -667,7 +663,6 @@ namespace ModiBuff.Core.Units
 			public readonly bool IsDead;
 
 			public readonly ModifierController.SaveData ModifierControllerSaveData;
-			public readonly ModifierApplierController.SaveData ModifierApplierControllerSaveData;
 			public readonly IReadOnlyDictionary<ApplierType, IEnumerable<(int Id, IEnumerable<object>)>>? Appliers;
 			public readonly MultiInstanceStatusEffectController.SaveData MultiInstanceStatusEffectControllerSaveData;
 			public readonly StatusEffectController.SaveData SingleInstanceStatusEffectControllerSaveData;
@@ -678,7 +673,6 @@ namespace ModiBuff.Core.Units
 			public SaveData(int id, UnitTag unitTag, float health, float maxHealth, float damage, float healValue,
 				float mana, float maxMana, UnitType unitType, bool isDead,
 				ModifierController.SaveData modifierControllerSaveData,
-				ModifierApplierController.SaveData modifierApplierControllerSaveData,
 				IReadOnlyDictionary<ApplierType, IEnumerable<(int Id, IEnumerable<object>)>>? appliers,
 				MultiInstanceStatusEffectController.SaveData multiInstanceStatusEffectControllerSaveData,
 				StatusEffectController.SaveData singleInstanceStatusEffectControllerSaveData)
@@ -694,7 +688,6 @@ namespace ModiBuff.Core.Units
 				UnitType = unitType;
 				IsDead = isDead;
 				ModifierControllerSaveData = modifierControllerSaveData;
-				ModifierApplierControllerSaveData = modifierApplierControllerSaveData;
 				Appliers = appliers;
 				MultiInstanceStatusEffectControllerSaveData = multiInstanceStatusEffectControllerSaveData;
 				SingleInstanceStatusEffectControllerSaveData = singleInstanceStatusEffectControllerSaveData;

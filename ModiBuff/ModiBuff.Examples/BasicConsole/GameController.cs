@@ -1,3 +1,4 @@
+using System.Linq;
 using ModiBuff.Core;
 
 namespace ModiBuff.Examples.BasicConsole
@@ -47,9 +48,8 @@ namespace ModiBuff.Examples.BasicConsole
 			//But we're adding it as an applier, and not as a normal modifier
 			//This means that instead of it being applier to the player
 			//it will be applied to a unit that the player attacks
-			_player.ModifierApplierController.TryAddApplier(_idManager.GetId("DoT")!.Value, false, ApplierType.Attack);
-			_player.ModifierApplierController.TryAddApplier(_idManager.GetId("InitHeal")!.Value, false,
-				ApplierType.Cast);
+			_player.AddApplierModifierNew(_idManager.GetId("DoT")!.Value, ApplierType.Attack);
+			_player.AddApplierModifierNew(_idManager.GetId("InitHeal")!.Value, ApplierType.Cast);
 			//_player.ModifierController.TryAddApplier(_idManager.GetId("DisarmChance"), true, ApplierType.Cast);
 		}
 
@@ -101,12 +101,12 @@ namespace ModiBuff.Examples.BasicConsole
 		private bool PlayerCastAction()
 		{
 			//Display all possible modifiers to cast, then when one was chosen, choose the target
-			var modifierIds = _player.ModifierApplierController.GetApplierCastModifierIds();
+			int[] modifierIds = _player.GetApplierCastModifierIds().ToArray();
 
 			while (true)
 			{
 				Console.GameMessage("Choose modifier to cast, or c to cancel");
-				for (int i = 0; i < modifierIds.Count; i++)
+				for (int i = 0; i < modifierIds.Length; i++)
 				{
 					var modifierInfo = _recipes.GetModifierInfo(modifierIds[i]);
 					Console.GameMessage($"{i + 1} - {modifierInfo.DisplayName} - {modifierInfo.Description}");
@@ -115,10 +115,10 @@ namespace ModiBuff.Examples.BasicConsole
 				string castAction = System.Console.ReadLine();
 				if (int.TryParse(castAction, out int castActionInt))
 				{
-					if (castActionInt > 0 && castActionInt <= modifierIds.Count)
+					if (castActionInt > 0 && castActionInt <= modifierIds.Length)
 					{
 						//TODO: choosing target
-						_player.TryCast(modifierIds[castActionInt - 1], _player);
+						_player.TryApply(modifierIds[castActionInt - 1], _player);
 						break;
 					}
 				}

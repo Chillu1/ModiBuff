@@ -22,7 +22,6 @@ namespace ModiBuff.Tests
 			public float MaxHealth { get; }
 			public float Damage { get; }
 
-			public ModifierApplierController ModifierApplierController { get; }
 			private readonly Dictionary<ApplierType, List<(int Id, ICheck[] Checks)>> _modifierAppliers;
 
 			public ModifierApplierUnit(float health, float damage, UnitType unitType = UnitType.Good)
@@ -32,7 +31,6 @@ namespace ModiBuff.Tests
 				MaxHealth = Health = health;
 				Damage = damage;
 
-				ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
 				_modifierAppliers = new Dictionary<ApplierType, List<(int, ICheck[])>>
 				{
 					{ ApplierType.Attack, new List<(int, ICheck[])>() },
@@ -43,7 +41,30 @@ namespace ModiBuff.Tests
 			public float Attack(IUnit target)
 			{
 				if (target is IModifierOwner modifierOwner)
-					this.ApplyAllAttackModifier(modifierOwner);
+				{
+					foreach ((int id, ICheck[] checks) in _modifierAppliers[ApplierType.Attack])
+					{
+						bool checksPassed = true;
+						if (checks != null)
+							foreach (var check in checks)
+							{
+								if (!check.Check(this))
+								{
+									checksPassed = false;
+									break;
+								}
+							}
+
+						if (!checksPassed)
+							continue;
+
+						if (checks != null)
+							foreach (var check in checks)
+								check.Use(this);
+
+						modifierOwner.ModifierController.Add(id, target, this);
+					}
+				}
 
 				return ((IDamagable)target).TakeDamage(Damage, this);
 			}

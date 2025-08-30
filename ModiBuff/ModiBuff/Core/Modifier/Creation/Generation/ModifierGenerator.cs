@@ -3,13 +3,11 @@ using System.Collections.Generic;
 
 namespace ModiBuff.Core
 {
-	public sealed class ModifierGenerator : IModifierGenerator, IModifierApplyCheckGenerator
+	public sealed class ModifierGenerator : IModifierGenerator
 	{
 		public int Id { get; }
 		public int GenId { get; private set; }
 		public string Name { get; }
-
-		public bool HasApplyChecks { get; }
 
 		private readonly bool _hasEffectChecks;
 
@@ -32,17 +30,6 @@ namespace ModiBuff.Core
 
 		private readonly ModifierEffectsCreator _modifierEffectsCreator;
 
-		private readonly Func<IUnit, bool>[]? _applyFuncChecks;
-		private readonly List<IUpdatableCheck> _updatableApplyChecksList;
-		private readonly List<INoUnitCheck> _noUnitApplyChecksList;
-		private readonly List<IUnitCheck> _unitApplyChecksList;
-		private readonly List<IUsableCheck> _usableApplyChecksList;
-		private readonly IUpdatableCheck[] _updatableApplyChecks;
-		private readonly INoUnitCheck[] _noUnitApplyChecks;
-		private readonly IUnitCheck[] _unitApplyChecks;
-		private readonly IUsableCheck[] _usableApplyChecks;
-		private readonly IStateCheck[] _stateApplyChecks;
-
 		private readonly Func<IUnit, bool>[]? _effectFuncChecks;
 		private readonly List<IUpdatableCheck> _updatableEffectChecksList;
 		private readonly List<INoUnitCheck> _noUnitEffectChecksList;
@@ -59,7 +46,6 @@ namespace ModiBuff.Core
 			Id = data.Id;
 			Name = data.Name;
 
-			HasApplyChecks = data.HasApplyChecks;
 			_hasEffectChecks = data.HasEffectChecks;
 
 			_isAura = data.IsAura;
@@ -82,14 +68,6 @@ namespace ModiBuff.Core
 			_modifierEffectsCreator = new ModifierEffectsCreator(data.EffectWrappers, data.RemoveEffectWrapper,
 				data.DispelRegisterWrapper, data.CallbackUnitRegisterWrappers, data.CallbackEffectRegisterWrappers,
 				data.CallbackEffectUnitsRegisterWrappers);
-
-			if (HasApplyChecks)
-			{
-				_applyFuncChecks = data.ApplyFuncCheckList?.ToArray();
-				SetupChecks(data.ApplyCheckList, out _updatableApplyChecksList, out _noUnitApplyChecksList,
-					out _unitApplyChecksList, out _usableApplyChecksList, out _updatableApplyChecks,
-					out _noUnitApplyChecks, out _unitApplyChecks, out _usableApplyChecks, out _stateApplyChecks);
-			}
 
 			if (_hasEffectChecks)
 			{
@@ -182,13 +160,6 @@ namespace ModiBuff.Core
 
 			return new Modifier(Id, genId, Name, initComponent, timeComponents, stackComponent,
 				effectCheck, targetComponent, effects.SetDataEffects, effects.EffectStateInfo, effects.EffectSaveState);
-		}
-
-		ModifierCheck IModifierApplyCheckGenerator.CreateApplyCheck()
-		{
-			return CreateCheck(_stateApplyChecks, _applyFuncChecks, _updatableApplyChecks,
-				_noUnitApplyChecks, _unitApplyChecks, _usableApplyChecks, _updatableApplyChecksList,
-				_noUnitApplyChecksList, _unitApplyChecksList, _usableApplyChecksList);
 		}
 
 		private ModifierCheck CreateCheck(IStateCheck[] stateChecks, Func<IUnit, bool>[] funcChecks,
