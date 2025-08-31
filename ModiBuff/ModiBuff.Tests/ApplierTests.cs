@@ -250,7 +250,7 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
 			Unit.Update(5);
-			Assert.False(Unit.ContainsApplier("AddApplier_Effect"));
+			Assert.False(Unit.ContainsApplier("AddApplier_Effect", ApplierType.Cast));
 			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
 		}
 

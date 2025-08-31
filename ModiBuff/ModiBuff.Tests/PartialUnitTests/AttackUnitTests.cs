@@ -18,7 +18,6 @@ namespace ModiBuff.Tests
 			public float Damage { get; }
 
 			public ModifierController ModifierController { get; }
-			public ModifierApplierController ModifierApplierController { get; }
 
 			public AttackUnit(float damage, UnitType unitType = UnitType.Good)
 			{
@@ -27,13 +26,11 @@ namespace ModiBuff.Tests
 				UnitTag = UnitTag.Default;
 
 				ModifierController = ModifierControllerPool.Instance.Rent();
-				ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
 			}
 
 			public void Update(float delta)
 			{
 				ModifierController.Update(delta);
-				ModifierApplierController.Update(delta);
 			}
 
 			public float Attack(IUnit target)

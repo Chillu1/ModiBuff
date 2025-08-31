@@ -1,3 +1,4 @@
+using System.Linq;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using ModiBuff.Core.Units.Interfaces.NonGeneric;
@@ -10,7 +11,6 @@ namespace ModiBuff.Examples.BasicConsole
 		public static void PrintStateAndModifiers(this IModifierApplierOwner owner, IModifierRecipes modifierRecipes)
 		{
 			var modifierController = ((IModifierOwner)owner).ModifierController;
-			var modifierApplierController = owner.ModifierApplierController;
 			//Stats, ApplyModifiers, Normal modifiers.
 			var damagable = (IDamagable)owner;
 			var attacker = (IAttacker)owner;
@@ -18,22 +18,22 @@ namespace ModiBuff.Examples.BasicConsole
 			                    $"{attacker.Damage} Damage");
 			//Appliers
 			//Name, description, checks, (states, like cooldown)
-			var applierAttackIds = modifierApplierController.GetApplierAttackModifierIds();
-			if (applierAttackIds != null && applierAttackIds.Count > 0)
+			var applierAttackIds = ((Unit)owner).GetApplierCastModifierIds().ToArray();
+			if (applierAttackIds.Length > 0)
 			{
 				Console.GameMessage("Player attack appliers:");
-				for (int i = 0; i < applierAttackIds.Count; i++)
+				for (int i = 0; i < applierAttackIds.Length; i++)
 				{
 					var modifierInfo = modifierRecipes.GetModifierInfo(applierAttackIds[i]);
 					Console.GameMessage($"{i + 1} - {modifierInfo.DisplayName} - {modifierInfo.Description}");
 				}
 			}
 
-			var applierCastIds = modifierApplierController.GetApplierCastModifierIds();
-			if (applierCastIds != null && applierCastIds.Count > 0)
+			var applierCastIds = ((Unit)owner).GetApplierCastModifierIds().ToArray();
+			if (applierCastIds.Length > 0)
 			{
 				Console.GameMessage("Player cast appliers:");
-				for (int i = 0; i < applierCastIds.Count; i++)
+				for (int i = 0; i < applierCastIds.Length; i++)
 				{
 					var modifierInfo = modifierRecipes.GetModifierInfo(applierCastIds[i]);
 					Console.GameMessage($"{i + 1} - {modifierInfo.DisplayName} - {modifierInfo.Description}");

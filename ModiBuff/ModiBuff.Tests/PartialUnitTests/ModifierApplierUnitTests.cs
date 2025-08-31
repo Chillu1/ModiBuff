@@ -79,6 +79,49 @@ namespace ModiBuff.Tests
 				return dealtDamage;
 			}
 
+			public bool ContainsApplier(int modifierId, ApplierType applierType)
+			{
+				return _modifierAppliers.TryGetValue(applierType, out var list) && list.Exists(c => c.Id == modifierId);
+			}
+
+			public bool TryApply(int modifierId, IUnit target)
+			{
+				if (!(target is IModifierOwner modifierTarget))
+					return false;
+				if (!modifierId.IsLegalTarget((IUnitEntity)target, this))
+					return false;
+				if (!_modifierAppliers.TryGetValue(ApplierType.Cast, out var appliers))
+					return false;
+
+				(int Id, ICheck[] Checks)? applier = null;
+				for (int i = 0; i < appliers.Count; i++)
+				{
+					if (appliers[i].Id == modifierId)
+					{
+						applier = appliers[i];
+						break;
+					}
+				}
+
+				if (applier == null)
+					return false;
+
+				if (applier.Value.Checks != null)
+				{
+					foreach (var check in applier.Value.Checks)
+						if (!check.Check(this))
+							return false;
+
+					for (int i = 0; i < applier.Value.Checks.Length; i++)
+						applier.Value.Checks[i].Use(this);
+				}
+
+				modifierTarget.ModifierController.Add(modifierId, modifierTarget, this);
+
+
+				return true;
+			}
+
 			public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
 			{
 				if (checks?.Length > 0)

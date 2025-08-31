@@ -59,18 +59,6 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
-		public void ApplyDamageEffect_NoModifiersUnit()
-		{
-			AddEffect("InitDamage", new DamageEffect(5));
-			Setup();
-
-			Enemy.AddEffectApplier("InitDamage");
-
-			Enemy.TryCastEffect("InitDamage", Unit);
-			Assert.AreEqual(UnitHealth - 5, Unit.Health);
-		}
-
-		[Test]
 		public void TryApplyApplierEffect_NoModifiersUnit()
 		{
 			AddEffect("InitDamageApplier", new ApplierEffect("InitDamage"));

@@ -42,7 +42,6 @@ namespace ModiBuff.Tests
 			Config.DefaultTag = (ulong)Core.Units.TagType.Default;
 			Config.PoolSize = 1;
 			Config.ModifierControllerPoolSize = 3;
-			Config.ModifierApplierControllerPoolSize = 3;
 			EffectTypeIdManager = new EffectTypeIdManager();
 			EffectTypeIdManager.RegisterAllEffectTypesInAssemblies();
 

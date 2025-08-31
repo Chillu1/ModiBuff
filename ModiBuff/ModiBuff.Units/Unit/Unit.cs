@@ -483,6 +483,11 @@ namespace ModiBuff.Core.Units
 
 		//---Appliers---
 
+		public bool ContainsApplier(int modifierId, ApplierType applierType)
+		{
+			return _modifierAppliers.TryGetValue(applierType, out var list) && list.Exists(c => c.Id == modifierId);
+		}
+
 		public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[]? checks = null)
 		{
 			if (checks is { Length: > 0 })

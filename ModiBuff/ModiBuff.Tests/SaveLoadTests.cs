@@ -300,31 +300,6 @@ namespace ModiBuff.Tests
 #if !MODIBUFF_SYSTEM_TEXT_JSON
 		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
 #endif
-		public void SaveNewEffectIdLoad()
-		{
-			AddEffect("InitDamage", new DamageEffect(5));
-			AddEffect("InitBigDamage", new DamageEffect(10));
-			Setup();
-
-			const string gameStateFile = "effectIdGameStateTest.json";
-
-			//TODO save will not have modifier id redirection
-			if (!File.Exists(_saveController.Path + "/" + gameStateFile))
-			{
-				Unit.AddEffectApplier("InitBigDamage");
-				SaveGameState(gameStateFile, Unit);
-			}
-
-			LoadGameState(gameStateFile, out Unit loadedUnit);
-
-			loadedUnit.TryCastEffect("InitBigDamage", loadedUnit);
-			Assert.AreEqual(UnitHealth - 10, loadedUnit.Health);
-		}
-
-		[Test]
-#if !MODIBUFF_SYSTEM_TEXT_JSON
-		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
-#endif
 		public void SaveModifierNewEffectLoad()
 		{
 			AddRecipe("InitHeal")

@@ -47,25 +47,21 @@ namespace ModiBuff.Tests
 			return unit.ModifierController.Contains(ModifierIdManager.GetIdByName(name).Value);
 		}
 
-		internal static bool ContainsApplier(this IModifierApplierOwner unit, string name)
+		internal static bool ContainsApplier(this IModifierApplierOwner unit, string name, ApplierType applierType)
 		{
-			return unit.ModifierApplierController.ContainsApplier(ModifierIdManager.GetIdByName(name).Value);
+			return unit.ContainsApplier(ModifierIdManager.GetIdByName(name).Value, applierType);
 		}
 
-		internal static bool AddEffectApplier(this IModifierApplierOwner unit, string name)
+		internal static void AddApplierModifierNew(this IModifierApplierOwner unit, string name,
+			ApplierType applierType, params ICheck[] checks)
 		{
 			CheckForSetup(unit);
-			return unit.ModifierApplierController.TryAddEffectApplier(EffectIdManager.GetIdOld(name).Value);
+			unit.AddApplierModifierNew(ModifierIdManager.GetIdByName(name).Value, applierType, checks);
 		}
 
 		internal static void TryCast(this Unit unit, string name, IModifierOwner target)
 		{
 			unit.TryCast(ModifierIdManager.GetIdByName(name).Value, target);
-		}
-
-		internal static void TryCastEffect(this IModifierApplierOwner unit, string name, IUnit target)
-		{
-			unit.TryCastEffect(EffectIdManager.GetIdOld(name).Value, target);
 		}
 
 		internal static void ChangeStatusEffect(this IStatusEffectOwner<LegalAction, StatusEffectType> owner,

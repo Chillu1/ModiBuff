@@ -202,6 +202,11 @@ namespace ModiBuff.Examples.BasicConsole
 			return Health - originalHealth;
 		}
 
+		public bool ContainsApplier(int modifierId, ApplierType applierType)
+		{
+			return _modifierAppliers.TryGetValue(applierType, out var list) && list.Exists(c => c.Id == modifierId);
+		}
+
 		public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
 		{
 			if (checks?.Length > 0)

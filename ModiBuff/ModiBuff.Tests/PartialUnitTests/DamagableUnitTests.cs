@@ -23,7 +23,6 @@ namespace ModiBuff.Tests
 			public bool IsDead { get; private set; }
 
 			public ModifierController ModifierController { get; }
-			public ModifierApplierController ModifierApplierController { get; }
 
 			private readonly Dictionary<ApplierType, List<(int Id, ICheck[] Checks)>> _modifierAppliers;
 
@@ -34,7 +33,6 @@ namespace ModiBuff.Tests
 				MaxHealth = Health = health;
 
 				ModifierController = ModifierControllerPool.Instance.Rent();
-				ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
 				_modifierAppliers = new Dictionary<ApplierType, List<(int, ICheck[])>>
 				{
 					{ ApplierType.Attack, new List<(int, ICheck[])>() },
@@ -45,7 +43,6 @@ namespace ModiBuff.Tests
 			public void Update(float delta)
 			{
 				ModifierController.Update(delta);
-				ModifierApplierController.Update(delta);
 			}
 
 			public float TakeDamage(float damage, IUnit source)
@@ -68,6 +65,13 @@ namespace ModiBuff.Tests
 			{
 				Health -= value;
 			}
+
+			public bool ContainsApplier(int modifierId, ApplierType applierType)
+			{
+				return _modifierAppliers.TryGetValue(applierType, out var list) && list.Exists(c => c.Id == modifierId);
+			}
+
+			public bool TryApply(int modifierId, IUnit target) => TryCast(modifierId, target);
 
 			public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
 			{

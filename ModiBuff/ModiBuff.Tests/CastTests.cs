@@ -160,14 +160,14 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth, Unit.Health);
 			//TODO Enemy has SelfCast (shouldn't), Unit doesn't get his appliers removed
 			Assert.False(Unit.ContainsModifier("DurationDamageSelfCast"));
-			Assert.False(Unit.ContainsApplier("DurationDamageSelfCast"));
+			Assert.False(Unit.ContainsApplier("DurationDamageSelfCast", ApplierType.Cast));
 
 			//Unit.TryCastEffect("DurationDamageCast", Unit); //Adds modifier, starts duration
 			Unit.TryCast("DurationDamageCast", Unit);
 			Unit.Update(1);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 			Assert.False(Unit.ContainsModifier("DurationDamageSelfCast"));
-			Assert.False(Unit.ContainsApplier("DurationDamageSelfCast"));
+			Assert.False(Unit.ContainsApplier("DurationDamageSelfCast", ApplierType.Cast));
 		}
 	}
 }
