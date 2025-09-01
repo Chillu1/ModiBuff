@@ -207,6 +207,19 @@ namespace ModiBuff.Examples.BasicConsole
 			return _modifierAppliers.TryGetValue(applierType, out var list) && list.Exists(c => c.Id == modifierId);
 		}
 
+		public bool RemoveApplier(int id, ApplierType applierType)
+		{
+			if (!_modifierAppliers.TryGetValue(applierType, out var list))
+				return false;
+
+			int index = list.FindIndex(c => c.Id == id);
+			if (index == -1)
+				return false;
+
+			list.RemoveAt(index);
+			return true;
+		}
+
 		public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
 		{
 			if (checks?.Length > 0)

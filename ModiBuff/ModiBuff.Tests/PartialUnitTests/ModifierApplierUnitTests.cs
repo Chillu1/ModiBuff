@@ -84,6 +84,19 @@ namespace ModiBuff.Tests
 				return _modifierAppliers.TryGetValue(applierType, out var list) && list.Exists(c => c.Id == modifierId);
 			}
 
+			public bool RemoveApplier(int id, ApplierType applierType)
+			{
+				if (!_modifierAppliers.TryGetValue(applierType, out var list))
+					return false;
+
+				int index = list.FindIndex(c => c.Id == id);
+				if (index == -1)
+					return false;
+
+				list.RemoveAt(index);
+				return true;
+			}
+
 			public bool TryApply(int modifierId, IUnit target)
 			{
 				if (!(target is IModifierOwner modifierTarget))

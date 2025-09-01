@@ -58,8 +58,7 @@ namespace ModiBuff.Core
 
 			if (_applierType != null)
 			{
-				//TODO
-				//((IModifierApplierOwner)target).RemoveApplier(_id /*, _genId*/, _applierType.Value);
+				((IModifierApplierOwner)target).RemoveApplier(_id /*, _genId*/, _applierType.Value);
 				//return;
 			}
 

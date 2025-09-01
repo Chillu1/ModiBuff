@@ -7,6 +7,6 @@ namespace ModiBuff.Core
 		bool TryApply(int modifierId, IUnit target);
 
 		void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[]? checks = null);
-		//void RemoveApplier(int id, ApplierType applierType);
+		bool RemoveApplier(int id, ApplierType applierType);
 	}
 }

@@ -73,6 +73,19 @@ namespace ModiBuff.Tests
 
 			public bool TryApply(int modifierId, IUnit target) => TryCast(modifierId, target);
 
+			public bool RemoveApplier(int id, ApplierType applierType)
+			{
+				if (!_modifierAppliers.TryGetValue(applierType, out var list))
+					return false;
+
+				int index = list.FindIndex(c => c.Id == id);
+				if (index == -1)
+					return false;
+
+				list.RemoveAt(index);
+				return true;
+			}
+
 			public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
 			{
 				if (checks?.Length > 0)
