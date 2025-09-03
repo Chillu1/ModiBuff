@@ -18,12 +18,13 @@ namespace ModiBuff.Tests
 			AddRecipe(PoisonRecipe);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("Poison"), ApplierType.Cast);
-			Unit.TryCast("Poison", Enemy);
+			int id = IdManager.GetId("Poison").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
+			Unit.TryCast(id, Enemy);
 			Enemy.Update(1);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
-			Unit.TryCast("Poison", Enemy);
+			Unit.TryCast(id, Enemy);
 			Enemy.Update(1);
 			Assert.AreEqual(EnemyHealth - 5 - 5 * 2, Enemy.Health);
 		}
@@ -60,13 +61,14 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Enemy.AddModifierSelf("HealPerPoisonStack");
-			Unit.AddApplierModifier(Recipes.GetGenerator("Poison"), ApplierType.Cast);
-			Unit.TryCast("Poison", Enemy);
+			int id = IdManager.GetId("Poison").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
+			Unit.TryCast(id, Enemy);
 			Enemy.Update(1);
 			Enemy.AddModifierSelf("HealPerPoisonStack"); //Checks for stack behaviour
 			Assert.AreEqual(EnemyHealth - 5 + 1, Enemy.Health);
 
-			Unit.TryCast("Poison", Enemy);
+			Unit.TryCast(id, Enemy);
 			Enemy.Update(1);
 			Assert.AreEqual(EnemyHealth - 5 + 1 - 5 * 2 + 1 * 2, Enemy.Health);
 		}
@@ -75,23 +77,23 @@ namespace ModiBuff.Tests
 		public void HealBasedOnPoisonStacks()
 		{
 			AddRecipe(PoisonRecipe);
-			AddRecipe("PoisonHealHeal")
+			AddRecipe("PoisonHeal")
 				.Stack(WhenStackEffect.Always)
 				.Effect(new HealEffect(0, HealEffect.EffectState.None,
 						StackEffectType.Effect | StackEffectType.SetStacksBased, 1)
 					.SetMetaEffects(new AddValueBasedOnPoisonStacksMetaEffect(1f)), EffectOn.Stack);
-			AddEffect("PoisonHeal",
-				new ApplierEffect("Poison"),
-				new ApplierEffect("PoisonHealHeal", targeting: Targeting.SourceTarget));
+			AddRecipe("PosionHealApplier")
+				.Effect(new ApplierEffect("Poison"), EffectOn.Init)
+				.Effect(new ApplierEffect("PoisonHeal", targeting: Targeting.SourceTarget), EffectOn.Init);
 			Setup();
 
 			Unit.TakeDamage(UnitHealth / 2f, Unit);
-			Unit.AddEffectApplier("PoisonHeal");
+			Unit.AddApplierModifierNew("PosionHealApplier", ApplierType.Cast);
 
-			Unit.TryCastEffect("PoisonHeal", Enemy);
+			Unit.TryCast("PosionHealApplier", Enemy);
 			Assert.AreEqual(UnitHealth / 2f + 1, Unit.Health);
 
-			Unit.TryCastEffect("PoisonHeal", Enemy);
+			Unit.TryCast("PosionHealApplier", Enemy);
 			Assert.AreEqual(UnitHealth / 2f + 1 + 1 * 2, Unit.Health);
 		}
 
@@ -108,20 +110,21 @@ namespace ModiBuff.Tests
 			Setup();
 
 			Enemy.AddModifierSelf("PoisonThorns");
-			Unit.AddApplierModifier(Recipes.GetGenerator("Poison"), ApplierType.Cast);
+			int id = IdManager.GetId("Poison").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 
-			Unit.TryCast("Poison", Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Enemy.Update(1);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 
-			Unit.TryCast("Poison", Enemy);
+			Unit.TryCast(id, Enemy);
 			Enemy.Update(1);
 			Assert.AreEqual(UnitHealth - 5 - 5 * 2, Unit.Health);
 
-			Ally.AddApplierModifier(Recipes.GetGenerator("Poison"), ApplierType.Cast);
-			Ally.TryCast("Poison", Enemy);
+			Ally.AddApplierModifierNew(id, ApplierType.Cast);
+			Ally.TryCast(id, Enemy);
 
 			Enemy.Update(1);
 			Assert.AreEqual(UnitHealth - 5 - 5 * 2 - 5 * 2, Unit.Health);

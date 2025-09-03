@@ -4,7 +4,6 @@ namespace ModiBuff.Core
 		IShallowClone<IEffect>
 	{
 		private readonly ApplierType? _applierType;
-		private readonly bool _hasApplyChecks;
 		private IRevertEffect[]? _revertibleEffects;
 		private int _id;
 		private int? _genId;
@@ -15,11 +14,10 @@ namespace ModiBuff.Core
 
 		internal RemoveEffect(int id) => _id = id;
 
-		internal RemoveEffect(int id, ApplierType? applierType = null, bool hasApplyChecks = false)
+		internal RemoveEffect(int id, ApplierType? applierType = null)
 		{
 			_id = id;
 			_applierType = applierType;
-			_hasApplyChecks = hasApplyChecks;
 		}
 
 		/// <summary>
@@ -27,17 +25,16 @@ namespace ModiBuff.Core
 		/// </summary>
 		public static RemoveEffect Create(int id, int? genId, params IRevertEffect[] revertibleEffects)
 		{
-			var effect = new RemoveEffect(id, genId, null, false);
+			var effect = new RemoveEffect(id, genId, null);
 			effect.SetRevertibleEffects(revertibleEffects);
 			return effect;
 		}
 
-		private RemoveEffect(int id, int? genId, ApplierType? applierType, bool hasApplyChecks)
+		private RemoveEffect(int id, int? genId, ApplierType? applierType)
 		{
 			_id = id;
 			_genId = genId;
 			_applierType = applierType;
-			_hasApplyChecks = hasApplyChecks;
 		}
 
 		public void SetModifierId(int id) => _id = id;
@@ -61,8 +58,7 @@ namespace ModiBuff.Core
 
 			if (_applierType != null)
 			{
-				((IModifierApplierOwner)target).ModifierApplierController.RemoveApplier(_id /*, _genId*/,
-					_applierType.Value, _hasApplyChecks);
+				((IModifierApplierOwner)target).RemoveApplier(_id /*, _genId*/, _applierType.Value);
 				//return;
 			}
 
@@ -71,7 +67,7 @@ namespace ModiBuff.Core
 
 		public void StackEffect(int stacks, IUnit target, IUnit source) => Effect(target, source);
 
-		public IEffect ShallowClone() => new RemoveEffect(_id, _genId, _applierType, _hasApplyChecks);
+		public IEffect ShallowClone() => new RemoveEffect(_id, _genId, _applierType);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

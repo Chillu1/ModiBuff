@@ -41,7 +41,7 @@ namespace ModiBuff.Core.Units
 				return;
 			}
 
-			applierSource.TryCast(_modifierId, modifierTarget);
+			applierSource.TryApply(_modifierId, modifierTarget);
 		}
 	}
 }

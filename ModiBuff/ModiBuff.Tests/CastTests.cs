@@ -11,9 +11,10 @@ namespace ModiBuff.Tests
 		{
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Cast);
+			int id = IdManager.GetId("InitDamage").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 
-			Unit.TryCast(IdManager.GetId("InitDamage").Value, Enemy);
+			Unit.TryCast(id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
@@ -22,19 +23,20 @@ namespace ModiBuff.Tests
 		public void CastInitDamageChecks_OnEnemy()
 		{
 			AddRecipe("InitDamageFullHealth")
-				.ApplyCondition(ConditionType.HealthIsFull)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageFullHealth"), ApplierType.Cast);
+			int id = IdManager.GetId("InitDamageFullHealth").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast,
+				new ICheck[] { new ConditionCheck(ConditionType.HealthIsFull) });
 
-			Unit.TryCast(IdManager.GetId("InitDamageFullHealth").Value, Enemy);
+			Unit.TryCast(id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
 			Unit.TakeDamage(5, Enemy);
 
-			Unit.TryCast(IdManager.GetId("InitDamageFullHealth").Value, Enemy);
+			Unit.TryCast(id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
@@ -44,7 +46,7 @@ namespace ModiBuff.Tests
 		{
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamage").Value, ApplierType.Attack);
 
 			Unit.Attack(Enemy);
 
@@ -55,11 +57,11 @@ namespace ModiBuff.Tests
 		public void AttackInitDamageChecks_OnEnemy()
 		{
 			AddRecipe("InitDamageFullHealth")
-				.ApplyCondition(ConditionType.HealthIsFull)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageFullHealth"), ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamageFullHealth").Value, ApplierType.Attack,
+				new ICheck[] { new ConditionCheck(ConditionType.HealthIsFull) });
 
 			Unit.Attack(Enemy);
 
@@ -76,15 +78,15 @@ namespace ModiBuff.Tests
 		public void CastInitDamageChecksDelayedUse_OnEnemy()
 		{
 			AddRecipe("InitDamageFullHealth")
-				.ApplyCondition(ConditionType.HealthIsFull)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
 			int id = IdManager.GetId("InitDamageFullHealth").Value;
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageFullHealth"), ApplierType.Cast);
+			Unit.AddApplierModifierNew(id, ApplierType.Cast,
+				new ICheck[] { new ConditionCheck(ConditionType.HealthIsFull) });
 
-			Assert.True(Unit.TryCastCheck(id));
+			Assert.True(Unit.TryCast(id, Unit));
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
 
 			Assert.True(Unit.TryCastNoChecks(id, Enemy));
@@ -100,14 +102,15 @@ namespace ModiBuff.Tests
 				.CallbackUnit(CallbackUnitType.OnCast);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Cast);
+			int id = IdManager.GetId("InitDamage").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 			Unit.AddModifierSelf("CastInitDamageEvent");
 
-			Unit.TryCast(IdManager.GetId("InitDamage").Value, Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5 - 5 * Unit.MaxEventCount, Enemy.Health);
 		}
 
-		//[Test]
+		[Test, Ignore("Advanced applier logic needed")]
 		public void SelfApplyIfNotCast()
 		{
 			//Trigger duration timer, if duration timer ends, damages self
@@ -148,7 +151,7 @@ namespace ModiBuff.Tests
 
 			//Unit.AddEffectApplier("DurationDamageCast");
 			//Unit.TryCastEffect("DurationDamageCast", Unit); //Adds modifier, starts duration
-			Unit.AddApplierModifier(Recipes.GetGenerator("DurationDamageCast"), ApplierType.Cast);
+			Unit.AddApplierModifierNew(IdManager.GetId("DurationDamageCast").Value, ApplierType.Cast);
 			Unit.TryCast("DurationDamageCast", Unit); //Adds modifier, starts duration
 
 			Unit.TryCast("DurationDamageSelfCast", Enemy); //Removes modifier, applies damage to enemy
@@ -157,14 +160,14 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth, Unit.Health);
 			//TODO Enemy has SelfCast (shouldn't), Unit doesn't get his appliers removed
 			Assert.False(Unit.ContainsModifier("DurationDamageSelfCast"));
-			Assert.False(Unit.ContainsApplier("DurationDamageSelfCast"));
+			Assert.False(Unit.ContainsApplier("DurationDamageSelfCast", ApplierType.Cast));
 
 			//Unit.TryCastEffect("DurationDamageCast", Unit); //Adds modifier, starts duration
 			Unit.TryCast("DurationDamageCast", Unit);
 			Unit.Update(1);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 			Assert.False(Unit.ContainsModifier("DurationDamageSelfCast"));
-			Assert.False(Unit.ContainsApplier("DurationDamageSelfCast"));
+			Assert.False(Unit.ContainsApplier("DurationDamageSelfCast", ApplierType.Cast));
 		}
 	}
 }

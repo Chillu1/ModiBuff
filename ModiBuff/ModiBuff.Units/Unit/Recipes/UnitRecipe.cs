@@ -11,7 +11,7 @@ namespace ModiBuff.Core.Units
 		private float _damage;
 		private float _health;
 
-		private ModifierAddReference[] _modifierAddReferences;
+		private (int Id, ApplierType? ApplierType)[] _modifiers;
 
 		private readonly IModifierRecipes _modifierRecipes;
 
@@ -22,8 +22,6 @@ namespace ModiBuff.Core.Units
 			UnitType = unitType;
 			_modifierRecipes = modifierRecipes;
 		}
-
-		//public Unit Create() => new Unit(_health, _damage, _modifierAddReferences, UnitType);
 
 		public UnitRecipe Health(float health)
 		{
@@ -39,8 +37,7 @@ namespace ModiBuff.Core.Units
 
 		public UnitRecipe Modifiers(params (string name, ApplierType? applier)[] modifiers)
 		{
-			_modifierAddReferences = modifiers
-				.Select(r => new ModifierAddReference(_modifierRecipes.GetGenerator(r.Item1), r.Item2)).ToArray();
+			_modifiers = modifiers.Select(r => (ModifierIdManager.GetIdByName(r.name).Value, r.applier)).ToArray();
 			return this;
 		}
 	}

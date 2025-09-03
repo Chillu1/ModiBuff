@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using ModiBuff.Core.Units.Interfaces.NonGeneric;
 
@@ -42,7 +43,6 @@ namespace ModiBuff.Core.Units
 		public bool IsDead { get; private set; }
 
 		public ModifierController ModifierController { get; }
-		public ModifierApplierController ModifierApplierController { get; }
 
 		//Note: use one of these, not both
 		public IMultiInstanceStatusEffectController<LegalAction, StatusEffectType> StatusEffectController =>
@@ -63,6 +63,9 @@ namespace ModiBuff.Core.Units
 		private readonly MultiInstanceStatusEffectController _statusEffectController;
 		private readonly StatusEffectController _singleInstanceStatusEffectController;
 		private readonly DurationLessStatusEffectController _durationLessStatusEffectController;
+
+		private readonly Dictionary<ApplierType, List<(int Id, ICheck[]? Checks)>> _modifierAppliers;
+		private readonly List<IUpdatableCheck> _updatableChecks;
 
 		private readonly Dictionary<int, int> _modifierLevels;
 
@@ -115,21 +118,19 @@ namespace ModiBuff.Core.Units
 			_debuffs = new DebuffType[Enum.GetValues(typeof(DebuffType)).Length];
 
 			ModifierController = ModifierControllerPool.Instance.Rent();
-			ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
 			_statusEffectController = new MultiInstanceStatusEffectController
 				(this, StatusEffectType.None, _statusEffectAddedEvents, _statusEffectRemovedEvents);
 			_singleInstanceStatusEffectController = new StatusEffectController();
 			_durationLessStatusEffectController = new DurationLessStatusEffectController();
 
-			_modifierLevels = new Dictionary<int, int>();
-		}
+			_modifierAppliers = new Dictionary<ApplierType, List<(int Id, ICheck[] Checks)>>()
+			{
+				{ ApplierType.Attack, new List<(int Id, ICheck[] Checks)>() },
+				{ ApplierType.Cast, new List<(int Id, ICheck[] Checks)>() },
+			};
+			_updatableChecks = new List<IUpdatableCheck>();
 
-		public Unit(float health, float damage, ModifierAddReference[] modifierAddReferences,
-			UnitType unitType, UnitTag unitTag)
-			: this(health, damage, unitType: unitType, unitTag: unitTag)
-		{
-			foreach (var modifierAddReference in modifierAddReferences)
-				this.TryAddModifierReference(modifierAddReference);
+			_modifierLevels = new Dictionary<int, int>();
 		}
 
 		public static Unit LoadUnit(int oldId)
@@ -144,7 +145,8 @@ namespace ModiBuff.Core.Units
 			_statusEffectController.Update(deltaTime);
 			_singleInstanceStatusEffectController.Update(deltaTime);
 			ModifierController.Update(deltaTime);
-			ModifierApplierController.Update(deltaTime);
+			for (int i = 0; i < _updatableChecks.Count; i++)
+				_updatableChecks[i].Update(deltaTime);
 
 			_callbackTimer += deltaTime;
 			if (_callbackTimer >= CallbackTimerCooldown)
@@ -206,7 +208,10 @@ namespace ModiBuff.Core.Units
 			bool wasDead = killableTarget != null && killableTarget.IsDead;
 
 			if (target is IModifierOwner modifierOwner)
-				this.ApplyAllAttackModifier(modifierOwner);
+			{
+				//this.ApplyAllAttackModifier(modifierOwner);
+				DoChecks(modifierOwner, ApplierType.Attack);
+			}
 
 			if (++_onAttackCounter <= MaxEventCount)
 			{
@@ -341,16 +346,46 @@ namespace ModiBuff.Core.Units
 			return valueHealed;
 		}
 
-		public void TryCast(int modifierId, IUnit target)
+		public bool TryApply(int modifierId, IUnit target) => TryCastInternal(modifierId, target);
+		public bool TryCast(int modifierId, IUnit target) => TryCastInternal(modifierId, target);
+
+		internal bool TryCastNoChecks(int modifierId, IUnit target) => TryCastInternal(modifierId, target, true);
+
+		private bool TryCastInternal(int modifierId, IUnit target, bool skipChecks = false)
 		{
 			if (!(target is IModifierOwner modifierTarget))
-				return;
+				return false;
 			if (!modifierId.IsLegalTarget((IUnitEntity)target, this))
-				return;
+				return false;
 			if (!StatusEffectController.HasLegalAction(LegalAction.Cast))
-				return;
-			if (!this.CanCastModifier(modifierId))
-				return;
+				return false;
+			if (!_modifierAppliers.TryGetValue(ApplierType.Cast, out var appliers))
+				return false;
+
+			(int Id, ICheck[] Checks)? applier = null;
+			for (int i = 0; i < appliers.Count; i++)
+			{
+				if (appliers[i].Id == modifierId)
+				{
+					applier = appliers[i];
+					break;
+				}
+			}
+
+			if (applier == null)
+				return false;
+
+			if (applier.Value.Checks != null && !skipChecks)
+			{
+				foreach (var check in applier.Value.Checks)
+					if (!check.Check(this))
+						return false;
+				//if (!this.CanCastModifier(modifierId))
+				//	return;
+
+				for (int i = 0; i < applier.Value.Checks.Length; i++)
+					applier.Value.Checks[i].Use(this);
+			}
 
 			if (++_onCastCounter <= MaxEventCount)
 			{
@@ -367,6 +402,8 @@ namespace ModiBuff.Core.Units
 				ResetEventCounters();
 				(target as ICallbackCounter)?.ResetEventCounters();
 			}
+
+			return true;
 		}
 
 		public void AddDamage(float damage)
@@ -444,6 +481,78 @@ namespace ModiBuff.Core.Units
 				ResetEventCounters();
 		}
 
+		//---Appliers---
+
+		public bool ContainsApplier(int modifierId, ApplierType applierType)
+		{
+			return _modifierAppliers.TryGetValue(applierType, out var list) && list.Exists(c => c.Id == modifierId);
+		}
+
+		public bool RemoveApplier(int id, ApplierType applierType)
+		{
+			if (!_modifierAppliers.TryGetValue(applierType, out var list))
+				return false;
+
+			int index = list.FindIndex(c => c.Id == id);
+			if (index < 0)
+				return false;
+
+			var checks = list[index].Checks;
+			if (checks != null)
+				foreach (var check in checks)
+					if (check is IUpdatableCheck updatableCheck)
+						_updatableChecks.Remove(updatableCheck);
+			list.RemoveAt(index);
+			return true;
+		}
+
+		public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[]? checks = null)
+		{
+			if (checks is { Length: > 0 })
+			{
+				if (_modifierAppliers.TryGetValue(applierType, out var list))
+				{
+					list.Add((modifierId, checks));
+					foreach (var check in checks)
+						if (check is IUpdatableCheck updatableCheck)
+							_updatableChecks.Add(updatableCheck);
+					return;
+				}
+
+				_modifierAppliers[applierType] =
+					new List<(int Id, ICheck[] Checks)>(new[] { (modifierId, checks) });
+				foreach (var check in checks)
+					if (check is IUpdatableCheck updatableCheck)
+						_updatableChecks.Add(updatableCheck);
+				return;
+			}
+
+			_modifierAppliers[applierType].Add((modifierId, null));
+		}
+
+		private void DoChecks(IModifierOwner target, ApplierType applierType)
+		{
+			foreach ((int id, var checks) in _modifierAppliers[applierType])
+			{
+				bool success = true;
+				for (int i = 0; i < checks?.Length; i++)
+				{
+					if (checks[i].Check(this))
+						continue;
+
+					success = false;
+					break;
+				}
+
+				if (!success)
+					continue;
+
+				for (int i = 0; i < checks?.Length; i++)
+					checks[i].Use(this);
+				target.ModifierController.Add(id, target, this);
+			}
+		}
+
 		//---Aura---
 
 		public void AddAuraTargets(int id, params Unit[] targets) => _auraTargets[id].AddRange(targets);
@@ -494,7 +603,6 @@ namespace ModiBuff.Core.Units
 			_singleInstanceStatusEffectController.ResetState();
 			_durationLessStatusEffectController.ResetState();
 			ModifierControllerPool.Instance.Return(ModifierController);
-			ModifierControllerPool.Instance.ReturnApplier(ModifierApplierController);
 
 			void ClearEvents(params IList[] lists)
 			{
@@ -506,8 +614,11 @@ namespace ModiBuff.Core.Units
 		public SaveData SaveState()
 		{
 			return new SaveData(Id, UnitTag, Health, MaxHealth, Damage, HealValue, Mana, MaxMana,
-				UnitType, IsDead, ModifierController.SaveState(), ModifierApplierController.SaveState(),
-				_statusEffectController.SaveState(), _singleInstanceStatusEffectController.SaveState());
+				UnitType, IsDead, ModifierController.SaveState(),
+				_modifierAppliers.ToDictionary(a => a.Key,
+					a => a.Value.Select(cs => (cs.Id, cs.Checks.Select(c => (c as IStateCheck)?.SaveState())))),
+				_statusEffectController.SaveState(),
+				_singleInstanceStatusEffectController.SaveState());
 		}
 
 		public void LoadState(SaveData data)
@@ -522,7 +633,36 @@ namespace ModiBuff.Core.Units
 			UnitType = data.UnitType;
 			IsDead = data.IsDead;
 			ModifierController.LoadState(data.ModifierControllerSaveData, this);
-			ModifierApplierController.LoadState(data.ModifierApplierControllerSaveData);
+			if (data.Appliers != null)
+				foreach (var loadPair in data.Appliers)
+				{
+					foreach ((int id, var checkStates) in loadPair.Value)
+					{
+						if (!_modifierAppliers[loadPair.Key].Exists(c => c.Id == id))
+						{
+							Logger.LogWarning(
+								$"Could not find modifier applier with id {id} for applier type {loadPair.Key} when loading unit {Id}");
+							continue;
+						}
+
+						var loadCheck = _modifierAppliers[loadPair.Key].First(c => c.Id == id); //TODO Nullable
+
+						int i = 0;
+						foreach (object state in checkStates)
+						{
+#if MODIBUFF_SYSTEM_TEXT_JSON
+							if (state.FromAnonymousJsonObjectToSaveData((IStateCheck)loadCheck.Checks[i]))
+							{
+								i++;
+								continue;
+							}
+#endif
+							((IStateCheck)loadCheck.Checks[i]).LoadState(state);
+							i++;
+						}
+					}
+				}
+
 			_statusEffectController.LoadState(data.MultiInstanceStatusEffectControllerSaveData);
 			_singleInstanceStatusEffectController.LoadState(data.SingleInstanceStatusEffectControllerSaveData);
 		}
@@ -546,8 +686,7 @@ namespace ModiBuff.Core.Units
 			public readonly bool IsDead;
 
 			public readonly ModifierController.SaveData ModifierControllerSaveData;
-
-			public readonly ModifierApplierController.SaveData ModifierApplierControllerSaveData;
+			public readonly IReadOnlyDictionary<ApplierType, IEnumerable<(int Id, IEnumerable<object>)>>? Appliers;
 			public readonly MultiInstanceStatusEffectController.SaveData MultiInstanceStatusEffectControllerSaveData;
 			public readonly StatusEffectController.SaveData SingleInstanceStatusEffectControllerSaveData;
 
@@ -557,7 +696,7 @@ namespace ModiBuff.Core.Units
 			public SaveData(int id, UnitTag unitTag, float health, float maxHealth, float damage, float healValue,
 				float mana, float maxMana, UnitType unitType, bool isDead,
 				ModifierController.SaveData modifierControllerSaveData,
-				ModifierApplierController.SaveData modifierApplierControllerSaveData,
+				IReadOnlyDictionary<ApplierType, IEnumerable<(int Id, IEnumerable<object>)>>? appliers,
 				MultiInstanceStatusEffectController.SaveData multiInstanceStatusEffectControllerSaveData,
 				StatusEffectController.SaveData singleInstanceStatusEffectControllerSaveData)
 			{
@@ -572,7 +711,7 @@ namespace ModiBuff.Core.Units
 				UnitType = unitType;
 				IsDead = isDead;
 				ModifierControllerSaveData = modifierControllerSaveData;
-				ModifierApplierControllerSaveData = modifierApplierControllerSaveData;
+				Appliers = appliers;
 				MultiInstanceStatusEffectControllerSaveData = multiInstanceStatusEffectControllerSaveData;
 				SingleInstanceStatusEffectControllerSaveData = singleInstanceStatusEffectControllerSaveData;
 			}

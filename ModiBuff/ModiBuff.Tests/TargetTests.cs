@@ -14,11 +14,11 @@ namespace ModiBuff.Tests
 				.Remove(5);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitAddDamageRevertible");
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			int id = IdManager.GetId("InitAddDamageRevertible").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 
-			Unit.TryCast(generator.Id, Enemy);
-			Unit.TryCast(generator.Id, Ally);
+			Unit.TryCast(id, Enemy);
+			Unit.TryCast(id, Ally);
 
 			Assert.AreEqual(EnemyDamage + 5, Enemy.Damage);
 			Assert.AreEqual(AllyDamage + 5, Ally.Damage);

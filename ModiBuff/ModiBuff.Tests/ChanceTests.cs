@@ -10,11 +10,13 @@ namespace ModiBuff.Tests
 		public void Random_InitDamage()
 		{
 			AddRecipe("ChanceInitDamage")
-				.ApplyChance(0.5f)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("ChanceInitDamage"), ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("ChanceInitDamage").Value, ApplierType.Attack, new ICheck[]
+			{
+				new ChanceCheck(0.5f)
+			});
 
 			for (int i = 0; i < 50; i++)
 				Unit.Attack(Enemy);
@@ -64,7 +66,7 @@ namespace ModiBuff.Tests
 
 		//DurationComp should not have modifier checks, cuz remove comp might be there, and that should always be called.
 		//Fix this somehow (through recipes)
-		//[Test]
+		[Test, Ignore("Duration component currently does not support modifier checks, and won't either")]
 		public void Random_DurationDamage_Effect()
 		{
 			AddRecipe("ChanceEffectDurationDamage")

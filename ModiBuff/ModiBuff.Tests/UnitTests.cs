@@ -23,7 +23,6 @@ namespace ModiBuff.Tests
 		public void UnitDeath_ModifiersPooled()
 		{
 			AddRecipe("InitDamage_ApplyCondition_HealthAbove100")
-				.ApplyCondition(StatType.Health, 100, ComparisonType.GreaterOrEqual)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
@@ -35,14 +34,18 @@ namespace ModiBuff.Tests
 			var unit = new Unit();
 
 			unit.AddModifierSelf("InitDamage");
-			unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Attack);
-			unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Cast);
-			unit.AddApplierModifier(Recipes.GetGenerator("InitDamage_ApplyCondition_HealthAbove100"),
-				ApplierType.Attack);
+			int id = IdManager.GetId("InitDamage").Value;
+			unit.AddApplierModifierNew(id, ApplierType.Attack);
+			unit.AddApplierModifierNew(id, ApplierType.Cast);
+			unit.AddApplierModifierNew(IdManager.GetId("InitDamage_ApplyCondition_HealthAbove100").Value,
+				ApplierType.Cast, new ICheck[]
+				{
+					new StatCheck(StatType.Health, ComparisonType.GreaterOrEqual, 100)
+				});
 
 			unit.TakeDamage(unit.Health, unit); //Unit dies, all modifiers should be returned to pool
 
-			Assert.Throws<Exception>(() => Pool.Allocate(IdManager.GetId("InitDamage").Value, 1));
+			Assert.Throws<Exception>(() => Pool.Allocate(id, 1));
 
 			Pool.SetMaxPoolSize(Config.MaxPoolSize);
 		}
