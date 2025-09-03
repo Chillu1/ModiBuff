@@ -59,9 +59,9 @@ namespace ModiBuff.Tests
 			unit.AddApplierModifierNew(ModifierIdManager.GetIdByName(name).Value, applierType, checks);
 		}
 
-		internal static void TryCast(this Unit unit, string name, IModifierOwner target)
+		internal static bool TryCast(this Unit unit, string name, IModifierOwner target)
 		{
-			unit.TryCast(ModifierIdManager.GetIdByName(name).Value, target);
+			return unit.TryCast(ModifierIdManager.GetIdByName(name).Value, target);
 		}
 
 		internal static void ChangeStatusEffect(this IStatusEffectOwner<LegalAction, StatusEffectType> owner,

@@ -237,9 +237,9 @@ namespace ModiBuff.Tests
 		{
 			AddRecipe("AddApplier_Effect")
 				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init)
-				.RemoveApplier(5, ApplierType.Cast);
+				.RemoveApplier(ApplierType.Cast, 5);
 			AddRecipe("AddApplier_ApplierEffect")
-				.Effect(new ApplierEffect("AddApplier_Effect", ApplierType.Cast, false), EffectOn.Init);
+				.Effect(new ApplierEffect("AddApplier_Effect", ApplierType.Cast), EffectOn.Init);
 			Setup();
 
 			Unit.TryCast("AddApplier_Effect", Enemy);
@@ -279,6 +279,30 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - 5 - 5, Enemy.Health);
 			Unit.TryCast("ConditionalApplierBasedOnUnitType", Ally);
 			Assert.AreEqual(AllyHealth - 5 + 5, Ally.Health);
+		}
+
+		//[Test
+		public void AddApplier_DurationRemove()
+		{
+			AddRecipe("AddApplier_Effect")
+				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init)
+				.RemoveApplier(ApplierType.Cast, 5);
+			//TODO Issue that modifier is not being added, so the duration doesn't work
+			//We probably need to have two modifiers for applier removal, one that is used as the applier by the unit
+			//Second as the duration remover that removes self and the applier in unit
+			Setup();
+
+			Unit.AddApplierModifierNew("AddApplier_Effect", ApplierType.Cast);
+			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
+
+			Unit.TryCast("AddApplier_Effect", Enemy);
+			Unit.Update(1);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+
+			Unit.Update(4);
+			Assert.False(Unit.ContainsApplier("AddApplier_Effect", ApplierType.Cast));
+			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
+			Assert.False(Unit.TryCast("AddApplier_Effect", Enemy));
 		}
 	}
 }

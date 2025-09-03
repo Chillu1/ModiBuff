@@ -7,6 +7,11 @@ namespace ModiBuff.Core.Units
 			return recipe.Tag(tag.ToInternalTag());
 		}
 
+		public static ModifierRecipe RemoveApplier(this ModifierRecipe recipe, ApplierType applierType, float duration)
+		{
+			return recipe.Effect(new RemoveApplierEffect(applierType), EffectOn.Duration).Duration(duration);
+		}
+
 		public static ModifierRecipe LegalTarget(this ModifierRecipe recipe, LegalTarget target)
 		{
 			recipe.RemoveTag((Core.TagType)TagType.LegalTargetAll);

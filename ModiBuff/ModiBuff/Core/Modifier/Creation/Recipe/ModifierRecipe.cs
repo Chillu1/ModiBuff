@@ -191,7 +191,7 @@ namespace ModiBuff.Core
 		///		How many seconds should pass before the modifier gets removed.
 		/// </summary>
 		/// <remarks>OVERWRITES all previous remove effects.</remarks>
-		public ModifierRecipe RemoveApplier(float duration, ApplierType applierType)
+		public ModifierRecipe RemoveApplierOld(float duration, ApplierType applierType)
 		{
 			Duration(duration);
 			_removeEffectWrapper = new RemoveEffectWrapper(new RemoveEffect(Id, applierType), EffectOn.Duration);
@@ -623,15 +623,6 @@ namespace ModiBuff.Core
 			ValidateCallbacks(EffectOnCallbackEffectData.AllCallbackEffectData, _callbackEffectRegisterWrappers);
 			ValidateCallbacks(EffectOnCallbackEffectData.AllCallbackEffectUnitsData,
 				_callbackEffectUnitsRegisterWrappers);
-
-			if (_effectWrappers.Exists(w =>
-				    w.GetEffect() is ApplierEffect applierEffect && applierEffect.HasApplierType))
-			{
-				Logger.LogWarning(
-					"[ModiBuff] ApplierEffect ApplierType set in a modifier, adding this modifier will add " +
-					"the applier effect to the owner because of how modifiers work, use effect (modifier-less-effects) " +
-					"if not desired in modifier: " + Name + " id: " + Id);
-			}
 
 			if (_tag.HasTag(TagType.CustomStack) && !_modifierActions.HasFlag(Core.ModifierAction.Stack))
 			{
