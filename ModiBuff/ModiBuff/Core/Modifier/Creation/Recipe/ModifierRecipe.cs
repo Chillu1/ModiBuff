@@ -188,17 +188,6 @@ namespace ModiBuff.Core
 		}
 
 		/// <summary>
-		///		How many seconds should pass before the modifier gets removed.
-		/// </summary>
-		/// <remarks>OVERWRITES all previous remove effects.</remarks>
-		public ModifierRecipe RemoveApplierOld(float duration, ApplierType applierType)
-		{
-			Duration(duration);
-			_removeEffectWrapper = new RemoveEffectWrapper(new RemoveEffect(Id, applierType), EffectOn.Duration);
-			return this;
-		}
-
-		/// <summary>
 		///		Adds a basic remove effect, that should be triggered on either stack, or callback
 		/// </summary>
 		public ModifierRecipe Remove(RemoveEffectOn removeEffectOn)
@@ -631,6 +620,18 @@ namespace ModiBuff.Core
 					"[ModiBuff] CustomStack tag set, but no custom stack modifier action set, for modifier: " + Name +
 					" id: " + Id);
 			}
+
+			//TODO Somehow dissallow any usage of modifier logic when ApplierEffect is present in Effects?
+			//It's own ModifierRecipe type? But then we introduce opinionated logic.
+			//Maybe extra code that allows for custom Recipes?
+			//TODO Add rest of possible conflicts with ApplierEffect with recipes
+			/*if (_effectWrappers.Any(w => w.EffectType == typeof(ApplierEffect)
+				&& _removeEffectWrapper?.EffectOn.HasFlag(EffectOn.Duration) == true))
+			{
+				Logger.LogWarning(
+					"[ModiBuff] ApplierEffect won't use remove timer as it's not added to the target, for modifier: " +
+					Name + " id: " + Id);
+			}*/
 
 			if (!validRecipe)
 				Logger.LogError($"[ModiBuff] Recipe validation failed for {Name}, with Id: {Id}, " +

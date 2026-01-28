@@ -175,7 +175,7 @@ namespace ModiBuff.Tests
 
 		[Test, Ignore("Needs serializing of all IChecks on runtime")]
 #if !MODIBUFF_SYSTEM_TEXT_JSON
-		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+		//[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
 #endif
 		public void SaveLoadApplierState()
 		{
@@ -261,7 +261,7 @@ namespace ModiBuff.Tests
 
 		[Test, Ignore("Needs serializing of all IChecks on runtime")]
 #if !MODIBUFF_SYSTEM_TEXT_JSON
-		[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
+		//[Ignore("MODIBUFF_SYSTEM_TEXT_JSON not set. Skipping test")]
 #endif
 		public void SaveNewModifierApplierIdLoad()
 		{

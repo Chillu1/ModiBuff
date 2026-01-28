@@ -3,7 +3,6 @@ namespace ModiBuff.Core
 	public sealed class RemoveEffect : IModifierGenIdOwner, IEffect, IStackEffect, IModifierIdOwner,
 		IShallowClone<IEffect>
 	{
-		private readonly ApplierType? _applierType;
 		private IRevertEffect[]? _revertibleEffects;
 		private int _id;
 		private int? _genId;
@@ -14,27 +13,20 @@ namespace ModiBuff.Core
 
 		internal RemoveEffect(int id) => _id = id;
 
-		internal RemoveEffect(int id, ApplierType? applierType = null)
-		{
-			_id = id;
-			_applierType = applierType;
-		}
-
 		/// <summary>
 		///		Manual modifier generation constructor
 		/// </summary>
 		public static RemoveEffect Create(int id, int? genId, params IRevertEffect[] revertibleEffects)
 		{
-			var effect = new RemoveEffect(id, genId, null);
+			var effect = new RemoveEffect(id, genId);
 			effect.SetRevertibleEffects(revertibleEffects);
 			return effect;
 		}
 
-		private RemoveEffect(int id, int? genId, ApplierType? applierType)
+		private RemoveEffect(int id, int? genId)
 		{
 			_id = id;
 			_genId = genId;
-			_applierType = applierType;
 		}
 
 		public void SetModifierId(int id) => _id = id;
@@ -56,18 +48,12 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _revertibleEffects?.Length; i++)
 				_revertibleEffects[i].RevertEffect(target, source);
 
-			if (_applierType != null)
-			{
-				((IModifierApplierOwner)target).RemoveApplier(_id /*, _genId*/, _applierType.Value);
-				//return;
-			}
-
 			((IModifierOwner)target).ModifierController.PrepareRemove(_id, _genId!.Value);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source) => Effect(target, source);
 
-		public IEffect ShallowClone() => new RemoveEffect(_id, _genId, _applierType);
+		public IEffect ShallowClone() => new RemoveEffect(_id, _genId);
 		object IShallowClone.ShallowClone() => ShallowClone();
 	}
 }

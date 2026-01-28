@@ -64,7 +64,8 @@ namespace ModiBuff.Core.Units
 		private readonly StatusEffectController _singleInstanceStatusEffectController;
 		private readonly DurationLessStatusEffectController _durationLessStatusEffectController;
 
-		private readonly Dictionary<ApplierType, List<(int Id, ICheck[]? Checks)>> _modifierAppliers;
+		private readonly Dictionary<ApplierType, List<(int Id, int ApplierGenId, ICheck[]? Checks)>> _modifierAppliers;
+		private readonly Dictionary<int, int> _applierGenIds;
 		private readonly List<IUpdatableCheck> _updatableChecks;
 
 		private readonly Dictionary<int, int> _modifierLevels;
@@ -123,11 +124,12 @@ namespace ModiBuff.Core.Units
 			_singleInstanceStatusEffectController = new StatusEffectController();
 			_durationLessStatusEffectController = new DurationLessStatusEffectController();
 
-			_modifierAppliers = new Dictionary<ApplierType, List<(int Id, ICheck[] Checks)>>()
+			_modifierAppliers = new Dictionary<ApplierType, List<(int Id, int ApplierId, ICheck[]? Checks)>>()
 			{
-				{ ApplierType.Attack, new List<(int Id, ICheck[] Checks)>() },
-				{ ApplierType.Cast, new List<(int Id, ICheck[] Checks)>() },
+				{ ApplierType.Attack, new List<(int Id, int ApplierId, ICheck[]? Checks)>() },
+				{ ApplierType.Cast, new List<(int Id, int ApplierId, ICheck[]? Checks)>() },
 			};
+			_applierGenIds = new Dictionary<int, int>();
 			_updatableChecks = new List<IUpdatableCheck>();
 
 			_modifierLevels = new Dictionary<int, int>();
@@ -346,12 +348,14 @@ namespace ModiBuff.Core.Units
 			return valueHealed;
 		}
 
-		public bool TryApply(int modifierId, IUnit target) => TryCastInternal(modifierId, target);
-		public bool TryCast(int modifierId, IUnit target) => TryCastInternal(modifierId, target);
+		public bool TryApply(int modifierId, int? applierGenId, IUnit target) =>
+			TryCastInternal(modifierId, applierGenId, target);
 
-		internal bool TryCastNoChecks(int modifierId, IUnit target) => TryCastInternal(modifierId, target, true);
+		public bool TryCast(int modifierId, IUnit target) => TryCastInternal(modifierId, null, target);
 
-		private bool TryCastInternal(int modifierId, IUnit target, bool skipChecks = false)
+		internal bool TryCastNoChecks(int modifierId, IUnit target) => TryCastInternal(modifierId, null, target, true);
+
+		private bool TryCastInternal(int modifierId, int? applierGenId, IUnit target, bool skipChecks = false)
 		{
 			if (!(target is IModifierOwner modifierTarget))
 				return false;
@@ -362,10 +366,11 @@ namespace ModiBuff.Core.Units
 			if (!_modifierAppliers.TryGetValue(ApplierType.Cast, out var appliers))
 				return false;
 
-			(int Id, ICheck[] Checks)? applier = null;
+			(int Id, int OrderId, ICheck[]? Checks)? applier = null;
 			for (int i = 0; i < appliers.Count; i++)
 			{
-				if (appliers[i].Id == modifierId)
+				if (appliers[i].Id == modifierId &&
+				    (applierGenId == null || appliers[i].ApplierGenId == applierGenId))
 				{
 					applier = appliers[i];
 					break;
@@ -483,19 +488,26 @@ namespace ModiBuff.Core.Units
 
 		//---Appliers---
 
-		public bool ContainsApplier(int modifierId, ApplierType applierType)
-		{
-			return _modifierAppliers.TryGetValue(applierType, out var list) && list.Exists(c => c.Id == modifierId);
-		}
+		public bool ContainsApplier(int modifierId, ApplierType applierType) =>
+			_modifierAppliers.TryGetValue(applierType, out var list) && list.Exists(c => c.Id == modifierId);
 
-		public bool RemoveApplier(int id, ApplierType applierType)
+		public bool ContainsApplier(int id, int applierGenId, ApplierType applierType) =>
+			_modifierAppliers.TryGetValue(applierType, out var list) &&
+			list.Exists(c => c.Id == id && c.ApplierGenId == applierGenId);
+
+		public bool RemoveApplier(int id, int? applierGenId, ApplierType applierType)
 		{
 			if (!_modifierAppliers.TryGetValue(applierType, out var list))
 				return false;
 
-			int index = list.FindIndex(c => c.Id == id);
+			int index = list.FindIndex(c => c.Id == id && (applierGenId == null || c.ApplierGenId == applierGenId));
 			if (index < 0)
+			{
+				if (list.Any(c => c.Id == id))
+					Logger.LogWarning(
+						$"[ModiBuff.Units] Unit.RemoveApplier: Tried to remove applier with id {id} and applierGenId {applierGenId}, modifier with such id exists but with different applierGenId");
 				return false;
+			}
 
 			var checks = list[index].Checks;
 			if (checks != null)
@@ -506,33 +518,42 @@ namespace ModiBuff.Core.Units
 			return true;
 		}
 
-		public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[]? checks = null)
+		public int AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[]? checks = null)
 		{
+			List<(int Id, int ApplierGenId, ICheck[] Checks)> list;
+			int applierGenId = _applierGenIds.ContainsKey(modifierId)
+				? ++_applierGenIds[modifierId]
+				: (_applierGenIds[modifierId] = 0);
+
 			if (checks is { Length: > 0 })
 			{
-				if (_modifierAppliers.TryGetValue(applierType, out var list))
+				if (_modifierAppliers.TryGetValue(applierType, out list))
 				{
-					list.Add((modifierId, checks));
+					list.Add((modifierId, applierGenId, checks));
 					foreach (var check in checks)
 						if (check is IUpdatableCheck updatableCheck)
 							_updatableChecks.Add(updatableCheck);
-					return;
+					return applierGenId;
 				}
 
-				_modifierAppliers[applierType] =
-					new List<(int Id, ICheck[] Checks)>(new[] { (modifierId, checks) });
+				_modifierAppliers[applierType] = new List<(int Id, int ApplierGenId, ICheck[] Checks)>
+				{
+					(modifierId, applierGenId, checks)
+				};
 				foreach (var check in checks)
 					if (check is IUpdatableCheck updatableCheck)
 						_updatableChecks.Add(updatableCheck);
-				return;
+				return applierGenId;
 			}
 
-			_modifierAppliers[applierType].Add((modifierId, null));
+			list = _modifierAppliers[applierType];
+			list.Add((modifierId, applierGenId, null));
+			return applierGenId;
 		}
 
 		private void DoChecks(IModifierOwner target, ApplierType applierType)
 		{
-			foreach ((int id, var checks) in _modifierAppliers[applierType])
+			foreach ((int id, int _, var checks) in _modifierAppliers[applierType])
 			{
 				bool success = true;
 				for (int i = 0; i < checks?.Length; i++)

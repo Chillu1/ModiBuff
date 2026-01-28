@@ -76,6 +76,21 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+		public void DamageApplier_CastApplier_Damage()
+		{
+			AddRecipe("InitDamage_Applier")
+				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init);
+			Setup();
+
+			int id = IdManager.GetId("InitDamage_Applier").Value;
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamage_Applier").Value, ApplierType.Cast);
+
+			Unit.TryCast(id, Enemy);
+
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+		}
+
+		[Test]
 		public void DamageApplier_Interval()
 		{
 			AddRecipe("DamageApplier_Interval")
@@ -232,12 +247,12 @@ namespace ModiBuff.Tests
 			Config.ModifierArraySize = Config.DefaultModifierArraySize;
 		}
 
-		[Test]
+		[Test] //TODO
 		public void Cast_AddApplier()
 		{
 			AddRecipe("AddApplier_Effect")
-				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init)
-				.RemoveApplier(ApplierType.Cast, 5);
+				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init);
+			//.RemoveApplier(ApplierType.Cast, 5);
 			AddRecipe("AddApplier_ApplierEffect")
 				.Effect(new ApplierEffect("AddApplier_Effect", ApplierType.Cast), EffectOn.Init);
 			Setup();
@@ -281,18 +296,25 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(AllyHealth - 5 + 5, Ally.Health);
 		}
 
-		//[Test
+		[Test]
 		public void AddApplier_DurationRemove()
 		{
 			AddRecipe("AddApplier_Effect")
-				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init)
-				.RemoveApplier(ApplierType.Cast, 5);
-			//TODO Issue that modifier is not being added, so the duration doesn't work
-			//We probably need to have two modifiers for applier removal, one that is used as the applier by the unit
-			//Second as the duration remover that removes self and the applier in unit
+				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init);
+			AddRecipe("AddApplier_Effect_Remover")
+				.Remove(5)
+				.RemoveApplier("AddApplier_Effect");
 			Setup();
 
-			Unit.AddApplierModifierNew("AddApplier_Effect", ApplierType.Cast);
+			//TODO Some kind of relationship system? Maybe in MB.Units- Automatically adds Remove modifier if link exists.
+			var applierType = ApplierType.Cast;
+			int applierGenId = Unit.AddApplierModifierNew("AddApplier_Effect", applierType);
+			IData[] data =
+			{
+				new EffectData<ApplierType>(applierType, (typeof(RemoveApplierEffect), 0)),
+				new EffectData<int>(applierGenId, (typeof(RemoveApplierEffect), 0)),
+			};
+			Unit.AddModifierWithDataSelf("AddApplier_Effect_Remover", data);
 			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
 
 			Unit.TryCast("AddApplier_Effect", Enemy);
@@ -302,6 +324,7 @@ namespace ModiBuff.Tests
 			Unit.Update(4);
 			Assert.False(Unit.ContainsApplier("AddApplier_Effect", ApplierType.Cast));
 			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
+			Assert.False(Unit.ContainsModifier("AddApplier_Effect_Remover"));
 			Assert.False(Unit.TryCast("AddApplier_Effect", Enemy));
 		}
 	}

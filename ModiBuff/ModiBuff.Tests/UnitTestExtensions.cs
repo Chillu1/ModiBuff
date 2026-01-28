@@ -52,11 +52,11 @@ namespace ModiBuff.Tests
 			return unit.ContainsApplier(ModifierIdManager.GetIdByName(name).Value, applierType);
 		}
 
-		internal static void AddApplierModifierNew(this IModifierApplierOwner unit, string name,
+		internal static int AddApplierModifierNew(this IModifierApplierOwner unit, string name,
 			ApplierType applierType, params ICheck[] checks)
 		{
 			CheckForSetup(unit);
-			unit.AddApplierModifierNew(ModifierIdManager.GetIdByName(name).Value, applierType, checks);
+			return unit.AddApplierModifierNew(ModifierIdManager.GetIdByName(name).Value, applierType, checks);
 		}
 
 		internal static bool TryCast(this Unit unit, string name, IModifierOwner target)

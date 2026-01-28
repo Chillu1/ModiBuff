@@ -3,6 +3,7 @@ namespace ModiBuff.Core.Units
 	public sealed class CastActionEffect : IEffect
 	{
 		private readonly int _modifierId;
+		//TODO ApplierGenId?
 
 		public CastActionEffect(string modifierName)
 		{
@@ -41,7 +42,7 @@ namespace ModiBuff.Core.Units
 				return;
 			}
 
-			applierSource.TryApply(_modifierId, modifierTarget);
+			applierSource.TryApply(_modifierId, null, modifierTarget);
 		}
 	}
 }

@@ -24,7 +24,9 @@ namespace ModiBuff.Tests
 
 			public ModifierController ModifierController { get; }
 
-			private readonly Dictionary<ApplierType, List<(int Id, ICheck[] Checks)>> _modifierAppliers;
+			private readonly Dictionary<ApplierType, List<(int Id, int ApplierGenId, ICheck[] Checks)>> _modifierAppliers;
+			private readonly Dictionary<int, int> _applierGenIds;
+			private readonly List<IUpdatableCheck> _updatableChecks;
 
 			public DamagableUnit(float health, UnitType unitType = UnitType.Good)
 			{
@@ -33,15 +35,20 @@ namespace ModiBuff.Tests
 				MaxHealth = Health = health;
 
 				ModifierController = ModifierControllerPool.Instance.Rent();
-				_modifierAppliers = new Dictionary<ApplierType, List<(int, ICheck[])>>
+				_modifierAppliers = new Dictionary<ApplierType, List<(int, int, ICheck[])>>
 				{
-					{ ApplierType.Attack, new List<(int, ICheck[])>() },
-					{ ApplierType.Cast, new List<(int, ICheck[])>() }
+					{ ApplierType.Attack, new List<(int, int, ICheck[])>() },
+					{ ApplierType.Cast, new List<(int, int, ICheck[])>() }
 				};
+				_applierGenIds = new Dictionary<int, int>();
+				_updatableChecks = new List<IUpdatableCheck>();
 			}
 
 			public void Update(float delta)
 			{
+				for (int i = 0; i < _updatableChecks.Count; i++)
+					_updatableChecks[i].Update(delta);
+
 				ModifierController.Update(delta);
 			}
 
@@ -71,9 +78,15 @@ namespace ModiBuff.Tests
 				return _modifierAppliers.TryGetValue(applierType, out var list) && list.Exists(c => c.Id == modifierId);
 			}
 
-			public bool TryApply(int modifierId, IUnit target) => TryCast(modifierId, target);
+			public bool ContainsApplier(int modifierId, int applierGenId, ApplierType applierType)
+			{
+				return _modifierAppliers.TryGetValue(applierType, out var list) &&
+					   list.Exists(c => c.Id == modifierId && c.ApplierGenId == applierGenId);
+			}
 
-			public bool RemoveApplier(int id, ApplierType applierType)
+			public bool TryApply(int modifierId, int? applierGenId, IUnit target) => TryCast(modifierId, target);
+
+			public bool RemoveApplier(int id, int? applierGenId, ApplierType applierType)
 			{
 				if (!_modifierAppliers.TryGetValue(applierType, out var list))
 					return false;
@@ -86,22 +99,36 @@ namespace ModiBuff.Tests
 				return true;
 			}
 
-			public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
+			public int AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
 			{
+				List<(int Id, int ApplierGenId, ICheck[] Checks)> list;
+				int applierGenId = _applierGenIds.ContainsKey(modifierId)
+					? ++_applierGenIds[modifierId]
+					: (_applierGenIds[modifierId] = 0);
+
 				if (checks?.Length > 0)
 				{
-					if (_modifierAppliers.TryGetValue(applierType, out var list))
+					if (_modifierAppliers.TryGetValue(applierType, out list))
 					{
-						list.Add((modifierId, checks));
-						return;
+						list.Add((modifierId, applierGenId, checks));
+						foreach (var check in checks)
+							if (check is IUpdatableCheck updatableCheck)
+								_updatableChecks.Add(updatableCheck);
+						return applierGenId;
 					}
-
-					_modifierAppliers[applierType] =
-						new List<(int Id, ICheck[] Checks)>(new[] { (modifierId, checks) });
-					return;
+					_modifierAppliers[applierType] = new List<(int Id, int ApplierGenId, ICheck[] Checks)>
+				{
+					(modifierId, applierGenId, checks)
+				};
+					foreach (var check in checks)
+						if (check is IUpdatableCheck updatableCheck)
+							_updatableChecks.Add(updatableCheck);
+					return applierGenId;
 				}
 
-				_modifierAppliers[applierType].Add((modifierId, null));
+				list = _modifierAppliers[applierType];
+				list.Add((modifierId, applierGenId, null));
+				return applierGenId;
 			}
 
 			public bool TryCast(int modifierId, IUnit target) => TryCastInternal(modifierId, target);
@@ -117,7 +144,7 @@ namespace ModiBuff.Tests
 				if (!_modifierAppliers.TryGetValue(ApplierType.Cast, out var appliers))
 					return false;
 
-				(int Id, ICheck[] Checks)? applier = null;
+				(int Id, int ApplierGenId, ICheck[] Checks)? applier = null;
 				for (int i = 0; i < appliers.Count; i++)
 				{
 					if (appliers[i].Id == modifierId)
