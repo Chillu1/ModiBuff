@@ -14,12 +14,12 @@ namespace ModiBuff.Tests
 					.SetPostEffects(new LifeStealPostEffect(0.5f, Targeting.SourceTarget)), EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamageLifeStealPost");
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			int id = IdManager.GetId("InitDamageLifeStealPost").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 
 			Unit.TakeDamage(2.5f, Unit);
 
-			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(id, Enemy);
 
 			Assert.AreEqual(UnitHealth, Unit.Health);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
@@ -33,12 +33,12 @@ namespace ModiBuff.Tests
 					.SetPostEffects(new AddDamageOnKillPostEffect(2, Targeting.SourceTarget)), EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamageAddDamageOnKillPost");
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			int id = IdManager.GetId("InitDamageAddDamageOnKillPost").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 
 			Enemy.TakeDamage(EnemyHealth - 5, Unit);
 
-			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(id, Enemy);
 
 			Assert.AreEqual(UnitDamage + 2, Unit.Damage);
 			Assert.AreEqual(0, Enemy.Health);
@@ -52,12 +52,12 @@ namespace ModiBuff.Tests
 					.SetPostEffects(new DamagePostEffect(Targeting.SourceTarget)), EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("HealDamageSelfPost");
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			int id = IdManager.GetId("HealDamageSelfPost").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 
 			Enemy.TakeDamage(5, Enemy);
 
-			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(id, Enemy);
 
 			Assert.AreEqual(EnemyHealth, Enemy.Health);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);

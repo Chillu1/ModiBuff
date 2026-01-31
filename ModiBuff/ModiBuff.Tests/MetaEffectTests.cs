@@ -14,16 +14,16 @@ namespace ModiBuff.Tests
 					.SetMetaEffects(new StatPercentMetaEffect(StatType.Health, Targeting.SourceTarget)), EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamageValueBasedOnStatMeta");
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			int id = IdManager.GetId("InitDamageValueBasedOnStatMeta").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 
-			Unit.TryCast(generator.Id, Enemy); //5 * 1
+			Unit.TryCast(id, Enemy); //5 * 1
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
 			Unit.TakeDamage(UnitHealth / 2f, Unit);
 
-			Unit.TryCast(generator.Id, Enemy); //5 * 0.5
+			Unit.TryCast(id, Enemy); //5 * 0.5
 
 			Assert.AreEqual(EnemyHealth - 5 - 2.5f, Enemy.Health);
 		}
@@ -39,17 +39,17 @@ namespace ModiBuff.Tests
 					EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamageValueBasedOnHealthAndManaMeta");
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			int id = IdManager.GetId("InitDamageValueBasedOnHealthAndManaMeta").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 
-			Unit.TryCast(generator.Id, Enemy); //5 * 1
+			Unit.TryCast(id, Enemy); //5 * 1
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
 			Unit.TakeDamage(UnitHealth / 2f, Unit);
 			Unit.UseMana(UnitMana / 2f);
 
-			Unit.TryCast(generator.Id, Enemy); //5 * 0.5 * 0.5
+			Unit.TryCast(id, Enemy); //5 * 0.5 * 0.5
 
 			Assert.AreEqual(EnemyHealth - 5 - 1.25f, Enemy.Health);
 		}
@@ -65,21 +65,21 @@ namespace ModiBuff.Tests
 					EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamageValueBasedOnStatusEffectMeta");
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			int id = IdManager.GetId("InitDamageValueBasedOnStatusEffectMeta").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 
-			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
 			Enemy.StatusEffectController.ChangeStatusEffect(0, 0, StatusEffectType.Disarm, 1f, Unit);
 
-			Unit.TryCast(generator.Id, Enemy); //5 * 2f
+			Unit.TryCast(id, Enemy); //5 * 2f
 			Assert.AreEqual(EnemyHealth - 5 - 10f, Enemy.Health);
 
 			Enemy.Update(1f);
 			Enemy.StatusEffectController.ChangeStatusEffect(0, 0, StatusEffectType.Silence, 1f, Unit);
 
-			Unit.TryCast(generator.Id, Enemy); //5 * 0.5f
+			Unit.TryCast(id, Enemy); //5 * 0.5f
 			Assert.AreEqual(EnemyHealth - 5 - 10f - 2.5f, Enemy.Health);
 		}
 
@@ -92,15 +92,15 @@ namespace ModiBuff.Tests
 					EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamageValue2XWhenDisarmedMeta");
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			int id = IdManager.GetId("InitDamageValue2XWhenDisarmedMeta").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 
-			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
 			Unit.StatusEffectController.ChangeStatusEffect(0, 0, StatusEffectType.Disarm, 1f, Enemy);
 
-			Unit.TryCast(generator.Id, Enemy); //5 * 2f
+			Unit.TryCast(id, Enemy); //5 * 2f
 			Assert.AreEqual(EnemyHealth - 5 - 10f, Enemy.Health);
 		}
 
@@ -114,26 +114,26 @@ namespace ModiBuff.Tests
 					EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamageDynamicEffectValueOnManaSpentMeta");
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
+			int id = IdManager.GetId("InitDamageDynamicEffectValueOnManaSpentMeta").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast);
 			Unit.UseMana(UnitMana);
 
 			Unit.UseMana(-3);
-			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 2, Enemy.Health);
 			Assert.AreEqual(0, Unit.Mana);
 
 			Unit.UseMana(-2);
-			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 2 - 1.5, Enemy.Health);
 			Assert.AreEqual(0, Unit.Mana);
 
 			Unit.UseMana(-1);
-			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 2 - 1.5 - 1, Enemy.Health);
 			Assert.AreEqual(0, Unit.Mana);
 
-			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(id, Enemy);
 			Assert.AreEqual(EnemyHealth - 2 - 1.5 - 1, Enemy.Health);
 			Assert.AreEqual(0, Unit.Mana);
 		}

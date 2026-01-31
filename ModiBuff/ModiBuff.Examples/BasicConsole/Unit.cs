@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ModiBuff.Core;
 using ModiBuff.Core.Units;
 using ModiBuff.Core.Units.Interfaces.NonGeneric;
@@ -21,7 +22,7 @@ namespace ModiBuff.Examples.BasicConsole
 		public ModifierController ModifierController { get; }
 
 		//TODO Explain
-		public ModifierApplierController ModifierApplierController { get; }
+		private readonly Dictionary<ApplierType, List<(int Id, ICheck[] Checks)>> _modifierAppliers;
 
 		//Basic implementation of status effects, unit can't attack when it's disarmed
 		//Move when it's rooted/frozen/stunned, etc.
@@ -47,7 +48,11 @@ namespace ModiBuff.Examples.BasicConsole
 
 			//Remember to rent the modifier controllers in the constructor
 			ModifierController = ModifierControllerPool.Instance.Rent();
-			ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
+			_modifierAppliers = new Dictionary<ApplierType, List<(int, ICheck[])>>
+			{
+				{ ApplierType.Attack, new List<(int, ICheck[])>() },
+				{ ApplierType.Cast, new List<(int, ICheck[])>() }
+			};
 			StatusEffectController = new StatusEffectController();
 			_targetingSystem = new TargetingSystem();
 		}
@@ -60,7 +65,6 @@ namespace ModiBuff.Examples.BasicConsole
 			//We need to update the modifier controller each frame/tick
 			//To update the modifier timers (interval, duration)
 			ModifierController.Update(deltaTime);
-			ModifierApplierController.Update(deltaTime);
 			StatusEffectController.Update(deltaTime);
 		}
 
@@ -95,12 +99,69 @@ namespace ModiBuff.Examples.BasicConsole
 			if (!StatusEffectController.HasLegalAction(LegalAction.Act))
 				return 0;
 
-			//This method will try to apply all our applier attack modifiers to the target
-			this.ApplyAllAttackModifier(target);
+			foreach ((int id, ICheck[] checks) in _modifierAppliers[ApplierType.Attack])
+			{
+				bool checksPassed = true;
+				if (checks != null)
+					foreach (var check in checks)
+					{
+						if (!check.Check(this))
+						{
+							checksPassed = false;
+							break;
+						}
+					}
+
+				if (!checksPassed)
+					continue;
+
+				if (checks != null)
+					foreach (var check in checks)
+						check.Use(this);
+
+				target.ModifierController.Add(id, target, this);
+			}
 
 			float damageDealt = target.TakeDamage(Damage, this);
 
 			return damageDealt;
+		}
+
+		public bool TryApply(int modifierId, IUnit target)
+		{
+			if (!(target is IModifierOwner modifierTarget))
+				return false;
+			if (!StatusEffectController.HasLegalAction(LegalAction.Cast))
+				return false;
+			if (!_modifierAppliers.TryGetValue(ApplierType.Cast, out var appliers))
+				return false;
+
+			(int Id, ICheck[] Checks)? applier = null;
+			for (int i = 0; i < appliers.Count; i++)
+			{
+				if (appliers[i].Id == modifierId)
+				{
+					applier = appliers[i];
+					break;
+				}
+			}
+
+			if (applier == null)
+				return false;
+
+			if (applier.Value.Checks != null)
+			{
+				foreach (var check in applier.Value.Checks)
+					if (!check.Check(this))
+						return false;
+
+				for (int i = 0; i < applier.Value.Checks.Length; i++)
+					applier.Value.Checks[i].Use(this);
+			}
+
+			modifierTarget.ModifierController.Add(modifierId, modifierTarget, this);
+
+			return true;
 		}
 
 		public float TakeDamage(float damage, IUnit source)
@@ -139,6 +200,49 @@ namespace ModiBuff.Examples.BasicConsole
 			Console.GameMessage($"{this} healed {heal} from {source}. Health: {Health}/{MaxHealth}");
 
 			return Health - originalHealth;
+		}
+
+		public bool ContainsApplier(int modifierId, ApplierType applierType)
+		{
+			return _modifierAppliers.TryGetValue(applierType, out var list) && list.Exists(c => c.Id == modifierId);
+		}
+
+		public bool RemoveApplier(int id, ApplierType applierType)
+		{
+			if (!_modifierAppliers.TryGetValue(applierType, out var list))
+				return false;
+
+			int index = list.FindIndex(c => c.Id == id);
+			if (index == -1)
+				return false;
+
+			list.RemoveAt(index);
+			return true;
+		}
+
+		public void AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[] checks = null)
+		{
+			if (checks?.Length > 0)
+			{
+				if (_modifierAppliers.TryGetValue(applierType, out var list))
+				{
+					list.Add((modifierId, checks));
+					return;
+				}
+
+				_modifierAppliers[applierType] =
+					new List<(int Id, ICheck[] Checks)>(new[] { (modifierId, checks) });
+				return;
+			}
+
+			_modifierAppliers[applierType].Add((modifierId, null));
+		}
+
+		public IEnumerable<int> GetApplierCastModifierIds()
+		{
+			if (_modifierAppliers.TryGetValue(ApplierType.Cast, out var list))
+				foreach ((int id, ICheck[] _) in list)
+					yield return id;
 		}
 
 		public string GetDebugString()

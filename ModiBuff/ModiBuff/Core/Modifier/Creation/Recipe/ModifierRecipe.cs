@@ -22,7 +22,7 @@ namespace ModiBuff.Core
 		private int _auraId;
 		private TagType _tag;
 
-		private object _data;
+		private object? _data;
 
 		private bool _currentIsInterval;
 		private float _interval;
@@ -43,10 +43,6 @@ namespace ModiBuff.Core
 		private int? _everyXStacks;
 		private float? _singleStackTime;
 		private float? _independentStackTime;
-
-		private bool _hasApplyChecks;
-		private List<ICheck>? _applyCheckList;
-		private List<Func<IUnit, bool>>? _applyFuncCheckList;
 
 		private bool _hasEffectChecks;
 		private List<ICheck>? _effectCheckList;
@@ -138,24 +134,6 @@ namespace ModiBuff.Core
 			return this;
 		}
 
-		//---ApplyChecks---
-
-		public ModifierRecipe ApplyCheck(Func<IUnit, bool> check)
-		{
-			_applyFuncCheckList ??= new List<Func<IUnit, bool>>();
-			_applyFuncCheckList.Add(check);
-			_hasApplyChecks = true;
-			return this;
-		}
-
-		public ModifierRecipe ApplyCheck(ICheck check)
-		{
-			_applyCheckList ??= new List<ICheck>();
-			_applyCheckList.Add(check);
-			_hasApplyChecks = true;
-			return this;
-		}
-
 		//---EffectChecks---
 
 		public ModifierRecipe EffectCheck(Func<IUnit, bool> check)
@@ -210,18 +188,6 @@ namespace ModiBuff.Core
 		}
 
 		/// <summary>
-		///		How many seconds should pass before the modifier gets removed.
-		/// </summary>
-		/// <remarks>OVERWRITES all previous remove effects.</remarks>
-		public ModifierRecipe RemoveApplier(float duration, ApplierType applierType, bool hasApplyChecks)
-		{
-			Duration(duration);
-			_removeEffectWrapper =
-				new RemoveEffectWrapper(new RemoveEffect(Id, applierType, hasApplyChecks), EffectOn.Duration);
-			return this;
-		}
-
-		/// <summary>
 		///		Adds a basic remove effect, that should be triggered on either stack, or callback
 		/// </summary>
 		public ModifierRecipe Remove(RemoveEffectOn removeEffectOn)
@@ -231,17 +197,6 @@ namespace ModiBuff.Core
 				removeEffectOn.ToEffectOn()));
 			return this;
 		}
-
-		/// <summary>
-		///		Adds a basic remove effect, that should be triggered on either stack, or callback
-		/// </summary>
-		/// <remarks>OVERWRITES all previous remove effects.</remarks>
-		//public ModifierRecipe RemoveApplier(RemoveEffectOn removeEffectOn, ApplierType applierType, bool hasApplyChecks)
-		//{
-		//	_removeEffectWrapper =
-		//		new RemoveEffectWrapper(new RemoveEffect(Id, applierType, hasApplyChecks), removeEffectOn.ToEffectOn());
-		//	return this;
-		//}
 
 		/// <summary>
 		///		If a modifier gets applied to a target that already has the modifier, should the interval or duration be reset?
@@ -327,6 +282,19 @@ namespace ModiBuff.Core
 		{
 			_data = data;
 			//_saveInstructions.Add(new SaveInstruction.Data(@object));
+			return this;
+		}
+
+		public ModifierRecipe UpdateData<T>(Func<T, T> updateFunc) where T : notnull, new()
+		{
+			if (_data != null && _data is not T)
+			{
+				Logger.LogWarning("[ModiBuff] UpdateData() called with incompatible data type");
+				return this;
+			}
+
+			_data ??= new T();
+			_data = updateFunc((T)_data);
 			return this;
 		}
 
@@ -559,9 +527,9 @@ namespace ModiBuff.Core
 			var data = new ModifierRecipeData(Id, Name, _effectWrappers, finalRemoveEffectWrapper,
 				_dispelRegisterWrapper, _callbackUnitRegisterWrappers.ToArray(),
 				_callbackEffectRegisterWrappers.ToArray(), _callbackEffectUnitsRegisterWrappers.ToArray(),
-				_hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList,
-				_effectFuncCheckList, _isAura, _tag, _interval, _duration, _refreshDuration, _refreshInterval,
-				_whenStackEffect, _maxStacks, _everyXStacks, _singleStackTime, _independentStackTime);
+				_hasEffectChecks, _effectCheckList, _effectFuncCheckList, _isAura, _tag, _interval, _duration,
+				_refreshDuration, _refreshInterval, _whenStackEffect, _maxStacks, _everyXStacks, _singleStackTime,
+				_independentStackTime);
 			return new ModifierGenerator(in data);
 		}
 
@@ -647,15 +615,6 @@ namespace ModiBuff.Core
 			ValidateCallbacks(EffectOnCallbackEffectData.AllCallbackEffectUnitsData,
 				_callbackEffectUnitsRegisterWrappers);
 
-			if (_effectWrappers.Exists(w =>
-				    w.GetEffect() is ApplierEffect applierEffect && applierEffect.HasApplierType))
-			{
-				Logger.LogWarning(
-					"[ModiBuff] ApplierEffect ApplierType set in a modifier, adding this modifier will add " +
-					"the applier effect to the owner because of how modifiers work, use effect (modifier-less-effects) " +
-					"if not desired in modifier: " + Name + " id: " + Id);
-			}
-
 			if (_tag.HasTag(TagType.CustomStack) && !_modifierActions.HasFlag(Core.ModifierAction.Stack))
 			{
 				validRecipe = false;
@@ -663,6 +622,18 @@ namespace ModiBuff.Core
 					"[ModiBuff] CustomStack tag set, but no custom stack modifier action set, for modifier: " + Name +
 					" id: " + Id);
 			}
+
+			//TODO Somehow dissallow any usage of modifier logic when ApplierEffect is present in Effects?
+			//It's own ModifierRecipe type? But then we introduce opinionated logic.
+			//Maybe extra code that allows for custom Recipes?
+			//TODO Add rest of possible conflicts with ApplierEffect with recipes, other effectOns?
+			/*if (_effectWrappers.Any(w => w.EffectType == typeof(ApplierEffect)
+				&& _removeEffectWrapper?.EffectOn.HasFlag(EffectOn.Duration) == true))
+			{
+				Logger.LogWarning(
+					"[ModiBuff] ApplierEffect won't use remove timer as it's not added to the target, for modifier: " +
+					Name + " id: " + Id);
+			}*/
 
 			if (!validRecipe)
 				Logger.LogError($"[ModiBuff] Recipe validation failed for {Name}, with Id: {Id}, " +

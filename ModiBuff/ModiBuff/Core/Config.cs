@@ -12,7 +12,6 @@ namespace ModiBuff.Core
 
 		private const int DefaultModifierControllerPoolSize = 256;
 		private const int DefaultMaxModifierControllerPoolSize = 32_768;
-		private const int DefaultModifierApplierControllerPoolSize = 64;
 
 		public const int DefaultModifierArraySize = 32;
 		private const int DefaultDispellableSize = 8;
@@ -20,11 +19,6 @@ namespace ModiBuff.Core
 		private const int DefaultModifierIndexDictionarySize = 8;
 
 		private const int DefaultMultiTargetComponentInitialCapacity = 4;
-
-		private const int DefaultAttackApplierSize = 4,
-			DefaultCastApplierSize = 4,
-			DefaultAttackCheckApplierSize = 4,
-			DefaultCastCheckApplierSize = 4;
 
 		private const int DefaultEffectCastsSize = 4;
 
@@ -46,7 +40,6 @@ namespace ModiBuff.Core
 
 		public static int ModifierControllerPoolSize = DefaultModifierControllerPoolSize;
 		public static int MaxModifierControllerPoolSize = DefaultMaxModifierControllerPoolSize;
-		public static int ModifierApplierControllerPoolSize = DefaultModifierApplierControllerPoolSize;
 
 		public static int ModifierArraySize = DefaultModifierArraySize;
 		public static int DispellableSize = DefaultDispellableSize;
@@ -54,11 +47,6 @@ namespace ModiBuff.Core
 		public static int ModifierIndexDictionarySize = DefaultModifierIndexDictionarySize;
 
 		public static int MultiTargetComponentInitialCapacity = DefaultMultiTargetComponentInitialCapacity;
-
-		public static int AttackApplierSize = DefaultAttackApplierSize;
-		public static int CastApplierSize = DefaultCastApplierSize;
-		public static int AttackCheckApplierSize = DefaultAttackCheckApplierSize;
-		public static int CastCheckApplierSize = DefaultCastCheckApplierSize;
 
 		public static int EffectCastsSize = DefaultEffectCastsSize;
 
@@ -79,7 +67,6 @@ namespace ModiBuff.Core
 
 			ModifierControllerPoolSize = DefaultModifierControllerPoolSize;
 			MaxModifierControllerPoolSize = DefaultMaxModifierControllerPoolSize;
-			ModifierApplierControllerPoolSize = DefaultModifierApplierControllerPoolSize;
 
 			ModifierArraySize = DefaultModifierArraySize;
 			DispellableSize = DefaultDispellableSize;
@@ -87,11 +74,6 @@ namespace ModiBuff.Core
 			ModifierIndexDictionarySize = DefaultModifierIndexDictionarySize;
 
 			MultiTargetComponentInitialCapacity = DefaultMultiTargetComponentInitialCapacity;
-
-			AttackApplierSize = DefaultAttackApplierSize;
-			CastApplierSize = DefaultCastApplierSize;
-			AttackCheckApplierSize = DefaultAttackCheckApplierSize;
-			CastCheckApplierSize = DefaultCastCheckApplierSize;
 
 			EffectCastsSize = DefaultEffectCastsSize;
 

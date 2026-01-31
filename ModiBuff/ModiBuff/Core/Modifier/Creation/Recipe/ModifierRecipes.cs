@@ -105,6 +105,22 @@ namespace ModiBuff.Core
 		public static ref readonly TagType GetTag(int id) => ref _instance._tags[id];
 		public static int? GetAuraId(int id) => _instance._auraIds[id];
 
+		public static T? TryGetModifierDataPrimitive<T>(int id) where T : struct
+		{
+			if (_instance._modifierData[id] is T data)
+				return data;
+
+			return null;
+		}
+
+		public static T? TryGetModifierData<T>(int id) where T : class
+		{
+			if (_instance._modifierData[id] is T data)
+				return data;
+
+			return null;
+		}
+
 		public static T GetModifierData<T>(int id) => (T)_instance._modifierData[id];
 
 		public static (int Id, T Data)[] GetModifierData<T>()

@@ -10,10 +10,7 @@ namespace ModiBuff.Core
 
 		private readonly Modifier[][] _pools;
 		private readonly int[] _poolTops;
-		private readonly ModifierCheck[][] _checkPools;
-		private readonly int[] _checkPoolTops;
 		private readonly IModifierGenerator[] _generators;
-		private readonly IModifierApplyCheckGenerator[] _applyCheckRecipes;
 
 #if DEBUG && !MODIBUFF_PROFILE
 		private readonly int[] _maxModifiersCreated;
@@ -34,10 +31,7 @@ namespace ModiBuff.Core
 
 			_pools = new Modifier[generators.Length][];
 			_poolTops = new int[generators.Length];
-			_checkPools = new ModifierCheck[generators.Length][];
-			_checkPoolTops = new int[generators.Length];
 			_generators = new IModifierGenerator[generators.Length];
-			_applyCheckRecipes = new IModifierApplyCheckGenerator[generators.Length];
 
 #if DEBUG && !MODIBUFF_PROFILE
 			_maxModifiersCreated = new int[generators.Length];
@@ -54,17 +48,6 @@ namespace ModiBuff.Core
 				else
 					_pools[generator.Id] = new Modifier[initialSize];
 				_generators[generator.Id] = generator;
-
-				if (generator is IModifierApplyCheckGenerator applyCheckRecipe)
-				{
-					if (Config.ModifierAllocationsCount.TryGetValue(applyCheckRecipe.Name, out int applyCount))
-						_checkPools[generator.Id] = new ModifierCheck[applyCount];
-					else
-						_checkPools[generator.Id] = new ModifierCheck[initialSize];
-					_applyCheckRecipes[generator.Id] = applyCheckRecipe;
-
-					AllocateDoubleChecks(generator.Id);
-				}
 
 				AllocateDouble(generator.Id);
 			}
@@ -102,14 +85,6 @@ namespace ModiBuff.Core
 
 			Array.Resize(ref pool, size);
 			_pools[id] = pool;
-		}
-
-		internal void ResizeChecks(int id, int size)
-		{
-			var pool = _checkPools[id];
-
-			Array.Resize(ref pool, size);
-			_checkPools[id] = pool;
 		}
 
 		internal void Allocate(int id, int count)
@@ -160,37 +135,12 @@ namespace ModiBuff.Core
 #endif
 		}
 
-		internal void AllocateDoubleChecks(int id)
-		{
-			var recipe = _applyCheckRecipes[id];
-			int poolLength = _checkPools[id].Length; //Don't cache pool array, it can be resized.
-
-			if (_checkPoolTops[id] == poolLength)
-				ResizeChecks(id, poolLength << 1);
-
-			if (recipe.HasApplyChecks)
-				for (int i = 0; i < poolLength; i++)
-					_checkPools[id][_checkPoolTops[id]++] = recipe.CreateApplyCheck();
-
-			if (_checkPoolTops[id] > MaxPoolSize)
-				throw new Exception(
-					$"Modifier check pool for {recipe.Name} is over the max pool size of {MaxPoolSize}.");
-		}
-
 		public Modifier Rent(int id)
 		{
 			if (_poolTops[id] == 0)
 				AllocateDouble(id);
 
 			return _pools[id][--_poolTops[id]];
-		}
-
-		public ModifierCheck RentModifierCheck(int id)
-		{
-			if (_checkPoolTops[id] == 0)
-				AllocateDoubleChecks(id);
-
-			return _checkPools[id][--_checkPoolTops[id]];
 		}
 
 		public void Return(Modifier modifier)
@@ -203,16 +153,6 @@ namespace ModiBuff.Core
 				Resize(id, _pools[id].Length << 1);
 
 			_pools[id][_poolTops[id]++] = modifier;
-		}
-
-		public void ReturnCheck(ModifierCheck check)
-		{
-			check.ResetState();
-
-			if (_checkPoolTops[check.Id] == _checkPools[check.Id].Length)
-				ResizeChecks(check.Id, _checkPools[check.Id].Length << 1);
-
-			_checkPools[check.Id][_checkPoolTops[check.Id]++] = check;
 		}
 
 #if DEBUG && !MODIBUFF_PROFILE
@@ -233,11 +173,6 @@ namespace ModiBuff.Core
 			{
 				Array.Clear(_pools[i], 0, _pools[i].Length);
 				_poolTops[i] = 0;
-				if (_checkPools[i] != null)
-				{
-					Array.Clear(_checkPools[i], 0, _checkPools[i].Length);
-					_checkPoolTops[i] = 0;
-				}
 			}
 		}
 

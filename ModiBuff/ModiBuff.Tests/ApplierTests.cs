@@ -25,8 +25,7 @@ namespace ModiBuff.Tests
 		{
 			Setup();
 
-			var applier = Recipes.GetGenerator("InitDamage");
-			Unit.AddApplierModifier(applier, ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamage").Value, ApplierType.Attack);
 
 			Unit.Attack(Enemy);
 
@@ -40,8 +39,7 @@ namespace ModiBuff.Tests
 				.Effect(new HealEffect(10), EffectOn.Init);
 			Setup();
 
-			var applier = Recipes.GetGenerator("InitStrongHeal");
-			Unit.AddApplierModifier(applier, ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitStrongHeal").Value, ApplierType.Attack);
 
 			Enemy.TakeDamage(10, Enemy);
 			Unit.Attack(Enemy); //Heal appliers triggers first, then attack damage
@@ -56,8 +54,8 @@ namespace ModiBuff.Tests
 				.Effect(new DamageEffect(5, targeting: Targeting.SourceTarget), EffectOn.Init);
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamageSelf"), ApplierType.Attack);
-			Unit.AddApplierModifier(Recipes.GetGenerator("InitDamage"), ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamageSelf").Value, ApplierType.Attack);
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamage").Value, ApplierType.Attack);
 
 			Unit.Attack(Enemy);
 
@@ -69,10 +67,25 @@ namespace ModiBuff.Tests
 		{
 			Setup();
 
-			var applier = Recipes.GetGenerator("InitDamage");
-			Unit.AddApplierModifier(applier, ApplierType.Cast);
+			int id = IdManager.GetId("InitDamage").Value;
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamage").Value, ApplierType.Cast);
 
-			Unit.TryCast(applier.Id, Enemy);
+			Unit.TryCast(id, Enemy);
+
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+		}
+
+		[Test]
+		public void DamageApplier_CastApplier_Damage()
+		{
+			AddRecipe("InitDamage_Applier")
+				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init);
+			Setup();
+
+			int id = IdManager.GetId("InitDamage_Applier").Value;
+			Unit.AddApplierModifierNew(IdManager.GetId("InitDamage_Applier").Value, ApplierType.Cast);
+
+			Unit.TryCast(id, Enemy);
 
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
@@ -100,15 +113,13 @@ namespace ModiBuff.Tests
 		public void InitDamageCostMana()
 		{
 			AddRecipe("InitDamage_CostMana")
-				.ApplyCost(CostType.Mana, 5)
 				.Effect(new DamageEffect(5), EffectOn.Init);
 			Setup();
 
-			var generator = Recipes.GetGenerator("InitDamage_CostMana");
+			int id = IdManager.GetId("InitDamage_CostMana").Value;
+			Unit.AddApplierModifierNew(id, ApplierType.Cast, new ICheck[] { new CostCheck(CostType.Mana, 5) });
 
-			Unit.AddApplierModifier(generator, ApplierType.Cast);
-
-			Unit.TryCast(generator.Id, Enemy);
+			Unit.TryCast(id, Enemy);
 
 			Assert.AreEqual(UnitMana - 5, Unit.Mana);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
@@ -239,21 +250,26 @@ namespace ModiBuff.Tests
 		[Test]
 		public void Cast_AddApplier()
 		{
+			Recipes.Register("AddApplier_Effect", "AddApplier_Effect_Remover");
 			AddRecipe("AddApplier_Effect")
-				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init)
-				.RemoveApplier(5, ApplierType.Cast, false);
-			AddEffect("AddApplier_ApplierEffect", new ApplierEffect("AddApplier_Effect", ApplierType.Cast, false));
+				.RemoveApplierData("AddApplier_Effect_Remover")
+				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init);
+			AddRecipe("AddApplier_Effect_Remover")
+				.Remove(5)
+				.RemoveApplier("AddApplier_Effect");
+			AddRecipe("AddApplier_ApplierEffect")
+				.Effect(new ApplierEffect("AddApplier_Effect", ApplierType.Cast), EffectOn.Init);
 			Setup();
 
-			Unit.AddEffectApplier("AddApplier_ApplierEffect");
 			Unit.TryCast("AddApplier_Effect", Enemy);
-			Unit.TryCastEffect("AddApplier_ApplierEffect", Unit);
+			Unit.AddModifierSelf("AddApplier_ApplierEffect");
+			Unit.TryCast("AddApplier_ApplierEffect", Unit);
 
 			Unit.TryCast("AddApplier_Effect", Enemy);
 			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 
 			Unit.Update(5);
-			Assert.False(Unit.ContainsApplier("AddApplier_Effect"));
+			Assert.False(Unit.ContainsApplier("AddApplier_Effect", ApplierType.Cast));
 			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
 		}
 
@@ -273,7 +289,7 @@ namespace ModiBuff.Tests
 				.Remove(5).Refresh();
 			Setup();
 
-			Unit.AddApplierModifier(Recipes.GetGenerator("ConditionalApplierBasedOnUnitType"), ApplierType.Cast);
+			Unit.AddApplierModifierNew(IdManager.GetId("ConditionalApplierBasedOnUnitType").Value, ApplierType.Cast);
 
 			Enemy.TakeDamage(5, Enemy);
 			Ally.TakeDamage(5, Ally);
@@ -282,6 +298,75 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(EnemyHealth - 5 - 5, Enemy.Health);
 			Unit.TryCast("ConditionalApplierBasedOnUnitType", Ally);
 			Assert.AreEqual(AllyHealth - 5 + 5, Ally.Health);
+		}
+
+		[Test]
+		public void AddApplier_DurationRemove()
+		{
+			//TODO Try making an applier recipe without any assumptions in MB.Core
+			//TODO Remove all/almost all static data, force DI
+
+			//TODO convoluted
+			Recipes.Register("AddApplier_Effect", "AddApplier_Effect_Remover");
+			AddRecipe("AddApplier_Effect")
+				.RemoveApplierData("AddApplier_Effect_Remover")
+				//TODO Another idea, declaring sub-recipes in recipe. Would need outside access to register them though, and a finish call, and easy to mistake which one is being handled.
+				//Could allow for enabling only logic that makes sense for applier removal?
+				//Again, this idea of an extended/dynamic recipe system
+				//This would also skip some boilerplate, like naming, registering, and setting up the remove applier
+				//.RemoveApplierRecipe("AddApplier_Effect_Remover")
+				//	.Remove(5).Finish()
+				//or
+				//.RemoveApplierRecipe("AddApplier_Effect_Remover",
+				// 	recipe => recipe.Remove(5))
+				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init);
+			AddRecipe("AddApplier_Effect_Remover")
+				//TODO Validate that some kind of removal is set, duration or RemoveOnEffect
+				//.ApplierRemoveRelationship("AddApplier_Effect")
+				.Remove(5)
+				.RemoveApplier("AddApplier_Effect");
+			Setup();
+
+			//TODO Some kind of relationship system? Maybe in MB.Units- Automatically adds Remove modifier if link exists.
+			//Or an extension, with core logic supported in MB.Core.
+			Unit.AddApplierModifierNew("AddApplier_Effect", ApplierType.Cast);
+			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
+
+			Unit.TryCast("AddApplier_Effect", Enemy);
+			Unit.Update(1);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+
+			Unit.Update(4);
+			Assert.False(Unit.ContainsApplier("AddApplier_Effect", ApplierType.Cast));
+			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
+			Assert.False(Unit.ContainsModifier("AddApplier_Effect_Remover"));
+			Assert.False(Unit.TryCast("AddApplier_Effect", Enemy));
+		}
+
+		[Test]
+		public void AddApplier_CallbackRemove()
+		{
+			Recipes.Register("AddApplier_Effect", "AddApplier_Effect_Remover");
+			AddRecipe("AddApplier_Effect")
+				.RemoveApplierData("AddApplier_Effect_Remover")
+				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init);
+			AddRecipe("AddApplier_Effect_Remover")
+				.CallbackUnit(CallbackUnitType.StrongDispel)
+				.Remove(RemoveEffectOn.CallbackUnit)
+				.RemoveApplier("AddApplier_Effect", EffectOn.CallbackUnit);
+			Setup();
+
+			Unit.AddApplierModifierNew("AddApplier_Effect", ApplierType.Cast);
+			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
+			Unit.TryCast("AddApplier_Effect", Enemy);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+
+			Unit.StrongDispel(Unit);
+			Assert.False(Unit.ContainsApplier("AddApplier_Effect", ApplierType.Cast));
+			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
+
+			Unit.TryCast("AddApplier_Effect", Enemy);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
 	}
 }

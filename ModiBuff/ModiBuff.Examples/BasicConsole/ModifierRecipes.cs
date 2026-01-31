@@ -47,10 +47,8 @@ namespace ModiBuff.Examples.BasicConsole
 				.Effect(new DamageEffect(1), EffectOn.Interval);
 
 			//Here we introduce a new effect, and a chance for the modifier to be applied
+			//Chance needs to be applied when adding the applier
 			Add("DisarmChance", "Disarm", "Disarms target for 1 second, 20% chance to apply")
-				//When applying a modifier (through attacking or casting it)
-				//It will have 20% chance to apply the modifier to the unit
-				.ApplyChance(0.2f)
 				//Disarms (can't attack) the target unit for 1 second when applied
 				.Effect(new StatusEffectEffect(StatusEffectType.Disarm, 1f), EffectOn.Init)
 				.Remove(1f).Refresh();

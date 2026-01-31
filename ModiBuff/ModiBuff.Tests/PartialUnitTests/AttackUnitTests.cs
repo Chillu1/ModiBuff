@@ -11,15 +11,13 @@ namespace ModiBuff.Tests
 		protected override void SetupUnitFactory() =>
 			UnitFactory = (health, damage, heal, mana, type, tag) => new AttackUnit(damage, type);
 
-		public sealed class AttackUnit : IUnit, IModifierOwner, IAttacker, IUpdatable, IUnitEntity,
-			IModifierApplierOwner
+		public sealed class AttackUnit : IUnit, IModifierOwner, IAttacker, IUpdatable, IUnitEntity
 		{
 			public UnitTag UnitTag { get; }
 			public UnitType UnitType { get; }
 			public float Damage { get; }
 
 			public ModifierController ModifierController { get; }
-			public ModifierApplierController ModifierApplierController { get; }
 
 			public AttackUnit(float damage, UnitType unitType = UnitType.Good)
 			{
@@ -28,18 +26,16 @@ namespace ModiBuff.Tests
 				UnitTag = UnitTag.Default;
 
 				ModifierController = ModifierControllerPool.Instance.Rent();
-				ModifierApplierController = ModifierControllerPool.Instance.RentApplier();
 			}
 
 			public void Update(float delta)
 			{
 				ModifierController.Update(delta);
-				ModifierApplierController.Update(delta);
 			}
 
 			public float Attack(IUnit target)
 			{
-				this.ApplyAllAttackModifier((IModifierOwner)target);
+				//this.ApplyAllAttackModifier((IModifierOwner)target);
 
 				return ((IDamagable)target).TakeDamage(Damage, this);
 			}

@@ -13,11 +13,8 @@ namespace ModiBuff.Core
 		public readonly EffectWrapper[] CallbackUnitRegisterWrappers;
 		public readonly EffectWrapper[] CallbackEffectRegisterWrappers;
 		public readonly EffectWrapper[] CallbackEffectUnitsRegisterWrappers;
-		public readonly bool HasApplyChecks;
-		public readonly List<ICheck>? ApplyCheckList;
 		public readonly bool HasEffectChecks;
 		public readonly List<ICheck>? EffectCheckList;
-		public readonly List<Func<IUnit, bool>>? ApplyFuncCheckList;
 		public readonly List<Func<IUnit, bool>>? EffectFuncCheckList;
 		public readonly bool IsAura;
 		public readonly TagType Tag;
@@ -34,11 +31,10 @@ namespace ModiBuff.Core
 		public ModifierRecipeData(int id, string name, List<EffectWrapper> effectWrappers,
 			EffectWrapper? removeEffectWrapper, EffectWrapper? dispelRegisterWrapper,
 			EffectWrapper[] callbackUnitRegisterWrappers, EffectWrapper[] callbackEffectRegisterWrappers,
-			EffectWrapper[] callbackEffectUnitsRegisterWrappers, bool hasApplyChecks, List<ICheck>? applyCheckList,
-			bool hasEffectChecks, List<ICheck>? effectCheckList, List<Func<IUnit, bool>>? applyFuncCheckList,
-			List<Func<IUnit, bool>>? effectFuncCheckList, bool isAura, TagType tag, float interval,
-			float duration, bool refreshDuration, bool refreshInterval, WhenStackEffect? whenStackEffect,
-			int? maxStacks, int? everyXStacks, float? singleStackTime, float? independentStackTime)
+			EffectWrapper[] callbackEffectUnitsRegisterWrappers, bool hasEffectChecks, List<ICheck>? effectCheckList,
+			List<Func<IUnit, bool>>? effectFuncCheckList, bool isAura, TagType tag, float interval, float duration,
+			bool refreshDuration, bool refreshInterval, WhenStackEffect? whenStackEffect, int? maxStacks,
+			int? everyXStacks, float? singleStackTime, float? independentStackTime)
 		{
 			Id = id;
 			Name = name;
@@ -48,11 +44,8 @@ namespace ModiBuff.Core
 			CallbackUnitRegisterWrappers = callbackUnitRegisterWrappers;
 			CallbackEffectRegisterWrappers = callbackEffectRegisterWrappers;
 			CallbackEffectUnitsRegisterWrappers = callbackEffectUnitsRegisterWrappers;
-			HasApplyChecks = hasApplyChecks;
-			ApplyCheckList = applyCheckList;
 			HasEffectChecks = hasEffectChecks;
 			EffectCheckList = effectCheckList;
-			ApplyFuncCheckList = applyFuncCheckList;
 			EffectFuncCheckList = effectFuncCheckList;
 			IsAura = isAura;
 			Tag = tag;
