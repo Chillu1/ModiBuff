@@ -247,12 +247,16 @@ namespace ModiBuff.Tests
 			Config.ModifierArraySize = Config.DefaultModifierArraySize;
 		}
 
-		[Test] //TODO
+		[Test]
 		public void Cast_AddApplier()
 		{
+			Recipes.Register("AddApplier_Effect", "AddApplier_Effect_Remover");
 			AddRecipe("AddApplier_Effect")
+				.RemoveApplierData("AddApplier_Effect_Remover")
 				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init);
-			//.RemoveApplier(ApplierType.Cast, 5);
+			AddRecipe("AddApplier_Effect_Remover")
+				.Remove(5)
+				.RemoveApplier("AddApplier_Effect");
 			AddRecipe("AddApplier_ApplierEffect")
 				.Effect(new ApplierEffect("AddApplier_Effect", ApplierType.Cast), EffectOn.Init);
 			Setup();
@@ -299,22 +303,33 @@ namespace ModiBuff.Tests
 		[Test]
 		public void AddApplier_DurationRemove()
 		{
+			//TODO Try making an applier recipe without any assumptions in MB.Core
+			//TODO Remove all/almost all static data, force DI
+
+			//TODO convoluted
+			Recipes.Register("AddApplier_Effect", "AddApplier_Effect_Remover");
 			AddRecipe("AddApplier_Effect")
+				.RemoveApplierData("AddApplier_Effect_Remover")
+				//TODO Another idea, declaring sub-recipes in recipe. Would need outside access to register them though, and a finish call, and easy to mistake which one is being handled.
+				//Could allow for enabling only logic that makes sense for applier removal?
+				//Again, this idea of an extended/dynamic recipe system
+				//This would also skip some boilerplate, like naming, registering, and setting up the remove applier
+				//.RemoveApplierRecipe("AddApplier_Effect_Remover")
+				//	.Remove(5).Finish()
+				//or
+				//.RemoveApplierRecipe("AddApplier_Effect_Remover",
+				// 	recipe => recipe.Remove(5))
 				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init);
 			AddRecipe("AddApplier_Effect_Remover")
+				//TODO Validate that some kind of removal is set, duration or RemoveOnEffect
+				//.ApplierRemoveRelationship("AddApplier_Effect")
 				.Remove(5)
 				.RemoveApplier("AddApplier_Effect");
 			Setup();
 
 			//TODO Some kind of relationship system? Maybe in MB.Units- Automatically adds Remove modifier if link exists.
-			var applierType = ApplierType.Cast;
-			int applierGenId = Unit.AddApplierModifierNew("AddApplier_Effect", applierType);
-			IData[] data =
-			{
-				new EffectData<ApplierType>(applierType, (typeof(RemoveApplierEffect), 0)),
-				new EffectData<int>(applierGenId, (typeof(RemoveApplierEffect), 0)),
-			};
-			Unit.AddModifierWithDataSelf("AddApplier_Effect_Remover", data);
+			//Or an extension, with core logic supported in MB.Core.
+			Unit.AddApplierModifierNew("AddApplier_Effect", ApplierType.Cast);
 			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
 
 			Unit.TryCast("AddApplier_Effect", Enemy);
@@ -326,6 +341,32 @@ namespace ModiBuff.Tests
 			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
 			Assert.False(Unit.ContainsModifier("AddApplier_Effect_Remover"));
 			Assert.False(Unit.TryCast("AddApplier_Effect", Enemy));
+		}
+
+		[Test]
+		public void AddApplier_CallbackRemove()
+		{
+			Recipes.Register("AddApplier_Effect", "AddApplier_Effect_Remover");
+			AddRecipe("AddApplier_Effect")
+				.RemoveApplierData("AddApplier_Effect_Remover")
+				.Effect(new ApplierEffect("InitDamage"), EffectOn.Init);
+			AddRecipe("AddApplier_Effect_Remover")
+				.CallbackUnit(CallbackUnitType.StrongDispel)
+				.Remove(RemoveEffectOn.CallbackUnit)
+				.RemoveApplier("AddApplier_Effect", EffectOn.CallbackUnit);
+			Setup();
+
+			Unit.AddApplierModifierNew("AddApplier_Effect", ApplierType.Cast);
+			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
+			Unit.TryCast("AddApplier_Effect", Enemy);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
+
+			Unit.StrongDispel(Unit);
+			Assert.False(Unit.ContainsApplier("AddApplier_Effect", ApplierType.Cast));
+			Assert.False(Unit.ContainsModifier("AddApplier_Effect"));
+
+			Unit.TryCast("AddApplier_Effect", Enemy);
+			Assert.AreEqual(EnemyHealth - 5, Enemy.Health);
 		}
 	}
 }

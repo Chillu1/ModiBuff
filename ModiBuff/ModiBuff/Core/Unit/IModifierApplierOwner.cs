@@ -1,5 +1,6 @@
 namespace ModiBuff.Core
 {
+	//TODO Move away from Core
 	public interface IModifierApplierOwner : IUnit
 	{
 		bool ContainsApplier(int modifierId, ApplierType applierType);

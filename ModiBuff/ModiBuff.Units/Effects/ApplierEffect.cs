@@ -16,7 +16,7 @@ namespace ModiBuff.Core.Units
 			int? id = ModifierIdManager.GetIdByName(modifierName);
 			if (id == null)
 				Logger.LogError("[ModiBuff.Units] Can't find modifier with name " + modifierName +
-								". Either wrong order of modifier initialization or wrong modifier name.");
+				                ". Either wrong order of modifier initialization or wrong modifier name.");
 
 			_modifierId = id ?? -1;
 
@@ -68,8 +68,6 @@ namespace ModiBuff.Core.Units
 
 					modifierApplierOwnerTarget.AddApplierModifierNew(modifierId, _applierType.Value);
 					return;
-				default:
-					throw new ArgumentOutOfRangeException();
 			}
 
 			if (!(effectTarget is IModifierOwner modifierOwnerTarget))

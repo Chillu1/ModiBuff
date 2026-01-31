@@ -2,19 +2,11 @@ namespace ModiBuff.Core.Units
 {
 	public sealed class RemoveApplierEffect : IEffect, IStackEffect, ISetDataEffect, IShallowClone<IEffect>
 	{
-		private int _id;
+		private readonly int _id;
 		private ApplierType? _applierType;
 		private int? _applierGenId;
 
-		public RemoveApplierEffect(string applierModifierName)
-		{
-			//Could ask the user to instead supply the id, but that isn't ideal
-			int? id = ModifierIdManager.GetIdByName(applierModifierName);
-			if (id == null)
-				Logger.LogError("[ModiBuff.Units] Can't find modifier with name " + applierModifierName +
-								". Either wrong order of modifier initialization or wrong modifier name.");
-			_id = id ?? -1;
-		}
+		public RemoveApplierEffect(int applierModifierId) => _id = applierModifierId;
 
 		/// <summary>
 		///		Manual modifier generation constructor
@@ -40,8 +32,8 @@ namespace ModiBuff.Core.Units
 				case EffectData<ApplierType> effectData:
 					_applierType = effectData.Value;
 					break;
-				case EffectData<int> effectData:
-					_applierGenId = effectData.Value;
+				case EffectData<RemoveApplierGenId> effectData:
+					_applierGenId = effectData.Value.GenId;
 					break;
 				case ModifierData:
 					break;
@@ -53,7 +45,7 @@ namespace ModiBuff.Core.Units
 
 		public void Effect(IUnit target, IUnit source)
 		{
-			((IModifierApplierOwner)target).RemoveApplier(_id, _applierGenId, _applierType.Value);
+			((IModifierApplierOwner)target).RemoveApplier(_id, _applierGenId, _applierType!.Value);
 		}
 
 		public void StackEffect(int stacks, IUnit target, IUnit source) => Effect(target, source);

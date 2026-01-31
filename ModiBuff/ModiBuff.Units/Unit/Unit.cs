@@ -520,10 +520,24 @@ namespace ModiBuff.Core.Units
 
 		public int AddApplierModifierNew(int modifierId, ApplierType applierType, ICheck[]? checks = null)
 		{
-			List<(int Id, int ApplierGenId, ICheck[] Checks)> list;
+			List<(int Id, int ApplierGenId, ICheck[]? Checks)> list;
 			int applierGenId = _applierGenIds.ContainsKey(modifierId)
 				? ++_applierGenIds[modifierId]
 				: (_applierGenIds[modifierId] = 0);
+
+			//TODO Check for relationship instead of data impl?
+			var data = ModifierRecipes.TryGetModifierData<CommonModifierData>(modifierId);
+
+			if (data?.ApplierRemoverId != null)
+			{
+				ModifierController.Add(data.ApplierRemoverId.Value.Id, this, this);
+				IData[] modData =
+				{
+					new EffectData<ApplierType>(applierType, (typeof(RemoveApplierEffect), 0)),
+					new EffectData<RemoveApplierGenId>(new RemoveApplierGenId(applierGenId), (typeof(RemoveApplierEffect), 0)),
+				};
+				ModifierController.AddWithData(data.ApplierRemoverId.Value.Id, this, this, modData);
+			}
 
 			if (checks is { Length: > 0 })
 			{
@@ -536,7 +550,7 @@ namespace ModiBuff.Core.Units
 					return applierGenId;
 				}
 
-				_modifierAppliers[applierType] = new List<(int Id, int ApplierGenId, ICheck[] Checks)>
+				_modifierAppliers[applierType] = new List<(int Id, int ApplierGenId, ICheck[]? Checks)>
 				{
 					(modifierId, applierGenId, checks)
 				};

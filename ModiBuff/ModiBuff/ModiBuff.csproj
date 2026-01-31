@@ -19,6 +19,7 @@
         <PackageIcon>ModiBuffSmallIcon.png</PackageIcon>
         <TargetFramework>netstandard2.0</TargetFramework>
         <Nullable>enable</Nullable>
+        <WarningsAsErrors>CS8509</WarningsAsErrors>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

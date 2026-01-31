@@ -22,7 +22,7 @@ namespace ModiBuff.Core
 		private int _auraId;
 		private TagType _tag;
 
-		private object _data;
+		private object? _data;
 
 		private bool _currentIsInterval;
 		private float _interval;
@@ -199,17 +199,6 @@ namespace ModiBuff.Core
 		}
 
 		/// <summary>
-		///		Adds a basic remove effect, that should be triggered on either stack, or callback
-		/// </summary>
-		/// <remarks>OVERWRITES all previous remove effects.</remarks>
-		//public ModifierRecipe RemoveApplier(RemoveEffectOn removeEffectOn, ApplierType applierType, bool hasApplyChecks)
-		//{
-		//	_removeEffectWrapper =
-		//		new RemoveEffectWrapper(new RemoveEffect(Id, applierType, hasApplyChecks), removeEffectOn.ToEffectOn());
-		//	return this;
-		//}
-
-		/// <summary>
 		///		If a modifier gets applied to a target that already has the modifier, should the interval or duration be reset?
 		///		Order matters, call after <see cref="Interval(float,bool)"/> or <see cref="Duration(float)"/>
 		/// </summary>
@@ -293,6 +282,19 @@ namespace ModiBuff.Core
 		{
 			_data = data;
 			//_saveInstructions.Add(new SaveInstruction.Data(@object));
+			return this;
+		}
+
+		public ModifierRecipe UpdateData<T>(Func<T, T> updateFunc) where T : notnull, new()
+		{
+			if (_data != null && _data is not T)
+			{
+				Logger.LogWarning("[ModiBuff] UpdateData() called with incompatible data type");
+				return this;
+			}
+
+			_data ??= new T();
+			_data = updateFunc((T)_data);
 			return this;
 		}
 
@@ -624,7 +626,7 @@ namespace ModiBuff.Core
 			//TODO Somehow dissallow any usage of modifier logic when ApplierEffect is present in Effects?
 			//It's own ModifierRecipe type? But then we introduce opinionated logic.
 			//Maybe extra code that allows for custom Recipes?
-			//TODO Add rest of possible conflicts with ApplierEffect with recipes
+			//TODO Add rest of possible conflicts with ApplierEffect with recipes, other effectOns?
 			/*if (_effectWrappers.Any(w => w.EffectType == typeof(ApplierEffect)
 				&& _removeEffectWrapper?.EffectOn.HasFlag(EffectOn.Duration) == true))
 			{

@@ -7,9 +7,17 @@ namespace ModiBuff.Core.Units
 			return recipe.Tag(tag.ToInternalTag());
 		}
 
-		public static ModifierRecipe RemoveApplier(this ModifierRecipe recipe, string applierModifierName)
+		public static ModifierRecipe RemoveApplier(this ModifierRecipe recipe, string applierModifierName, EffectOn effectOn = EffectOn.Duration)
 		{
-			return recipe.Effect(new RemoveApplierEffect(applierModifierName), EffectOn.Duration);
+			return recipe.Effect(new RemoveApplierEffect(recipe.IdManager.GetId(applierModifierName)!.Value), effectOn);
+		}
+
+		public static ModifierRecipe RemoveApplierData(this ModifierRecipe recipe, string applierRemoverName)
+		{
+			return recipe.UpdateData<CommonModifierData>(current => current with
+			{
+				ApplierRemoverId = new RemoveApplierId(recipe.IdManager.GetId(applierRemoverName)!.Value)
+			});
 		}
 
 		public static ModifierRecipe LegalTarget(this ModifierRecipe recipe, LegalTarget target)
