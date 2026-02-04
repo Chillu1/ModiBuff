@@ -12,7 +12,11 @@ namespace ModiBuff.Core
 
 	public sealed record ModifierIntervalData(float Interval) : ModifierData;
 
+	public sealed record ModifierIntervalTickData(int IntervalTick) : ModifierData;
+
 	public sealed record ModifierDurationData(float Duration) : ModifierData;
+
+	public sealed record ModifierDurationTickData(int DurationTick) : ModifierData;
 
 	public sealed record ModifierStartingStacksData(int Stacks) : ModifierData;
 

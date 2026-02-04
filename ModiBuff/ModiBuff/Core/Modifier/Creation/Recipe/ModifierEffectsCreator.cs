@@ -20,7 +20,9 @@ namespace ModiBuff.Core
 		private ISetDataEffect[] _setDataEffects;
 		private IEffect[] _initEffects;
 		private IEffect[] _intervalEffects;
+		private IEffect[] _intervalTickEffects;
 		private IEffect[] _durationEffects;
+		private IEffect[] _durationTickEffects;
 		private IStackEffect[] _stackEffects;
 		private IEffect[][] _callbackUnitEffects;
 		private IEffect[][] _callbackEffectEffects;
@@ -30,7 +32,9 @@ namespace ModiBuff.Core
 			_setDataEffectsIndex,
 			_initEffectsIndex,
 			_intervalEffectsIndex,
+			_intervalTickEffectsIndex,
 			_durationEffectsIndex,
+			_durationTickEffectsIndex,
 			_stackEffectsIndex,
 			_callbackUnitEffectsIndex,
 			_callbackEffectEffectsIndex,
@@ -77,8 +81,12 @@ namespace ModiBuff.Core
 					_initEffectsIndex++;
 				if ((effectWrapper.EffectOn & EffectOn.Interval) != 0)
 					_intervalEffectsIndex++;
+				if ((effectWrapper.EffectOn & EffectOn.IntervalTick) != 0)
+					_intervalTickEffectsIndex++;
 				if ((effectWrapper.EffectOn & EffectOn.Duration) != 0)
 					_durationEffectsIndex++;
+				if ((effectWrapper.EffectOn & EffectOn.DurationTick) != 0)
+					_durationTickEffectsIndex++;
 				if ((effectWrapper.EffectOn & EffectOn.Stack) != 0)
 					_stackEffectsIndex++;
 				if ((effectWrapper.EffectOn & EffectOn.CallbackUnit) != 0)
@@ -126,10 +134,22 @@ namespace ModiBuff.Core
 				_intervalEffectsIndex = 0;
 			}
 
+			if (_intervalTickEffectsIndex > 0)
+			{
+				_intervalTickEffects = new IEffect[_intervalTickEffectsIndex];
+				_intervalTickEffectsIndex = 0;
+			}
+
 			if (_durationEffectsIndex > 0)
 			{
 				_durationEffects = new IEffect[_durationEffectsIndex];
 				_durationEffectsIndex = 0;
+			}
+
+			if (_durationTickEffectsIndex > 0)
+			{
+				_durationTickEffects = new IEffect[_durationTickEffectsIndex];
+				_durationTickEffectsIndex = 0;
 			}
 
 			if (_stackEffectsIndex > 0)
@@ -253,8 +273,12 @@ namespace ModiBuff.Core
 					_initEffects[_initEffectsIndex++] = effect;
 				if ((effectOn & EffectOn.Interval) != 0)
 					_intervalEffects[_intervalEffectsIndex++] = effect;
+				if ((effectOn & EffectOn.IntervalTick) != 0)
+					_intervalTickEffects[_intervalTickEffectsIndex++] = effect;
 				if ((effectOn & EffectOn.Duration) != 0)
 					_durationEffects[_durationEffectsIndex++] = effect;
+				if ((effectOn & EffectOn.DurationTick) != 0)
+					_durationTickEffects[_durationTickEffectsIndex++] = effect;
 				if ((effectOn & EffectOn.Stack) != 0)
 					_stackEffects[_stackEffectsIndex++] = (IStackEffect)effect;
 				if ((effectOn & EffectOn.CallbackUnit) != 0)
@@ -328,8 +352,8 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _effectWrappers.Length; i++)
 				_effectWrappers[i].Reset();
 
-			return new SyncedModifierEffects(_initEffects, _intervalEffects, _durationEffects, _stackEffects,
-				_setDataEffects, effectStateInfo, effectSaveState);
+			return new SyncedModifierEffects(_initEffects, _intervalEffects, _intervalTickEffects, _durationEffects, _durationTickEffects,
+				_stackEffects, _setDataEffects, effectStateInfo, effectSaveState);
 		}
 	}
 
@@ -337,20 +361,24 @@ namespace ModiBuff.Core
 	{
 		public readonly IEffect[]? InitEffects;
 		public readonly IEffect[]? IntervalEffects;
+		public readonly IEffect[]? IntervalTickEffects;
 		public readonly IEffect[]? DurationEffects;
+		public readonly IEffect[]? DurationTickEffects;
 		public readonly IStackEffect[]? StackEffects;
 		public readonly ISetDataEffect[]? SetDataEffects;
 		public readonly EffectStateInfo? EffectStateInfo;
 		public readonly EffectSaveState? EffectSaveState;
 
-		public SyncedModifierEffects(IEffect[]? initEffectsArray, IEffect[]? intervalEffectsArray,
-			IEffect[]? durationEffectsArray, IStackEffect[]? stackEffectsArray, ISetDataEffect[] dataEffects,
-			EffectStateInfo? effectStateInfo, EffectSaveState? effectSaveState)
+		public SyncedModifierEffects(IEffect[]? initEffectsArray, IEffect[]? intervalEffectsArray, IEffect[]? intervalTickEffectsArray,
+			IEffect[]? durationEffectsArray, IEffect[]? durationTickEffectsArray, IStackEffect[]? stackEffectsArray,
+			ISetDataEffect[]? dataEffects, EffectStateInfo? effectStateInfo, EffectSaveState? effectSaveState)
 		{
 			SetDataEffects = dataEffects;
 			InitEffects = initEffectsArray;
 			IntervalEffects = intervalEffectsArray;
+			IntervalTickEffects = intervalTickEffectsArray;
 			DurationEffects = durationEffectsArray;
+			DurationTickEffects = durationTickEffectsArray;
 			StackEffects = stackEffectsArray;
 			EffectStateInfo = effectStateInfo;
 			EffectSaveState = effectSaveState;

@@ -105,7 +105,7 @@ namespace ModiBuff.Tests
 					new IntervalComponent(1f, true, new IEffect[] { new NoOpEffect() }, null)
 				};
 
-				return new Modifier(id, genId, name, null, timeComponents, null, null, new SingleTargetComponent(),
+				return new Modifier(id, genId, name, null, timeComponents, null, null, null, new SingleTargetComponent(),
 					null, null, null);
 			});
 			AddGenerator("DurationRefreshDamage", (id, genId, name, tag) =>
@@ -115,7 +115,7 @@ namespace ModiBuff.Tests
 					new DurationComponent(1f, true, new IEffect[] { new NoOpEffect() })
 				};
 
-				return new Modifier(id, genId, name, null, timeComponents, null, null, new SingleTargetComponent(),
+				return new Modifier(id, genId, name, null, timeComponents, null, null, null, new SingleTargetComponent(),
 					null, null, null);
 			});
 			Setup();

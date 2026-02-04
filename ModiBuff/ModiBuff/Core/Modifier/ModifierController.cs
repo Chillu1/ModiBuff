@@ -53,6 +53,22 @@ namespace ModiBuff.Core
 			_modifiersToRemove.Clear();
 		}
 
+		public void UpdateTick()
+		{
+			int modifiersTop = _modifiersTop;
+			for (int i = 0; i < modifiersTop; i++)
+				_modifiers[i]!.UpdateTick();
+
+			int removeCount = _modifiersToRemove.Count;
+			if (removeCount == 0)
+				return;
+
+			for (int i = 0; i < removeCount; i++)
+				Remove(_modifiersToRemove[i]);
+
+			_modifiersToRemove.Clear();
+		}
+
 		public ModifierReference[] GetModifierReferences()
 		{
 			var modifierReferences = new ModifierReference[_modifiersTop];
@@ -72,6 +88,12 @@ namespace ModiBuff.Core
 			where TTimeComponent : ITimeComponent
 		{
 			return GetModifier(id, genId)?.GetTimer<TTimeComponent>(timeComponentNumber);
+		}
+
+		public ITimeTickReference? GetTickTimer<TTimeTickComponent>(int id, int genId = 0,
+			int timeTickComponentNumber = 0) where TTimeTickComponent : ITimeTickComponent
+		{
+			return GetModifier(id, genId)?.GetTickTimer<TTimeTickComponent>(timeTickComponentNumber);
 		}
 
 		/// <summary>

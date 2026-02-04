@@ -47,9 +47,19 @@ namespace ModiBuff.Core
 						Interval(((SaveInstruction.Interval)instruction).Value);
 #endif
 						break;
+					case SaveInstruction.IntervalTick.Id:
+#if MODIBUFF_SYSTEM_TEXT_JSON
+						IntervalTick(((SaveInstruction.IntervalTick)instruction).Ticks);
+#endif
+						break;
 					case SaveInstruction.Duration.Id:
 #if MODIBUFF_SYSTEM_TEXT_JSON
 						Duration(((SaveInstruction.Duration)instruction).Value);
+#endif
+						break;
+					case SaveInstruction.DurationTick.Id:
+#if MODIBUFF_SYSTEM_TEXT_JSON
+						DurationTick(((SaveInstruction.DurationTick)instruction).Ticks);
 #endif
 						break;
 					case SaveInstruction.Remove.Id:
@@ -61,7 +71,10 @@ namespace ModiBuff.Core
 								Remove(remove.EffectOn.ToRemoveEffectOn());
 								break;
 							case SaveInstruction.Remove.Type.Duration:
-								Remove(remove.Duration);
+								Remove(remove.Duration!.Value);
+								break;
+							case SaveInstruction.Remove.Type.DurationTick:
+								RemoveTicks(remove.Ticks!.Value);
 								break;
 							default:
 								Logger.LogError(
@@ -147,7 +160,7 @@ namespace ModiBuff.Core
 					: effectType.GetConstructors()[0];
 
 				var parameters = constructor.GetParameters();
-				object[] effectStates = new object[parameters.Length];
+				object?[] effectStates = new object[parameters.Length];
 				int i = 0;
 				//TODO Refactor entire approach
 				foreach (var property in ((System.Text.Json.JsonElement)effect.SaveData).EnumerateObject())
@@ -255,7 +268,7 @@ namespace ModiBuff.Core
 							: conditionType.GetConstructors()[0];
 						var parameters = constructor.GetParameters();
 
-						object[] states = new object[parameters.Length];
+						object?[] states = new object[parameters.Length];
 						int j = 0;
 						//TODO recipeSaveData is null if SaveRecipeState() returns null
 						foreach (var recipeProperty in recipeSaveData.EnumerateObject())
@@ -356,7 +369,9 @@ namespace ModiBuff.Core
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(InstanceStackable), InstanceStackable.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Aura), Aura.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Interval), Interval.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(IntervalTick), IntervalTick.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Duration), Duration.Id)]
+		[System.Text.Json.Serialization.JsonDerivedType(typeof(DurationTick), DurationTick.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Remove), Remove.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Refresh), Refresh.Id)]
 		[System.Text.Json.Serialization.JsonDerivedType(typeof(Stack), Stack.Id)]
@@ -425,9 +440,24 @@ namespace ModiBuff.Core
 				}
 			}
 
-			public sealed record Duration : SaveInstruction
+			public sealed record IntervalTick : SaveInstruction
 			{
 				public const int Id = Interval.Id + 1;
+
+				public readonly int Ticks;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+				[System.Text.Json.Serialization.JsonConstructor]
+#endif
+				public IntervalTick(int ticks) : base(Id)
+				{
+					Ticks = ticks;
+				}
+			}
+
+			public sealed record Duration : SaveInstruction
+			{
+				public const int Id = IntervalTick.Id + 1;
 
 				public readonly float Value;
 
@@ -440,28 +470,46 @@ namespace ModiBuff.Core
 				}
 			}
 
+			public sealed record DurationTick : SaveInstruction
+			{
+				public const int Id = Duration.Id + 1;
+
+				public readonly int Ticks;
+
+#if MODIBUFF_SYSTEM_TEXT_JSON
+				[System.Text.Json.Serialization.JsonConstructor]
+#endif
+				public DurationTick(int ticks) : base(Id)
+				{
+					Ticks = ticks;
+				}
+			}
+
 			public sealed record Remove : SaveInstruction
 			{
-				public const int Id = SaveInstruction.Duration.Id + 1;
+				public const int Id = DurationTick.Id + 1;
 
 				public readonly Type RemoveType;
 				public readonly EffectOn EffectOn;
-				public readonly float Duration;
+				public readonly float? Duration;
+				public readonly int? Ticks;
 
 				public enum Type
 				{
 					RemoveOn,
 					Duration,
+					DurationTick,
 				}
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
 				[System.Text.Json.Serialization.JsonConstructor]
 #endif
-				public Remove(Type removeType, EffectOn effectOn, float duration = 0) : base(Id)
+				public Remove(Type removeType, EffectOn effectOn, float? duration, int? ticks) : base(Id)
 				{
 					RemoveType = removeType;
 					EffectOn = effectOn;
 					Duration = duration;
+					Ticks = ticks;
 				}
 			}
 

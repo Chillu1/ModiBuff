@@ -16,10 +16,14 @@ namespace ModiBuff.Core
 		private readonly bool _isAura;
 
 		private readonly float _interval;
+		private readonly int _ticksInterval;
 		private readonly float _duration;
+		private readonly int _ticksDuration;
 
-		private readonly bool _refreshDuration;
 		private readonly bool _refreshInterval;
+		private readonly bool _refreshIntervalTick;
+		private readonly bool _refreshDuration;
+		private readonly bool _refreshDurationTick;
 
 		private readonly WhenStackEffect? _whenStackEffect;
 		private readonly int? _maxStacks;
@@ -29,6 +33,8 @@ namespace ModiBuff.Core
 
 		private readonly int _timeComponentCount;
 		private int _timeComponentIndex;
+		private readonly int _timeTickComponentCount;
+		private int _timeTickComponentIndex;
 
 		private readonly ModifierEffectsCreator _modifierEffectsCreator;
 
@@ -65,9 +71,13 @@ namespace ModiBuff.Core
 			_isAura = data.IsAura;
 			var tag = data.Tag;
 			_interval = data.Interval;
+			_ticksInterval = data.TicksInterval;
 			_duration = data.Duration;
-			_refreshDuration = data.RefreshDuration;
+			_ticksDuration = data.TicksDuration;
 			_refreshInterval = data.RefreshInterval;
+			_refreshIntervalTick = data.RefreshIntervalTick;
+			_refreshDuration = data.RefreshDuration;
+			_refreshDurationTick = data.RefreshDurationTick;
 			_whenStackEffect = data.WhenStackEffect;
 			_maxStacks = data.MaxStacks;
 			_everyXStacks = data.EveryXStacks;
@@ -76,8 +86,12 @@ namespace ModiBuff.Core
 
 			if (data.Interval > 0)
 				_timeComponentCount++;
+			if (data.TicksInterval > 0)
+				_timeTickComponentCount++;
 			if (data.Duration > 0)
 				_timeComponentCount++;
+			if (data.TicksDuration > 0)
+				_timeTickComponentCount++;
 
 			_modifierEffectsCreator = new ModifierEffectsCreator(data.EffectWrappers, data.RemoveEffectWrapper,
 				data.DispelRegisterWrapper, data.CallbackUnitRegisterWrappers, data.CallbackEffectRegisterWrappers,
@@ -154,11 +168,17 @@ namespace ModiBuff.Core
 
 			InitComponent? initComponent = null;
 			ITimeComponent[]? timeComponents = null;
+			ITimeTickComponent[]? timeTickComponents = null;
 			StackComponent? stackComponent = null;
 			if (_timeComponentCount > 0)
 			{
 				_timeComponentIndex = 0;
 				timeComponents = new ITimeComponent[_timeComponentCount];
+			}
+			if (_timeTickComponentCount > 0)
+			{
+				_timeTickComponentIndex = 0;
+				timeTickComponents = new ITimeTickComponent[_timeTickComponentCount];
 			}
 
 			var effects = _modifierEffectsCreator.Create(genId);
@@ -170,9 +190,17 @@ namespace ModiBuff.Core
 				timeComponents![_timeComponentIndex++] = new IntervalComponent(_interval, _refreshInterval,
 					effects.IntervalEffects, effectCheck);
 
+			if (effects.IntervalTickEffects != null)
+				timeTickComponents![_timeTickComponentIndex++] = new IntervalTickComponent(_ticksInterval, _refreshIntervalTick,
+					effects.IntervalTickEffects, effectCheck);
+
 			if (effects.DurationEffects != null)
 				timeComponents![_timeComponentIndex++] = new DurationComponent(_duration, _refreshDuration,
 					effects.DurationEffects);
+
+			if (effects.DurationTickEffects != null)
+				timeTickComponents![_timeTickComponentIndex++] = new DurationTickComponent(_ticksDuration, _refreshDurationTick,
+					effects.DurationTickEffects);
 
 			if (effects.StackEffects != null)
 				stackComponent = new StackComponent(_whenStackEffect!.Value, _maxStacks,
@@ -180,7 +208,7 @@ namespace ModiBuff.Core
 
 			var targetComponent = !_isAura ? (ITargetComponent)new SingleTargetComponent() : new MultiTargetComponent();
 
-			return new Modifier(Id, genId, Name, initComponent, timeComponents, stackComponent,
+			return new Modifier(Id, genId, Name, initComponent, timeComponents, timeTickComponents, stackComponent,
 				effectCheck, targetComponent, effects.SetDataEffects, effects.EffectStateInfo, effects.EffectSaveState);
 		}
 
