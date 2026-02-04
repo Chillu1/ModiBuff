@@ -21,6 +21,7 @@ namespace ModiBuff.Core
 		private readonly InitComponent? _initComponent;
 
 		private readonly ITimeComponent[]? _timeComponents;
+		private readonly ITimeTickComponent[]? _timeTickComponents;
 		private readonly StackComponent? _stackComponent;
 
 		private readonly ModifierCheck? _effectCheck;
@@ -36,9 +37,9 @@ namespace ModiBuff.Core
 		private readonly EffectSaveState? _effectSaveState;
 
 		public Modifier(int id, int genId, string name, InitComponent? initComponent,
-			ITimeComponent[]? timeComponents, StackComponent? stackComponent, ModifierCheck? effectCheck,
-			ITargetComponent targetComponent, ISetDataEffect[] setDataEffects, EffectStateInfo? effectStateInfo,
-			EffectSaveState? effectSaveState)
+			ITimeComponent[]? timeComponents, ITimeTickComponent[]? timeTickComponents, StackComponent? stackComponent,
+			ModifierCheck? effectCheck, ITargetComponent targetComponent, ISetDataEffect[] setDataEffects,
+			EffectStateInfo? effectStateInfo, EffectSaveState? effectSaveState)
 		{
 			Id = id;
 			GenId = genId;
@@ -47,6 +48,7 @@ namespace ModiBuff.Core
 			_initComponent = initComponent;
 
 			_timeComponents = timeComponents;
+			_timeTickComponents = timeTickComponents;
 			_stackComponent = stackComponent;
 			_effectCheck = effectCheck;
 
@@ -109,6 +111,10 @@ namespace ModiBuff.Core
 					for (int i = 0; i < _timeComponents.Length; i++)
 						_timeComponents[i].SetupTarget(_targetComponent);
 
+				if (_timeTickComponents != null)
+					for (int i = 0; i < _timeTickComponents.Length; i++)
+						_timeTickComponents[i].SetupTarget(_targetComponent);
+
 				_stackComponent?.SetupTarget(_targetComponent);
 			}
 
@@ -161,18 +167,26 @@ namespace ModiBuff.Core
 			if (_stackComponent is { UsesStackTime: true })
 				_stackComponent.Update(deltaTime);
 
-			if (_timeComponents == null)
+			for (int i = 0; i < _timeComponents?.Length; i++)
+				_timeComponents[i].Update(deltaTime);
+		}
+
+		public void UpdateTick()
+		{
+			if (_timeTickComponents == null)
 				return;
 
-			for (int i = 0; i < _timeComponents.Length; i++)
-				_timeComponents[i].Update(deltaTime);
+			for (int i = 0; i < _timeTickComponents.Length; i++)
+				_timeTickComponents[i].Update();
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Refresh()
 		{
-			for (int i = 0; i < _timeComponents!.Length; i++)
+			for (int i = 0; i < _timeComponents?.Length; i++)
 				_timeComponents[i].Refresh();
+			for (int i = 0; i < _timeTickComponents?.Length; i++)
+				_timeTickComponents[i].Refresh();
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -198,6 +212,8 @@ namespace ModiBuff.Core
 					case ModifierData modifierData:
 						for (int i = 0; i < _timeComponents?.Length; i++)
 							_timeComponents[i].SetData(modifierData);
+						for (int i = 0; i < _timeTickComponents?.Length; i++)
+							_timeTickComponents[i].SetData(modifierData);
 
 						_stackComponent?.SetData(modifierData);
 
@@ -238,6 +254,7 @@ namespace ModiBuff.Core
 		}
 
 		public ITimeComponent[] GetTimers() => _timeComponents!;
+		public ITimeTickComponent[] GetTickTimers() => _timeTickComponents!;
 
 		/// <summary>
 		///		Gets a timer reference, used to update UI/UX
@@ -277,6 +294,41 @@ namespace ModiBuff.Core
 			}
 
 			Logger.LogError($"[ModiBuff] Couldn't find {typeof(TTimeComponent)} at number {timeComponentNumber}");
+			return null;
+		}
+
+		public ITimeTickReference? GetTickTimer<TTimeTickComponent>(int timeTickComponentNumber = 0)
+			where TTimeTickComponent : ITimeTickComponent
+		{
+			if (_timeTickComponents == null)
+			{
+				Logger.LogError("[ModiBuff] Trying to get tick timer from a modifier that doesn't have any.");
+				return null;
+			}
+#if DEBUG && !MODIBUFF_PROFILE
+			if (timeTickComponentNumber < 0 || timeTickComponentNumber >= _timeTickComponents.Length)
+			{
+				Logger.LogError("[ModiBuff] Time tick component number can't be lower than 0 or higher " +
+								"than time tick components length");
+				return null;
+			}
+#endif
+			int currentNumber = timeTickComponentNumber;
+			for (int i = 0; i < _timeTickComponents.Length; i++)
+			{
+				if (!(_timeTickComponents[i] is TTimeTickComponent))
+					continue;
+
+				if (currentNumber > 0)
+				{
+					currentNumber--;
+					continue;
+				}
+
+				return _timeTickComponents[i];
+			}
+
+			Logger.LogError($"[ModiBuff] Couldn't find {typeof(TTimeTickComponent)} at number {timeTickComponentNumber}");
 			return null;
 		}
 
@@ -330,12 +382,19 @@ namespace ModiBuff.Core
 				for (int i = 0; i < _timeComponents.Length; i++)
 					timeComponentsSaveData[i] = _timeComponents[i].SaveState();
 			}
+			TimeTickComponentSaveData[]? timeTickComponentsSaveData = null;
+			if (_timeTickComponents != null && _timeTickComponents.Length > 0)
+			{
+				timeTickComponentsSaveData = new TimeTickComponentSaveData[_timeTickComponents.Length];
+				for (int i = 0; i < _timeTickComponents.Length; i++)
+					timeTickComponentsSaveData[i] = _timeTickComponents[i].SaveState();
+			}
 
 			var effectCheckSaveData = _effectCheck?.SaveState();
 			var effectSaveState = _effectSaveState?.SaveState();
 
 			return new SaveData(Id, targetSaveData, _multiTarget, effectCheckSaveData, stackSaveData,
-				timeComponentsSaveData, effectSaveState);
+				timeComponentsSaveData, timeTickComponentsSaveData, effectSaveState);
 		}
 
 		public void LoadState(SaveData data, IUnit owner)
@@ -369,6 +428,9 @@ namespace ModiBuff.Core
 			for (int i = 0; i < _timeComponents?.Length; i++)
 				_timeComponents[i].LoadState(data.TimeComponentsSaveData![i]);
 
+			for (int i = 0; i < _timeTickComponents?.Length; i++)
+				_timeTickComponents[i].LoadState(data.TimeTickComponentsSaveData![i]);
+
 			if (data.EffectCheckSaveData != null)
 				_effectCheck?.LoadState(data.EffectCheckSaveData.Value);
 
@@ -379,9 +441,10 @@ namespace ModiBuff.Core
 		public void ResetState()
 		{
 			_initComponent?.ResetState();
-			if (_timeComponents != null)
-				for (int i = 0; i < _timeComponents.Length; i++)
-					_timeComponents[i].ResetState();
+			for (int i = 0; i < _timeComponents?.Length; i++)
+				_timeComponents[i].ResetState();
+			for (int i = 0; i < _timeTickComponents?.Length; i++)
+				_timeTickComponents[i].ResetState();
 			_stackComponent?.ResetState();
 			_effectCheck?.ResetState();
 			_targetComponent.ResetState();
@@ -424,6 +487,7 @@ namespace ModiBuff.Core
 			public readonly ModifierCheck.SaveData? EffectCheckSaveData;
 			public readonly StackComponent.SaveData? StackSaveData;
 			public readonly IReadOnlyList<TimeComponentSaveData>? TimeComponentsSaveData;
+			public readonly IReadOnlyList<TimeTickComponentSaveData>? TimeTickComponentsSaveData;
 			public readonly IReadOnlyList<EffectSaveState.EffectSaveData>? EffectsSaveData;
 
 #if MODIBUFF_SYSTEM_TEXT_JSON
@@ -432,6 +496,7 @@ namespace ModiBuff.Core
 			public SaveData(int id, object targetSaveData, bool isMultiTarget,
 				ModifierCheck.SaveData? effectCheckSaveData, StackComponent.SaveData? stackSaveData,
 				IReadOnlyList<TimeComponentSaveData>? timeComponentsSaveData,
+				IReadOnlyList<TimeTickComponentSaveData>? timeTickComponentsSaveData,
 				IReadOnlyList<EffectSaveState.EffectSaveData>? effectsSaveData)
 			{
 				Id = id;
@@ -440,6 +505,7 @@ namespace ModiBuff.Core
 				EffectCheckSaveData = effectCheckSaveData;
 				StackSaveData = stackSaveData;
 				TimeComponentsSaveData = timeComponentsSaveData;
+				TimeTickComponentsSaveData = timeTickComponentsSaveData;
 				EffectsSaveData = effectsSaveData;
 			}
 		}

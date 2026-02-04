@@ -24,9 +24,11 @@ namespace ModiBuff.Core
 
 		private object _data;
 
-		private bool _currentIsInterval;
+		private RefreshType? _lastSetRefreshType;
 		private float _interval;
+		private int _ticksInterval;
 		private float _duration;
+		private int _ticksDuration;
 
 		private RemoveEffectWrapper? _removeEffectWrapper;
 		private EffectWrapper? _dispelRegisterWrapper;
@@ -36,7 +38,7 @@ namespace ModiBuff.Core
 
 		private readonly List<EffectWrapper> _effectWrappers;
 
-		private bool _refreshDuration, _refreshInterval;
+		private bool _refreshInterval, _refreshIntervalTick, _refreshDuration, _refreshDurationTick;
 
 		private WhenStackEffect? _whenStackEffect;
 		private int? _maxStacks;
@@ -182,8 +184,19 @@ namespace ModiBuff.Core
 		public ModifierRecipe Interval(float interval)
 		{
 			_interval = interval;
-			_currentIsInterval = true;
+			_lastSetRefreshType = RefreshType.Interval;
 			_saveInstructions.Add(new SaveInstruction.Interval(interval));
+			return this;
+		}
+
+		/// <summary>
+		///		How many ticks should pass between the interval effects get applied.
+		/// </summary>
+		public ModifierRecipe IntervalTick(int ticksInterval)
+		{
+			_ticksInterval = ticksInterval;
+			_lastSetRefreshType = RefreshType.IntervalTick;
+			//_saveInstructions.Add(new SaveInstruction.IntervalTick(ticksInterval)); //TODO 
 			return this;
 		}
 
@@ -197,6 +210,13 @@ namespace ModiBuff.Core
 			return this;
 		}
 
+		public ModifierRecipe DurationTick(int ticksDuration)
+		{
+			DurationTickInternal(ticksDuration);
+			//_saveInstructions.Add(new SaveInstruction.DurationTick(ticksDuration)); //TODO
+			return this;
+		}
+
 		/// <summary>
 		///		How many seconds should pass before the modifier gets removed.
 		/// </summary>
@@ -205,7 +225,16 @@ namespace ModiBuff.Core
 			DurationInternal(duration);
 			AddRemoveEffect(EffectOn.Duration);
 			_saveInstructions.Add(new SaveInstruction.Remove(SaveInstruction.Remove.Type.Duration, EffectOn.Duration,
-				duration));
+				duration, null));
+			return this;
+		}
+
+		public ModifierRecipe RemoveTicks(int ticksDuration)
+		{
+			DurationTickInternal(ticksDuration);
+			AddRemoveEffect(EffectOn.DurationTick);
+			_saveInstructions.Add(new SaveInstruction.Remove(SaveInstruction.Remove.Type.DurationTick, EffectOn.Duration,
+				null, ticksDuration));
 			return this;
 		}
 
@@ -228,7 +257,7 @@ namespace ModiBuff.Core
 		{
 			AddRemoveEffect(removeEffectOn.ToEffectOn());
 			_saveInstructions.Add(new SaveInstruction.Remove(SaveInstruction.Remove.Type.RemoveOn,
-				removeEffectOn.ToEffectOn()));
+				removeEffectOn.ToEffectOn(), null, null));
 			return this;
 		}
 
@@ -260,14 +289,7 @@ namespace ModiBuff.Core
 				return this;
 			}
 
-			if (_currentIsInterval)
-			{
-				Refresh(RefreshType.Interval);
-				return this;
-			}
-
-			Refresh(RefreshType.Duration);
-			return this;
+			return Refresh(_lastSetRefreshType!.Value);
 		}
 
 		/// <summary>
@@ -278,11 +300,17 @@ namespace ModiBuff.Core
 		{
 			switch (type)
 			{
+				case RefreshType.Interval:
+					_refreshInterval = true;
+					break;
+				case RefreshType.IntervalTick:
+					_refreshIntervalTick = true;
+					break;
 				case RefreshType.Duration:
 					_refreshDuration = true;
 					break;
-				case RefreshType.Interval:
-					_refreshInterval = true;
+				case RefreshType.DurationTick:
+					_refreshDurationTick = true;
 					break;
 			}
 
@@ -384,7 +412,7 @@ namespace ModiBuff.Core
 				                  "use Remove(RemoveEffectOn) or Remove(float) instead");
 #endif
 				AddRemoveEffect(effectOn);
-				_saveInstructions.Add(new SaveInstruction.Remove(SaveInstruction.Remove.Type.RemoveOn, effectOn));
+				_saveInstructions.Add(new SaveInstruction.Remove(SaveInstruction.Remove.Type.RemoveOn, effectOn, null, null));
 				return this;
 			}
 
@@ -547,7 +575,7 @@ namespace ModiBuff.Core
 				}
 			}
 
-			if (_refreshDuration || _refreshInterval)
+			if (_refreshInterval || _refreshIntervalTick || _refreshDuration || _refreshDurationTick)
 				_tag |= TagType.IsRefresh;
 			if (_isInstanceStackable)
 				_tag |= TagType.IsInstanceStackable;
@@ -560,8 +588,9 @@ namespace ModiBuff.Core
 				_dispelRegisterWrapper, _callbackUnitRegisterWrappers.ToArray(),
 				_callbackEffectRegisterWrappers.ToArray(), _callbackEffectUnitsRegisterWrappers.ToArray(),
 				_hasApplyChecks, _applyCheckList, _hasEffectChecks, _effectCheckList, _applyFuncCheckList,
-				_effectFuncCheckList, _isAura, _tag, _interval, _duration, _refreshDuration, _refreshInterval,
-				_whenStackEffect, _maxStacks, _everyXStacks, _singleStackTime, _independentStackTime);
+				_effectFuncCheckList, _isAura, _tag, _interval, _ticksInterval, _duration, _ticksDuration,
+				_refreshInterval, _refreshIntervalTick, _refreshDuration, _refreshDurationTick, _whenStackEffect,
+				_maxStacks, _everyXStacks, _singleStackTime, _independentStackTime);
 			return new ModifierGenerator(in data);
 		}
 
@@ -579,7 +608,14 @@ namespace ModiBuff.Core
 		private ModifierRecipe DurationInternal(float duration)
 		{
 			_duration = duration;
-			_currentIsInterval = false;
+			_lastSetRefreshType = RefreshType.Duration;
+			return this;
+		}
+
+		private ModifierRecipe DurationTickInternal(int ticksDuration)
+		{
+			_ticksDuration = ticksDuration;
+			_lastSetRefreshType = RefreshType.DurationTick;
 			return this;
 		}
 
@@ -635,11 +671,25 @@ namespace ModiBuff.Core
 				                + Name + " id: " + Id);
 			}
 
+			if (_refreshIntervalTick && _ticksInterval == 0)
+			{
+				validRecipe = false;
+				Logger.LogError("[ModiBuff] Refresh interval tick set, but ticks interval is 0, for modifier: "
+								+ Name + " id: " + Id);
+			}
+
 			if (_refreshDuration && _duration == 0)
 			{
 				validRecipe = false;
 				Logger.LogError("[ModiBuff] Refresh duration set, but duration is 0, for modifier: "
 				                + Name + " id: " + Id);
+			}
+
+			if (_refreshDurationTick && _ticksDuration == 0)
+			{
+				validRecipe = false;
+				Logger.LogError("[ModiBuff] Refresh duration tick set, but ticks duration is 0, for modifier: "
+								+ Name + " id: " + Id);
 			}
 
 			ValidateCallbacks(EffectOnCallbackEffectData.AllCallbackUnitData, _callbackUnitRegisterWrappers);

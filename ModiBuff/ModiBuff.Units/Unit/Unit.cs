@@ -156,6 +156,17 @@ namespace ModiBuff.Core.Units
 			}
 		}
 
+		internal void UpdateTicks(int count)
+		{
+			for (int i = 0; i < count; i++)
+				UpdateTick();
+		}
+
+		public void UpdateTick()
+		{
+			ModifierController.UpdateTick();
+		}
+
 		/// <summary>
 		///		Should be called before we attack/on attack. For modifiers like split shot that we want to trigger when starting an attack.
 		/// </summary>

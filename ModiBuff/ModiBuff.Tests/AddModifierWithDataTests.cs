@@ -129,6 +129,30 @@ namespace ModiBuff.Tests
 		}
 
 		[Test]
+		public void AddWithData_CustomIntervalTick()
+		{
+			AddRecipe("IntervalTickDamage")
+				.IntervalTick(1)
+				.Effect(new DamageEffect(5), EffectOn.IntervalTick);
+			Setup();
+
+			IData[] data =
+			{
+				new ModifierIntervalTickData(2)
+			};
+			Unit.AddModifierWithDataSelf("IntervalTickDamage", data);
+
+			Unit.UpdateTick();
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.UpdateTick();
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+
+			Unit.UpdateTicks(2);
+			Assert.AreEqual(UnitHealth - 5 - 5, Unit.Health);
+		}
+
+		[Test]
 		public void AddWithData_CustomDuration()
 		{
 			AddRecipe("DurationDamage")
@@ -146,6 +170,27 @@ namespace ModiBuff.Tests
 			Assert.AreEqual(UnitHealth, Unit.Health);
 
 			Unit.Update(1f);
+			Assert.AreEqual(UnitHealth - 5, Unit.Health);
+		}
+
+		[Test]
+		public void AddWithData_CustomDurationTick()
+		{
+			AddRecipe("DurationTickDamage")
+				.DurationTick(2)
+				.Effect(new DamageEffect(5), EffectOn.DurationTick);
+			Setup();
+
+			IData[] data =
+			{
+				new ModifierDurationTickData(3)
+			};
+			Unit.AddModifierWithDataSelf("DurationTickDamage", data);
+
+			Unit.UpdateTicks(2);
+			Assert.AreEqual(UnitHealth, Unit.Health);
+
+			Unit.UpdateTicks(1);
 			Assert.AreEqual(UnitHealth - 5, Unit.Health);
 		}
 
